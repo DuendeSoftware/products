@@ -477,7 +477,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         if (IsExpired(context, result, time, ExpirationValidationMode.Nonce))
         {
-            Logger.LogDebug("DPoP 'nonce' expiration failed. It's possible that the server farm clocks might not be closely synchronized, so consider setting the ServerClockSkew on the DPoPOptions on the IdentityServerOptions.");
+            Logger.LogDebug("DPoP 'nonce' expired. Issuing new value to client.");
 
             result.SetError("Invalid 'nonce' value.", OidcConstants.TokenErrors.UseDPoPNonce);
             result.ServerIssuedNonce = CreateNonce(context, result);
