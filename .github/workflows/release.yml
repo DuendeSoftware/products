@@ -1,0 +1,108 @@
+name: release
+
+on:
+  workflow_dispatch:
+   inputs:
+      version:
+        type: string
+        description: "Version in format X.Y.Z or X.Y.Z-preview.N"
+        required: true
+        default: '0.0.0'
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  tag:
+    name: Tag and Pack
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+
+    - name: Tag
+      run: |
+        git config --global user.email "github-bot@duendesoftware.com"
+        git config --global user.name "Duende Software GitHub Bot"
+        git tag -a anc-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
+        git push origin anc-${{ github.event.inputs.version }}
+
+    - name: Pack
+      run: dotnet pack -c Release src/AspNetCore.Authentication.JwtBearer/AspNetCore.Authentication.JwtBearer.csproj -o artifacts
+
+    - name: Sign
+      if: (github.ref == 'refs/heads/main')
+      run: |
+        echo "Install Sectigo CodeSiging CA certificates"
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates
+        sudo cp .github/workflows/SectigoPublicCodeSigningRootCrossAAA.crt /usr/local/share/ca-certificates/
+        sudo update-ca-certificates
+        echo "Restore tools"
+        dotnet tool restore
+        echo "Sign"
+        for file in artifacts/*.nupkg; do
+            dotnet NuGetKeyVaultSignTool sign "$file" \
+                --file-digest sha256 \
+                --timestamp-rfc3161 http://timestamp.digicert.com \
+                --azure-key-vault-url https://duendecodesigning.vault.azure.net/ \
+                --azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 \
+                --azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 \
+                --azure-key-vault-client-secret ${{ secrets.SignClientSecret }} \
+                --azure-key-vault-certificate CodeSigning
+        done
+
+    - name: Push packages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        dotnet nuget push artifacts/*.nupkg -s https://www.myget.org/F/duende_identityserver/api/v2/package -k ${{ secrets.MYGET }} --skip-duplicate
+        dotnet nuget push artifacts/*.nupkg --source https://nuget.pkg.github.com/DuendeSoftware/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+     
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      if: (github.ref == 'refs/heads/main')
+      with:
+        path: artifacts/*.nupkg
+        name: anc-artifacts
+        compression-level: 0
+        overwrite: true
+        retention-days: 15
+
+  publish:
+    name: Publish to NuGet
+    runs-on: ubuntu-latest
+    environment: nuget.org
+    needs: tag
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: anc-artifacts
+        path: artifacts
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+    
+    - name: List files
+      shell: bash
+      run: tree
+
+    - name: Push to nuget.org
+      run: dotnet nuget push artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_API_KEY }} --skip-duplicate

@@ -4,6 +4,8 @@ root=true
 # C# files
 [*.cs]
 
+file_header_template=Copyright (c) Duende Software. All rights reserved.\nSee LICENSE in the project root for license information.
+
 #### Core EditorConfig Options ####
 
 # Indentation and spacing
