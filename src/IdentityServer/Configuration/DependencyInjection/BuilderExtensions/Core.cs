@@ -34,6 +34,7 @@ using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Stores.Empty;
 using Duende.IdentityServer.Endpoints.Results;
+using Duende.IdentityServer.Licensing.v2;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -205,6 +206,10 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<IResourceStore, EmptyResourceStore>();
 
         builder.Services.AddTransient(services => IdentityServerLicenseValidator.Instance.GetLicense());
+
+        builder.Services.AddSingleton<ILicenseAccessor, LicenseAccessor>();
+        builder.Services.AddSingleton<ITokenCounter, TokenCounter>();
+        builder.Services.AddSingleton<IFeatureManager, FeatureManager>();
 
         return builder;
     }

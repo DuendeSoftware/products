@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Licensing.v2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -39,6 +40,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly IDeviceCodeValidator _deviceCodeValidator;
     private readonly IBackchannelAuthenticationRequestIdValidator _backchannelAuthenticationRequestIdValidator;
     private readonly IClock _clock;
+    private readonly IFeatureManager _features;
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
@@ -60,9 +62,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
         IDPoPProofValidator dPoPProofValidator,
         IEventService events,
         IClock clock,
+        IFeatureManager features,
         ILogger<TokenRequestValidator> logger)
     {
         _logger = logger;
+        _features = features;
         _options = options;
         _issuerNameService = issuerNameService;
         _serverUrls = serverUrls;
@@ -228,6 +232,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // DPoP
         if (context.DPoPProofToken.IsPresent())
         {
+            _features.UseFeature(LicenseFeature.DPoP);
             IdentityServerLicenseValidator.Instance.ValidateDPoP();
 
             if (context.DPoPProofToken.Length > _options.InputLengthRestrictions.DPoPProofToken)
@@ -298,6 +303,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         LogSuccess();
 
+        // TODO - Consider how to use the new licensing system here
         IdentityServerLicenseValidator.Instance.ValidateClient(customValidationContext.Result.ValidatedRequest.ClientId);
 
         return customValidationContext.Result;
@@ -457,6 +463,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             }
         }
 
+        // TODO - Consider how to use the new licensing system here
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(_validatedRequest.RequestedResourceIndicator);
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(_validatedRequest.RequestedResourceIndicator);
 
@@ -803,6 +810,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             }
         }
 
+        // TODO - Consider how to use the new licensing system here
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(_validatedRequest.RequestedResourceIndicator);
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(_validatedRequest.RequestedResourceIndicator);
 
@@ -883,6 +891,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             }
         }
 
+        // TODO - Consider how to use the new licensing system here
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(_validatedRequest.RequestedResourceIndicator);
         _validatedRequest.ValidatedResources = validatedResources;
 
@@ -904,6 +913,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.UnauthorizedClient);
         }
 
+        _features.UseFeature(LicenseFeature.CIBA);
         IdentityServerLicenseValidator.Instance.ValidateCiba();
 
         /////////////////////////////////////////////
@@ -969,6 +979,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             }
         }
 
+        // TODO - Consider how to use the new licensing system here
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(_validatedRequest.RequestedResourceIndicator);
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(_validatedRequest.RequestedResourceIndicator);
 
@@ -1151,6 +1162,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         _validatedRequest.RequestedScopes = requestedScopes;
 
+        // TODO - Consider how to use the new licensing system here
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(_validatedRequest.RequestedResourceIndicator);
         _validatedRequest.ValidatedResources = resourceValidationResult.FilterByResourceIndicator(_validatedRequest.RequestedResourceIndicator);
 

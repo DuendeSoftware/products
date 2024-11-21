@@ -7,6 +7,7 @@
 using System.Threading.Tasks;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Licensing.v2;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -19,6 +20,7 @@ namespace Duende.IdentityServer.Validation;
 internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestValidator
 {
 
+    private readonly IFeatureManager _features;
     private readonly IAuthorizeRequestValidator _authorizeRequestValidator;
 
     /// <summary>
@@ -28,14 +30,17 @@ internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequest
     /// <param name="authorizeRequestValidator">The authorize request validator,
     /// used to validate the pushed authorization parameters as if they were
     /// used directly at the authorize endpoint.</param>
-    public PushedAuthorizationRequestValidator(IAuthorizeRequestValidator authorizeRequestValidator)
+    /// <param name="features">The feature manager</param>
+    public PushedAuthorizationRequestValidator(IAuthorizeRequestValidator authorizeRequestValidator, IFeatureManager features)
     {
         _authorizeRequestValidator = authorizeRequestValidator;
+        _features = features;
     }
 
     /// <inheritdoc />
     public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context)
     {
+        _features.UseFeature(LicenseFeature.PAR);
         IdentityServerLicenseValidator.Instance.ValidatePar();
         var validatedRequest = await ValidateRequestUriAsync(context);
         if(validatedRequest.IsError)

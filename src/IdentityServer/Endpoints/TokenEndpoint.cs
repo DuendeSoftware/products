@@ -17,6 +17,8 @@ using Duende.IdentityServer.Validation;
 using System.IO;
 using Duende.IdentityServer.Configuration;
 using System.Linq;
+using Duende.IdentityServer.Licensing;
+using Duende.IdentityServer.Licensing.v2;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -30,6 +32,7 @@ internal class TokenEndpoint : IEndpointHandler
     private readonly IClientSecretValidator _clientValidator;
     private readonly ITokenRequestValidator _requestValidator;
     private readonly ITokenResponseGenerator _responseGenerator;
+    private readonly ITokenCounter _tokenCounter;
     private readonly IEventService _events;
     private readonly ILogger _logger;
 
@@ -40,13 +43,15 @@ internal class TokenEndpoint : IEndpointHandler
     /// <param name="clientValidator">The client validator.</param>
     /// <param name="requestValidator">The request validator.</param>
     /// <param name="responseGenerator">The response generator.</param>
+    /// <param name="tokenCounter"></param>
     /// <param name="events">The events.</param>
     /// <param name="logger">The logger.</param>
     public TokenEndpoint(
         IdentityServerOptions identityServerOptions,
         IClientSecretValidator clientValidator, 
         ITokenRequestValidator requestValidator, 
-        ITokenResponseGenerator responseGenerator, 
+        ITokenResponseGenerator responseGenerator,
+        ITokenCounter tokenCounter,
         IEventService events, 
         ILogger<TokenEndpoint> logger)
     {
@@ -54,6 +59,7 @@ internal class TokenEndpoint : IEndpointHandler
         _clientValidator = clientValidator;
         _requestValidator = requestValidator;
         _responseGenerator = responseGenerator;
+        _tokenCounter = tokenCounter;
         _events = events;
         _logger = logger;
     }
@@ -135,7 +141,8 @@ internal class TokenEndpoint : IEndpointHandler
         await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
         Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null);
         LogTokens(response, requestResult);
-
+        _tokenCounter.Increment();
+        
         // return result
         _logger.LogDebug("Token request success.");
         return new TokenResult(response);

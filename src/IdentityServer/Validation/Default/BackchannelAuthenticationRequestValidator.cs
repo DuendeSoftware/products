@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing.v2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using static Duende.IdentityServer.Constants;
@@ -25,6 +26,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
     private readonly IBackchannelAuthenticationUserValidator _backchannelAuthenticationUserValidator;
     private readonly IJwtRequestValidator _jwtRequestValidator;
     private readonly ICustomBackchannelAuthenticationValidator _customValidator;
+    private readonly IFeatureManager _features;
     private readonly ILogger<BackchannelAuthenticationRequestValidator> _logger;
 
     private ValidatedBackchannelAuthenticationRequest _validatedRequest;
@@ -36,6 +38,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         IBackchannelAuthenticationUserValidator backchannelAuthenticationUserValidator,
         IJwtRequestValidator jwtRequestValidator,
         ICustomBackchannelAuthenticationValidator customValidator,
+        IFeatureManager features,
         ILogger<BackchannelAuthenticationRequestValidator> logger)
     {
         _options = options;
@@ -45,6 +48,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         _jwtRequestValidator = jwtRequestValidator;
         _customValidator = customValidator;
         _logger = logger;
+        _features = features;
     }
 
     public async Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult)
@@ -71,6 +75,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.UnauthorizedClient, "Unauthorized client");
         }
 
+        _features.UseFeature(LicenseFeature.CIBA);
         IdentityServerLicenseValidator.Instance.ValidateCiba();
 
         //////////////////////////////////////////////////////////
@@ -173,6 +178,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             }
         }
 
+        // TODO - Consider how to use the new licensing system here
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(resourceIndicators);
         _validatedRequest.ValidatedResources = validatedResources;
 

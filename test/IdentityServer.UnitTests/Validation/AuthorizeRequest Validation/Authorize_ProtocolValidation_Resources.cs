@@ -56,6 +56,7 @@ public class Authorize_ProtocolValidation_Resources
             _mockResourceValidator,
             _mockUserSession,
             Factory.CreateRequestObjectValidator(),
+            new TestFeatureManager(),
             TestLogger.Create<AuthorizeRequestValidator>());
     }
 

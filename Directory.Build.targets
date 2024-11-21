@@ -35,7 +35,8 @@
         <PackageReference Update="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(FrameworkVersion)" />
         <PackageReference Update="AngleSharp" Version="1.1.2" />
         <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-
+        <PackageReference Update="Microsoft.Extensions.Diagnostics.Testing" Version="9.0.0" />
+        <PackageReference Update="Microsoft.Extensions.TimeProvider.Testing" Version="9.0.0" />
 
         <!--microsoft extensions -->
         <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="$(ExtensionsVersion)"/>
