@@ -46,7 +46,10 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
             if (key != null)
             {
                 var licenseClaims = ValidateKey(key);
-                return new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)));
+                if (licenseClaims.Any()) // (validate key will give us an empty collection if it fails)
+                {
+                    return new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)));
+                }
             }
 
             return new License();
@@ -67,7 +70,7 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
         return null;
     }
 
-    internal Claim[] ValidateKey(string licenseKey)
+    private Claim[] ValidateKey(string licenseKey)
     {
         var handler = new JsonWebTokenHandler();
 
@@ -97,7 +100,7 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
             logger.LogCritical(validateResult.Exception, "Error validating the Duende software license key");
         }
 
-        return validateResult.ClaimsIdentity.Claims.ToArray();
+        return validateResult.ClaimsIdentity?.Claims.ToArray() ?? [];
     }
     
 }

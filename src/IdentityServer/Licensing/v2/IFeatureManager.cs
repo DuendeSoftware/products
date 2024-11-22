@@ -2,10 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 #nullable enable
+using System.Collections.Generic;
+
 namespace Duende.IdentityServer.Licensing.v2;
 
-internal interface ITokenCounter
+internal interface IFeatureManager
 {
-    void Increment();
-    uint TokenCount { get; }
+    IEnumerable<LicenseFeature> UsedFeatures();
+    void UseFeature(LicenseFeature feature);
 }

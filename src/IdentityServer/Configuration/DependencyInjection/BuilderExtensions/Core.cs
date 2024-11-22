@@ -208,7 +208,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransient(services => IdentityServerLicenseValidator.Instance.GetLicense());
 
         builder.Services.AddSingleton<ILicenseAccessor, LicenseAccessor>();
-        builder.Services.AddSingleton<ITokenCounter, TokenCounter>();
+        builder.Services.AddSingleton<IProtocolRequestCounter, ProtocolRequestCounter>();
         builder.Services.AddSingleton<IFeatureManager, FeatureManager>();
 
         return builder;

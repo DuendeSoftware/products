@@ -6,9 +6,7 @@ using System.ComponentModel;
 
 namespace Duende.IdentityServer.Licensing.v2;
 
-// TODO - Xmldoc
-#pragma warning disable CS1591
-public enum LicenseFeature
+internal enum LicenseFeature
 {
     [Description("key_management")]
     KeyManagement,
@@ -41,7 +39,7 @@ public enum LicenseFeature
     Redistribution,
 }
 
-public static class LicenseFeatureExtensions
+internal static class LicenseFeatureExtensions
 {
     internal static ulong ToFeatureMask(this LicenseFeature feature) => 1UL << (int) feature;
 

@@ -11,12 +11,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.v2;
 
-internal interface IFeatureManager
-{
-    IEnumerable<LicenseFeature> UsedFeatures();
-    void UseFeature(LicenseFeature feature);
-}
-
 internal class FeatureManager : IFeatureManager
 {
     public FeatureManager(

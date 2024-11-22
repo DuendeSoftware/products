@@ -32,7 +32,7 @@ internal class TokenEndpoint : IEndpointHandler
     private readonly IClientSecretValidator _clientValidator;
     private readonly ITokenRequestValidator _requestValidator;
     private readonly ITokenResponseGenerator _responseGenerator;
-    private readonly ITokenCounter _tokenCounter;
+    private readonly IProtocolRequestCounter _protocolRequestCounter;
     private readonly IEventService _events;
     private readonly ILogger _logger;
 
@@ -43,7 +43,7 @@ internal class TokenEndpoint : IEndpointHandler
     /// <param name="clientValidator">The client validator.</param>
     /// <param name="requestValidator">The request validator.</param>
     /// <param name="responseGenerator">The response generator.</param>
-    /// <param name="tokenCounter"></param>
+    /// <param name="protocolRequestCounter"></param>
     /// <param name="events">The events.</param>
     /// <param name="logger">The logger.</param>
     public TokenEndpoint(
@@ -51,7 +51,7 @@ internal class TokenEndpoint : IEndpointHandler
         IClientSecretValidator clientValidator, 
         ITokenRequestValidator requestValidator, 
         ITokenResponseGenerator responseGenerator,
-        ITokenCounter tokenCounter,
+        IProtocolRequestCounter protocolRequestCounter,
         IEventService events, 
         ILogger<TokenEndpoint> logger)
     {
@@ -59,7 +59,7 @@ internal class TokenEndpoint : IEndpointHandler
         _clientValidator = clientValidator;
         _requestValidator = requestValidator;
         _responseGenerator = responseGenerator;
-        _tokenCounter = tokenCounter;
+        _protocolRequestCounter = protocolRequestCounter;
         _events = events;
         _logger = logger;
     }
@@ -141,7 +141,7 @@ internal class TokenEndpoint : IEndpointHandler
         await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
         Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null);
         LogTokens(response, requestResult);
-        _tokenCounter.Increment();
+        _protocolRequestCounter.Increment();
         
         // return result
         _logger.LogDebug("Token request success.");

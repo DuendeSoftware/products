@@ -31,5 +31,9 @@
         <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Licensing\v2\licenses\" />
+    </ItemGroup>
+
 
 </Project>

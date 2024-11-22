@@ -9,11 +9,11 @@ using Xunit;
 
 namespace IdentityServer.UnitTests.Licensing.v2;
 
-public class TokenCounterTests
+public class ProtocolRequestCounterTests
 {
-    private readonly TokenCounter _counter;
+    private readonly ProtocolRequestCounter _counter;
     private readonly TestLicenseAccessor _license;
-    private readonly FakeLogger<TokenCounter> _logger;
+    private readonly FakeLogger<ProtocolRequestCounter> _logger;
     private readonly FakeTimeProvider _timeProvider;
 
     private readonly DateTimeOffset _januaryFirst = new DateTimeOffset(
@@ -21,12 +21,12 @@ public class TokenCounterTests
         new TimeOnly(12, 00),
         TimeSpan.Zero); 
     
-    public TokenCounterTests()
+    public ProtocolRequestCounterTests()
     {
         _license = new TestLicenseAccessor();
         _timeProvider = new FakeTimeProvider();
-        _logger = new FakeLogger<TokenCounter>();
-        _counter = new TokenCounter(_license, _timeProvider, _logger);
+        _logger = new FakeLogger<ProtocolRequestCounter>();
+        _counter = new ProtocolRequestCounter(_license, _timeProvider, _logger);
     }
 
 
@@ -36,26 +36,12 @@ public class TokenCounterTests
         for (uint i = 0; i < 10; i++)
         {
             _counter.Increment();
-            _counter.TokenCount.Should().Be(i + 1);
+            _counter.RequestCount.Should().Be(i + 1);
         }
     }
 
     [Fact]
-    public void warning_is_logged_after_too_many_tokens_are_issued()
-    {
-        _counter.Threshold = 10;
-        for (uint i = 0; i < _counter.Threshold + 1; i++)
-        {
-            _counter.Increment();
-        }
-
-        _logger.Collector.GetSnapshot().Should().Contain(r =>
-            r.Message ==
-            "You've issued 11 tokens without a license. In future versions, unlicensed IdentityServer instances will shut down after 10 tokens are issued. Please contact sales to obtain a license. If you are running in a test environment, please use a test license");
-    }
-
-    [Fact]
-    public void too_many_tokens_warning_is_logged_only_once()
+    public void warning_is_logged_once_after_too_many_protocol_requests_are_handled()
     {
         _counter.Threshold = 10;
         for (uint i = 0; i < _counter.Threshold * 10; i++)
@@ -66,7 +52,7 @@ public class TokenCounterTests
         _logger.Collector.GetSnapshot().Should()
             .ContainSingle(r =>
                 r.Message ==
-                "You've issued 11 tokens without a license. In future versions, unlicensed IdentityServer instances will shut down after 10 tokens are issued. Please contact sales to obtain a license. If you are running in a test environment, please use a test license");
+                $"IdentityServer has handled {_counter.Threshold + 1} protocol requests without a license. In future versions, unlicensed IdentityServer instances will shut down after {_counter.Threshold} protocol requests. Please contact sales to obtain a license. If you are running in a test environment, please use a test license");
     }
 
     [Fact]

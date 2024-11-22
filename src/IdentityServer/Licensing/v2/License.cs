@@ -15,7 +15,7 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// Models a Duende commercial license.
 /// </summary>
-public class License
+internal class License
 {
     
     /// <summary>
@@ -44,12 +44,16 @@ public class License
             Expiration = DateTimeOffset.FromUnixTimeSeconds(exp);
         }
 
-        var edition = claims.FindFirst("edition")?.Value;
-        if (!Enum.TryParse<LicenseEdition>(edition, true, out var editionValue))
+        var edition = claims.FindFirstValue("edition");
+        if (edition != null)
         {
-            throw new Exception($"Invalid edition in license: '{edition}'");
+            if (!Enum.TryParse<LicenseEdition>(edition, true, out var editionValue))
+            {
+                throw new Exception($"Invalid edition in license: '{edition}'");
+            }
+            Edition = editionValue;
         }
-        Edition = editionValue;
+
 
         Features = claims.FindAll("feature").Select(f => f.Value);
         
@@ -109,12 +113,6 @@ public class License
     ]
     public bool IsConfigured { get; set; }
     
-    internal bool IsEnterpriseEdition => Edition == LicenseEdition.Enterprise;
-    internal bool IsBusinessEdition => Edition == LicenseEdition.Business;
-    internal bool IsStarterEdition => Edition == LicenseEdition.Starter;
-    internal bool IsCommunityEdition => Edition == LicenseEdition.Community;
-    internal bool IsBffEdition => Edition == LicenseEdition.Bff;
-
     internal bool IsEnabled(LicenseFeature feature)
     {
         return IsConfigured && (AllowedFeatureMask & feature.ToFeatureMask()) != 0;
@@ -147,14 +145,7 @@ public class License
         {
             if (Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
             {
-                if (attribute.Description == claimValue)
-                {
-                    return (LicenseFeature) field.GetValue(null)!;
-                }
-            }
-            else
-            {
-                if (field.Name == claimValue)
+                if (string.Equals(attribute.Description, claimValue, StringComparison.OrdinalIgnoreCase))
                 {
                     return (LicenseFeature) field.GetValue(null)!;
                 }
@@ -169,11 +160,13 @@ public class License
         return Edition switch
         {
             null => FeatureMaskForFeatures(),
+            LicenseEdition.Bff => FeatureMaskForFeatures(),
             LicenseEdition.Starter => FeatureMaskForFeatures(),
             LicenseEdition.Business => FeatureMaskForFeatures(
                 LicenseFeature.KeyManagement, 
                 LicenseFeature.PAR,
-                LicenseFeature.ServerSideSessions),
+                LicenseFeature.ServerSideSessions,
+                LicenseFeature.DCR),
             LicenseEdition.Enterprise => FeatureMaskForFeatures(
                 LicenseFeature.KeyManagement,
                 LicenseFeature.PAR,
@@ -181,7 +174,8 @@ public class License
                 LicenseFeature.DynamicProviders,
                 LicenseFeature.CIBA,
                 LicenseFeature.ServerSideSessions,
-                LicenseFeature.DPoP
+                LicenseFeature.DPoP,
+                LicenseFeature.DCR
             ),
             LicenseEdition.Community => FeatureMaskForFeatures(
                 LicenseFeature.KeyManagement,
@@ -190,7 +184,8 @@ public class License
                 LicenseFeature.DynamicProviders,
                 LicenseFeature.CIBA,
                 LicenseFeature.ServerSideSessions,
-                LicenseFeature.DPoP
+                LicenseFeature.DPoP,
+                LicenseFeature.DCR
             ),
             _ => throw new ArgumentException(),
         };
