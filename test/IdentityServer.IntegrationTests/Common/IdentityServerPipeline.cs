@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading;
@@ -16,11 +15,11 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
 using FluentAssertions;
 using Duende.IdentityModel.Client;
+using IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -50,7 +49,6 @@ public class IdentityServerPipeline
     public const string RevocationEndpoint = BaseUrl + "/connect/revocation";
     public const string UserInfoEndpoint = BaseUrl + "/connect/userinfo";
     public const string IntrospectionEndpoint = BaseUrl + "/connect/introspect";
-    public const string IdentityTokenValidationEndpoint = BaseUrl + "/connect/identityTokenValidation";
     public const string EndSessionEndpoint = BaseUrl + "/connect/endsession";
     public const string EndSessionCallbackEndpoint = BaseUrl + "/connect/endsession/callback";
     public const string CheckSessionEndpoint = BaseUrl + "/connect/checksession";
@@ -74,6 +72,8 @@ public class IdentityServerPipeline
 
     public MockMessageHandler BackChannelMessageHandler { get; set; } = new MockMessageHandler();
     public MockMessageHandler JwtRequestMessageHandler { get; set; } = new MockMessageHandler();
+
+    public MockLogger MockLogger { get; set; } = MockLogger.Create();
 
     public event Action<IServiceCollection> OnPreConfigureServices = services => { };
     public event Action<IServiceCollection> OnPostConfigureServices = services => { };
@@ -103,7 +103,10 @@ public class IdentityServerPipeline
 
         if (enableLogging)
         {
-            builder.ConfigureLogging((ctx, b) => b.AddConsole());
+            // Configure logging so that the logger provider will always use our mock logger
+            // The MockLogger allows us to verify that particular messages were logged.
+            builder.ConfigureLogging((ctx, b) =>
+                b.Services.AddSingleton<ILoggerProvider>(new MockLoggerProvider(MockLogger)));
         }
 
         Server = new TestServer(builder);
