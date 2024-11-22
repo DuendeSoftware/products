@@ -12,8 +12,6 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Models;
 using System.Linq;
 using Duende.IdentityServer.Configuration;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Collections.Generic;
 
 namespace Duende.IdentityServer.Hosting;
 

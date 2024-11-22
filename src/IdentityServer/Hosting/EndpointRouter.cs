@@ -8,18 +8,25 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing.v2;
 
 namespace Duende.IdentityServer.Hosting;
 
 internal class EndpointRouter : IEndpointRouter
 {
     private readonly IEnumerable<Endpoint> _endpoints;
+    private readonly IProtocolRequestCounter _requestCounter;
     private readonly IdentityServerOptions _options;
     private readonly ILogger _logger;
 
-    public EndpointRouter(IEnumerable<Endpoint> endpoints, IdentityServerOptions options, ILogger<EndpointRouter> logger)
+    public EndpointRouter(
+        IEnumerable<Endpoint> endpoints,
+        IProtocolRequestCounter requestCounter,
+        IdentityServerOptions options, 
+        ILogger<EndpointRouter> logger)
     {
         _endpoints = endpoints;
+        _requestCounter = requestCounter;
         _options = options;
         _logger = logger;
     }
@@ -36,6 +43,7 @@ internal class EndpointRouter : IEndpointRouter
                 var endpointName = endpoint.Name;
                 _logger.LogDebug("Request path {path} matched to endpoint type {endpoint}", context.Request.Path, endpointName);
 
+                _requestCounter.Increment();
                 return GetEndpointHandler(endpoint, context);
             }
         }

@@ -3,22 +3,20 @@
 
 
 using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.IO;
-using Duende.IdentityServer.Configuration;
 using System.Linq;
-using Duende.IdentityServer.Licensing;
-using Duende.IdentityServer.Licensing.v2;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -32,7 +30,6 @@ internal class TokenEndpoint : IEndpointHandler
     private readonly IClientSecretValidator _clientValidator;
     private readonly ITokenRequestValidator _requestValidator;
     private readonly ITokenResponseGenerator _responseGenerator;
-    private readonly IProtocolRequestCounter _protocolRequestCounter;
     private readonly IEventService _events;
     private readonly ILogger _logger;
 
@@ -43,7 +40,6 @@ internal class TokenEndpoint : IEndpointHandler
     /// <param name="clientValidator">The client validator.</param>
     /// <param name="requestValidator">The request validator.</param>
     /// <param name="responseGenerator">The response generator.</param>
-    /// <param name="protocolRequestCounter"></param>
     /// <param name="events">The events.</param>
     /// <param name="logger">The logger.</param>
     public TokenEndpoint(
@@ -51,7 +47,6 @@ internal class TokenEndpoint : IEndpointHandler
         IClientSecretValidator clientValidator, 
         ITokenRequestValidator requestValidator, 
         ITokenResponseGenerator responseGenerator,
-        IProtocolRequestCounter protocolRequestCounter,
         IEventService events, 
         ILogger<TokenEndpoint> logger)
     {
@@ -59,7 +54,6 @@ internal class TokenEndpoint : IEndpointHandler
         _clientValidator = clientValidator;
         _requestValidator = requestValidator;
         _responseGenerator = responseGenerator;
-        _protocolRequestCounter = protocolRequestCounter;
         _events = events;
         _logger = logger;
     }
@@ -141,7 +135,6 @@ internal class TokenEndpoint : IEndpointHandler
         await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
         Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null);
         LogTokens(response, requestResult);
-        _protocolRequestCounter.Increment();
         
         // return result
         _logger.LogDebug("Token request success.");

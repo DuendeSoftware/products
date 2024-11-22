@@ -17,6 +17,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityServer.IntegrationTests.Common;
 
 namespace Duende.IdentityServer.IntegrationTests.TestFramework;
 

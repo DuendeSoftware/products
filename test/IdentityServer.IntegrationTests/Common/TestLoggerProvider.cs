@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
-namespace Duende.IdentityServer.IntegrationTests.TestFramework;
+namespace IdentityServer.IntegrationTests.Common;
 
 public class TestLoggerProvider : ILoggerProvider
 {
