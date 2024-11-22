@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\EntityFramework.Storage\Duende.IdentityServer.EntityFramework.Storage.csproj" />
         <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
     </ItemGroup>
 

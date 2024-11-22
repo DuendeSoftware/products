@@ -13,6 +13,7 @@ using System;
 using System.Net.Http;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.EntityFramework;
 using Microsoft.Extensions.Logging;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 
@@ -173,6 +174,20 @@ public static class IdentityServerBuilderExtensionsAdditional
         return builder;
     }
 
+    /// <summary>
+    /// Adds a token cleanup service.
+    /// </summary>
+    /// <typeparam name="T">The type of the concrete token cleanup service that is registered in DI.</typeparam>
+    /// <param name="builder">The builder.</param>
+    /// <returns>The builder.</returns>
+    public static IIdentityServerBuilder AddTokenCleanupService<T>(this IIdentityServerBuilder builder)
+        where T : class, ITokenCleanupService
+    {
+        builder.Services.AddTransient<ITokenCleanupService, T>();
+
+        return builder;
+    }
+    
     /// <summary>
     /// Adds a signing key store.
     /// </summary>
