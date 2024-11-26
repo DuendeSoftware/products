@@ -101,6 +101,8 @@ public class LicenseTests : IDisposable
     [InlineData("6681-business-standard-added-dynamic-providers-feature", "Duende_IdentityServer_License.key")]
     [InlineData("6685-enterprise-standard", "Duende_License.key")]
     [InlineData("6685-enterprise-standard", "Duende_IdentityServer_License.key")]
+    [InlineData("6703-community", "Duende_License.key")]
+    [InlineData("6703-community", "Duende_IdentityServer_License.key")]
     public async Task expired_license_warnings_are_logged(string licenseFileName, string destinationFileName)
     {
         // Copy a test license to the file system where the mock pipeline will see it
@@ -182,6 +184,8 @@ public class LicenseTests : IDisposable
     [InlineData("6681-business-standard-added-dynamic-providers-feature", "Duende_IdentityServer_License.key")]
     [InlineData("6685-enterprise-standard", "Duende_License.key")]
     [InlineData("6685-enterprise-standard", "Duende_IdentityServer_License.key")]
+    [InlineData("6703-community", "Duende_License.key")]
+    [InlineData("6703-community", "Duende_IdentityServer_License.key")]
     public async Task nonexpired_license_warnings_are_not_logged(string licenseFileName, string destinationFileName)
     {
         // Copy a test license to the file system where the mock pipeline will see it
