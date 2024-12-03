@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+
 using System.Collections.Generic;
 
 namespace Duende.IdentityServer.Licensing.v2;

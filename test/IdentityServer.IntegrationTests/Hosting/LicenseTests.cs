@@ -61,7 +61,7 @@ public class LicenseTests : IDisposable
     }
     
     [Fact]
-    public async Task unlicensed_warnings_are_logged()
+    public async Task unlicensed_protocol_requests_log_a_warning()
     {
         var threshold = 5u;
         _mockPipeline.OnPostConfigure += builder =>
@@ -116,7 +116,7 @@ public class LicenseTests : IDisposable
         var timeProvider = new FakeTimeProvider();
         _mockPipeline.OnPreConfigureServices += collection => collection.AddSingleton<TimeProvider>(timeProvider);
         _mockPipeline.Initialize(enableLogging: true);
-        var testLicenseExpiration = new DateTime(2024, 11, 15);
+        var testLicenseExpiration = new DateTime(2024, 11, 15); // This is the value in all the test license keys
         var afterExpiration = testLicenseExpiration + TimeSpan.FromDays(1);
         timeProvider.SetUtcNow(afterExpiration);
 
@@ -132,6 +132,7 @@ public class LicenseTests : IDisposable
         await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
         
         // Expect a warning because the license is expired
+        // REMINDER - If this test needs to be updated because the logged message changed, expired_redist_licenses_do_not_log_warnings should also be updated
         _mockPipeline.MockLogger.LogMessages.Should().Contain("Your license expired on 2024-11-15. You are required to obtain a new license. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
 

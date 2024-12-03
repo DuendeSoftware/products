@@ -27,7 +27,7 @@ public class TokenEndpointTests
     private string scope_name = "api";
     private string scope_secret = "api_secret";
 
-    private IdentityServerPipeline _mockPipeline = new();
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public TokenEndpointTests()
     {
@@ -53,23 +53,20 @@ public class TokenEndpointTests
             }
         });
 
-        _mockPipeline.IdentityScopes.AddRange(new IdentityResource[]
-        {
+        _mockPipeline.IdentityScopes.AddRange(new IdentityResource[] {
             new IdentityResources.OpenId()
         });
 
-        _mockPipeline.ApiResources.AddRange(new ApiResource[]
-        {
+        _mockPipeline.ApiResources.AddRange(new ApiResource[] {
             new ApiResource
             {
                 Name = "api",
                 ApiSecrets = new List<Secret> { new Secret(scope_secret.Sha256()) },
-                Scopes = { scope_name }
+                Scopes = {scope_name}
             }
         });
 
-        _mockPipeline.ApiScopes.AddRange(new[]
-        {
+        _mockPipeline.ApiScopes.AddRange(new[] {
             new ApiScope
             {
                 Name = scope_name
@@ -91,8 +88,7 @@ public class TokenEndpointTests
             { "scope", scope_name },
         };
         var form = new FormUrlEncodedContent(data);
-        _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer",
-            "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
+        _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer", "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -115,8 +111,7 @@ public class TokenEndpointTests
             { "scope", scope_name },
         };
         var form = new FormUrlEncodedContent(data);
-        _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer",
-            "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
+        _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer", "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -131,7 +126,7 @@ public class TokenEndpointTests
     {
         var text = $"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}&scope=%00";
         var content = new StringContent(text, Encoding.UTF8, "application/x-www-form-urlencoded");
-
+        
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, content);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

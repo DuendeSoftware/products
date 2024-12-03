@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" />

@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 
@@ -47,7 +46,6 @@ internal class FeatureManager : IFeatureManager
                 // Two AlreadyWarned checks makes the hottest code path lock-free
                 if (!AlreadyWarned(feature))
                 {
-                    // TODO - this is not a very sophisticated message (we don't say which license would include the feature)
                     _logger.LogWarning("Attempt to use feature {feature}, but the license does not allow it",
                         feature);
                     _warnedFeatures.Add(feature);
@@ -59,7 +57,6 @@ internal class FeatureManager : IFeatureManager
         Interlocked.Or(ref _usedFeatures, featureMask);
     }
 
-    // TODO - Consider use of C# 9's System.Thread.Lock for better performance
     private readonly object _lock = new();
     private readonly HashSet<LicenseFeature> _warnedFeatures = new();
     private bool AlreadyWarned(LicenseFeature feature) => _warnedFeatures.Contains(feature);

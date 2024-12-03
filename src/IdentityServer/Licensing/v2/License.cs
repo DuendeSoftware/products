@@ -55,8 +55,7 @@ public sealed class License
             Edition = editionValue;
         }
 
-
-        Features = claims.FindAll("feature").Select(f => f.Value);
+        Features = claims.FindAll("feature").Select(f => f.Value).ToArray();
         
         Extras = claims.FindFirst("extras")?.Value ?? string.Empty;
         IsConfigured = true;
@@ -94,7 +93,7 @@ public sealed class License
     /// <summary>
     /// The license features
     /// </summary>
-    public IEnumerable<string> Features { get; init; }
+    public string[] Features { get; init; }
     
     /// <summary>
     /// Extras
@@ -198,7 +197,7 @@ public sealed class License
         };
     }
 
-    private ulong FeatureMaskForFeatures(params IEnumerable<LicenseFeature> licenseFeatures)
+    private ulong FeatureMaskForFeatures(params LicenseFeature[] licenseFeatures)
     {
         var result = 0UL;
         foreach(var feature in licenseFeatures)

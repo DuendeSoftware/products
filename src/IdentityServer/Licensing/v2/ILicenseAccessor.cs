@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
+
 namespace Duende.IdentityServer.Licensing.v2;
 
 /// <summary>

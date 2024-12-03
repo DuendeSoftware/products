@@ -7,7 +7,7 @@ using Xunit;
 
 namespace IntegrationTests.Extensibility;
 
-public class CustomLicenseServiceTests
+public class LicensingCustomizationTests
 {
     [Fact]
     public void customization_of_ILicenseAccessor_is_not_allowed()

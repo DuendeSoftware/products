@@ -3,20 +3,20 @@
 
 
 using Duende.IdentityModel;
-using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
-using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.IO;
+using Duende.IdentityServer.Configuration;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -46,7 +46,7 @@ internal class TokenEndpoint : IEndpointHandler
         IdentityServerOptions identityServerOptions,
         IClientSecretValidator clientValidator, 
         ITokenRequestValidator requestValidator, 
-        ITokenResponseGenerator responseGenerator,
+        ITokenResponseGenerator responseGenerator, 
         IEventService events, 
         ILogger<TokenEndpoint> logger)
     {
@@ -135,7 +135,7 @@ internal class TokenEndpoint : IEndpointHandler
         await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
         Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null);
         LogTokens(response, requestResult);
-        
+
         // return result
         _logger.LogDebug("Token request success.");
         return new TokenResult(response);

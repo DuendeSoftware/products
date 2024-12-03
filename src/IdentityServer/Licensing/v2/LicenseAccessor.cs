@@ -27,7 +27,6 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
     ];
 
     private License? _license;
-    // TODO - Using C# 9 System.Thread.Lock if available (better performance)
     private readonly object _lock = new();
     public License Current => _license ??= Initialize();
 
@@ -46,7 +45,7 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
             if (key != null)
             {
                 var licenseClaims = ValidateKey(key);
-                if (licenseClaims.Any()) // (validate key will give us an empty collection if it fails)
+                if (licenseClaims.Any()) // (ValidateKey will return an empty collection if it fails)
                 {
                     return new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)));
                 }

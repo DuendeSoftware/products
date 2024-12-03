@@ -8,11 +8,28 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// </summary>
 public enum LicenseEdition
 {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    /// <summary>
+    /// Enterprise license edition
+    /// </summary>
     Enterprise,
+
+    /// <summary>
+    /// Business license edition
+    /// </summary>
     Business,
+
+    /// <summary>
+    /// Starter license edition
+    /// </summary>
     Starter,
+
+    /// <summary>
+    /// Community license edition
+    /// </summary>
     Community,
+
+    /// <summary>
+    /// Bff license edition
+    /// </summary>
     Bff
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

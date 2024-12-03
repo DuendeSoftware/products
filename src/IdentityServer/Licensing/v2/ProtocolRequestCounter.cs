@@ -25,20 +25,23 @@ internal class ProtocolRequestCounter : IProtocolRequestCounter
     /// The number of protocol requests allowed for unlicensed use. This should only be changed in tests.
     /// </summary>
     internal uint Threshold = 1000;
+    /// <summary>
+    /// The amount of time an expired license may be used for before we shut down the server.
+    /// </summary>
+    private readonly TimeSpan _gracePeriod = TimeSpan.FromDays(90);
 
-    private bool _requestsWarned;
-    private bool _expiredLicenseWarned;
-
+    //// Dependencies
     private readonly ILicenseAccessor _license;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<ProtocolRequestCounter> _logger;
 
-    private TimeSpan _gracePeriod = TimeSpan.FromDays(90);
-    
-    private bool IsExpired => _timeProvider.GetUtcNow() > _license.Current.Expiration;
+    ///// Flags for warning once
+    private bool _requestsWarned;
+    private bool _expiredLicenseWarned;
 
     private uint _requestCount;
     public uint RequestCount => _requestCount;
+
 
     public void Increment()
     {
@@ -60,4 +63,6 @@ internal class ProtocolRequestCounter : IProtocolRequestCounter
                 _license.Current.Expiration?.ToString("yyyy-MM-dd"), _gracePeriod.Days);
         }
     }
+
+    private bool IsExpired => _timeProvider.GetUtcNow() > _license.Current.Expiration;
 }
