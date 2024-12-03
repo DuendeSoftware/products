@@ -28,7 +28,7 @@ internal class FeatureManager : IFeatureManager
     {
         foreach (LicenseFeature feature in Enum.GetValues<LicenseFeature>())
         {
-            if ((_usedFeatures & feature.ToFeatureMask()) != 0)
+            if ((_usedFeatures & (ulong) feature) != 0)
             {
                 yield return feature;
             }
@@ -52,8 +52,7 @@ internal class FeatureManager : IFeatureManager
                 }
             }
         }
-        // TODO - refactor the feature so that its value is already the feature mask
-        var featureMask = feature.ToFeatureMask();
+        var featureMask = (ulong) feature;
         Interlocked.Or(ref _usedFeatures, featureMask);
     }
 

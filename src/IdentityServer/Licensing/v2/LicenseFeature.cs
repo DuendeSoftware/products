@@ -9,70 +9,65 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// The features of IdentityServer that can be enabled or disabled through the License.
 /// </summary>
-public enum LicenseFeature
+public enum LicenseFeature : ulong
 {
     /// <summary>
     /// Automatic Key Management
     /// </summary>
     [Description("key_management")]
-    KeyManagement,
+    KeyManagement = 1,
 
     /// <summary>
     /// Pushed Authorization Requests
     /// </summary>
     [Description("par")]
-    PAR,
+    PAR = 2,
  
     /// <summary>
     /// Resource Isolation
     /// </summary>
     [Description("resource_isolation")]
-    ResourceIsolation,
+    ResourceIsolation = 4,
  
     /// <summary>
     /// Dyanmic External Providers
     /// </summary>
     [Description("dynamic_providers")]
-    DynamicProviders,
+    DynamicProviders = 8,
 
     /// <summary>
     /// Client Initiated Backchannel Authorization
     /// </summary>
     [Description("ciba")]
-    CIBA,
+    CIBA = 16,
 
     /// <summary>
     /// Server-Side Sessions
     /// </summary>
     [Description("server_side_sessions")]
-    ServerSideSessions,
+    ServerSideSessions = 32,
 
     /// <summary>
     /// Demonstrating Proof of Possesion
     /// </summary>
     [Description("dpop")]
-    DPoP,
+    DPoP = 64,
 
     /// <summary>
     /// Configuration API
     /// </summary>
     [Description("config_api")]
-    DCR,
+    DCR = 128,
     
     /// <summary>
     /// ISV (same as Redistribution)
     /// </summary>
     [Description("isv")]
-    ISV,
+    ISV = 256,
     
     /// <summary>
     /// Dedistribution
     /// </summary>
     [Description("redistribution")]
-    Redistribution,
-}
-
-internal static class LicenseFeatureExtensions
-{
-    internal static ulong ToFeatureMask(this LicenseFeature feature) => 1UL << (int) feature;
+    Redistribution = 512,
 }

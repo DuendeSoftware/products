@@ -121,7 +121,7 @@ public sealed class License
     /// <returns></returns>
     public bool IsEnabled(LicenseFeature feature)
     {
-        return !IsConfigured || (AllowedFeatureMask & feature.ToFeatureMask()) != 0;
+        return !IsConfigured || (AllowedFeatureMask & (ulong) feature) != 0;
     }
 
     
@@ -136,7 +136,7 @@ public sealed class License
                 foreach (var featureClaim in Features)
                 {
                     var feature = ToFeatureEnum(featureClaim);
-                    features |= feature.ToFeatureMask();
+                    features |= (ulong) feature;
                 }
 
                 _allowedFeatureMask = features;
@@ -202,7 +202,7 @@ public sealed class License
         var result = 0UL;
         foreach(var feature in licenseFeatures)
         {
-            result |= feature.ToFeatureMask();
+            result |= (ulong) feature;
         }
         return result;
     }
