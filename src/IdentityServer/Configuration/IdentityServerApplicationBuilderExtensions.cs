@@ -20,6 +20,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Duende.IdentityServer.Licensing.v2;
 
 namespace Microsoft.AspNetCore.Builder;
 
@@ -91,6 +92,29 @@ public static class IdentityServerApplicationBuilderExtensions
             ValidateOptions(options, logger);
 
             ValidateAsync(serviceProvider, logger).GetAwaiter().GetResult();
+
+            ValidateLicenseServices(serviceProvider);
+        }
+    }
+
+    private static void ValidateLicenseServices(IServiceProvider serviceProvider)
+    {
+        var licenseAccessor = serviceProvider.GetRequiredService<ILicenseAccessor>(); 
+        if (licenseAccessor is not LicenseAccessor)
+        {
+            throw new InvalidOperationException("Detected a custom ILicenseAccessor implementation. The default ILicenseAccessor is required.");
+        }
+
+        var counter = serviceProvider.GetRequiredService<IProtocolRequestCounter>();
+        if (counter is not ProtocolRequestCounter)
+        {
+            throw new InvalidOperationException("Detected a custom IProtocolRequestCounter implementation. The default IProtocolRequestCounter is required.");
+        }
+
+        var featureManager = serviceProvider.GetRequiredService<IFeatureManager>();
+        if (featureManager is not FeatureManager)
+        {
+            throw new InvalidOperationException("Detected a custom IFeatureManager implementation. The default IFeatureManager is required.");
         }
     }
 

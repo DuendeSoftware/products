@@ -4,7 +4,13 @@
 #nullable enable
 namespace Duende.IdentityServer.Licensing.v2;
 
-internal interface ILicenseAccessor
+/// <summary>
+/// Provides access to the current License.
+/// </summary>
+public interface ILicenseAccessor
 {
+    /// <summary>
+    /// Gets the current IdentityServer license.
+    /// </summary>
     License Current { get; }
 }

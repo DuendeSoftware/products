@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
 using Duende.IdentityServer.Licensing.v2;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
@@ -59,7 +57,7 @@ public class ProtocolRequestCounterTests
     public void warning_is_logged_for_expired_license()
     {
         _timeProvider.SetUtcNow(_januaryFirst);
-        _license.Current = CreateLicense(LicenseEdition.Enterprise, _januaryFirst.Subtract(TimeSpan.FromDays(1)));
+        _license.Current = LicenseFactory.Create(LicenseEdition.Enterprise, _januaryFirst.Subtract(TimeSpan.FromDays(1)));
 
         _counter.Increment();
         var expiration = _license.Current.Expiration?.ToString("yyyy-MM-dd");
@@ -72,7 +70,7 @@ public class ProtocolRequestCounterTests
     public void no_expired_license_warning_for_redistribution_license()
     {
         _timeProvider.SetUtcNow(_januaryFirst);
-        _license.Current = CreateLicense(LicenseEdition.Enterprise, _januaryFirst.Subtract(TimeSpan.FromDays(1)), redistribution: true);
+        _license.Current = LicenseFactory.Create(LicenseEdition.Enterprise, _januaryFirst.Subtract(TimeSpan.FromDays(1)), redistribution: true);
 
         _license.Current.IsEnabled(LicenseFeature.Redistribution).Should().BeTrue();
         
@@ -82,17 +80,5 @@ public class ProtocolRequestCounterTests
             .BeEmpty();
     }
 
-    private static License CreateLicense(LicenseEdition edition, DateTimeOffset expiration, bool redistribution = false)
-    {
-        var claims = new List<Claim>
-        {
-            new Claim("exp", expiration.ToUnixTimeSeconds().ToString()),
-            new Claim("edition", edition.ToString()),
-        };
-        if (redistribution)
-        {
-            claims.Add(new Claim("feature", "redistribution"));
-        }
-        return new(new ClaimsPrincipal(new ClaimsIdentity(claims)));
-    }
+
 }

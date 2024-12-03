@@ -15,7 +15,7 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// Models a Duende commercial license.
 /// </summary>
-internal class License
+public sealed class License
 {
     
     /// <summary>
@@ -24,6 +24,7 @@ internal class License
     internal License()
     {
         IsConfigured = false;
+        Features = [];
     }
 
     /// <summary>
@@ -64,26 +65,26 @@ internal class License
     /// <summary>
     /// The serial number
     /// </summary>
-    public int? SerialNumber { get; set; }
+    public int? SerialNumber { get; init; }
 
     /// <summary>
     /// The company name
     /// </summary>
-    public string? CompanyName { get; set; }
+    public string? CompanyName { get; init; }
     /// <summary>
     /// The company contact info
     /// </summary>
-    public string? ContactInfo { get; set; }
+    public string? ContactInfo { get; init; }
 
     /// <summary>
     /// The license expiration
     /// </summary>
-    public DateTimeOffset? Expiration { get; set; }
+    public DateTimeOffset? Expiration { get; init; }
 
     /// <summary>
     /// The license edition 
     /// </summary>
-    public LicenseEdition? Edition { get; set; }
+    public LicenseEdition? Edition { get; init; }
 
     /// <summary>
     /// True if redistribution is enabled for this license, and false otherwise.
@@ -93,12 +94,12 @@ internal class License
     /// <summary>
     /// The license features
     /// </summary>
-    public IEnumerable<string> Features { get; set; } = [];
+    public IEnumerable<string> Features { get; init; }
     
     /// <summary>
     /// Extras
     /// </summary>
-    public string? Extras { get; set; }
+    public string? Extras { get; init; }
     
     /// <summary>
     /// True if the license was configured in options or from a file, and false otherwise.
@@ -111,11 +112,17 @@ internal class License
         nameof(Edition),
         nameof(Extras))
     ]
-    public bool IsConfigured { get; set; }
+    public bool IsConfigured { get; init; }
     
-    internal bool IsEnabled(LicenseFeature feature)
+    /// <summary>
+    /// Checks if a LicenseFeature is enabled in the current license. If there
+    /// is no configured license, this always returns true.
+    /// </summary>
+    /// <param name="feature"></param>
+    /// <returns></returns>
+    public bool IsEnabled(LicenseFeature feature)
     {
-        return IsConfigured && (AllowedFeatureMask & feature.ToFeatureMask()) != 0;
+        return !IsConfigured || (AllowedFeatureMask & feature.ToFeatureMask()) != 0;
     }
 
     

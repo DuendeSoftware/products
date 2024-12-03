@@ -38,11 +38,13 @@ internal class FeatureManager : IFeatureManager
 
     public void UseFeature(LicenseFeature feature)
     {
-        if (!_license.Current.IsEnabled(feature) && !AlreadyWarned(feature))
+        if ( _license.Current.IsConfigured && 
+            !_license.Current.IsEnabled(feature) && 
+            !AlreadyWarned(feature))
         {
             lock (_lock)
             {
-                // Two AlreadyWarned checks makes the hotest code path lock-free
+                // Two AlreadyWarned checks makes the hottest code path lock-free
                 if (!AlreadyWarned(feature))
                 {
                     // TODO - this is not a very sophisticated message (we don't say which license would include the feature)
@@ -52,6 +54,7 @@ internal class FeatureManager : IFeatureManager
                 }
             }
         }
+        // TODO - refactor the feature so that its value is already the feature mask
         var featureMask = feature.ToFeatureMask();
         Interlocked.Or(ref _usedFeatures, featureMask);
     }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Linq;
+using System.Security.Claims;
 using Duende.IdentityServer.Licensing.v2;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
@@ -23,9 +24,15 @@ public class FeatureManagerTests
     private readonly TestLicenseAccessor _license;
     private readonly FakeLogger<FeatureManager> _logger;
 
-    [Fact]
-    public void used_features_are_reported()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void used_features_are_reported(bool configureLicense)
     {
+        if (configureLicense)
+        {
+            _license.Current = LicenseFactory.Create(LicenseEdition.Enterprise);
+        }
         _featureManager.UseFeature(LicenseFeature.PAR);
         _featureManager.UseFeature(LicenseFeature.DPoP);
         _featureManager.UseFeature(LicenseFeature.KeyManagement);
@@ -40,11 +47,11 @@ public class FeatureManagerTests
     [Fact]
     public void unlicensed_features_log_warnings_exactly_once()
     {
+        _license.Current = LicenseFactory.Create(LicenseEdition.Starter);
         _featureManager.UseFeature(LicenseFeature.PAR);
         _featureManager.UseFeature(LicenseFeature.PAR);
        
         _logger.Collector.GetSnapshot().Should()
             .ContainSingle(r => r.Message == "Attempt to use feature PAR, but the license does not allow it");
     }
-
 }
