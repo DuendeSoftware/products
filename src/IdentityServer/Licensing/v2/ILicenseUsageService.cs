@@ -10,12 +10,23 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// Tracks the usage of the license. 
 /// </summary>
-public interface ILicenseUsageService
+internal interface ILicenseUsageService
 {
     /// <summary>
-    /// Gets the licensed features that have been used.
+    /// Gets the licensed business edition features that have been used.
     /// </summary>
-    HashSet<LicenseFeature> UsedFeatures { get; }
+    HashSet<LicenseFeature> BusinessFeaturesUsed { get; }
+
+    /// <summary>
+    /// Gets the licensed enterprise edition features that have been used.
+    /// </summary>
+    HashSet<LicenseFeature> EnterpriseFeaturesUsed { get; }
+
+    /// <summary>
+    /// Gets other licensed features that have been used.
+    /// </summary>
+    HashSet<LicenseFeature> OtherFeaturesUsed { get; }
+
     /// <summary>
     /// Indicates that a licensed feature has been used.
     /// </summary>
@@ -25,16 +36,17 @@ public interface ILicenseUsageService
     /// Gets the client ids that have been used.
     /// </summary>
     HashSet<string> UsedClients { get; }
+    
     /// <summary>
     /// Indicates that a client id has been used.
     /// </summary>
     void UseClient(string clientId);
 
-    
     /// <summary>
     /// Gets the issuers that have been used.
     /// </summary>
     HashSet<string> UsedIssuers { get; }
+
     /// <summary>
     /// Indicates that an issuer has been used.
     /// </summary>

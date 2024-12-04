@@ -14,9 +14,8 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// Models a Duende commercial license.
 /// </summary>
-public sealed class License
+internal class License
 {
-    
     /// <summary>
     /// Initializes an empty (non-configured) license.
     /// </summary>

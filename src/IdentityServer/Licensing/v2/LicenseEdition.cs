@@ -6,7 +6,7 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// The editions of our license, which give access to different features.
 /// </summary>
-public enum LicenseEdition
+internal enum LicenseEdition
 {
     /// <summary>
     /// Enterprise license edition

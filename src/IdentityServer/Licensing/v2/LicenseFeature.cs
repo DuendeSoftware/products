@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// The features of IdentityServer that can be enabled or disabled through the License.
 /// </summary>
-public enum LicenseFeature : ulong
+internal enum LicenseFeature : ulong
 {
     /// <summary>
     /// Automatic Key Management
@@ -48,7 +48,7 @@ public enum LicenseFeature : ulong
     ServerSideSessions = 32,
 
     /// <summary>
-    /// Demonstrating Proof of Possesion
+    /// Demonstrating Proof of Possession
     /// </summary>
     [Description("dpop")]
     DPoP = 64,

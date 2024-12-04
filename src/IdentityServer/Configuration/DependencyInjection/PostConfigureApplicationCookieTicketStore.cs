@@ -29,18 +29,16 @@ public class PostConfigureApplicationCookieTicketStore : IPostConfigureOptions<C
     /// </summary>
     /// <param name="httpContextAccessor"></param>
     /// <param name="identityServerOptions"></param>
-    /// <param name="licenseUsage"></param>
     /// <param name="options"></param>
     /// <param name="logger"></param>
     public PostConfigureApplicationCookieTicketStore(
         IHttpContextAccessor httpContextAccessor,
         IdentityServerOptions identityServerOptions,
-        ILicenseUsageService licenseUsage,
         IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> options,
         ILogger<PostConfigureApplicationCookieTicketStore> logger)
     {
         _httpContextAccessor = httpContextAccessor;
-        _licenseUsage = licenseUsage;
+        _licenseUsage = httpContextAccessor.HttpContext?.RequestServices.GetRequiredService<ILicenseUsageService>();
         _logger = logger;
 
         _scheme = identityServerOptions.Authentication.CookieAuthenticationScheme ??

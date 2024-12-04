@@ -210,7 +210,6 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<ILicenseAccessor, LicenseAccessor>();
         builder.Services.AddSingleton<IProtocolRequestCounter, ProtocolRequestCounter>();
         builder.Services.AddSingleton<ILicenseUsageService, LicenseUsageService>();
-        builder.Services.AddHostedService<UsageSummaryService>();
 
         return builder;
     }
@@ -395,6 +394,15 @@ public static class IdentityServerBuilderExtensionsCore
     {
         builder.Services.AddTransient<ISecretValidator, HashedSharedSecretValidator>();
 
+        return builder;
+    }
+
+    /// <summary>
+    /// Adds the license summary, which provides information about the current license usage.
+    /// </summary>
+    public static IIdentityServerBuilder AddLicenseSummary(this IIdentityServerBuilder builder)
+    {
+        builder.Services.AddSingleton<ILicenseSummary, LicenseSummary>();
         return builder;
     }
 

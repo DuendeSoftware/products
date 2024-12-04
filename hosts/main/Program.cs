@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.Licensing.v2;
 using IdentityServerHost;
 using Serilog;
 using Serilog.Events;
@@ -36,7 +37,11 @@ try
         .ConfigureServices()
         .ConfigurePipeline();
 
+    var license = app.Services.GetRequiredService<ILicenseSummary>();
+
     app.Run();
+
+    Console.Write(license.Summary);
 }
 catch (Exception ex)
 {

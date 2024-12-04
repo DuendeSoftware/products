@@ -13,6 +13,7 @@ using Duende.IdentityServer.Models;
 using System.Linq;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.v2;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Hosting;
 
@@ -45,7 +46,6 @@ public class IdentityServerMiddleware
     /// <param name="events">The event service.</param>
     /// <param name="issuerNameService">The issuer name service</param>
     /// <param name="sessionCoordinationService"></param>
-    /// <param name="licenseUsage"></param>
     /// <returns></returns>
     public async Task Invoke(
         HttpContext context, 
@@ -54,8 +54,7 @@ public class IdentityServerMiddleware
         IUserSession userSession, 
         IEventService events,
         IIssuerNameService issuerNameService,
-        ISessionCoordinationService sessionCoordinationService,
-        ILicenseUsageService licenseUsage)
+        ISessionCoordinationService sessionCoordinationService)
     {
         // this will check the authentication session and from it emit the check session
         // cookie needed from JS-based signout clients.
@@ -101,6 +100,7 @@ public class IdentityServerMiddleware
                     activity?.SetTag(Tracing.Properties.EndpointType, endpointType);
 
                     var issuer = await issuerNameService.GetCurrentAsync();
+                    var licenseUsage = context.RequestServices.GetRequiredService<ILicenseUsageService>();
                     licenseUsage.UseIssuer(issuer);
                     IdentityServerLicenseValidator.Instance.ValidateIssuer(issuer);
 

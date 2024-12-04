@@ -16,7 +16,6 @@ using System;
 using System.Collections.Specialized;
 using System.Net;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.v2;
 
 namespace Duende.IdentityServer.Endpoints;

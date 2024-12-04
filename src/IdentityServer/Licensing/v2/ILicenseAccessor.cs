@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// Provides access to the current License.
 /// </summary>
-public interface ILicenseAccessor
+internal interface ILicenseAccessor
 {
     /// <summary>
     /// Gets the current IdentityServer license.

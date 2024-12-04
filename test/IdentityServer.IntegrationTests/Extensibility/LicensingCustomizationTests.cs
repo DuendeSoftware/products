@@ -66,13 +66,20 @@ internal class CustomProtocolRequestCounter : IProtocolRequestCounter
 
 internal class CustomFeatureManager : ILicenseUsageService
 {
-    public HashSet<LicenseFeature> UsedFeatures { get; } = new();
+    public HashSet<LicenseFeature> BusinessFeaturesUsed { get; } = [];
+    public HashSet<LicenseFeature> EnterpriseFeaturesUsed { get; } = [];
+    public HashSet<LicenseFeature> OtherFeaturesUsed { get; } = [];
+    public void UseFeature(LicenseFeature feature)
+    {
+    }
 
-    public void UseFeature(LicenseFeature feature) => UsedFeatures.Add(feature);
+    public HashSet<string> UsedClients { get; } = [];
+    public void UseClient(string clientId)
+    {
+    }
 
-    public HashSet<string> UsedClients { get; } = new();
-    public void UseClient(string clientId) => UsedClients.Add(clientId);
-
-    public HashSet<string> UsedIssuers { get; } = new();
-    public void UseIssuer(string issuer) => UsedIssuers.Add(issuer);
+    public HashSet<string> UsedIssuers { get; } = [];
+    public void UseIssuer(string issuer)
+    {
+    }
 }

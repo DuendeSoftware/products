@@ -4,7 +4,6 @@
 #nullable enable
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Duende.IdentityServer.Licensing.v2;
 
@@ -38,9 +37,34 @@ internal class LicenseUsageService : ILicenseUsageService
 
     // Features
     private readonly object _featureLock = new();
-    private HashSet<LicenseFeature> _features = new();
-    public HashSet<LicenseFeature> UsedFeatures => _features;
-    public void UseFeature(LicenseFeature feature) => EnsureAdded(ref _features, _featureLock, feature);
+    private HashSet<LicenseFeature> _otherFeatures = new();
+    private HashSet<LicenseFeature> _businessFeatures = new();
+    private HashSet<LicenseFeature> _enterpriseFeatures = new();
+    public HashSet<LicenseFeature> BusinessFeaturesUsed => _businessFeatures;
+    public HashSet<LicenseFeature> EnterpriseFeaturesUsed => _enterpriseFeatures;
+    public HashSet<LicenseFeature> OtherFeaturesUsed => _otherFeatures;
+    public void UseFeature(LicenseFeature feature)
+    {
+        switch (feature)
+        {
+            case LicenseFeature.ResourceIsolation:
+            case LicenseFeature.DynamicProviders:
+            case LicenseFeature.CIBA:
+            case LicenseFeature.DPoP:
+                EnsureAdded(ref _enterpriseFeatures, _featureLock, feature);
+                break;
+            case LicenseFeature.KeyManagement:
+            case LicenseFeature.PAR:
+            case LicenseFeature.ServerSideSessions:
+            case LicenseFeature.DCR:
+                EnsureAdded(ref _businessFeatures, _featureLock, feature);
+                break;
+            case LicenseFeature.ISV:
+            case LicenseFeature.Redistribution:
+                EnsureAdded(ref _otherFeatures, _featureLock, feature);
+                break;
+        }
+    }
 
     // Clients
     private readonly object _clientLock = new();
@@ -52,5 +76,6 @@ internal class LicenseUsageService : ILicenseUsageService
     private readonly object _issuerLock = new();
     private HashSet<string> _issuers = new();
     public HashSet<string> UsedIssuers => _issuers;
+
     public void UseIssuer(string issuer) => EnsureAdded(ref _issuers, _issuerLock, issuer);
 }
