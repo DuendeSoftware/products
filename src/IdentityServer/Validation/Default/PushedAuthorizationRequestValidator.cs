@@ -20,7 +20,7 @@ namespace Duende.IdentityServer.Validation;
 internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestValidator
 {
 
-    private readonly IFeatureManager _features;
+    private readonly ILicenseUsageService _features;
     private readonly IAuthorizeRequestValidator _authorizeRequestValidator;
 
     /// <summary>
@@ -31,7 +31,7 @@ internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequest
     /// used to validate the pushed authorization parameters as if they were
     /// used directly at the authorize endpoint.</param>
     /// <param name="features">The feature manager</param>
-    public PushedAuthorizationRequestValidator(IAuthorizeRequestValidator authorizeRequestValidator, IFeatureManager features)
+    public PushedAuthorizationRequestValidator(IAuthorizeRequestValidator authorizeRequestValidator, ILicenseUsageService features)
     {
         _authorizeRequestValidator = authorizeRequestValidator;
         _features = features;

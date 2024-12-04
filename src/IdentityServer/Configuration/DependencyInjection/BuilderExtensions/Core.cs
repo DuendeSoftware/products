@@ -209,7 +209,8 @@ public static class IdentityServerBuilderExtensionsCore
 
         builder.Services.AddSingleton<ILicenseAccessor, LicenseAccessor>();
         builder.Services.AddSingleton<IProtocolRequestCounter, ProtocolRequestCounter>();
-        builder.Services.AddSingleton<IFeatureManager, FeatureManager>();
+        builder.Services.AddSingleton<ILicenseUsageService, LicenseUsageService>();
+        builder.Services.AddHostedService<UsageSummaryService>();
 
         return builder;
     }

@@ -19,7 +19,7 @@ class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvider
 {
     private readonly IAuthenticationSchemeProvider _inner;
     private readonly DynamicProviderOptions _options;
-    private readonly IFeatureManager _features;
+    private readonly ILicenseUsageService _features;
 
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<DynamicAuthenticationSchemeProvider> _logger;
@@ -27,7 +27,7 @@ class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvider
     public DynamicAuthenticationSchemeProvider(
         Decorator<IAuthenticationSchemeProvider> inner,
         DynamicProviderOptions options,
-        IFeatureManager features,
+        ILicenseUsageService features,
         IHttpContextAccessor httpContextAccessor,
         ILogger<DynamicAuthenticationSchemeProvider> logger)
     {

@@ -42,7 +42,7 @@ public class LicensingCustomizationTests
         
         mockPipeline.OnPostConfigureServices += svcs =>
         {
-            svcs.AddTransient<IFeatureManager, CustomFeatureManager>();
+            svcs.AddTransient<ILicenseUsageService, CustomFeatureManager>();
         };
 
         Assert.Throws<InvalidOperationException>(() => mockPipeline.Initialize());
@@ -64,11 +64,15 @@ internal class CustomProtocolRequestCounter : IProtocolRequestCounter
     }
 }
 
-internal class CustomFeatureManager : IFeatureManager
+internal class CustomFeatureManager : ILicenseUsageService
 {
-    public IEnumerable<LicenseFeature> UsedFeatures() => [];
+    public HashSet<LicenseFeature> UsedFeatures { get; } = new();
 
-    public void UseFeature(LicenseFeature feature)
-    {
-    }
+    public void UseFeature(LicenseFeature feature) => UsedFeatures.Add(feature);
+
+    public HashSet<string> UsedClients { get; } = new();
+    public void UseClient(string clientId) => UsedClients.Add(clientId);
+
+    public HashSet<string> UsedIssuers { get; } = new();
+    public void UseIssuer(string issuer) => UsedIssuers.Add(issuer);
 }

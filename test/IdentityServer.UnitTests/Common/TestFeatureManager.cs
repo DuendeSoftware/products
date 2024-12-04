@@ -7,17 +7,15 @@ using System.Collections.Generic;
 
 namespace UnitTests.Common;
 
-internal class TestFeatureManager : IFeatureManager
+internal class TestFeatureManager : ILicenseUsageService
 {
-    public List<LicenseFeature> Features { get; set; }
+    public HashSet<LicenseFeature> UsedFeatures { get; } = new();
 
-    public IEnumerable<LicenseFeature> UsedFeatures()
-    {
-        return Features;
-    }
+    public void UseFeature(LicenseFeature feature) => UsedFeatures.Add(feature);
 
-    public void UseFeature(LicenseFeature feature)
-    {
-        Features.Add(feature);
-    }
+    public HashSet<string> UsedClients { get; } = new();
+    public void UseClient(string clientId) => UsedClients.Add(clientId);
+
+    public HashSet<string> UsedIssuers { get; } = new();
+    public void UseIssuer(string issuer) => UsedIssuers.Add(issuer);
 }

@@ -25,7 +25,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
     private readonly IClientSecretValidator _clientValidator;
     private readonly IPushedAuthorizationRequestValidator _parValidator;
     private readonly IPushedAuthorizationResponseGenerator _responseGenerator;
-    private readonly IFeatureManager _features;
+    private readonly ILicenseUsageService _features;
     private readonly IdentityServerOptions _options;
     private readonly ILogger<PushedAuthorizationEndpoint> _logger;
 
@@ -33,7 +33,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         IClientSecretValidator clientValidator,
         IPushedAuthorizationRequestValidator parValidator,
         IPushedAuthorizationResponseGenerator responseGenerator,
-        IFeatureManager features,
+        ILicenseUsageService features,
         IdentityServerOptions options,
         ILogger<PushedAuthorizationEndpoint> logger
         )

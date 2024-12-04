@@ -78,6 +78,11 @@ public static class IdentityServerApplicationBuilderExtensions
             var options = serviceProvider.GetRequiredService<IdentityServerOptions>();
             var env = serviceProvider.GetRequiredService<IHostEnvironment>();
             IdentityServerLicenseValidator.Instance.Initialize(loggerFactory, options, env.IsDevelopment());
+            if (options.KeyManagement.Enabled)
+            {
+                var licenseUsage = serviceProvider.GetRequiredService<ILicenseUsageService>();
+                licenseUsage.UseFeature(LicenseFeature.KeyManagement);
+            }
 
             TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");
             TestService(serviceProvider, typeof(IClientStore), logger, "No storage mechanism for clients specified. Use the 'AddInMemoryClients' extension method to register a development version.");
@@ -111,8 +116,8 @@ public static class IdentityServerApplicationBuilderExtensions
             throw new InvalidOperationException("Detected a custom IProtocolRequestCounter implementation. The default IProtocolRequestCounter is required.");
         }
 
-        var featureManager = serviceProvider.GetRequiredService<IFeatureManager>();
-        if (featureManager is not FeatureManager)
+        var featureManager = serviceProvider.GetRequiredService<ILicenseUsageService>();
+        if (featureManager is not LicenseUsageService)
         {
             throw new InvalidOperationException("Detected a custom IFeatureManager implementation. The default IFeatureManager is required.");
         }

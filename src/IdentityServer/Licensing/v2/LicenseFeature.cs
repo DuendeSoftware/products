@@ -66,7 +66,7 @@ public enum LicenseFeature : ulong
     ISV = 256,
     
     /// <summary>
-    /// Dedistribution
+    /// Redistribution
     /// </summary>
     [Description("redistribution")]
     Redistribution = 512,
