@@ -12,16 +12,16 @@ internal class LicenseExpirationChecker : ILicenseExpirationChecker
 {
     private readonly ILicenseAccessor _license;
     private readonly TimeProvider _timeProvider;
-    private readonly ILogger<LicenseExpirationChecker> _logger;
+    private readonly ILogger _logger;
 
         public LicenseExpirationChecker(
         ILicenseAccessor license,
         TimeProvider timeProvider,
-        ILogger<LicenseExpirationChecker> logger)
+        ILoggerFactory loggerFactory)
     {
         _license = license;
         _timeProvider = timeProvider;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
     }
 
     /// <summary>

@@ -12,10 +12,10 @@ internal class ProtocolRequestCounter : IProtocolRequestCounter
 {
     public ProtocolRequestCounter(
         ILicenseAccessor license,
-        ILogger<ProtocolRequestCounter> logger)
+        ILoggerFactory loggerFactory)
     {
         _license = license;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ internal class ProtocolRequestCounter : IProtocolRequestCounter
     internal uint Threshold = 1000;
 
     private readonly ILicenseAccessor _license;
-    private readonly ILogger<ProtocolRequestCounter> _logger;
+    private readonly ILogger _logger;
 
     private bool _warned;
 
