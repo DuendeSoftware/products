@@ -25,7 +25,7 @@ internal static class AllowedSigningAlgorithmsConverter
         if (!String.IsNullOrWhiteSpace(sourceMember))
         {
             sourceMember = sourceMember.Trim();
-            foreach (var item in sourceMember.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct())
+            foreach (var item in sourceMember.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 list.Add(item);
             }

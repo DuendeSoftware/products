@@ -92,8 +92,7 @@ public static class TokenExtensions
 
             var simpleClaimTypes = token.Claims.Where(c =>
                     c.Type != JwtClaimTypes.AuthenticationMethod && c.Type != JwtClaimTypes.Scope)
-                .Select(c => c.Type)
-                .Distinct();
+                .Select(c => c.Type);
 
             // other claims
             foreach (var claimType in simpleClaimTypes)
