@@ -52,7 +52,7 @@ public class LicensingCustomizationTests
 
 internal class CustomLicenseAccessor : ILicenseAccessor
 {
-    public License Current { get; }
+    public License Current => new License();
 }
 
 internal class CustomProtocolRequestCounter : IProtocolRequestCounter

@@ -15,7 +15,7 @@ public class ProtocolRequestCounterTests
     {
         _license = new TestLicenseAccessor();
         _logger = new FakeLogger<ProtocolRequestCounter>();
-        _counter = new ProtocolRequestCounter(_license, _logger);
+        _counter = new ProtocolRequestCounter(_license, new StubLoggerFactory(_logger));
     }
 
     [Fact]

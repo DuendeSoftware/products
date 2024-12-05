@@ -27,7 +27,7 @@ public class EndpointRouterTests
         _pathMap = new Dictionary<string, Duende.IdentityServer.Hosting.Endpoint>();
         _endpoints = new List<Duende.IdentityServer.Hosting.Endpoint>();
         _options = new IdentityServerOptions();
-        _subject = new EndpointRouter(_endpoints, new TestProtocolRequestCounter(), _options, TestLogger.Create<EndpointRouter>());
+        _subject = new EndpointRouter(_endpoints, new TestProtocolRequestCounter(), new TestLicenseExpirationChecker(), _options, TestLogger.Create<EndpointRouter>());
     }
 
     [Fact]

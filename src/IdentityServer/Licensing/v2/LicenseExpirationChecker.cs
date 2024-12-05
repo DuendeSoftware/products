@@ -36,7 +36,7 @@ internal class LicenseExpirationChecker : ILicenseExpirationChecker
         if (!_expiredLicenseWarned && !_license.Current.Redistribution && IsExpired) 
         {
             _expiredLicenseWarned = true;
-            _logger.LogError("In a future version of IdentityServer, expired licenses will stop the server after {gracePeriod} days.", _gracePeriod.Days);
+            _logger.LogError("The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after {gracePeriod} days.", _gracePeriod.Days);
         }
     }
 

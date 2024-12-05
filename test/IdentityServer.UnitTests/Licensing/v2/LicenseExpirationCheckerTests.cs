@@ -27,7 +27,7 @@ public class LicenseExpirationCheckerTests
         _license = new TestLicenseAccessor();
         _timeProvider = new FakeTimeProvider();
         _logger = new FakeLogger<LicenseExpirationChecker>();
-        _expirationCheck = new LicenseExpirationChecker(_license, _timeProvider, _logger);
+        _expirationCheck = new LicenseExpirationChecker(_license, _timeProvider, new StubLoggerFactory(_logger));
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class LicenseExpirationCheckerTests
         // REMINDER - If this test needs to change because the log message was updated, so should no_warning_is_logged_for_unexpired_license
         _logger.Collector.GetSnapshot().Should()
             .ContainSingle(r =>
-                r.Message == $"In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+                r.Message == $"The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class LicenseExpirationCheckerTests
         var expiration = _license.Current.Expiration?.ToString("yyyy-MM-dd");
         _logger.Collector.GetSnapshot().Should()
             .NotContain(r =>
-                r.Message == $"In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+                r.Message == $"The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
     
     [Fact]

@@ -103,7 +103,7 @@ public class LicenseTests : IDisposable
     [InlineData("6685-enterprise-standard", "Duende_IdentityServer_License.key")]
     [InlineData("6703-community", "Duende_License.key")]
     [InlineData("6703-community", "Duende_IdentityServer_License.key")]
-    public async Task expired_license_warnings_are_logged(string licenseFileName, string destinationFileName)
+    public async Task expired_license_warnings_are_logged_if_license_expires_while_server_is_running(string licenseFileName, string destinationFileName)
     {
         // Copy a test license to the file system where the mock pipeline will see it
         var contentRoot = Path.GetFullPath(Directory.GetCurrentDirectory());
@@ -112,28 +112,63 @@ public class LicenseTests : IDisposable
         var dest = Path.Combine(contentRoot, destinationFileName);
         File.Copy(src, dest, true);
         
-        // Set the time to be after the license expiration
+        // Start up with an unexpired license
         var timeProvider = new FakeTimeProvider();
         _mockPipeline.OnPreConfigureServices += collection => collection.AddSingleton<TimeProvider>(timeProvider);
+        var testLicenseExpiration = new DateTime(2024, 11, 15); // This is the value in all the test license keys
+        var beforeExpiration = testLicenseExpiration - TimeSpan.FromDays(1);
+        timeProvider.SetUtcNow(beforeExpiration);
         _mockPipeline.Initialize(enableLogging: true);
+
+        // License is not expired yet
+        _mockPipeline.MockLogger.LogMessages.Should().NotContain("The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+
+        // Advance the clock to after expiration
+        var afterExpiration = testLicenseExpiration + TimeSpan.FromDays(1);
+        timeProvider.SetUtcNow(afterExpiration);
+        _mockPipeline.MockLogger.LogMessages.Should().NotContain("The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+
+        // Make a protocol request
+        await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint);
+        
+        // Now expect a warning because we handled a request with an expired license
+        // REMINDER - If this test needs to be updated because the logged message changed, expired_redist_licenses_do_not_log_warnings should also be updated
+        _mockPipeline.MockLogger.LogMessages.Should().Contain("The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+    }
+
+    [Theory]
+    [InlineData("6677-starter-standard", "Duende_License.key")]
+    [InlineData("6677-starter-standard","Duende_IdentityServer_License.key")]
+    [InlineData("6678-business-standard", "Duende_License.key")]
+    [InlineData("6678-business-standard", "Duende_IdentityServer_License.key")]
+    [InlineData("6680-starter-standard-added-key-management-feature", "Duende_License.key")]
+    [InlineData("6680-starter-standard-added-key-management-feature", "Duende_IdentityServer_License.key")]
+    [InlineData("6681-business-standard-added-dynamic-providers-feature", "Duende_License.key")]
+    [InlineData("6681-business-standard-added-dynamic-providers-feature", "Duende_IdentityServer_License.key")]
+    [InlineData("6685-enterprise-standard", "Duende_License.key")]
+    [InlineData("6685-enterprise-standard", "Duende_IdentityServer_License.key")]
+    [InlineData("6703-community", "Duende_License.key")]
+    [InlineData("6703-community", "Duende_IdentityServer_License.key")]
+    public void expired_license_warnings_are_logged_on_startup(string licenseFileName, string destinationFileName)
+    {
+        // Copy a test license to the file system where the mock pipeline will see it
+        var contentRoot = Path.GetFullPath(Directory.GetCurrentDirectory());
+        var sourceFileName = Path.Combine("TestLicenses", licenseFileName);
+        var src = Path.Combine(contentRoot, sourceFileName);
+        var dest = Path.Combine(contentRoot, destinationFileName);
+        File.Copy(src, dest, true);
+        
+        // Start up with an expired license
+        var timeProvider = new FakeTimeProvider();
+        _mockPipeline.OnPreConfigureServices += collection => collection.AddSingleton<TimeProvider>(timeProvider);
         var testLicenseExpiration = new DateTime(2024, 11, 15); // This is the value in all the test license keys
         var afterExpiration = testLicenseExpiration + TimeSpan.FromDays(1);
         timeProvider.SetUtcNow(afterExpiration);
+        _mockPipeline.Initialize(enableLogging: true);
 
-        // Make any protocol request
-        var data = new Dictionary<string, string>
-        {
-            { "grant_type", "client_credentials" },
-            { "client_id", client_id },
-            { "client_secret", client_secret },
-            { "scope", scope_name },
-        };
-        var form = new FormUrlEncodedContent(data);
-        await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
-        
-        // Expect a warning because the license is expired
+        // Expect a warning because we handled a request with an expired license
         // REMINDER - If this test needs to be updated because the logged message changed, expired_redist_licenses_do_not_log_warnings should also be updated
-        _mockPipeline.MockLogger.LogMessages.Should().Contain("In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+        _mockPipeline.MockLogger.LogMessages.Should().Contain("The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
 
     [Theory]
@@ -172,7 +207,7 @@ public class LicenseTests : IDisposable
         await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
         
         // Expect no warning because the license is a redistribution license
-        _mockPipeline.MockLogger.LogMessages.Should().NotContain("In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+        _mockPipeline.MockLogger.LogMessages.Should().NotContain("The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
     
     [Theory]
@@ -216,8 +251,6 @@ public class LicenseTests : IDisposable
         await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
         
         // Expect no warning because the license is not expired
-        _mockPipeline.MockLogger.LogMessages.Should().NotContain("In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+        _mockPipeline.MockLogger.LogMessages.Should().NotContain("The IdentityServer license is expired. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
-    
-    
 }
