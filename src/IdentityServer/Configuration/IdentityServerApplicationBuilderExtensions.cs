@@ -78,6 +78,10 @@ public static class IdentityServerApplicationBuilderExtensions
             var options = serviceProvider.GetRequiredService<IdentityServerOptions>();
             var env = serviceProvider.GetRequiredService<IHostEnvironment>();
             IdentityServerLicenseValidator.Instance.Initialize(loggerFactory, options, env.IsDevelopment());
+
+            var licenseExpiration = serviceProvider.GetRequiredService<ILicenseExpirationChecker>();
+            licenseExpiration.CheckExpiration();
+
             if (options.KeyManagement.Enabled)
             {
                 var licenseUsage = serviceProvider.GetRequiredService<ILicenseUsageService>();
@@ -104,22 +108,18 @@ public static class IdentityServerApplicationBuilderExtensions
 
     private static void ValidateLicenseServices(IServiceProvider serviceProvider)
     {
-        var licenseAccessor = serviceProvider.GetRequiredService<ILicenseAccessor>(); 
-        if (licenseAccessor is not LicenseAccessor)
-        {
-            throw new InvalidOperationException("Detected a custom ILicenseAccessor implementation. The default ILicenseAccessor is required.");
-        }
+        VerifyDefaultServiceRegistration<ILicenseAccessor, LicenseAccessor>(serviceProvider);
+        VerifyDefaultServiceRegistration<ILicenseExpirationChecker, LicenseExpirationChecker>(serviceProvider);
+        VerifyDefaultServiceRegistration<IProtocolRequestCounter, ProtocolRequestCounter>(serviceProvider);
+        VerifyDefaultServiceRegistration<ILicenseUsageService, LicenseUsageService>(serviceProvider);
+    }
 
-        var counter = serviceProvider.GetRequiredService<IProtocolRequestCounter>();
-        if (counter is not ProtocolRequestCounter)
+    private static void VerifyDefaultServiceRegistration<TService, TImplementation>(IServiceProvider serviceProvider) where TService : notnull
+    {
+        var service = serviceProvider.GetRequiredService<TService>();
+        if (service is not TImplementation)
         {
-            throw new InvalidOperationException("Detected a custom IProtocolRequestCounter implementation. The default IProtocolRequestCounter is required.");
-        }
-
-        var featureManager = serviceProvider.GetRequiredService<ILicenseUsageService>();
-        if (featureManager is not LicenseUsageService)
-        {
-            throw new InvalidOperationException("Detected a custom IFeatureManager implementation. The default IFeatureManager is required.");
+            throw new InvalidOperationException($"Detected a custom {nameof(TService)} implementation. The default {nameof(TService)} is required.");
         }
     }
 

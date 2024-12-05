@@ -133,7 +133,7 @@ public class LicenseTests : IDisposable
         
         // Expect a warning because the license is expired
         // REMINDER - If this test needs to be updated because the logged message changed, expired_redist_licenses_do_not_log_warnings should also be updated
-        _mockPipeline.MockLogger.LogMessages.Should().Contain("Your license expired on 2024-11-15. You are required to obtain a new license. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+        _mockPipeline.MockLogger.LogMessages.Should().Contain("In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
 
     [Theory]
@@ -172,7 +172,7 @@ public class LicenseTests : IDisposable
         await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
         
         // Expect no warning because the license is a redistribution license
-        _mockPipeline.MockLogger.LogMessages.Should().NotContain("Your license expired on 2024-11-15. You are required to obtain a new license. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+        _mockPipeline.MockLogger.LogMessages.Should().NotContain("In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
     
     [Theory]
@@ -216,7 +216,7 @@ public class LicenseTests : IDisposable
         await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
         
         // Expect no warning because the license is not expired
-        _mockPipeline.MockLogger.LogMessages.Should().NotContain("Your license expired on 2024-11-15. You are required to obtain a new license. In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
+        _mockPipeline.MockLogger.LogMessages.Should().NotContain("In a future version of IdentityServer, expired licenses will stop the server after 90 days.");
     }
     
     

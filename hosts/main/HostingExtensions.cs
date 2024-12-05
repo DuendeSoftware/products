@@ -3,7 +3,6 @@
 
 using System.Security.Claims;
 using Duende.IdentityServer;
-using Duende.IdentityServer.Configuration;
 using IdentityServerHost.Extensions;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
@@ -158,9 +157,6 @@ internal static class HostingExtensions
         // UI
         app.MapRazorPages()
             .RequireAuthorization();
-
-        app.MapDynamicClientRegistration()
-            .AllowAnonymous();
 
         // Map /metrics that displays Otel data in human readable form.
         app.UseOpenTelemetryPrometheusScrapingEndpoint();
