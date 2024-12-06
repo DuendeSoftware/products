@@ -208,7 +208,6 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransient(services => IdentityServerLicenseValidator.Instance.GetLicense());
 
         builder.Services.AddSingleton<ILicenseAccessor, LicenseAccessor>();
-        builder.Services.AddSingleton<ILicenseExpirationChecker, LicenseExpirationChecker>();
         builder.Services.AddSingleton<IProtocolRequestCounter, ProtocolRequestCounter>();
         builder.Services.AddSingleton<ILicenseUsageService, LicenseUsageService>();
 
@@ -403,7 +402,7 @@ public static class IdentityServerBuilderExtensionsCore
     /// </summary>
     public static IIdentityServerBuilder AddLicenseSummary(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddSingleton<ILicenseSummary, LicenseSummary>();
+        builder.Services.AddSingleton<IUsageSummary, UsageSummary>();
         return builder;
     }
 

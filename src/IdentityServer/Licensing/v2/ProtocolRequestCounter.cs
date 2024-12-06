@@ -21,7 +21,7 @@ internal class ProtocolRequestCounter : IProtocolRequestCounter
     /// <summary>
     /// The number of protocol requests allowed for unlicensed use. This should only be changed in tests.
     /// </summary>
-    internal uint Threshold = 1000;
+    internal uint Threshold = 500;
 
     private readonly ILicenseAccessor _license;
     private readonly ILogger _logger;

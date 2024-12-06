@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Globalization;
+using System.Text;
 
 Console.Title = "IdentityServer (Main)";
 
@@ -37,11 +38,12 @@ try
         .ConfigureServices()
         .ConfigurePipeline();
 
-    var license = app.Services.GetRequiredService<ILicenseSummary>();
+    var usage = app.Services.GetRequiredService<IUsageSummary>();
 
     app.Run();
 
-    Console.Write(license.Summary);
+    Console.Write(Summary(usage));
+    Console.ReadKey();
 }
 catch (Exception ex)
 {
@@ -52,3 +54,17 @@ finally
     Log.Information("Shut down complete");
     Log.CloseAndFlush();
 }
+
+string Summary(IUsageSummary usage)
+{
+    var sb = new StringBuilder();
+    sb.AppendLine("IdentityServer Usage Summary:");
+    sb.AppendLine(CultureInfo.InvariantCulture, $"  License: {usage.LicenseEdition}");
+    var features = usage.FeaturesUsed.Any() ? string.Join(", ", usage.FeaturesUsed) : "None";
+    sb.AppendLine(CultureInfo.InvariantCulture, $"  Business and Enterprise Edition Features Used: {features}");
+    sb.AppendLine(CultureInfo.InvariantCulture, $"  {usage.UsedClients.Count()} Client Id(s) Used");
+    sb.AppendLine(CultureInfo.InvariantCulture, $"  {usage.UsedIssuers.Count()} Issuer(s) Used");
+
+    return sb.ToString();
+}
+    

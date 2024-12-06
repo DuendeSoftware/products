@@ -16,20 +16,17 @@ internal class EndpointRouter : IEndpointRouter
 {
     private readonly IEnumerable<Endpoint> _endpoints;
     private readonly IProtocolRequestCounter _requestCounter;
-    private readonly ILicenseExpirationChecker _expirationChecker;
     private readonly IdentityServerOptions _options;
     private readonly ILogger _logger;
 
     public EndpointRouter(
         IEnumerable<Endpoint> endpoints,
         IProtocolRequestCounter requestCounter,
-        ILicenseExpirationChecker expirationChecker,
         IdentityServerOptions options, 
         ILogger<EndpointRouter> logger)
     {
         _endpoints = endpoints;
         _requestCounter = requestCounter;
-        _expirationChecker = expirationChecker;
         _options = options;
         _logger = logger;
     }
@@ -47,7 +44,6 @@ internal class EndpointRouter : IEndpointRouter
                 _logger.LogDebug("Request path {path} matched to endpoint type {endpoint}", context.Request.Path, endpointName);
 
                 _requestCounter.Increment();
-                _expirationChecker.CheckExpiration();
 
                 return GetEndpointHandler(endpoint, context);
             }

@@ -10,32 +10,17 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// Summarizes the usage of IdentityServer
 /// </summary>
-public interface ILicenseSummary
+public interface IUsageSummary
 {
-    /// <summary>
-    /// Summarizes the usage of IdentityServer, including licensed features, clients, and issuers.
-    /// </summary>
-    public string Summary { get; }
-
     /// <summary>
     /// Gets the license edition.
     /// </summary>
     public string LicenseEdition { get; }
 
     /// <summary>
-    /// Gets the licensed enterprise edition features that have been used.
+    /// Gets the licensed features that have been used.
     /// </summary>
-    IEnumerable<string> EnterpriseFeaturesUsed { get; }
-    
-    /// <summary>
-    /// Gets the licensed business edition features that have been used.
-    /// </summary>
-    IEnumerable<string> BusinessFeaturesUsed { get; }
-
-    /// <summary>
-    /// Gets other licensed features that have been used.
-    /// </summary>
-    IEnumerable<string> OtherFeaturesUsed { get; }
+    IEnumerable<string> FeaturesUsed { get; }
 
     /// <summary>
     /// Gets the client ids that have been used.

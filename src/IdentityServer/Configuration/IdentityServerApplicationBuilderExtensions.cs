@@ -79,9 +79,6 @@ public static class IdentityServerApplicationBuilderExtensions
             var env = serviceProvider.GetRequiredService<IHostEnvironment>();
             IdentityServerLicenseValidator.Instance.Initialize(loggerFactory, options, env.IsDevelopment());
 
-            var licenseExpiration = serviceProvider.GetRequiredService<ILicenseExpirationChecker>();
-            licenseExpiration.CheckExpiration();
-
             if (options.KeyManagement.Enabled)
             {
                 var licenseUsage = serviceProvider.GetRequiredService<ILicenseUsageService>();
@@ -109,7 +106,6 @@ public static class IdentityServerApplicationBuilderExtensions
     private static void ValidateLicenseServices(IServiceProvider serviceProvider)
     {
         VerifyDefaultServiceRegistration<ILicenseAccessor, LicenseAccessor>(serviceProvider);
-        VerifyDefaultServiceRegistration<ILicenseExpirationChecker, LicenseExpirationChecker>(serviceProvider);
         VerifyDefaultServiceRegistration<IProtocolRequestCounter, ProtocolRequestCounter>(serviceProvider);
         VerifyDefaultServiceRegistration<ILicenseUsageService, LicenseUsageService>(serviceProvider);
     }
