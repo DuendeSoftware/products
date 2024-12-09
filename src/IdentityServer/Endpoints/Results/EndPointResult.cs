@@ -20,7 +20,7 @@ public abstract class EndpointResult<T> : IEndpointResult
     where T : class, IEndpointResult
 {
     /// <inheritdoc/>
-    public async Task ExecuteAsync(HttpContext context)
+    public Task ExecuteAsync(HttpContext context)
     {
         var writer = context.RequestServices.GetService<IHttpResponseWriter<T>>();
         if (writer != null)
@@ -31,7 +31,7 @@ public abstract class EndpointResult<T> : IEndpointResult
                 throw new Exception($"Type parameter {typeof(T)} must be the class derived from 'EndpointResult<T>'.");
             }
 
-            await writer.WriteHttpResponse(target, context);
+            return writer.WriteHttpResponse(target, context);
         }
         else
         {

@@ -37,7 +37,7 @@ public class BackchannelAuthenticationResult : EndpointResult<BackchannelAuthent
 
 internal class BackchannelAuthenticationHttpWriter : IHttpResponseWriter<BackchannelAuthenticationResult>
 {
-    public async Task WriteHttpResponse(BackchannelAuthenticationResult result, HttpContext context)
+    public Task WriteHttpResponse(BackchannelAuthenticationResult result, HttpContext context)
     {
         context.Response.SetNoCache();
 
@@ -56,7 +56,7 @@ internal class BackchannelAuthenticationHttpWriter : IHttpResponseWriter<Backcha
                     break;
             }
 
-            await context.Response.WriteJsonAsync(new ErrorResultDto
+            return context.Response.WriteJsonAsync(new ErrorResultDto
             {
                 error = result.Response.Error,
                 error_description = result.Response.ErrorDescription
@@ -65,7 +65,7 @@ internal class BackchannelAuthenticationHttpWriter : IHttpResponseWriter<Backcha
         else
         {
             context.Response.StatusCode = 200;
-            await context.Response.WriteJsonAsync(new SuccessResultDto
+            return context.Response.WriteJsonAsync(new SuccessResultDto
             {
                 auth_req_id = result.Response.AuthenticationRequestId,
                 expires_in = result.Response.ExpiresIn,

@@ -244,9 +244,9 @@ public class DefaultGrantStore<T>
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns></returns>
-    protected virtual async Task RemoveItemByHashedKeyAsync(string key)
+    protected virtual Task RemoveItemByHashedKeyAsync(string key)
     {
-        await Store.RemoveAsync(key);
+        return Store.RemoveAsync(key);
     }
 
     /// <summary>
@@ -256,9 +256,9 @@ public class DefaultGrantStore<T>
     /// <param name="clientId">The client identifier.</param>
     /// <param name="sessionId">The optional session identifier.</param>
     /// <returns></returns>
-    protected virtual async Task RemoveAllAsync(string subjectId, string clientId, string sessionId = null)
+    protected virtual Task RemoveAllAsync(string subjectId, string clientId, string sessionId = null)
     {
-        await Store.RemoveAllAsync(new PersistedGrantFilter
+        return Store.RemoveAllAsync(new PersistedGrantFilter
         {
             SubjectId = subjectId,
             ClientId = clientId,

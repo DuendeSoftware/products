@@ -34,7 +34,7 @@ public class DeviceAuthorizationResult : EndpointResult<DeviceAuthorizationResul
 
 internal class DeviceAuthorizationHttpWriter : IHttpResponseWriter<DeviceAuthorizationResult>
 {
-    public async Task WriteHttpResponse(DeviceAuthorizationResult result, HttpContext context)
+    public Task WriteHttpResponse(DeviceAuthorizationResult result, HttpContext context)
     {
         context.Response.SetNoCache();
 
@@ -48,7 +48,7 @@ internal class DeviceAuthorizationHttpWriter : IHttpResponseWriter<DeviceAuthori
             interval = result.Response.Interval
         };
 
-        await context.Response.WriteJsonAsync(dto);
+        return context.Response.WriteJsonAsync(dto);
     }
 
     internal class ResultDto

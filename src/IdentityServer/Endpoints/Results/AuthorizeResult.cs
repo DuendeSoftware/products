@@ -84,16 +84,18 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         }
     }
 
-    private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result)
+    private Task ConsumePushedAuthorizationRequest(AuthorizeResult result)
     {
         var referenceValue = result.Response?.Request?.PushedAuthorizationReferenceValue;
         if(referenceValue.IsPresent())
         {
-            await _pushedAuthorizationService.ConsumeAsync(referenceValue);
+            return _pushedAuthorizationService.ConsumeAsync(referenceValue);
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task ProcessErrorAsync(AuthorizeResponse response, HttpContext context)
+    private Task ProcessErrorAsync(AuthorizeResponse response, HttpContext context)
     {
         // these are the conditions where we can send a response 
         // back directly to the client, otherwise we're only showing the error UI
@@ -108,12 +110,12 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         if (isSafeError)
         {
             // this scenario we can return back to the client
-            await ProcessResponseAsync(response, context);
+            return ProcessResponseAsync(response, context);
         }
         else
         {
             // we now know we must show error page
-            await RedirectToErrorPageAsync(response, context);
+            return RedirectToErrorPageAsync(response, context);
         }
     }
 

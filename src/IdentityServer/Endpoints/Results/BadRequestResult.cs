@@ -37,7 +37,7 @@ public class BadRequestResult : EndpointResult<BadRequestResult>
 
 internal class BadRequestHttpWriter : IHttpResponseWriter<BadRequestResult>
 {
-    public async Task WriteHttpResponse(BadRequestResult result, HttpContext context)
+    public Task WriteHttpResponse(BadRequestResult result, HttpContext context)
     {
         context.Response.StatusCode = 400;
         context.Response.SetNoCache();
@@ -50,8 +50,10 @@ internal class BadRequestHttpWriter : IHttpResponseWriter<BadRequestResult>
                 error_description = result.ErrorDescription
             };
 
-            await context.Response.WriteJsonAsync(dto);
+            return context.Response.WriteJsonAsync(dto);
         }
+
+        return Task.CompletedTask;
     }
 
     internal class ResultDto

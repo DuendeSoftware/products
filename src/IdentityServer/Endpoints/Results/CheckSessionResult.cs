@@ -30,12 +30,12 @@ internal class CheckSessionHttpWriter : IHttpResponseWriter<CheckSessionResult>
     private static readonly object Lock = new object();
     private static volatile string LastCheckSessionCookieName;
 
-    public async Task WriteHttpResponse(CheckSessionResult result, HttpContext context)
+    public Task WriteHttpResponse(CheckSessionResult result, HttpContext context)
     {
         AddCspHeaders(context);
 
         var html = GetHtml(_options.Authentication.CheckSessionCookieName);
-        await context.Response.WriteHtmlAsync(html);
+        return context.Response.WriteHtmlAsync(html);
     }
 
     private void AddCspHeaders(HttpContext context)

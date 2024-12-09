@@ -20,10 +20,10 @@ public class BaseUrlMiddleware
         _next = next;
     }
 
-    public async Task Invoke(HttpContext context)
+    public Task Invoke(HttpContext context)
     {
         context.RequestServices.GetRequiredService<IServerUrls>().BasePath = context.Request.PathBase.Value;
 
-        await _next(context);
+        return _next(context);
     }
 }

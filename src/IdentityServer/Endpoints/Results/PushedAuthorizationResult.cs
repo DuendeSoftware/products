@@ -35,7 +35,7 @@ public class PushedAuthorizationResult : EndpointResult<PushedAuthorizationResul
 
 internal class PushedAuthorizationHttpWriter : IHttpResponseWriter<PushedAuthorizationResult>
 {
-    public async Task WriteHttpResponse(PushedAuthorizationResult result, HttpContext context)
+    public Task WriteHttpResponse(PushedAuthorizationResult result, HttpContext context)
     {
         context.Response.SetNoCache();
         context.Response.StatusCode = (int) HttpStatusCode.Created;
@@ -44,7 +44,7 @@ internal class PushedAuthorizationHttpWriter : IHttpResponseWriter<PushedAuthori
             request_uri = result.Response.RequestUri,
             expires_in = result.Response.ExpiresIn
         };
-        await context.Response.WriteJsonAsync(dto);
+        return context.Response.WriteJsonAsync(dto);
     }
 
     internal class ResultDto

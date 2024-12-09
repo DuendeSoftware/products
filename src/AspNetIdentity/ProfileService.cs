@@ -68,12 +68,12 @@ public class ProfileService<TUser> : IProfileService
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns></returns>
-    public virtual async Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public virtual Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
         var sub = context.Subject?.GetSubjectId();
         if (sub == null) throw new Exception("No sub claim present");
 
-        await GetProfileDataAsync(context, sub);
+        return GetProfileDataAsync(context, sub);
     }
 
     /// <summary>
@@ -122,12 +122,12 @@ public class ProfileService<TUser> : IProfileService
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns></returns>
-    public virtual async Task IsActiveAsync(IsActiveContext context)
+    public virtual Task IsActiveAsync(IsActiveContext context)
     {
         var sub = context.Subject?.GetSubjectId();
         if (sub == null) throw new Exception("No subject Id claim present");
 
-        await IsActiveAsync(context, sub);
+        return IsActiveAsync(context, sub);
     }
 
     /// <summary>

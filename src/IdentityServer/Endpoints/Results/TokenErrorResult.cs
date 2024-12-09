@@ -39,7 +39,7 @@ public class TokenErrorResult : EndpointResult<TokenErrorResult>
 
 internal class TokenErrorHttpWriter : IHttpResponseWriter<TokenErrorResult>
 {
-    public async Task WriteHttpResponse(TokenErrorResult result, HttpContext context)
+    public Task WriteHttpResponse(TokenErrorResult result, HttpContext context)
     {
         context.Response.StatusCode = 400;
         context.Response.SetNoCache();
@@ -57,7 +57,7 @@ internal class TokenErrorHttpWriter : IHttpResponseWriter<TokenErrorResult>
             custom = result.Response.Custom
         };
 
-        await context.Response.WriteJsonAsync(dto);
+        return context.Response.WriteJsonAsync(dto);
     }
 
     internal class ResultDto

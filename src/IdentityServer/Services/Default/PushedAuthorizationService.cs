@@ -53,10 +53,10 @@ public class PushedAuthorizationService : IPushedAuthorizationService
     }
 
     /// <inheritdoc />
-    public async Task StoreAsync(DeserializedPushedAuthorizationRequest request)
+    public Task StoreAsync(DeserializedPushedAuthorizationRequest request)
     {
         var protectedData = _serializer.Serialize(request.PushedParameters);
-        await _store.StoreAsync(new Models.PushedAuthorizationRequest
+        return _store.StoreAsync(new Models.PushedAuthorizationRequest
         {
             ReferenceValueHash = request.ReferenceValue.ToSha256(),
             ExpiresAtUtc = request.ExpiresAtUtc,

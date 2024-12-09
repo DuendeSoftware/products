@@ -37,7 +37,7 @@ public class TokenResult : EndpointResult<TokenResult>
 
 internal class TokenHttpWriter : IHttpResponseWriter<TokenResult>
 {
-    public async Task WriteHttpResponse(TokenResult result, HttpContext context)
+    public Task WriteHttpResponse(TokenResult result, HttpContext context)
     {
         context.Response.SetNoCache();
 
@@ -58,7 +58,7 @@ internal class TokenHttpWriter : IHttpResponseWriter<TokenResult>
             Custom = result.Response.Custom
         };
 
-        await context.Response.WriteJsonAsync(dto);
+        return context.Response.WriteJsonAsync(dto);
     }
 
     internal class ResultDto
