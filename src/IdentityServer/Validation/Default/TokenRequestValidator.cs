@@ -465,7 +465,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.UseResourceIndicator(requestedIndicator);
+        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
@@ -813,7 +813,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.UseResourceIndicator(requestedIndicator);
+        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
@@ -895,7 +895,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.UseResourceIndicator(requestedIndicator);
+        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
         _validatedRequest.ValidatedResources = validatedResources;
 
@@ -984,7 +984,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.UseResourceIndicator(requestedIndicator);
+        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
         _validatedRequest.ValidatedResources = validatedResources.FilterByResourceIndicator(requestedIndicator);
 
@@ -1167,7 +1167,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _validatedRequest.RequestedScopes = requestedScopes;
 
         var requestedIndicator = _validatedRequest.RequestedResourceIndicator;
-        _licenseUsage.UseResourceIndicator(requestedIndicator);
+        _licenseUsage.ResourceIndicatorUsed(requestedIndicator);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(requestedIndicator);
         _validatedRequest.ValidatedResources = resourceValidationResult.FilterByResourceIndicator(requestedIndicator);
 

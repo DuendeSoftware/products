@@ -10,19 +10,19 @@ namespace Duende.IdentityServer.Licensing.V2;
 
 internal static class LicenseUsageTrackerExtensions
 {
-    internal static void UseResourceIndicator(this LicenseUsageTracker licenseUsage, string? resourceIndicator)
+    internal static void ResourceIndicatorUsed(this LicenseUsageTracker tracker, string? resourceIndicator)
     {
         if (!string.IsNullOrWhiteSpace(resourceIndicator))
         {
-            licenseUsage.FeatureUsed(LicenseFeature.ResourceIsolation);
+            tracker.FeatureUsed(LicenseFeature.ResourceIsolation);
         }
     }
 
-    internal static void UseResourceIndicators(this LicenseUsageTracker licenseUsage, IEnumerable<string> resourceIndicators)
+    internal static void ResourceIndicatorsUsed(this LicenseUsageTracker tracker, IEnumerable<string> resourceIndicators)
     {
         if (resourceIndicators.Any())
         {
-            licenseUsage.FeatureUsed(LicenseFeature.ResourceIsolation);
+            tracker.FeatureUsed(LicenseFeature.ResourceIsolation);
         }
     }
 }

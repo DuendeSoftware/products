@@ -513,7 +513,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             }
         }
 
-        _licenseUsage.UseResourceIndicators(resourceIndicators);
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(resourceIndicators);
 
         if (validatedResources.Resources.IdentityResources.Any() && !request.IsOpenIdRequest)

@@ -177,7 +177,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             }
         }
 
-        _licenseUsage.UseResourceIndicators(resourceIndicators);
+        _licenseUsage.ResourceIndicatorsUsed(resourceIndicators);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(resourceIndicators);
         _validatedRequest.ValidatedResources = validatedResources;
 
