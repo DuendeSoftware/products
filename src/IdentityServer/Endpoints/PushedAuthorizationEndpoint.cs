@@ -24,7 +24,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
     private readonly IClientSecretValidator _clientValidator;
     private readonly IPushedAuthorizationRequestValidator _parValidator;
     private readonly IPushedAuthorizationResponseGenerator _responseGenerator;
-    private readonly ILicenseUsageService _features;
+    private readonly LicenseUsageTracker _features;
     private readonly IdentityServerOptions _options;
     private readonly ILogger<PushedAuthorizationEndpoint> _logger;
 
@@ -32,7 +32,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         IClientSecretValidator clientValidator,
         IPushedAuthorizationRequestValidator parValidator,
         IPushedAuthorizationResponseGenerator responseGenerator,
-        ILicenseUsageService features,
+        LicenseUsageTracker features,
         IdentityServerOptions options,
         ILogger<PushedAuthorizationEndpoint> logger
         )
@@ -51,7 +51,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
         _logger.LogDebug("Start pushed authorization request");
 
-        _features.UseFeature(LicenseFeature.PAR);
+        _features.FeatureUsed(LicenseFeature.PAR);
 
         NameValueCollection values;
         IFormCollection form;

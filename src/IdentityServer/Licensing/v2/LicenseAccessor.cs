@@ -18,7 +18,7 @@ namespace Duende.IdentityServer.Licensing.v2;
 /// <summary>
 /// Loads the license from configuration or a file, and validates its contents.
 /// </summary>
-internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAccessor> logger) : ILicenseAccessor
+internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAccessor> logger)
 {
     static readonly string[] LicenseFileNames =
     [
@@ -28,30 +28,27 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
 
     private License? _license;
     private readonly object _lock = new();
+
     public License Current => _license ??= Initialize();
 
     private License Initialize()
     {
         lock (_lock)
         {
-            if (_license != null) return _license;
+            if (_license != null)
+            {
+                return _license;
+            }
             
-            var key = options.LicenseKey;
+            var key = options.LicenseKey ?? LoadLicenseKeyFromFile();
             if (key == null)
             {
-                key = LoadLicenseKeyFromFile();
+                return new License();
             }
-
-            if (key != null)
-            {
-                var licenseClaims = ValidateKey(key);
-                if (licenseClaims.Any()) // (ValidateKey will return an empty collection if it fails)
-                {
-                    return new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)));
-                }
-            }
-
-            return new License();
+            
+            var licenseClaims = ValidateKey(key);
+            return licenseClaims.Any() ? // (ValidateKey will return an empty collection if it fails)
+                new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims))) : new License();
         }
     }
     

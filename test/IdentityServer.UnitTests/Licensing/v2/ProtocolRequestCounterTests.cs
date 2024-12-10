@@ -1,5 +1,7 @@
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.v2;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
 using Xunit;
 
@@ -8,14 +10,13 @@ namespace IdentityServer.UnitTests.Licensing.v2;
 public class ProtocolRequestCounterTests
 {
     private readonly ProtocolRequestCounter _counter;
-    private readonly TestLicenseAccessor _license;
     private readonly FakeLogger<ProtocolRequestCounter> _logger;
 
     public ProtocolRequestCounterTests()
     {
-        _license = new TestLicenseAccessor();
+        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance);
         _logger = new FakeLogger<ProtocolRequestCounter>();
-        _counter = new ProtocolRequestCounter(_license, new StubLoggerFactory(_logger));
+        _counter = new ProtocolRequestCounter(licenseAccessor, new StubLoggerFactory(_logger));
     }
 
     [Fact]

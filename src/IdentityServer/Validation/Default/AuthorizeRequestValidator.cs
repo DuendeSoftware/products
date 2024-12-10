@@ -30,7 +30,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly IResourceValidator _resourceValidator;
     private readonly IUserSession _userSession;
     private readonly IRequestObjectValidator _requestObjectValidator;
-    private readonly ILicenseUsageService _licenseUsage;
+    private readonly LicenseUsageTracker _licenseUsage;
     private readonly ILogger _logger;
 
     private readonly ResponseTypeEqualityComparer
@@ -46,7 +46,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         IResourceValidator resourceValidator,
         IUserSession userSession,
         IRequestObjectValidator requestObjectValidator,
-        ILicenseUsageService licenseUsage,
+        LicenseUsageTracker licenseUsage,
         ILogger<AuthorizeRequestValidator> logger)
     {
         _options = options;
@@ -146,7 +146,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
 
         _logger.LogTrace("Authorize request protocol validation successful");
 
-        _licenseUsage.UseClient(request.ClientId);
+        _licenseUsage.ClientUsed(request.ClientId);
         IdentityServerLicenseValidator.Instance.ValidateClient(request.ClientId);
 
         return Valid(request);

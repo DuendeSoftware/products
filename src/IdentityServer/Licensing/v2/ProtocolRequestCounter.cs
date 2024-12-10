@@ -8,39 +8,33 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.v2;
 
-internal class ProtocolRequestCounter : IProtocolRequestCounter
+internal class ProtocolRequestCounter(
+    LicenseAccessor license,
+    ILoggerFactory loggerFactory)
 {
-    public ProtocolRequestCounter(
-        ILicenseAccessor license,
-        ILoggerFactory loggerFactory)
-    {
-        _license = license;
-        _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
-    }
+    private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
+    private bool _warned;
+    private ulong _requestCount;
 
     /// <summary>
     /// The number of protocol requests allowed for unlicensed use. This should only be changed in tests.
     /// </summary>
-    internal uint Threshold = 500;
+    internal ulong Threshold = 500;
 
-    private readonly ILicenseAccessor _license;
-    private readonly ILogger _logger;
+    internal ulong RequestCount => _requestCount;
 
-    private bool _warned;
-
-    private uint _requestCount;
-    public uint RequestCount => _requestCount;
-    public void Increment()
+    internal void Increment()
     {
-        if (!_license.Current.IsConfigured)
+        if (license.Current.IsConfigured)
         {
-            var total = Interlocked.Increment(ref _requestCount);
-
-            if (total > Threshold && !_warned)
-            {
-                _logger.LogError("IdentityServer has handled {total} protocol requests without a license. In future versions, unlicensed IdentityServer instances will shut down after {threshold} protocol requests. Please contact sales to obtain a license. If you are running in a test environment, please use a test license", total, Threshold);
-                _warned = true;
-            }
+            return;
         }
+        var total = Interlocked.Increment(ref _requestCount);
+        if (total <= Threshold || _warned)
+        {
+            return;
+        }
+        _logger.LogError("IdentityServer has handled {total} protocol requests without a license. In future versions, unlicensed IdentityServer instances will shut down after {threshold} protocol requests. Please contact sales to obtain a license. If you are running in a test environment, please use a test license", total, Threshold);
+        _warned = true;
     }
 }

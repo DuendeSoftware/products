@@ -100,8 +100,8 @@ public class IdentityServerMiddleware
                     activity?.SetTag(Tracing.Properties.EndpointType, endpointType);
 
                     var issuer = await issuerNameService.GetCurrentAsync();
-                    var licenseUsage = context.RequestServices.GetRequiredService<ILicenseUsageService>();
-                    licenseUsage.UseIssuer(issuer);
+                    var licenseUsage = context.RequestServices.GetRequiredService<LicenseUsageTracker>();
+                    licenseUsage.IssuerUsed(issuer);
                     IdentityServerLicenseValidator.Instance.ValidateIssuer(issuer);
 
                     _logger.LogInformation("Invoking IdentityServer endpoint: {endpointType} for {url}", endpointType, requestPath);

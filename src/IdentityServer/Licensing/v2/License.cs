@@ -21,8 +21,6 @@ internal class License
     /// </summary>
     internal License()
     {
-        IsConfigured = false;
-        Features = [];
     }
 
     /// <summary>
@@ -86,22 +84,22 @@ internal class License
     /// <summary>
     /// True if redistribution is enabled for this license, and false otherwise.
     /// </summary>
-    public bool Redistribution => IsEnabled(LicenseFeature.Redistribution) || IsEnabled(LicenseFeature.ISV); 
-    
+    public bool Redistribution => IsEnabled(LicenseFeature.Redistribution) || IsEnabled(LicenseFeature.ISV);
+
     /// <summary>
     /// The license features
     /// </summary>
-    public string[] Features { get; init; }
+    public string[] Features { get; init; } = [];
     
     /// <summary>
     /// Extras
     /// </summary>
     public string? Extras { get; init; }
-    
+
     /// <summary>
     /// True if the license was configured in options or from a file, and false otherwise.
     /// </summary>
-    [MemberNotNullWhen(true, 
+    [MemberNotNullWhen(true,
         nameof(SerialNumber),
         nameof(CompanyName),
         nameof(ContactInfo),

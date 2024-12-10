@@ -59,7 +59,7 @@ public class LicenseTests : IDisposable
         var threshold = 5u;
         _mockPipeline.OnPostConfigure += builder =>
         {
-            var counter = builder.ApplicationServices.GetRequiredService<IProtocolRequestCounter>() as ProtocolRequestCounter;
+            var counter = builder.ApplicationServices.GetRequiredService<ProtocolRequestCounter>();
             counter.Threshold = threshold;
         };
         _mockPipeline.Initialize(enableLogging: true);

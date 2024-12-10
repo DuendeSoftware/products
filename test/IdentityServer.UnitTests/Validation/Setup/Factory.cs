@@ -17,8 +17,8 @@ using UnitTests.Common;
 using Microsoft.Extensions.Logging;
 using Duende.IdentityServer.Services.KeyManagement;
 using Duende.IdentityServer;
-using Microsoft.AspNetCore.DataProtection;
 using Duende.IdentityServer.Licensing.v2;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace UnitTests.Validation.Setup;
 
@@ -142,7 +142,7 @@ internal static class Factory
             new DefaultDPoPProofValidator(options, new MockReplayCache(), new StubClock(), new StubDataProtectionProvider(), new LoggerFactory().CreateLogger<DefaultDPoPProofValidator>()),
             new TestEventService(),
             new StubClock(),
-            new TestLicenseUsageService(),
+            new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance)),
             TestLogger.Create<TokenRequestValidator>());
     }
 
@@ -275,7 +275,7 @@ internal static class Factory
             resourceValidator,
             userSession,
             requestObjectValidator,
-            new TestLicenseUsageService(),
+            new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance)),
             TestLogger.Create<AuthorizeRequestValidator>());
     }
 

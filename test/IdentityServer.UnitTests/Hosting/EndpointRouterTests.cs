@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Licensing.v2;
 using FluentAssertions;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace UnitTests.Hosting;
@@ -18,17 +20,18 @@ namespace UnitTests.Hosting;
 public class EndpointRouterTests
 {
     private Dictionary<string, Duende.IdentityServer.Hosting.Endpoint> _pathMap;
-    private List<Duende.IdentityServer.Hosting.Endpoint> _endpoints;
-    private IdentityServerOptions _options;
-    private EndpointRouter _subject;
+    private readonly List<Duende.IdentityServer.Hosting.Endpoint> _endpoints;
+    private readonly IdentityServerOptions _options;
+    private readonly EndpointRouter _subject;
 
     public EndpointRouterTests()
     {
         _pathMap = new Dictionary<string, Duende.IdentityServer.Hosting.Endpoint>();
         _endpoints = new List<Duende.IdentityServer.Hosting.Endpoint>();
         _options = new IdentityServerOptions();
-        
-        _subject = new EndpointRouter(_endpoints, new TestProtocolRequestCounter(), _options, TestLogger.Create<EndpointRouter>());
+        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance);
+        var protocolRequestCounter = new ProtocolRequestCounter(licenseAccessor, new NullLoggerFactory());
+        _subject = new EndpointRouter(_endpoints, protocolRequestCounter, _options, TestLogger.Create<EndpointRouter>());
     }
 
     [Fact]

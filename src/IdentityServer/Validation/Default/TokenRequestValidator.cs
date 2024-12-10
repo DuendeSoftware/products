@@ -40,7 +40,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly IDeviceCodeValidator _deviceCodeValidator;
     private readonly IBackchannelAuthenticationRequestIdValidator _backchannelAuthenticationRequestIdValidator;
     private readonly IClock _clock;
-    private readonly ILicenseUsageService _licenseUsage;
+    private readonly LicenseUsageTracker _licenseUsage;
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
@@ -62,7 +62,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         IDPoPProofValidator dPoPProofValidator,
         IEventService events,
         IClock clock,
-        ILicenseUsageService licenseUsage,
+        LicenseUsageTracker licenseUsage,
         ILogger<TokenRequestValidator> logger)
     {
         _logger = logger;
@@ -232,7 +232,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // DPoP
         if (context.DPoPProofToken.IsPresent())
         {
-            _licenseUsage.UseFeature(LicenseFeature.DPoP);
+            _licenseUsage.FeatureUsed(LicenseFeature.DPoP);
             IdentityServerLicenseValidator.Instance.ValidateDPoP();
 
             if (context.DPoPProofToken.Length > _options.InputLengthRestrictions.DPoPProofToken)
@@ -304,7 +304,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         LogSuccess();
 
         var clientId = customValidationContext.Result.ValidatedRequest.ClientId;
-        _licenseUsage.UseClient(clientId);
+        _licenseUsage.ClientUsed(clientId);
         IdentityServerLicenseValidator.Instance.ValidateClient(clientId);
 
         return customValidationContext.Result;
@@ -917,7 +917,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.UnauthorizedClient);
         }
 
-        _licenseUsage.UseFeature(LicenseFeature.CIBA);
+        _licenseUsage.FeatureUsed(LicenseFeature.CIBA);
         IdentityServerLicenseValidator.Instance.ValidateCiba();
 
         /////////////////////////////////////////////

@@ -81,8 +81,8 @@ public static class IdentityServerApplicationBuilderExtensions
 
             if (options.KeyManagement.Enabled)
             {
-                var licenseUsage = serviceProvider.GetRequiredService<ILicenseUsageService>();
-                licenseUsage.UseFeature(LicenseFeature.KeyManagement);
+                var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();
+                licenseUsage.FeatureUsed(LicenseFeature.KeyManagement);
             }
 
             TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");
@@ -98,24 +98,6 @@ public static class IdentityServerApplicationBuilderExtensions
             ValidateOptions(options, logger);
 
             ValidateAsync(serviceProvider, logger).GetAwaiter().GetResult();
-
-            ValidateLicenseServices(serviceProvider);
-        }
-    }
-
-    private static void ValidateLicenseServices(IServiceProvider serviceProvider)
-    {
-        VerifyDefaultServiceRegistration<ILicenseAccessor, LicenseAccessor>(serviceProvider);
-        VerifyDefaultServiceRegistration<IProtocolRequestCounter, ProtocolRequestCounter>(serviceProvider);
-        VerifyDefaultServiceRegistration<ILicenseUsageService, LicenseUsageService>(serviceProvider);
-    }
-
-    private static void VerifyDefaultServiceRegistration<TService, TImplementation>(IServiceProvider serviceProvider) where TService : notnull
-    {
-        var service = serviceProvider.GetRequiredService<TService>();
-        if (service is not TImplementation)
-        {
-            throw new InvalidOperationException($"Detected a custom {nameof(TService)} implementation. The default {nameof(TService)} is required.");
         }
     }
 

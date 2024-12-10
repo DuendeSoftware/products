@@ -25,7 +25,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
     private readonly IBackchannelAuthenticationUserValidator _backchannelAuthenticationUserValidator;
     private readonly IJwtRequestValidator _jwtRequestValidator;
     private readonly ICustomBackchannelAuthenticationValidator _customValidator;
-    private readonly ILicenseUsageService _licenseUsage;
+    private readonly LicenseUsageTracker _licenseUsage;
     private readonly ILogger<BackchannelAuthenticationRequestValidator> _logger;
 
     private ValidatedBackchannelAuthenticationRequest _validatedRequest;
@@ -37,7 +37,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         IBackchannelAuthenticationUserValidator backchannelAuthenticationUserValidator,
         IJwtRequestValidator jwtRequestValidator,
         ICustomBackchannelAuthenticationValidator customValidator,
-        ILicenseUsageService licenseUsage,
+        LicenseUsageTracker licenseUsage,
         ILogger<BackchannelAuthenticationRequestValidator> logger)
     {
         _options = options;
@@ -74,7 +74,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.UnauthorizedClient, "Unauthorized client");
         }
 
-        _licenseUsage.UseFeature(LicenseFeature.CIBA);
+        _licenseUsage.FeatureUsed(LicenseFeature.CIBA);
         IdentityServerLicenseValidator.Instance.ValidateCiba();
 
         //////////////////////////////////////////////////////////

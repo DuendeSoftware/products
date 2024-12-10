@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -20,7 +20,7 @@ namespace Duende.IdentityServer.Validation;
 internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestValidator
 {
 
-    private readonly ILicenseUsageService _features;
+    private readonly LicenseUsageTracker _features;
     private readonly IAuthorizeRequestValidator _authorizeRequestValidator;
 
     /// <summary>
@@ -31,7 +31,7 @@ internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequest
     /// used to validate the pushed authorization parameters as if they were
     /// used directly at the authorize endpoint.</param>
     /// <param name="features">The feature manager</param>
-    public PushedAuthorizationRequestValidator(IAuthorizeRequestValidator authorizeRequestValidator, ILicenseUsageService features)
+    public PushedAuthorizationRequestValidator(IAuthorizeRequestValidator authorizeRequestValidator, LicenseUsageTracker features)
     {
         _authorizeRequestValidator = authorizeRequestValidator;
         _features = features;
@@ -40,7 +40,7 @@ internal class PushedAuthorizationRequestValidator : IPushedAuthorizationRequest
     /// <inheritdoc />
     public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context)
     {
-        _features.UseFeature(LicenseFeature.PAR);
+        _features.FeatureUsed(LicenseFeature.PAR);
         IdentityServerLicenseValidator.Instance.ValidatePar();
         var validatedRequest = await ValidateRequestUriAsync(context);
         if(validatedRequest.IsError)

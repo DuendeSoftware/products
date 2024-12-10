@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing;
 using IdentityServerHost;
 using Serilog;
 using Serilog.Events;
@@ -38,7 +38,7 @@ try
         .ConfigureServices()
         .ConfigurePipeline();
 
-    var usage = app.Services.GetRequiredService<IUsageSummary>();
+    var usage = app.Services.GetRequiredService<LicenseUsageSummary>();
 
     app.Run();
 
@@ -55,15 +55,15 @@ finally
     Log.CloseAndFlush();
 }
 
-string Summary(IUsageSummary usage)
+string Summary(LicenseUsageSummary usage)
 {
     var sb = new StringBuilder();
     sb.AppendLine("IdentityServer Usage Summary:");
     sb.AppendLine(CultureInfo.InvariantCulture, $"  License: {usage.LicenseEdition}");
-    var features = usage.FeaturesUsed.Any() ? string.Join(", ", usage.FeaturesUsed) : "None";
+    var features = usage.FeaturesUsed.Count > 0 ? string.Join(", ", usage.FeaturesUsed) : "None";
     sb.AppendLine(CultureInfo.InvariantCulture, $"  Business and Enterprise Edition Features Used: {features}");
-    sb.AppendLine(CultureInfo.InvariantCulture, $"  {usage.UsedClients.Count()} Client Id(s) Used");
-    sb.AppendLine(CultureInfo.InvariantCulture, $"  {usage.UsedIssuers.Count()} Issuer(s) Used");
+    sb.AppendLine(CultureInfo.InvariantCulture, $"  {usage.ClientsUsed.Count} Client Id(s) Used");
+    sb.AppendLine(CultureInfo.InvariantCulture, $"  {usage.IssuersUsed.Count} Issuer(s) Used");
 
     return sb.ToString();
 }
