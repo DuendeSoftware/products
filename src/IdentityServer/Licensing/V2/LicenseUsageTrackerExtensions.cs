@@ -20,7 +20,7 @@ internal static class LicenseUsageTrackerExtensions
 
     internal static void ResourceIndicatorsUsed(this LicenseUsageTracker tracker, IEnumerable<string> resourceIndicators)
     {
-        if (resourceIndicators.Any())
+        if (resourceIndicators?.Any() == true)
         {
             tracker.FeatureUsed(LicenseFeature.ResourceIsolation);
         }
