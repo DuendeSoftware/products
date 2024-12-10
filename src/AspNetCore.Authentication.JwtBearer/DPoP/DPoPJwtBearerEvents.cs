@@ -82,7 +82,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
                 Scheme = context.Scheme.Name,
                 ProofToken = proofToken,
                 AccessToken = at,
-                AccessTokenClaims = parsedToken?.Claims ?? [],
+                AccessTokenClaims = context.Principal?.Claims ?? parsedToken?.Claims ?? [],
                 Method = context.HttpContext.Request.Method,
                 Url = context.HttpContext.Request.Scheme + "://" + context.HttpContext.Request.Host + context.HttpContext.Request.PathBase + context.HttpContext.Request.Path
             });
