@@ -60,7 +60,15 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor)
     {
         private readonly ConcurrentDictionary<T, byte> _dictionary = new();
 
-        public bool Add(T item) => _dictionary.TryAdd(item, 0);
+        // We check if the dictionary contains the key first, because it
+        // performs better given our workload. Typically these sets will contain
+        // a small number of elements, and won't change much over time (e.g.,
+        // the first time we try to use DPoP, that gets added, and then all
+        // subsequent requests with a proof don't need to do anything here).
+        // ConcurrentDictionary's ContainsKey method is lock free, while TryAdd
+        // always acquires a lock, so in the (by far more common) steady state,
+        // the ContainsKey check is much faster.
+        public bool Add(T item) => _dictionary.ContainsKey(item) ? false : _dictionary.TryAdd(item, 0);
 
         public IReadOnlyCollection<T> Values => _dictionary.Keys.ToList().AsReadOnly();
     }
