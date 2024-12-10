@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
-namespace IdentityServer.UnitTests.Licensing.v2;
+namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class LicenseUsageTests
 {

@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer.UnitTests.Licensing.v2;
+namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class StubLoggerFactory(ILogger logger) : ILoggerFactory
 {

@@ -1,11 +1,11 @@
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
 using Xunit;
 
-namespace IdentityServer.UnitTests.Licensing.v2;
+namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class ProtocolRequestCounterTests
 {

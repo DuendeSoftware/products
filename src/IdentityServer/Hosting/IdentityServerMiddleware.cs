@@ -12,7 +12,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Models;
 using System.Linq;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Hosting;

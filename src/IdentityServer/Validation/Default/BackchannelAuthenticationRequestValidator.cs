@@ -10,7 +10,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using static Duende.IdentityServer.Constants;

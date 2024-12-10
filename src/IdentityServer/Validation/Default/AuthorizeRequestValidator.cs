@@ -13,7 +13,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Services;
 using static Duende.IdentityServer.IdentityServerConstants;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using FluentAssertions;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;

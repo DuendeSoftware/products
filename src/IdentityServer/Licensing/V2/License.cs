@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Duende.IdentityServer.Licensing.v2;
+namespace Duende.IdentityServer.Licensing.V2;
 
 /// <summary>
 /// Models a Duende commercial license.

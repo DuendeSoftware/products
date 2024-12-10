@@ -11,7 +11,7 @@ using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
 using Duende.IdentityModel;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using Microsoft.Extensions.Logging.Abstractions;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;

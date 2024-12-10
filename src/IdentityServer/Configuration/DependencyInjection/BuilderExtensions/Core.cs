@@ -35,7 +35,7 @@ using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Stores.Empty;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Licensing;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

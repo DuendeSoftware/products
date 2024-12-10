@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 
-namespace IdentityServer.UnitTests.Licensing.v2;
+namespace IdentityServer.UnitTests.Licensing.V2;
 
 internal static class LicenseFactory
 {

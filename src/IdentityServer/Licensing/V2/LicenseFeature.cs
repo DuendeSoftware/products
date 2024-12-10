@@ -4,7 +4,7 @@
 #nullable enable
 using System.ComponentModel;
 
-namespace Duende.IdentityServer.Licensing.v2;
+namespace Duende.IdentityServer.Licensing.V2;
 
 /// <summary>
 /// The features of IdentityServer that can be enabled or disabled through the License.

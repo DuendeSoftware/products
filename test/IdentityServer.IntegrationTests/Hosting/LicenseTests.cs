@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Models;
 using FluentAssertions;
 using IntegrationTests.Common;

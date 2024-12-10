@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.IdentityServer.Licensing.v2;
+namespace Duende.IdentityServer.Licensing.V2;
 
 /// <summary>
 /// The editions of our license, which give access to different features.

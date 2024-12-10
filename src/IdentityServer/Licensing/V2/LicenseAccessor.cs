@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Duende.IdentityServer.Licensing.v2;
+namespace Duende.IdentityServer.Licensing.V2;
 
 /// <summary>
 /// Loads the license from configuration or a file, and validates its contents.

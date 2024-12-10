@@ -16,7 +16,7 @@ using System;
 using System.Collections.Specialized;
 using System.Net;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 
 namespace Duende.IdentityServer.Endpoints;
 internal class PushedAuthorizationEndpoint : IEndpointHandler

@@ -7,7 +7,7 @@
 using System.Threading.Tasks;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityModel;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 
 namespace Duende.IdentityServer.Validation;
 

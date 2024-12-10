@@ -6,7 +6,7 @@
 using System.Threading;
 using Microsoft.Extensions.Logging;
 
-namespace Duende.IdentityServer.Licensing.v2;
+namespace Duende.IdentityServer.Licensing.V2;
 
 internal class ProtocolRequestCounter(
     LicenseAccessor license,

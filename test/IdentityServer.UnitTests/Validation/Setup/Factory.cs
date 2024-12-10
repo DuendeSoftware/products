@@ -17,7 +17,7 @@ using UnitTests.Common;
 using Microsoft.Extensions.Logging;
 using Duende.IdentityServer.Services.KeyManagement;
 using Duende.IdentityServer;
-using Duende.IdentityServer.Licensing.v2;
+using Duende.IdentityServer.Licensing.V2;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace UnitTests.Validation.Setup;
