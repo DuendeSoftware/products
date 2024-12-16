@@ -4,8 +4,8 @@
 
 #nullable enable
 
-using System;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -29,7 +29,7 @@ public class AuthenticationOptions
     /// Specifies if the cookie should be sliding or not (only effective if the built-in cookie middleware is used)
     /// </summary>
     public bool CookieSlidingExpiration { get; set; } = false;
-        
+
     /// <summary>
     /// Specifies the SameSite mode for the internal authentication and temp cookie
     /// </summary>
@@ -47,7 +47,7 @@ public class AuthenticationOptions
     /// Gets or sets the name of the cookie used for the check session endpoint.
     /// </summary>
     public string CheckSessionCookieName { get; set; } = IdentityServerConstants.DefaultCheckSessionCookieName;
-        
+
     /// <summary>
     /// Gets or sets the domain of the cookie used for the check session endpoint. Defaults to null.
     /// </summary>

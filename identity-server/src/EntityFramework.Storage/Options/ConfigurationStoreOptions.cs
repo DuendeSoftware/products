@@ -4,8 +4,8 @@
 
 #nullable enable
 
-using System;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Duende.IdentityServer.EntityFramework.Options;
 

@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Services.KeyManagement;
 

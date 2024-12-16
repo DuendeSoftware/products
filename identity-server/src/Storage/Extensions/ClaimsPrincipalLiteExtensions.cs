@@ -1,9 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Stores.Serialization;
 using System.Linq;
 using System.Security.Claims;
 

@@ -19,7 +19,7 @@ internal static class StringExtensions
         {
             return string.Empty;
         }
-        
+
         return String.Join(' ', list);
     }
 
@@ -27,7 +27,7 @@ internal static class StringExtensions
     public static IEnumerable<string> FromSpaceSeparatedString(this string input)
     {
         input = input.Trim();
-        return input.Split(' ' , StringSplitOptions.RemoveEmptyEntries).ToList();
+        return input.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 
     public static List<string> ParseScopesString(this string scopes)

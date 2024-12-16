@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -34,7 +34,7 @@ internal class DiscoveryKeyEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
-        
+
         _logger.LogTrace("Processing discovery request.");
 
         // validate HTTP

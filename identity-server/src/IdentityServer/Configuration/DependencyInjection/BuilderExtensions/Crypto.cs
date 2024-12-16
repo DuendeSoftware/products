@@ -266,7 +266,7 @@ public static class IdentityServerBuilderExtensionsCrypto
         // add signing algorithm name to key ID to allow using the same key for two different algorithms (e.g. RS256 and PS56);
         var key = new X509SecurityKey(certificate);
         key.KeyId += signingAlgorithm;
-            
+
         var keyInfo = new SecurityKeyInfo
         {
             Key = key,

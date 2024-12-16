@@ -2,17 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Specialized;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using Duende.IdentityModel;
+using System;
+using System.Collections.Specialized;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -235,7 +235,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         var mockResourceValidator = new MockResourceValidator();
         var grants = Factory.CreateRefreshTokenStore();
         var client = (await _clients.FindEnabledClientByIdAsync("roclient")).ToValidationResult();
-            
+
         var validator = Factory.CreateTokenRequestValidator(refreshTokenStore: grants, resourceValidator: mockResourceValidator);
 
         {
@@ -278,8 +278,8 @@ public class TokenRequestValidation_RefreshToken_Invalid
             var parameters = new NameValueCollection();
             parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
             parameters.Add(OidcConstants.TokenRequest.RefreshToken, handle);
-            parameters.Add("resource", "urn:api1"); 
-                
+            parameters.Add("resource", "urn:api1");
+
             mockResourceValidator.Result = new ResourceValidationResult
             {
                 InvalidResourceIndicators = { "foo" }

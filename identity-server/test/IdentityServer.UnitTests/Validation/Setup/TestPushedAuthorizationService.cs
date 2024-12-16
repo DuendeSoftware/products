@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Services;
 
 namespace UnitTests.Validation.Setup;
 

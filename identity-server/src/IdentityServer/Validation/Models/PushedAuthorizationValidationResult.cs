@@ -37,7 +37,7 @@ public class PushedAuthorizationValidationResult : ValidationResult
     /// ASCII text providing additional information, used to assist the client
     /// developer in understanding the error that occurred."</param>
     public PushedAuthorizationValidationResult(
-        string error, 
+        string error,
         string errorDescription)
     {
         IsError = true;
@@ -61,8 +61,8 @@ public class PushedAuthorizationValidationResult : ValidationResult
     /// <param name="authorizeRequest">The partial results of validating the
     /// pushed authorize parameters.</param>
     public PushedAuthorizationValidationResult(
-        string? error, 
-        string? errorDescription, 
+        string? error,
+        string? errorDescription,
         ValidatedAuthorizeRequest authorizeRequest)
     {
         IsError = true;
@@ -75,7 +75,7 @@ public class PushedAuthorizationValidationResult : ValidationResult
     /// The validated pushed authorization request, or null if a validation error occurred. 
     /// </summary>
     public ValidatedPushedAuthorizationRequest? ValidatedRequest { get; set; }
-    
+
     /// <summary>
     /// The partially validated authorize request returned by the <see
     /// cref="IAuthorizeRequestValidator" /> when authorize request validation

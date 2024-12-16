@@ -1,12 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing.V2;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
+using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace IdentityServer.UnitTests.Licensing.V2;
@@ -40,10 +40,10 @@ public class LicenseAccessorTests
         l.SerialNumber.Should().Be(serialNumber);
         l.Expiration!.Value.Date.Should().Be(new DateTime(2024, 11, 15));
         l.Redistribution.Should().Be(isRedistribution);
-        
+
         var enterpriseFeaturesEnabled = edition == LicenseEdition.Enterprise || edition == LicenseEdition.Community;
         var businessFeaturesEnabled = enterpriseFeaturesEnabled || edition == LicenseEdition.Business;
-        
+
         _licenseAccessor.Current.IsEnabled(LicenseFeature.DynamicProviders).Should().Be(enterpriseFeaturesEnabled || addDynamicProviders);
         _licenseAccessor.Current.IsEnabled(LicenseFeature.ResourceIsolation).Should().Be(enterpriseFeaturesEnabled);
         _licenseAccessor.Current.IsEnabled(LicenseFeature.DPoP).Should().Be(enterpriseFeaturesEnabled);
@@ -78,13 +78,13 @@ public class LicenseAccessorTests
     ];
 
 
-    
+
     [Fact]
     public void keys_that_cannot_be_parsed_are_treated_the_same_as_an_absent_license()
     {
         _options.LicenseKey = "invalid key";
         _licenseAccessor.Current.IsConfigured.Should().BeFalse();
-        _logger.Collector.GetSnapshot().Should().Contain(r => 
+        _logger.Collector.GetSnapshot().Should().Contain(r =>
             r.Message == "Error validating the Duende software license key");
     }
 }

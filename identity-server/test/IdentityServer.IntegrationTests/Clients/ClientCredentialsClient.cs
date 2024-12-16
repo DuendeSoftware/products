@@ -2,6 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
+using FluentAssertions;
+using IntegrationTests.Clients.Setup;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,12 +15,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Clients.Setup;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using Xunit;
 
 namespace IntegrationTests.Clients;
@@ -76,7 +76,7 @@ public class ClientCredentialsClient
         payload["client_id"].GetString().Should().Be("client");
         payload.Keys.Should().Contain("jti");
         payload.Keys.Should().Contain("iat");
-            
+
         var scopes = payload["scope"].EnumerateArray();
         scopes.First().ToString().Should().Be("api1");
     }
@@ -281,7 +281,7 @@ public class ClientCredentialsClient
         response.RefreshToken.Should().BeNull();
 
         var payload = GetPayload(response);
-            
+
         payload["iss"].GetString().Should().Be("https://idsvr4");
         payload["aud"].GetString().Should().Be("api");
         payload["client_id"].GetString().Should().Be("client.no_secret");

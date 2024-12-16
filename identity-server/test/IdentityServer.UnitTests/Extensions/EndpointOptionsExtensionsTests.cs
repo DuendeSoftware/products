@@ -1,11 +1,11 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Hosting;
 using Xunit;
 
 namespace UnitTests.Extensions;
@@ -155,7 +155,7 @@ public class EndpointOptionsExtensionsTests
             expectedIsEndpointEnabled,
             _options.IsEndpointEnabled(
                 CreateTestEndpoint(IdentityServerConstants.EndpointNames.BackchannelAuthentication)));
-    }    
+    }
 
     private Endpoint CreateTestEndpoint(string name)
     {

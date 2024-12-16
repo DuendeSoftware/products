@@ -67,4 +67,3 @@ string Summary(LicenseUsageSummary usage)
 
     return sb.ToString();
 }
-    

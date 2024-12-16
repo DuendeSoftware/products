@@ -2,6 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
+using FluentAssertions;
+using IntegrationTests.Clients.Setup;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,12 +15,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Clients.Setup;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using Xunit;
 
 namespace IntegrationTests.Clients;
@@ -64,7 +64,7 @@ public class ResourceOwnerClient
         payload["idp"].GetString().Should().Be("local");
         payload.Keys.Should().Contain("jti");
         payload.Keys.Should().Contain("iat");
-            
+
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
         scopes.Count.Should().Be(1);
         scopes.Should().Contain("api1");
@@ -94,7 +94,7 @@ public class ResourceOwnerClient
         response.RefreshToken.Should().NotBeNull();
 
         var payload = GetPayload(response);
-            
+
         payload["iss"].GetString().Should().Be("https://idsvr4");
         payload["aud"].GetString().Should().Be("api");
         payload["client_id"].GetString().Should().Be("roclient");
@@ -102,11 +102,11 @@ public class ResourceOwnerClient
         payload["idp"].GetString().Should().Be("local");
         payload.Keys.Should().Contain("jti");
         payload.Keys.Should().Contain("iat");
-            
+
         var amr = payload["amr"].EnumerateArray().ToList();
         amr.Count.Should().Be(1);
         amr.First().GetString().Should().Be("pwd");
-            
+
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
         scopes.Count.Should().Be(8);
 
@@ -192,7 +192,7 @@ public class ResourceOwnerClient
         payload["idp"].GetString().Should().Be("local");
         payload.Keys.Should().Contain("jti");
         payload.Keys.Should().Contain("iat");
-            
+
         var amr = payload["amr"].EnumerateArray().ToList();
         amr.Count.Should().Be(1);
         amr.First().ToString().Should().Be("pwd");
@@ -224,7 +224,7 @@ public class ResourceOwnerClient
         response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
         response.Error.Should().Be("invalid_grant");
     }
-        
+
     [Fact]
     public async Task User_with_empty_password_should_succeed()
     {

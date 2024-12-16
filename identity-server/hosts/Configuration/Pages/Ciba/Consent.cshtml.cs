@@ -31,7 +31,7 @@ public class Consent : PageModel
     }
 
     public ViewModel View { get; set; } = default!;
-        
+
     [BindProperty]
     public InputModel Input { get; set; } = default!;
 
@@ -50,7 +50,7 @@ public class Consent : PageModel
         return Page();
     }
 
-	public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPost()
     {
         // validate return url is still valid
         var request = await _interaction.GetLoginRequestByInternalIdAsync(Input.Id ?? throw new ArgumentNullException(nameof(Input.Id)));

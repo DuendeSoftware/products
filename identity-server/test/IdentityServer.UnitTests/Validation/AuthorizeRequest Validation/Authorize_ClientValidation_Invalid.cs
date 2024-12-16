@@ -1,12 +1,12 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Specialized;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using FluentAssertions;
-using Duende.IdentityModel;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using Xunit;

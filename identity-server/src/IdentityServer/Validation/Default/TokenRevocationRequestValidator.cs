@@ -1,6 +1,5 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
-
 
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
@@ -43,7 +42,7 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
     public Task<TokenRevocationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, Client client)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRevocationRequestValidator.ValidateRequest");
-        
+
         _logger.LogTrace("ValidateRequestAsync called");
 
         if (parameters == null)

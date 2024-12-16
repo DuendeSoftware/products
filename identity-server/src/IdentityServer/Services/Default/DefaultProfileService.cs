@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 
@@ -37,7 +37,7 @@ public class DefaultProfileService : IProfileService
     public virtual Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultProfileService.GetProfileData");
-        
+
         context.LogProfileRequest(Logger);
         context.AddRequestedClaims(context.Subject.Claims);
         context.LogIssuedClaims(Logger);
@@ -54,7 +54,7 @@ public class DefaultProfileService : IProfileService
     public virtual Task IsActiveAsync(IsActiveContext context)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultProfileService.IsActive");
-        
+
         Logger.LogDebug("IsActive called from: {caller}", context.Caller);
 
         context.IsActive = true;

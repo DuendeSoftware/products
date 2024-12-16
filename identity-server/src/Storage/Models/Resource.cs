@@ -31,7 +31,7 @@ public abstract class Resource
     /// Display name of the resource.
     /// </summary>
     public string? DisplayName { get; set; }
-        
+
     /// <summary>
     /// Description of the resource.
     /// </summary>

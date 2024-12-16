@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Authentication;
@@ -62,7 +61,7 @@ public class PostConfigureApplicationCookieTicketStore : IPostConfigureOptions<C
     {
         if (name == _scheme)
         {
-            if(_httpContextAccessor.HttpContext == null)
+            if (_httpContextAccessor.HttpContext == null)
             {
                 _logger?.LogDebug("Failed to configure server side sessions for the authentication cookie scheme \"{scheme}\" because there is no current HTTP request");
                 return;

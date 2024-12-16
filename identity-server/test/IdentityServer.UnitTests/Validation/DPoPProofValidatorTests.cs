@@ -2,24 +2,23 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using Xunit;
 
@@ -45,10 +44,10 @@ public class DPoPProofValidatorTests
     }
 
     private DPoPProofValidatonContext _context = new DPoPProofValidatonContext
-    { 
-        ClientClockSkew = TimeSpan.Zero, 
-        Url = "https://identityserver/connect/token", 
-        Method = "POST" 
+    {
+        ClientClockSkew = TimeSpan.Zero,
+        Url = "https://identityserver/connect/token",
+        Method = "POST"
     };
 
     Dictionary<string, object> _header;
@@ -68,7 +67,7 @@ public class DPoPProofValidatorTests
         _testReplayCache = new TestReplayCache(_clock);
 
         _subject = new DefaultDPoPProofValidator(
-            _options, 
+            _options,
             _testReplayCache,
             _clock,
             _stubDataProtectionProvider,
@@ -158,7 +157,7 @@ public class DPoPProofValidatorTests
         result.AccessTokenHash.Should().Be(accessTokenHash);
     }
 
-    private Claim CnfClaim(string jwkString = null )
+    private Claim CnfClaim(string jwkString = null)
     {
         jwkString ??= _publicJWK;
         var jwk = new Microsoft.IdentityModel.Tokens.JsonWebKey(jwkString);
@@ -225,7 +224,7 @@ public class DPoPProofValidatorTests
         result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
         result.ErrorDescription.Should().Be("Missing 'cnf' value.");
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public async Task empty_cnf_should_fail()
@@ -262,7 +261,7 @@ public class DPoPProofValidatorTests
         result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
         result.ErrorDescription.Should().Be("Invalid 'cnf' value.");
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public async Task null_cnf_values_should_fail()
@@ -280,7 +279,7 @@ public class DPoPProofValidatorTests
         result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
         result.ErrorDescription.Should().Be("Missing 'cnf' value.");
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public async Task cnf_missing_jkt_should_fail()
@@ -320,7 +319,7 @@ public class DPoPProofValidatorTests
         result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
         result.ErrorDescription.Should().Be("Invalid 'cnf' value.");
     }
-    
+
     private static string GenerateJwk()
     {
         var rsaKey = new RsaSecurityKey(RSA.Create(2048));
@@ -328,7 +327,7 @@ public class DPoPProofValidatorTests
         jsonWebKey.Alg = "PS256";
         return JsonSerializer.Serialize(jsonWebKey);
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public async Task server_clock_skew_should_allow_tokens_outside_normal_duration()
@@ -393,7 +392,7 @@ public class DPoPProofValidatorTests
             _payload["nonce"] = _stubDataProtectionProvider.Protect(new DateTimeOffset(_now).ToUnixTimeSeconds().ToString());
             _context.ProofToken = CreateDPoPProofToken();
             _now = _now.AddMinutes(-5);
-            
+
             {
                 var result = await _subject.ValidateAsync(_context);
                 result.IsError.Should().BeFalse();
@@ -410,7 +409,7 @@ public class DPoPProofValidatorTests
     public async Task client_clock_skew_should_allow_tokens_outside_normal_duration()
     {
         _options.DPoP.ProofTokenValidityDuration = TimeSpan.FromMinutes(1);
-        
+
         _context.ClientClockSkew = TimeSpan.FromMinutes(5);
 
         {
@@ -439,7 +438,7 @@ public class DPoPProofValidatorTests
     public async Task client_clock_skew_should_extend_replay_cache()
     {
         _options.DPoP.ProofTokenValidityDuration = TimeSpan.FromMinutes(1);
-        
+
         _context.ClientClockSkew = TimeSpan.FromMinutes(5);
 
         {
@@ -538,11 +537,11 @@ public class DPoPProofValidatorTests
         var key = new SymmetricSecurityKey(Duende.IdentityModel.CryptoRandom.CreateRandomKey(32));
         _publicJWK = JsonSerializer.Serialize(key);
         CreateHeaderValuesFromPublicKey();
-        
+
         _context.ProofToken = CreateDPoPProofToken("HS256", key);
 
         var result = await _subject.ValidateAsync(_context);
-        
+
         result.IsError.Should().BeTrue();
         result.Error.Should().Be("invalid_dpop_proof");
     }
@@ -615,7 +614,7 @@ public class DPoPProofValidatorTests
         _context.ProofToken = CreateDPoPProofToken();
 
         var result = await _subject.ValidateAsync(_context);
-        
+
         result.IsError.Should().BeTrue();
         result.Error.Should().Be("invalid_dpop_proof");
     }
@@ -822,7 +821,7 @@ public class DPoPProofValidatorTests
         result.Error.Should().Be("use_dpop_nonce");
         result.ServerIssuedNonce.Should().NotBeNullOrEmpty();
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public async Task nonce_provided_when_required_should_succeed()
@@ -833,11 +832,11 @@ public class DPoPProofValidatorTests
         var result = await _subject.ValidateAsync(_context);
 
         result.IsError.Should().BeTrue();
-        
+
         _payload["nonce"] = result.ServerIssuedNonce;
 
         _context.ProofToken = CreateDPoPProofToken();
-        
+
         result = await _subject.ValidateAsync(_context);
 
         result.IsError.Should().BeFalse();

@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using IntegrationTests.Common;
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
 namespace IntegrationTests.Clients.Setup;
 

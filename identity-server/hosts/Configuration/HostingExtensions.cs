@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using IdentityServerHost.Extensions;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using System.Security.Claims;
 
 namespace IdentityServerHost;
 
@@ -157,7 +157,7 @@ internal static class HostingExtensions
 
         // health checks
         app.MapHealthChecks("/health");
-        
+
         // local API endpoints
         app.MapControllers()
             .RequireAuthorization(IdentityServerConstants.LocalApi.PolicyName);

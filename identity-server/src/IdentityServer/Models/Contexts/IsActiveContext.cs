@@ -27,7 +27,7 @@ public class IsActiveContext
         Subject = subject;
         Client = client;
         Caller = caller;
-            
+
         IsActive = true;
     }
 

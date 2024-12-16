@@ -1,6 +1,5 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
-
 
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -46,7 +45,7 @@ public class InMemoryCorsPolicyService : ICorsPolicyService
     public virtual Task<bool> IsOriginAllowedAsync(string origin)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("InMemoryCorsPolicyService.IsOriginAllowedAsync");
-        
+
         var query =
             from client in Clients
             from url in client.AllowedCorsOrigins

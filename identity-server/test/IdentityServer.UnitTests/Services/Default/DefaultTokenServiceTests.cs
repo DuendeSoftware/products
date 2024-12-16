@@ -2,19 +2,18 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using Duende.IdentityModel;
-using UnitTests.Common;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using UnitTests.Common;
+using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -49,12 +48,13 @@ public class DefaultTokenServiceTests
     [Fact]
     public async Task CreateAccessTokenAsync_should_include_aud_for_each_ApiResource()
     {
-        var request = new TokenCreationRequest { 
+        var request = new TokenCreationRequest
+        {
             ValidatedResources = new ResourceValidationResult()
             {
                 Resources = new Resources()
                 {
-                    ApiResources = 
+                    ApiResources =
                     {
                         new ApiResource("api1"){ Scopes = { "scope1" } },
                         new ApiResource("api2"){ Scopes = { "scope2" } },
@@ -131,7 +131,7 @@ public class DefaultTokenServiceTests
 
         result.Claims.SingleOrDefault(x => x.Type == JwtClaimTypes.SessionId).Should().BeNull();
     }
-        
+
     [Fact]
     public async Task CreateAccessTokenAsync_when_session_should_include_sid()
     {
@@ -191,9 +191,9 @@ public class DefaultTokenServiceTests
     {
         var token = new Token
         {
-            Claims = 
-            { 
-                new Claim("sub", "123") 
+            Claims =
+            {
+                new Claim("sub", "123")
             },
             Version = 4,
             Type = OidcConstants.TokenTypes.AccessToken,

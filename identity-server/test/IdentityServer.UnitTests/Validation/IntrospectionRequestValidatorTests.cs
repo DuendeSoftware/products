@@ -2,16 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -38,7 +38,8 @@ public class IntrospectionRequestValidatorTests
     [Trait("Category", Category)]
     public async Task valid_token_should_successfully_validate()
     {
-        var token = new Token {
+        var token = new Token
+        {
             CreationTime = DateTime.UtcNow,
             Issuer = "http://op",
             ClientId = "codeclient",
@@ -50,7 +51,7 @@ public class IntrospectionRequestValidatorTests
             }
         };
         var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token);
-            
+
         var param = new NameValueCollection()
         {
             { "token", handle}
@@ -58,7 +59,7 @@ public class IntrospectionRequestValidatorTests
 
         var result = await _subject.ValidateAsync(
             new IntrospectionRequestValidationContext
-            { 
+            {
                 Parameters = param,
                 Api = new ApiResource("api")
             }
@@ -75,7 +76,7 @@ public class IntrospectionRequestValidatorTests
         claimTypes.Should().Contain("iat");
         claimTypes.Should().Contain("nbf");
         claimTypes.Should().Contain("exp");
-            
+
     }
 
     [Fact]
@@ -86,7 +87,7 @@ public class IntrospectionRequestValidatorTests
 
         var result = await _subject.ValidateAsync(new IntrospectionRequestValidationContext
         {
-            Parameters = param, 
+            Parameters = param,
             Api = new ApiResource("api")
         });
 
@@ -106,10 +107,10 @@ public class IntrospectionRequestValidatorTests
             { "token", "invalid" }
         };
 
-        var result = await _subject.ValidateAsync(new IntrospectionRequestValidationContext 
-        { 
-            Parameters = param, 
-            Api = new ApiResource("api") 
+        var result = await _subject.ValidateAsync(new IntrospectionRequestValidationContext
+        {
+            Parameters = param,
+            Api = new ApiResource("api")
         });
 
         result.IsError.Should().Be(false);

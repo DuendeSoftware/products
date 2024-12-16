@@ -1,13 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -35,7 +34,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     public async Task ValidateAsync(ClientConfigurationValidationContext context)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultClientConfigurationValidator.Validate");
-        
+
         if (context.Client.ProtocolType == IdentityServerConstants.ProtocolTypes.OpenIdConnect)
         {
             await ValidateGrantTypesAsync(context);
@@ -137,7 +136,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
                 var allowedByPar = _options.PushedAuthorization.AllowUnregisteredPushedRedirectUris &&
                     context.Client.RequireClientSecret;
 
-                if (context.Client.RedirectUris?.Any() == false && 
+                if (context.Client.RedirectUris?.Any() == false &&
                     !allowedByPar)
                 {
                     context.SetError("No redirect URI configured.");
@@ -164,7 +163,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
                 if (!string.IsNullOrWhiteSpace(origin) && origin.IsUri())
                 {
                     var uri = new Uri(origin);
-                    
+
                     if (uri.AbsolutePath == "/" && !origin.EndsWith('/'))
                     {
                         fail = false;

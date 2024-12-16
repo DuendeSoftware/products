@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace UnitTests.Endpoints.Results;

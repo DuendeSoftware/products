@@ -1,16 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Collections.Specialized;
-using System.Globalization;
 
 #pragma warning disable 1591
 
@@ -43,8 +42,8 @@ public static class ValidatedAuthorizeRequestExtensions
         }
 
         request.Raw.Add(Constants.ProcessedPrompt, suppress.ToString());
-        request.PromptModes = request.PromptModes.Except(new[] { 
-            OidcConstants.PromptModes.Login, 
+        request.PromptModes = request.PromptModes.Except(new[] {
+            OidcConstants.PromptModes.Login,
             OidcConstants.PromptModes.SelectAccount,
             OidcConstants.PromptModes.Create
         }).ToArray();
@@ -171,10 +170,10 @@ public static class ValidatedAuthorizeRequestExtensions
                 // https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests 
                 // requires client id and response type to always be in URL
                 if (key == OidcConstants.AuthorizeRequest.ClientId ||
-                    key == OidcConstants.AuthorizeRequest.ResponseType ||  
+                    key == OidcConstants.AuthorizeRequest.ResponseType ||
                     request.RequestObjectValues.All(x => x.Type != key))
                 {
-                    foreach(var value in request.Raw.GetValues(key))
+                    foreach (var value in request.Raw.GetValues(key))
                     {
                         collection.Add(key, value);
                     }
@@ -186,7 +185,7 @@ public static class ValidatedAuthorizeRequestExtensions
 
         return request.Raw;
     }
-        
+
     public static string ToOptimizedQueryString(this ValidatedAuthorizeRequest request)
     {
         return request.ToOptimizedRawValues().ToQueryString();

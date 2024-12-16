@@ -2,17 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Text.Json;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using Xunit;
 
@@ -114,7 +114,7 @@ public class UserInfoResponseGeneratorTests
     {
         _identityResources.Add(new IdentityResource("id1", new[] { "foo" }));
         _identityResources.Add(new IdentityResource("id2", new[] { "bar" }));
-            
+
         var address = new
         {
             street_address = "One Hacker Way",
@@ -122,7 +122,7 @@ public class UserInfoResponseGeneratorTests
             postal_code = 69118,
             country = "Germany"
         };
-            
+
         _mockProfileService.ProfileClaims = new[]
         {
             new Claim("email", "fred@gmail.com"),
@@ -152,11 +152,11 @@ public class UserInfoResponseGeneratorTests
         claims["email"].Should().Be("fred@gmail.com");
         claims.Should().ContainKey("name");
         claims["name"].Should().Be("fred jones");
-            
+
         // this will be treated as a string because this is not valid JSON from the System.Text library point of view
         claims.Should().ContainKey("address");
         claims["address"].Should().Be("{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }");
-            
+
         // this is a JsonElement
         claims.Should().ContainKey("address2");
         claims["address2"].ToString().Should().Be("{\"street_address\":\"One Hacker Way\",\"locality\":\"Heidelberg\",\"postal_code\":69118,\"country\":\"Germany\"}");

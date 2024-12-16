@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net.Http;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
+using FluentAssertions;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntegrationTests.Clients;

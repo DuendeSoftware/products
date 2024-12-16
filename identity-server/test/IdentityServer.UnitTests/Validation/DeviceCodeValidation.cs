@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using Duende.IdentityModel;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnitTests.Validation.Setup;
 using Xunit;
 
@@ -231,10 +231,10 @@ public class DeviceCodeValidation
         var request = new ValidatedTokenRequest();
         request.SetClient(client);
 
-        var context = new DeviceCodeValidationContext {DeviceCode = handle, Request = request};
+        var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
         await validator.ValidateAsync(context);
-            
+
         context.Result.IsError.Should().BeFalse();
     }
 }

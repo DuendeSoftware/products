@@ -18,7 +18,7 @@ namespace Duende.IdentityServer.Models;
 public class ApiScope : Resource
 {
     private string DebuggerDisplay => Name ?? $"{{{typeof(ApiScope)}}}";
-        
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiScope"/> class.
     /// </summary>

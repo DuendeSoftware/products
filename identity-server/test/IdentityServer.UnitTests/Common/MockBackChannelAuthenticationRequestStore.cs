@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
 
 namespace UnitTests.Common;
 
@@ -37,7 +37,7 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
 
     public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, string clientId = null)
     {
-        var items = Items.Where(x => x.Value.Subject.GetSubjectId() == subjectId 
+        var items = Items.Where(x => x.Value.Subject.GetSubjectId() == subjectId
                                      && (clientId == null || x.Value.ClientId == clientId)
         );
         return Task.FromResult(items.Select(x => x.Value).AsEnumerable());

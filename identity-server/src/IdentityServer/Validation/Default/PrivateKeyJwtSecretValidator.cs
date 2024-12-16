@@ -1,18 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Validation;
@@ -34,7 +33,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
     /// Instantiates an instance of private_key_jwt secret validator
     /// </summary>
     public PrivateKeyJwtSecretValidator(
-        IIssuerNameService issuerNameService, 
+        IIssuerNameService issuerNameService,
         IReplayCache replayCache,
         IServerUrls urls,
         IdentityServerOptions options,
@@ -101,7 +100,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             string.Concat(_urls.BaseUrl.EnsureTrailingSlash(), ProtocolRoutePaths.BackchannelAuthentication),
             // PAR endpoint: https://datatracker.ietf.org/doc/html/rfc9126#name-request
             string.Concat(_urls.BaseUrl.EnsureTrailingSlash(), ProtocolRoutePaths.PushedAuthorization),
-            
+
         }.Distinct();
 
         var tokenValidationParameters = new TokenValidationParameters
@@ -129,7 +128,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             return fail;
         }
 
-        var jwtToken = (JsonWebToken) result.SecurityToken;
+        var jwtToken = (JsonWebToken)result.SecurityToken;
         if (jwtToken.Subject != jwtToken.Issuer)
         {
             _logger.LogError("Both 'sub' and 'iss' in the client assertion token must have a value of client_id.");

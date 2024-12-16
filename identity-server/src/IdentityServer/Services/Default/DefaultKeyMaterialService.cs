@@ -1,16 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
-using System.Linq;
-using System;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.KeyManagement;
+using Duende.IdentityServer.Stores;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 
@@ -44,7 +43,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     public async Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string> allowedAlgorithms = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetSigningCredentials");
-        
+
         if (IEnumerableExtensions.IsNullOrEmpty(allowedAlgorithms))
         {
             var list = _signingCredentialStores.ToList();
@@ -56,7 +55,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
                     return key;
                 }
             }
-                
+
             var automaticKey = await _keyManagerKeyStore.GetSigningCredentialsAsync();
             if (automaticKey != null)
             {
@@ -81,7 +80,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync()
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetAllSigningCredentials");
-        
+
         var credentials = new List<SigningCredentials>();
 
         foreach (var store in _signingCredentialStores)
@@ -92,7 +91,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
                 credentials.Add(signingKey);
             }
         }
-            
+
         var automaticSigningKeys = await _keyManagerKeyStore.GetAllSigningCredentialsAsync();
         if (automaticSigningKeys != null)
         {
@@ -106,7 +105,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetValidationKeys");
-        
+
         var keys = new List<SecurityKeyInfo>();
 
         var automaticSigningKeys = await _keyManagerKeyStore.GetValidationKeysAsync();

@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System;
 using Duende.IdentityServer.EntityFramework;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Interfaces;
@@ -14,6 +13,7 @@ using Duende.IdentityServer.EntityFramework.Storage;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -53,7 +53,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         builder.AddResourceStore<ResourceStore>();
         builder.AddCorsPolicyService<CorsPolicyService>();
         builder.AddIdentityProviderStore<IdentityProviderStore>();
-            
+
         return builder;
     }
 

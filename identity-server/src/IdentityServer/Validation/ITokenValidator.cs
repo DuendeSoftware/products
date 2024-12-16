@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -18,7 +18,7 @@ public interface ITokenValidator
     /// <param name="expectedScope">The expected scope.</param>
     /// <returns></returns>
     Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope = null);
-        
+
     /// <summary>
     /// Validates an identity token.
     /// </summary>

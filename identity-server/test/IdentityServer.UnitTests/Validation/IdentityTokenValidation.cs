@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using FluentAssertions;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
 

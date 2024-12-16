@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Configuration.RequestProcessing;
 using Duende.IdentityServer.Configuration.Configuration;
-using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Duende.IdentityServer.Configuration.Models;
+using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
+using Duende.IdentityServer.Configuration.RequestProcessing;
+using Duende.IdentityServer.Models;
 
 namespace IdentityServerHost;
 
@@ -48,7 +48,7 @@ internal sealed class CustomClientRegistrationProcessor : DynamicClientRegistrat
 
     protected override async Task<(Secret, string)> GenerateSecret(DynamicClientRegistrationContext context)
     {
-         if(context.Request.Extensions.TryGetValue("client_secret", out var secretParam))
+        if (context.Request.Extensions.TryGetValue("client_secret", out var secretParam))
         {
             var plainText = secretParam.ToString();
             ArgumentNullException.ThrowIfNull(plainText);

@@ -1,11 +1,10 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 
@@ -32,7 +31,7 @@ internal static class NameValueCollectionExtensions
 
         return nvc;
     }
-        
+
     public static string ToQueryString(this NameValueCollection collection)
     {
         if (collection.Count == 0)

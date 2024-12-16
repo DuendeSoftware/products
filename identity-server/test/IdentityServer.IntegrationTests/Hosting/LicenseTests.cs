@@ -1,17 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+// See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Models;
 using FluentAssertions;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Time.Testing;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntegrationTests.Hosting;
@@ -52,7 +51,7 @@ public class LicenseTests : IDisposable
             File.Delete(path2);
         }
     }
-    
+
     [Fact]
     public async Task unlicensed_protocol_requests_log_a_warning()
     {
@@ -63,7 +62,7 @@ public class LicenseTests : IDisposable
             counter.Threshold = threshold;
         };
         _mockPipeline.Initialize(enableLogging: true);
-        
+
         // The actual protocol parameters aren't the point of this test, this could be any protocol request 
         var data = new Dictionary<string, string>
         {
@@ -73,7 +72,7 @@ public class LicenseTests : IDisposable
             { "scope", scope_name },
         };
         var form = new FormUrlEncodedContent(data);
-        
+
         for (int i = 0; i < threshold + 1; i++)
         {
             await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);

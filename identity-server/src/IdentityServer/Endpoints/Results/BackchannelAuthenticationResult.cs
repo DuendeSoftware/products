@@ -1,16 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.ResponseHandling;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Hosting;
-using Duende.IdentityServer.ResponseHandling;
-using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -70,7 +69,7 @@ internal class BackchannelAuthenticationHttpWriter : IHttpResponseWriter<Backcha
                 auth_req_id = result.Response.AuthenticationRequestId,
                 expires_in = result.Response.ExpiresIn,
                 interval = result.Response.Interval,
-                
+
                 Custom = result.Response.Custom
             });
         }

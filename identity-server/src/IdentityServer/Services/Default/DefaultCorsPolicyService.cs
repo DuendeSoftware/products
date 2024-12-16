@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -53,7 +52,7 @@ public class DefaultCorsPolicyService : ICorsPolicyService
     public virtual Task<bool> IsOriginAllowedAsync(string origin)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultCorsPolicyService.IsOriginAllowed");
-        
+
         if (!String.IsNullOrWhiteSpace(origin))
         {
             if (AllowAll)

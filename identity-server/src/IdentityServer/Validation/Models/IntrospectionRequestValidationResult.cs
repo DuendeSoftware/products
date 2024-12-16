@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Models;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -30,7 +29,7 @@ public class IntrospectionRequestValidationResult : ValidationResult
     /// The API.
     /// </value>
     public ApiResource Api { get; set; }
- 
+
     /// <summary>
     /// Gets or sets the client.
     /// </summary>

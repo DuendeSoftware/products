@@ -1,12 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System.Threading.Tasks;
+using Duende.IdentityServer.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Duende.IdentityServer.Hosting;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 

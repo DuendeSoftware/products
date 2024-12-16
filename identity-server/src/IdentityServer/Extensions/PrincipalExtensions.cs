@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
 using System;
 using System.Collections.Generic;
@@ -50,7 +49,7 @@ public static class PrincipalExtensions
         var claim = id.FindFirst(JwtClaimTypes.AuthenticationTime);
 
         if (claim == null) throw new InvalidOperationException("auth_time is missing.");
-           
+
         return long.Parse(claim.Value);
     }
 
@@ -185,7 +184,7 @@ public static class PrincipalExtensions
     {
         return principal.FindFirst(IdentityServerConstants.ClaimTypes.Tenant)?.Value;
     }
-        
+
     /// <summary>
     /// Determines whether this instance is authenticated.
     /// </summary>

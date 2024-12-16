@@ -1,20 +1,19 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
-using Duende.IdentityServer.Extensions;
+using Microsoft.Extensions.Logging;
 using System.IO;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -60,7 +59,7 @@ internal class TokenRevocationEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Revocation + "Endpoint");
-        
+
         _logger.LogTrace("Processing revocation request.");
 
         if (!HttpMethods.IsPost(context.Request.Method))

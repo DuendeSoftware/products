@@ -1,25 +1,25 @@
 // Copyright (c) Duende Software. All rights reserved.
-// See LICENSE in the project root for license information.using System.Collections.Generic;
+// See LICENSE in the project root for license information.
 
-using System.Collections.Generic;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
+using System.Collections.Generic;
 
 namespace IdentityServerHost.Configuration;
 
 public static class ClientsWeb
 {
-    static string[] allowedScopes = 
+    static string[] allowedScopes =
     {
         IdentityServerConstants.StandardScopes.OpenId,
         IdentityServerConstants.StandardScopes.Profile,
         IdentityServerConstants.StandardScopes.Email,
-        "resource1.scope1", 
+        "resource1.scope1",
         "resource2.scope1",
         "transaction",
         "custom.profile"
     };
-        
+
     public static IEnumerable<Client> Get()
     {
         return new List<Client>
@@ -32,11 +32,11 @@ public static class ClientsWeb
                 ClientId = "js_oidc",
                 ClientName = "JavaScript OIDC Client",
                 ClientUri = "http://identityserver.io",
-                    
+
                 AllowedGrantTypes = GrantTypes.Code,
                 RequireClientSecret = false,
-                    
-                RedirectUris = 
+
+                RedirectUris =
                 {
                     "https://localhost:44300/index.html",
                     "https://localhost:44300/callback.html",
@@ -56,7 +56,7 @@ public static class ClientsWeb
             new Client
             {
                 ClientId = "mvc.tokenmanagement",
-                    
+
                 ClientSecrets =
                 {
                     new Secret("secret".Sha256())
@@ -100,7 +100,7 @@ public static class ClientsWeb
                 AllowOfflineAccess = true,
 
                 AllowedScopes = allowedScopes,
-                InitiateLoginUri = "https://localhost:44302/Home/Secure" 
+                InitiateLoginUri = "https://localhost:44302/Home/Secure"
             },
 
             ///////////////////////////////////////////
@@ -119,7 +119,7 @@ public static class ClientsWeb
 
                 RequireConsent = false,
                 AllowedGrantTypes = GrantTypes.Code,
-                
+
                 RequireDPoP = true,
 
                 RedirectUris = { "https://localhost:44310/signin-oidc" },
@@ -148,7 +148,7 @@ public static class ClientsWeb
 
                 RequireConsent = true,
                 AllowedGrantTypes = GrantTypes.Code,
-                
+
                 RequirePushedAuthorization = true,
                 // RedirectUris = { "https://localhost:44305/signin-oidc" },
                 FrontChannelLogoutUri = "https://localhost:44305/signout-oidc",
@@ -236,7 +236,7 @@ public static class ClientsWeb
                     new Secret
                     {
                         Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                        Value = 
+                        Value =
                         """
                         {
                             "e":"AQAB",

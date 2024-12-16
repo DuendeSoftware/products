@@ -1,16 +1,16 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using FluentAssertions;
-using Duende.IdentityModel;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -139,7 +139,7 @@ public class AccessTokenValidation
         now = DateTime.UtcNow;
 
         var store = Factory.CreateReferenceTokenStore();
-        var validator = Factory.CreateTokenValidator(store, clock:_clock);
+        var validator = Factory.CreateTokenValidator(store, clock: _clock);
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 2, "read", "write");
         token.CreationTime = now;
@@ -178,7 +178,7 @@ public class AccessTokenValidation
 
         result.IsError.Should().BeFalse();
     }
-        
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -187,7 +187,7 @@ public class AccessTokenValidation
     {
         var options = TestIdentityServerOptions.Create();
         options.EmitScopesAsSpaceDelimitedStringInJwt = flag;
-            
+
         var signer = Factory.CreateDefaultTokenCreator(options);
         var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"));
 
@@ -204,7 +204,7 @@ public class AccessTokenValidation
         scopes[0].Should().Be("read");
         scopes[1].Should().Be("write");
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task JWT_Token_invalid_Issuer()
@@ -227,7 +227,7 @@ public class AccessTokenValidation
     {
         var signer = Factory.CreateDefaultTokenCreator();
         var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessTokenLong(new Client { ClientId = "roclient" }, "valid", 600, 1000, "read", "write"));
-            
+
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt);
 

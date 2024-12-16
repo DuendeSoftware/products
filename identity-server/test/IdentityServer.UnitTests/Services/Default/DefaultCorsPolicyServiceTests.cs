@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
 using FluentAssertions;
+using System;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using Xunit;
 

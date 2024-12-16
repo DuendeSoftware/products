@@ -1,10 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Validation;
 using System;
-using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
 namespace Duende.IdentityServer;
@@ -252,7 +250,7 @@ public static class Telemetry
         /// <summary>
         /// Successful Client Secret validations
         /// </summary>
-        public static Counter<long> ClientSecretValidationCounter = 
+        public static Counter<long> ClientSecretValidationCounter =
             ExperimentalMeter.CreateCounter<long>(Counters.ClientSecretValidation);
 
         /// <summary>
@@ -444,7 +442,7 @@ public static class Telemetry
         /// <summary>
         /// Successful token issuance counter.
         /// </summary>
-        public static readonly Counter<long> TokenIssuedCounter = 
+        public static readonly Counter<long> TokenIssuedCounter =
             ExperimentalMeter.CreateCounter<long>(Counters.TokenIssued);
 
         /// <summary>

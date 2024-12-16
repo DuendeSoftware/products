@@ -2,18 +2,18 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
+using FluentAssertions;
+using IntegrationTests.Clients.Setup;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Clients.Setup;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using Xunit;
 
 namespace IntegrationTests.Clients;
@@ -50,7 +50,7 @@ public class CustomTokenResponseClients
         // raw fields
         var fields = GetFields(response);
         fields["string_value"].GetString().Should().Be("some_string");
-        fields["int_value"].GetInt32().Should().Be(42); 
+        fields["int_value"].GetInt32().Should().Be(42);
 
         JsonElement temp;
         fields.TryGetValue("identity_token", out temp).Should().BeFalse();
@@ -78,7 +78,7 @@ public class CustomTokenResponseClients
         response.TokenType.Should().Be("Bearer");
         response.IdentityToken.Should().BeNull();
         response.RefreshToken.Should().BeNull();
-            
+
 
         // token content
         var payload = GetPayload(response);
@@ -114,7 +114,7 @@ public class CustomTokenResponseClients
         // raw fields
         var fields = GetFields(response);
         fields["string_value"].GetString().Should().Be("some_string");
-        fields["int_value"].GetInt32().Should().Be(42); 
+        fields["int_value"].GetInt32().Should().Be(42);
 
         JsonElement temp;
         fields.TryGetValue("identity_token", out temp).Should().BeFalse();
@@ -168,7 +168,7 @@ public class CustomTokenResponseClients
         // raw fields
         var fields = GetFields(response);
         fields["string_value"].GetString().Should().Be("some_string");
-        fields["int_value"].GetInt32().Should().Be(42); 
+        fields["int_value"].GetInt32().Should().Be(42);
 
         JsonElement temp;
         fields.TryGetValue("identity_token", out temp).Should().BeFalse();
@@ -206,7 +206,7 @@ public class CustomTokenResponseClients
         payload["sub"].GetString().Should().Be("bob");
         payload["idp"].GetString().Should().Be("local");
         payload["aud"].GetString().Should().Be("api");
-         
+
         var scopes = payload["scope"].EnumerateArray();
         scopes.First().ToString().Should().Be("api1");
 
@@ -237,8 +237,8 @@ public class CustomTokenResponseClients
         // raw fields
         var fields = GetFields(response);
         fields["string_value"].GetString().Should().Be("some_string");
-        fields["int_value"].GetInt32().Should().Be(42); 
-            
+        fields["int_value"].GetInt32().Should().Be(42);
+
         JsonElement temp;
         fields.TryGetValue("identity_token", out temp).Should().BeFalse();
         fields.TryGetValue("refresh_token", out temp).Should().BeFalse();

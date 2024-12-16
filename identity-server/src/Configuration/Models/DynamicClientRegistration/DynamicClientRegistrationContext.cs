@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Security.Claims;
 using Duende.IdentityServer.Models;
+using System.Security.Claims;
 
 namespace Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 

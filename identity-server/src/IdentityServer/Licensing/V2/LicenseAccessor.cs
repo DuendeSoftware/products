@@ -3,15 +3,15 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using Duende.IdentityServer.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Licensing.V2;
 
@@ -39,19 +39,19 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
             {
                 return _license;
             }
-            
+
             var key = options.LicenseKey ?? LoadLicenseKeyFromFile();
             if (key == null)
             {
                 return new License();
             }
-            
+
             var licenseClaims = ValidateKey(key);
             return licenseClaims.Any() ? // (ValidateKey will return an empty collection if it fails)
                 new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims))) : new License();
         }
     }
-    
+
     private static string? LoadLicenseKeyFromFile()
     {
         foreach (var name in LicenseFileNames)
@@ -98,5 +98,5 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
 
         return validateResult.ClaimsIdentity?.Claims.ToArray() ?? [];
     }
-    
+
 }

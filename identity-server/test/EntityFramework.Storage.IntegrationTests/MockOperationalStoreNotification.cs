@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.EntityFramework;
+using Duende.IdentityServer.EntityFramework.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.IdentityServer.EntityFramework;
-using Duende.IdentityServer.EntityFramework.Entities;
 
 namespace EntityFramework.Storage.IntegrationTests;
 

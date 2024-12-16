@@ -1,11 +1,11 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using Duende.IdentityServer.Models;
 using FluentAssertions;
+using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace UnitTests.Validation;
@@ -45,7 +45,7 @@ public class GrantTypesValidation
         var client = new Client();
         client.AllowedGrantTypes = new[] { "custom" };
     }
-        
+
     [Theory]
     [Trait("Category", Category)]
     [InlineData(GrantType.Implicit, GrantType.Hybrid)]
@@ -57,7 +57,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes = new[] { type1, type2 };
 
-        act.Should().Throw<InvalidOperationException>();            
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Theory]

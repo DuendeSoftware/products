@@ -15,9 +15,9 @@ namespace Duende.IdentityServer.IntegrationTests.TestFramework
     public class MockExternalAuthenticationHandler : RemoteAuthenticationHandler<MockExternalAuthenticationOptions>, IAuthenticationSignOutHandler
     {
         public MockExternalAuthenticationHandler(
-            IOptionsMonitor<MockExternalAuthenticationOptions> options, 
-            ILoggerFactory logger, 
-            UrlEncoder encoder) 
+            IOptionsMonitor<MockExternalAuthenticationOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder)
             : base(options, logger, encoder)
         {
         }

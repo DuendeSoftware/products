@@ -7,7 +7,6 @@
 using Duende.IdentityServer.Validation;
 using System.Collections.Generic;
 using System.Security.Claims;
-using Duende.IdentityServer.ResponseHandling;
 
 namespace Duende.IdentityServer.Models;
 
@@ -20,7 +19,7 @@ public class BackchannelUserLoginRequest
     /// Gets or sets the id of the request in the store.
     /// </summary>
     public string InternalId { get; set; } = default!;
-        
+
     /// <summary>
     /// Gets or sets the subject.
     /// </summary>
@@ -40,7 +39,7 @@ public class BackchannelUserLoginRequest
     /// Gets or sets the tenant passed in the acr_values.
     /// </summary>
     public string? Tenant { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the idp passed in the acr_values.
     /// </summary>

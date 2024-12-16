@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
@@ -10,8 +9,9 @@ using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+using UnitTests.Common;
 using Xunit;
 using static Duende.IdentityModel.OidcConstants;
 
@@ -21,9 +21,9 @@ public class CustomAuthorizeInteractionResponseGenerator : Duende.IdentityServer
 {
     public CustomAuthorizeInteractionResponseGenerator(
         IdentityServerOptions options,
-        IClock clock, 
-        ILogger<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator> logger, 
-        IConsentService consent, 
+        IClock clock,
+        ILogger<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator> logger,
+        IConsentService consent,
         IProfileService profile) : base(options, clock, logger, consent, profile)
     {
     }

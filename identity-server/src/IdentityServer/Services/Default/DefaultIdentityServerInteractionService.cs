@@ -1,16 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Extensions;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using System.Linq;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 
@@ -51,7 +50,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task<AuthorizationRequest> GetAuthorizationContextAsync(string returnUrl)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAuthorizationContext");
-        
+
         var result = await _returnUrlParser.ParseAsync(returnUrl);
 
         if (result != null)
@@ -69,7 +68,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task<LogoutRequest> GetLogoutContextAsync(string logoutId)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetLogoutContext");
-        
+
         var msg = await _logoutMessageStore.ReadAsync(logoutId);
         var iframeUrl = await _context.HttpContext.GetIdentityServerSignoutFrameCallbackUrlAsync(msg?.Data);
         return new LogoutRequest(iframeUrl, msg?.Data);
@@ -78,7 +77,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task<string> CreateLogoutContextAsync()
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.CreateLogoutContext");
-        
+
         var user = await _userSession.GetUserAsync();
         if (user != null)
         {
@@ -103,9 +102,9 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task<ErrorMessage> GetErrorContextAsync(string errorId)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetErrorContext");
-        
+
         if (errorId != null)
-        { 
+        {
             var result = await _errorMessageStore.ReadAsync(errorId);
             var data = result?.Data;
             if (data != null)
@@ -127,7 +126,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task GrantConsentAsync(AuthorizationRequest request, ConsentResponse consent, string subject = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GrantConsent");
-        
+
         if (subject == null)
         {
             var user = await _userSession.GetUserAsync();
@@ -146,8 +145,8 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public Task DenyAuthorizationAsync(AuthorizationRequest request, AuthorizationError error, string errorDescription = null)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.DenyAuthorization");
-        
-        var response = new ConsentResponse 
+
+        var response = new ConsentResponse
         {
             Error = error,
             ErrorDescription = errorDescription
@@ -158,7 +157,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public bool IsValidReturnUrl(string returnUrl)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.IsValidReturnUrl");
-        
+
         var result = _returnUrlParser.IsValidReturnUrl(returnUrl);
 
         if (result)
@@ -176,7 +175,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task<IEnumerable<Grant>> GetAllUserGrantsAsync()
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAllUserGrants");
-        
+
         var user = await _userSession.GetUserAsync();
         if (user != null)
         {
@@ -190,7 +189,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task RevokeUserConsentAsync(string clientId)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeUserConsent");
-        
+
         var user = await _userSession.GetUserAsync();
         if (user != null)
         {
@@ -202,7 +201,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     public async Task RevokeTokensForCurrentSessionAsync()
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeTokensForCurrentSession");
-        
+
         var user = await _userSession.GetUserAsync();
         if (user != null)
         {

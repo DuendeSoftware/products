@@ -2,32 +2,31 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Test;
+using Duende.IdentityServer.Validation;
 using FluentAssertions;
+using IntegrationTests.Common;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Xunit;
-using Duende.IdentityModel.Client;
-using System;
-using Microsoft.AspNetCore.Authentication;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
-using System.Linq;
-using System.Net;
-using Duende.IdentityModel;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Validation;
-using Duende.IdentityServer.Services;
-using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using System.Text;
-using Duende.IdentityServer;
 
 namespace IntegrationTests.Endpoints.Token;
 
@@ -261,7 +260,7 @@ public class DPoPTokenEndpointTests
         // The point here is to have an array in the payload, to exercise 
         // the json serialization
         _payload.Add("key_ops", new string[] { "sign", "verify" });
-        
+
         var dpopToken = CreateDPoPProofToken();
         var request = new ClientCredentialsTokenRequest
         {
@@ -993,7 +992,7 @@ public class DPoPTokenEndpointTests
                 dpop_jkt = new string('x', 101)
             });
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
-        
+
         _mockPipeline.ErrorWasCalled.Should().BeTrue();
     }
 

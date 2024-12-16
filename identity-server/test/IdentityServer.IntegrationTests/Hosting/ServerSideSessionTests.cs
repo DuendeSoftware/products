@@ -2,26 +2,26 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Test;
 using FluentAssertions;
 using IntegrationTests.Common;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using Duende.IdentityModel.Client;
-using System.Collections.Generic;
-using System;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Duende.IdentityServer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
-using Duende.IdentityServer.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.JsonWebTokens;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace IntegrationTests.Hosting;
 
@@ -148,10 +148,10 @@ public class ServerSideSessionTests
     public async Task renewal_should_create_new_record_if_missing()
     {
         await _pipeline.LoginAsync("bob");
-        
+
         ShouldRenewCookie = true;
         (await IsLoggedIn()).Should().BeTrue();
-        
+
         (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().NotBeEmpty();
     }
 
@@ -166,7 +166,7 @@ public class ServerSideSessionTests
 
         (await IsLoggedIn()).Should().BeFalse();
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public async Task logout_should_remove_server_side_session()
@@ -408,7 +408,7 @@ public class ServerSideSessionTests
             RevokeConsents = false,
             RevokeTokens = false,
             SendBackchannelLogoutNotification = true,
-            ClientIds = new List<string>{ "foo" }
+            ClientIds = new List<string> { "foo" }
         });
 
         _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeFalse();
@@ -430,7 +430,7 @@ public class ServerSideSessionTests
         });
 
         _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeFalse();
-        
+
         (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Should().NotBeEmpty();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
@@ -462,7 +462,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        _pipeline.BackChannelMessageHandler.OnInvoke = async msg => 
+        _pipeline.BackChannelMessageHandler.OnInvoke = async msg =>
         {
             var form = await msg.Content.ReadAsStringAsync();
             var jwt = form.Substring("login_token=".Length + 1);
@@ -552,7 +552,8 @@ public class ServerSideSessionTests
 
         await Task.Delay(1000);
 
-        await _pipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest {
+        await _pipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
+        {
             Address = IdentityServerPipeline.TokenEndpoint,
             ClientId = "client",
             RefreshToken = tokenResponse.RefreshToken
@@ -745,7 +746,7 @@ public class ServerSideSessionTests
         }
     }
 
-    
+
     [Fact]
     public async Task claim_issuers_should_be_persisted()
     {

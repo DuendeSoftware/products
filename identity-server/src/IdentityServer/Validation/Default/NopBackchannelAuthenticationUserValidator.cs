@@ -16,7 +16,8 @@ public class NopBackchannelAuthenticationUserValidator : IBackchannelAuthenticat
     /// <inheritdoc/>
     public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext)
     {
-        var result = new BackchannelAuthenticationUserValidationResult { 
+        var result = new BackchannelAuthenticationUserValidationResult
+        {
             Error = "not implemented"
         };
         return Task.FromResult(result);

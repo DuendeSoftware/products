@@ -39,7 +39,7 @@ public class DiscoveryHealthCheck : IHealthCheck
         catch
         {
         }
-        
+
         return new HealthCheckResult(context.Registration.FailureStatus);
     }
 }

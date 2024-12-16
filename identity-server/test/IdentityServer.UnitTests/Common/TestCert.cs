@@ -1,10 +1,10 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
+using Microsoft.IdentityModel.Tokens;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Tokens;
 
 namespace UnitTests.Common;
 

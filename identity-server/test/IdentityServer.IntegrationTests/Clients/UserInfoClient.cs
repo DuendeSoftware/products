@@ -2,6 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
+using FluentAssertions;
+using IntegrationTests.Clients.Setup;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,12 +15,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Clients.Setup;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using Xunit;
 
 namespace IntegrationTests.Clients;
@@ -171,10 +171,10 @@ public class UserInfoEndpointClient
         });
 
         response.IsError.Should().BeFalse();
-            
+
         var payload = GetPayload(response);
 
-        var scopes = ((JsonElement) payload["scope"]).ToStringList();
+        var scopes = ((JsonElement)payload["scope"]).ToStringList();
         scopes.Count.Should().Be(5);
         scopes.Should().Contain("openid");
         scopes.Should().Contain("email");
@@ -182,11 +182,11 @@ public class UserInfoEndpointClient
         scopes.Should().Contain("api4.with.roles");
         scopes.Should().Contain("roles");
 
-        var roles = ((JsonElement) payload["role"]).ToStringList();
+        var roles = ((JsonElement)payload["role"]).ToStringList();
         roles.Count.Should().Be(2);
         roles.Should().Contain("Geek");
         roles.Should().Contain("Developer");
-            
+
         var userInfo = await _client.GetUserInfoAsync(new UserInfoRequest
         {
             Address = UserInfoEndpoint,

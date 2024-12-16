@@ -1,13 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Hosting;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Net;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Hosting;
-using System;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -39,7 +38,7 @@ class TokenRevocationErrorHttpWriter : IHttpResponseWriter<TokenRevocationErrorR
 {
     public Task WriteHttpResponse(TokenRevocationErrorResult result, HttpContext context)
     {
-        context.Response.StatusCode = (int) HttpStatusCode.BadRequest;
+        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
         return context.Response.WriteJsonAsync(new { error = result.Error });
     }
 }

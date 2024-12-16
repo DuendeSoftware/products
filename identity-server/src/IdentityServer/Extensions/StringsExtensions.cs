@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ internal static class StringExtensions
         {
             return string.Empty;
         }
-        
+
         return String.Join(' ', list);
     }
 
@@ -53,7 +52,7 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static bool IsMissing([NotNullWhen(false)]this string value)
+    public static bool IsMissing([NotNullWhen(false)] this string value)
     {
         return string.IsNullOrWhiteSpace(value);
     }
@@ -264,7 +263,7 @@ internal static class StringExtensions
             }
         }
 
-        return new NameValueCollection();           
+        return new NameValueCollection();
     }
 
     public static string GetOrigin(this string url)
@@ -286,7 +285,7 @@ internal static class StringExtensions
 
         return null;
     }
-        
+
     public static string Obfuscate(this string value)
     {
         var last4Chars = "****";

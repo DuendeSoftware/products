@@ -4,9 +4,9 @@
 
 #nullable enable
 
-using System.Threading.Tasks;
-using Duende.IdentityServer.Stores;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Stores;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 

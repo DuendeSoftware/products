@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer;
+using FluentAssertions;
 using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
-using Duende.IdentityServer;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
 

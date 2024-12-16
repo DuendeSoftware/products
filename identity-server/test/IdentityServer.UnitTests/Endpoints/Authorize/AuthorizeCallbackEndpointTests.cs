@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Specialized;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints;
@@ -13,11 +10,13 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Collections.Specialized;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using UnitTests.Common;
 using Xunit;
-using Duende.IdentityServer.Stores;
 
 namespace UnitTests.Endpoints.Authorize;
 

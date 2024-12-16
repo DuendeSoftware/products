@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace Duende.IdentityServer.EntityFramework.Mappers;
 
-internal static class PropertiesConverter 
+internal static class PropertiesConverter
 {
     public static string Convert(Dictionary<string, string> sourceMember)
     {

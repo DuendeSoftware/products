@@ -6,8 +6,8 @@
         <PackageId>Duende.IdentityServer.Storage</PackageId>
         <Description>Storage interfaces and models for Duende IdentityServer</Description>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
         <PackageReadmeFile>README.md</PackageReadmeFile>    
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     </PropertyGroup>
 
     <ItemGroup>

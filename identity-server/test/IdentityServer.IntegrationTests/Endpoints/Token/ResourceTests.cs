@@ -2,17 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
+using FluentAssertions;
 using IntegrationTests.Common;
-using Xunit;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using Duende.IdentityModel.Client;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace IntegrationTests.Endpoints.Token;
 

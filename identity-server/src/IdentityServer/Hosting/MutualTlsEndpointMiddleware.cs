@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Hosting;
@@ -91,7 +91,7 @@ public class MutualTlsEndpointMiddleware
                 }
             }
         }
-            
+
         await _next(context);
     }
 

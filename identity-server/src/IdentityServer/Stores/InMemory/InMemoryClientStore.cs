@@ -1,6 +1,5 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
-
 
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -42,12 +41,12 @@ public class InMemoryClientStore : IClientStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
-        
+
         var query =
             from client in _clients
             where client.ClientId == clientId
             select client;
-            
+
         return Task.FromResult(query.SingleOrDefault());
     }
 }

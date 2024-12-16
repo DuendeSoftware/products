@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer.Stores;
+using FluentAssertions;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Stores;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
 
@@ -51,8 +51,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
         result.IsError.Should().BeFalse();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Select(x=>x.Name).Should().BeEquivalentTo(new[] { "api", "urn:api1", "urn:api2", "urn:api3" });
-        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Select(x=>x.Name).Should().BeEquivalentTo(new[] { "resource", "resource2", "scope1" });
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "api", "urn:api1", "urn:api2", "urn:api3" });
+        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource", "resource2", "scope1" });
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     {
         var client = await _clients.FindEnabledClientByIdAsync("client");
         var validator = Factory.CreateTokenRequestValidator();
-            
+
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
         parameters.Add(OidcConstants.TokenRequest.Scope, "unknown");

@@ -2,18 +2,18 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Validation;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Duende.IdentityServer;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using UnitTests.Common;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace UnitTests.Validation.Secrets;
@@ -97,7 +97,7 @@ public class ClientAssertionSecretParsing
     {
         var context = new DefaultHttpContext();
         var body = "malformed";
-            
+
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 

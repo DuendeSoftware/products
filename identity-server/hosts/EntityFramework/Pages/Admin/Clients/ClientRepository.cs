@@ -120,13 +120,13 @@ public class ClientRepository
 
     public async Task CreateAsync(CreateClientModel model)
     {
-        ArgumentNullException.ThrowIfNull(model);   
+        ArgumentNullException.ThrowIfNull(model);
         var client = new Duende.IdentityServer.Models.Client();
         client.ClientId = model.ClientId.Trim();
         client.ClientName = model.Name?.Trim();
 
         client.ClientSecrets.Add(new Duende.IdentityServer.Models.Secret(model.Secret.Sha256()));
-        
+
         if (model.Flow == Flow.ClientCredentials)
         {
             client.AllowedGrantTypes = GrantTypes.ClientCredentials;
@@ -138,9 +138,9 @@ public class ClientRepository
         }
 
 #pragma warning disable CA1849 // Call async methods when in an async method
-// CA1849 Suppressed because AddAsync is only needed for value generators that
-// need async database access (e.g., HiLoValueGenerator), and we don't use those
-// generators
+        // CA1849 Suppressed because AddAsync is only needed for value generators that
+        // need async database access (e.g., HiLoValueGenerator), and we don't use those
+        // generators
         _context.Clients.Add(client.ToEntity());
 #pragma warning restore CA1849 // Call async methods when in an async method
         await _context.SaveChangesAsync();

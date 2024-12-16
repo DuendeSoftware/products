@@ -4,11 +4,11 @@
 
 #nullable enable
 
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -143,7 +143,7 @@ public class IdentityServerTools : IIdentityServerTools
 
             Claims = new HashSet<Claim>(claims, new ClaimComparer())
         };
-        
+
         return await _tokenCreation.CreateTokenAsync(token);
     }
 

@@ -39,7 +39,7 @@ public class PushedAuthorizationOptions
     /// <remarks>There is also a per-client configuration setting that takes
     /// precedence over this global configuration.
     /// </remarks>
-    public int Lifetime { get; set; } = 60*10;
+    public int Lifetime { get; set; } = 60 * 10;
 
     /// <summary>
     /// Specifies whether clients may use redirect uris that were not previously

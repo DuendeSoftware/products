@@ -58,7 +58,7 @@ public class ResourceValidationResult
     /// The parsed scopes represented by the result.
     /// </summary>
     public ICollection<ParsedScopeValue> ParsedScopes { get; set; } = new HashSet<ParsedScopeValue>();
-        
+
     /// <summary>
     /// The original (raw) scope values represented by the validated result.
     /// </summary>
@@ -111,7 +111,7 @@ public class ResourceValidationResult
         var apiResourcesToKeep = (String.IsNullOrWhiteSpace(resourceIndicator) ?
             Resources.ApiResources.Where(x => !x.RequireResourceIndicator) :
             Resources.ApiResources.Where(x => x.Name == resourceIndicator)).ToArray();
-            
+
         var apiScopesToKeep = Resources.ApiScopes.AsEnumerable();
         var parsedScopesToKeep = ParsedScopes;
 
@@ -129,7 +129,7 @@ public class ResourceValidationResult
             }
             parsedScopesToKeep = parsedScopesToKeepList;
         }
-            
+
         var resources = new Resources(Resources.IdentityResources, apiResourcesToKeep, apiScopesToKeep)
         {
             OfflineAccess = Resources.OfflineAccess,

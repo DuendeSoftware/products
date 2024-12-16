@@ -3,10 +3,10 @@
 
 
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Xunit;
-using Models = Duende.IdentityServer.Models;
-using Entities = Duende.IdentityServer.EntityFramework.Entities;
 using FluentAssertions;
+using Xunit;
+using Entities = Duende.IdentityServer.EntityFramework.Entities;
+using Models = Duende.IdentityServer.Models;
 
 namespace EntityFramework.Storage.UnitTests.Mappers;
 

@@ -2,14 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
@@ -19,8 +11,14 @@ using Duende.IdentityServer.Test;
 using FluentAssertions;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using Xunit;
-using static Duende.IdentityServer.Models.IdentityResources;
 
 namespace IntegrationTests.Endpoints.Authorize;
 
@@ -280,7 +278,7 @@ public class ConsentTests
     }
 
     [Theory]
-    [InlineData((Type) null)]
+    [InlineData((Type)null)]
     [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
     [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
     [Trait("Category", Category)]
@@ -323,7 +321,7 @@ public class ConsentTests
     }
 
     [Theory]
-    [InlineData((Type) null)]
+    [InlineData((Type)null)]
     [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
     [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
     [Trait("Category", Category)]
@@ -382,7 +380,7 @@ public class ConsentTests
             CreationTime = DateTime.UtcNow,
             Scopes = new List<string> { "openid" }
         });
-        
+
         // Store the consent using the legacy key format
         var persistedGrantStore = _mockPipeline.Resolve<IPersistedGrantStore>();
         var legacyKey = $"{clientId}|{subjectId}:{IdentityServerConstants.PersistedGrantTypes.UserConsent}".Sha256();
@@ -403,7 +401,7 @@ public class ConsentTests
 
         // Create a session cookie
         await _mockPipeline.LoginAsync("bob");
-        
+
         // Start a challenge
         var url = _mockPipeline.CreateAuthorizeUrl(
            clientId: "client2",
@@ -422,11 +420,11 @@ public class ConsentTests
         _mockPipeline.ConsentWasCalled.Should().BeFalse();
 
         // The legacy consent should be migrated to use a new key...
-        
+
         // Old key shouldn't find anything
         var grant = await persistedGrantStore.GetAsync(legacyKey);
         grant.Should().BeNull();
-        
+
         // New key should
         var hexEncodedKeyNoHash = $"{clientId}|{subjectId}-1:{IdentityServerConstants.PersistedGrantTypes.UserConsent}";
         using (var sha = SHA256.Create())

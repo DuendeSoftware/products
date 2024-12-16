@@ -2,10 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
@@ -14,23 +10,27 @@ using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.Extensions.Logging.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using UnitTests.Common;
 using Xunit;
 
 namespace UnitTests.ResponseHandling;
 
 public class DeviceAuthorizationResponseGeneratorTests
 {
-    private readonly List<IdentityResource> identityResources = new List<IdentityResource> {new IdentityResources.OpenId(), new IdentityResources.Profile()};
-    private readonly List<ApiResource> apiResources = new List<ApiResource> { new ApiResource("resource") { Scopes = {"api1" } } };
+    private readonly List<IdentityResource> identityResources = new List<IdentityResource> { new IdentityResources.OpenId(), new IdentityResources.Profile() };
+    private readonly List<ApiResource> apiResources = new List<ApiResource> { new ApiResource("resource") { Scopes = { "api1" } } };
     private readonly List<ApiScope> scopes = new List<ApiScope> { new ApiScope("api1") };
 
     private readonly FakeUserCodeGenerator fakeUserCodeGenerator = new FakeUserCodeGenerator();
     private readonly IDeviceFlowCodeService deviceFlowCodeService = new DefaultDeviceFlowCodeService(new InMemoryDeviceFlowStore(), new StubHandleGenerationService());
     private readonly IdentityServerOptions options = new IdentityServerOptions();
     private readonly StubClock clock = new StubClock();
-        
+
     private readonly DeviceAuthorizationResponseGenerator generator;
     private readonly DeviceAuthorizationRequestValidationResult testResult;
     private const string TestBaseUrl = "http://localhost:5000/";
@@ -39,14 +39,14 @@ public class DeviceAuthorizationResponseGeneratorTests
     {
         testResult = new DeviceAuthorizationRequestValidationResult(new ValidatedDeviceAuthorizationRequest
         {
-            Client = new Client {ClientId = Guid.NewGuid().ToString()},
+            Client = new Client { ClientId = Guid.NewGuid().ToString() },
             IsOpenIdRequest = true,
             ValidatedResources = new ResourceValidationResult()
         });
 
         generator = new DeviceAuthorizationResponseGenerator(
             options,
-            new DefaultUserCodeService(new IUserCodeGenerator[] {new NumericUserCodeGenerator(), fakeUserCodeGenerator }),
+            new DefaultUserCodeService(new IUserCodeGenerator[] { new NumericUserCodeGenerator(), fakeUserCodeGenerator }),
             deviceFlowCodeService,
             clock,
             new NullLogger<DeviceAuthorizationResponseGenerator>());
@@ -63,7 +63,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     public async Task ProcessAsync_when_validationresult_client_null_expect_exception()
     {
         var validationResult = new DeviceAuthorizationRequestValidationResult(new ValidatedDeviceAuthorizationRequest());
-        Func <Task> act = () => generator.ProcessAsync(validationResult, TestBaseUrl);
+        Func<Task> act = () => generator.ProcessAsync(validationResult, TestBaseUrl);
         await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -109,9 +109,9 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         testResult.ValidatedRequest.RequestedScopes = new List<string> { "openid", "api1" };
         testResult.ValidatedRequest.ValidatedResources = new ResourceValidationResult(new Resources(
-            identityResources.Where(x=>x.Name == "openid"), 
-            apiResources.Where(x=>x.Name == "resource"), 
-            scopes.Where(x=>x.Name == "api1")));
+            identityResources.Where(x => x.Name == "openid"),
+            apiResources.Where(x => x.Name == "resource"),
+            scopes.Where(x => x.Name == "api1")));
 
         var response = await generator.ProcessAsync(testResult, TestBaseUrl);
 
@@ -138,7 +138,7 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         response.DeviceCode.Should().NotBeNullOrWhiteSpace();
         response.Interval.Should().Be(options.DeviceFlow.Interval);
-            
+
         var deviceCode = await deviceFlowCodeService.FindByDeviceCodeAsync(response.DeviceCode);
         deviceCode.Should().NotBeNull();
         deviceCode.ClientId.Should().Be(testResult.ValidatedRequest.Client.ClientId);
@@ -147,7 +147,7 @@ public class DeviceAuthorizationResponseGeneratorTests
         deviceCode.CreationTime.Should().Be(creationTime);
         deviceCode.Subject.Should().BeNull();
         deviceCode.AuthorizedScopes.Should().BeNull();
-            
+
         response.DeviceCodeLifetime.Should().Be(deviceCode.Lifetime);
     }
 

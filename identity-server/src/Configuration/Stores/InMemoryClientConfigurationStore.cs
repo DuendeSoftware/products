@@ -26,7 +26,7 @@ public class InMemoryClientConfigurationStore : IClientConfigurationStore
     /// <inheritdoc/>
     public Task AddAsync(Client client)
     {
-        if(_clients.Select(c => c.ClientId).Contains(client.ClientId))
+        if (_clients.Select(c => c.ClientId).Contains(client.ClientId))
         {
             throw new Exception($"Attempted to add duplicate client id {client.ClientId} to the in memory clients");
         }

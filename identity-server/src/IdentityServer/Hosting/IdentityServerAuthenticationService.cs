@@ -1,18 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration.DependencyInjection;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Extensions;
-using System;
-using Duende.IdentityModel;
-using System.Linq;
-using Duende.IdentityServer.Configuration.DependencyInjection;
-using Duende.IdentityServer.Services;
 
 namespace Duende.IdentityServer.Hosting;
 
@@ -39,7 +38,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         ILogger<IdentityServerAuthenticationService> logger)
     {
         _inner = decorator.Instance;
-            
+
         _schemes = schemes;
         _clock = clock;
         _session = session;

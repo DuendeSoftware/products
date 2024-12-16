@@ -1,14 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System.Threading.Tasks;
 using Duende.IdentityServer.Events;
-using Duende.IdentityServer.Services;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Stores;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -48,7 +47,7 @@ public class ClientSecretValidator : IClientSecretValidator
     public async Task<ClientSecretValidationResult> ValidateAsync(HttpContext context)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ClientSecretValidator.Validate");
-        
+
         _logger.LogDebug("Start client validation");
 
         var fail = new ClientSecretValidationResult

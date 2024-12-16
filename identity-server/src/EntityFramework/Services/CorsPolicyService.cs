@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
@@ -27,12 +26,12 @@ public class CorsPolicyService : ICorsPolicyService
     /// The CancellationToken provider.
     /// </summary>
     protected readonly ICancellationTokenProvider CancellationTokenProvider;
-        
+
     /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<CorsPolicyService> Logger;
-    
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CorsPolicyService"/> class.
@@ -58,8 +57,8 @@ public class CorsPolicyService : ICorsPolicyService
         origin = origin.ToLowerInvariant();
 
         var query = from o in DbContext.ClientCorsOrigins
-            where o.Origin == origin
-            select o;
+                    where o.Origin == origin
+                    select o;
 
         var isAllowed = await query.AnyAsync(CancellationTokenProvider.CancellationToken);
 

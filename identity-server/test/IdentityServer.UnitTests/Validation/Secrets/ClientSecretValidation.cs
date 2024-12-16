@@ -1,13 +1,13 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
 using UnitTests.Validation.Setup;
-using Microsoft.AspNetCore.Http;
 using Xunit;
 
 namespace UnitTests.Validation.Secrets;

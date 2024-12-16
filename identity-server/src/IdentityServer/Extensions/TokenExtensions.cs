@@ -1,17 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Extensions;
 
@@ -41,7 +40,7 @@ public static class TokenExtensions
             // set times (nbf, exp, iat)
             var now = clock.UtcNow.ToUnixTimeSeconds();
             var exp = now + token.Lifetime;
-                
+
             payload.Add(JwtClaimTypes.NotBefore, now);
             payload.Add(JwtClaimTypes.IssuedAt, now);
             payload.Add(JwtClaimTypes.Expiration, exp);
@@ -122,7 +121,7 @@ public static class TokenExtensions
             throw;
         }
     }
-        
+
     private static IEnumerable<object> AddObjects(IEnumerable<Claim> claims)
     {
         foreach (var claim in claims)
@@ -130,7 +129,7 @@ public static class TokenExtensions
             yield return AddObject(claim);
         }
     }
-        
+
     private static object AddObject(Claim claim)
     {
         if (claim.ValueType == ClaimValueTypes.Boolean)
@@ -147,12 +146,12 @@ public static class TokenExtensions
         {
             return long.Parse(claim.Value);
         }
-        
+
         if (claim.ValueType == ClaimValueTypes.Double)
         {
             return double.Parse(claim.Value);
         }
-        
+
         if (claim.ValueType == IdentityServerConstants.ClaimValueTypes.Json)
         {
             return JsonSerializer.Deserialize<JsonElement>(claim.Value);
@@ -202,7 +201,7 @@ public static class TokenExtensions
         }
         catch
         { }
-        
+
         return new ProofKeyThumbprint { Type = ProofType.None };
     }
 }

@@ -1,17 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Duende.IdentityServer.Services;
 
@@ -69,7 +67,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     public virtual async Task<string> CreateTokenAsync(Token token)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.CreateToken");
-        
+
         var payload = await CreatePayloadAsync(token);
         var headerElements = await CreateHeaderElementsAsync(token);
 
@@ -126,7 +124,7 @@ public class DefaultTokenCreationService : ITokenCreationService
         Dictionary<string, object> headerElements)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.CreateJwt");
-        
+
         var credential = await Keys.GetSigningCredentialsAsync(token.AllowedSigningAlgorithms);
 
         if (credential == null)

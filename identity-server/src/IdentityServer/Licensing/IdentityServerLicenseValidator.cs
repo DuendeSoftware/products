@@ -152,7 +152,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
         else
         {
-            if (!_validateIssuerWarned  && _issuers.Count > 1)
+            if (!_validateIssuerWarned && _issuers.Count > 1)
             {
                 _validateIssuerWarned = true;
                 WarningLog?.Invoke(

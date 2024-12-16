@@ -1,11 +1,10 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System;
 using Microsoft.AspNetCore.Http;
-using System.Linq;
 using Microsoft.Net.Http.Headers;
+using System;
+using System.Linq;
 
 #pragma warning disable 1591
 
@@ -28,11 +27,11 @@ public static class HttpRequestExtensions
 
         return null;
     }
-        
+
     internal static bool HasApplicationFormContentType(this HttpRequest request)
     {
         if (request.ContentType is null) return false;
-            
+
         if (MediaTypeHeaderValue.TryParse(request.ContentType, out var header))
         {
             // Content-Type: application/x-www-form-urlencoded; charset=utf-8

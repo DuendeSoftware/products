@@ -1,18 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using System.Net;
-using System;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Validation;
 using Duende.IdentityServer.Extensions;
-using System.Text.Encodings.Web;
-using System.Text;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Validation;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -50,7 +49,7 @@ class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCallbackResul
     {
         if (result.Result.IsError)
         {
-            context.Response.StatusCode = (int) HttpStatusCode.BadRequest;
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
         }
         else
         {

@@ -116,7 +116,7 @@ public static class IdentityServerConstants
         SecurityAlgorithms.EcdsaSha512
     };
 
-    public readonly static IEnumerable<string> SupportedDPoPSigningAlgorithms = new[] 
+    public readonly static IEnumerable<string> SupportedDPoPSigningAlgorithms = new[]
     {
         SecurityAlgorithms.RsaSha256,
         SecurityAlgorithms.RsaSha384,
@@ -252,29 +252,29 @@ public static class IdentityServerConstants
 
     public static class ProtocolRoutePaths
     {
-        public const string ConnectPathPrefix       = "connect";
+        public const string ConnectPathPrefix = "connect";
 
-        public const string Authorize                   = ConnectPathPrefix + "/authorize";
-        public const string AuthorizeCallback           = Authorize + "/callback";
-        public const string DiscoveryConfiguration      = ".well-known/openid-configuration";
-        public const string DiscoveryWebKeys            = DiscoveryConfiguration + "/jwks";
-        public const string BackchannelAuthentication   = ConnectPathPrefix + "/ciba";
-        public const string Token                       = ConnectPathPrefix + "/token";
-        public const string Revocation                  = ConnectPathPrefix + "/revocation";
-        public const string UserInfo                    = ConnectPathPrefix + "/userinfo";
-        public const string Introspection               = ConnectPathPrefix + "/introspect";
-        public const string EndSession                  = ConnectPathPrefix + "/endsession";
-        public const string EndSessionCallback          = EndSession + "/callback";
-        public const string CheckSession                = ConnectPathPrefix + "/checksession";
-        public const string DeviceAuthorization         = ConnectPathPrefix + "/deviceauthorization";
-        public const string PushedAuthorization         = ConnectPathPrefix + "/par";
+        public const string Authorize = ConnectPathPrefix + "/authorize";
+        public const string AuthorizeCallback = Authorize + "/callback";
+        public const string DiscoveryConfiguration = ".well-known/openid-configuration";
+        public const string DiscoveryWebKeys = DiscoveryConfiguration + "/jwks";
+        public const string BackchannelAuthentication = ConnectPathPrefix + "/ciba";
+        public const string Token = ConnectPathPrefix + "/token";
+        public const string Revocation = ConnectPathPrefix + "/revocation";
+        public const string UserInfo = ConnectPathPrefix + "/userinfo";
+        public const string Introspection = ConnectPathPrefix + "/introspect";
+        public const string EndSession = ConnectPathPrefix + "/endsession";
+        public const string EndSessionCallback = EndSession + "/callback";
+        public const string CheckSession = ConnectPathPrefix + "/checksession";
+        public const string DeviceAuthorization = ConnectPathPrefix + "/deviceauthorization";
+        public const string PushedAuthorization = ConnectPathPrefix + "/par";
 
 
-        public const string MtlsPathPrefix              = ConnectPathPrefix + "/mtls";
-        public const string MtlsToken                   = MtlsPathPrefix + "/token";
-        public const string MtlsRevocation              = MtlsPathPrefix + "/revocation";
-        public const string MtlsIntrospection           = MtlsPathPrefix + "/introspect";
-        public const string MtlsDeviceAuthorization     = MtlsPathPrefix + "/deviceauthorization";
+        public const string MtlsPathPrefix = ConnectPathPrefix + "/mtls";
+        public const string MtlsToken = MtlsPathPrefix + "/token";
+        public const string MtlsRevocation = MtlsPathPrefix + "/revocation";
+        public const string MtlsIntrospection = MtlsPathPrefix + "/introspect";
+        public const string MtlsDeviceAuthorization = MtlsPathPrefix + "/deviceauthorization";
 
         public static readonly string[] CorsPaths =
         {

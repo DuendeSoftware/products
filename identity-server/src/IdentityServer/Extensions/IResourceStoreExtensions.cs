@@ -1,12 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -58,7 +57,7 @@ public static class IResourceStoreExtensions
             throw new Exception(
                 $"Duplicate api resources found. This is an invalid configuration. Use different names for API resources. Names found: {names}");
         }
-            
+
         var scopesNames = apiScopes.Select(x => x.Name);
         dups = GetDuplicates(scopesNames);
         if (dups.Any())

@@ -38,7 +38,7 @@ public class MockCache<T> : ICache<T>
                 return true;
             }
         }
-        
+
         item = null;
         return false;
     }
@@ -65,7 +65,7 @@ public class MockCache<T> : ICache<T>
             item = await get();
             Add(key, item, duration);
         }
-        
+
         return item;
     }
 

@@ -1,22 +1,21 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.IO;
-using Duende.IdentityServer.Configuration;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -44,10 +43,10 @@ internal class TokenEndpoint : IEndpointHandler
     /// <param name="logger">The logger.</param>
     public TokenEndpoint(
         IdentityServerOptions identityServerOptions,
-        IClientSecretValidator clientValidator, 
-        ITokenRequestValidator requestValidator, 
-        ITokenResponseGenerator responseGenerator, 
-        IEventService events, 
+        IClientSecretValidator clientValidator,
+        ITokenRequestValidator requestValidator,
+        ITokenResponseGenerator responseGenerator,
+        IEventService events,
         ILogger<TokenEndpoint> logger)
     {
         _identityServerOptions = identityServerOptions;
@@ -66,7 +65,7 @@ internal class TokenEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Token + "Endpoint");
-        
+
         _logger.LogTrace("Processing token request.");
 
         // validate HTTP
@@ -80,7 +79,7 @@ internal class TokenEndpoint : IEndpointHandler
         {
             return await ProcessTokenRequestAsync(context);
         }
-        catch(InvalidDataException ex)
+        catch (InvalidDataException ex)
         {
             _logger.LogWarning(ex, "Invalid HTTP request for token endpoint");
             return Error(OidcConstants.TokenErrors.InvalidRequest);
@@ -109,7 +108,7 @@ internal class TokenEndpoint : IEndpointHandler
             RequestParameters = form,
             ClientValidationResult = clientResult,
         };
-        
+
         var error = await TryReadProofTokens(context, requestContext);
         if (error != null)
         {

@@ -1,15 +1,14 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 
 namespace Duende.IdentityServer.AspNetIdentity;
 
@@ -25,7 +24,7 @@ public class ProfileService<TUser> : IProfileService
     /// The claims factory.
     /// </summary>
     protected readonly IUserClaimsPrincipalFactory<TUser> ClaimsFactory;
-        
+
     /// <summary>
     /// The logger
     /// </summary>
@@ -112,7 +111,7 @@ public class ProfileService<TUser> : IProfileService
     {
         var principal = await ClaimsFactory.CreateAsync(user);
         if (principal == null) throw new Exception("ClaimsFactory failed to create a principal");
-            
+
         return principal;
     }
 

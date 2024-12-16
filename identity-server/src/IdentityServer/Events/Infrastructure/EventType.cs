@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -23,7 +23,7 @@ public enum EventTypes
     /// Information event
     /// </summary>
     Information = 3,
-        
+
     /// <summary>
     /// Error event
     /// </summary>

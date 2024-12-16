@@ -34,7 +34,7 @@ public static class IdentityProviderMappers
     /// <returns></returns>
     public static Entities.IdentityProvider ToEntity(this Models.IdentityProvider model)
     {
-        return model == null ? null : 
+        return model == null ? null :
             new Entities.IdentityProvider
             {
                 Scheme = model.Scheme,

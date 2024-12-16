@@ -1,17 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Validation;
-using Duende.IdentityServer.Configuration;
 
 namespace Duende.IdentityServer.ResponseHandling;
 
@@ -40,7 +39,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// The clock
     /// </summary>
     protected readonly IClock Clock;
-        
+
     /// <summary>
     /// The options
     /// </summary>
@@ -58,7 +57,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         IdentityServerOptions options,
         IClock clock,
         ILogger<AuthorizeInteractionResponseGenerator> logger,
-        IConsentService consent, 
+        IConsentService consent,
         IProfileService profile)
     {
         Options = options;
@@ -78,7 +77,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeInteractionResponseGenerator.ProcessInteraction");
         activity?.SetTag(Tracing.Properties.ClientId, request.Client.ClientId);
-        
+
         Logger.LogTrace("ProcessInteractionAsync");
 
         // handle the scenario where user choose to deny prior to even logging in
@@ -97,7 +96,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                 AuthorizationError.UnmetAuthenticationRequirements => OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements,
                 _ => OidcConstants.AuthorizeErrors.AccessDenied
             };
-                
+
             return new InteractionResponse
             {
                 Error = error,
@@ -125,7 +124,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             result = new InteractionResponse
             {
                 Error = result.IsLogin ? OidcConstants.AuthorizeErrors.LoginRequired :
-                    result.IsConsent ? OidcConstants.AuthorizeErrors.ConsentRequired : 
+                    result.IsConsent ? OidcConstants.AuthorizeErrors.ConsentRequired :
                     OidcConstants.AuthorizeErrors.InteractionRequired
             };
         }
@@ -201,7 +200,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
 
         // unauthenticated user
         var isAuthenticated = request.Subject.IsAuthenticated();
-            
+
         // user de-activated
         bool isActive = false;
 
@@ -209,7 +208,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         {
             var isActiveCtx = new IsActiveContext(request.Subject, request.Client, IdentityServerConstants.ProfileIsActiveCallers.AuthorizeEndpoint);
             await Profile.IsActiveAsync(isActiveCtx);
-                
+
             isActive = isActiveCtx.IsActive;
         }
 
@@ -278,7 +277,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             }
         }
         // check external idp restrictions if user not using local idp
-        else if (request.Client.IdentityProviderRestrictions != null && 
+        else if (request.Client.IdentityProviderRestrictions != null &&
                  request.Client.IdentityProviderRestrictions.Any() &&
                  !request.Client.IdentityProviderRestrictions.Contains(currentIdp))
         {
@@ -370,7 +369,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                         AuthorizationError.UnmetAuthenticationRequirements => OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements,
                         _ => OidcConstants.AuthorizeErrors.AccessDenied
                     };
-                        
+
                     response.Error = error;
                     response.ErrorDescription = consent.ErrorDescription;
                 }

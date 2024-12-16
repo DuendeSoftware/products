@@ -1,14 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using Microsoft.Extensions.Hosting;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
 using Duende.IdentityServer.EntityFramework;
 using Duende.IdentityServer.EntityFramework.Options;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +21,7 @@ public class TokenCleanupHost : IHostedService
     private readonly ILogger<TokenCleanupHost> _logger;
 
     private TimeSpan CleanupInterval => TimeSpan.FromSeconds(_options.TokenCleanupInterval);
-        
+
     private CancellationTokenSource _source;
 
     /// <summary>
@@ -53,7 +52,7 @@ public class TokenCleanupHost : IHostedService
 
             Task.Factory.StartNew(() => StartInternalAsync(_source.Token), cancellationToken);
         }
-            
+
         return Task.CompletedTask;
     }
 

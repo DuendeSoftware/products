@@ -1,10 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,10 +15,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Licensing.V2;
-using Duende.IdentityServer.Logging.Models;
-using Duende.IdentityServer.Services;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Validation;
@@ -62,12 +61,12 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     }
 
     public async Task<AuthorizeRequestValidationResult> ValidateAsync(
-        NameValueCollection parameters, 
-        ClaimsPrincipal subject = null, 
+        NameValueCollection parameters,
+        ClaimsPrincipal subject = null,
         AuthorizeRequestType authorizeRequestType = AuthorizeRequestType.Authorize)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeRequestValidator.Validate");
-        
+
         _logger.LogDebug("Start authorize request protocol validation");
 
         var request = new ValidatedAuthorizeRequest
@@ -710,7 +709,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         var processed_max_age = request.Raw.Get(Constants.ProcessedMaxAge);
-        if(processed_max_age.IsPresent())
+        if (processed_max_age.IsPresent())
         {
             request.MaxAge = null;
             // TODO - Consider adding an OriginalMaxAge property for consistency with prompt.

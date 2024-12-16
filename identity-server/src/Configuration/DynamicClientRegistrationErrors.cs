@@ -19,12 +19,12 @@ public static class DynamicClientRegistrationErrors
     /// server has rejected this request.
     /// </summary>
     public const string InvalidClientMetadata = "invalid_client_metadata";
-    
+
     /// <summary>
     /// The software statement presented is invalid.
     /// </summary>
     public const string InvalidSoftwareStatement = "invalid_software_statement";
-    
+
     /// <summary>
     /// The software statement presented is not approved for use by this
     /// authorization server.

@@ -2,6 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel.Client;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Test;
+using FluentAssertions;
+using IntegrationTests.Common;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -9,11 +14,6 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Common;
 using Xunit;
 
 namespace IntegrationTests.Endpoints.Authorize;
@@ -502,7 +502,7 @@ public class ResourceTests
             claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1" });
             claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope1", "scope3", "offline_access" });
         }
-        
+
         tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
             Address = IdentityServerPipeline.TokenEndpoint,
@@ -571,7 +571,7 @@ public class ResourceTests
             clientId: "client2",
             responseType: "id_token token",
             scope: "openid profile scope1 scope2 scope3 scope4",
-            nonce:"nonce",
+            nonce: "nonce",
             redirectUri: "https://client2/callback");
 
         url += "&resource=urn:resource1";

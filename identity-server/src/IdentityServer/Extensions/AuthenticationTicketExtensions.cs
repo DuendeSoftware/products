@@ -1,10 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Serialization;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
@@ -60,7 +59,7 @@ public static class AuthenticationTicketExtensions
         ticket.Properties.Items.TryGetValue(JwtClaimTypes.Issuer, out var value);
         return value;
     }
-    
+
     /// <summary>
     /// Sets a issuer
     /// </summary>
@@ -86,7 +85,7 @@ public static class AuthenticationTicketExtensions
         return ticket.Properties.ExpiresUtc?.UtcDateTime;
     }
 
-    
+
     /// <summary>
     /// Serializes and AuthenticationTicket to a string
     /// </summary>

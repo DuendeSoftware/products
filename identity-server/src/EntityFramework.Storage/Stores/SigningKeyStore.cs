@@ -2,10 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Models;
@@ -13,6 +9,10 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.EntityFramework.Stores;
 
@@ -60,7 +60,7 @@ public class SigningKeyStore : ISigningKeyStore
     public async Task<IEnumerable<SerializedKey>> LoadKeysAsync()
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.LoadKeys");
-        
+
         var entities = await Context.Keys.Where(x => x.Use == Use)
             .AsNoTracking()
             .ToArrayAsync(CancellationTokenProvider.CancellationToken);
@@ -84,7 +84,7 @@ public class SigningKeyStore : ISigningKeyStore
     public async Task StoreKeyAsync(SerializedKey key)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.StoreKey");
-        
+
         var entity = new Key
         {
             Id = key.Id,
@@ -108,7 +108,7 @@ public class SigningKeyStore : ISigningKeyStore
     public async Task DeleteKeyAsync(string id)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.DeleteKey");
-        
+
         var item = await Context.Keys.Where(x => x.Use == Use && x.Id == id)
             .FirstOrDefaultAsync(CancellationTokenProvider.CancellationToken);
         if (item != null)
@@ -120,7 +120,7 @@ public class SigningKeyStore : ISigningKeyStore
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                foreach(var entity in ex.Entries)
+                foreach (var entity in ex.Entries)
                 {
                     entity.State = EntityState.Detached;
                 }

@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
@@ -12,6 +10,8 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EntityFramework.Storage.IntegrationTests.Stores;
@@ -36,7 +36,8 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
         {
             var idp = new OidcProvider
             {
-                Scheme = "scheme1", Type = "oidc"
+                Scheme = "scheme1",
+                Type = "oidc"
             };
             context.IdentityProviders.Add(idp.ToEntity());
             context.SaveChanges();
@@ -59,7 +60,8 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
         {
             var idp = new OidcProvider
             {
-                Scheme = "scheme2", Type = "saml"
+                Scheme = "scheme2",
+                Type = "saml"
             };
             context.IdentityProviders.Add(idp.ToEntity());
             context.SaveChanges();
@@ -82,7 +84,8 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
         {
             var idp = new OidcProvider
             {
-                Scheme = "SCHEME3", Type = "oidc"
+                Scheme = "SCHEME3",
+                Type = "oidc"
             };
             context.IdentityProviders.Add(idp.ToEntity());
             context.SaveChanges();

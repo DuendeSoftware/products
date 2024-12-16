@@ -4,8 +4,8 @@
 
 #nullable enable
 
-using System.Threading.Tasks;
 using Duende.IdentityServer.Validation;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.ResponseHandling;
 

@@ -1,15 +1,14 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System.Net;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Endpoints.Results;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Validation;
-using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -29,7 +28,7 @@ internal class EndSessionCallbackEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.EndSession + "CallbackEndpoint");
-        
+
         if (!HttpMethods.IsGet(context.Request.Method))
         {
             _logger.LogWarning("Invalid HTTP method for end session callback endpoint.");
@@ -49,7 +48,7 @@ internal class EndSessionCallbackEndpoint : IEndpointHandler
         {
             _logger.LogError("Error validating signout callback: {error}", result.Error);
         }
-            
+
         return new EndSessionCallbackResult(result);
     }
 }

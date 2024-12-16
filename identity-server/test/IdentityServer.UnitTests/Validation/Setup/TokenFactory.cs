@@ -1,13 +1,13 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using Duende.IdentityServer.Models;
-using Duende.IdentityModel;
 using UnitTests.Common;
 
 namespace UnitTests.Validation.Setup;
@@ -16,7 +16,7 @@ internal static class TokenFactory
 {
     public static Token CreateAccessToken(Client client, string subjectId, int lifetime, params string[] scopes)
     {
-        var claims = new List<Claim> 
+        var claims = new List<Claim>
         {
             new Claim("client_id", client.ClientId),
             new Claim("sub", subjectId)
@@ -71,7 +71,7 @@ internal static class TokenFactory
     {
         var clients = Factory.CreateClientStore();
 
-        var claims = new List<Claim> 
+        var claims = new List<Claim>
         {
             new Claim("sub", subjectId)
         };

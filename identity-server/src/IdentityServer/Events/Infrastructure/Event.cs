@@ -5,9 +5,9 @@
 #nullable enable
 
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Logging;
 using System;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Logging;
 
 namespace Duende.IdentityServer.Events;
 

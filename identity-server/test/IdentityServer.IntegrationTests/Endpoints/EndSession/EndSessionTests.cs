@@ -2,6 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Test;
+using FluentAssertions;
+using IntegrationTests.Common;
+using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +19,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Duende.IdentityServer;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel;
-using IntegrationTests.Common;
-using Microsoft.AspNetCore.WebUtilities;
 using Xunit;
 
 namespace IntegrationTests.Endpoints.EndSession;
@@ -166,7 +166,7 @@ public class EndSessionTests
 
         var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.EndSessionEndpoint +
                                                                   "?id_token_hint=" + id_token +
-                                                                  "&post_logout_redirect_uri=https://client2/signout-callback2" + 
+                                                                  "&post_logout_redirect_uri=https://client2/signout-callback2" +
                                                                   "&ui_locales=fr-FR fr-CA");
 
         _mockPipeline.LogoutWasCalled.Should().BeTrue();
@@ -463,7 +463,7 @@ public class EndSessionTests
         var id_token = authorization.IdentityToken;
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = true;
-        response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.EndSessionEndpoint + 
+        response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.EndSessionEndpoint +
                                                               "?id_token_hint=" + id_token);
 
         _mockPipeline.LogoutRequest.PostLogoutRedirectUri.Should().BeNull();
@@ -545,7 +545,7 @@ public class EndSessionTests
             var bytes = Base64Url.Decode(parts[1]);
             var json = Encoding.UTF8.GetString(bytes);
             var payload = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                
+
             payload["iss"].GetString().Should().Be("https://server");
             payload["sub"].GetString().Should().Be("bob");
             payload["aud"].GetString().Should().Be("client3");

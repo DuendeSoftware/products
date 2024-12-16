@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Duende.IdentityServer.Configuration.Models;
 using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Duende.IdentityServer.Configuration.ResponseGeneration;
 
@@ -60,7 +60,7 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
     /// <inheritdoc/>
     public virtual async Task WriteError(HttpContext context, DynamicClientRegistrationError error) =>
         await WriteResponse(context, StatusCodes.Status400BadRequest, error);
-    
+
 
     /// <inheritdoc/>
     public virtual async Task WriteSuccessResponse(HttpContext context, DynamicClientRegistrationResponse response) =>

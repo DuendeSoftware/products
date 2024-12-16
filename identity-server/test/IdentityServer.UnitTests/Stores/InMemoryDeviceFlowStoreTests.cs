@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores;
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
-using FluentAssertions;
 using Xunit;
 
 namespace UnitTests.Stores;
@@ -30,7 +30,7 @@ public class InMemoryDeviceFlowStoreTests
             IsAuthorized = false,
             IsOpenId = true,
             Subject = null,
-            RequestedScopes = new[] {"scope1", "scope2"}
+            RequestedScopes = new[] { "scope1", "scope2" }
         };
 
         await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
@@ -58,7 +58,7 @@ public class InMemoryDeviceFlowStoreTests
             IsAuthorized = false,
             IsOpenId = true,
             Subject = null,
-            RequestedScopes = new[] {"scope1", "scope2"}
+            RequestedScopes = new[] { "scope1", "scope2" }
         };
 
         await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
@@ -86,7 +86,7 @@ public class InMemoryDeviceFlowStoreTests
             IsAuthorized = false,
             IsOpenId = true,
             Subject = null,
-            RequestedScopes = new[] {"scope1", "scope2"}
+            RequestedScopes = new[] { "scope1", "scope2" }
         };
 
         await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, initialData);
@@ -98,8 +98,8 @@ public class InMemoryDeviceFlowStoreTests
             Lifetime = initialData.Lifetime + 600,
             IsAuthorized = !initialData.IsAuthorized,
             IsOpenId = !initialData.IsOpenId,
-            Subject = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> {new Claim("sub", "123")})),
-            RequestedScopes = new[] {"api1", "api2"}
+            Subject = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> { new Claim("sub", "123") })),
+            RequestedScopes = new[] { "api1", "api2" }
         };
 
         await _store.UpdateByUserCodeAsync(userCode, updatedData);

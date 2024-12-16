@@ -2,16 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using FluentAssertions;
-using Xunit;
-using Models = Duende.IdentityServer.Models;
-using Entities = Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.Models;
+using FluentAssertions;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Linq;
+using Xunit;
+using Entities = Duende.IdentityServer.EntityFramework.Entities;
+using Models = Duende.IdentityServer.Models;
 
 namespace EntityFramework.Storage.UnitTests.Mappers;
 
@@ -121,7 +120,8 @@ public class ClientMappersTests
         MapperTestHelpers
             .AllPropertiesAreMapped<Models.Client, Entities.Client>(
                 notAutoInitialized,
-                source => {
+                source =>
+                {
                     source.AllowedIdentityTokenSigningAlgorithms.Add("RS256"); // We have to add values, otherwise the converter will produce null
                     source.AllowedGrantTypes = new List<string>
                     {
@@ -213,7 +213,8 @@ public class ClientMappersTests
         MapperTestHelpers
             .AllPropertiesAreMapped<ExtendedClientModel, ExtendedClientEntity>(
                 notAutoInitialized,
-                source => {
+                source =>
+                {
                     source.AllowedIdentityTokenSigningAlgorithms.Add("RS256"); // We have to add values, otherwise the converter will produce null
                     source.AllowedGrantTypes = new List<string>
                     {

@@ -1,6 +1,5 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
-
 
 using Duende.IdentityModel;
 using System;
@@ -67,7 +66,7 @@ internal static class ClaimsExtensions
                 return value;
             }
         }
-        
+
         if (claim.ValueType == ClaimValueTypes.Double)
         {
             if (Double.TryParse(claim.Value, out var value))

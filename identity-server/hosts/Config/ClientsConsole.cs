@@ -1,9 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Collections.Generic;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
+using System.Collections.Generic;
 
 namespace IdentityServerHost.Configuration;
 
@@ -26,7 +26,7 @@ public static class ClientsConsole
                     "resource1.scope1", "resource2.scope1", IdentityServerConstants.LocalApi.ScopeName
                 }
             },
-                
+
             new Client
             {
                 ClientId = "client.reference",
@@ -36,7 +36,7 @@ public static class ClientsConsole
                 {
                     "resource1.scope1", "resource2.scope1", IdentityServerConstants.LocalApi.ScopeName
                 },
-                    
+
                 AccessTokenType = AccessTokenType.Reference
             },
 
@@ -59,20 +59,20 @@ public static class ClientsConsole
                 ClientId = "console.resource.scope",
                 ClientSecrets = { new Secret("secret".Sha256()) },
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    
+
                 AllowedScopes =
                 {
                     "resource1.scope1",
                     "resource1.scope2",
-                        
+
                     "resource2.scope1",
                     "resource2.scope2",
-                        
+
                     "resource3.scope1",
                     "resource3.scope2",
-                        
+
                     "shared.scope",
-                        
+
                     "transaction",
                     "scope3",
                     "scope4",
@@ -176,7 +176,7 @@ public static class ClientsConsole
                     "resource1.scope1",
                     "resource2.scope1"
                 },
-                    
+
                 RefreshTokenUsage = TokenUsage.OneTimeOnly,
                 AbsoluteRefreshTokenLifetime = 3600 * 24,
                 SlidingRefreshTokenLifetime = 10,
@@ -235,24 +235,24 @@ public static class ClientsConsole
                 RequirePkce = true,
                 RedirectUris = { "http://127.0.0.1" },
                 AllowOfflineAccess = true,
-                    
+
                 RefreshTokenUsage = TokenUsage.ReUse,
-                    
+
                 AllowedScopes =
                 {
                     IdentityServerConstants.StandardScopes.OpenId,
-                        
+
                     "resource1.scope1",
                     "resource1.scope2",
-                        
+
                     "resource2.scope1",
                     "resource2.scope2",
-                        
+
                     "resource3.scope1",
                     "resource3.scope2",
-                        
+
                     "shared.scope",
-                        
+
                     "transaction",
                     "scope3",
                     "scope4",
@@ -323,13 +323,13 @@ public static class ClientsConsole
             {
                 ClientId = "ciba",
                 ClientName = "CIBA Client",
-                ClientSecrets = 
-                { 
+                ClientSecrets =
+                {
                     new Secret("secret".Sha256()),
                     new Secret
                     {
                         Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                        Value = 
+                        Value =
                         """
                         {
                             "e":"AQAB",

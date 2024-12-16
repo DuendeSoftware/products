@@ -4,24 +4,23 @@
 
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
+using Duende.IdentityServer.Validation;
 using FluentAssertions;
 using IntegrationTests.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
-using Microsoft.Extensions.DependencyInjection;
-using Duende.IdentityServer.Validation;
-using Duende.IdentityServer.Services;
-using System.Text.Json;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
 using static Duende.IdentityServer.IdentityServerConstants;
-using Duende.IdentityModel.Client;
 
 namespace IdentityServer.IntegrationTests.Endpoints.Ciba;
 
@@ -57,7 +56,7 @@ public class CibaTests
                     new Secret
                     {
                         Type = SecretTypes.JsonWebKey,
-                        Value = 
+                        Value =
                         """
                         {
                             "kid":"ZzAjSnraU3bkWGnnAqLapYGpTyNfLbjbzgAPbbW2GEA",
@@ -133,7 +132,7 @@ public class CibaTests
             }
         }
 
-        const string rsaKey = 
+        const string rsaKey =
             """
             {
                 "kid":"ZzAjSnraU3bkWGnnAqLapYGpTyNfLbjbzgAPbbW2GEA",
@@ -257,7 +256,7 @@ public class CibaTests
         _mockCustomBackchannelAuthenticationValidator.Thunk = ctx =>
             {
                 // Invent a nested value, as if there was custom logic doing something "interesting"
-                ctx.ValidationResult.ValidatedRequest.Properties.Add("complex", 
+                ctx.ValidationResult.ValidatedRequest.Properties.Add("complex",
                     new Dictionary<string, string>
                     {
                         { "nested", "value" },

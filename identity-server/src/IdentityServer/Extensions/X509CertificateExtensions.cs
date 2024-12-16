@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Extensions;
 
@@ -23,7 +23,7 @@ public static class X509CertificateExtensions
     public static string CreateThumbprintCnf(this X509Certificate2 certificate)
     {
         var hash = certificate.GetSha256Thumbprint();
-                            
+
         var values = new Dictionary<string, string>
         {
             { "x5t#S256", hash }

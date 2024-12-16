@@ -1,20 +1,20 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Test;
+using FluentAssertions;
+using IntegrationTests.Common;
+using Microsoft.AspNetCore.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel;
-using IntegrationTests.Common;
-using Microsoft.AspNetCore.Authentication;
 using Xunit;
 
 namespace IntegrationTests.Hosting;

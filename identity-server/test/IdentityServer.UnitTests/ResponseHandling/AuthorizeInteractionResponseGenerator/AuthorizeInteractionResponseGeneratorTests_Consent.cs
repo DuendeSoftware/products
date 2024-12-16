@@ -2,16 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Validation;
+using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Common;
 using Xunit;
 
@@ -115,7 +115,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         (await act.Should().ThrowAsync<ArgumentNullException>())
             .And.ParamName.Should().Be("request");
     }
-        
+
     [Fact]
     public async Task ProcessConsentAsync_AllowsNullConsent()
     {
@@ -192,7 +192,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         result.Error.Should().Be(OidcConstants.AuthorizeErrors.ConsentRequired);
         AssertUpdateConsentNotCalled();
     }
-        
+
     [Fact]
     public async Task ProcessConsentAsync_PromptModeIsConsent_NoPriorConsent_ReturnsConsentResult()
     {
@@ -246,7 +246,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         var consent = new ConsentResponse
         {
             RememberConsent = false,
-            ScopesValuesConsented = new string[] {}
+            ScopesValuesConsented = new string[] { }
         };
         var result = await _subject.ProcessConsentAsync(request, consent);
         request.WasConsentShown.Should().BeTrue();
@@ -270,7 +270,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         var consent = new ConsentResponse
         {
             RememberConsent = false,
-            ScopesValuesConsented = new string[] {}
+            ScopesValuesConsented = new string[] { }
         };
         var result = await _subject.ProcessConsentAsync(request, consent);
         request.WasConsentShown.Should().BeTrue();
@@ -283,7 +283,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
     public async Task ProcessConsentAsync_NoPromptMode_ConsentServiceRequiresConsent_ConsentGrantedButMissingRequiredScopes_ReturnsErrorResult()
     {
         RequiresConsent(true);
-        var client = new Client {};
+        var client = new Client { };
         var request = new ValidatedAuthorizeRequest()
         {
             ResponseMode = OidcConstants.ResponseModes.Fragment,
@@ -315,7 +315,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ResponseMode = OidcConstants.ResponseModes.Fragment,
             State = "12345",
             RedirectUri = "https://client.com/callback",
-            Client = new Client {
+            Client = new Client
+            {
                 AllowRememberConsent = false
             },
             RequestedScopes = new List<string> { "openid", "read", "write" },
@@ -335,7 +336,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         result.IsConsent.Should().BeFalse();
         AssertUpdateConsentNotCalled();
     }
-        
+
     [Fact]
     public async Task ProcessConsentAsync_PromptModeConsent_ConsentGranted_ScopesSelected_ReturnsConsentResult()
     {
@@ -345,7 +346,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ResponseMode = OidcConstants.ResponseModes.Fragment,
             State = "12345",
             RedirectUri = "https://client.com/callback",
-            Client = new Client {
+            Client = new Client
+            {
                 AllowRememberConsent = false
             },
             RequestedScopes = new List<string> { "openid", "read", "write" },

@@ -23,7 +23,7 @@ public class ValidatedBackchannelAuthenticationRequest : ValidatedRequest
     /// Gets or sets the resource indicator.
     /// </summary>
     public ICollection<string>? RequestedResourceIndicators { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the authentication context reference classes.
     /// </summary>
@@ -33,7 +33,7 @@ public class ValidatedBackchannelAuthenticationRequest : ValidatedRequest
     /// Gets or sets the tenant.
     /// </summary>
     public string? Tenant { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the idp.
     /// </summary>
@@ -63,7 +63,7 @@ public class ValidatedBackchannelAuthenticationRequest : ValidatedRequest
     /// Gets or sets the binding message.
     /// </summary>
     public string? BindingMessage { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the user code.
     /// </summary>

@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using UnitTests.Validation.Setup;
 using Xunit;
 

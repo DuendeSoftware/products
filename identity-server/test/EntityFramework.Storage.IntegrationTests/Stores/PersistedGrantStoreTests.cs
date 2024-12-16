@@ -2,10 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
@@ -15,6 +11,10 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EntityFramework.Storage.IntegrationTests.Stores;
@@ -111,7 +111,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
     {
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.RemoveRange(context.PersistedGrants.ToArray()); 
+            context.PersistedGrants.RemoveRange(context.PersistedGrants.ToArray());
             context.PersistedGrants.Add(CreateTestObject(sub: "sub1", clientId: "c1", sid: "s1", type: "t1").ToEntity());
             context.PersistedGrants.Add(CreateTestObject(sub: "sub1", clientId: "c1", sid: "s1", type: "t2").ToEntity());
             context.PersistedGrants.Add(CreateTestObject(sub: "sub1", clientId: "c1", sid: "s2", type: "t1").ToEntity());
@@ -196,7 +196,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             context.PersistedGrants.Add(persistedGrant.ToEntity());
             context.SaveChanges();
         }
-            
+
         using (var context = new PersistedGrantDbContext(options))
         {
             var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
@@ -224,9 +224,10 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
-            await store.RemoveAllAsync(new PersistedGrantFilter { 
-                SubjectId = persistedGrant.SubjectId, 
-                ClientId = persistedGrant.ClientId 
+            await store.RemoveAllAsync(new PersistedGrantFilter
+            {
+                SubjectId = persistedGrant.SubjectId,
+                ClientId = persistedGrant.ClientId
             });
         }
 
@@ -251,10 +252,12 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
-            await store.RemoveAllAsync(new PersistedGrantFilter { 
-                SubjectId = persistedGrant.SubjectId, 
-                ClientId = persistedGrant.ClientId, 
-                Type = persistedGrant.Type });
+            await store.RemoveAllAsync(new PersistedGrantFilter
+            {
+                SubjectId = persistedGrant.SubjectId,
+                ClientId = persistedGrant.ClientId,
+                Type = persistedGrant.Type
+            });
         }
 
         using (var context = new PersistedGrantDbContext(options))
@@ -318,7 +321,8 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
-                SubjectId = "sub1", ClientId = "c1"
+                SubjectId = "sub1",
+                ClientId = "c1"
             });
             context.PersistedGrants.Count().Should().Be(6);
         }
@@ -371,7 +375,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
-                ClientId = "c1", 
+                ClientId = "c1",
                 SessionId = "s1"
             });
             context.PersistedGrants.Count().Should().Be(8);
@@ -400,7 +404,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             {
                 SubjectId = "sub1",
                 ClientId = "c1",
-                SessionId = "s1", 
+                SessionId = "s1",
                 Type = "t1"
             });
             context.PersistedGrants.Count().Should().Be(9);

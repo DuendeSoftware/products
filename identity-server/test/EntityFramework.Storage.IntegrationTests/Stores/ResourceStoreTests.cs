@@ -2,18 +2,18 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityModel;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace EntityFramework.Storage.IntegrationTests.Stores;
@@ -37,7 +37,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             DisplayName = Guid.NewGuid().ToString(),
             Description = Guid.NewGuid().ToString(),
             ShowInDiscoveryDocument = true,
-            UserClaims = 
+            UserClaims =
             {
                 JwtClaimTypes.Subject,
                 JwtClaimTypes.Name,
@@ -59,7 +59,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             }
         };
     }
-        
+
     private static ApiScope CreateApiScopeTestResource()
     {
         return new ApiScope()
@@ -346,7 +346,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             context.IdentityResources.Add(hiddenIdentityResource.ToEntity());
             context.ApiResources.Add(hiddenApiResource.ToEntity());
             context.ApiScopes.Add(hiddenApiScope.ToEntity());
-                
+
             context.SaveChanges();
         }
 

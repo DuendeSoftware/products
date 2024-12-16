@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
@@ -28,7 +27,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     /// <summary>
     /// Ctor
     /// </summary>
-    public NonCachingIdentityProviderStore(T inner, 
+    public NonCachingIdentityProviderStore(T inner,
         IdentityServerOptions options,
         IHttpContextAccessor httpContextAccessor,
         ILogger<NonCachingIdentityProviderStore<T>> logger)
@@ -48,7 +47,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     /// <inheritdoc/>
     public async Task<IdentityProvider> GetBySchemeAsync(string scheme)
     {
-        if(_httpContextAccessor.HttpContext == null)
+        if (_httpContextAccessor.HttpContext == null)
         {
             _logger.LogDebug("Failed to retrieve the dynamic authentication scheme \"{scheme}\" because there is no current HTTP request", scheme);
             return null;

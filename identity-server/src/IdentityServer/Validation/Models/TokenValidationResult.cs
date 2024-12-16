@@ -22,7 +22,7 @@ public class TokenValidationResult : ValidationResult
     /// The claims.
     /// </value>
     public IEnumerable<Claim>? Claims { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the JWT.
     /// </summary>

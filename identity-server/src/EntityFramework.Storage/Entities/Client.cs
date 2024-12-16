@@ -4,9 +4,9 @@
 
 #pragma warning disable 1591
 
+using Duende.IdentityServer.Models;
 using System;
 using System.Collections.Generic;
-using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.EntityFramework.Entities;
 

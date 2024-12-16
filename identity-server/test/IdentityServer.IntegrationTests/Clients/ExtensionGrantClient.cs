@@ -2,6 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
+using FluentAssertions;
+using IntegrationTests.Clients.Setup;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,12 +17,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Clients.Setup;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
 using Xunit;
 
 namespace IntegrationTests.Clients;
@@ -129,7 +129,7 @@ public class ExtensionGrantClient
         var amr = payload["amr"].EnumerateArray();
         amr.Count().Should().Be(1);
         amr.First().ToString().Should().Be("custom");
-            
+
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public class ExtensionGrantClient
         var refreshResponse = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
             Address = TokenEndpoint,
-                
+
             ClientId = "client.custom",
             ClientSecret = "secret",
 
@@ -231,7 +231,7 @@ public class ExtensionGrantClient
         payload["iss"].GetString().Should().Be("https://idsvr4");
         payload["aud"].GetString().Should().Be("api");
         payload["client_id"].GetString().Should().Be("client.custom");
-            
+
         var scopes = payload["scope"].EnumerateArray();
         scopes.First().ToString().Should().Be("api1");
     }
@@ -270,7 +270,7 @@ public class ExtensionGrantClient
         payload["idp"].GetString().Should().Be("local");
         payload.Keys.Should().Contain("jti");
         payload.Keys.Should().Contain("iat");
-            
+
         var amr = payload["amr"].EnumerateArray();
         amr.Count().Should().Be(1);
         amr.First().ToString().Should().Be("custom");

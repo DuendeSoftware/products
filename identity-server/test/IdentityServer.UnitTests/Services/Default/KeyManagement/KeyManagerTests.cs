@@ -2,11 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Internal;
@@ -14,6 +9,11 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.KeyManagement;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using UnitTests.Validation.Setup;
 using Xunit;
 
@@ -36,14 +36,14 @@ public class KeyManagerTests
     {
         // just to speed up the tests
         _options.KeyManagement.InitializationSynchronizationDelay = TimeSpan.FromMilliseconds(1);
-            
+
         _options.KeyManagement.SigningAlgorithms = new[] { _rsaOptions };
 
         _subject = new KeyManager(
             _options,
-            _mockKeyStore, 
+            _mockKeyStore,
             _mockKeyStoreCache,
-            _mockKeyProtector, 
+            _mockKeyProtector,
             _mockClock,
             new NopConcurrencyLock<KeyManager>(),
             new LoggerFactory().CreateLogger<KeyManager>(),
@@ -66,7 +66,7 @@ public class KeyManagerTests
         var container = x509 ?
             new X509KeyContainer(key, alg, date, _options.KeyManagement.KeyRetirementAge) :
             (KeyContainer)new RsaKeyContainer(key, alg, date);
-            
+
         return container;
     }
 
@@ -317,7 +317,7 @@ public class KeyManagerTests
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
         var key = signgingKeys.Single();
-            
+
         key.Should().NotBeNull();
         key.Id.Should().Be(key1);
         _mockKeyStore.Keys.Count.Should().Be(2);

@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net.Http.Headers;
-using System.Text.Json;
 using Duende.IdentityServer.Configuration.Models;
 using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Duende.IdentityServer.Configuration.RequestProcessing;
@@ -11,6 +9,8 @@ using Duende.IdentityServer.Configuration.ResponseGeneration;
 using Duende.IdentityServer.Configuration.Validation.DynamicClientRegistration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -71,15 +71,15 @@ public class DynamicClientRegistrationEndpoint
         else
         {
             var processingResult = await _processor.ProcessAsync(dcrContext);
-            if(processingResult is DynamicClientRegistrationError processingFailure)
+            if (processingResult is DynamicClientRegistrationError processingFailure)
             {
                 await _responseGenerator.WriteError(httpContext, processingFailure);
-            } 
+            }
             else if (processingResult is DynamicClientRegistrationResponse success)
             {
                 await _responseGenerator.WriteSuccessResponse(httpContext, success);
             }
-            else 
+            else
             {
                 // This "can't happen" - if it does, something weird is going on.
                 throw new InvalidOperationException("Results of request processing where neither success or failure");

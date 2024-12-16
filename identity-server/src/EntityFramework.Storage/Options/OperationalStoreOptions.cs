@@ -4,8 +4,8 @@
 
 #nullable enable
 
-using System;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Duende.IdentityServer.EntityFramework.Options;
 
@@ -61,7 +61,7 @@ public class OperationalStoreOptions
     /// The keys.
     /// </value>
     public TableConfiguration Keys { get; set; } = new TableConfiguration("Keys");
-    
+
     /// <summary>
     /// Gets or sets the user sessions table configuration.
     /// </summary>

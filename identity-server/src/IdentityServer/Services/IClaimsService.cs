@@ -4,10 +4,10 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Validation;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Services;
 

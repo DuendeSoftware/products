@@ -2,23 +2,23 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores.Serialization;
 using FluentAssertions;
-using Duende.IdentityModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.InMemory.Infrastructure.Internal;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
-using Duende.IdentityServer.Services;
 
 namespace EntityFramework.Storage.IntegrationTests.Stores;
 
@@ -222,9 +222,9 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             code = await store.FindByUserCodeAsync(testUserCode);
         }
-            
-        code.Should().BeEquivalentTo(expectedDeviceCodeData, 
-            assertionOptions => assertionOptions.Excluding(x=> x.Subject));
+
+        code.Should().BeEquivalentTo(expectedDeviceCodeData,
+            assertionOptions => assertionOptions.Excluding(x => x.Subject));
 
         code.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).Should().NotBeNull();
     }
@@ -306,7 +306,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         var unauthorizedDeviceCode = new DeviceCode
         {
             ClientId = "device_flow",
-            RequestedScopes = new[] {"openid", "api1"},
+            RequestedScopes = new[] { "openid", "api1" },
             CreationTime = new DateTime(2018, 10, 19, 16, 14, 29),
             Lifetime = 300,
             IsOpenId = true
@@ -390,13 +390,13 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             });
             context.SaveChanges();
         }
-            
+
         using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             await store.RemoveByDeviceCodeAsync(testDeviceCode);
         }
-            
+
         using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.FirstOrDefault(x => x.UserCode == testUserCode).Should().BeNull();

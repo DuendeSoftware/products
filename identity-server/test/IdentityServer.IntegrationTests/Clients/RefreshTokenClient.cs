@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net.Http;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
+using FluentAssertions;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntegrationTests.Clients;
@@ -142,7 +142,7 @@ public class RefreshTokenClient
 
         rt1.Should().BeEquivalentTo(rt2);
     }
-        
+
     [Fact]
     public async Task Refreshing_a_refresh_token_with_one_time_only_should_return_different_refresh_token()
     {
@@ -184,7 +184,7 @@ public class RefreshTokenClient
 
         rt1.Should().NotBeEquivalentTo(rt2);
     }
-        
+
     [Fact]
     public async Task Replaying_a_rotated_token_should_fail()
     {
@@ -223,7 +223,7 @@ public class RefreshTokenClient
         response.TokenType.Should().Be("Bearer");
         response.IdentityToken.Should().NotBeNull();
         response.RefreshToken.Should().NotBeNull();
-            
+
         // refresh token (again)
         response = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -237,7 +237,7 @@ public class RefreshTokenClient
         response.IsError.Should().BeTrue();
         response.Error.Should().Be("invalid_grant");
     }
-        
+
     [Fact]
     public async Task Using_a_valid_refresh_token_should_succeed()
     {
@@ -273,7 +273,7 @@ public class RefreshTokenClient
 
         response.IsError.Should().BeFalse();
     }
-        
+
     [Fact]
     public async Task Using_a_revoked_refresh_token_should_fail()
     {
@@ -310,7 +310,7 @@ public class RefreshTokenClient
         });
 
         revocationResponse.IsError.Should().Be(false);
-            
+
         // refresh token
         response = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {

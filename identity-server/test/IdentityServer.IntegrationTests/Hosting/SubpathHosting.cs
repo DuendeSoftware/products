@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using FluentAssertions;
-using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntegrationTests.Hosting;
@@ -53,7 +53,7 @@ public class SubpathHosting
             new IdentityResources.Profile(),
             new IdentityResources.Email()
         });
-            
+
         _mockPipeline.Initialize("/subpath");
     }
 

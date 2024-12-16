@@ -2,11 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.EntityFramework;
 using Duende.IdentityServer.EntityFramework.DbContexts;
@@ -19,6 +14,10 @@ using Duende.IdentityServer.Test;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using IPersistedGrantStore = Duende.IdentityServer.Stores.IPersistedGrantStore;
 
@@ -272,7 +271,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
             context.PersistedGrants.ToList().Should().BeEmpty();
 
-            for(int i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
+            for (int i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
             {
                 var expiredGrant = new PersistedGrant
                 {
@@ -281,10 +280,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                     Key = Guid.NewGuid().ToString(),
                     Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
                     ClientId = "app1",
-                    Data = "{!}"  
+                    Data = "{!}"
                 };
                 context.PersistedGrants.Add(expiredGrant);
-            }           
+            }
             context.SaveChanges();
 
             context.PersistedGrants.Count().Should().Be(StoreOptions.TokenCleanupBatchSize * expectedPageCount);
@@ -293,15 +292,16 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         var mockNotifications = new MockOperationalStoreNotification();
 
-        await CreateSut(options, svcs => {
+        await CreateSut(options, svcs =>
+        {
             svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
         }).CleanupGrantsAsync();
 
         // The right number of batches executed
         mockNotifications.PersistedGrantNotifications.Count.Should().Be(expectedPageCount);
-        
+
         // Each batch contained the expected number of grants
-        foreach(var notification in mockNotifications.PersistedGrantNotifications)
+        foreach (var notification in mockNotifications.PersistedGrantNotifications)
         {
             notification.Count().Should().Be(StoreOptions.TokenCleanupBatchSize);
         }
@@ -322,7 +322,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            for(int i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
+            for (int i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
             {
                 var expiredGrant = new PersistedGrant
                 {
@@ -331,17 +331,17 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                     Key = Guid.NewGuid().ToString(),
                     Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
                     ClientId = "app1",
-                    Data = "{!}"  
+                    Data = "{!}"
                 };
                 context.PersistedGrants.Add(expiredGrant);
-            }           
+            }
             context.SaveChanges();
         }
 
         // Whenever we cleanup a batch of grants, a new (expired) grant is inserted
         var mockNotifications = new MockOperationalStoreNotification()
         {
-            OnPersistedGrantsRemoved = grants => 
+            OnPersistedGrantsRemoved = grants =>
             {
                 using (var context = new PersistedGrantDbContext(options))
                 {
@@ -352,7 +352,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                         Key = Guid.NewGuid().ToString(),
                         Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken,
                         ClientId = "app1",
-                        Data = "{Extra grant created between pages}"  
+                        Data = "{Extra grant created between pages}"
                     };
                     context.PersistedGrants.Add(expiredGrant);
                     context.SaveChanges();
@@ -360,16 +360,17 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             }
         };
 
-        await CreateSut(options, svcs => {
+        await CreateSut(options, svcs =>
+        {
             svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
         }).CleanupGrantsAsync();
 
         // Each batch created an extra grant, so we do an extra batch to clean up
         // the extras
         mockNotifications.PersistedGrantNotifications.Count.Should().Be(expectedPageCount + 1);
-        
+
         // Each batch had the expected number of grants. Most batches had the batch size grants
-        for(int i = 0; i < expectedPageCount; i++)
+        for (int i = 0; i < expectedPageCount; i++)
         {
             mockNotifications.PersistedGrantNotifications[i].Count().Should().Be(StoreOptions.TokenCleanupBatchSize);
         }
@@ -438,7 +439,8 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         DbContextOptions<PersistedGrantDbContext> dbContextOpts,
         bool removeConsumedTokens,
         int consumedTokenCleanupDelay = 0
-    ) {
+    )
+    {
         StoreOptions.RemoveConsumedTokens = removeConsumedTokens;
         StoreOptions.ConsumedTokenCleanupDelay = consumedTokenCleanupDelay;
         return CreateSut(dbContextOpts);
@@ -447,7 +449,8 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
     private TokenCleanupService CreateSut(
         DbContextOptions<PersistedGrantDbContext> options,
         Action<IServiceCollection> configureServices
-    ) {
+    )
+    {
         IServiceCollection services = new ServiceCollection();
 
         configureServices(services);
@@ -462,7 +465,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             new PersistedGrantDbContext(options));
         services.AddTransient<IPersistedGrantStore, PersistedGrantStore>();
         services.AddTransient<IDeviceFlowStore, DeviceFlowStore>();
-            
+
         services.AddTransient<ITokenCleanupService, TokenCleanupService>();
         services.AddSingleton(StoreOptions);
 

@@ -1,22 +1,22 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace UnitTests.Extensions;
 
 public class IdentityServerBuilderExtensionsCacheStoreTests
 {
-    private class CustomClientStore: IClientStore
+    private class CustomClientStore : IClientStore
     {
         public Task<Client> FindClientByIdAsync(string clientId)
         {

@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
@@ -14,12 +10,16 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using Duende.IdentityModel;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Services.Default;
 using UnitTests.Validation.Setup;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace UnitTests.Validation.Secrets;
@@ -33,11 +33,11 @@ public class PrivateKeyJwtSecretValidation
     {
         _validator = new PrivateKeyJwtSecretValidator(
             new TestIssuerNameService("https://idsrv3.com"),
-            new DefaultReplayCache(new TestCache()), 
+            new DefaultReplayCache(new TestCache()),
             new MockServerUrls() { Origin = "https://idsrv3.com" },
             new IdentityServerOptions(),
             new LoggerFactory().CreateLogger<PrivateKeyJwtSecretValidator>());
-            
+
         _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
     }
 
@@ -134,7 +134,7 @@ public class PrivateKeyJwtSecretValidation
         var secret = new ParsedSecret
         {
             Id = clientId,
-            Credential = new JwtSecurityTokenHandler().WriteToken(CreateToken(clientId, aud:aud)),
+            Credential = new JwtSecurityTokenHandler().WriteToken(CreateToken(clientId, aud: aud)),
             Type = IdentityServerConstants.ParsedSecretTypes.JwtBearer
         };
 
@@ -149,7 +149,7 @@ public class PrivateKeyJwtSecretValidation
         var clientId = "certificate_base64_valid";
         var client = await _clients.FindEnabledClientByIdAsync(clientId);
         var token = new JwtSecurityTokenHandler().WriteToken(CreateToken(clientId));
-            
+
         var secret = new ParsedSecret
         {
             Id = clientId,
@@ -159,7 +159,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
         result.Success.Should().BeTrue();
-            
+
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
         result.Success.Should().BeFalse();
     }

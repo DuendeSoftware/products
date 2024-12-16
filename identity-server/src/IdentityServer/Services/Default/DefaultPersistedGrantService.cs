@@ -1,15 +1,14 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using Duende.IdentityServer.Models;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 

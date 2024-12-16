@@ -54,7 +54,7 @@ public class TestBrowserClient : HttpClient
     }
 
     private CookieHandler _handler;
-        
+
     public CookieContainer CookieContainer => _handler.CookieContainer;
     public Uri CurrentUri => _handler.CurrentUri;
     public HttpResponseMessage LastResponse => _handler.LastResponse;

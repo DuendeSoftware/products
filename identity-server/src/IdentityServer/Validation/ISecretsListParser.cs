@@ -4,10 +4,10 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Validation;
 

@@ -18,7 +18,7 @@ public class EndpointsOptions
     /// <c>true</c> if the authorize endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
     public bool EnableAuthorizeEndpoint { get; set; } = true;
-        
+
     /// <summary>
     /// Gets or sets if JWT request_uri processing is enabled on the authorize endpoint. 
     /// </summary>
@@ -55,7 +55,7 @@ public class EndpointsOptions
     /// <c>true</c> if the end session endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
     public bool EnableEndSessionEndpoint { get; set; } = true;
-        
+
     /// <summary>
     /// Gets or sets a value indicating whether the check session endpoint is enabled.
     /// </summary>

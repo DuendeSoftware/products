@@ -8,10 +8,10 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -74,7 +74,7 @@ public static class IdentityServerBuilderExtensionsInMemory
 
         return builder;
     }
-        
+
     /// <summary>
     /// Adds the in memory API resources.
     /// </summary>
@@ -142,8 +142,8 @@ public static class IdentityServerBuilderExtensionsInMemory
         builder.AddClientStore<InMemoryClientStore>();
 
         var existingCors = builder.Services.LastOrDefault(x => x.ServiceType == typeof(ICorsPolicyService));
-        if (existingCors != null && 
-            existingCors.ImplementationType == typeof(DefaultCorsPolicyService) && 
+        if (existingCors != null &&
+            existingCors.ImplementationType == typeof(DefaultCorsPolicyService) &&
             existingCors.Lifetime == ServiceLifetime.Transient)
         {
             // if our default is registered, then overwrite with the InMemoryCorsPolicyService
@@ -187,7 +187,7 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <returns></returns>
-    public static IIdentityServerBuilder AddInMemoryPushedAuthorizationRequests(this IIdentityServerBuilder builder) 
+    public static IIdentityServerBuilder AddInMemoryPushedAuthorizationRequests(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IPushedAuthorizationRequestStore, InMemoryPushedAuthorizationRequestStore>();
         return builder;

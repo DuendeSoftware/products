@@ -1,14 +1,14 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using Duende.IdentityServer;
-using Duende.IdentityServer.Configuration;
 using Xunit;
 
 namespace UnitTests.Extensions;

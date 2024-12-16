@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
@@ -47,7 +46,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     /// The server-side session store (if configured).
     /// </summary>
     protected readonly IServerSideSessionStore ServerSideSessionStore;
-    
+
     /// <summary>
     /// Ctor.
     /// </summary>
@@ -102,7 +101,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
             if (clientsToCoordinate.Count > 0)
             {
                 Logger.LogDebug("Due to user logout, removing tokens for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
-                
+
                 await PersistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
                 {
                     SubjectId = session.SubjectId,
@@ -113,7 +112,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
             }
 
             Logger.LogDebug("Due to user logout, invoking backchannel logout for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
-            
+
             // this uses all the clientIds since that's how logout worked before session coordination existed
             // IOW, we know we're not using the clientsToCoordinate list here, also because it's active logout
             await BackChannelLogoutService.SendLogoutNotificationsAsync(new LogoutNotificationContext
@@ -151,7 +150,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         if (clientsToCoordinate.Count > 0)
         {
             Logger.LogDebug("Due to expired session, removing tokens for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
-            
+
             await PersistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
             {
                 SubjectId = session.SubjectId,

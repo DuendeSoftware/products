@@ -1,13 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityModel;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using Duende.IdentityModel;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.AspNetIdentity;
 
@@ -42,7 +41,7 @@ internal class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
             identity.AddClaim(new Claim(JwtClaimTypes.PreferredUserName, username));
         }
 
-        if (!identity.HasClaim(x=>x.Type == JwtClaimTypes.Name))
+        if (!identity.HasClaim(x => x.Type == JwtClaimTypes.Name))
         {
             identity.AddClaim(new Claim(JwtClaimTypes.Name, username));
         }

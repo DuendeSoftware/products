@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -13,7 +13,7 @@ internal static class ObjectSerializer
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-        
+
     public static string ToString(object o)
     {
         return JsonSerializer.Serialize(o, Options);

@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Services.KeyManagement;
 using FluentAssertions;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace UnitTests.Services.Default.KeyManagement;

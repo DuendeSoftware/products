@@ -2,21 +2,21 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel.Client;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Test;
+using FluentAssertions;
+using IntegrationTests.Common;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Common;
 using Xunit;
 
 namespace IntegrationTests.Conformance.Basic;
 
-public class ClientAuthenticationTests 
+public class ClientAuthenticationTests
 {
     private const string Category = "Conformance.Basic.ClientAuthenticationTests";
 

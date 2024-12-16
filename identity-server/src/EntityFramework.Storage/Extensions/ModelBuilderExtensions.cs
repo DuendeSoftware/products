@@ -52,7 +52,7 @@ public static class ModelBuilderExtensions
 
             client.HasIndex(x => x.ClientId).IsUnique();
 
-            client.HasMany(x => x.AllowedGrantTypes).WithOne(x => x.Client).HasForeignKey(x=>x.ClientId).IsRequired().OnDelete(DeleteBehavior.Cascade);
+            client.HasMany(x => x.AllowedGrantTypes).WithOne(x => x.Client).HasForeignKey(x => x.ClientId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             client.HasMany(x => x.RedirectUris).WithOne(x => x.Client).HasForeignKey(x => x.ClientId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             client.HasMany(x => x.PostLogoutRedirectUris).WithOne(x => x.Client).HasForeignKey(x => x.ClientId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             client.HasMany(x => x.AllowedScopes).WithOne(x => x.Client).HasForeignKey(x => x.ClientId).IsRequired().OnDelete(DeleteBehavior.Cascade);
@@ -187,7 +187,7 @@ public static class ModelBuilderExtensions
             // apparently anything over 4K converts to nvarchar(max) on SqlServer
             codes.Property(x => x.Data).HasMaxLength(50000).IsRequired();
 
-            codes.HasKey(x => new {x.UserCode});
+            codes.HasKey(x => new { x.UserCode });
 
             codes.HasIndex(x => x.DeviceCode).IsUnique();
             codes.HasIndex(x => x.Expiration);

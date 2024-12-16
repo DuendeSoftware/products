@@ -2,18 +2,18 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Test;
 using FluentAssertions;
+using IntegrationTests.Common;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Xunit;
-using System.Text;
 
 namespace IntegrationTests.Endpoints.Token;
 
@@ -126,7 +126,7 @@ public class TokenEndpointTests
     {
         var text = $"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}&scope=%00";
         var content = new StringContent(text, Encoding.UTF8, "application/x-www-form-urlencoded");
-        
+
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, content);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

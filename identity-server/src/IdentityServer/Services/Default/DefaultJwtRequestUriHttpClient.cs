@@ -1,15 +1,14 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System;
-using System.Collections.Generic;
+using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Services;
 
@@ -44,7 +43,7 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
     public async Task<string> GetJwtAsync(string url, Client client)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultJwtRequestUriHttpClient.GetJwt");
-        
+
         var req = new HttpRequestMessage(HttpMethod.Get, url);
         req.Options.TryAdd(IdentityServerConstants.JwtRequestClientKey, client);
 

@@ -4,10 +4,10 @@
 
 #nullable enable
 
+using Duende.IdentityServer.EntityFramework.Entities;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.IdentityServer.EntityFramework.Entities;
 
 namespace Duende.IdentityServer.EntityFramework;
 

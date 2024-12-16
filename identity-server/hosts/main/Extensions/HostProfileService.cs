@@ -1,9 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Security.Claims;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
+using System.Security.Claims;
 
 namespace IdentityServerHost.Extensions;
 

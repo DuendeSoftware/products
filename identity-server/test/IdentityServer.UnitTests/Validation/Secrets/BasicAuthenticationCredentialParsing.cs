@@ -2,18 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using System;
+using System.Text;
+using System.Threading.Tasks;
+using UnitTests.Common;
 using Xunit;
 
 namespace UnitTests.Validation.Secrets;
@@ -59,7 +58,7 @@ public class BasicAuthenticationSecretParsing
         secret.Id.Should().Be("client");
         secret.Credential.Should().Be("secret");
     }
-        
+
     [Theory]
     [Trait("Category", Category)]
     [InlineData("client", "secret")]
@@ -73,20 +72,20 @@ public class BasicAuthenticationSecretParsing
     {
         Encoding encoding = Encoding.UTF8;
         var context = new DefaultHttpContext();
-            
+
         if (password == null) password = "";
         string credential = $"{Uri.EscapeDataString(userName)}:{Uri.EscapeDataString(password)}";
 
         var headerValue = $"Basic {Convert.ToBase64String(encoding.GetBytes(credential))}";
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
-            
+
         var secret = await _parser.ParseAsync(context);
 
         secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
         secret.Id.Should().Be(userName);
         secret.Credential.Should().Be(password);
     }
-        
+
     [Theory]
     [Trait("Category", Category)]
     [InlineData("client", "secret")]
@@ -104,7 +103,7 @@ public class BasicAuthenticationSecretParsing
         var credential = BasicAuthenticationOAuthHeaderValue.EncodeCredential(userName, password);
         var headerValue = $"Basic {credential}";
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
-            
+
         var secret = await _parser.ParseAsync(context);
 
         secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
@@ -117,7 +116,7 @@ public class BasicAuthenticationSecretParsing
     public async Task Valid_BasicAuthentication_Request_With_UserName_Only_And_Colon_For_Optional_ClientSecret()
     {
         var context = new DefaultHttpContext();
-            
+
         var headerValue = string.Format("Basic {0}",
             Convert.ToBase64String(Encoding.UTF8.GetBytes("client:")));
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));

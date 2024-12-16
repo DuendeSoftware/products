@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer;
+using FluentAssertions;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
 
@@ -201,7 +201,7 @@ public class Authorize_ProtocolValidation_Valid
 
         result.ValidatedRequest.SessionId.Should().NotBeNull();
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task multiple_prompt_values_should_be_accepted()
@@ -227,7 +227,7 @@ public class Authorize_ProtocolValidation_Valid
     public async Task processed_prompt_values_should_overwrite_original_values()
     {
         var validator = Factory.CreateAuthorizeRequestValidator();
-            
+
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.AuthorizeRequest.ClientId, "codeclient");
         parameters.Add(OidcConstants.AuthorizeRequest.Scope, "openid");

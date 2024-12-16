@@ -50,7 +50,7 @@ public class Token
     /// The audiences.
     /// </value>
     public ICollection<string> Audiences { get; set; } = new HashSet<string>();
-        
+
     /// <summary>
     /// Gets or sets the issuer.
     /// </summary>
@@ -66,7 +66,7 @@ public class Token
     /// The creation time.
     /// </value>
     public DateTime CreationTime { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the lifetime.
     /// </summary>

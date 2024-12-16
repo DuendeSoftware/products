@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using FluentAssertions;
-using Duende.IdentityModel;
 using IntegrationTests.Common;
 using System;
 using System.Collections.Generic;
@@ -69,7 +69,7 @@ public class PushedAuthorizationTests
     public async Task using_pushed_authorization_when_it_is_globally_disabled_fails()
     {
         _mockPipeline.Options.Endpoints.EnablePushedAuthorizationEndpoint = false;
-        
+
         var (_, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync();
         statusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -91,7 +91,7 @@ public class PushedAuthorizationTests
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
         response.Should().Be302Found();
-        response.Should().HaveHeader("Location").And.Match("*/error*"); 
+        response.Should().HaveHeader("Location").And.Match("*/error*");
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class PushedAuthorizationTests
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
         response.Should().Be302Found();
-        response.Should().HaveHeader("Location").And.Match("*/error*"); 
+        response.Should().HaveHeader("Location").And.Match("*/error*");
     }
 
     [Fact]
@@ -230,7 +230,7 @@ public class PushedAuthorizationTests
         var returnUrl = new Uri(new Uri(IdentityServerPipeline.BaseUrl), returnPath);
         await _mockPipeline.LoginAsync("bob");
         var authorizeCallbackResponse = await _mockPipeline.BrowserClient.GetAsync(returnUrl);
-        
+
         // The authorize callback should continue back to the application (the prompt parameter is processed so we don't go back to the UI)
         authorizeCallbackResponse.Should().Be302Found();
         authorizeCallbackResponse.Headers.Location.Should().Be(expectedCallback);

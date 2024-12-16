@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using FluentAssertions;
-using Duende.IdentityModel;
+using System;
+using System.Collections.Specialized;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -31,7 +31,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
         IsOpenId = true,
         Lifetime = 300,
         CreationTime = DateTime.UtcNow,
-        AuthorizedScopes = new[] {"openid", "profile", "resource"}
+        AuthorizedScopes = new[] { "openid", "profile", "resource" }
     };
 
     [Fact]
@@ -51,7 +51,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
         result.IsError.Should().BeTrue();
         result.Error.Should().Be(OidcConstants.TokenErrors.InvalidRequest);
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task DeviceCode_Too_Long()
@@ -59,7 +59,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
         var client = await _clients.FindClientByIdAsync("device_flow");
 
         var longCode = "x".Repeat(new IdentityServerOptions().InputLengthRestrictions.AuthorizationCode + 1);
-            
+
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection

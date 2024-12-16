@@ -107,7 +107,7 @@ public class GenericHost
     void ConfigureApp(IApplicationBuilder app)
     {
         _appServices = app.ApplicationServices;
-            
+
         OnConfigure(app);
 
         ConfigureSignin(app);
@@ -150,7 +150,7 @@ public class GenericHost
 
                 var props = _propsToSignIn ?? new AuthenticationProperties();
                 await ctx.SignInAsync(_userToSignIn, props);
-                    
+
                 _userToSignIn = null;
                 _propsToSignIn = null;
 

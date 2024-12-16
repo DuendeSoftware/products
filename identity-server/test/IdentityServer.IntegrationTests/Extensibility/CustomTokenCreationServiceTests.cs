@@ -2,20 +2,20 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using FluentAssertions;
-using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntegrationTests.Extensibility;
@@ -58,7 +58,8 @@ public class CustomTokenCreationServiceTests
     public async Task custom_aud_should_be_in_access_token()
     {
         var result = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(
-            new ClientCredentialsTokenRequest { 
+            new ClientCredentialsTokenRequest
+            {
                 Address = IdentityServerPipeline.TokenEndpoint,
                 ClientId = "test",
                 ClientSecret = "secret"

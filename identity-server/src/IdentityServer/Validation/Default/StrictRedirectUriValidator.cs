@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -82,7 +81,7 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
         // on the PAR endpoint and at the authorize endpoint (if a redirect uri
         // was pushed)
         if (_options?.PushedAuthorization?.AllowUnregisteredPushedRedirectUris == true &&
-            context.Client.RequireClientSecret && 
+            context.Client.RequireClientSecret &&
             (context.AuthorizeRequestType == AuthorizeRequestType.PushedAuthorization ||
              context.AuthorizeRequestType == AuthorizeRequestType.AuthorizeWithPushedParameters))
         {

@@ -1,14 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Licensing.V2;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Licensing.V2;
 
 namespace Duende.IdentityServer.Hosting;
 
@@ -25,7 +24,7 @@ internal class EndpointRouter(
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        foreach(var endpoint in endpoints)
+        foreach (var endpoint in endpoints)
         {
             var path = endpoint.Path;
             if (context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase))

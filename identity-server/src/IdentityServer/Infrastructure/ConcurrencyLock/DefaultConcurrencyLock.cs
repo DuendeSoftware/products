@@ -22,7 +22,7 @@ public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>
         {
             throw new ArgumentException("millisecondsTimeout must be greater than zero.");
         }
-            
+
         return Lock.WaitAsync(millisecondsTimeout);
     }
 

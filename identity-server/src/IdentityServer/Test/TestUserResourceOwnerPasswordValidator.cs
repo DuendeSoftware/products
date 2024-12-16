@@ -1,11 +1,10 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
-using System.Threading.Tasks;
-using System;
 using Duende.IdentityServer.Validation;
+using System;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Test;
 
@@ -40,8 +39,8 @@ public class TestUserResourceOwnerPasswordValidator : IResourceOwnerPasswordVali
         {
             var user = _users.FindByUsername(context.UserName);
             context.Result = new GrantValidationResult(
-                user.SubjectId ?? throw new ArgumentException("Subject ID not set", nameof(user.SubjectId)), 
-                OidcConstants.AuthenticationMethods.Password, _clock.UtcNow.UtcDateTime, 
+                user.SubjectId ?? throw new ArgumentException("Subject ID not set", nameof(user.SubjectId)),
+                OidcConstants.AuthenticationMethods.Password, _clock.UtcNow.UtcDateTime,
                 user.Claims);
         }
 

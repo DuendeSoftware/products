@@ -2,6 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
+using Duende.IdentityServer.Models;
+using FluentAssertions;
+using IntegrationTests.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,10 +14,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using FluentAssertions;
-using Duende.IdentityModel;
-using IntegrationTests.Common;
 using Xunit;
 
 namespace IntegrationTests.Endpoints.DeviceAuthorization;
@@ -29,9 +29,9 @@ public class DeviceAuthorizationTests
         _mockPipeline.Clients.Add(new Client
         {
             ClientId = "client1",
-            ClientSecrets = {new Secret("secret".Sha256())},
+            ClientSecrets = { new Secret("secret".Sha256()) },
             AllowedGrantTypes = GrantTypes.DeviceFlow,
-            AllowedScopes = {"openid"}
+            AllowedScopes = { "openid" }
         });
 
         _mockPipeline.IdentityScopes.AddRange(new IdentityResource[] {
@@ -119,7 +119,7 @@ public class DeviceAuthorizationTests
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
-            
+
         var resultDto = ParseJsonBody<ResultDto>(await response.Content.ReadAsStreamAsync());
 
         resultDto.Should().NotBeNull();

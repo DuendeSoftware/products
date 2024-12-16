@@ -111,7 +111,7 @@ public class Secret
         if (other == null) return false;
         if (ReferenceEquals(other, this)) return true;
 
-        return String.Equals(other.Type, Type, StringComparison.Ordinal) && 
+        return String.Equals(other.Type, Type, StringComparison.Ordinal) &&
                String.Equals(other.Value, Value, StringComparison.Ordinal);
     }
 }

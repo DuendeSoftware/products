@@ -7,6 +7,7 @@
         <AssemblyName>Duende.IdentityServer.AspNetIdentity</AssemblyName>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,5 +21,4 @@
     <ItemGroup>
         <ProjectReference Include="..\IdentityServer\Duende.IdentityServer.csproj" />
     </ItemGroup>
-
 </Project>

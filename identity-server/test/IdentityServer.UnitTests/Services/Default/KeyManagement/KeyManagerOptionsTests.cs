@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using Duende.IdentityServer.Configuration;
 using FluentAssertions;
+using System;
 using Xunit;
 
 namespace UnitTests.Services.Default.KeyManagement;

@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Specialized;
 using Duende.IdentityServer.Models;
+using System.Collections.Specialized;
 
 namespace Duende.IdentityServer.Validation;
 

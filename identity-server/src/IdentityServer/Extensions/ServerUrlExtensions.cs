@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -22,7 +21,7 @@ public static class ServerUrlExtensions
         var split = urls.Origin.Split("://", StringSplitOptions.RemoveEmptyEntries);
         var scheme = split.First();
         var host = HostString.FromUriComponent(split.Last()).Value;
-            
+
         return scheme + "://" + host;
     }
 

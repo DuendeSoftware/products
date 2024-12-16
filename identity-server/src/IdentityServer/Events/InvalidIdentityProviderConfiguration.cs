@@ -18,7 +18,7 @@ public class InvalidIdentityProviderConfiguration : Event
     public InvalidIdentityProviderConfiguration(IdentityProvider idp, string errorMessage)
         : base(EventCategories.Error,
             "Invalid IdentityProvider Configuration",
-            EventTypes.Error, 
+            EventTypes.Error,
             EventIds.InvalidIdentityProviderConfiguration,
             errorMessage)
     {
@@ -36,7 +36,7 @@ public class InvalidIdentityProviderConfiguration : Event
     /// Gets or sets the display name of the identity provider.
     /// </summary>
     public string DisplayName { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the type of the identity provider.
     /// </summary>

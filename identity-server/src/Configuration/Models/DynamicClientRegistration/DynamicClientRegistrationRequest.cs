@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Text.Json.Serialization;
 using Duende.IdentityModel;
+using System.Text.Json.Serialization;
 
 namespace Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 
@@ -163,7 +163,7 @@ public class DynamicClientRegistrationRequest
     /// </remark>
     [JsonPropertyName(OidcConstants.ClientMetadata.SoftwareId)]
     public string? SoftwareId { get; set; }
-    
+
     /// <summary>
     /// A version identifier string for the client software identified by
     /// "software_id".  The value of the "software_version" SHOULD change on any

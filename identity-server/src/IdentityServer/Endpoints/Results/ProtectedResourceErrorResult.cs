@@ -1,14 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System.Threading.Tasks;
-using Duende.IdentityServer.Hosting;
-using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.Primitives;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Net.Http.Headers;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 

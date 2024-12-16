@@ -2,12 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
@@ -17,9 +12,14 @@ using Duende.IdentityServer.Stores.Default;
 using Duende.IdentityServer.Test;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
-using Duende.IdentityModel;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntegrationTests.Endpoints.Authorize;
@@ -40,7 +40,7 @@ public class AuthorizeTests
                 ClientId = "client1",
                 AllowedGrantTypes = GrantTypes.Implicit,
                 RequireConsent = false,
-                    
+
                 AllowedScopes = new List<string> { "openid", "profile" },
                 RedirectUris = new List<string> { "https://client1/callback" },
                 AllowAccessTokensViaBrowser = true
@@ -50,7 +50,7 @@ public class AuthorizeTests
                 ClientId = "client2",
                 AllowedGrantTypes = GrantTypes.Implicit,
                 RequireConsent = true,
-                    
+
                 AllowedScopes = new List<string> { "openid", "profile", "api1", "api2" },
                 RedirectUris = new List<string> { "https://client2/callback" },
                 AllowAccessTokensViaBrowser = true
@@ -60,7 +60,7 @@ public class AuthorizeTests
                 ClientId = "client3",
                 AllowedGrantTypes = GrantTypes.Implicit,
                 RequireConsent = false,
-                    
+
                 AllowedScopes = new List<string> { "openid", "profile", "api1", "api2" },
                 RedirectUris = new List<string> { "https://client3/callback" },
                 AllowAccessTokensViaBrowser = true,
@@ -242,7 +242,7 @@ public class AuthorizeTests
         authorization.State.Should().Be("123_state");
         authorization.Values.Keys.Should().NotContain("iss");
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task code_success_response_should_have_all_expected_values()
@@ -419,7 +419,7 @@ public class AuthorizeTests
         _mockPipeline.LoginWasCalled.Should().BeTrue();
         _mockPipeline.LoginRequest.IdP.Should().Be("idp2");
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task when_tenant_validation_enabled_user_tenant_does_not_match_acr_tenant_should_cause_login_page()
@@ -991,7 +991,7 @@ public class AuthorizeTests
             scope: "openid",
             redirectUri: "https://client1/callback",
             state: "123_state"
-            //nonce: "123_nonce"
+        //nonce: "123_nonce"
         );
         await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -1251,7 +1251,7 @@ public class AuthorizeTests
             redirectUri: "https://client3/callback",
             state: "123_state",
             nonce: "123_nonce",
-            extra:new { prompt = "login" }
+            extra: new { prompt = "login" }
         );
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -1272,7 +1272,7 @@ public class AuthorizeTests
             redirectUri: "https://client3/callback",
             state: "123_state",
             nonce: "123_nonce",
-            extra:new { max_age = "0" }
+            extra: new { max_age = "0" }
         );
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -1371,7 +1371,7 @@ public class AuthorizeTests
     [Trait("Category", Category)]
     public async Task with_config_prompt_create_should_show_create_account_page_and_preserve_prompt_values()
     {
-        _mockPipeline.OnPreConfigureServices += svcs => 
+        _mockPipeline.OnPreConfigureServices += svcs =>
         {
             svcs.PostConfigure<IdentityServerOptions>(opts =>
             {
@@ -1408,8 +1408,8 @@ public class AuthorizeTests
                 opts.UserInteraction.CreateAccountUrl = "/account/create";
             });
         };
-        _mockPipeline.Initialize(); 
-        
+        _mockPipeline.Initialize();
+
         await _mockPipeline.LoginAsync("bob");
 
         var url = _mockPipeline.CreateAuthorizeUrl(
@@ -1428,7 +1428,7 @@ public class AuthorizeTests
 
 
     [Theory]
-    [InlineData((Type) null)]
+    [InlineData((Type)null)]
     [InlineData(typeof(QueryStringAuthorizationParametersMessageStore))]
     [InlineData(typeof(DistributedCacheAuthorizationParametersMessageStore))]
     [Trait("Category", Category)]
@@ -1518,7 +1518,7 @@ public class AuthorizeTests
             services.AddTransient(typeof(IAuthorizeInteractionResponseGenerator), svc => mockAuthzInteractionService);
         };
         _mockPipeline.Initialize();
-        
+
         _mockPipeline.Options.UserInteraction.PromptValuesSupported.Add("custom-prompt");
 
         await _mockPipeline.LoginAsync("bob");

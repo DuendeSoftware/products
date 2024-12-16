@@ -1,19 +1,18 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.ResponseHandling;
 
@@ -60,7 +59,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     public virtual async Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("UserInfoResponseGenerator.Process");
-        
+
         Logger.LogDebug("Creating userinfo response");
 
         // extract scopes and turn into requested claim types
@@ -126,10 +125,10 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
 
         // if we ever parameterized identity scopes, then we would need to invoke the resource validator's parse API here
         var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes);
-            
+
         var resources = new Resources(identityResources, Enumerable.Empty<ApiResource>(), Enumerable.Empty<ApiScope>());
         var result = new ResourceValidationResult(resources);
-            
+
         return result;
     }
 

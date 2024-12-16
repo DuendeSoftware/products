@@ -1,9 +1,14 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging.Models;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,12 +17,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Events;
-using Duende.IdentityServer.Licensing.V2;
-using Duende.IdentityServer.Logging.Models;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Validation;

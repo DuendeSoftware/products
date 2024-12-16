@@ -18,7 +18,7 @@ public interface ISessionCoordinationService
     /// Coordinates when a user logs out.
     /// </summary>
     Task ProcessLogoutAsync(UserSession session);
-    
+
     /// <summary>
     /// Coordinates when a user session has expired.
     /// </summary>

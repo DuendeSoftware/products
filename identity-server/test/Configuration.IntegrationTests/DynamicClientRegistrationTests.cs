@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
+using Duende.IdentityServer.Models;
 using FluentAssertions;
 using IntegrationTests.TestHosts;
-using Xunit;
-using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using System.Net.Http.Json;
-using Duende.IdentityServer.Models;
+using Xunit;
 
 namespace IntegrationTests;
 

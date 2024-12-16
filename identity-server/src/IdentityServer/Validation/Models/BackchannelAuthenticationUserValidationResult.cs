@@ -23,7 +23,7 @@ public class BackchannelAuthenticationUserValidationResult
     /// Gets or sets the error.
     /// </summary>
     public string? Error { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the error description.
     /// </summary>

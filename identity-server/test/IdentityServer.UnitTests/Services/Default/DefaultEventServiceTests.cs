@@ -1,10 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using FluentAssertions;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Services.Default.KeyManagement;
 using Xunit;
@@ -22,10 +22,10 @@ public class DefaultEventServiceTests
         var sink = new MockEventSink();
 
         var sut = new DefaultEventService(
-            options, 
+            options,
             // This is the most important part of this test. We want to ensure
             // that we don't throw exceptions when there is no http context available.
-            new NullHttpContextAccessor(), 
+            new NullHttpContextAccessor(),
             sink,
             new MockClock());
 
@@ -36,12 +36,12 @@ public class DefaultEventServiceTests
         sink.Events.Should().Contain(e => e.Id == 123);
     }
 
-   
+
 }
 
 internal class TestEvent : Event
 {
-    public TestEvent(int id = 0, string message = "") 
+    public TestEvent(int id = 0, string message = "")
         : base(category: "Test", name: "Test", EventTypes.Information, id, message)
     {
     }

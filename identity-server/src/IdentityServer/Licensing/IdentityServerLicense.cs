@@ -30,7 +30,7 @@ public class IdentityServerLicense : License
     internal override void Initialize(ClaimsPrincipal claims)
     {
         base.Initialize(claims);
-        
+
         RedistributionFeature = claims.HasClaim("feature", "isv") || claims.HasClaim("feature", "redistribution");
 
         KeyManagementFeature = claims.HasClaim("feature", "key_management");
@@ -42,7 +42,7 @@ public class IdentityServerLicense : License
                 KeyManagementFeature = true;
                 break;
         }
-        
+
         ParFeature = claims.HasClaim("feature", "par");
         switch (Edition)
         {
@@ -70,7 +70,7 @@ public class IdentityServerLicense : License
                 DynamicProvidersFeature = true;
                 break;
         }
-        
+
         CibaFeature = claims.HasClaim("feature", "ciba");
         switch (Edition)
         {
@@ -120,7 +120,7 @@ public class IdentityServerLicense : License
                         break;
                 }
             }
-                    
+
             if (Int32.TryParse(claims.FindFirst("client_limit")?.Value, out var clientLimit))
             {
                 // explicit, so use that value

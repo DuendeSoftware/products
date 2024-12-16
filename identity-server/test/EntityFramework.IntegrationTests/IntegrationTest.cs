@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace EntityFramework.IntegrationTests;
@@ -55,7 +55,7 @@ public class IntegrationTest<TClass, TDbContext, TStoreOption> : IClassFixture<D
 
     protected IntegrationTest(DatabaseProviderFixture<TDbContext> fixture)
     {
-        fixture.Options = TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<TDbContext>) y))
+        fixture.Options = TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<TDbContext>)y))
             .ToList();
     }
 }

@@ -1,12 +1,12 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Options;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using Xunit;
 
 namespace EntityFramework.Storage.IntegrationTests.DbContexts;

@@ -1,17 +1,17 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace UnitTests.Validation.Secrets;
@@ -29,7 +29,7 @@ public class SecretValidation
     {
         _validator = new SecretValidator(
             new StubClock(),
-            new[] { _hashedSecretValidator }, 
+            new[] { _hashedSecretValidator },
             new Logger<SecretValidator>(new LoggerFactory()));
     }
 
@@ -168,7 +168,7 @@ public class SecretValidation
             Id = clientId,
             Type = IdentityServerConstants.ParsedSecretTypes.SharedSecret
         };
-            
+
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
         result.Success.Should().BeFalse();
     }

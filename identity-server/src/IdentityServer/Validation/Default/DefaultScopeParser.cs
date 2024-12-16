@@ -1,11 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityServer.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -30,7 +29,7 @@ public class DefaultScopeParser : IScopeParser
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultScopeParser.ParseScopeValues");
         activity?.SetTag(Tracing.Properties.Scope, scopeValues.ToSpaceSeparatedString());
-        
+
         if (scopeValues == null) throw new ArgumentNullException(nameof(scopeValues));
 
         var result = new ParsedScopesResult();
@@ -39,7 +38,7 @@ public class DefaultScopeParser : IScopeParser
         {
             var ctx = new ParseScopeContext(scopeValue);
             ParseScopeValue(ctx);
-                
+
             if (ctx.Succeeded)
             {
                 var parsedScope = ctx.ParsedName != null ?
@@ -95,7 +94,7 @@ public class DefaultScopeParser : IScopeParser
         /// The error encountered parsing the scope.
         /// </summary>
         public string Error { get; private set; }
-            
+
         /// <summary>
         /// Indicates if the scope should be excluded from the parsed results.
         /// </summary>

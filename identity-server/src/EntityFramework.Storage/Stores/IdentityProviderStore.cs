@@ -2,10 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Models;
@@ -13,6 +9,10 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.EntityFramework.Stores;
 
@@ -55,13 +55,14 @@ public class IdentityProviderStore : IIdentityProviderStore
     public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync()
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetAllSchemeNames");
-        
-        var query = Context.IdentityProviders.Select(x => new IdentityProviderName { 
+
+        var query = Context.IdentityProviders.Select(x => new IdentityProviderName
+        {
             Enabled = x.Enabled,
             Scheme = x.Scheme,
-            DisplayName  = x.DisplayName
+            DisplayName = x.DisplayName
         });
-        
+
         return await query.ToArrayAsync(CancellationTokenProvider.CancellationToken);
     }
 
@@ -70,7 +71,7 @@ public class IdentityProviderStore : IIdentityProviderStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetByScheme");
         activity?.SetTag(Tracing.Properties.Scheme, scheme);
-        
+
         var idp = (await Context.IdentityProviders.AsNoTracking().Where(x => x.Scheme == scheme)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))
             .SingleOrDefault(x => x.Scheme == scheme);
@@ -81,7 +82,7 @@ public class IdentityProviderStore : IIdentityProviderStore
         {
             Logger.LogError("Identity provider record found in database, but mapping failed for scheme {scheme} and protocol type {protocol}", idp.Scheme, idp.Type);
         }
-            
+
         return result;
     }
 

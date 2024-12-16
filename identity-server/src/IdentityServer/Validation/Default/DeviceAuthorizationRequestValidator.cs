@@ -1,18 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
+using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Logging;
+using Duende.IdentityServer.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Logging;
-using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -21,7 +20,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
     private readonly IdentityServerOptions _options;
     private readonly IResourceValidator _resourceValidator;
     private readonly ILogger<DeviceAuthorizationRequestValidator> _logger;
-        
+
     public DeviceAuthorizationRequestValidator(
         IdentityServerOptions options,
         IResourceValidator resourceValidator,
@@ -35,7 +34,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
     public async Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceAuthorizationRequestValidator.Validate");
-        
+
         _logger.LogDebug("Start device authorization request validation");
 
         var request = new ValidatedDeviceAuthorizationRequest
@@ -154,8 +153,9 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         //////////////////////////////////////////////////////////
         // check if scopes are valid/supported
         //////////////////////////////////////////////////////////
-        var validatedResources = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest{
-            Client = request.Client, 
+        var validatedResources = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest
+        {
+            Client = request.Client,
             Scopes = request.RequestedScopes
         });
 
@@ -165,7 +165,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
             {
                 return Invalid(request, OidcConstants.AuthorizeErrors.InvalidScope);
             }
-                
+
             return Invalid(request, OidcConstants.AuthorizeErrors.UnauthorizedClient, "Invalid scope");
         }
 
@@ -176,7 +176,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         }
 
         request.ValidatedResources = validatedResources;
-            
+
         return Valid(request);
     }
 }

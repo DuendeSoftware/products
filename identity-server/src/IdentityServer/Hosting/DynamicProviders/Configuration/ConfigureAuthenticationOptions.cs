@@ -49,7 +49,7 @@ public abstract class ConfigureAuthenticationOptions<TAuthenticationOptions, TId
         // we have to resolve these here due to DI lifetime issues
         var providerOptions = _httpContextAccessor.HttpContext.RequestServices.GetRequiredService<DynamicProviderOptions>();
         var cache = _httpContextAccessor.HttpContext.RequestServices.GetRequiredService<DynamicAuthenticationSchemeCache>();
-            
+
         var idp = cache.GetIdentityProvider<TIdentityProvider>(name);
         if (idp != null)
         {

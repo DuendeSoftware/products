@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using Microsoft.Extensions.Caching.Distributed;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace UnitTests.Common;
 

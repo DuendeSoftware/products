@@ -1,18 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.ResponseHandling;
 
@@ -189,7 +188,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
         if (responseTypes.Contains(OidcConstants.ResponseTypes.IdToken))
         {
             string stateHash = null;
-                
+
             if (Options.EmitStateHash && request.State.IsPresent())
             {
                 var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms);

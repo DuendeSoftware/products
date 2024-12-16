@@ -3,9 +3,9 @@
 
 using IdentityServerHost;
 using Serilog;
-using System.Globalization;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+using System.Globalization;
 
 Console.Title = "IdentityServer (AspNetIdentity)";
 

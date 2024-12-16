@@ -4,11 +4,11 @@
 
 #nullable enable
 
+using Duende.IdentityServer.EntityFramework.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.IdentityServer.EntityFramework.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace Duende.IdentityServer.EntityFramework.Interfaces;
 
