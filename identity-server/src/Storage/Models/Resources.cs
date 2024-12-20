@@ -19,6 +19,9 @@ public class Resources
     /// </summary>
     public Resources()
     {
+        IdentityResources = new HashSet<IdentityResource>();
+        ApiResources = new HashSet<ApiResource>();
+        ApiScopes = new HashSet<ApiScope>();
     }
 
     /// <summary>
@@ -37,20 +40,11 @@ public class Resources
     /// <param name="identityResources">The identity resources.</param>
     /// <param name="apiResources">The API resources.</param>
     /// <param name="apiScopes">The API scopes.</param>
-    public Resources(IEnumerable<IdentityResource> identityResources, IEnumerable<ApiResource> apiResources, IEnumerable<ApiScope> apiScopes)
+    public Resources(IEnumerable<IdentityResource>? identityResources, IEnumerable<ApiResource>? apiResources, IEnumerable<ApiScope>? apiScopes)
     {
-        if (identityResources?.Any() == true)
-        {
-            IdentityResources = identityResources.ToHashSet();
-        }
-        if (apiResources?.Any() == true)
-        {
-            ApiResources = apiResources.ToHashSet();
-        }
-        if (apiScopes?.Any() == true)
-        {
-            ApiScopes = apiScopes.ToHashSet();
-        }
+        IdentityResources = identityResources?.ToHashSet() ?? new HashSet<IdentityResource>();
+        ApiResources = apiResources?.ToHashSet() ?? new HashSet<ApiResource>();
+        ApiScopes = apiScopes?.ToHashSet() ?? new HashSet<ApiScope>();
     }
 
     /// <summary>
@@ -64,15 +58,15 @@ public class Resources
     /// <summary>
     /// Gets or sets the identity resources.
     /// </summary>
-    public ICollection<IdentityResource> IdentityResources { get; set; } = new HashSet<IdentityResource>();
+    public ICollection<IdentityResource> IdentityResources { get; set; }
 
     /// <summary>
     /// Gets or sets the API resources.
     /// </summary>
-    public ICollection<ApiResource> ApiResources { get; set; } = new HashSet<ApiResource>();
+    public ICollection<ApiResource> ApiResources { get; set; }
         
     /// <summary>
     /// Gets or sets the API scopes.
     /// </summary>
-    public ICollection<ApiScope> ApiScopes { get; set; } = new HashSet<ApiScope>();
+    public ICollection<ApiScope> ApiScopes { get; set; }
 }
