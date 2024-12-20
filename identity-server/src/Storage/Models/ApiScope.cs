@@ -64,7 +64,7 @@ public class ApiScope : Resource
     /// <exception cref="System.ArgumentNullException">name</exception>
     public ApiScope(string name, string displayName, IEnumerable<string>? userClaims)
     {
-        if (name.IsMissing()) throw new ArgumentNullException(nameof(name));
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         Name = name;
         DisplayName = displayName;
