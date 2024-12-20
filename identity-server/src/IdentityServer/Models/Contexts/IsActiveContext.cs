@@ -22,7 +22,7 @@ public class IsActiveContext
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(client);
-        if (caller.IsMissing()) throw new ArgumentNullException(nameof(caller));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(caller);
 
         Subject = subject;
         Client = client;
