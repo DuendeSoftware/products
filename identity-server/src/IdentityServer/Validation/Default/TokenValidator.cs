@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+#nullable enable
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Microsoft.Extensions.Logging;
@@ -61,7 +62,7 @@ internal class TokenValidator : ITokenValidator
         _log = new TokenValidationLog();
     }
 
-    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId = null,
+    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string? clientId = null,
         bool validateLifetime = true)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateIdentityToken");
@@ -124,7 +125,7 @@ internal class TokenValidator : ITokenValidator
         return customResult;
     }
 
-    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope = null)
+    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string? expectedScope = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateAccessToken");
         
@@ -180,7 +181,7 @@ internal class TokenValidator : ITokenValidator
         }
 
         // make sure client is still active (if client_id claim is present)
-        var clientClaim = result.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.ClientId);
+        var clientClaim = result.Claims?.FirstOrDefault(c => c.Type == JwtClaimTypes.ClientId);
         if (clientClaim != null)
         {
             var client = await _clients.FindEnabledClientByIdAsync(clientClaim.Value);
@@ -197,10 +198,10 @@ internal class TokenValidator : ITokenValidator
         }
 
         // make sure user is still active (if sub claim is present)
-        var subClaim = result.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
+        var subClaim = result.Claims?.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
         if (subClaim != null)
         {
-            var principal = Principal.Create("tokenvalidator", result.Claims.ToArray());
+            var principal = Principal.Create("tokenvalidator", result.Claims!.ToArray());
 
             if (result.ReferenceTokenId.IsPresent())
             {
@@ -208,7 +209,7 @@ internal class TokenValidator : ITokenValidator
                     .AddClaim(new Claim(JwtClaimTypes.ReferenceTokenId, result.ReferenceTokenId));
             }
 
-            var isActiveCtx = new IsActiveContext(principal, result.Client,
+            var isActiveCtx = new IsActiveContext(principal, result.Client!,
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
             await _profile.IsActiveAsync(isActiveCtx);
 
@@ -231,7 +232,7 @@ internal class TokenValidator : ITokenValidator
                 {
                     SubjectId = sub,
                     SessionId = sid,
-                    Client = result.Client,
+                    Client = result.Client!,
                     Type = SessionValidationType.AccessToken
                 });
 
@@ -246,7 +247,7 @@ internal class TokenValidator : ITokenValidator
         // check expected scope(s)
         if (expectedScope.IsPresent())
         {
-            var scope = result.Claims.FirstOrDefault(c =>
+            var scope = result.Claims?.FirstOrDefault(c =>
                 c.Type == JwtClaimTypes.Scope && c.Value == expectedScope);
             if (scope == null)
             {
@@ -272,7 +273,7 @@ internal class TokenValidator : ITokenValidator
     }
 
     private async Task<TokenValidationResult> ValidateJwtAsync(string jwtString,
-        IEnumerable<SecurityKeyInfo> validationKeys, bool validateLifetime = true, string audience = null)
+        IEnumerable<SecurityKeyInfo> validationKeys, bool validateLifetime = true, string? audience = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateJwt");
         
@@ -327,7 +328,7 @@ internal class TokenValidator : ITokenValidator
         }
 
         // load the client that belongs to the client_id claim
-        Client client = null;
+        Client? client = null;
         var clientId = id.FindFirst(JwtClaimTypes.ClientId);
         if (clientId != null)
         {
@@ -388,7 +389,7 @@ internal class TokenValidator : ITokenValidator
         }
 
         // load the client that is defined in the token
-        Client client = null;
+        Client? client = null;
         if (token.ClientId != null)
         {
             client = await _clients.FindEnabledClientByIdAsync(token.ClientId);
@@ -444,7 +445,7 @@ internal class TokenValidator : ITokenValidator
         return claims;
     }
 
-    private string GetClientIdFromJwt(string token)
+    private string? GetClientIdFromJwt(string token)
     {
         try
         {
