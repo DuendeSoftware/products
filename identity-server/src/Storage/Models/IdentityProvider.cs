@@ -40,7 +40,8 @@ public class IdentityProvider
     /// </summary>
     public IdentityProvider(string type)
     {
-        Type = type ?? throw new ArgumentNullException(nameof(type));
+        ArgumentException.ThrowIfNullOrWhiteSpace(type);
+        Type = type;
     }
 
     /// <summary>
