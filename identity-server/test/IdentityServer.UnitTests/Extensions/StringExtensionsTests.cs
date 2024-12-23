@@ -176,7 +176,9 @@ public class StringExtensionsTests
     {
         // especially on linux
         // https://github.com/DuendeSoftware/Support/issues/148
+        " /path".IsUri().Should().BeFalse();
         "/path".IsUri().Should().BeFalse();
+        " //".IsUri().Should().BeFalse();
         "//".IsUri().Should().BeFalse();
         "://".IsUri().Should().BeFalse();
         " ://".IsUri().Should().BeFalse();

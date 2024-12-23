@@ -207,12 +207,9 @@ internal static class StringExtensions
             return false;
         }
 
-        if (uri.IsFile && !input.StartsWith(Uri.UriSchemeFile + "://", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        return true;
+        return !uri.IsFile ||
+               // no need to check if input starts with {Uri.UriSchemeFile}:// because uri.IsFile ensures it is either '/' or `file://`
+               input.StartsWith(Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase);
     }
 
     [DebuggerStepThrough]
