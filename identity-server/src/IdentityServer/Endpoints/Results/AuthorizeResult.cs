@@ -177,8 +177,8 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
         if (response.IsError && !uri.Contains('#'))
         {
-            // https://tools.ietf.org/html/draft-bradley-oauth-open-redirector-00
-            uri += "#_=_";
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29#section-4.1.3
+            uri += "#_";
         }
 
         return uri;
