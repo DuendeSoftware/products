@@ -1,0 +1,170 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "build",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/src/Duende.Bff/Duende.Bff.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-identityserver",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/samples/IdentityServer/IdentityServer.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-api",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/samples/Apis/Api/Api.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-api.dpop",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/samples/Apis/Api.DPoP/Api.DPoP.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-api.isolated",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/samples/Apis/Api.Isolated/Api.Isolated.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-bff-8",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "--framework=net8.0",
+            "${workspaceFolder}/samples/Bff/Bff.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-bff-9",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "--framework=net9.0",
+            "${workspaceFolder}/samples/Bff/Bff.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-bffdpop-8",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "--framework=net8.0",
+            "${workspaceFolder}/samples/Bff.DPoP/Bff.DPoP.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-bffdpop-9",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "--framework=net9.0",
+            "${workspaceFolder}/samples/Bff.DPoP/Bff.DPoP.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-bffef-8",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "--framework=net8.0",
+            "${workspaceFolder}/samples/Bff.EF/Bff.EF.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-bffef-9",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "--framework=net9.0",
+            "${workspaceFolder}/samples/Bff.EF/Bff.EF.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-PerComponent",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/samples/Blazor/PerComponent/PerComponent/PerComponent.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      
+      {
+        "label": "build-WebAssembly",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/samples/Blazor/WebAssembly/WebAssembly/WebAssembly.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      
+    ]
+
+}

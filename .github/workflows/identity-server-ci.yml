@@ -3,12 +3,13 @@ name: "CI"
 on:
   push:
     branches:
-    - main
-    - features/**
-    # tags:
-    # - '*.*.*'
+      - main
+      - releases/is/**
+    tags:
+      - 'is/*.*.*'
     paths: 
     - 'identity-server/**'
+
   pull_request:
     paths: 
     - 'identity-server/**'

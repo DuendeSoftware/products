@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support Forum
+    url: https://github.com/DuendeSoftware/Support/issues/new/choose
+    about: The place for questions, bug reports, support and feature requests
+  - name: Direct Contact
+    url: https://duendesoftware.com/contact
+    about: Contact us directly
