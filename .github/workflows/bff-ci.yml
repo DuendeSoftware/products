@@ -30,7 +30,7 @@ jobs:
       run:
         working-directory: bff
     steps:
-    - uses: actions/checkout@v2.4.0
+    - uses: actions/checkout@v4.2.2
       with:
         fetch-depth: 0
     
