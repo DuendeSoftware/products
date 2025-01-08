@@ -8,12 +8,12 @@ using System.Collections.Generic;
 namespace Duende.IdentityServer.Licensing;
 
 /// <summary>
-/// Usage summary for the current license.
+/// Usage summary for the current IdentityServer instance intended for auditing purposes.
 /// </summary>
-/// <param name="LicenseEdition"></param>
-/// <param name="ClientsUsed"></param>
-/// <param name="IssuersUsed"></param>
-/// <param name="FeaturesUsed"></param>
+/// <param name="LicenseEdition">License edition retrieved from license key.</param>
+/// <param name="ClientsUsed">Clients used in the current IdentityServer instance.</param>
+/// <param name="IssuersUsed">Issuers used in the current IdentityServer instance.</param>
+/// <param name="FeaturesUsed">Features used in the current IdentityServer instance.</param>
 public record LicenseUsageSummary(
     string LicenseEdition,
     IReadOnlyCollection<string> ClientsUsed,
