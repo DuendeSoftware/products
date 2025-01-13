@@ -47,7 +47,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
     }
 
     [Fact]
-    public async Task deliberate_failure()
+    public void deliberate_failure()
     {
         true.Should().Be(false);
     }
