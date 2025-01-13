@@ -115,7 +115,11 @@ namespace build
                         "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 " +
                         $"--azure-key-vault-client-secret {signClientSecret} " +
                         "--azure-key-vault-certificate CodeSigning"
-                        ,noEcho: true, handleExitCode: code => false);
+                        ,noEcho: true, handleExitCode: code =>
+                        {
+                            Console.WriteLine($"In the handleExitCode callback. code: {code}");
+                            return false;
+                        });
             }
         }
     }
