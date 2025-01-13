@@ -47,12 +47,6 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
     }
 
     [Fact]
-    public void deliberate_failure()
-    {
-        true.Should().Be(false);
-    }
-
-    [Fact]
     public async Task GetPendingLoginRequestsForCurrentUserAsync_should_use_current_sub_to_filter_results()
     {
         _mockUserSession.User = new IdentityServerUser("123").CreatePrincipal();
