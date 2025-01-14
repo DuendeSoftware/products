@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System;
 using Duende.Bff.Tests.TestFramework;
 using Shouldly;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,7 +17,7 @@ using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Xunit.Abstractions;
+using Yarp.ReverseProxy.Forwarder;
 
 namespace Duende.Bff.Tests.TestHosts
 {
@@ -59,9 +59,8 @@ namespace Duende.Bff.Tests.TestHosts
                 BffOptions = options; 
             });
 
-            services.AddSingleton<IHttpMessageInvokerFactory>(
-                new CallbackHttpMessageInvokerFactory(
-                    path => new HttpMessageInvoker(_apiHost.Server.CreateHandler())));
+            services.AddSingleton<IForwarderHttpClientFactory>(
+                new BackChannelHttpMessageInvokerFactory(_apiHost.Server.CreateHandler()));
 
             services.AddAuthentication("cookie")
                 .AddCookie("cookie", options =>
@@ -159,9 +158,6 @@ namespace Duende.Bff.Tests.TestHosts
                     .WithUserAccessTokenParameter(new BffUserAccessTokenParameters("cookie", null, true, "named_token_not_stored"))
                     .RequireAccessToken();
             });
-
-            app.Map("/invalid_endpoint",
-                invalid => invalid.Use(next => RemoteApiEndpoint.Map("/invalid_endpoint", _apiHost.Url())));
         }
 
         public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
@@ -226,20 +222,12 @@ namespace Duende.Bff.Tests.TestHosts
             response = await BrowserClient.GetAsync(Url(response.Headers.Location.ToString()));
             return response;
         }
+    }
 
-        public class CallbackHttpMessageInvokerFactory : IHttpMessageInvokerFactory
-        {
-            public CallbackHttpMessageInvokerFactory(Func<string, HttpMessageInvoker> callback)
-            {
-                CreateInvoker = callback;
-            }
-
-            public Func<string, HttpMessageInvoker> CreateInvoker { get; set; }
-
-            public HttpMessageInvoker CreateClient(string localPath)
-            {
-                return CreateInvoker.Invoke(localPath);
-            }
-        }
+    public class BackChannelHttpMessageInvokerFactory(HttpMessageHandler backChannel) 
+        : IForwarderHttpClientFactory
+    {
+        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => 
+            new HttpMessageInvoker(backChannel);
     }
 }

@@ -1,5 +1,5 @@
-// // Copyright (c) Duende Software. All rights reserved.
-// // See LICENSE in the project root for license information.
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -79,8 +79,6 @@ public class AccessTokenTransformProvider : ITransformProvider
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
-        TokenType tokenType;
-        bool optional;
         if(GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))
         {
             if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
@@ -94,13 +92,10 @@ public class AccessTokenTransformProvider : ITransformProvider
                 });
                 return;
             }
-            optional = true;
-            tokenType = TokenType.User;
         } 
         else if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
         {
-            optional = false;
-            if (!TokenType.TryParse(tokenTypeMetadata, true, out tokenType))
+            if (!Enum.TryParse<TokenType>(tokenTypeMetadata, true, out _))
             {
                 throw new ArgumentException("Invalid value for Duende.Bff.Yarp.TokenType metadata");
             }
@@ -114,13 +109,9 @@ public class AccessTokenTransformProvider : ITransformProvider
         {
             transformContext.HttpContext.CheckForBffMiddleware(_options);
 
-            var token = await transformContext.HttpContext.GetManagedAccessToken(tokenType, optional);
-
             var accessTokenTransform = new AccessTokenRequestTransform(
                 _dPoPProofService,
-                _loggerFactory.CreateLogger<AccessTokenRequestTransform>(),
-                token,
-                transformBuildContext?.Route?.RouteId, tokenType);
+                _loggerFactory.CreateLogger<AccessTokenRequestTransform>());
 
             await accessTokenTransform.ApplyAsync(transformContext);
         });

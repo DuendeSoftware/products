@@ -4,7 +4,10 @@
 using Duende.Bff;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using System;
 using Duende.Bff.Yarp;
+using Microsoft.Extensions.DependencyInjection;
+using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Microsoft.AspNetCore.Builder;
 
@@ -19,17 +22,37 @@ public static class BffYarpEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     /// <param name="localPath"></param>
     /// <param name="apiAddress"></param>
+    /// <param name="yarpTransformBuilder"></param>
     /// <returns></returns>
     public static IEndpointConventionBuilder MapRemoteBffApiEndpoint(
         this IEndpointRouteBuilder endpoints,
-        PathString localPath, 
-        string apiAddress)
+        PathString localPath,
+        string apiAddress,
+        Action<TransformBuilderContext>? yarpTransformBuilder = null)
     {
         endpoints.CheckLicense();
-            
-        return endpoints.Map(
-                localPath.Add("/{**catch-all}").Value!,
-                RemoteApiEndpoint.Map(localPath, apiAddress))
+
+        // Configure the yarp transform pipeline. Either use the one provided or the default
+        yarpTransformBuilder ??= context =>
+        {
+            // For the default, either get one from DI (to globally configure a default) 
+            var defaultYarpTransformBuilder = context.Services.GetService<BffYarpTransformBuilder>()
+                // or use the built-in default
+                ?? DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken;
+
+            // invoke the default transform builder
+            defaultYarpTransformBuilder(localPath, context);
+        };
+
+        return endpoints.MapForwarder(
+                pattern: localPath.Add("/{**catch-all}").Value!,
+                destinationPrefix: apiAddress,
+                configureTransform: context =>
+                {
+                    yarpTransformBuilder(context);
+                })
             .WithMetadata(new BffRemoteApiEndpointMetadata());
     }
+
+
 }

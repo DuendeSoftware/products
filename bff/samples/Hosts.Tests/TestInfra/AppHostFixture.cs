@@ -92,7 +92,8 @@ public class AppHostFixture : IAsyncLifetime
                 .WaitAsync(TimeSpan.FromSeconds(30));
         }
 
-
+#else
+        _app = null!;
 #endif //#DEBUG_NCRUNCH
     }
 

@@ -245,31 +245,6 @@ public class YarpBffHost : GenericHost
             endpoints.MapBffManagementEndpoints();
 
             endpoints.MapReverseProxy(proxyApp => { proxyApp.UseAntiforgeryCheck(); });
-
-            // replace with YARP endpoints
-            // endpoints.MapRemoteBffApiEndpoint(
-            //         "/api_user", _apiHost.Url())
-            //     .RequireAccessToken();
-            //
-            // endpoints.MapRemoteBffApiEndpoint(
-            //         "/api_user_no_csrf", _apiHost.Url())
-            //     .SkipAntiforgery()
-            //     .RequireAccessToken();
-            //
-            // endpoints.MapRemoteBffApiEndpoint(
-            //         "/api_client", _apiHost.Url())
-            //     .RequireAccessToken(TokenType.Client);
-            //
-            // endpoints.MapRemoteBffApiEndpoint(
-            //         "/api_user_or_client", _apiHost.Url())
-            //     .RequireAccessToken(TokenType.UserOrClient);
-            //
-            // endpoints.MapRemoteBffApiEndpoint(
-            //         "/api_user_or_anon", _apiHost.Url())
-            //     .WithOptionalUserAccessToken();
-            //
-            // endpoints.MapRemoteBffApiEndpoint(
-            //     "/api_anon_only", _apiHost.Url());
         });
     }
 

@@ -1,5 +1,5 @@
-// // Copyright (c) Duende Software. All rights reserved.
-// // See LICENSE in the project root for license information.
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,38 +20,7 @@ public static class BffBuilderExtensions
     public static BffBuilder AddRemoteApis(this BffBuilder builder)
     {
         builder.Services.AddHttpForwarder();
-
-        builder.Services.TryAddSingleton<IHttpMessageInvokerFactory, DefaultHttpMessageInvokerFactory>();
-        builder.Services.TryAddSingleton<IHttpTransformerFactory, DefaultHttpTransformerFactory>();
-
         return builder;
     }
 
-    /// <summary>
-    /// Adds a custom HttpMessageInvokerFactory to DI
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public static BffBuilder AddHttpMessageInvokerFactory<T>(this BffBuilder builder)
-        where T : class, IHttpMessageInvokerFactory
-    {
-        builder.Services.AddTransient<IHttpMessageInvokerFactory, T>();
-        
-        return builder;
-    }
-        
-    /// <summary>
-    /// Adds a custom HttpTransformerFactory to DI
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public static BffBuilder AddHttpTransformerFactory<T>(this BffBuilder builder)
-        where T : class, IHttpTransformerFactory
-    {
-        builder.Services.AddTransient<IHttpTransformerFactory, T>();
-        
-        return builder;
-    }
 }

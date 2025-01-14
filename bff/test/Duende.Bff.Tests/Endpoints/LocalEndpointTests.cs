@@ -21,7 +21,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/local_authz")
             );
 
@@ -35,7 +35,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/local_authz_no_csrf")
             );
 
@@ -75,7 +75,7 @@ namespace Duende.Bff.Tests.Endpoints
         [Fact]
         public async Task calls_to_anon_endpoint_should_allow_anonymous()
         {
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/local_anon")
             );
 
@@ -89,7 +89,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/local_authz"),
                 method: HttpMethod.Put,
                 content: JsonContent.Create(new TestPayload("hello test api"))

@@ -31,7 +31,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            var (response, apiResult) = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/api_user/test")
             );
 
@@ -39,6 +39,9 @@ namespace Duende.Bff.Tests.Endpoints
             apiResult.Path.ShouldBe("/test");
             apiResult.Sub.ShouldBe("alice");
             apiResult.ClientId.ShouldBe("spa");
+
+            response.Headers.GetValues("added-by-custom-default-transform").ShouldBe(["some-value"],
+                "this value is added by the CustomDefaultBffTransformBuilder()");
         }
 
         [Fact]
@@ -46,7 +49,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHostWithNamedTokens.BffLoginAsync("alice");
 
-            var apiResult = await BffHostWithNamedTokens.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHostWithNamedTokens.BrowserClient.CallBffHostApi(
                 url: BffHostWithNamedTokens.Url("/api_user_with_useraccesstokenparameters_having_stored_named_token/test")
             );
 
@@ -72,7 +75,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/api_user/test"),
                 method: HttpMethod.Put,
                 content: JsonContent.Create(new TestPayload("hello test api"))
@@ -91,7 +94,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/api_user/test"),
                 method: HttpMethod.Post,
                 content: JsonContent.Create(new TestPayload("hello test api"))
@@ -109,7 +112,7 @@ namespace Duende.Bff.Tests.Endpoints
         public async Task calls_to_remote_endpoint_should_forward_user_or_anonymous_to_api()
         {
             {
-                var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+                ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                     url: BffHost.Url("/api_user_or_anon/test")
                 );
 
@@ -122,7 +125,7 @@ namespace Duende.Bff.Tests.Endpoints
             {
                 await BffHost.BffLoginAsync("alice");
 
-                var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+                ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                     url: BffHost.Url("/api_user_or_anon/test")
                 );
 
@@ -138,7 +141,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/api_client/test")
             );
 
@@ -164,7 +167,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/api_with_access_token_retriever")
             );
 
@@ -176,7 +179,7 @@ namespace Duende.Bff.Tests.Endpoints
         public async Task calls_to_remote_endpoint_should_forward_user_or_client_to_api()
         {
             {
-                var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+                ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                     url: BffHost.Url("/api_user_or_client/test")
                 );
 
@@ -189,7 +192,7 @@ namespace Duende.Bff.Tests.Endpoints
             {
                 await BffHost.BffLoginAsync("alice");
 
-                var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+                ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                     url: BffHost.Url("/api_user_or_client/test")
                 );
 
@@ -204,7 +207,7 @@ namespace Duende.Bff.Tests.Endpoints
         public async Task calls_to_remote_endpoint_with_anon_should_be_anon()
         {
             {
-                var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+                ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                     url: BffHost.Url("/api_anon_only/test")
                 );
 
@@ -217,7 +220,7 @@ namespace Duende.Bff.Tests.Endpoints
             {
                 await BffHost.BffLoginAsync("alice");
 
-                var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+                ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                     url: BffHost.Url("/api_anon_only/test")
                 );
 
@@ -282,7 +285,7 @@ namespace Duende.Bff.Tests.Endpoints
         {
             await BffHost.BffLoginAsync("alice");
 
-            var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/api_user_no_csrf/test")
             );
 
@@ -293,22 +296,23 @@ namespace Duende.Bff.Tests.Endpoints
         }
 
         [Fact]
-        public async Task calls_to_endpoint_without_bff_metadata_should_fail()
+        public async Task endpoint_can_be_configured_with_custom_transform()
         {
-            Func<Task> f = () => BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/not_bff_endpoint")
-            );
-            await f.ShouldThrowAsync<Exception>();
-        }
+            await BffHost.BffLoginAsync("alice");
 
-        [Fact]
-        public async Task calls_to_bff_not_in_endpoint_routing_should_fail()
-        {
-            Func<Task> f = () => BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/invalid_endpoint/test")
-            );
-            await f.ShouldThrowAsync<Exception>();
-        }
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_custom_transform/test"));
+            req.Headers.Add("x-csrf", "1");
+            req.Headers.Add("my-header-to-be-copied-by-yarp", "copied-value");
+            var response = await BffHost.BrowserClient.SendAsync(req);
 
+            response.IsSuccessStatusCode.ShouldBeTrue();
+            response.Content.Headers.ContentType!.MediaType.ShouldBe("application/json");
+            var json = await response.Content.ReadAsStringAsync();
+            ApiResponse apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
+            apiResult.RequestHeaders["my-header-to-be-copied-by-yarp"].First().ShouldBe("copied-value");
+
+            response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform", 
+                "a custom transform doesn't run the defaults");
+        }
     }
 }

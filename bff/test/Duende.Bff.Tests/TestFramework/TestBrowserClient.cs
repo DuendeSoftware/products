@@ -86,7 +86,7 @@ public class TestBrowserClient : HttpClient
     /// <param name="expectedStatusCode">If specified, the system will verify that this reponse code was given</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>The specified api response</returns>
-    public async Task<ApiResponse> CallBffHostApi(
+    public async Task<BffHostResponse> CallBffHostApi(
         string url, 
         HttpStatusCode? expectedStatusCode = null, 
         CancellationToken ct = default)
@@ -104,17 +104,17 @@ public class TestBrowserClient : HttpClient
 
             apiResult.Method.ShouldBe("GET", StringCompareShould.IgnoreCase);
 
-            return apiResult;
+            return new (response, apiResult);
         }
         else
         {
             response.StatusCode.ToString().ShouldBe(expectedStatusCode.ToString());
-            return null!;
+            return new (response, null!);
         }
 
     }
 
-    public async Task<ApiResponse> CallBffHostApi(
+    public async Task<BffHostResponse> CallBffHostApi(
         string url, 
         HttpMethod method, 
         HttpContent? content = null,
@@ -136,15 +136,20 @@ public class TestBrowserClient : HttpClient
             var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
             apiResult.Method.ShouldBe(method.ToString(), StringCompareShould.IgnoreCase);
-            return apiResult;
+            return new(response, apiResult);
         }
         else
         {
             response.StatusCode.ToString().ShouldBe(expectedStatusCode.ToString());
-            return null!;
+            return new(response, null!);
         }
     }
 
+    public record BffHostResponse(HttpResponseMessage HttpResponse, ApiResponse ApiResponse)
+    {
+        public static implicit operator HttpResponseMessage(BffHostResponse response) => response.HttpResponse;
+        public static implicit operator ApiResponse(BffHostResponse response) => response.ApiResponse;
+    }
 
 
 }

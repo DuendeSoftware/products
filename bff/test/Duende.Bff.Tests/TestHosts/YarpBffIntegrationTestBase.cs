@@ -17,7 +17,7 @@ namespace Duende.Bff.Tests.TestHosts
     {
         private readonly IdentityServerHost _identityServerHost;
         protected readonly ApiHost ApiHost;
-        protected readonly YarpBffHost BffHost;
+        protected readonly YarpBffHost YarpBasedBffHost;
         private BffHostUsingResourceNamedTokens _bffHostWithNamedTokens;
 
         protected YarpBffIntegrationTestBase(ITestOutputHelper output)
@@ -40,14 +40,14 @@ namespace Duende.Bff.Tests.TestHosts
             _identityServerHost.OnConfigureServices += services => {
                 services.AddTransient<IBackChannelLogoutHttpClient>(provider => 
                     new DefaultBackChannelLogoutHttpClient(
-                        BffHost!.HttpClient, 
+                        YarpBasedBffHost!.HttpClient, 
                         provider.GetRequiredService<ILoggerFactory>(), 
                         provider.GetRequiredService<ICancellationTokenProvider>()));
             };
             
             ApiHost = new ApiHost(output.WriteLine, _identityServerHost, "scope1");
 
-            BffHost = new YarpBffHost(output.WriteLine, _identityServerHost, ApiHost, "spa");
+            YarpBasedBffHost = new YarpBffHost(output.WriteLine, _identityServerHost, ApiHost, "spa");
 
             _bffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(output.WriteLine, _identityServerHost, ApiHost, "spa");
         }
@@ -61,7 +61,7 @@ namespace Duende.Bff.Tests.TestHosts
         {
             await _identityServerHost.InitializeAsync();
             await ApiHost.InitializeAsync();
-            await BffHost.InitializeAsync();
+            await YarpBasedBffHost.InitializeAsync();
             await _bffHostWithNamedTokens.InitializeAsync();
 
         }
@@ -70,7 +70,7 @@ namespace Duende.Bff.Tests.TestHosts
         {
             await _identityServerHost.DisposeAsync();
             await ApiHost.DisposeAsync();
-            await BffHost.DisposeAsync();
+            await YarpBasedBffHost.DisposeAsync();
             await _bffHostWithNamedTokens.DisposeAsync();
         }
     }

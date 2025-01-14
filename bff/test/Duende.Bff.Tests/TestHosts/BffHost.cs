@@ -17,6 +17,10 @@ using System.Threading.Tasks;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Yarp.ReverseProxy.Forwarder;
+using Yarp.ReverseProxy.Transforms;
+using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Duende.Bff.Tests.TestHosts;
 
@@ -61,15 +65,17 @@ public class BffHost : GenericHost
             BffOptions = options;
         });
 
-        services.AddSingleton<IHttpMessageInvokerFactory>(
+        services.AddSingleton<IForwarderHttpClientFactory>(
             new CallbackHttpMessageInvokerFactory(
-                path => new HttpMessageInvoker(_apiHost.Server.CreateHandler())));
+                () => new HttpMessageInvoker(_apiHost.Server.CreateHandler())));
 
         services.AddAuthentication("cookie")
             .AddCookie("cookie", options =>
             {
                 options.Cookie.Name = "bff";
             });
+
+        services.AddSingleton<BffYarpTransformBuilder>(CustomDefaultBffTransformBuilder);
 
         bff.AddServerSideSessions();
         bff.AddRemoteApis();
@@ -116,6 +122,13 @@ public class BffHost : GenericHost
 
         services.AddSingleton(new TestAccessTokenRetriever(async ()
             => await _identityServerHost.CreateJwtAccessTokenAsync()));
+    }
+
+
+    private void CustomDefaultBffTransformBuilder(string localpath, TransformBuilderContext context)
+    {
+        context.AddResponseHeader("added-by-custom-default-transform", "some-value");
+        DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken(localpath, context);
     }
 
     private void Configure(IApplicationBuilder app)
@@ -421,6 +434,16 @@ public class BffHost : GenericHost
             endpoints.MapRemoteBffApiEndpoint(
                 "/api_anon_only", _apiHost.Url());
 
+            // Add a custom transform. This transform just copies the request headers
+            // which allows the tests to see if this custom transform works
+            endpoints.MapRemoteBffApiEndpoint(
+                "/api_custom_transform", _apiHost.Url(),
+                c =>
+                {
+                    c.CopyRequestHeaders = true;
+                    DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken("/api_custom_transform", c);
+                });
+
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_with_access_token_retriever", _apiHost.Url())
                 .RequireAccessToken(TokenType.UserOrClient)
@@ -430,14 +453,7 @@ public class BffHost : GenericHost
                     "/api_with_access_token_retrieval_that_fails", _apiHost.Url())
                 .RequireAccessToken(TokenType.UserOrClient)
                 .WithAccessTokenRetriever<FailureAccessTokenRetriever>();
-
-            endpoints.Map(
-                "/not_bff_endpoint",
-                RemoteApiEndpoint.Map("/not_bff_endpoint", _apiHost.Url()));
         });
-
-        app.Map("/invalid_endpoint",
-            invalid => invalid.Use(next => RemoteApiEndpoint.Map("/invalid_endpoint", _apiHost.Url())));
     }
 
     public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
@@ -519,13 +535,18 @@ public class BffHost : GenericHost
         return response;
     }
 
-    private class CallbackHttpMessageInvokerFactory(Func<string, HttpMessageInvoker> callback)
-        : IHttpMessageInvokerFactory
+    public class CallbackHttpMessageInvokerFactory : IForwarderHttpClientFactory
     {
-
-        public HttpMessageInvoker CreateClient(string localPath)
+        public CallbackHttpMessageInvokerFactory(Func<HttpMessageInvoker> callback)
         {
-            return callback.Invoke(localPath);
+            CreateInvoker = callback;
+        }
+
+        public Func<HttpMessageInvoker> CreateInvoker { get; set; }
+
+        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context)
+        {
+            return CreateInvoker.Invoke();
         }
     }
 }

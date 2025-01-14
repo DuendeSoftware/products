@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 
@@ -15,25 +16,26 @@ public class AccessTokenRetrievalContext
     /// The HttpContext of the incoming HTTP request that will be forwarded to
     /// the remote API.
     /// </summary>
-    public HttpContext HttpContext { get; set; } = default!;
+    public required HttpContext HttpContext { get; set; }
     
     /// <summary>
     /// Metadata that describes the remote API.
     /// </summary>
-    public BffRemoteApiEndpointMetadata Metadata { get; set; } = default!;
-    
-    /// <summary>
-    /// The locally requested path.
-    /// </summary>
-    public string LocalPath { get; set; } = string.Empty;
-    
-    /// <summary>
-    /// The remote address of the API.
-    /// </summary>
-    public string ApiAddress { get; set; } = string.Empty;
+    public required BffRemoteApiEndpointMetadata Metadata { get; set; }
 
     /// <summary>
     /// Additional optional per request parameters for a user access token request.
     /// </summary>
-    public UserTokenRequestParameters? UserTokenRequestParameters { get; set; }
+    public required UserTokenRequestParameters? UserTokenRequestParameters { get; set; }
+
+
+    /// <summary>
+    /// The locally requested path.
+    /// </summary>
+    public required PathString LocalPath { get; set; }
+
+    /// <summary>
+    /// The remote address of the API.
+    /// </summary>
+    public required Uri ApiAddress { get; set; }
 }

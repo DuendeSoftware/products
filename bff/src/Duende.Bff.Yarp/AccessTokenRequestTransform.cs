@@ -2,12 +2,18 @@
 // See LICENSE in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Duende.AccessTokenManagement;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Logging;
 using Duende.IdentityModel;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Yarp.ReverseProxy.Model;
 using Yarp.ReverseProxy.Transforms;
 
 namespace Duende.Bff.Yarp;
@@ -15,40 +21,53 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Adds an access token to outgoing requests
 /// </summary>
-public class AccessTokenRequestTransform : RequestTransform
+public class AccessTokenRequestTransform(
+    IDPoPProofService proofService,
+    ILogger<AccessTokenRequestTransform> logger) : RequestTransform
 {
-    private readonly IDPoPProofService _dPoPProofService;
-    private readonly ILogger<AccessTokenRequestTransform> _logger;
-    private readonly AccessTokenResult _token;
-    private readonly string? _routeId;
-    private readonly TokenType? _tokenType;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="proofService"></param>
-    /// <param name="logger"></param>
-    /// <param name="accessToken"></param>
-    /// <param name="routeId"></param>
-    /// <param name="tokenType"></param>
-    public AccessTokenRequestTransform(
-        IDPoPProofService proofService,
-        ILogger<AccessTokenRequestTransform> logger,
-        AccessTokenResult accessToken,
-        string? routeId = null,
-        TokenType? tokenType = null)
-    {
-        _dPoPProofService = proofService;
-        _logger = logger;
-        _token = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
-        _routeId = routeId;
-        _tokenType = tokenType;
-    }
 
     /// <inheritdoc />
     public override async ValueTask ApplyAsync(RequestTransformContext context)
     {
-        switch (_token)
+        var endpoint = context.HttpContext.GetEndpoint();
+        if (endpoint == null)
+        {
+            throw new InvalidOperationException("endpoint not found");
+        }
+        UserTokenRequestParameters? userAccessTokenParameters = null;
+
+        context.HttpContext.RequestServices.CheckLicense();
+
+        // Get the metadata
+        var metadata =
+            // Either from the endpoint directly, when using mapbff
+            endpoint.Metadata.GetMetadata<BffRemoteApiEndpointMetadata>()
+            // or from yarp
+            ?? GetBffMetadataFromYarp(endpoint)
+            ?? throw new InvalidOperationException("API endpoint is missing BFF metadata");
+        
+        if (metadata.BffUserAccessTokenParameters != null)
+        {
+            userAccessTokenParameters = metadata.BffUserAccessTokenParameters.ToUserAccessTokenRequestParameters();
+        }
+
+        if (context.HttpContext.RequestServices.GetRequiredService(metadata.AccessTokenRetriever)
+            is not IAccessTokenRetriever accessTokenRetriever)
+        {
+            throw new InvalidOperationException("TokenRetriever is not an IAccessTokenRetriever");
+        }
+
+        var accessTokenContext = new AccessTokenRetrievalContext()
+        {
+            HttpContext = context.HttpContext,
+            Metadata = metadata,
+            UserTokenRequestParameters = userAccessTokenParameters,
+            ApiAddress = new Uri(context.DestinationPrefix),
+            LocalPath = context.HttpContext.Request.Path
+        };
+        var result = await accessTokenRetriever.GetAccessToken(accessTokenContext);
+
+        switch (result)
         {
             case BearerTokenResult bearerToken:
                 ApplyBearerToken(context, bearerToken);
@@ -57,7 +76,7 @@ public class AccessTokenRequestTransform : RequestTransform
                 await ApplyDPoPToken(context, dpopToken);
                 break;
             case AccessTokenRetrievalError tokenError:
-                ApplyError(context, tokenError, _routeId ?? "Unknown Route", _tokenType);
+                ApplyError(context, tokenError, metadata.RequiredTokenType);
                 break;
             case NoAccessTokenResult noToken:
                 break;
@@ -66,12 +85,31 @@ public class AccessTokenRequestTransform : RequestTransform
         }
     }
 
-    private void ApplyError(RequestTransformContext context, AccessTokenRetrievalError tokenError, string routeId, TokenType? tokenType)
+    private static BffRemoteApiEndpointMetadata? GetBffMetadataFromYarp(Endpoint endpoint)
+    {
+        var yarp = endpoint.Metadata.GetMetadata<RouteModel>();
+        if (yarp == null)
+            return null;
+
+        TokenType? requiredTokenType = null;
+        if (Enum.TryParse<TokenType>(yarp.Config?.Metadata?.GetValueOrDefault(Constants.Yarp.TokenTypeMetadata), true, out var type))
+        {
+            requiredTokenType = type;
+        }
+
+        return new BffRemoteApiEndpointMetadata()
+        {
+            OptionalUserToken = yarp.Config?.Metadata?.GetValueOrDefault(Constants.Yarp.OptionalUserTokenMetadata) == "true",
+            RequiredTokenType = requiredTokenType
+        };
+    }
+
+    private void ApplyError(RequestTransformContext context, AccessTokenRetrievalError tokenError, TokenType? tokenType)
     {
         // short circuit forwarder and return 401
         context.HttpContext.Response.StatusCode = 401;
 
-        _logger.AccessTokenMissing(tokenType?.ToString() ?? "Unknown token type", routeId, tokenError.Error);
+        logger.AccessTokenMissing(tokenType?.ToString() ?? "Unknown token type", context.HttpContext.Request.Path, tokenError.Error);
     }
 
     private void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token)
@@ -85,7 +123,7 @@ public class AccessTokenRequestTransform : RequestTransform
         ArgumentNullException.ThrowIfNull(token.DPoPJsonWebKey, nameof(token.DPoPJsonWebKey));
 
         var baseUri = new Uri(context.DestinationPrefix);
-        var proofToken = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
+        var proofToken = await proofService.CreateProofTokenAsync(new DPoPProofRequest
         {
             AccessToken = token.AccessToken,
             DPoPJsonWebKey = token.DPoPJsonWebKey,

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System;
 using Duende.Bff;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -133,11 +134,17 @@ public static class BffEndpointRouteBuilderExtensions
         
     internal static void CheckLicense(this IEndpointRouteBuilder endpoints)
     {
+        endpoints.ServiceProvider.CheckLicense();
+
+    }
+
+    internal static void CheckLicense(this IServiceProvider serviceProvider)
+    {
         if (LicenseChecked == false)
         {
-            var loggerFactory = endpoints.ServiceProvider.GetRequiredService<ILoggerFactory>();
-            var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
-                
+            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+            var options = serviceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
+
             LicenseValidator.Initalize(loggerFactory, options);
             LicenseValidator.ValidateLicense();
         }
