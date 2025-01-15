@@ -4,7 +4,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using IdentityModel;
+using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,22 +43,22 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// Provides the options for DPoP proof validation. 
     /// </summary>
     protected readonly IOptionsMonitor<DPoPOptions> OptionsMonitor;
-    
+
     /// <summary>
     /// Protects and unprotects nonce values.
     /// </summary>
     protected readonly IDataProtector DataProtector;
-    
+
     /// <summary>
     /// Caches proof tokens to detect replay.
     /// </summary>
     protected readonly IReplayCache ReplayCache;
-    
+
     /// <summary>
     /// Clock for checking proof expiration.
     /// </summary>
     protected readonly TimeProvider TimeProvider;
-    
+
     /// <summary>
     /// The logger.
     /// </summary>
@@ -198,7 +198,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                 Logger.LogDebug("Null cnf value in DPoP access token.");
                 result.SetError("Invalid 'cnf' value.");
                 return Task.CompletedTask;
-            } 
+            }
             else if (cnfJson.TryGetValue(JwtClaimTypes.ConfirmationMethods.JwkThumbprint, out var jktJson))
             {
                 var accessTokenJkt = jktJson.ToString();
@@ -274,7 +274,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// </summary>
     protected virtual async Task ValidatePayload(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
     {
-        if(result.Payload is null )
+        if (result.Payload is null)
         {
             result.SetError("Missing payload");
             return;
@@ -443,7 +443,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         CancellationToken _ = default)
     {
         // iat is required by an earlier validation, so result.IssuedAt will not be null
-        if (IsExpired(context, result, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt)) 
+        if (IsExpired(context, result, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt))
         {
             result.SetError("Invalid 'iat' value.");
         }
@@ -524,12 +524,12 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
         var validityDuration = dpopOptions.ProofTokenValidityDuration;
-        var skew = mode == ExpirationValidationMode.Nonce ? dpopOptions.ServerClockSkew 
+        var skew = mode == ExpirationValidationMode.Nonce ? dpopOptions.ServerClockSkew
             : dpopOptions.ClientClockSkew;
 
         return IsExpired(validityDuration, skew, time);
     }
-    
+
     internal bool IsExpired(TimeSpan validityDuration, TimeSpan clockSkew, long time)
     {
         var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();

@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using IdentityModel;
+using Duende.IdentityModel;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
@@ -49,7 +49,7 @@ public class DPoPProofValidationResult
     /// The SHA256 hash of the jti value read from the payload.
     /// </summary>
     public string? TokenIdHash { get; set; }
-    
+
     /// <summary>
     /// The ath value read from the payload.
     /// </summary>
