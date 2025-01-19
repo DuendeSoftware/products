@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.Net.Http.Headers;
 using static IdentityModel.OidcConstants;
 
@@ -73,16 +72,12 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
                 throw new InvalidOperationException("Missing DPoP (proof token) HTTP header");
             }
 
-            // TODO - Add support for introspection
-            var handler = new JsonWebTokenHandler();
-            var parsedToken = handler.ReadJsonWebToken(at);
-
             var result = await _validator.Validate(new DPoPProofValidationContext
             {
                 Scheme = context.Scheme.Name,
                 ProofToken = proofToken,
                 AccessToken = at,
-                AccessTokenClaims = context.Principal?.Claims ?? parsedToken?.Claims ?? [],
+                AccessTokenClaims = context.Principal?.Claims ?? [],
                 Method = context.HttpContext.Request.Method,
                 Url = context.HttpContext.Request.Scheme + "://" + context.HttpContext.Request.Host + context.HttpContext.Request.PathBase + context.HttpContext.Request.Path
             });
