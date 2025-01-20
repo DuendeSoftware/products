@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
-using IdentityModel;
+using Duende.IdentityModel;
 using Microsoft.IdentityModel.Tokens;
 using Shouldly;
 

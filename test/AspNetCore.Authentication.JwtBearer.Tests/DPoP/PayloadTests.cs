@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using IdentityModel;
+using Duende.IdentityModel;
 using Shouldly;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
