@@ -85,6 +85,11 @@ public class X509KeyContainer : KeyContainer
     /// The X509 certificate data.
     /// </summary>
     public string CertificateRawData { get; set; }
+    
+    /// <summary>
+    /// The expiration date of the certificate.
+    /// </summary>
+    public DateTime NotAfter => _cert.NotAfter;
 
     /// <inheritdoc />
     public override AsymmetricSecurityKey ToSecurityKey()

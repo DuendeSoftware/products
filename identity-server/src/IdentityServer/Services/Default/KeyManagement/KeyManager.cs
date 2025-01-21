@@ -384,6 +384,11 @@ public class KeyManager : IKeyManager
         var result = keys
             .Where(x =>
             {
+                if (x is X509KeyContainer x509Key)
+                {
+                    return x509Key.NotAfter > _clock.UtcNow;
+                }
+                
                 var age = _clock.GetAge(x.Created);
                 var isExpired = _options.KeyManagement.IsExpired(age);
                 return !isExpired;
