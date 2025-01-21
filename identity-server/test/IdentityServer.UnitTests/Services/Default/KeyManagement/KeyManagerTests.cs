@@ -540,7 +540,7 @@ public class KeyManagerTests
 
         var result = _subject.FilterExpiredKeys(new[] { key1, key2, key3, key4, key5, key6, key7, key8 });
 
-        result.Select(x => x.Id).Should().BeEquivalentTo(new[] { key3.Id, key4.Id, key5.Id, key6.Id });
+        result.Select(x => x.Id).Should().BeEquivalentTo(new[] { key3.Id, key4.Id, key5.Id, key6.Id, key8.Id });
     }
 
     // CacheKeysAsync
