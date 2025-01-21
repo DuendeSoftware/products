@@ -531,16 +531,12 @@ public class KeyManagerTests
         var key4 = CreateKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromSeconds(1)));
         var key5 = CreateKey(_options.KeyManagement.PropagationTime);
         var key6 = CreateKey(_options.KeyManagement.PropagationTime.Subtract(TimeSpan.FromSeconds(1)));
-        var key7 = CreateKey(
-            _options.KeyManagement.RotationInterval.Subtract(TimeSpan.FromSeconds(1)),
-            x509: true);
-        var key8 = CreateKey(
-            _options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(1)),
-            x509: true);
+        var key7 = CreateKey(_options.KeyManagement.RotationInterval.Subtract(TimeSpan.FromSeconds(1)), x509: true);
+        var key8 = CreateKey(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(1)), x509: true);
 
         var result = _subject.FilterExpiredKeys(new[] { key1, key2, key3, key4, key5, key6, key7, key8 });
 
-        result.Select(x => x.Id).Should().BeEquivalentTo(new[] { key3.Id, key4.Id, key5.Id, key6.Id, key8.Id });
+        result.Select(x => x.Id).Should().BeEquivalentTo(new[] { key3.Id, key4.Id, key5.Id, key6.Id, key7.Id });
     }
 
     // CacheKeysAsync
