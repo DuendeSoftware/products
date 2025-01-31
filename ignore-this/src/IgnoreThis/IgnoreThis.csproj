@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Duende.IgnoreThis</PackageId>
+    <AssemblyName>$(PackageId)</AssemblyName>
+    <RootNamespace>$(PackageId)</RootNamespace>
+    <Description>Automatic access token management for OAuth client credential flows</Description>
+  </PropertyGroup>
+</Project>

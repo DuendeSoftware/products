@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <RootNamespace>Duende.IgnoreThis</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IgnoreThis\IgnoreThis.csproj" />
+  </ItemGroup>
+</Project>
