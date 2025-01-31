@@ -10,19 +10,16 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
         <PackageReference Include="AngleSharp" />
-        <PackageReference Include="xunit" />
-        <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="FluentAssertions.Web" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Net.Http" Version="4.3.4" />
-        <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+        <PackageReference Include="System.Net.Http" />
+        <PackageReference Include="System.Text.RegularExpressions" />
     </ItemGroup>
 
     <ItemGroup>

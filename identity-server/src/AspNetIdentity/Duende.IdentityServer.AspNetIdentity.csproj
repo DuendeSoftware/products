@@ -5,13 +5,7 @@
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Description>ASP.NET Core Identity Integration for Duende IdentityServer</Description>
         <AssemblyName>Duende.IdentityServer.AspNetIdentity</AssemblyName>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath=""/>
-    </ItemGroup>
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />

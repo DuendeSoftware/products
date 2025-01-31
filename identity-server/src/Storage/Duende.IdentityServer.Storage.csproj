@@ -5,14 +5,7 @@
 
         <PackageId>Duende.IdentityServer.Storage</PackageId>
         <Description>Storage interfaces and models for Duende IdentityServer</Description>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
-        <PackageReadmeFile>README.md</PackageReadmeFile>    
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath=""/>
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Duende.IdentityModel" />
