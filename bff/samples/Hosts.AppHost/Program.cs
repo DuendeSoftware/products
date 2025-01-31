@@ -18,15 +18,14 @@ builder.AddProject<Projects.Bff_EF>("bff-ef")
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
-builder.AddProject<Projects.WebAssembly>("bff-webassembly-per-component")
+builder.AddProject<Projects.WebAssembly>("bff-blazor-webassembly")
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
 
-
-builder.AddProject<Projects.PerComponent>("bff-blazor-per-component")
+builder.AddProject<Projects.PerComponent>("bff-blazor-server")
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
