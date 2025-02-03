@@ -51,8 +51,8 @@ internal static class ClaimsExtensions
 
     private static object GetValue(Claim claim)
     {
-        if (claim.ValueType == ClaimValueTypes.Integer ||
-            claim.ValueType == ClaimValueTypes.Integer32)
+        if (claim.ValueType is ClaimValueTypes.Integer or
+                               ClaimValueTypes.Integer32)
         {
             if (Int32.TryParse(claim.Value, out var value))
             {

@@ -83,8 +83,8 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
         // was pushed)
         if (_options?.PushedAuthorization?.AllowUnregisteredPushedRedirectUris == true &&
             context.Client.RequireClientSecret && 
-            (context.AuthorizeRequestType == AuthorizeRequestType.PushedAuthorization ||
-             context.AuthorizeRequestType == AuthorizeRequestType.AuthorizeWithPushedParameters))
+            context.AuthorizeRequestType is AuthorizeRequestType.PushedAuthorization or
+                                            AuthorizeRequestType.AuthorizeWithPushedParameters)
         {
             return Task.FromResult(true);
         }
