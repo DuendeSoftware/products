@@ -1,4 +1,5 @@
 using Aspire.Hosting;
+using Hosts.ServiceDefaults;
 using Microsoft.Extensions.Logging;
 using Projects;
 using Serilog;
@@ -77,33 +78,16 @@ public class AppHostFixture : IAsyncLifetime
         await (await appHost.BuildAsync()).StartAsync();
 
         // Wait for all the services so that their logs are mostly written. 
-        await resourceNotificationService.WaitForResourceAsync(
-                "bff",
-                KnownResourceStates.Running
-            )
-            .WaitAsync(TimeSpan.FromSeconds(30));
 
-        await resourceNotificationService.WaitForResourceAsync(
-                "bff-ef",
-                KnownResourceStates.Running
-            )
-            .WaitAsync(TimeSpan.FromSeconds(30));
+        foreach (var resource in AppHostServices.All)
+        {
+            await resourceNotificationService.WaitForResourceAsync(
+                    resource,
+                    KnownResourceStates.Running
+                )
+                .WaitAsync(TimeSpan.FromSeconds(30));
+        }
 
-        await resourceNotificationService.WaitForResourceAsync(
-                "bff-webassembly-per-component",
-                KnownResourceStates.Running
-            )
-            .WaitAsync(TimeSpan.FromSeconds(30));
-        await resourceNotificationService.WaitForResourceAsync(
-                "bff-dpop",
-                KnownResourceStates.Running
-            )
-            .WaitAsync(TimeSpan.FromSeconds(30));
-        await resourceNotificationService.WaitForResourceAsync(
-                "migrations",
-                KnownResourceStates.Running
-            )
-            .WaitAsync(TimeSpan.FromSeconds(30));
 
 #endif //#DEBUG_NCRUNCH
     }
