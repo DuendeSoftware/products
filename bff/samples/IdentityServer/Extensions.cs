@@ -2,8 +2,6 @@
 // // See LICENSE in the project root for license information.
 
 using IdentityServerHost;
-using Serilog;
-
 namespace IdentityServer;
 
 internal static class Extensions
@@ -34,8 +32,8 @@ internal static class Extensions
     }
     
     public static WebApplication ConfigurePipeline(this WebApplication app)
-    { 
-        app.UseSerilogRequestLogging();
+    {
+        app.UseHttpLogging();
         app.UseDeveloperExceptionPage();
         app.UseStaticFiles();
 

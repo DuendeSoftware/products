@@ -12,8 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" />
-    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="Aspire.Hosting.AppHost"/>
   </ItemGroup>
 
     <ItemGroup>

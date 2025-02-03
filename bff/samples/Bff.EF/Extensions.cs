@@ -6,14 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using UserSessionDb.Migrations.UserSessions;
 
 namespace Bff.EF
 {
     internal static class Extensions
     {
-
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
             var services = builder.Services;
@@ -79,7 +77,7 @@ namespace Bff.EF
 
         public static WebApplication ConfigurePipeline(this WebApplication app)
         {
-            app.UseSerilogRequestLogging();
+            app.UseHttpLogging();
             app.UseDeveloperExceptionPage();
 
             app.UseDefaultFiles();

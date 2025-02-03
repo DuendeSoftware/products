@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 
 namespace Api.Isolated
 {
@@ -56,7 +55,7 @@ namespace Api.Isolated
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost,
             });
 
-            app.UseSerilogRequestLogging();
+            app.UseHttpLogging();
 
             if (app.Environment.IsDevelopment())
             {

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
 	<TargetFrameworks>net9.0</TargetFrameworks>
@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" />
     <ProjectReference Include="..\PerComponent.Client\PerComponent.Client.csproj" />
     <ProjectReference Include="..\..\..\..\src\Duende.Bff\Duende.Bff.csproj" />
     <ProjectReference Include="..\..\..\..\src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj" />

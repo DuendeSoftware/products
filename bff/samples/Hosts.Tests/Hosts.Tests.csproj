@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
@@ -21,7 +21,10 @@
 		<PackageReference Include="Serilog.Extensions.Logging" />
 		<PackageReference Include="Serilog.Sinks.TextWriter" />
 		<PackageReference Include="Serilog.Sinks.XUnit" />
-		<PackageReference Include="Shouldly" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Shouldly" />
+		<PackageReference Include="xunit.core" />
+		<PackageReference Include="xunit.runner.visualstudio" />
 		<PackageReference Include="Aspire.Hosting.Testing" />
 		<PackageReference Include="Xunit.SkippableFact" />
 

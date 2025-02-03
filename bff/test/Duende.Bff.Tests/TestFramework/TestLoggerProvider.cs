@@ -48,7 +48,14 @@ namespace Duende.Bff.Tests.TestFramework
 
         private void Log(string msg)
         {
-            _writeOutput?.Invoke(_name + msg);
+            try
+            {
+                _writeOutput?.Invoke(_name + msg);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Logging Failed: " + msg);
+            }
             LogEntries.Add(msg);
         }
 
