@@ -150,7 +150,9 @@ public class AppHostFixture : IAsyncLifetime
             // so build a http client that directly points to this host. 
             var url = clientName switch
             {
-                "bff" => "https://localhost:5002",
+                AppHostServices.Bff => "https://localhost:5002",
+                AppHostServices.BffBlazorPerComponent => "https://localhost:5105",
+                AppHostServices.BffBlazorWebassembly => "https://localhost:5005",
                 _ => throw new InvalidOperationException("client not configured")
             };
             baseAddress = new Uri(url);

@@ -74,9 +74,9 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                         OidcConstants.GrantTypes.TokenExchange
                     },
 
-                    RedirectUris = { $"https://{bffDPopUrl}signin-oidc" },
-                    FrontChannelLogoutUri = $"https://{bffDPopUrl}signout-oidc",
-                    PostLogoutRedirectUris = { $"https://{bffDPopUrl}signout-callback-oidc" },
+                    RedirectUris = { $"{bffDPopUrl}signin-oidc" },
+                    FrontChannelLogoutUri = $"{bffDPopUrl}signout-oidc",
+                    PostLogoutRedirectUris = { $"{bffDPopUrl}signout-callback-oidc" },
 
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
@@ -94,10 +94,10 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                         GrantType.ClientCredentials,
                         OidcConstants.GrantTypes.TokenExchange
                     },
-                    RedirectUris = { $"https://{bffEfUrl}signin-oidc" },
-                    FrontChannelLogoutUri = $"https://{bffEfUrl}signout-oidc",
-                    BackChannelLogoutUri = $"https://{bffEfUrl}bff/backchannel",
-                    PostLogoutRedirectUris = { $"https://{bffEfUrl}signout-callback-oidc" },
+                    RedirectUris = { $"{bffEfUrl}signin-oidc" },
+                    FrontChannelLogoutUri = $"{bffEfUrl}signout-oidc",
+                    BackChannelLogoutUri = $"{bffEfUrl}bff/backchannel",
+                    PostLogoutRedirectUris = { $"{bffEfUrl}signout-callback-oidc" },
 
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
@@ -117,10 +117,10 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                         OidcConstants.GrantTypes.TokenExchange
                     },
 
-                    RedirectUris = { $"https://{bffBlazorWebAssemblyUrl}signin-oidc", $"https://{bffBlazorPerComponentUrl}signin-oidc" },
+                    RedirectUris = { $"{bffBlazorWebAssemblyUrl}signin-oidc", $"{bffBlazorPerComponentUrl}signin-oidc" },
                     PostLogoutRedirectUris =
                     {
-                        $"https://{bffBlazorWebAssemblyUrl}signout-callback-oidc", $"https://{bffBlazorPerComponentUrl}signout-callback-oidc"
+                        $"{bffBlazorWebAssemblyUrl}signout-callback-oidc", $"{bffBlazorPerComponentUrl}signout-callback-oidc"
                     },
 
                     AllowOfflineAccess = true,

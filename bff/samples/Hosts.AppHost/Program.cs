@@ -1,4 +1,5 @@
 using Hosts.ServiceDefaults;
+using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -14,20 +15,20 @@ var bff = builder.AddProject<Projects.Bff>(AppHostServices.Bff)
     .WithAwaitedReference(api)
     ;
 
-builder.AddProject<Projects.Bff_EF>(AppHostServices.BffEf)
+var bffEf = builder.AddProject<Projects.Bff_EF>(AppHostServices.BffEf)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
-builder.AddProject<Projects.WebAssembly>(AppHostServices.BffBlazorWebassembly)
+var bffBlazorWebAssembly = builder.AddProject<Projects.WebAssembly>(AppHostServices.BffBlazorWebassembly)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
 
-builder.AddProject<Projects.PerComponent>(AppHostServices.BffBlazorPerComponent)
+var bffBlazorPerComponent = builder.AddProject<Projects.PerComponent>(AppHostServices.BffBlazorPerComponent)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
@@ -35,14 +36,21 @@ builder.AddProject<Projects.PerComponent>(AppHostServices.BffBlazorPerComponent)
 
 var apiDPop = builder.AddProject<Projects.Api_DPoP>(AppHostServices.ApiDpop);
 
-builder.AddProject<Projects.Bff_DPoP>(AppHostServices.BffDpop)
+var bffDPop = builder.AddProject<Projects.Bff_DPoP>(AppHostServices.BffDpop)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(apiDPop);
 
 builder.AddProject<Projects.UserSessionDb>(AppHostServices.Migrations);
 
-idServer.WithReference(bff);
+idServer
+    .WithReference(bff)
+    .WithReference(bffEf)
+    .WithReference(bffBlazorPerComponent)
+    .WithReference(bffBlazorWebAssembly)
+    .WithReference(apiDPop)
+    .WithReference(bffDPop)
+    ;
 
 builder.Build().Run();
 
