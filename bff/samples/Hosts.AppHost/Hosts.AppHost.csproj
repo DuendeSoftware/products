@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
 
@@ -14,6 +14,10 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
   </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" IsAspireProjectResource="false" />
+    </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
