@@ -26,8 +26,9 @@
 		<PackageReference Include="xunit.runner.visualstudio" />
 		<PackageReference Include="Aspire.Hosting.Testing" />
 		<PackageReference Include="Xunit.SkippableFact" />
+        <PackageReference Include="Microsoft.Playwright.Xunit"/>
 
-	</ItemGroup>
+    </ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)' != 'Debug_NCrunch'">
 
