@@ -1,17 +1,24 @@
-﻿using Xunit.Abstractions;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
-namespace Hosts.Tests.TestInfra;
+using Hosts.Tests.TestInfra;
+using Microsoft.Playwright;
+using Microsoft.Playwright.Xunit;
+using Xunit.Abstractions;
+
+namespace Hosts.Tests;
 
 [Collection(AppHostCollection.CollectionName)]
-public class IntegrationTestBase : IDisposable
+public class PlaywrightTestBase : PageTest, IDisposable
 {
     private readonly IDisposable _loggingScope;
 
-    public IntegrationTestBase(ITestOutputHelper output, AppHostFixture fixture)
+    public PlaywrightTestBase(ITestOutputHelper output, AppHostFixture fixture)
     {
         Output = output;
         Fixture = fixture;
         _loggingScope = fixture.ConnectLogger(output.WriteLine);
+
         if (Fixture.UsingAlreadyRunningInstance)
         {
             output.WriteLine("Running tests against locally running instance");
@@ -25,6 +32,22 @@ public class IntegrationTestBase : IDisposable
 #endif
         }
     }
+
+    public override BrowserNewContextOptions ContextOptions()
+    {
+        return new()
+        {
+            Locale = "en-US",
+            ColorScheme = ColorScheme.Light,
+
+            // We need to ignore https errors to make this work on the build server. 
+            // Even though we use dotnet dev-certs https --trust on the build agent,
+            // it still claims the certs are invalid. 
+            IgnoreHTTPSErrors = true,
+            
+        };
+    }
+
 
     public AppHostFixture Fixture { get; }
 

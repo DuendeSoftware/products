@@ -3,6 +3,7 @@ using Hosts.ServiceDefaults;
 using Microsoft.Extensions.Logging;
 
 #if !DEBUG_NCRUNCH
+using Microsoft.Extensions.Logging.Console;
 using Projects;
 #endif
 
@@ -11,6 +12,15 @@ using Serilog.Core;
 using Serilog.Extensions.Logging;
 
 namespace Hosts.Tests.TestInfra;
+
+[CollectionDefinition(AppHostCollection.CollectionName)]
+public class AppHostCollection : ICollectionFixture<AppHostFixture>
+{
+    public const string CollectionName = "apphost collection";
+    // This class has no code, and is never created. Its purpose is simply
+    // to be the place to apply [CollectionDefinition] and all the
+    // ICollectionFixture<> interfaces.
+}
 
 /// <summary>
 ///     This fixture will launch the app host, if needed.
@@ -59,10 +69,25 @@ public class AppHostFixture : IAsyncLifetime
         }
 
 #if !DEBUG_NCRUNCH
+
+        // The console logger is cluttering up the test output
+        void RemoveConsoleLogger(ILoggingBuilder x)
+        {
+            var collection = x.Services;
+            for (int i = collection.Count - 1; i >= 0; i--)
+            {
+                ServiceDescriptor? descriptor = collection[i];
+                if (descriptor.ServiceType == typeof(ILoggerProvider) && descriptor.ImplementationType == typeof(ConsoleLoggerProvider))
+                {
+                    collection.RemoveAt(i);
+                }
+            }
+        }
+
         // Not running in ncrunch AND no service found running. 
         // So, create an AppHost that will be used for the duration of this test run. 
         var appHost = await DistributedApplicationTestingBuilder
-            .CreateAsync<Hosts_AppHost>();
+                .CreateAsync<Hosts_AppHost>();
         appHost.Configuration["DcpPublisher:RandomizePorts"] = "false";
 
         appHost.Services.ConfigureHttpClientDefaults(c => c.ConfigurePrimaryHttpMessageHandler(() =>
@@ -72,7 +97,11 @@ public class AppHostFixture : IAsyncLifetime
                 AllowAutoRedirect = false
             }));
 
-        appHost.Services.AddLogging(x => { x.AddSerilog(_logger); });
+        appHost.Services.AddLogging(x =>
+        {
+            RemoveConsoleLogger(x);
+            x.AddSerilog(_logger);
+        });
 
         _app = await appHost.BuildAsync();
 
@@ -96,6 +125,7 @@ public class AppHostFixture : IAsyncLifetime
         _app = null!;
 #endif //#DEBUG_NCRUNCH
     }
+
 
     public async Task DisposeAsync()
     {
@@ -147,16 +177,8 @@ public class AppHostFixture : IAsyncLifetime
 
         if (UsingAlreadyRunningInstance)
         {
-            // An aspire host is already found (likely was started manually)
-            // so build a http client that directly points to this host. 
-            var url = clientName switch
-            {
-                AppHostServices.Bff => "https://localhost:5002",
-                AppHostServices.BffBlazorPerComponent => "https://localhost:5105",
-                AppHostServices.BffBlazorWebassembly => "https://localhost:5005",
-                _ => throw new InvalidOperationException("client not configured")
-            };
-            baseAddress = new Uri(url);
+            var url = GetUrlTo(clientName);
+            baseAddress = url;
 
             inner = new SocketsHttpHandler
             {
@@ -213,6 +235,33 @@ public class AppHostFixture : IAsyncLifetime
         {
             BaseAddress = baseAddress
         };
+    }
+
+    public Uri GetUrlTo(string clientName)
+    {
+        if (UsingAlreadyRunningInstance)
+        {
+            // An aspire host is already found (likely was started manually)
+            // so build a http client that directly points to this host. 
+            var url = clientName switch
+            {
+                AppHostServices.Bff => "https://localhost:5002",
+                AppHostServices.BffBlazorPerComponent => "https://localhost:5105",
+                AppHostServices.BffBlazorWebassembly => "https://localhost:5005",
+                _ => throw new InvalidOperationException("client not configured")
+            };
+            return new Uri(url);
+        }
+        else
+        {
+#if !DEBUG_NCRUNCH
+            if (_app == null) throw new NullReferenceException("App should not be null");
+            return this._app.GetEndpoint(clientName);
+#else
+            Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
+            return null!;
+#endif
+        }
     }
 
     private ILogger<T> CreateLogger<T>()

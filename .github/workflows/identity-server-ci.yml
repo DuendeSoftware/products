@@ -47,9 +47,6 @@ jobs:
       run: dotnet build identity-server.slnf -c Release
     - name: Test
       run: dotnet test identity-server.slnf -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
-    - name: test
-      run: 'ls '
-      working-directory: test
     - name: Test report
       if: github.event == 'push' && (success() || failure())
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5

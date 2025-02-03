@@ -191,6 +191,8 @@ void GenerateBffWorkflow(SystemDescription system)
     // Devcerts are needed because some tests run start an a http server with https. 
     job.StepDotNetDevCerts();
 
+    job.StepInstallPlayWright();
+
     job.StepTest(system.Solution);
 
     job.StepToolRestore();
@@ -311,6 +313,10 @@ public static class StepExtensions
         => job.Step()
             .Name("Dotnet devcerts")
             .Run("dotnet dev-certs https --trust");
+    public static void StepInstallPlayWright(this Job job)
+        => job.Step()
+            .Name("Install Playwright")
+            .Run("pwsh test/Hosts.Tests/bin/Release/net9.0/playwright.ps1 install --with-deps");
 
     public static void StepToolRestore(this Job job)
         => job.Step()
@@ -339,13 +345,6 @@ public static class StepExtensions
         job.Step()
             .Name("Test")
             .Run($"dotnet test {solution} -c Release --no-build {loggingFlags}");
-
-        job.Step()
-            .Name("test")
-            .WorkingDirectory("test")
-            .Run("""
-                 ls 
-                 """);
 
         job.Step()
             .Name("Test report")

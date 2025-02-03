@@ -14,7 +14,7 @@
 
 	<ItemGroup>
 
-		<PackageReference Include="AngleSharp"/>
+		<PackageReference Include="AngleSharp" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Extensions.Logging" />
 		<PackageReference Include="Serilog.Sinks.TextWriter" />
@@ -22,8 +22,9 @@
         <PackageReference Include="Serilog.AspNetCore" />
 		<PackageReference Include="Aspire.Hosting.Testing" />
 		<PackageReference Include="Xunit.SkippableFact" />
+        <PackageReference Include="Microsoft.Playwright.Xunit" />
 
-	</ItemGroup>
+    </ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)' != 'Debug_NCrunch'">
 
