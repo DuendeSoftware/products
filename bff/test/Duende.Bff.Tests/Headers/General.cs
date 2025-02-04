@@ -21,7 +21,7 @@ namespace Duende.Bff.Tests.Headers
 
             response.IsSuccessStatusCode.ShouldBeTrue();
             var json = await response.Content.ReadAsStringAsync();
-            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json);
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
             apiResult.RequestHeaders.Count.ShouldBe(2);
             apiResult.RequestHeaders["Host"].Single().ShouldBe("app");
@@ -40,7 +40,7 @@ namespace Duende.Bff.Tests.Headers
 
             response.IsSuccessStatusCode.ShouldBeTrue();
             var json = await response.Content.ReadAsStringAsync();
-            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json);
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
             apiResult.RequestHeaders["Host"].Single().ShouldBe("api");
             apiResult.RequestHeaders["x-custom"].Single().ShouldBe("custom");
@@ -58,7 +58,7 @@ namespace Duende.Bff.Tests.Headers
 
             response.IsSuccessStatusCode.ShouldBeTrue();
             var json = await response.Content.ReadAsStringAsync();
-            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json);
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
             
             apiResult.RequestHeaders["X-Forwarded-Host"].Single().ShouldBe("app");
             apiResult.RequestHeaders["X-Forwarded-Proto"].Single().ShouldBe("https");

@@ -12,7 +12,7 @@ namespace Duende.Bff.Tests.TestFramework
         private readonly WriteTestOutput _writeOutput = writeOutput ?? throw new ArgumentNullException(nameof(writeOutput));
         private readonly string _name = name ?? throw new ArgumentNullException(nameof(name));
 
-        public class DebugLogger : ILogger, IDisposable
+        private class DebugLogger : ILogger, IDisposable
         {
             private readonly TestLoggerProvider _parent;
             private readonly string _category;
@@ -27,7 +27,7 @@ namespace Duende.Bff.Tests.TestFramework
             {
             }
 
-            public IDisposable BeginScope<TState>(TState state)
+            public IDisposable BeginScope<TState>(TState state) where TState : notnull
             {
                 return this;
             }
@@ -37,7 +37,7 @@ namespace Duende.Bff.Tests.TestFramework
                 return true;
             }
 
-            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
             {
                 var msg = $"[{logLevel}] {_category} : {formatter(state, exception)}";
                 _parent.Log(msg);

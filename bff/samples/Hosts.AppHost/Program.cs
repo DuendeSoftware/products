@@ -1,47 +1,56 @@
+using Hosts.ServiceDefaults;
+using Projects;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-var idServer = builder.AddProject<Projects.IdentityServer>("identity-server");
+var idServer = builder.AddProject<Projects.IdentityServer>(AppHostServices.IdentityServer);
 
-var api = builder.AddProject<Projects.Api>("api");
-var isolatedApi = builder.AddProject<Projects.Api_Isolated>("api-isolated");
+var api = builder.AddProject<Projects.Api>(AppHostServices.Api);
+var isolatedApi = builder.AddProject<Projects.Api_Isolated>(AppHostServices.IsolatedApi);
 
-var bff = builder.AddProject<Projects.Bff>("bff")
+var bff = builder.AddProject<Projects.Bff>(AppHostServices.Bff)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api)
     ;
 
-builder.AddProject<Projects.Bff_EF>("bff-ef")
+var bffEf = builder.AddProject<Projects.Bff_EF>(AppHostServices.BffEf)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
-builder.AddProject<Projects.WebAssembly>("bff-webassembly-per-component")
+var bffBlazorWebAssembly = builder.AddProject<Projects.WebAssembly>(AppHostServices.BffBlazorWebassembly)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
 
-
-builder.AddProject<Projects.PerComponent>("bff-blazor-per-component")
+var bffBlazorPerComponent = builder.AddProject<Projects.PerComponent>(AppHostServices.BffBlazorPerComponent)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
-var apiDPop = builder.AddProject<Projects.Api_DPoP>("api-dpop");
+var apiDPop = builder.AddProject<Projects.Api_DPoP>(AppHostServices.ApiDpop);
 
-builder.AddProject<Projects.Bff_DPoP>("bff-dpop")
+var bffDPop = builder.AddProject<Projects.Bff_DPoP>(AppHostServices.BffDpop)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(apiDPop);
 
-builder.AddProject<Projects.UserSessionDb>("migrations");
+builder.AddProject<Projects.UserSessionDb>(AppHostServices.Migrations);
 
-idServer.WithReference(bff);
+idServer
+    .WithReference(bff)
+    .WithReference(bffEf)
+    .WithReference(bffBlazorPerComponent)
+    .WithReference(bffBlazorWebAssembly)
+    .WithReference(apiDPop)
+    .WithReference(bffDPop)
+    ;
 
 builder.Build().Run();
 

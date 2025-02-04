@@ -20,18 +20,15 @@ namespace Duende.Bff.Tests.TestHosts
         public int? ApiStatusCodeToReturn { get; set; }
 
         private readonly IdentityServerHost _identityServerHost;
-        private readonly bool _useForwardedHeaders;
 
         public ApiHost(
             WriteTestOutput output,
             IdentityServerHost identityServerHost, 
             string scope, 
-            string baseAddress = "https://api", 
-            bool useForwardedHeaders = false) 
+            string baseAddress = "https://api")
             : base(output, baseAddress)
         {
             _identityServerHost = identityServerHost;
-            _useForwardedHeaders = useForwardedHeaders;
 
             _identityServerHost.ApiScopes.Add(new ApiScope(scope));
 
@@ -56,17 +53,6 @@ namespace Duende.Bff.Tests.TestHosts
 
         private void Configure(IApplicationBuilder app)
         {
-            if (_useForwardedHeaders)
-            {
-                app.UseForwardedHeaders(new ForwardedHeadersOptions
-                {
-                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost,
-                    
-                    // allow double-hop scenarios
-                    ForwardLimit = null
-                });
-            }
-            
             app.UseRouting();
 
             app.UseAuthentication();
@@ -90,16 +76,16 @@ namespace Duende.Bff.Tests.TestHosts
                     var requestHeaders = new Dictionary<string, List<string>>();
                     foreach (var header in context.Request.Headers)
                     {
-                        var values = new List<string>(header.Value.Select(v => v));
+                        var values = new List<string>(header.Value.Select(v => v ?? string.Empty));
                         requestHeaders.Add(header.Key, values);
                     }
 
                     var response = new ApiResponse(
-                        context.Request.Method,
-                        context.Request.Path.Value,
-                        context.User.FindFirst("sub")?.Value,
-                        context.User.FindFirst("client_id")?.Value,
-                        context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                        Method: context.Request.Method,
+                        Path: context.Request.Path.Value ?? "/",
+                        Sub: context.User.FindFirst("sub")?.Value,
+                        ClientId: context.User.FindFirst("client_id")?.Value,
+                        Claims: context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
                     {
                         Body = body,
                         RequestHeaders = requestHeaders

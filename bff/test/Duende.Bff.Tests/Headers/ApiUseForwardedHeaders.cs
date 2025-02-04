@@ -14,13 +14,9 @@ namespace Duende.Bff.Tests.Headers
     {
         public ApiUseForwardedHeaders(ITestOutputHelper output) : base(output)
         {
-            ApiHost = new ApiHost(output.WriteLine, IdentityServerHost, "scope1", useForwardedHeaders: true);
-            ApiHost.InitializeAsync().Wait();
-
-            BffHost = new BffHost(output.WriteLine, IdentityServerHost, ApiHost, "spa", useForwardedHeaders: false);
-            BffHost.InitializeAsync().Wait();
+            ApiHost.UseForwardedHeaders = true;
         }
-        
+
         [Fact]
         public async Task bff_host_name_should_propagate_to_api()
         {
@@ -30,7 +26,7 @@ namespace Duende.Bff.Tests.Headers
 
             response.IsSuccessStatusCode.ShouldBeTrue();
             var json = await response.Content.ReadAsStringAsync();
-            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json);
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
             var host = apiResult.RequestHeaders["Host"].Single();
             host.ShouldBe("app");
@@ -46,7 +42,7 @@ namespace Duende.Bff.Tests.Headers
 
             response.IsSuccessStatusCode.ShouldBeTrue();
             var json = await response.Content.ReadAsStringAsync();
-            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json);
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
             var host = apiResult.RequestHeaders["Host"].Single();
             host.ShouldBe("app");

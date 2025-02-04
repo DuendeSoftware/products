@@ -63,7 +63,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
 
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout"));
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
 
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout"));
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
         {
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout"));
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
         }
 
         [Fact]
@@ -99,7 +99,12 @@ namespace Duende.Bff.Tests.Endpoints.Management
             
             await BffHost.BffLogoutAsync("sid123");
             
-            BffHost.BrowserClient.CurrentUri.ToString().ToLowerInvariant().ShouldBe(BffHost.Url("/"));
+            BffHost.BrowserClient.CurrentUri
+                .ShouldNotBeNull()
+                .ToString()
+                .ToLowerInvariant()
+                .ShouldBe(BffHost.Url("/"));
+
             (await BffHost.GetIsUserLoggedInAsync()).ShouldBeFalse();
         }
 
@@ -110,19 +115,19 @@ namespace Duende.Bff.Tests.Endpoints.Management
 
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout") + "?sid=sid123&returnUrl=/foo");
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
 
-            response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
+            response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location!.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // logout
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/account/logout"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/account/logout"));
 
-            response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
+            response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location!.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // post logout redirect uri
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(BffHost.Url("/signout-callback-oidc"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(BffHost.Url("/signout-callback-oidc"));
 
-            response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
+            response = await BffHost.BrowserClient.GetAsync(response.Headers.Location!.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldBe("/foo");
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/foo");
         }
 
         [Fact]

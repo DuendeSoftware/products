@@ -13,7 +13,7 @@ namespace Duende.Bff.Tests.SessionManagement
 {
     public class ServerSideTicketStoreTests : BffIntegrationTestBase
     {
-        InMemoryUserSessionStore _sessionStore = new InMemoryUserSessionStore();
+        readonly InMemoryUserSessionStore _sessionStore = new();
 
         public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output)
         {
@@ -21,7 +21,6 @@ namespace Duende.Bff.Tests.SessionManagement
             {
                 services.AddSingleton<IUserSessionStore>(_sessionStore);
             };
-            BffHost.InitializeAsync().Wait();
         }
 
         [Fact]

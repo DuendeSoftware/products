@@ -13,39 +13,38 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Duende.Bff.Tests.TestFramework
 {
-    public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "https://server")
+    public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "https://server"): IAsyncDisposable
     {
         private readonly string _baseAddress = baseAddress.EndsWith("/")
             ? baseAddress.Substring(0, baseAddress.Length - 1)
             : baseAddress;
 
-        IServiceProvider _appServices;
+        IServiceProvider _appServices = null!;
 
-        public Assembly HostAssembly { get; set; }
-        public bool IsDevelopment { get; set; }
+        public bool UseForwardedHeaders { get; set; }
 
-        public TestServer Server { get; private set; }
-        public TestBrowserClient BrowserClient { get; set; }
-        public HttpClient HttpClient { get; set; }
+        public TestServer Server { get; private set; } = null!;
+        public TestBrowserClient BrowserClient { get; private set; } = null!;
+        public HttpClient HttpClient { get; private set; } = null!;
 
-        public TestLoggerProvider Logger { get; set; } = new TestLoggerProvider(writeOutput, baseAddress + " - ");
+        private TestLoggerProvider Logger { get; } = new(writeOutput, baseAddress + " - ");
 
 
-        public T Resolve<T>()
+        public T Resolve<T>() where T:notnull
         {
             // not calling dispose on scope on purpose
             return _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
         }
 
-        public string Url(string path = null)
+        public string Url(string? path = null)
         {
-            path = path ?? String.Empty;
+            path ??= String.Empty;
             if (!path.StartsWith("/")) path = "/" + path;
             return _baseAddress + path;
         }
@@ -57,25 +56,21 @@ namespace Duende.Bff.Tests.TestFramework
                 {
                     builder.UseTestServer();
 
-                    builder.ConfigureAppConfiguration((context, b) =>
-                    {
-                        if (HostAssembly is not null)
-                        {
-                            context.HostingEnvironment.ApplicationName = HostAssembly.GetName().Name;
-                        }
-                    });
-
-                    if (IsDevelopment)
-                    {
-                        builder.UseSetting("Environment", "Development");
-                    }
-                    else
-                    {
-                        builder.UseSetting("Environment", "Production");
-                    }
-
                     builder.ConfigureServices(ConfigureServices);
-                    builder.Configure(ConfigureApp);
+                    builder.Configure(app =>
+                    {
+                        if (UseForwardedHeaders)
+                        {
+                            app.UseForwardedHeaders(new ForwardedHeadersOptions
+                            {
+                                ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                                                   ForwardedHeaders.XForwardedProto |
+                                                   ForwardedHeaders.XForwardedHost
+                            });
+                        }
+
+                        ConfigureApp(app);
+                    });
                 });
 
             // Build and start the IHost
@@ -86,8 +81,8 @@ namespace Duende.Bff.Tests.TestFramework
             HttpClient = Server.CreateClient();
         }
 
-        public event Action<IServiceCollection> OnConfigureServices = services => { };
-        public event Action<IApplicationBuilder> OnConfigure = app => { };
+        public event Action<IServiceCollection> OnConfigureServices = _ => { };
+        public event Action<IApplicationBuilder> OnConfigure = _ => { };
 
         void ConfigureServices(IServiceCollection services)
         {
@@ -137,7 +132,7 @@ namespace Duende.Bff.Tests.TestFramework
             {
                 if (ctx.Request.Path == "/__signin")
                 {
-                    if (_userToSignIn is not object)
+                    if (_userToSignIn is null)
                     {
                         throw new Exception("No User Configured for SignIn");
                     }
@@ -155,15 +150,16 @@ namespace Duende.Bff.Tests.TestFramework
                 await next();
             });
         }
-        ClaimsPrincipal _userToSignIn;
-        AuthenticationProperties _propsToSignIn;
+        ClaimsPrincipal? _userToSignIn;
+        AuthenticationProperties? _propsToSignIn;
         public async Task IssueSessionCookieAsync(params Claim[] claims)
         {
             _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
             var response = await BrowserClient.GetAsync(Url("__signin"));
             response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         }
-        public Task IssueSessionCookieAsync(AuthenticationProperties props, params Claim[] claims)
+
+        protected Task IssueSessionCookieAsync(AuthenticationProperties props, params Claim[] claims)
         {
             _propsToSignIn = props;
             return IssueSessionCookieAsync(claims);
@@ -171,6 +167,28 @@ namespace Duende.Bff.Tests.TestFramework
         public Task IssueSessionCookieAsync(string sub, params Claim[] claims)
         {
             return IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await CastAndDispose(Server);
+            await CastAndDispose(BrowserClient);
+            await CastAndDispose(HttpClient);
+            await CastAndDispose(Logger);
+
+            return;
+
+            static async ValueTask CastAndDispose(IDisposable resource)
+            {
+                if (resource is IAsyncDisposable resourceAsyncDisposable)
+                {
+                    await resourceAsyncDisposable.DisposeAsync();
+                }
+                else
+                {
+                    resource.Dispose();
+                }
+            }
         }
     }
 }

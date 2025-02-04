@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Duende.Bff;
 using Duende.Bff.Yarp;
+using Hosts.ServiceDefaults;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,7 +59,7 @@ internal static class Extensions
                 // Normally, here you simply configure the authority. But here we want to
                 // use service discovery, because aspire can change the url's at run-time. 
                 // So, it needs to be discovered at runtime. 
-                var authority = DiscoverAuthorityByName(getServiceProvider, "identity-server");
+                var authority = DiscoverAuthorityByName(getServiceProvider, AppHostServices.IdentityServer);
                 options.Authority = authority;
 
                 // confidential client using code flow + PKCE

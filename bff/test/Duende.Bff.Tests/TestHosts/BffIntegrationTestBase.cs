@@ -1,18 +1,21 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts
 {
-    public class BffIntegrationTestBase
+    public class BffIntegrationTestBase : IAsyncLifetime
     {
+        private readonly ITestOutputHelper _output;
         protected readonly IdentityServerHost IdentityServerHost;
         protected ApiHost ApiHost;
         protected BffHost BffHost;
@@ -20,8 +23,12 @@ namespace Duende.Bff.Tests.TestHosts
 
         public BffIntegrationTestBase(ITestOutputHelper output)
         {
+            _output = output;
             IdentityServerHost = new IdentityServerHost(output.WriteLine);
-            
+            ApiHost = new ApiHost(_output.WriteLine, IdentityServerHost, "scope1");
+            BffHost = new BffHost(_output.WriteLine, IdentityServerHost, ApiHost, "spa");
+            BffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(_output.WriteLine, IdentityServerHost, ApiHost, "spa");
+
             IdentityServerHost.Clients.Add(new Client
             {
                 ClientId = "spa",
@@ -38,28 +45,35 @@ namespace Duende.Bff.Tests.TestHosts
             IdentityServerHost.OnConfigureServices += services => {
                 services.AddTransient<IBackChannelLogoutHttpClient>(provider => 
                     new DefaultBackChannelLogoutHttpClient(
-                        BffHost.HttpClient, 
+                        BffHost!.HttpClient, 
                         provider.GetRequiredService<ILoggerFactory>(), 
                         provider.GetRequiredService<ICancellationTokenProvider>()));
 
                 services.AddSingleton<DefaultAccessTokenRetriever>();
             };
             
-            IdentityServerHost.InitializeAsync().Wait();
-
-            ApiHost = new ApiHost(output.WriteLine, IdentityServerHost, "scope1");
-            ApiHost.InitializeAsync().Wait();
-
-            BffHost = new BffHost(output.WriteLine, IdentityServerHost, ApiHost, "spa");
-            BffHost.InitializeAsync().Wait();
-
-            BffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(output.WriteLine, IdentityServerHost, ApiHost, "spa");
-            BffHostWithNamedTokens.InitializeAsync().Wait();
         }
 
         public async Task Login(string sub)
         {
             await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
+        }
+
+        public async Task InitializeAsync()
+        {
+            await IdentityServerHost.InitializeAsync();
+            await ApiHost.InitializeAsync();
+            await BffHost.InitializeAsync();
+            await BffHostWithNamedTokens.InitializeAsync();
+
+        }
+
+        public async Task DisposeAsync()
+        {
+            await ApiHost.DisposeAsync();
+            await BffHost.DisposeAsync();
+            await BffHostWithNamedTokens.DisposeAsync();
+            await IdentityServerHost.DisposeAsync();
         }
     }
 }

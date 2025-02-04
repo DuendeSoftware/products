@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Duende.Bff.Yarp;
@@ -29,7 +30,7 @@ namespace Duende.Bff.Tests.TestHosts
         private readonly string _clientId;
         private readonly bool _useForwardedHeaders;
 
-        public BffOptions BffOptions { get; private set; }
+        public BffOptions BffOptions { get; private set; } = null!;
 
         public BffHostUsingResourceNamedTokens(
             WriteTestOutput output,
@@ -80,7 +81,8 @@ namespace Duende.Bff.Tests.TestHosts
                 {
                     options.Events.OnUserInformationReceived = context =>
                     {
-                        StoreNamedTokens((context.ProtocolMessage.AccessToken, context.ProtocolMessage.RefreshToken), context.Properties, context.ProtocolMessage.IdToken);
+                        StoreNamedTokens((context.ProtocolMessage.AccessToken, context.ProtocolMessage.RefreshToken), context.Properties 
+                            ?? throw new NullReferenceException("AuthenticationProperties are not set"));
                         return Task.CompletedTask;
                     };
 
@@ -116,7 +118,7 @@ namespace Duende.Bff.Tests.TestHosts
             });
         }
 
-        public static void StoreNamedTokens((string accessToken, string refreshToken) userTokens, AuthenticationProperties authenticationProperties, string identityToken = null)
+        public static void StoreNamedTokens((string accessToken, string refreshToken) userTokens, AuthenticationProperties authenticationProperties)
         {
             var tokens = new List<AuthenticationToken>();
             tokens.Add(new AuthenticationToken { Name = $"{OpenIdConnectParameterNames.AccessToken}::named_token_stored", Value = userTokens.accessToken,  });
@@ -162,7 +164,7 @@ namespace Duende.Bff.Tests.TestHosts
                 invalid => invalid.Use(next => RemoteApiEndpoint.Map("/invalid_endpoint", _apiHost.Url())));
         }
 
-        public async Task<bool> GetIsUserLoggedInAsync(string userQuery = null)
+        public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
         {
             if (userQuery != null) userQuery = "?" + userQuery;
 
@@ -175,21 +177,7 @@ namespace Duende.Bff.Tests.TestHosts
             return response.StatusCode == HttpStatusCode.OK;
         }
 
-        public async Task<List<JsonRecord>> CallUserEndpointAsync()
-        {
-            var req = new HttpRequestMessage(HttpMethod.Get, Url("/bff/user"));
-            req.Headers.Add("x-csrf", "1");
-
-            var response = await BrowserClient.SendAsync(req);
-
-            response.StatusCode.ShouldBe(HttpStatusCode.OK);
-            response.Content.Headers.ContentType.MediaType.ShouldBe("application/json");
-
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<JsonRecord>>(json);
-        }
-
-        public async Task<HttpResponseMessage> BffLoginAsync(string sub, string sid = null)
+        public async Task<HttpResponseMessage> BffLoginAsync(string sub, string? sid = null)
         {
             await _identityServerHost.CreateIdentityServerSessionCookieAsync(sub, sid);
             return await BffOidcLoginAsync();
@@ -199,15 +187,15 @@ namespace Duende.Bff.Tests.TestHosts
         {
             var response = await BrowserClient.GetAsync(Url("/bff/login"));
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // authorize
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
 
             response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // client callback
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
 
             response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldBe("/");
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
             (await GetIsUserLoggedInAsync()).ShouldBeTrue();
 
@@ -215,23 +203,23 @@ namespace Duende.Bff.Tests.TestHosts
             return response;
         }
 
-        public async Task<HttpResponseMessage> BffLogoutAsync(string sid = null)
+        public async Task<HttpResponseMessage> BffLogoutAsync(string? sid = null)
         {
             var response = await BrowserClient.GetAsync(Url("/bff/logout") + "?sid=" + sid);
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
 
             response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // logout
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
 
             response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // post logout redirect uri
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
 
             response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
-            response.Headers.Location.ToString().ToLowerInvariant().ShouldBe("/");
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
             (await GetIsUserLoggedInAsync()).ShouldBeFalse();
 

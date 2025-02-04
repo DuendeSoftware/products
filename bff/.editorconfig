@@ -148,7 +148,6 @@ csharp_preserve_single_line_statements=true
 csharp_style_namespace_declarations=file_scoped:silent
 
 [*]
-charset=utf-8
 end_of_line=lf
 trim_trailing_whitespace=false
 insert_final_newline=false

@@ -1,19 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    </PropertyGroup>
+  
+    <ItemGroup>
+        <PackageReference Include="Duende.IdentityServer" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Duende.IdentityServer" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
-    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Duende.Bff\Duende.Bff.csproj" />
-    <ProjectReference Include="..\..\src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Duende.Bff\Duende.Bff.csproj" />
+        <ProjectReference Include="..\..\src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj" />
+    </ItemGroup>
 
 </Project>

@@ -1,9 +1,10 @@
-﻿// // Copyright (c) Duende Software. All rights reserved.
+// // Copyright (c) Duende Software. All rights reserved.
 // // See LICENSE in the project root for license information.
 
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
+using Hosts.ServiceDefaults;
 using Microsoft.Extensions.ServiceDiscovery;
 
 namespace IdentityServer;
@@ -32,7 +33,11 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                 return;
             }
             // Get the BFF URL from the service discovery system. Then use this for building the redirect urls etc..
-            var bffUrl = (await resolver.GetEndpointsAsync("https://bff", CancellationToken.None)).Endpoints.First().EndPoint.ToString();
+            var bffUrl = await GetUrlAsync(AppHostServices.Bff);
+            var bffDPopUrl = await GetUrlAsync(AppHostServices.BffDpop);
+            var bffEfUrl = await GetUrlAsync(AppHostServices.BffEf);
+            var bffBlazorPerComponentUrl = await GetUrlAsync(AppHostServices.BffBlazorPerComponent);
+            var bffBlazorWebAssemblyUrl = await GetUrlAsync(AppHostServices.BffBlazorWebassembly);
 
             _clients = [
                 new Client
@@ -69,9 +74,9 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                         OidcConstants.GrantTypes.TokenExchange
                     },
 
-                    RedirectUris = { "https://localhost:5003/signin-oidc" },
-                    FrontChannelLogoutUri = "https://localhost:5003/signout-oidc",
-                    PostLogoutRedirectUris = { "https://localhost:5003/signout-callback-oidc" },
+                    RedirectUris = { $"{bffDPopUrl}signin-oidc" },
+                    FrontChannelLogoutUri = $"{bffDPopUrl}signout-oidc",
+                    PostLogoutRedirectUris = { $"{bffDPopUrl}signout-callback-oidc" },
 
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
@@ -89,10 +94,10 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                         GrantType.ClientCredentials,
                         OidcConstants.GrantTypes.TokenExchange
                     },
-                    RedirectUris = { "https://localhost:5004/signin-oidc" },
-                    FrontChannelLogoutUri = "https://localhost:5004/signout-oidc",
-                    BackChannelLogoutUri = "https://localhost:5004/bff/backchannel",
-                    PostLogoutRedirectUris = { "https://localhost:5004/signout-callback-oidc" },
+                    RedirectUris = { $"{bffEfUrl}signin-oidc" },
+                    FrontChannelLogoutUri = $"{bffEfUrl}signout-oidc",
+                    BackChannelLogoutUri = $"{bffEfUrl}bff/backchannel",
+                    PostLogoutRedirectUris = { $"{bffEfUrl}signout-callback-oidc" },
 
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
@@ -112,10 +117,10 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                         OidcConstants.GrantTypes.TokenExchange
                     },
 
-                    RedirectUris = { "https://localhost:5005/signin-oidc", "https://localhost:5105/signin-oidc" },
+                    RedirectUris = { $"{bffBlazorWebAssemblyUrl}signin-oidc", $"{bffBlazorPerComponentUrl}signin-oidc" },
                     PostLogoutRedirectUris =
                     {
-                        "https://localhost:5005/signout-callback-oidc", "https://localhost:5105/signout-callback-oidc"
+                        $"{bffBlazorWebAssemblyUrl}signout-callback-oidc", $"{bffBlazorPerComponentUrl}signout-callback-oidc"
                     },
 
                     AllowOfflineAccess = true,
@@ -130,6 +135,11 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
             _semaphore.Release();
         }
 
+    }
+
+    private async Task<string> GetUrlAsync(string serviceName)
+    {
+        return (await resolver.GetEndpointsAsync("https://" + serviceName, CancellationToken.None)).Endpoints.First().EndPoint.ToString();
     }
 
 

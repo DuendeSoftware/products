@@ -31,9 +31,7 @@ public class BffHost : GenericHost
     private readonly IdentityServerHost _identityServerHost;
     private readonly ApiHost _apiHost;
     private readonly string _clientId;
-    private readonly bool _useForwardedHeaders;
-
-    public BffOptions BffOptions { get; private set; }
+    public BffOptions BffOptions { get; private set; } = null!;
 
     public BffHost(
         WriteTestOutput output,
@@ -47,7 +45,7 @@ public class BffHost : GenericHost
         _identityServerHost = identityServerHost;
         _apiHost = apiHost;
         _clientId = clientId;
-        _useForwardedHeaders = useForwardedHeaders;
+        UseForwardedHeaders = useForwardedHeaders;
 
         OnConfigureServices += ConfigureServices;
         OnConfigure += Configure;
@@ -122,16 +120,6 @@ public class BffHost : GenericHost
 
     private void Configure(IApplicationBuilder app)
     {
-        if (_useForwardedHeaders)
-        {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor |
-                                   ForwardedHeaders.XForwardedProto |
-                                   ForwardedHeaders.XForwardedHost
-            });
-        }
-
         app.UseAuthentication();
 
         app.UseRouting();
@@ -159,13 +147,13 @@ public class BffHost : GenericHost
                     var requestHeaders = new Dictionary<string, List<string>>();
                     foreach (var header in context.Request.Headers)
                     {
-                        var values = new List<string>(header.Value.Select(v => v));
+                        var values = new List<string>(header.Value.Select(v => v!));
                         requestHeaders.Add(header.Key, values);
                     }
 
                     var response = new ApiResponse(
                         context.Request.Method,
-                        context.Request.Path.Value,
+                        context.Request.Path.Value ?? "/",
                         context.User.FindFirst("sub")?.Value,
                         context.User.FindFirst("client_id")?.Value,
                         context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
@@ -212,13 +200,13 @@ public class BffHost : GenericHost
                     var requestHeaders = new Dictionary<string, List<string>>();
                     foreach (var header in context.Request.Headers)
                     {
-                        var values = new List<string>(header.Value.Select(v => v));
+                        var values = new List<string>(header.Value.Select(v => v)!);
                         requestHeaders.Add(header.Key, values);
                     }
 
                     var response = new ApiResponse(
                         context.Request.Method,
-                        context.Request.Path.Value,
+                        context.Request.Path.Value ?? "/",
                         context.User.FindFirst("sub")?.Value,
                         context.User.FindFirst("client_id")?.Value,
                         context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
@@ -266,13 +254,13 @@ public class BffHost : GenericHost
                 var requestHeaders = new Dictionary<string, List<string>>();
                 foreach (var header in context.Request.Headers)
                 {
-                    var values = new List<string>(header.Value.Select(v => v));
+                    var values = new List<string>(header.Value.Select(v => v!));
                     requestHeaders.Add(header.Key, values);
                 }
 
                 var response = new ApiResponse(
                     context.Request.Method,
-                    context.Request.Path.Value,
+                    context.Request.Path.Value ?? "/",
                     context.User.FindFirst("sub")?.Value,
                     context.User.FindFirst("client_id")?.Value,
                     context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
@@ -322,7 +310,7 @@ public class BffHost : GenericHost
 
                     var response = new ApiResponse(
                         context.Request.Method,
-                        context.Request.Path.Value,
+                        context.Request.Path.Value ?? "/",
                         sub,
                         context.User.FindFirst("client_id")?.Value,
                         context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
@@ -369,7 +357,7 @@ public class BffHost : GenericHost
 
                     var response = new ApiResponse(
                         context.Request.Method,
-                        context.Request.Path.Value,
+                        context.Request.Path.Value ?? "/",
                         sub,
                         context.User.FindFirst("client_id")?.Value,
                         context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
@@ -452,7 +440,7 @@ public class BffHost : GenericHost
             invalid => invalid.Use(next => RemoteApiEndpoint.Map("/invalid_endpoint", _apiHost.Url())));
     }
 
-    public async Task<bool> GetIsUserLoggedInAsync(string userQuery = null)
+    public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
     {
         if (userQuery != null) userQuery = "?" + userQuery;
 
@@ -474,13 +462,13 @@ public class BffHost : GenericHost
         var response = await BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.MediaType.ShouldBe("application/json");
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
 
         var json = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<List<JsonRecord>>(json);
+        return JsonSerializer.Deserialize<List<JsonRecord>>(json, TestSerializerOptions.Default) ?? [];
     }
 
-    public async Task<HttpResponseMessage> BffLoginAsync(string sub, string sid = null)
+    public async Task<HttpResponseMessage> BffLoginAsync(string sub, string? sid = null)
     {
         await _identityServerHost.CreateIdentityServerSessionCookieAsync(sub, sid);
         return await BffOidcLoginAsync();
@@ -490,16 +478,16 @@ public class BffHost : GenericHost
     {
         var response = await BrowserClient.GetAsync(Url("/bff/login"));
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // authorize
-        response.Headers.Location.ToString().ToLowerInvariant()
+        response.Headers.Location!.ToString().ToLowerInvariant()
             .ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // client callback
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
 
         response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldBe("/");
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
         (await GetIsUserLoggedInAsync()).ShouldBeTrue();
 
@@ -507,23 +495,23 @@ public class BffHost : GenericHost
         return response;
     }
 
-    public async Task<HttpResponseMessage> BffLogoutAsync(string sid = null)
+    public async Task<HttpResponseMessage> BffLogoutAsync(string? sid = null)
     {
         var response = await BrowserClient.GetAsync(Url("/bff/logout") + "?sid=" + sid);
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // logout
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // post logout redirect uri
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
 
         response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldBe("/");
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
         (await GetIsUserLoggedInAsync()).ShouldBeFalse();
 
@@ -531,18 +519,13 @@ public class BffHost : GenericHost
         return response;
     }
 
-    public class CallbackHttpMessageInvokerFactory : IHttpMessageInvokerFactory
+    private class CallbackHttpMessageInvokerFactory(Func<string, HttpMessageInvoker> callback)
+        : IHttpMessageInvokerFactory
     {
-        public CallbackHttpMessageInvokerFactory(Func<string, HttpMessageInvoker> callback)
-        {
-            CreateInvoker = callback;
-        }
-
-        public Func<string, HttpMessageInvoker> CreateInvoker { get; set; }
 
         public HttpMessageInvoker CreateClient(string localPath)
         {
-            return CreateInvoker.Invoke(localPath);
+            return callback.Invoke(localPath);
         }
     }
 }

@@ -17,8 +17,8 @@ namespace Duende.Bff.Tests.SessionManagement
 {
     public class CookieSlidingTests : BffIntegrationTestBase
     {
-        InMemoryUserSessionStore _sessionStore = new InMemoryUserSessionStore();
-        FakeTimeProvider _clock = new(DateTime.UtcNow);
+        readonly InMemoryUserSessionStore _sessionStore = new();
+        readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
 
         public CookieSlidingTests(ITestOutputHelper output) : base(output)
         {
@@ -32,7 +32,6 @@ namespace Duende.Bff.Tests.SessionManagement
                 });
                 services.AddSingleton<TimeProvider>(_clock);
             };
-            BffHost.InitializeAsync().Wait();
         }
 
         private void SetClock(TimeSpan t)

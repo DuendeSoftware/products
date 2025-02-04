@@ -74,12 +74,12 @@ namespace Duende.Bff.Tests.Endpoints.Management
         }
 
         [Fact]
-        public async Task when_configured_user_endpoint_for_unauthenticated_user_should_return_200_and_null()
+        public async Task when_configured_user_endpoint_for_unauthenticated_user_should_return_200_and_empty()
         {
             BffHost.BffOptions.AnonymousSessionResponse = AnonymousSessionResponse.Response200;
 
             var data = await BffHost.CallUserEndpointAsync();
-            data.ShouldBeNull();
+            data.ShouldBeEmpty();
         }
     }
 }

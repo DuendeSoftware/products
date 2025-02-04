@@ -25,14 +25,14 @@ public class IdentityServerHost : GenericHost
         OnConfigure += Configure;
     }
 
-    public List<Client> Clients { get; set; } = new List<Client>();
-    public List<IdentityResource> IdentityResources { get; set; } = new List<IdentityResource>()
+    public List<Client> Clients { get; set; } = new();
+    public List<IdentityResource> IdentityResources { get; set; } = new()
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
             new IdentityResources.Email(),
         };
-    public List<ApiScope> ApiScopes { get; set; } = new List<ApiScope>();
+    public List<ApiScope> ApiScopes { get; set; } = new();
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -76,7 +76,7 @@ public class IdentityServerHost : GenericHost
 
                 var signOutContext = await interaction.GetLogoutContextAsync(logoutId);
 
-                context.Response.Redirect(signOutContext.PostLogoutRedirectUri);
+                context.Response.Redirect(signOutContext.PostLogoutRedirectUri ?? "/");
             });
             endpoints.MapGet("/__token", async (ITokenService tokens) =>
             {
@@ -103,7 +103,7 @@ public class IdentityServerHost : GenericHost
         });
     }
 
-    public async Task CreateIdentityServerSessionCookieAsync(string sub, string sid = null)
+    public async Task CreateIdentityServerSessionCookieAsync(string sub, string? sid = null)
     {
         var props = new AuthenticationProperties();
 

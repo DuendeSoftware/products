@@ -9,18 +9,18 @@ namespace Duende.Bff.Tests.TestFramework
     public record JsonRecord(string Type, JsonElement Value)
     {
         [JsonPropertyName("type")]
-        public string Type { get; init; } = Type;
+        public string Type { get; } = Type;
 
         [JsonPropertyName("value")]
-        public JsonElement Value { get; init; } = Value;
+        public JsonElement Value { get; } = Value;
     }
 
     public record ClaimRecord(string Type, string Value)
     {
         [JsonPropertyName("type")]
-        public string Type { get; init; } = Type;
+        public string Type { get; } = Type;
 
         [JsonPropertyName("value")]
-        public string Value { get; init; } = Value;
+        public string Value { get; } = Value;
     }
 }
