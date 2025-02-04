@@ -1,17 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <AssemblyName>Duende.BFF.Yarp</AssemblyName>
         <Description>Backend for frontend (BFF) host for ASP.NET Core (YARP integration)</Description>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath=""/>
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Yarp.ReverseProxy" />

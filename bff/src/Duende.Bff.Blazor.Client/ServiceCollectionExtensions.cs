@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Adds Duende.BFF services to a Blazor Client (wasm) application.
     /// </summary>
+    /// <param name="services">The service collection.</param>
     /// <param name="configureAction">A callback used to set <see cref="BffBlazorOptions"/>.</param>
     public static IServiceCollection AddBffBlazorClient(this IServiceCollection services,
         Action<BffBlazorOptions>? configureAction = null)
@@ -124,6 +125,7 @@ public static class ServiceCollectionExtensions
     /// Adds a named <see cref="HttpClient"/> for use when invoking remote APIs
     /// proxied through Duende.Bff and configures the client with a callback.
     /// </summary>
+    /// <param name="services">The service collection.</param>
     /// <param name="clientName">The name of that <see cref="HttpClient"/> to
     /// configure. A common use case is to use the same named client in multiple
     /// render contexts that are automatically switched between via interactive
@@ -143,6 +145,7 @@ public static class ServiceCollectionExtensions
     /// proxied through Duende.Bff and configures the client with a callback
     /// that has access to the underlying service provider.
     /// </summary>
+    /// <param name="services">The service collection.</param>
     /// <param name="clientName">The name of that <see cref="HttpClient"/> to
     /// configure. A common use case is to use the same named client in multiple
     /// render contexts that are automatically switched between via interactive
@@ -161,11 +164,7 @@ public static class ServiceCollectionExtensions
     /// Adds a typed <see cref="HttpClient"/> for use when invoking remote APIs
     /// proxied through Duende.Bff and configures the client with a callback.
     /// </summary>
-    /// <param name="clientName">The name of that <see cref="HttpClient"/> to
-    /// configure. A common use case is to use the same named client in multiple
-    /// render contexts that are automatically switched between via interactive
-    /// render modes. In that case, ensure both the client and server project
-    /// define the HttpClient appropriately.</param>
+    /// <param name="services">The service collection.</param>
     /// <param name="configureClient">A configuration callback used to set up
     /// the <see cref="HttpClient"/>.</param>
     public static IHttpClientBuilder AddRemoteApiHttpClient<T>(this IServiceCollection services,
@@ -181,11 +180,7 @@ public static class ServiceCollectionExtensions
     /// proxied through Duende.Bff and configures the client with a callback
     /// that has access to the underlying service provider.
     /// </summary>
-    /// <param name="clientName">The name of that <see cref="HttpClient"/> to
-    /// configure. A common use case is to use the same named client in multiple
-    /// render contexts that are automatically switched between via interactive
-    /// render modes. In that case, ensure both the client and server project
-    /// define the HttpClient appropriately.</param>
+    /// <param name="services">The service collection.</param>
     /// <param name="configureClient">A configuration callback used to set up
     /// the <see cref="HttpClient"/>.</param>
     public static IHttpClientBuilder AddRemoteApiHttpClient<T>(this IServiceCollection services,

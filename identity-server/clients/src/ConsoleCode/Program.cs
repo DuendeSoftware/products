@@ -1,6 +1,5 @@
 ﻿using Clients;
 using Duende.IdentityModel.Client;
-using IdentityModel.OidcClient;
 using Serilog;
 using System;
 using System.Net.Http;

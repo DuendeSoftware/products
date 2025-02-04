@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-
+  <Import Project="../../samples.props" />
 </Project>

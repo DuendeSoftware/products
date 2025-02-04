@@ -21,10 +21,10 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
 {
     public CorsPolicyServiceTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
-        foreach (var options in TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<ConfigurationDbContext>) y)).ToList())
+        foreach (var options in TestDatabaseProviders)
         {
-            using (var context = new ConfigurationDbContext(options))
-                context.Database.EnsureCreated();
+            using var context = new ConfigurationDbContext(options);
+            context.Database.EnsureCreated();
         }
     }
 

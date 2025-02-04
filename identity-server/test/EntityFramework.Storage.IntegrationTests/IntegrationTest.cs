@@ -55,7 +55,6 @@ public class IntegrationTest<TClass, TDbContext, TStoreOption> : IClassFixture<D
 
     protected IntegrationTest(DatabaseProviderFixture<TDbContext> fixture)
     {
-        fixture.Options = TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<TDbContext>) y))
-            .ToList();
+        fixture.Options = TestDatabaseProviders.ToList<DbContextOptions<TDbContext>>();
     }
 }

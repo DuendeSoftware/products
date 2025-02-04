@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Duende.IdentityServer" />
     <PackageReference Include="Duende.IdentityModel" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>

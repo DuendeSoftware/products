@@ -2,17 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <LangVersion>latest</LangVersion>
 
     <AssemblyName>Duende.BFF.EntityFramework</AssemblyName>
     <Description>Entity Framework Core support for backend for frontend (BFF) host for ASP.NET Core</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
-
-  <ItemGroup>
-      <None Include="README.md" Pack="true" PackagePath=""/>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />

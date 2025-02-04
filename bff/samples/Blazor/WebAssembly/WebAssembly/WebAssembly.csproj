@@ -9,8 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Duende.Bff\Duende.Bff.csproj" />
     <ProjectReference Include="..\WebAssembly.Client\WebAssembly.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
   </ItemGroup>
 
 </Project>

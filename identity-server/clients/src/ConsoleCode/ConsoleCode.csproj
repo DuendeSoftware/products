@@ -8,7 +8,7 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
         
-        <PackageReference Include="IdentityModel.OidcClient" Version="5.2.1" />
+        <PackageReference Include="Duende.IdentityModel.OidcClient" />
         <PackageReference Include="Serilog.AspNetCore" />
     </ItemGroup>
 

@@ -22,24 +22,20 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
 {
     public ClientStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
-        foreach (var options in TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<ConfigurationDbContext>) y)).ToList())
+        foreach (var options in TestDatabaseProviders)
         {
-            using (var context = new ConfigurationDbContext(options))
-            {
-                context.Database.EnsureCreated();
-            }
+            using var context = new ConfigurationDbContext(options);
+            context.Database.EnsureCreated();
         }
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task FindClientByIdAsync_WhenClientDoesNotExist_ExpectNull(DbContextOptions<ConfigurationDbContext> options)
     {
-        using (var context = new ConfigurationDbContext(options))
-        {
-            var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
-            var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString());
-            client.Should().BeNull();
-        }
+        using var context = new ConfigurationDbContext(options);
+        var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
+        var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString());
+        client.Should().BeNull();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
