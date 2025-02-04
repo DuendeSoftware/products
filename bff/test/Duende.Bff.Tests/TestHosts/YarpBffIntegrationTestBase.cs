@@ -13,16 +13,16 @@ using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts
 {
-    public class YarpBffIntegrationTestBase : IAsyncLifetime
+    public class YarpBffIntegrationTestBase : OutputWritingTestBase
     {
         private readonly IdentityServerHost _identityServerHost;
         protected readonly ApiHost ApiHost;
         protected readonly YarpBffHost BffHost;
         private BffHostUsingResourceNamedTokens _bffHostWithNamedTokens;
 
-        protected YarpBffIntegrationTestBase(ITestOutputHelper output)
+        protected YarpBffIntegrationTestBase(ITestOutputHelper output) : base(output)
         {
-            _identityServerHost = new IdentityServerHost(output.WriteLine);
+            _identityServerHost = new IdentityServerHost(WriteLine);
             
             _identityServerHost.Clients.Add(new Client
             {
@@ -45,11 +45,11 @@ namespace Duende.Bff.Tests.TestHosts
                         provider.GetRequiredService<ICancellationTokenProvider>()));
             };
             
-            ApiHost = new ApiHost(output.WriteLine, _identityServerHost, "scope1");
+            ApiHost = new ApiHost(WriteLine, _identityServerHost, "scope1");
 
-            BffHost = new YarpBffHost(output.WriteLine, _identityServerHost, ApiHost, "spa");
+            BffHost = new YarpBffHost(WriteLine, _identityServerHost, ApiHost, "spa");
 
-            _bffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(output.WriteLine, _identityServerHost, ApiHost, "spa");
+            _bffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(WriteLine, _identityServerHost, ApiHost, "spa");
         }
 
         public async Task Login(string sub)
@@ -57,21 +57,22 @@ namespace Duende.Bff.Tests.TestHosts
             await _identityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
         }
 
-        public async Task InitializeAsync()
+        public override async Task InitializeAsync()
         {
             await _identityServerHost.InitializeAsync();
             await ApiHost.InitializeAsync();
             await BffHost.InitializeAsync();
             await _bffHostWithNamedTokens.InitializeAsync();
-
+            await base.InitializeAsync();
         }
 
-        public async Task DisposeAsync()
+        public override async Task DisposeAsync()
         {
             await _identityServerHost.DisposeAsync();
             await ApiHost.DisposeAsync();
             await BffHost.DisposeAsync();
             await _bffHostWithNamedTokens.DisposeAsync();
+            await base.DisposeAsync();
         }
     }
 }
