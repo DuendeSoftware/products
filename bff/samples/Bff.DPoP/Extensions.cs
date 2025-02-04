@@ -12,9 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 using Yarp.ReverseProxy.Configuration;
-
 
 namespace Bff.DPoP;
 
@@ -152,7 +150,7 @@ internal static class Extensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging();
+        app.UseHttpLogging();
         app.UseDeveloperExceptionPage();
 
         app.UseDefaultFiles();

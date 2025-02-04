@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.ServiceDiscovery;
-using Serilog;
 
 namespace Bff;
 
@@ -103,7 +102,7 @@ internal static class Extensions
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging();
+        app.UseHttpLogging();
         app.UseDeveloperExceptionPage();
 
         app.UseDefaultFiles();

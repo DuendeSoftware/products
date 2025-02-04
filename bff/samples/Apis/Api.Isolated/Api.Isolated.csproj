@@ -7,7 +7,6 @@
     <ItemGroup>
         <PackageReference Include="Duende.IdentityModel" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-        <PackageReference Include="Serilog.AspNetCore" />
     </ItemGroup>
 
 	<ItemGroup>

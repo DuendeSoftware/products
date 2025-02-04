@@ -7,13 +7,18 @@ using Duende.Bff.Yarp;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // BFF setup for blazor
 builder.Services.AddBff()
     .AddServerSideSessions()
     .AddBlazorServer()
     .AddRemoteApis();
+
 builder.Services.AddUserAccessTokenHttpClient("callApi", 
     configureClient: client => client.BaseAddress = new Uri("https://localhost:5010/"));
+
+
 
 // General blazor services
 builder.Services.AddRazorComponents()
@@ -61,6 +66,8 @@ builder.Services.AddAuthentication(options =>
     });
 
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
