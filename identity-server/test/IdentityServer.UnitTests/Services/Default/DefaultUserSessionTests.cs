@@ -171,7 +171,7 @@ public class DefaultUserSessionTests
         cookies = _mockHttpContext.HttpContext.Response.Headers.Where(x => x.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase)).Select(x => x.Value);
         cookieContainer.SetCookies(new Uri("http://server"), string.Join(',', cookies));
 
-        var query = cookieContainer.GetCookies(new Uri("http://server")).Cast<Cookie>().Where(x => x.Name == _options.Authentication.CheckSessionCookieName);
+        var query = cookieContainer.GetCookies(new Uri("http://server")).Where(x => x.Name == _options.Authentication.CheckSessionCookieName);
         query.Count().Should().Be(0);
     }
 

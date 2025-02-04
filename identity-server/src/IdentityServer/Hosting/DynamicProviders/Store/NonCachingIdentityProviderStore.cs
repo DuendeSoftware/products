@@ -78,7 +78,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
                     if (mi != null)
                     {
                         _logger.LogDebug($"Notice: The {provider.OptionsType.Name} object for scheme: {{scheme}} is not being cached. Consider enabling caching for the IIdentityProviderStore with AddIdentityProviderStoreCache<T>() on IdentityServer if you do not want the options to be reinitialized on each request.", idp.Scheme);
-                        mi.Invoke(optionsCache, new[] { idp.Scheme });
+                        mi.Invoke(optionsCache, new object[] { idp.Scheme });
                     }
                 }
             }

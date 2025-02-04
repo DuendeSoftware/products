@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -127,10 +128,10 @@ public class ResourceTests
     {
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
         var url = response.Headers.Location.ToString();
-        var idx = url.IndexOf("code=");
+        var idx = url.IndexOf("code=", StringComparison.Ordinal);
         idx.Should().BeGreaterThan(-1);
         var code = url.Substring(idx + 5);
-        idx = code.IndexOf("&");
+        idx = code.IndexOf("&", StringComparison.Ordinal);
         if (idx >= 0)
         {
             code = code.Substring(0, idx);

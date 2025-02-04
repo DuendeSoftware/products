@@ -286,6 +286,6 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             Results = results
         };
 
-        return Task<QueryResult<ServerSideSession>>.FromResult(result);
+        return Task.FromResult(result);
     }
 }

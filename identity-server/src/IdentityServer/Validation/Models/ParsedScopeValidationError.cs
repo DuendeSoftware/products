@@ -18,8 +18,8 @@ public class ParsedScopeValidationError
     /// <param name="error"></param>
     public ParsedScopeValidationError(string rawValue, string error)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(rawValue);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(error);
+        ArgumentException.ThrowIfNullOrWhiteSpace(rawValue);
+        ArgumentException.ThrowIfNullOrWhiteSpace(error);
 
         RawValue = rawValue;
         Error = error;

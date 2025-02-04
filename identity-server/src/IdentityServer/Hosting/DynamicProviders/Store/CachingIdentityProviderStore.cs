@@ -107,7 +107,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
                     var mi = optionsMonitorType.GetMethod("TryRemove");
                     if (mi != null)
                     {
-                        mi.Invoke(optionsCache, new[] { idp.Scheme });
+                        mi.Invoke(optionsCache, new object[] { idp.Scheme });
                     }
                 }
             }

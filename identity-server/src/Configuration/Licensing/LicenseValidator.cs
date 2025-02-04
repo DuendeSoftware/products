@@ -84,7 +84,7 @@ internal class LicenseValidator<T>
             return;
         }
 
-        DebugLog.Invoke("The Duende license key details: {@license}", new[] { License });
+        DebugLog.Invoke("The Duende license key details: {@license}", new object[] { License });
 
         var errors = new List<string>();
 
@@ -100,7 +100,7 @@ internal class LicenseValidator<T>
 
             ErrorLog.Invoke(
                 "Please contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software.",
-                new[] { License.ContactInfo, License.CompanyName });
+                new object[] { License.ContactInfo, License.CompanyName });
         }
         else
         {
