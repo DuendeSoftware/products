@@ -6,11 +6,6 @@ using static GitHubContexts;
 
 var contexts = Instance;
 Component[] components = [
-    new("ignore-this",
-        ["IgnoreThis"],
-        ["IgnoreThis.Tests"],
-        "it"),
-
     new("bff",
         ["Duende.Bff", "Duende.Bff.Blazor", "Duende.Bff.Blazor.Client", "Duende.Bff.EntityFramework", "Duende.Bff.Yarp"],
         ["Duende.Bff.Tests", "Duende.Bff.EntityFramework.Tests", "Duende.Bff.Blazor.UnitTests", "Duende.Bff.Blazor.Client.UnitTests"],
