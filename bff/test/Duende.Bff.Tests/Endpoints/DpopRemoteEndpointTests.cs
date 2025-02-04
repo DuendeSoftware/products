@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -35,7 +36,7 @@ public class DpopRemoteEndpointTests : BffIntegrationTestBase
     [Fact]
     public async Task test_dpop()
     {
-        var apiResult = await BffHost.BrowserClient.CallBffHostApi(
+        ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_client/test")
         );
 

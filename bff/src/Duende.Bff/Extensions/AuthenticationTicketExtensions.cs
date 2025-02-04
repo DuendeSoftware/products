@@ -149,7 +149,7 @@ public static class AuthenticationTicketExtensions
         /// <summary>
         /// The user
         /// </summary>
-        public ClaimsPrincipalLite User { get; set; } = default!;
+        public ClaimsPrincipalRecord User { get; set; } = default!;
 
         /// <summary>
         /// The items

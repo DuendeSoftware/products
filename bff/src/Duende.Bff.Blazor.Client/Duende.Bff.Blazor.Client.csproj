@@ -8,9 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Duende.Bff\Shared\ClaimLite.cs" Link="Shared\ClaimLite.cs" />
-    <Compile Include="..\Duende.Bff\Shared\ClaimsLiteExtensions.cs" Link="Shared\ClaimsLiteExtensions.cs" />
-    <Compile Include="..\Duende.Bff\Shared\ClaimsPrincipalLite.cs" Link="Shared\ClaimsPrincipalLite.cs" />
+    <Compile Include="..\Duende.Bff\Shared\ClaimRecordExtensions.cs" Link="Shared\ClaimRecordExtensions.cs" />
+    <Compile Include="..\Duende.Bff\Shared\ClaimsPrincipalRecord.cs" Link="Shared\ClaimsPrincipalRecord.cs" />
   </ItemGroup>
 
   <ItemGroup>

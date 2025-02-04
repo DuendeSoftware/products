@@ -73,14 +73,14 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         var authenticationState = await _authenticationStateTask;
 
         var claims = authenticationState.User.Claims
-            .Select(c => new ClaimLite
+            .Select(c => new ClaimRecord
             {
                 Type = c.Type,
                 Value = c.Value?.ToString() ?? string.Empty,
                 ValueType = c.ValueType == ClaimValueTypes.String ? null : c.ValueType
             }).ToArray();
 
-        var principal = new ClaimsPrincipalLite
+        var principal = new ClaimsPrincipalRecord
         {
             AuthenticationType = authenticationState.User.Identity!.AuthenticationType,
             NameClaimType = authenticationState.User.Identities.First().NameClaimType,
@@ -90,7 +90,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
 
         _logger.LogDebug("Persisting Authentication State");
 
-        _state.PersistAsJson(nameof(ClaimsPrincipalLite), principal);
+        _state.PersistAsJson(nameof(ClaimsPrincipalRecord), principal);
     }
 
 

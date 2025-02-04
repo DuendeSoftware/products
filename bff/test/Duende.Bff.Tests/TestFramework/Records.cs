@@ -14,13 +14,4 @@ namespace Duende.Bff.Tests.TestFramework
         [JsonPropertyName("value")]
         public JsonElement Value { get; } = Value;
     }
-
-    public record ClaimRecord(string Type, string Value)
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; } = Type;
-
-        [JsonPropertyName("value")]
-        public string Value { get; } = Value;
-    }
 }

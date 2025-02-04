@@ -3,14 +3,9 @@
 
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
-using System;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
+using System.Text.Json;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints

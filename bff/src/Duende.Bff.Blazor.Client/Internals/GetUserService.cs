@@ -58,9 +58,6 @@ internal class GetUserService : IGetUserService
         return _cachedUser;
     }
     
-    // TODO - Consider using ClaimLite instead here
-    record ClaimRecord(string Type, object Value);
-
     internal async Task<ClaimsPrincipal> FetchUser()
     {
         try

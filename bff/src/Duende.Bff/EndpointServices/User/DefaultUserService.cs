@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -134,20 +135,5 @@ public class DefaultUserService : IUserService
 
         return Task.FromResult((IEnumerable<ClaimRecord>)claims);
     }
-        
-    /// <summary>
-    /// Serialization-friendly claim
-    /// </summary>
-    /// <param name="Type"></param>
-    /// <param name="Value"></param>
-    protected record ClaimRecord(string Type, object Value)
-    {
-        /// <summary></summary>
-        [JsonPropertyName("type")]
-        public string Type { get; init; } = Type;
 
-        /// <summary></summary>
-        [JsonPropertyName("value")]
-        public object Value { get; init; } = Value;
-    }
 }

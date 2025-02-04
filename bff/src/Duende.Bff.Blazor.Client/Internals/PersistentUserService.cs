@@ -17,7 +17,7 @@ internal class PersistentUserService(PersistentComponentState state, ILogger<Per
     /// <inheritdoc />
     public ClaimsPrincipal GetPersistedUser()
     {
-        if (!state.TryTakeFromJson<ClaimsPrincipalLite>(nameof(ClaimsPrincipalLite), out var lite) || lite is null)
+        if (!state.TryTakeFromJson<ClaimsPrincipalRecord>(nameof(ClaimsPrincipalRecord), out var lite) || lite is null)
         {
             logger.LogDebug("Failed to load persisted user.");
             return new ClaimsPrincipal(new ClaimsIdentity());
