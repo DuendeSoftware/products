@@ -52,7 +52,7 @@ public class SessionRevocationService : ISessionRevocationService
 
         if (_options.RevokeRefreshTokenOnLogout)
         {
-            var tickets = await _ticketStore.GetUserTicketsAsync(filter);
+            var tickets = await _ticketStore.GetUserTicketsAsync(filter, cancellationToken);
             if (tickets?.Any() == true)
             {
                 foreach (var ticket in tickets)
