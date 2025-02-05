@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
@@ -69,7 +69,7 @@ public class ResponseTypeResponseModeTests
         await _mockPipeline.LoginAsync("bob");
 
         var metadata = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint);
-        metadata.StatusCode.Should().Be(HttpStatusCode.OK);
+        metadata.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var state = Guid.NewGuid().ToString();
         var nonce = Guid.NewGuid().ToString();
@@ -82,12 +82,12 @@ public class ResponseTypeResponseModeTests
             state: state,
             nonce: nonce);
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
-        response.StatusCode.Should().Be(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.Found);
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
-        authorization.Code.Should().NotBeNull();
-        authorization.State.Should().Be(state);
+        authorization.IsError.ShouldBeFalse();
+        authorization.Code.ShouldNotBeNull();
+        authorization.State.ShouldBe(state);
     }
 
     // this might not be in sync with the actual conformance tests
@@ -116,6 +116,6 @@ public class ResponseTypeResponseModeTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = true;
         var _ = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        _mockPipeline.ErrorMessage.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+        _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }
 }

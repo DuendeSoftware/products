@@ -4,7 +4,7 @@
 
 using System.Linq;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using Models = Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
@@ -39,19 +39,19 @@ public class ApiResourceMappersTests
 
         var mappedEntity = model.ToEntity();
 
-        mappedEntity.Scopes.Count.Should().Be(2);
+        mappedEntity.Scopes.Count.ShouldBe(2);
         var foo1 = mappedEntity.Scopes.FirstOrDefault(x => x.Scope == "foo1");
-        foo1.Should().NotBeNull();
+        foo1.ShouldNotBeNull();
         var foo2 = mappedEntity.Scopes.FirstOrDefault(x => x.Scope == "foo2");
-        foo2.Should().NotBeNull();
+        foo2.ShouldNotBeNull();
             
 
         var mappedModel = mappedEntity.ToModel();
             
-        mappedModel.Description.Should().Be("description");
-        mappedModel.DisplayName.Should().Be("displayname");
-        mappedModel.Enabled.Should().BeFalse();
-        mappedModel.Name.Should().Be("foo");
+        mappedModel.Description.ShouldBe("description");
+        mappedModel.DisplayName.ShouldBe("displayname");
+        mappedModel.Enabled.ShouldBeFalse();
+        mappedModel.Name.ShouldBe("foo");
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class ApiResourceMappersTests
         };
 
         var model = entity.ToModel();
-        model.ApiSecrets.First().Type.Should().Be(def.ApiSecrets.First().Type);
+        model.ApiSecrets.First().Type.ShouldBe(def.ApiSecrets.First().Type);
     }
 
     [Fact]
@@ -93,8 +93,7 @@ public class ApiResourceMappersTests
                 source => source.ToEntity(), 
                 excludedProperties, 
                 out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
     [Fact]
@@ -102,7 +101,6 @@ public class ApiResourceMappersTests
     {
         MapperTestHelpers
             .AllPropertiesAreMapped<Entities.ApiResource, Models.ApiResource>(source => source.ToModel(), out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 }

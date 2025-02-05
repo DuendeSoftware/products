@@ -4,7 +4,7 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
@@ -45,7 +45,7 @@ public class RevocationClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
+        response.IsError.ShouldBeFalse();
 
         // introspect - should be active
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
@@ -57,7 +57,7 @@ public class RevocationClient
             Token = response.AccessToken
         });
 
-        introspectionResponse.IsActive.Should().Be(true);
+        introspectionResponse.IsActive.ShouldBe(true);
 
         // revoke access token
         var revocationResponse = await _client.RevokeTokenAsync(new TokenRevocationRequest
@@ -79,6 +79,6 @@ public class RevocationClient
             Token = response.AccessToken
         });
 
-        introspectionResponse.IsActive.Should().Be(false);
+        introspectionResponse.IsActive.ShouldBe(false);
     }
 }

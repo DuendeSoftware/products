@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
@@ -48,30 +48,30 @@ public class ResourceOwnerClient
             Password = "bob"
         });
 
-        response.IsError.Should().Be(false);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBe(false);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(12);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("roclient");
-        payload["sub"].GetString().Should().Be("88421113");
-        payload["idp"].GetString().Should().Be("local");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(12);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("roclient");
+        payload["sub"].GetString().ShouldBe("88421113");
+        payload["idp"].GetString().ShouldBe("local");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
             
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
-        scopes.Count.Should().Be(1);
-        scopes.Should().Contain("api1");
+        scopes.Count.ShouldBe(1);
+        scopes.ShouldContain("api1");
 
         var amr = payload["amr"].EnumerateArray().ToList();
-        amr.Count.Should().Be(1);
-        amr.First().GetString().Should().Be("pwd");
+        amr.Count.ShouldBe(1);
+        amr.First().GetString().ShouldBe("pwd");
     }
 
     [Fact]
@@ -87,37 +87,37 @@ public class ResourceOwnerClient
             Password = "bob"
         });
 
-        response.IsError.Should().Be(false);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBe(false);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var payload = GetPayload(response);
             
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("roclient");
-        payload["sub"].GetString().Should().Be("88421113");
-        payload["idp"].GetString().Should().Be("local");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("roclient");
+        payload["sub"].GetString().ShouldBe("88421113");
+        payload["idp"].GetString().ShouldBe("local");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
             
         var amr = payload["amr"].EnumerateArray().ToList();
-        amr.Count.Should().Be(1);
-        amr.First().GetString().Should().Be("pwd");
+        amr.Count.ShouldBe(1);
+        amr.First().GetString().ShouldBe("pwd");
             
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
-        scopes.Count.Should().Be(8);
+        scopes.Count.ShouldBe(8);
 
-        scopes.Should().Contain("address");
-        scopes.Should().Contain("api1");
-        scopes.Should().Contain("api2");
-        scopes.Should().Contain("api4.with.roles");
-        scopes.Should().Contain("email");
-        scopes.Should().Contain("offline_access");
-        scopes.Should().Contain("openid");
-        scopes.Should().Contain("roles");
+        scopes.ShouldContain("address");
+        scopes.ShouldContain("api1");
+        scopes.ShouldContain("api2");
+        scopes.ShouldContain("api4.with.roles");
+        scopes.ShouldContain("email");
+        scopes.ShouldContain("offline_access");
+        scopes.ShouldContain("openid");
+        scopes.ShouldContain("roles");
     }
 
     [Fact]
@@ -134,32 +134,32 @@ public class ResourceOwnerClient
             Password = "bob"
         });
 
-        response.IsError.Should().Be(false);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBe(false);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(12);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("roclient");
-        payload["sub"].GetString().Should().Be("88421113");
-        payload["idp"].GetString().Should().Be("local");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(12);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("roclient");
+        payload["sub"].GetString().ShouldBe("88421113");
+        payload["idp"].GetString().ShouldBe("local");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
 
         var amr = payload["amr"].EnumerateArray();
-        amr.Count().Should().Be(1);
-        amr.First().ToString().Should().Be("pwd");
+        amr.Count().ShouldBe(1);
+        amr.First().ToString().ShouldBe("pwd");
 
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
-        scopes.Count.Should().Be(3);
-        scopes.Should().Contain("api1");
-        scopes.Should().Contain("email");
-        scopes.Should().Contain("openid");
+        scopes.Count.ShouldBe(3);
+        scopes.ShouldContain("api1");
+        scopes.ShouldContain("email");
+        scopes.ShouldContain("openid");
     }
 
     [Fact]
@@ -176,33 +176,33 @@ public class ResourceOwnerClient
             Password = "bob"
         });
 
-        response.IsError.Should().Be(false);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNullOrWhiteSpace();
+        response.IsError.ShouldBe(false);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNullOrWhiteSpace();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(12);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("roclient");
-        payload["sub"].GetString().Should().Be("88421113");
-        payload["idp"].GetString().Should().Be("local");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(12);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("roclient");
+        payload["sub"].GetString().ShouldBe("88421113");
+        payload["idp"].GetString().ShouldBe("local");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
             
         var amr = payload["amr"].EnumerateArray().ToList();
-        amr.Count.Should().Be(1);
-        amr.First().ToString().Should().Be("pwd");
+        amr.Count.ShouldBe(1);
+        amr.First().ToString().ShouldBe("pwd");
 
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
-        scopes.Count.Should().Be(4);
-        scopes.Should().Contain("api1");
-        scopes.Should().Contain("email");
-        scopes.Should().Contain("offline_access");
-        scopes.Should().Contain("openid");
+        scopes.Count.ShouldBe(4);
+        scopes.ShouldContain("api1");
+        scopes.ShouldContain("email");
+        scopes.ShouldContain("offline_access");
+        scopes.ShouldContain("openid");
     }
 
     [Fact]
@@ -219,10 +219,10 @@ public class ResourceOwnerClient
             Password = "bob"
         });
 
-        response.IsError.Should().Be(true);
-        response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-        response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-        response.Error.Should().Be("invalid_grant");
+        response.IsError.ShouldBe(true);
+        response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Error.ShouldBe("invalid_grant");
     }
         
     [Fact]
@@ -238,7 +238,7 @@ public class ResourceOwnerClient
             UserName = "bob_no_password"
         });
 
-        response.IsError.Should().Be(false);
+        response.IsError.ShouldBe(false);
     }
 
     [Theory]
@@ -257,10 +257,10 @@ public class ResourceOwnerClient
             Password = password
         });
 
-        response.IsError.Should().Be(true);
-        response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-        response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-        response.Error.Should().Be("invalid_grant");
+        response.IsError.ShouldBe(true);
+        response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Error.ShouldBe("invalid_grant");
     }
 
 

@@ -6,7 +6,7 @@ using System;
 using System.Security.Claims;
 using Duende;
 using Duende.IdentityServer;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using static Duende.License;
 
@@ -24,8 +24,8 @@ public class IdentityServerLicenseValidatorTests
             new Claim("edition", "enterprise"),
             new Claim("company_name", "foo"),
             new Claim("contact_info", "bar"));
-        subject.CompanyName.Should().Be("foo");
-        subject.ContactInfo.Should().Be("bar");
+        subject.CompanyName.ShouldBe("foo");
+        subject.ContactInfo.ShouldBe("bar");
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class IdentityServerLicenseValidatorTests
     {
         {
             var subject = new IdentityServerLicense(new Claim("edition", "enterprise"));
-            subject.Expiration.Should().BeNull();
+            subject.Expiration.ShouldBeNull();
         }
 
         {
@@ -42,7 +42,7 @@ public class IdentityServerLicenseValidatorTests
             var subject = new IdentityServerLicense(
                 new Claim("edition", "enterprise"),
                 new Claim("exp", exp.ToString()));
-            subject.Expiration.Should().Be(new DateTime(2020, 1, 12, 13, 5, 0, DateTimeKind.Utc));
+            subject.Expiration.ShouldBe(new DateTime(2020, 1, 12, 13, 5, 0, DateTimeKind.Utc));
         }
     }
 
@@ -53,149 +53,149 @@ public class IdentityServerLicenseValidatorTests
         // non-ISV
         {
             var subject = new IdentityServerLicense(new Claim("edition", "enterprise"));
-            subject.Edition.Should().Be(LicenseEdition.Enterprise);
-            subject.IsEnterpriseEdition.Should().BeTrue();
-            subject.ClientLimit.Should().BeNull();
-            subject.IssuerLimit.Should().BeNull();
-            subject.KeyManagementFeature.Should().BeTrue();
-            subject.ResourceIsolationFeature.Should().BeTrue();
-            subject.DynamicProvidersFeature.Should().BeTrue();
-            subject.ServerSideSessionsFeature.Should().BeTrue();
-            //subject.ConfigApiFeature.Should().BeTrue();
-            subject.DPoPFeature.Should().BeTrue();
-            //subject.BffFeature.Should().BeTrue();
-            subject.RedistributionFeature.Should().BeFalse();
-            subject.CibaFeature.Should().BeTrue();
-            subject.ParFeature.Should().BeTrue();
+            subject.Edition.ShouldBe(LicenseEdition.Enterprise);
+            subject.IsEnterpriseEdition.ShouldBeTrue();
+            subject.ClientLimit.ShouldBeNull();
+            subject.IssuerLimit.ShouldBeNull();
+            subject.KeyManagementFeature.ShouldBeTrue();
+            subject.ResourceIsolationFeature.ShouldBeTrue();
+            subject.DynamicProvidersFeature.ShouldBeTrue();
+            subject.ServerSideSessionsFeature.ShouldBeTrue();
+            //subject.ConfigApiFeature.ShouldBeTrue();
+            subject.DPoPFeature.ShouldBeTrue();
+            //subject.BffFeature.ShouldBeTrue();
+            subject.RedistributionFeature.ShouldBeFalse();
+            subject.CibaFeature.ShouldBeTrue();
+            subject.ParFeature.ShouldBeTrue();
         }
         {
             var subject = new IdentityServerLicense(new Claim("edition", "business"));
-            subject.Edition.Should().Be(LicenseEdition.Business);
-            subject.IsBusinessEdition.Should().BeTrue();
-            subject.ClientLimit.Should().Be(15);
-            subject.IssuerLimit.Should().Be(1);
-            subject.KeyManagementFeature.Should().BeTrue();
-            subject.ResourceIsolationFeature.Should().BeFalse();
-            subject.DynamicProvidersFeature.Should().BeFalse();
-            subject.ServerSideSessionsFeature.Should().BeTrue();
-            //subject.ConfigApiFeature.Should().BeTrue();
-            subject.DPoPFeature.Should().BeFalse();
-            //subject.BffFeature.Should().BeTrue();
-            subject.RedistributionFeature.Should().BeFalse();
-            subject.CibaFeature.Should().BeFalse();
-            subject.ParFeature.Should().BeTrue();
+            subject.Edition.ShouldBe(LicenseEdition.Business);
+            subject.IsBusinessEdition.ShouldBeTrue();
+            subject.ClientLimit.ShouldBe(15);
+            subject.IssuerLimit.ShouldBe(1);
+            subject.KeyManagementFeature.ShouldBeTrue();
+            subject.ResourceIsolationFeature.ShouldBeFalse();
+            subject.DynamicProvidersFeature.ShouldBeFalse();
+            subject.ServerSideSessionsFeature.ShouldBeTrue();
+            //subject.ConfigApiFeature.ShouldBeTrue();
+            subject.DPoPFeature.ShouldBeFalse();
+            //subject.BffFeature.ShouldBeTrue();
+            subject.RedistributionFeature.ShouldBeFalse();
+            subject.CibaFeature.ShouldBeFalse();
+            subject.ParFeature.ShouldBeTrue();
         }
         {
             var subject = new IdentityServerLicense(new Claim("edition", "starter"));
-            subject.Edition.Should().Be(LicenseEdition.Starter);
-            subject.IsStarterEdition.Should().BeTrue();
-            subject.ClientLimit.Should().Be(5);
-            subject.IssuerLimit.Should().Be(1);
-            subject.KeyManagementFeature.Should().BeFalse();
-            subject.ResourceIsolationFeature.Should().BeFalse();
-            subject.DynamicProvidersFeature.Should().BeFalse();
-            subject.ServerSideSessionsFeature.Should().BeFalse();
-            //subject.ConfigApiFeature.Should().BeFalse();
-            subject.DPoPFeature.Should().BeFalse();
-            //subject.BffFeature.Should().BeFalse();
-            subject.RedistributionFeature.Should().BeFalse();
-            subject.CibaFeature.Should().BeFalse();
-            subject.ParFeature.Should().BeFalse();
+            subject.Edition.ShouldBe(LicenseEdition.Starter);
+            subject.IsStarterEdition.ShouldBeTrue();
+            subject.ClientLimit.ShouldBe(5);
+            subject.IssuerLimit.ShouldBe(1);
+            subject.KeyManagementFeature.ShouldBeFalse();
+            subject.ResourceIsolationFeature.ShouldBeFalse();
+            subject.DynamicProvidersFeature.ShouldBeFalse();
+            subject.ServerSideSessionsFeature.ShouldBeFalse();
+            //subject.ConfigApiFeature.ShouldBeFalse();
+            subject.DPoPFeature.ShouldBeFalse();
+            //subject.BffFeature.ShouldBeFalse();
+            subject.RedistributionFeature.ShouldBeFalse();
+            subject.CibaFeature.ShouldBeFalse();
+            subject.ParFeature.ShouldBeFalse();
         }
         {
             var subject = new IdentityServerLicense(new Claim("edition", "community"));
-            subject.Edition.Should().Be(LicenseEdition.Community);
-            subject.IsCommunityEdition.Should().BeTrue();
-            subject.ClientLimit.Should().BeNull();
-            subject.IssuerLimit.Should().BeNull();
-            subject.KeyManagementFeature.Should().BeTrue();
-            subject.ResourceIsolationFeature.Should().BeTrue();
-            subject.DynamicProvidersFeature.Should().BeTrue();
-            subject.ServerSideSessionsFeature.Should().BeTrue();
-            //subject.ConfigApiFeature.Should().BeTrue();
-            subject.DPoPFeature.Should().BeTrue();
-            //subject.BffFeature.Should().BeTrue();
-            subject.RedistributionFeature.Should().BeFalse();
-            subject.CibaFeature.Should().BeTrue();
-            subject.ParFeature.Should().BeTrue();
+            subject.Edition.ShouldBe(LicenseEdition.Community);
+            subject.IsCommunityEdition.ShouldBeTrue();
+            subject.ClientLimit.ShouldBeNull();
+            subject.IssuerLimit.ShouldBeNull();
+            subject.KeyManagementFeature.ShouldBeTrue();
+            subject.ResourceIsolationFeature.ShouldBeTrue();
+            subject.DynamicProvidersFeature.ShouldBeTrue();
+            subject.ServerSideSessionsFeature.ShouldBeTrue();
+            //subject.ConfigApiFeature.ShouldBeTrue();
+            subject.DPoPFeature.ShouldBeTrue();
+            //subject.BffFeature.ShouldBeTrue();
+            subject.RedistributionFeature.ShouldBeFalse();
+            subject.CibaFeature.ShouldBeTrue();
+            subject.ParFeature.ShouldBeTrue();
         }
 
         // BFF
         // TODO
         //{
         //    var subject = new IdentityServerLicense(new Claim("edition", "bff"));
-        //    subject.Edition.Should().Be(LicenseEdition.Bff);
-        //    subject.IsBffEdition.Should().BeTrue();
-        //    subject.ServerSideSessionsFeature.Should().BeFalse();
-        //    //subject.ConfigApiFeature.Should().BeFalse();
-        //    subject.DPoPFeature.Should().BeFalse();
-        //    //subject.BffFeature.Should().BeTrue();
-        //    subject.ClientLimit.Should().Be(0);
-        //    subject.IssuerLimit.Should().Be(0);
-        //    subject.KeyManagementFeature.Should().BeFalse();
-        //    subject.ResourceIsolationFeature.Should().BeFalse();
-        //    subject.DynamicProvidersFeature.Should().BeFalse();
-        //    subject.RedistributionFeature.Should().BeFalse();
-        //    subject.CibaFeature.Should().BeFalse();
+        //    subject.Edition.ShouldBe(LicenseEdition.Bff);
+        //    subject.IsBffEdition.ShouldBeTrue();
+        //    subject.ServerSideSessionsFeature.ShouldBeFalse();
+        //    //subject.ConfigApiFeature.ShouldBeFalse();
+        //    subject.DPoPFeature.ShouldBeFalse();
+        //    //subject.BffFeature.ShouldBeTrue();
+        //    subject.ClientLimit.ShouldBe(0);
+        //    subject.IssuerLimit.ShouldBe(0);
+        //    subject.KeyManagementFeature.ShouldBeFalse();
+        //    subject.ResourceIsolationFeature.ShouldBeFalse();
+        //    subject.DynamicProvidersFeature.ShouldBeFalse();
+        //    subject.RedistributionFeature.ShouldBeFalse();
+        //    subject.CibaFeature.ShouldBeFalse();
         //}
 
         // ISV
         {
             var subject = new IdentityServerLicense(new Claim("edition", "enterprise"), new Claim("feature", "isv"));
-            subject.Edition.Should().Be(LicenseEdition.Enterprise);
-            subject.IsEnterpriseEdition.Should().BeTrue();
-            subject.ClientLimit.Should().Be(5);
-            subject.IssuerLimit.Should().BeNull();
-            subject.KeyManagementFeature.Should().BeTrue();
-            subject.ResourceIsolationFeature.Should().BeTrue();
-            subject.DynamicProvidersFeature.Should().BeTrue();
-            subject.ServerSideSessionsFeature.Should().BeTrue();
-            //subject.ConfigApiFeature.Should().BeTrue();
-            subject.DPoPFeature.Should().BeTrue();
-            //subject.BffFeature.Should().BeTrue();
-            subject.RedistributionFeature.Should().BeTrue();
-            subject.CibaFeature.Should().BeTrue();
+            subject.Edition.ShouldBe(LicenseEdition.Enterprise);
+            subject.IsEnterpriseEdition.ShouldBeTrue();
+            subject.ClientLimit.ShouldBe(5);
+            subject.IssuerLimit.ShouldBeNull();
+            subject.KeyManagementFeature.ShouldBeTrue();
+            subject.ResourceIsolationFeature.ShouldBeTrue();
+            subject.DynamicProvidersFeature.ShouldBeTrue();
+            subject.ServerSideSessionsFeature.ShouldBeTrue();
+            //subject.ConfigApiFeature.ShouldBeTrue();
+            subject.DPoPFeature.ShouldBeTrue();
+            //subject.BffFeature.ShouldBeTrue();
+            subject.RedistributionFeature.ShouldBeTrue();
+            subject.CibaFeature.ShouldBeTrue();
         }
         {
             var subject = new IdentityServerLicense(new Claim("edition", "business"), new Claim("feature", "isv"));
-            subject.Edition.Should().Be(LicenseEdition.Business);
-            subject.IsBusinessEdition.Should().BeTrue();
-            subject.ClientLimit.Should().Be(5);
-            subject.IssuerLimit.Should().Be(1);
-            subject.KeyManagementFeature.Should().BeTrue();
-            subject.ResourceIsolationFeature.Should().BeFalse();
-            subject.DynamicProvidersFeature.Should().BeFalse();
-            subject.ServerSideSessionsFeature.Should().BeTrue();
-            //subject.ConfigApiFeature.Should().BeTrue();
-            subject.DPoPFeature.Should().BeFalse();
-            //subject.BffFeature.Should().BeTrue();
-            subject.RedistributionFeature.Should().BeTrue();
-            subject.CibaFeature.Should().BeFalse();
+            subject.Edition.ShouldBe(LicenseEdition.Business);
+            subject.IsBusinessEdition.ShouldBeTrue();
+            subject.ClientLimit.ShouldBe(5);
+            subject.IssuerLimit.ShouldBe(1);
+            subject.KeyManagementFeature.ShouldBeTrue();
+            subject.ResourceIsolationFeature.ShouldBeFalse();
+            subject.DynamicProvidersFeature.ShouldBeFalse();
+            subject.ServerSideSessionsFeature.ShouldBeTrue();
+            //subject.ConfigApiFeature.ShouldBeTrue();
+            subject.DPoPFeature.ShouldBeFalse();
+            //subject.BffFeature.ShouldBeTrue();
+            subject.RedistributionFeature.ShouldBeTrue();
+            subject.CibaFeature.ShouldBeFalse();
         }
         {
             var subject = new IdentityServerLicense(new Claim("edition", "starter"), new Claim("feature", "isv"));
-            subject.Edition.Should().Be(LicenseEdition.Starter);
-            subject.IsStarterEdition.Should().BeTrue();
-            subject.ClientLimit.Should().Be(5);
-            subject.IssuerLimit.Should().Be(1);
-            subject.KeyManagementFeature.Should().BeFalse();
-            subject.ResourceIsolationFeature.Should().BeFalse();
-            subject.DynamicProvidersFeature.Should().BeFalse();
-            subject.ServerSideSessionsFeature.Should().BeFalse();
-            //subject.ConfigApiFeature.Should().BeFalse();
-            subject.DPoPFeature.Should().BeFalse();
-            //subject.BffFeature.Should().BeFalse();
-            subject.RedistributionFeature.Should().BeTrue();
-            subject.CibaFeature.Should().BeFalse();
+            subject.Edition.ShouldBe(LicenseEdition.Starter);
+            subject.IsStarterEdition.ShouldBeTrue();
+            subject.ClientLimit.ShouldBe(5);
+            subject.IssuerLimit.ShouldBe(1);
+            subject.KeyManagementFeature.ShouldBeFalse();
+            subject.ResourceIsolationFeature.ShouldBeFalse();
+            subject.DynamicProvidersFeature.ShouldBeFalse();
+            subject.ServerSideSessionsFeature.ShouldBeFalse();
+            //subject.ConfigApiFeature.ShouldBeFalse();
+            subject.DPoPFeature.ShouldBeFalse();
+            //subject.BffFeature.ShouldBeFalse();
+            subject.RedistributionFeature.ShouldBeTrue();
+            subject.CibaFeature.ShouldBeFalse();
         }
         // TODO: these exceptions were moved to the validator
         //{
         //    Action a = () => new IdentityServerLicense(new Claim("edition", "community"), new Claim("feature", "isv"));
-        //    a.Should().Throw<Exception>();
+        //    a.ShouldThrow<Exception>();
         //}
         //{
         //    Action a = () => new IdentityServerLicense(new Claim("edition", "bff"), new Claim("feature", "isv"));
-        //    a.Should().Throw<Exception>();
+        //    a.ShouldThrow<Exception>();
         //}
     }
 
@@ -208,8 +208,8 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("edition", "enterprise"),
                 new Claim("client_limit", "20"),
                 new Claim("issuer_limit", "5"));
-            subject.ClientLimit.Should().BeNull();
-            subject.IssuerLimit.Should().BeNull();
+            subject.ClientLimit.ShouldBeNull();
+            subject.IssuerLimit.ShouldBeNull();
         }
 
         {
@@ -220,11 +220,11 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "resource_isolation"),
                 new Claim("feature", "ciba"),
                 new Claim("feature", "dynamic_providers"));
-            subject.ClientLimit.Should().Be(20);
-            subject.IssuerLimit.Should().Be(5);
-            subject.ResourceIsolationFeature.Should().BeTrue();
-            subject.DynamicProvidersFeature.Should().BeTrue();
-            subject.CibaFeature.Should().BeTrue();
+            subject.ClientLimit.ShouldBe(20);
+            subject.IssuerLimit.ShouldBe(5);
+            subject.ResourceIsolationFeature.ShouldBeTrue();
+            subject.DynamicProvidersFeature.ShouldBeTrue();
+            subject.CibaFeature.ShouldBeTrue();
         }
         {
             var subject = new IdentityServerLicense(
@@ -233,8 +233,8 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "unlimited_issuers"),
                 new Claim("issuer_limit", "5"),
                 new Claim("feature", "unlimited_clients"));
-            subject.ClientLimit.Should().BeNull();
-            subject.IssuerLimit.Should().BeNull();
+            subject.ClientLimit.ShouldBeNull();
+            subject.IssuerLimit.ShouldBeNull();
         }
 
         {
@@ -252,18 +252,18 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "ciba"),
                 new Claim("feature", "dynamic_providers"),
                 new Claim("feature", "par"));
-            subject.ClientLimit.Should().Be(20);
-            subject.IssuerLimit.Should().Be(5);
-            subject.KeyManagementFeature.Should().BeTrue();
-            subject.ResourceIsolationFeature.Should().BeTrue();
-            subject.ServerSideSessionsFeature.Should().BeTrue();
-            //subject.ConfigApiFeature.Should().BeTrue();
-            subject.DPoPFeature.Should().BeTrue();
-            //subject.BffFeature.Should().BeTrue();
-            subject.DynamicProvidersFeature.Should().BeTrue();
-            subject.RedistributionFeature.Should().BeTrue();
-            subject.CibaFeature.Should().BeTrue();
-            subject.ParFeature.Should().BeTrue();
+            subject.ClientLimit.ShouldBe(20);
+            subject.IssuerLimit.ShouldBe(5);
+            subject.KeyManagementFeature.ShouldBeTrue();
+            subject.ResourceIsolationFeature.ShouldBeTrue();
+            subject.ServerSideSessionsFeature.ShouldBeTrue();
+            //subject.ConfigApiFeature.ShouldBeTrue();
+            subject.DPoPFeature.ShouldBeTrue();
+            //subject.BffFeature.ShouldBeTrue();
+            subject.DynamicProvidersFeature.ShouldBeTrue();
+            subject.RedistributionFeature.ShouldBeTrue();
+            subject.CibaFeature.ShouldBeTrue();
+            subject.ParFeature.ShouldBeTrue();
         }
         {
             var subject = new IdentityServerLicense(
@@ -272,8 +272,8 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "unlimited_issuers"),
                 new Claim("issuer_limit", "5"),
                 new Claim("feature", "unlimited_clients"));
-            subject.ClientLimit.Should().BeNull();
-            subject.IssuerLimit.Should().BeNull();
+            subject.ClientLimit.ShouldBeNull();
+            subject.IssuerLimit.ShouldBeNull();
         }
 
         {
@@ -281,8 +281,8 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("edition", "community"),
                 new Claim("client_limit", "20"),
                 new Claim("issuer_limit", "5"));
-            subject.ClientLimit.Should().BeNull();
-            subject.IssuerLimit.Should().BeNull();
+            subject.ClientLimit.ShouldBeNull();
+            subject.IssuerLimit.ShouldBeNull();
         }
 
         // ISV
@@ -291,7 +291,7 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("edition", "enterprise"),
                 new Claim("feature", "isv"),
                 new Claim("client_limit", "20"));
-            subject.ClientLimit.Should().Be(20);
+            subject.ClientLimit.ShouldBe(20);
         }
         {
             var subject = new IdentityServerLicense(
@@ -299,8 +299,8 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "isv"),
                 new Claim("feature", "ciba"),
                 new Claim("client_limit", "20"));
-            subject.ClientLimit.Should().Be(20);
-            subject.CibaFeature.Should().BeTrue();
+            subject.ClientLimit.ShouldBe(20);
+            subject.CibaFeature.ShouldBeTrue();
         }
         {
             var subject = new IdentityServerLicense(
@@ -312,12 +312,12 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "bff"),
                 new Claim("feature", "ciba"),
                 new Claim("client_limit", "20"));
-            subject.ClientLimit.Should().Be(20);
-            subject.ServerSideSessionsFeature.Should().BeTrue();
-            //subject.ConfigApiFeature.Should().BeTrue();
-            subject.DPoPFeature.Should().BeTrue();
-            //subject.BffFeature.Should().BeTrue();
-            subject.CibaFeature.Should().BeTrue();
+            subject.ClientLimit.ShouldBe(20);
+            subject.ServerSideSessionsFeature.ShouldBeTrue();
+            //subject.ConfigApiFeature.ShouldBeTrue();
+            subject.DPoPFeature.ShouldBeTrue();
+            //subject.BffFeature.ShouldBeTrue();
+            subject.CibaFeature.ShouldBeTrue();
         }
 
         {
@@ -326,7 +326,7 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "isv"),
                 new Claim("feature", "unlimited_clients"),
                 new Claim("client_limit", "20"));
-            subject.ClientLimit.Should().BeNull();
+            subject.ClientLimit.ShouldBeNull();
         }
         {
             var subject = new IdentityServerLicense(
@@ -334,7 +334,7 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "isv"),
                 new Claim("feature", "unlimited_clients"),
                 new Claim("client_limit", "20"));
-            subject.ClientLimit.Should().BeNull();
+            subject.ClientLimit.ShouldBeNull();
         }
         {
             var subject = new IdentityServerLicense(
@@ -342,7 +342,7 @@ public class IdentityServerLicenseValidatorTests
                 new Claim("feature", "isv"),
                 new Claim("feature", "unlimited_clients"),
                 new Claim("client_limit", "20"));
-            subject.ClientLimit.Should().BeNull();
+            subject.ClientLimit.ShouldBeNull();
         }
 
         // BFF
@@ -357,13 +357,13 @@ public class IdentityServerLicenseValidatorTests
         //        new Claim("feature", "ciba"),
         //        new Claim("feature", "key_management")
         //    );
-        //    //subject.BffFeature.Should().BeTrue();
-        //    subject.ClientLimit.Should().Be(0);
-        //    subject.IssuerLimit.Should().Be(0);
-        //    subject.KeyManagementFeature.Should().BeFalse();
-        //    subject.ResourceIsolationFeature.Should().BeFalse();
-        //    subject.DynamicProvidersFeature.Should().BeFalse();
-        //    subject.CibaFeature.Should().BeFalse();
+        //    //subject.BffFeature.ShouldBeTrue();
+        //    subject.ClientLimit.ShouldBe(0);
+        //    subject.IssuerLimit.ShouldBe(0);
+        //    subject.KeyManagementFeature.ShouldBeFalse();
+        //    subject.ResourceIsolationFeature.ShouldBeFalse();
+        //    subject.DynamicProvidersFeature.ShouldBeFalse();
+        //    subject.CibaFeature.ShouldBeFalse();
         //}
     }
 
@@ -373,11 +373,11 @@ public class IdentityServerLicenseValidatorTests
     {
         {
             Action func = () => new IdentityServerLicense(new Claim("edition", "invalid"));
-            func.Should().Throw<Exception>();
+            func.ShouldThrow<Exception>();
         }
         {
             Action func = () => new IdentityServerLicense(new Claim("edition", ""));
-            func.Should().Throw<Exception>();
+            func.ShouldThrow<Exception>();
         }
     }
 
@@ -408,26 +408,26 @@ public class IdentityServerLicenseValidatorTests
         }
 
         // Adding the allowed number of clients shouldn't log.
-        subject.ErrorLogCount.Should().Be(0);
-        subject.WarningLogCount.Should().Be(0);
+        subject.ErrorLogCount.ShouldBe(0);
+        subject.WarningLogCount.ShouldBe(0);
 
         // Validating same client again shouldn't log.
         subject.ValidateClient("client3", license);
-        subject.ErrorLogCount.Should().Be(0);
-        subject.WarningLogCount.Should().Be(0);
+        subject.ErrorLogCount.ShouldBe(0);
+        subject.WarningLogCount.ShouldBe(0);
 
         subject.ValidateClient("extra1", license);
         subject.ValidateClient("extra2", license);
 
         if (hasLicense)
         {
-            subject.ErrorLogCount.Should().Be(2);
-            subject.WarningLogCount.Should().Be(0);
+            subject.ErrorLogCount.ShouldBe(2);
+            subject.WarningLogCount.ShouldBe(0);
         }
         else
         {
-            subject.ErrorLogCount.Should().Be(0);
-            subject.WarningLogCount.Should().Be(1);
+            subject.ErrorLogCount.ShouldBe(0);
+            subject.WarningLogCount.ShouldBe(1);
         }
     }
 }

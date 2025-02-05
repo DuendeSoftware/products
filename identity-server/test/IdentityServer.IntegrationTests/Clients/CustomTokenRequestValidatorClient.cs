@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
@@ -46,7 +46,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     private Dictionary<string, JsonElement> GetFields(TokenResponse response) => response.Raw.GetFields();

@@ -9,7 +9,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Http;
 using Xunit;
 
@@ -39,17 +39,17 @@ public class CheckSessionResultTests
     {
         await _subject.WriteHttpResponse(new CheckSessionResult(), _context);
 
-        _context.Response.StatusCode.Should().Be(200);
-        _context.Response.ContentType.Should().StartWith("text/html");
-        _context.Response.Headers.ContentSecurityPolicy.First().Should().Contain("default-src 'none';");
-        _context.Response.Headers.ContentSecurityPolicy.First().Should().Contain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
-        _context.Response.Headers["X-Content-Security-Policy"].First().Should().Contain("default-src 'none';");
-        _context.Response.Headers["X-Content-Security-Policy"].First().Should().Contain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
+        _context.Response.StatusCode.ShouldBe(200);
+        _context.Response.ContentType.ShouldStartWith("text/html");
+        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain("default-src 'none';");
+        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
+        _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("default-src 'none';");
+        _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
         using (var rdr = new StreamReader(_context.Response.Body))
         {
             var html = rdr.ReadToEnd();
-            html.Should().Contain("<script id='cookie-name' type='application/json'>foobar</script>");
+            html.ShouldContain("<script id='cookie-name' type='application/json'>foobar</script>");
         }
     }
 
@@ -60,8 +60,8 @@ public class CheckSessionResultTests
 
         await _subject.WriteHttpResponse(new CheckSessionResult(), _context);
 
-        _context.Response.Headers.ContentSecurityPolicy.First().Should().Contain($"script-src 'unsafe-inline' '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
-        _context.Response.Headers["X-Content-Security-Policy"].First().Should().Contain($"script-src 'unsafe-inline' '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
+        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain($"script-src 'unsafe-inline' '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
+        _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"script-src 'unsafe-inline' '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
     }
 
     [Fact]
@@ -71,8 +71,8 @@ public class CheckSessionResultTests
 
         await _subject.WriteHttpResponse(new CheckSessionResult(), _context);
 
-        _context.Response.Headers.ContentSecurityPolicy.First().Should().Contain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
-        _context.Response.Headers["X-Content-Security-Policy"].Should().BeEmpty();
+        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
+        _context.Response.Headers["X-Content-Security-Policy"].ShouldBeEmpty();
     }
 
     [Theory]
@@ -87,7 +87,7 @@ public class CheckSessionResultTests
         using (var rdr = new StreamReader(_context.Response.Body))
         {
             var html = rdr.ReadToEnd();
-            html.Should().Contain($"<script id='cookie-name' type='application/json'>{cookieName}</script>");
+            html.ShouldContain($"<script id='cookie-name' type='application/json'>{cookieName}</script>");
         }
     }
 }

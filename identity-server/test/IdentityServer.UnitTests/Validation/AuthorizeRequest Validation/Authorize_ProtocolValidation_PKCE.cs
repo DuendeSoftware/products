@@ -5,7 +5,7 @@
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
@@ -36,8 +36,8 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(true);
-        result.ErrorDescription.Should().Be("Transform algorithm not supported");
+        result.IsError.ShouldBe(true);
+        result.ErrorDescription.ShouldBe("Transform algorithm not supported");
     }
 
     [Theory]
@@ -57,7 +57,7 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(false);
+        result.IsError.ShouldBe(false);
     }
 
     [Theory]
@@ -76,7 +76,7 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(false);
+        result.IsError.ShouldBe(false);
     }
 
     [Theory]
@@ -95,8 +95,8 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(true);
-        result.ErrorDescription.Should().Be("Transform algorithm not supported");
+        result.IsError.ShouldBe(true);
+        result.ErrorDescription.ShouldBe("Transform algorithm not supported");
     }
 
 
@@ -113,9 +113,9 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(true);
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
-        result.ErrorDescription.Should().Be("code challenge required");
+        result.IsError.ShouldBe(true);
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
+        result.ErrorDescription.ShouldBe("code challenge required");
     }
 
     [Fact]
@@ -131,9 +131,9 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(true);
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
-        result.ErrorDescription.Should().Be("code challenge required");
+        result.IsError.ShouldBe(true);
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
+        result.ErrorDescription.ShouldBe("code challenge required");
     }
 
     [Theory]
@@ -155,9 +155,9 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(true);
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
-        result.ErrorDescription.Should().Be("Transform algorithm not supported");
+        result.IsError.ShouldBe(true);
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
+        result.ErrorDescription.ShouldBe("Transform algorithm not supported");
     }
 
     [Theory]
@@ -179,8 +179,8 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(true);
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+        result.IsError.ShouldBe(true);
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }
 
     [Theory]
@@ -202,7 +202,7 @@ public class Authorize_ProtocolValidation_Valid_PKCE
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(true);
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+        result.IsError.ShouldBe(true);
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }
 }

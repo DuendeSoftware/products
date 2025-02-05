@@ -1,3 +1,6 @@
+# MacOs
+.DS_Store
+
 # Rider
 .idea
 
@@ -215,3 +218,6 @@ tempkey.jwk
 keys
 *.key
 test/Configuration.IntegrationTests/CoverageReports
+Duende.BFF.db
+*.db-shm
+*.db-wal

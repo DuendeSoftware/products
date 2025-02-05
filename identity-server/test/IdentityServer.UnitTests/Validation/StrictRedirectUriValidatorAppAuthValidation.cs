@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace UnitTests.Validation;
@@ -53,7 +53,7 @@ public class StrictRedirectUriValidatorAppAuthValidation
                 RequestedUri = requestedUri,
                 Client = clientWithValidLoopbackRedirectUri
             });
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Theory]
@@ -84,7 +84,7 @@ public class StrictRedirectUriValidatorAppAuthValidation
             RequestedUri = requestedUri,
             Client = clientWithValidLoopbackRedirectUri
         });
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -98,6 +98,6 @@ public class StrictRedirectUriValidatorAppAuthValidation
             RequestedUri = "http://127.0.0.1",
             Client = clientWithNoRedirectUris,
         });
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 }

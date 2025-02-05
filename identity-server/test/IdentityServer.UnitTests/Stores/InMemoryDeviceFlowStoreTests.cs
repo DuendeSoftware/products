@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace UnitTests.Stores;
@@ -36,13 +36,13 @@ public class InMemoryDeviceFlowStoreTests
         await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
         var foundData = await _store.FindByUserCodeAsync(userCode);
 
-        foundData.ClientId.Should().Be(data.ClientId);
-        foundData.CreationTime.Should().Be(data.CreationTime);
-        foundData.Lifetime.Should().Be(data.Lifetime);
-        foundData.IsAuthorized.Should().Be(data.IsAuthorized);
-        foundData.IsOpenId.Should().Be(data.IsOpenId);
-        foundData.Subject.Should().Be(data.Subject);
-        foundData.RequestedScopes.Should().BeEquivalentTo(data.RequestedScopes);
+        foundData.ClientId.ShouldBe(data.ClientId);
+        foundData.CreationTime.ShouldBe(data.CreationTime);
+        foundData.Lifetime.ShouldBe(data.Lifetime);
+        foundData.IsAuthorized.ShouldBe(data.IsAuthorized);
+        foundData.IsOpenId.ShouldBe(data.IsOpenId);
+        foundData.Subject.ShouldBe(data.Subject);
+        foundData.RequestedScopes.ShouldBe(data.RequestedScopes);
     }
 
     [Fact]
@@ -64,13 +64,13 @@ public class InMemoryDeviceFlowStoreTests
         await _store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
         var foundData = await _store.FindByDeviceCodeAsync(deviceCode);
 
-        foundData.ClientId.Should().Be(data.ClientId);
-        foundData.CreationTime.Should().Be(data.CreationTime);
-        foundData.Lifetime.Should().Be(data.Lifetime);
-        foundData.IsAuthorized.Should().Be(data.IsAuthorized);
-        foundData.IsOpenId.Should().Be(data.IsOpenId);
-        foundData.Subject.Should().Be(data.Subject);
-        foundData.RequestedScopes.Should().BeEquivalentTo(data.RequestedScopes);
+        foundData.ClientId.ShouldBe(data.ClientId);
+        foundData.CreationTime.ShouldBe(data.CreationTime);
+        foundData.Lifetime.ShouldBe(data.Lifetime);
+        foundData.IsAuthorized.ShouldBe(data.IsAuthorized);
+        foundData.IsOpenId.ShouldBe(data.IsOpenId);
+        foundData.Subject.ShouldBe(data.Subject);
+        foundData.RequestedScopes.ShouldBe(data.RequestedScopes);
     }
 
     [Fact]
@@ -106,13 +106,13 @@ public class InMemoryDeviceFlowStoreTests
 
         var foundData = await _store.FindByUserCodeAsync(userCode);
 
-        foundData.ClientId.Should().Be(updatedData.ClientId);
-        foundData.CreationTime.Should().Be(updatedData.CreationTime);
-        foundData.Lifetime.Should().Be(updatedData.Lifetime);
-        foundData.IsAuthorized.Should().Be(updatedData.IsAuthorized);
-        foundData.IsOpenId.Should().Be(updatedData.IsOpenId);
-        foundData.Subject.Should().BeEquivalentTo(updatedData.Subject);
-        foundData.RequestedScopes.Should().BeEquivalentTo(updatedData.RequestedScopes);
+        foundData.ClientId.ShouldBe(updatedData.ClientId);
+        foundData.CreationTime.ShouldBe(updatedData.CreationTime);
+        foundData.Lifetime.ShouldBe(updatedData.Lifetime);
+        foundData.IsAuthorized.ShouldBe(updatedData.IsAuthorized);
+        foundData.IsOpenId.ShouldBe(updatedData.IsOpenId);
+        foundData.Subject.ShouldBe(updatedData.Subject);
+        foundData.RequestedScopes.ShouldBe(updatedData.RequestedScopes);
     }
 
     [Fact]
@@ -135,6 +135,6 @@ public class InMemoryDeviceFlowStoreTests
         await _store.RemoveByDeviceCodeAsync(deviceCode);
         var foundData = await _store.FindByUserCodeAsync(userCode);
 
-        foundData.Should().BeNull();
+        foundData.ShouldBeNull();
     }
 }

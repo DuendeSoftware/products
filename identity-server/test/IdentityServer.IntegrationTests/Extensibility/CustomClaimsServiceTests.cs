@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
@@ -64,14 +64,14 @@ public class CustomClaimsServiceTests
                 ClientId = "test",
                 ClientSecret = "secret"
             });
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
 
         var accessToken = result.AccessToken;
         var payload = accessToken.Split('.')[1];
         var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
         var obj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
-        obj["foo"].GetString().Should().Be("foo1");
+        obj["foo"].GetString().ShouldBe("foo1");
     }
 }
 

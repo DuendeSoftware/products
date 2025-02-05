@@ -5,7 +5,6 @@
 using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Stores.Default;
-using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using UnitTests.Common;
@@ -21,7 +20,7 @@ public class ServerSideSessionCookieEventsTests
         
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
 
-        context.ShouldRenew.Should().BeFalse();
+        context.ShouldRenew.ShouldBeFalse();
     }
     
     [Fact]
@@ -31,7 +30,7 @@ public class ServerSideSessionCookieEventsTests
         
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
 
-        context.ShouldRenew.Should().BeTrue();
+        context.ShouldRenew.ShouldBeTrue();
     }
 
     [Fact]
@@ -41,7 +40,7 @@ public class ServerSideSessionCookieEventsTests
         
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
 
-        context.Properties.Items.Keys.Should().NotContain(IdentityServerConstants.ForceCookieRenewalFlag);
+        context.Properties.Items.Keys.ShouldNotContain(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -52,7 +51,7 @@ public class ServerSideSessionCookieEventsTests
         
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
         
-        context.ShouldRenew.Should().BeFalse();
+        context.ShouldRenew.ShouldBeFalse();
     }
 
     private CookieSlidingExpirationContext CreateSlidingExpirationContext(DateTime expiresUtc, bool forceRenew = false)

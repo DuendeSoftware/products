@@ -10,7 +10,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
@@ -63,14 +63,14 @@ public class CustomTokenCreationServiceTests
                 ClientId = "test",
                 ClientSecret = "secret"
             });
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
 
         var accessToken = result.AccessToken;
         var payload = accessToken.Split('.')[1];
         var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
         var obj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
-        obj["aud"].ToStringList().Should().Contain("custom1");
+        obj["aud"].ToStringList().ShouldContain("custom1");
     }
 }
 

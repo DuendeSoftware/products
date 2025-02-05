@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
+using Shouldly;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
@@ -81,7 +81,7 @@ public class RefreshTokenTests
                     responseType: "code",
                     scope: "openid scope offline_access",
                     redirectUri: "https://client/callback");
-        authz.Code.Should().NotBeNull();
+        authz.Code.ShouldNotBeNull();
 
         var code = authz.Code;
 
@@ -98,13 +98,13 @@ public class RefreshTokenTests
             RedirectUri = "https://client/callback"
         });
 
-        tokenResult1.IsError.Should().BeFalse();
-        tokenResult1.AccessToken.Should().NotBeNull();
+        tokenResult1.IsError.ShouldBeFalse();
+        tokenResult1.AccessToken.ShouldNotBeNull();
 
 
         var payload1 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult1.AccessToken.Split('.')[1]));
         var sid1 = payload1.TryGetValue("sid").GetString();
-        sid1.Should().Be(_mockPipeline.GetSessionCookie().Value);
+        sid1.ShouldBe(_mockPipeline.GetSessionCookie().Value);
 
         var tokenResult2 = await tokenClient.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -116,12 +116,12 @@ public class RefreshTokenTests
             RefreshToken = tokenResult1.RefreshToken
         });
 
-        tokenResult2.IsError.Should().BeFalse();
-        tokenResult2.AccessToken.Should().NotBeNull();
+        tokenResult2.IsError.ShouldBeFalse();
+        tokenResult2.AccessToken.ShouldNotBeNull();
 
         var payload2 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult2.AccessToken.Split('.')[1]));
         var sid2 = payload2.TryGetValue("sid").GetString();
-        sid1.Should().Be(sid2);
+        sid1.ShouldBe(sid2);
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class RefreshTokenTests
                     responseType: "code",
                     scope: "openid scope offline_access",
                     redirectUri: "https://client/callback");
-        authz.Code.Should().NotBeNull();
+        authz.Code.ShouldNotBeNull();
 
         var code = authz.Code;
 
@@ -156,13 +156,13 @@ public class RefreshTokenTests
             RedirectUri = "https://client/callback"
         });
 
-        tokenResult1.IsError.Should().BeFalse();
-        tokenResult1.AccessToken.Should().NotBeNull();
+        tokenResult1.IsError.ShouldBeFalse();
+        tokenResult1.AccessToken.ShouldNotBeNull();
 
 
         var payload1 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult1.AccessToken.Split('.')[1]));
         var sid1 = payload1.TryGetValue("sid").GetString();
-        sid1.Should().Be(_mockPipeline.GetSessionCookie().Value);
+        sid1.ShouldBe(_mockPipeline.GetSessionCookie().Value);
 
         var tokenResult2 = await tokenClient.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -174,11 +174,11 @@ public class RefreshTokenTests
             RefreshToken = tokenResult1.RefreshToken
         });
 
-        tokenResult2.IsError.Should().BeFalse();
-        tokenResult2.AccessToken.Should().NotBeNull();
+        tokenResult2.IsError.ShouldBeFalse();
+        tokenResult2.AccessToken.ShouldNotBeNull();
 
         var payload2 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult2.AccessToken.Split('.')[1]));
         var sid2 = payload2.TryGetValue("sid").GetString();
-        sid1.Should().Be(sid2);
+        sid1.ShouldBe(sid2);
     }
 }

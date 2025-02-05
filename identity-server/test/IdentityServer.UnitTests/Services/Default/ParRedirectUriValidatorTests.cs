@@ -4,7 +4,7 @@
 using Xunit;
 using Duende.IdentityServer.Validation;
 using System.Collections.Specialized;
-using FluentAssertions;
+using Shouldly;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Configuration;
@@ -37,7 +37,7 @@ public class ParRedirectUriValidatorTests
             }
         });
 
-        result.Should().Be(true);
+        result.ShouldBe(true);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class ParRedirectUriValidatorTests
             }
         });
 
-        result.Should().Be(true);
+        result.ShouldBe(true);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public class ParRedirectUriValidatorTests
             Client = new Client()
         });
         
-        result.Should().Be(false);
+        result.ShouldBe(false);
     }
 
     [Fact]
@@ -116,8 +116,8 @@ public class ParRedirectUriValidatorTests
             }
         });
         
-        registeredRedirectUri.Should().NotBe(pushedRedirectUri);
-        result.Should().Be(true);
+        registeredRedirectUri.ShouldNotBe(pushedRedirectUri);
+        result.ShouldBe(true);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class ParRedirectUriValidatorTests
             }
         });
         
-        registeredRedirectUri.Should().NotBe(requestedRedirectUri);
-        result.Should().Be(false);
+        registeredRedirectUri.ShouldNotBe(requestedRedirectUri);
+        result.ShouldBe(false);
     }
 }

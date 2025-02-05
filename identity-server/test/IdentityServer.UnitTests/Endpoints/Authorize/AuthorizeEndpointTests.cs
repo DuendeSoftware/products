@@ -11,7 +11,7 @@ using Duende.IdentityServer.Endpoints;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -65,7 +65,7 @@ public class AuthorizeEndpointTests
 
         var result = await _subject.ProcessAsync(_context);
 
-        result.Should().BeOfType<AuthorizeResult>();
+        result.ShouldBeOfType<AuthorizeResult>();
     }
 
     [Fact]
@@ -77,8 +77,8 @@ public class AuthorizeEndpointTests
         var result = await _subject.ProcessAsync(_context);
 
         var statusCode = result as StatusCodeResult;
-        statusCode.Should().NotBeNull();
-        statusCode.StatusCode.Should().Be(415);
+        statusCode.ShouldNotBeNull();
+        statusCode.StatusCode.ShouldBe(415);
     }
 
     internal void Init()

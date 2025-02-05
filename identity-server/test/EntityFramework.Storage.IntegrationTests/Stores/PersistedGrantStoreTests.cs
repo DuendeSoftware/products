@@ -13,7 +13,7 @@ using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -132,57 +132,57 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1"
-            })).ToList().Count.Should().Be(9);
+            })).ToList().Count.ShouldBe(9);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub2"
-            })).ToList().Count.Should().Be(0);
+            })).ToList().Count.ShouldBe(0);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c1"
-            })).ToList().Count.Should().Be(4);
+            })).ToList().Count.ShouldBe(4);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c2"
-            })).ToList().Count.Should().Be(4);
+            })).ToList().Count.ShouldBe(4);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c3"
-            })).ToList().Count.Should().Be(1);
+            })).ToList().Count.ShouldBe(1);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c4"
-            })).ToList().Count.Should().Be(0);
+            })).ToList().Count.ShouldBe(0);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c1",
                 SessionId = "s1"
-            })).ToList().Count.Should().Be(2);
+            })).ToList().Count.ShouldBe(2);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c3",
                 SessionId = "s1"
-            })).ToList().Count.Should().Be(0);
+            })).ToList().Count.ShouldBe(0);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c1",
                 SessionId = "s1",
                 Type = "t1"
-            })).ToList().Count.Should().Be(1);
+            })).ToList().Count.ShouldBe(1);
             (await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "sub1",
                 ClientId = "c1",
                 SessionId = "s1",
                 Type = "t3"
-            })).ToList().Count.Should().Be(0);
+            })).ToList().Count.ShouldBe(0);
         }
     }
 
@@ -296,7 +296,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             {
                 SubjectId = "sub1"
             });
-            context.PersistedGrants.Count().Should().Be(1);
+            context.PersistedGrants.Count().ShouldBe(1);
         }
 
         PopulateDb();
@@ -308,7 +308,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             {
                 SubjectId = "sub2"
             });
-            context.PersistedGrants.Count().Should().Be(10);
+            context.PersistedGrants.Count().ShouldBe(10);
         }
 
         PopulateDb();
@@ -320,7 +320,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             {
                 SubjectId = "sub1", ClientId = "c1"
             });
-            context.PersistedGrants.Count().Should().Be(6);
+            context.PersistedGrants.Count().ShouldBe(6);
         }
 
         PopulateDb();
@@ -333,7 +333,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
                 SubjectId = "sub1",
                 ClientId = "c2"
             });
-            context.PersistedGrants.Count().Should().Be(6);
+            context.PersistedGrants.Count().ShouldBe(6);
         }
 
         PopulateDb();
@@ -346,7 +346,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
                 SubjectId = "sub1",
                 ClientId = "c3"
             });
-            context.PersistedGrants.Count().Should().Be(9);
+            context.PersistedGrants.Count().ShouldBe(9);
         }
 
 
@@ -360,7 +360,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
                 SubjectId = "sub1",
                 ClientId = "c4"
             });
-            context.PersistedGrants.Count().Should().Be(10);
+            context.PersistedGrants.Count().ShouldBe(10);
         }
 
         PopulateDb();
@@ -374,7 +374,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
                 ClientId = "c1", 
                 SessionId = "s1"
             });
-            context.PersistedGrants.Count().Should().Be(8);
+            context.PersistedGrants.Count().ShouldBe(8);
         }
 
         PopulateDb();
@@ -388,7 +388,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
                 ClientId = "c3",
                 SessionId = "s1"
             });
-            context.PersistedGrants.Count().Should().Be(10);
+            context.PersistedGrants.Count().ShouldBe(10);
         }
 
         PopulateDb();
@@ -403,7 +403,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
                 SessionId = "s1", 
                 Type = "t1"
             });
-            context.PersistedGrants.Count().Should().Be(9);
+            context.PersistedGrants.Count().ShouldBe(9);
         }
 
         PopulateDb();
@@ -418,7 +418,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
                 SessionId = "s1",
                 Type = "t3"
             });
-            context.PersistedGrants.Count().Should().Be(10);
+            context.PersistedGrants.Count().ShouldBe(10);
         }
     }
 

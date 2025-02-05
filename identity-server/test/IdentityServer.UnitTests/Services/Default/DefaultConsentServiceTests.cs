@@ -11,7 +11,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using Xunit;
@@ -73,7 +73,7 @@ public class DefaultConsentServiceTests
         await _subject.UpdateConsentAsync(_user, _client, new [] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
         var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
-        consent.Should().BeNull();
+        consent.ShouldBeNull();
     }
 
     [Fact]
@@ -82,9 +82,9 @@ public class DefaultConsentServiceTests
         await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
         var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
-        consent.Scopes.Count().Should().Be(2);
-        consent.Scopes.Should().Contain("scope1");
-        consent.Scopes.Should().Contain("scope2");
+        consent.Scopes.Count().ShouldBe(2);
+        consent.Scopes.ShouldContain("scope1");
+        consent.Scopes.ShouldContain("scope2");
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class DefaultConsentServiceTests
         await _subject.UpdateConsentAsync(_user, _client, new ParsedScopeValue[] { });
 
         var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
-        consent.Should().BeNull();
+        consent.ShouldBeNull();
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class DefaultConsentServiceTests
 
         var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class DefaultConsentServiceTests
 
         var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class DefaultConsentServiceTests
     {
         var result = await _subject.RequiresConsentAsync(_user, _client, new ParsedScopeValue[] { });
 
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public class DefaultConsentServiceTests
     {
         var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("offline_access") });
 
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class DefaultConsentServiceTests
     {
         var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public class DefaultConsentServiceTests
 
         var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public class DefaultConsentServiceTests
 
         var result = await _subject.RequiresConsentAsync(_user, _client, new [] { new ParsedScopeValue("scope2") });
 
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public class DefaultConsentServiceTests
 
         var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class DefaultConsentServiceTests
 
         var result = await _subject.RequiresConsentAsync(_user, _client, scopes);
 
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -205,6 +205,6 @@ public class DefaultConsentServiceTests
 
         var result = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
 
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 }

@@ -10,7 +10,7 @@ using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
@@ -39,7 +39,7 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -55,9 +55,9 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
-        secret.Id.Should().Be("client");
-        secret.Credential.Should().Be("secret");
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
+        secret.Id.ShouldBe("client");
+        secret.Credential.ShouldBe("secret");
     }
         
     [Theory]
@@ -82,9 +82,9 @@ public class BasicAuthenticationSecretParsing
             
         var secret = await _parser.ParseAsync(context);
 
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
-        secret.Id.Should().Be(userName);
-        secret.Credential.Should().Be(password);
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
+        secret.Id.ShouldBe(userName);
+        secret.Credential.ShouldBe(password);
     }
         
     [Theory]
@@ -107,9 +107,9 @@ public class BasicAuthenticationSecretParsing
             
         var secret = await _parser.ParseAsync(context);
 
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
-        secret.Id.Should().Be(userName);
-        secret.Credential.Should().Be(password);
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
+        secret.Id.ShouldBe(userName);
+        secret.Credential.ShouldBe(password);
     }
 
     [Fact]
@@ -124,9 +124,9 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.NoSecret);
-        secret.Id.Should().Be("client");
-        secret.Credential.Should().BeNull();
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.NoSecret);
+        secret.Id.ShouldBe("client");
+        secret.Credential.ShouldBeNull();
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public class BasicAuthenticationSecretParsing
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
         var secret = await _parser.ParseAsync(context);
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class BasicAuthenticationSecretParsing
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
         var secret = await _parser.ParseAsync(context);
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Theory]
@@ -202,8 +202,8 @@ public class BasicAuthenticationSecretParsing
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
         var secret = await parser.ParseAsync(context);
-        secret.Id.Should().Be(clientId);
-        secret.Credential.Should().Be(clientSecret);
+        secret.Id.ShouldBe(clientId);
+        secret.Credential.ShouldBe(clientSecret);
     }
 
     private static BasicAuthenticationSecretParser CreateParser(int maxLength)
@@ -246,7 +246,7 @@ public class BasicAuthenticationSecretParsing
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
 
         var secret = await parser.ParseAsync(context);
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -259,7 +259,7 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -272,7 +272,7 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -300,6 +300,6 @@ public class BasicAuthenticationSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 }

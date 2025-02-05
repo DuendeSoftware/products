@@ -12,7 +12,7 @@ using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -77,7 +77,7 @@ public class AuthorizeCallbackEndpointTests
 
         var result = await _subject.ProcessAsync(_context);
 
-        result.Should().BeOfType<AuthorizeResult>();
+        result.ShouldBeOfType<AuthorizeResult>();
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class AuthorizeCallbackEndpointTests
 
         var result = await _subject.ProcessAsync(_context);
 
-        result.Should().BeOfType<AuthorizeResult>();
+        result.ShouldBeOfType<AuthorizeResult>();
     }
 
     [Fact]
@@ -114,8 +114,8 @@ public class AuthorizeCallbackEndpointTests
 
         var result = await _subject.ProcessAsync(_context);
 
-        result.Should().BeOfType<AuthorizeResult>();
-        ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
+        result.ShouldBeOfType<AuthorizeResult>();
+        ((AuthorizeResult)result).Response.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class AuthorizeCallbackEndpointTests
 
         var result = await _subject.ProcessAsync(_context);
 
-        result.Should().BeOfType<ConsentPageResult>();
+        result.ShouldBeOfType<ConsentPageResult>();
     }
 
     [Fact]
@@ -153,8 +153,8 @@ public class AuthorizeCallbackEndpointTests
         var result = await _subject.ProcessAsync(_context);
 
         var statusCode = result as StatusCodeResult;
-        statusCode.Should().NotBeNull();
-        statusCode.StatusCode.Should().Be(405);
+        statusCode.ShouldNotBeNull();
+        statusCode.StatusCode.ShouldBe(405);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class AuthorizeCallbackEndpointTests
 
         var result = await _subject.ProcessAsync(_context);
 
-        _mockUserConsentResponseMessageStore.Messages.Count.Should().Be(0);
+        _mockUserConsentResponseMessageStore.Messages.Count.ShouldBe(0);
     }
 
     [Fact]
@@ -202,7 +202,7 @@ public class AuthorizeCallbackEndpointTests
 
         var result = await _subject.ProcessAsync(_context);
 
-        result.Should().BeOfType<AuthorizeResult>();
+        result.ShouldBeOfType<AuthorizeResult>();
     }
 
     internal void Init()

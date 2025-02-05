@@ -9,7 +9,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
@@ -57,12 +57,12 @@ public class EndSessionResultTests
 
         await _subject.WriteHttpResponse(new EndSessionResult(_result), _context);
 
-        _mockLogoutMessageStore.Messages.Count.Should().Be(1);
+        _mockLogoutMessageStore.Messages.Count.ShouldBe(1);
         var location = _context.Response.Headers.Location.Single();
         var query = QueryHelpers.ParseQuery(new Uri(location).Query);
 
-        location.Should().StartWith("https://server/logout");
-        query["logoutId"].First().Should().Be(_mockLogoutMessageStore.Messages.First().Key);
+        location.ShouldStartWith("https://server/logout");
+        query["logoutId"].First().ShouldBe(_mockLogoutMessageStore.Messages.First().Key);
     }
 
     [Fact]
@@ -72,12 +72,12 @@ public class EndSessionResultTests
 
         await _subject.WriteHttpResponse(new EndSessionResult(_result), _context);
 
-        _mockLogoutMessageStore.Messages.Count.Should().Be(0);
+        _mockLogoutMessageStore.Messages.Count.ShouldBe(0);
         var location = _context.Response.Headers.Location.Single();
         var query = QueryHelpers.ParseQuery(new Uri(location).Query);
 
-        location.Should().StartWith("https://server/logout");
-        query.Count.Should().Be(0);
+        location.ShouldStartWith("https://server/logout");
+        query.Count.ShouldBe(0);
     }
 
     [Fact]
@@ -95,11 +95,11 @@ public class EndSessionResultTests
 
         await _subject.WriteHttpResponse(new EndSessionResult(_result), _context);
 
-        _mockLogoutMessageStore.Messages.Count.Should().Be(0);
+        _mockLogoutMessageStore.Messages.Count.ShouldBe(0);
         var location = _context.Response.Headers.Location.Single();
         var query = QueryHelpers.ParseQuery(new Uri(location).Query);
 
-        location.Should().StartWith("https://server/logout");
-        query.Count.Should().Be(0);
+        location.ShouldStartWith("https://server/logout");
+        query.Count.ShouldBe(0);
     }
 }

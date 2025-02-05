@@ -6,7 +6,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,8 +77,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeTrue();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeTrue();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 
     [Theory]
@@ -105,8 +105,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeFalse();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeFalse();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 
     [Fact]
@@ -128,8 +128,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, "wrong_name");
 
-        _mockPolicy.WasCalled.Should().BeFalse();
-        _mockInner.WasCalled.Should().BeTrue();
+        _mockPolicy.WasCalled.ShouldBeFalse();
+        _mockInner.WasCalled.ShouldBeTrue();
     }
 
     [Fact]
@@ -149,8 +149,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeFalse();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeFalse();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 
     [Theory]
@@ -172,7 +172,7 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeTrue();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeTrue();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 }

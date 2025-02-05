@@ -10,7 +10,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using Xunit;
@@ -45,7 +45,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -154,7 +154,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -175,7 +175,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -197,7 +197,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -218,7 +218,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -250,7 +250,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -269,6 +269,6 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        request.Raw.AllKeys.Should().Contain(Constants.ProcessedPrompt);
+        request.Raw.AllKeys.ShouldContain(Constants.ProcessedPrompt);
     }
 }

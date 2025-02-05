@@ -11,7 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
@@ -141,8 +141,8 @@ public class ClientAssertionClient
             Scope = "api1"
         });
 
-        response.IsError.Should().BeTrue();
-        response.Error.Should().Be("invalid_client");
+        response.IsError.ShouldBeTrue();
+        response.Error.ShouldBe("invalid_client");
     }
 
     [Fact]
@@ -163,9 +163,9 @@ public class ClientAssertionClient
             Scope = "api1"
         });
 
-        response.IsError.Should().Be(true);
-        response.Error.Should().Be(OidcConstants.TokenErrors.InvalidClient);
-        response.ErrorType.Should().Be(ResponseErrorType.Protocol);
+        response.IsError.ShouldBe(true);
+        response.Error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
+        response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
     }
 
     [Fact]
@@ -189,9 +189,9 @@ public class ClientAssertionClient
             Scope = "api1"
         });
 
-        response.IsError.Should().Be(true);
-        response.Error.Should().Be(OidcConstants.TokenErrors.InvalidClient);
-        response.ErrorType.Should().Be(ResponseErrorType.Protocol);
+        response.IsError.ShouldBe(true);
+        response.Error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
+        response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
     }
 
     private async Task<TokenResponse> GetToken(FormUrlEncodedContent body)
@@ -202,22 +202,22 @@ public class ClientAssertionClient
 
     private void AssertValidToken(TokenResponse response)
     {
-        response.IsError.Should().Be(false);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBe(false);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
             
-        payload.Count.Should().Be(8);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be(ClientId);
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(8);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe(ClientId);
+        payload.Keys.ShouldContain("iat");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
     }
 
     private Dictionary<string, JsonElement> GetPayload(TokenResponse response)

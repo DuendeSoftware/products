@@ -14,7 +14,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Services.Default;
@@ -97,7 +97,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 
     [Theory]
@@ -156,7 +156,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 
     [Theory]
@@ -182,7 +182,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().Be(expectSuccess, result.Error);
+        result.Success.ShouldBe(expectSuccess, result.Error);
     }
 
     [Theory]
@@ -207,7 +207,7 @@ public class PrivateKeyJwtSecretValidation
     
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
     
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -228,7 +228,7 @@ public class PrivateKeyJwtSecretValidation
     
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
     
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
     
     [Fact]
@@ -246,10 +246,10 @@ public class PrivateKeyJwtSecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
             
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -267,7 +267,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -288,7 +288,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -309,7 +309,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -328,7 +328,7 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -349,6 +349,6 @@ public class PrivateKeyJwtSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 }

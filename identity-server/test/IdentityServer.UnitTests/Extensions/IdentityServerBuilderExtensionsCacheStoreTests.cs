@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -60,7 +60,7 @@ public class IdentityServerBuilderExtensionsCacheStoreTests
 
         identityServerBuilder.AddClientStoreCache<CustomClientStore>();
 
-        services.Any(x => x.ImplementationType == typeof(CustomClientStore)).Should().BeTrue();
+        services.Any(x => x.ImplementationType == typeof(CustomClientStore)).ShouldBeTrue();
     }
 
     [Fact]
@@ -71,6 +71,6 @@ public class IdentityServerBuilderExtensionsCacheStoreTests
 
         identityServerBuilder.AddResourceStoreCache<CustomResourceStore>();
 
-        services.Any(x => x.ImplementationType == typeof(CustomResourceStore)).Should().BeTrue();
+        services.Any(x => x.ImplementationType == typeof(CustomResourceStore)).ShouldBeTrue();
     }
 }

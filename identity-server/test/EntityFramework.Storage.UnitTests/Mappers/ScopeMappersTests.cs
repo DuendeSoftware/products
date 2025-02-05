@@ -7,7 +7,7 @@ using System.Linq;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Models = Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace EntityFramework.Storage.UnitTests.Mappers;
@@ -39,8 +39,7 @@ public class ScopesMappersTests
 
         MapperTestHelpers
             .AllPropertiesAreMapped<Models.ApiScope, Entities.ApiScope>(source => source.ToEntity(), excludedProperties, out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
     [Fact]
@@ -48,8 +47,7 @@ public class ScopesMappersTests
     {
         MapperTestHelpers
             .AllPropertiesAreMapped<Entities.ApiScope, Models.ApiScope>(source => source.ToModel(), out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
     [Fact]
@@ -70,27 +68,27 @@ public class ScopesMappersTests
 
 
         var mappedEntity = model.ToEntity();
-        mappedEntity.Description.Should().Be("description");
-        mappedEntity.DisplayName.Should().Be("displayname");
-        mappedEntity.Name.Should().Be("foo");
+        mappedEntity.Description.ShouldBe("description");
+        mappedEntity.DisplayName.ShouldBe("displayname");
+        mappedEntity.Name.ShouldBe("foo");
 
-        mappedEntity.UserClaims.Count.Should().Be(2);
-        mappedEntity.UserClaims.Select(x => x.Type).Should().BeEquivalentTo(new[] { "c1", "c2" });
-        mappedEntity.Properties.Count.Should().Be(2);
-        mappedEntity.Properties.Should().Contain(x => x.Key == "x" && x.Value == "xx");
-        mappedEntity.Properties.Should().Contain(x => x.Key == "y" && x.Value == "yy");
+        mappedEntity.UserClaims.Count.ShouldBe(2);
+        mappedEntity.UserClaims.Select(x => x.Type).ShouldBe(["c1", "c2"]);
+        mappedEntity.Properties.Count.ShouldBe(2);
+        mappedEntity.Properties.ShouldContain(x => x.Key == "x" && x.Value == "xx");
+        mappedEntity.Properties.ShouldContain(x => x.Key == "y" && x.Value == "yy");
 
 
         var mappedModel = mappedEntity.ToModel();
 
-        mappedModel.Description.Should().Be("description");
-        mappedModel.DisplayName.Should().Be("displayname");
-        mappedModel.Enabled.Should().BeFalse();
-        mappedModel.Name.Should().Be("foo");
-        mappedModel.UserClaims.Count.Should().Be(2);
-        mappedModel.UserClaims.Should().BeEquivalentTo(new[] { "c1", "c2" });
-        mappedModel.Properties.Count.Should().Be(2);
-        mappedModel.Properties["x"].Should().Be("xx");
-        mappedModel.Properties["y"].Should().Be("yy");
+        mappedModel.Description.ShouldBe("description");
+        mappedModel.DisplayName.ShouldBe("displayname");
+        mappedModel.Enabled.ShouldBeFalse();
+        mappedModel.Name.ShouldBe("foo");
+        mappedModel.UserClaims.Count.ShouldBe(2);
+        mappedModel.UserClaims.ShouldBe(["c1", "c2"], true);
+        mappedModel.Properties.Count.ShouldBe(2);
+        mappedModel.Properties["x"].ShouldBe("xx");
+        mappedModel.Properties["y"].ShouldBe("yy");
     }
 }

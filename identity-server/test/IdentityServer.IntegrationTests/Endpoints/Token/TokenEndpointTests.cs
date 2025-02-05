@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
+using Shouldly;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -91,10 +91,10 @@ public class TokenEndpointTests
         _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer", "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        result.ContainsKey("error").Should().BeFalse();
+        result.ContainsKey("error").ShouldBeFalse();
     }
 
     [Fact]
@@ -114,10 +114,10 @@ public class TokenEndpointTests
         _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer", "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        result.ContainsKey("error").Should().BeFalse();
+        result.ContainsKey("error").ShouldBeFalse();
     }
 
     [Fact]
@@ -129,10 +129,10 @@ public class TokenEndpointTests
         
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, content);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         var error = result["error"].GetString();
-        error.Should().Be("invalid_request");
+        error.ShouldBe("invalid_request");
     }
 }

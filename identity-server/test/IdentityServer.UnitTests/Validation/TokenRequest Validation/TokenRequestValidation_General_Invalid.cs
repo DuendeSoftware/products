@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -31,7 +31,7 @@ public class TokenRequestValidation_General_Invalid
 
         Func<Task> act = () => validator.ValidateRequestAsync(null, null);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class TokenRequestValidation_General_Invalid
 
         Func<Task> act = () => validator.ValidateRequestAsync(parameters, null);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -79,8 +79,8 @@ public class TokenRequestValidation_General_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 
     [Fact]
@@ -98,8 +98,8 @@ public class TokenRequestValidation_General_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class TokenRequestValidation_General_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 }

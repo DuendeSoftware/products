@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using Duende.IdentityServer.Models;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace UnitTests.Validation;
@@ -57,7 +57,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes = new[] { type1, type2 };
 
-        act.Should().Throw<InvalidOperationException>();            
+        act.ShouldThrow<InvalidOperationException>();            
     }
 
     [Theory]
@@ -71,7 +71,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes = new[] { "custom1", type2, "custom2", type1 };
 
-        act.Should().Throw<InvalidOperationException>();
+        act.ShouldThrow<InvalidOperationException>();
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes = new[] { "custom1", "custom2", "custom1" };
 
-        act.Should().Throw<InvalidOperationException>();
+        act.ShouldThrow<InvalidOperationException>();
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes = null;
 
-        act.Should().Throw<ArgumentNullException>();
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes = new[] { "custo m2" };
 
-        act.Should().Throw<InvalidOperationException>();
+        act.ShouldThrow<InvalidOperationException>();
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes = new[] { "custom1", "custo m2", "custom1" };
 
-        act.Should().Throw<InvalidOperationException>();
+        act.ShouldThrow<InvalidOperationException>();
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public class GrantTypesValidation
 
         Action act = () => client.AllowedGrantTypes.Add("authorization_code");
 
-        act.Should().Throw<InvalidOperationException>();
+        act.ShouldThrow<InvalidOperationException>();
     }
 
     [Fact]
@@ -137,6 +137,6 @@ public class GrantTypesValidation
 
         client.AllowedGrantTypes.Add("custom");
 
-        client.AllowedGrantTypes.Count.Should().Be(2);
+        client.AllowedGrantTypes.Count.ShouldBe(2);
     }
 }

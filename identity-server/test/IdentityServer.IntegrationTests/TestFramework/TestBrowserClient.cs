@@ -5,7 +5,7 @@
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using FluentAssertions;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -94,7 +94,7 @@ public class TestBrowserClient : HttpClient
 
     public async Task FollowRedirectAsync()
     {
-        LastResponse.StatusCode.Should().Be(HttpStatusCode.Found);
+        LastResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
         var location = LastResponse.Headers.Location.ToString();
         await GetAsync(location);
     }
@@ -110,7 +110,7 @@ public class TestBrowserClient : HttpClient
     }
     public async Task<HtmlForm> ReadFormAsync(HttpResponseMessage response, string selector = null)
     {
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var htmlForm = new HtmlForm();
 
@@ -120,7 +120,7 @@ public class TestBrowserClient : HttpClient
         var document = await parser.ParseDocumentAsync(html);
 
         var form = document.QuerySelector(selector ?? "form") as IHtmlFormElement;
-        form.Should().NotBeNull();
+        form.ShouldNotBeNull();
 
         var postUrl = form.Action;
         if (!postUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
@@ -194,14 +194,14 @@ public class TestBrowserClient : HttpClient
 
     public async Task AssertExistsAsync(HttpResponseMessage response, string selector)
     {
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var html = await response.Content.ReadAsStringAsync();
 
         var parser = new HtmlParser();
         var dom = parser.ParseDocument(html);
         var element = dom.QuerySelectorAll(selector);
-        element.Length.Should().BeGreaterThan(0);
+        element.Length.ShouldBeGreaterThan(0);
     }
 
     public Task AssertNotExistsAsync(string selector)
@@ -210,14 +210,14 @@ public class TestBrowserClient : HttpClient
     }
     public async Task AssertNotExistsAsync(HttpResponseMessage response, string selector)
     {
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var html = await response.Content.ReadAsStringAsync();
 
         var parser = new HtmlParser();
         var dom = parser.ParseDocument(html);
         var element = dom.QuerySelectorAll(selector);
-        element.Length.Should().Be(0);
+        element.Length.ShouldBe(0);
     }
 
     public Task AssertErrorPageAsync(string error = null)
@@ -226,13 +226,13 @@ public class TestBrowserClient : HttpClient
     }
     public async Task AssertErrorPageAsync(HttpResponseMessage response, string error = null)
     {
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await AssertExistsAsync(response, ".error-page");
 
         if (!String.IsNullOrWhiteSpace(error))
         {
             var errorText = await ReadElementTextAsync(response, ".alert.alert-danger");
-            errorText.Should().Contain(error);
+            errorText.ShouldContain(error);
         }
     }
 
@@ -242,13 +242,13 @@ public class TestBrowserClient : HttpClient
     }
     public async Task AssertValidationErrorAsync(HttpResponseMessage response, string error = null)
     {
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await AssertExistsAsync(response, ".validation-summary-errors");
 
         if (!String.IsNullOrWhiteSpace(error))
         {
             var errorText = await ReadElementTextAsync(response, ".validation-summary-errors");
-            errorText.ToLowerInvariant().Should().Contain(error.ToLowerInvariant());
+            errorText.ToLowerInvariant().ShouldContain(error.ToLowerInvariant());
         }
     }
 }

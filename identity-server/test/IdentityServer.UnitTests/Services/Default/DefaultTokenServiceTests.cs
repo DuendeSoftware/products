@@ -8,7 +8,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
@@ -76,8 +76,8 @@ public class DefaultTokenServiceTests
 
         var result = await _subject.CreateAccessTokenAsync(request);
 
-        result.Audiences.Count.Should().Be(3);
-        result.Audiences.Should().BeEquivalentTo(new[] { "api1", "api2", "api3" });
+        result.Audiences.Count.ShouldBe(3);
+        result.Audiences.ShouldBe(new[] { "api1", "api2", "api3" });
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class DefaultTokenServiceTests
 
         var result = await _subject.CreateAccessTokenAsync(request);
 
-        result.Audiences.Count.Should().Be(0);
+        result.Audiences.Count.ShouldBe(0);
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public class DefaultTokenServiceTests
 
         var result = await _subject.CreateAccessTokenAsync(request);
 
-        result.Claims.SingleOrDefault(x => x.Type == JwtClaimTypes.SessionId).Should().BeNull();
+        result.Claims.SingleOrDefault(x => x.Type == JwtClaimTypes.SessionId).ShouldBeNull();
     }
         
     [Fact]
@@ -147,7 +147,7 @@ public class DefaultTokenServiceTests
 
         var result = await _subject.CreateAccessTokenAsync(request);
 
-        result.Claims.SingleOrDefault(x => x.Type == JwtClaimTypes.SessionId).Value.Should().Be("123");
+        result.Claims.SingleOrDefault(x => x.Type == JwtClaimTypes.SessionId).Value.ShouldBe("123");
     }
 
     [Fact]
@@ -162,28 +162,28 @@ public class DefaultTokenServiceTests
             token.IncludeJwtId = false;
             token.Type = OidcConstants.TokenTypes.IdentityToken;
             var result = await _subject.CreateSecurityTokenAsync(token);
-            _mockTokenCreationService.Token.Claims.Should().NotContain(x => x.Type == "jti");
+            _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.IncludeJwtId = false;
             token.Type = OidcConstants.TokenTypes.AccessToken;
             var result = await _subject.CreateSecurityTokenAsync(token);
-            _mockTokenCreationService.Token.Claims.Should().NotContain(x => x.Type == "jti");
+            _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.IncludeJwtId = true;
             token.Type = OidcConstants.TokenTypes.IdentityToken;
             var result = await _subject.CreateSecurityTokenAsync(token);
-            _mockTokenCreationService.Token.Claims.Should().NotContain(x => x.Type == "jti");
+            _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.IncludeJwtId = true;
             token.Type = OidcConstants.TokenTypes.AccessToken;
             var result = await _subject.CreateSecurityTokenAsync(token);
-            _mockTokenCreationService.Token.Claims.Should().Contain(x => x.Type == "jti");
+            _mockTokenCreationService.Token.Claims.ShouldContain(x => x.Type == "jti");
         }
     }
     [Fact]
@@ -202,15 +202,15 @@ public class DefaultTokenServiceTests
 
         {
             var result = await _subject.CreateSecurityTokenAsync(token);
-            _mockTokenCreationService.Token.Claims.Should().NotContain(x => x.Type == "jti");
+            _mockTokenCreationService.Token.Claims.ShouldNotContain(x => x.Type == "jti");
         }
 
         {
             token.Claims.Add(new Claim("jti", "xoxo"));
             token.Type = OidcConstants.TokenTypes.AccessToken;
             var result = await _subject.CreateSecurityTokenAsync(token);
-            _mockTokenCreationService.Token.Claims.Should().Contain(x => x.Type == "jti");
-            _mockTokenCreationService.Token.Claims.Single(x => x.Type == "jti").Value.Should().NotBe("xoxo");
+            _mockTokenCreationService.Token.Claims.ShouldContain(x => x.Type == "jti");
+            _mockTokenCreationService.Token.Claims.Single(x => x.Type == "jti").Value.ShouldNotBe("xoxo");
         }
     }
 }

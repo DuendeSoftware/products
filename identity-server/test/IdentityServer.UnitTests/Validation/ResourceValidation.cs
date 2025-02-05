@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Validation.Setup;
 using Xunit;
 
@@ -127,8 +127,8 @@ public class ResourceValidation
             Scopes = new[] { "offline_access" }
         });
 
-        result.Succeeded.Should().BeFalse();
-        result.InvalidScopes.Should().Contain("offline_access");
+        result.Succeeded.ShouldBeFalse();
+        result.InvalidScopes.ShouldContain("offline_access");
     }
 
     [Fact]
@@ -142,8 +142,8 @@ public class ResourceValidation
             Scopes = new[] { "openid", "scope1" }
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.InvalidScopes.Should().BeEmpty();
+        result.Succeeded.ShouldBeTrue();
+        result.InvalidScopes.ShouldBeEmpty();
     }
 
     [Fact]
@@ -158,9 +158,9 @@ public class ResourceValidation
                 Scopes = new[] { "openid", "email", "scope1", "unknown" }
             });
 
-            result.Succeeded.Should().BeFalse();
-            result.InvalidScopes.Should().Contain("unknown");
-            result.InvalidScopes.Should().Contain("email");
+            result.Succeeded.ShouldBeFalse();
+            result.InvalidScopes.ShouldContain("unknown");
+            result.InvalidScopes.ShouldContain("email");
         }
         {
             var validator = Factory.CreateResourceValidator(_subject);
@@ -170,8 +170,8 @@ public class ResourceValidation
                 Scopes = new[] { "openid", "scope1", "scope2" }
             });
 
-            result.Succeeded.Should().BeFalse();
-            result.InvalidScopes.Should().Contain("scope2");
+            result.Succeeded.ShouldBeFalse();
+            result.InvalidScopes.ShouldContain("scope2");
         }
         {
             var validator = Factory.CreateResourceValidator(_subject);
@@ -181,8 +181,8 @@ public class ResourceValidation
                 Scopes = new[] { "openid", "email", "scope1" }
             });
 
-            result.Succeeded.Should().BeFalse();
-            result.InvalidScopes.Should().Contain("email");
+            result.Succeeded.ShouldBeFalse();
+            result.InvalidScopes.ShouldContain("email");
         }
     }
 
@@ -197,8 +197,8 @@ public class ResourceValidation
             Scopes = new[] { "openid", "scope1", "disabled_scope" }
         });
 
-        result.Succeeded.Should().BeFalse();
-        result.InvalidScopes.Should().Contain("disabled_scope");
+        result.Succeeded.ShouldBeFalse();
+        result.InvalidScopes.ShouldContain("disabled_scope");
     }
 
     [Fact]
@@ -212,8 +212,8 @@ public class ResourceValidation
             Scopes = new[] { "openid", "scope1" }
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.InvalidScopes.Should().BeEmpty();
+        result.Succeeded.ShouldBeTrue();
+        result.InvalidScopes.ShouldBeEmpty();
     }
 
     [Fact]
@@ -227,9 +227,9 @@ public class ResourceValidation
             Scopes = new[] { "openid", "email", "scope1", "scope2" }
         });
 
-        result.Succeeded.Should().BeFalse();
-        result.InvalidScopes.Should().Contain("email");
-        result.InvalidScopes.Should().Contain("scope2");
+        result.Succeeded.ShouldBeFalse();
+        result.InvalidScopes.ShouldContain("email");
+        result.InvalidScopes.ShouldContain("scope2");
     }
 
     [Fact]
@@ -243,10 +243,10 @@ public class ResourceValidation
             Scopes = new[] { "openid", "scope1" }
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.Resources.IdentityResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "openid" });
-        result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope1" });
-        result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource1" });
+        result.Succeeded.ShouldBeTrue();
+        result.Resources.IdentityResources.Select(x => x.Name).ShouldBe(new[] { "openid" });
+        result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1" });
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1" });
     }
 
     [Fact]
@@ -260,10 +260,10 @@ public class ResourceValidation
             Scopes = new[] { "scope1" }
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.Resources.IdentityResources.Should().BeEmpty();
-        result.Resources.ApiScopes.Select(x => x.Name).Should().Contain("scope1");
-        result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource1" });
+        result.Succeeded.ShouldBeTrue();
+        result.Resources.IdentityResources.ShouldBeEmpty();
+        result.Resources.ApiScopes.Select(x => x.Name).ShouldContain("scope1");
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1" });
     }
 
     [Fact]
@@ -277,10 +277,10 @@ public class ResourceValidation
             Scopes = new[] { "openid" }
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.Resources.IdentityResources.SelectMany(x => x.Name).Should().Contain("openid");
-        result.Resources.ApiResources.Should().BeEmpty();
-        result.Resources.ApiResources.Should().BeEmpty();
+        result.Succeeded.ShouldBeTrue();
+        result.Resources.IdentityResources.Select(x => x.Name).ShouldContain("openid");
+        result.Resources.ApiResources.ShouldBeEmpty();
+        result.Resources.ApiResources.ShouldBeEmpty();
     }
 
     [Fact]
@@ -301,11 +301,11 @@ public class ResourceValidation
             Scopes = new[] { "s" }
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.Resources.ApiResources.Count.Should().Be(2);
-        result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "r1", "r2" });
-        result.RawScopeValues.Count().Should().Be(1);
-        result.RawScopeValues.Should().BeEquivalentTo(new[] { "s" });
+        result.Succeeded.ShouldBeTrue();
+        result.Resources.ApiResources.Count.ShouldBe(2);
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "r1", "r2" });
+        result.RawScopeValues.Count().ShouldBe(1);
+        result.RawScopeValues.ShouldBe(new[] { "s" });
     }
 
     // resource indicators
@@ -322,10 +322,10 @@ public class ResourceValidation
             ResourceIndicators = new[] { "isolated1" },
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource1", "isolated1" });
-        result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope1" });
-        result.Resources.OfflineAccess.Should().BeTrue();
+        result.Succeeded.ShouldBeTrue();
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1", "isolated1"]);
+        result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope1"]);
+        result.Resources.OfflineAccess.ShouldBeTrue();
     }
 
     [Fact]
@@ -339,9 +339,9 @@ public class ResourceValidation
             Scopes = new[] { "scope1" },
         });
 
-        result.Succeeded.Should().BeTrue();
-        result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource1" });
-        result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope1" });
+        result.Succeeded.ShouldBeTrue();
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1"]);
+        result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope1"]);
     }
 
     [Fact]
@@ -356,9 +356,9 @@ public class ResourceValidation
             ResourceIndicators = new[] { "invalid" }
         });
 
-        result.Succeeded.Should().BeFalse();
-        result.InvalidScopes.Should().BeEmpty();
-        result.InvalidResourceIndicators.Should().BeEquivalentTo(new[] { "invalid" });
+        result.Succeeded.ShouldBeFalse();
+        result.InvalidScopes.ShouldBeEmpty();
+        result.InvalidResourceIndicators.ShouldBe(["invalid"]);
     }
 
     [Fact]
@@ -373,9 +373,9 @@ public class ResourceValidation
             ResourceIndicators = new[] { "resource3" }
         });
 
-        result.Succeeded.Should().BeFalse();
-        result.InvalidScopes.Should().BeEmpty();
-        result.InvalidResourceIndicators.Should().BeEquivalentTo(new[] { "resource3" });
+        result.Succeeded.ShouldBeFalse();
+        result.InvalidScopes.ShouldBeEmpty();
+        result.InvalidResourceIndicators.ShouldBe(["resource3"]);
     }
 
 
@@ -408,36 +408,36 @@ public class ResourceValidation
 
         {
             var result = subject.FilterByResourceIndicator(null);
-            result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource1", "resource2" });
-            result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope1", "scope2", "scope3" });
-            result.Resources.OfflineAccess.Should().BeFalse();
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1", "resource2" });
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1", "scope2", "scope3" });
+            result.Resources.OfflineAccess.ShouldBeFalse();
         }
         {
             resources.OfflineAccess = true;
             var result = subject.FilterByResourceIndicator(null);
-            result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource1", "resource2" });
-            result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope1", "scope2", "scope3" });
-            result.Resources.OfflineAccess.Should().BeTrue();
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1", "resource2" });
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1", "scope2", "scope3" });
+            result.Resources.OfflineAccess.ShouldBeTrue();
         }
         {
             var result = subject.FilterByResourceIndicator("resource1");
-            result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource1" });
-            result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope1", "scope2" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1" });
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1", "scope2" });
         }
         {
             var result = subject.FilterByResourceIndicator("resource2");
-            result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "resource2" });
-            result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope1" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource2" });
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1" });
         }
         {
             var result = subject.FilterByResourceIndicator("isolated1");
-            result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "isolated1" });
-            result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope2", "scope3" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "isolated1" });
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope2", "scope3" });
         }
         {
             var result = subject.FilterByResourceIndicator("isolated2");
-            result.Resources.ApiResources.Select(x => x.Name).Should().BeEquivalentTo(new[] { "isolated2" });
-            result.Resources.ApiScopes.Select(x => x.Name).Should().BeEquivalentTo(new[] { "scope3" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "isolated2" });
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope3" });
         }
     }
 }

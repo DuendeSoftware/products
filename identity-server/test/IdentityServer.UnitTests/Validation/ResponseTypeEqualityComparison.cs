@@ -3,7 +3,7 @@
 
 
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace UnitTests.Validation;
@@ -33,7 +33,7 @@ public class ResponseTypeEqualityComparison
             string y = null;
             var result = comparer.Equals(x, y);
             var expected = (x == y);
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ public class ResponseTypeEqualityComparison
             string y = string.Empty;
             var result = comparer.Equals(x, y);
             var expected = (x == y);
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
 
         [Fact]
@@ -55,7 +55,7 @@ public class ResponseTypeEqualityComparison
             string y = null;
             var result = comparer.Equals(x, y);
             var expected = (x == y);
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ public class ResponseTypeEqualityComparison
             string y = "token";
             var result = comparer.Equals(x, y);
             var expected = (x == y);
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
 
         [Fact]
@@ -77,7 +77,7 @@ public class ResponseTypeEqualityComparison
             string y = "id_token";
             var result = comparer.Equals(x, y);
             var expected = (x == y);
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
 
         [Fact]
@@ -88,7 +88,7 @@ public class ResponseTypeEqualityComparison
             string y = "token";
             var result = comparer.Equals(x, y);
             var expected = (x == y);
-            result.Should().Be(expected);
+            result.ShouldBe(expected);
         }
     }
 
@@ -106,7 +106,7 @@ public class ResponseTypeEqualityComparison
             string x = "id_token token";
             string y = "token id_token";
             var result = comparer.Equals(x, y);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         [Fact]
@@ -116,7 +116,7 @@ public class ResponseTypeEqualityComparison
             string x = "code id_token";
             string y = "id_token code";
             var result = comparer.Equals(x, y);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         [Fact]
@@ -126,7 +126,7 @@ public class ResponseTypeEqualityComparison
             string x = "code token";
             string y = "token code";
             var result = comparer.Equals(x, y);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         [Fact]
@@ -136,7 +136,7 @@ public class ResponseTypeEqualityComparison
             string x = "code id_token token";
             string y = "id_token code token";
             var result = comparer.Equals(x, y);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         [Fact]
@@ -146,7 +146,7 @@ public class ResponseTypeEqualityComparison
             string x = "code id_token token";
             string y = "token id_token code";
             var result = comparer.Equals(x, y);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         [Fact]
@@ -156,7 +156,7 @@ public class ResponseTypeEqualityComparison
             string x = "code id_token token";
             string y = "id_token token";
             var result = comparer.Equals(x, y);
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
 
         [Fact]
@@ -166,7 +166,7 @@ public class ResponseTypeEqualityComparison
             string x = "code id_token token";
             string y = "id_token";
             var result = comparer.Equals(x, y);
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
 
         [Fact]
@@ -176,7 +176,7 @@ public class ResponseTypeEqualityComparison
             string x = "blerg smoo";
             string y = "token code";
             var result = comparer.Equals(x, y);
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
 
         [Fact]
@@ -186,7 +186,7 @@ public class ResponseTypeEqualityComparison
             string x = "code id_token token";
             string y = "tokenizer bleegerfi";
             var result = comparer.Equals(x, y);
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
     }
 }

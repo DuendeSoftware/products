@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -38,7 +38,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -56,10 +56,10 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().NotBeNull();
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.JwtBearer);
-        secret.Id.Should().Be("client");
-        secret.Credential.Should().Be(tokenString);
+        secret.ShouldNotBeNull();
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.JwtBearer);
+        secret.Id.ShouldBe("client");
+        secret.Credential.ShouldBe(tokenString);
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -135,6 +135,6 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 }

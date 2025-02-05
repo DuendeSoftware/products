@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
 using Xunit;
@@ -70,6 +70,6 @@ public class SubpathHosting
             nonce: "123_nonce");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        _mockPipeline.LoginWasCalled.Should().BeTrue();
+        _mockPipeline.LoginWasCalled.ShouldBeTrue();
     }
 }

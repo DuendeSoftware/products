@@ -5,7 +5,7 @@
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
@@ -32,7 +32,7 @@ public class Authorize_ClientValidation_Invalid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
     }
 }

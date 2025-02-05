@@ -17,7 +17,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel.Client;
 using IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
@@ -461,7 +461,7 @@ public class IdentityServerPipeline
 
         var url = CreateAuthorizeUrl(clientId, responseType, scope, redirectUri, state, nonce, loginHint, acrValues, responseMode, codeChallenge, codeChallengeMethod, requestUri, extra);
         var result = await BrowserClient.GetAsync(url);
-        result.StatusCode.Should().Be(HttpStatusCode.Found);
+        result.StatusCode.ShouldBe(HttpStatusCode.Found);
 
         BrowserClient.AllowAutoRedirect = old;
 

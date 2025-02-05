@@ -5,7 +5,7 @@
 using System;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -26,9 +26,9 @@ public class DefaultCorsPolicyServiceTests
     [Trait("Category", Category)]
     public async Task IsOriginAllowed_null_param_ReturnsFalse()
     {
-        (await subject.IsOriginAllowedAsync(null)).Should().Be(false);
-        (await subject.IsOriginAllowedAsync(String.Empty)).Should().Be(false);
-        (await subject.IsOriginAllowedAsync("    ")).Should().Be(false);
+        (await subject.IsOriginAllowedAsync(null)).ShouldBe(false);
+        (await subject.IsOriginAllowedAsync(String.Empty)).ShouldBe(false);
+        (await subject.IsOriginAllowedAsync("    ")).ShouldBe(false);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class DefaultCorsPolicyServiceTests
     public async Task IsOriginAllowed_OriginIsAllowed_ReturnsTrue()
     {
         subject.AllowedOrigins.Add("http://foo");
-        (await subject.IsOriginAllowedAsync("http://foo")).Should().Be(true);
+        (await subject.IsOriginAllowedAsync("http://foo")).ShouldBe(true);
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class DefaultCorsPolicyServiceTests
     public async Task IsOriginAllowed_OriginIsNotAllowed_ReturnsFalse()
     {
         subject.AllowedOrigins.Add("http://foo");
-        (await subject.IsOriginAllowedAsync("http://bar")).Should().Be(false);
+        (await subject.IsOriginAllowedAsync("http://bar")).ShouldBe(false);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class DefaultCorsPolicyServiceTests
         subject.AllowedOrigins.Add("http://foo");
         subject.AllowedOrigins.Add("http://bar");
         subject.AllowedOrigins.Add("http://baz");
-        (await subject.IsOriginAllowedAsync("http://bar")).Should().Be(true);
+        (await subject.IsOriginAllowedAsync("http://bar")).ShouldBe(true);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class DefaultCorsPolicyServiceTests
         subject.AllowedOrigins.Add("http://foo");
         subject.AllowedOrigins.Add("http://bar");
         subject.AllowedOrigins.Add("http://baz");
-        (await subject.IsOriginAllowedAsync("http://quux")).Should().Be(false);
+        (await subject.IsOriginAllowedAsync("http://quux")).ShouldBe(false);
     }
 
     [Fact]
@@ -72,6 +72,6 @@ public class DefaultCorsPolicyServiceTests
     public async Task IsOriginAllowed_AllowAllTrue_ReturnsTrue()
     {
         subject.AllowAll = true;
-        (await subject.IsOriginAllowedAsync("http://foo")).Should().Be(true);
+        (await subject.IsOriginAllowedAsync("http://foo")).ShouldBe(true);
     }
 }

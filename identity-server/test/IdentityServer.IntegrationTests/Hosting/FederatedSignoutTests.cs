@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
@@ -81,10 +81,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.MediaType.ShouldBe("text/html");
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Contain("https://server/connect/endsession/callback?endSessionId=");
+        html.ShouldContain("https://server/connect/endsession/callback?endSessionId=");
     }
 
     [Fact]
@@ -102,10 +102,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.PostAsync(IdentityServerPipeline.FederatedSignOutUrl, new FormUrlEncodedContent(new Dictionary<string, string> { { "sid", "123" } }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.MediaType.ShouldBe("text/html");
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Contain("https://server/connect/endsession/callback?endSessionId=");
+        html.ShouldContain("https://server/connect/endsession/callback?endSessionId=");
     }
 
     [Fact]
@@ -115,10 +115,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 
     [Fact]
@@ -126,10 +126,10 @@ public class FederatedSignoutTests
     {
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 
     [Fact]
@@ -152,10 +152,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 
     [Fact]
@@ -181,9 +181,9 @@ public class FederatedSignoutTests
         _pipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 }

@@ -12,7 +12,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -57,7 +57,7 @@ public class UserInfoResponseGeneratorTests
     {
         var resources = await _subject.GetRequestedResourcesAsync(null);
         var claims = await _subject.GetRequestedClaimTypesAsync(resources);
-        claims.Should().BeEquivalentTo(new string[] { });
+        claims.ShouldBe(new string[] { });
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class UserInfoResponseGeneratorTests
 
         var resources = await _subject.GetRequestedResourcesAsync(new[] { "id1", "id2", "id3" });
         var claims = await _subject.GetRequestedClaimTypesAsync(resources);
-        claims.Should().BeEquivalentTo(new string[] { "c1", "c2", "c3" });
+        claims.ShouldBe(["c1", "c2", "c3"]);
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class UserInfoResponseGeneratorTests
 
         var resources = await _subject.GetRequestedResourcesAsync(new[] { "id1", "id2", "id3" });
         var claims = await _subject.GetRequestedClaimTypesAsync(resources);
-        claims.Should().BeEquivalentTo(new string[] { "c2", "c3" });
+        claims.ShouldBe(["c2", "c3"]);
     }
 
     [Fact]
@@ -105,8 +105,8 @@ public class UserInfoResponseGeneratorTests
 
         var claims = await _subject.ProcessAsync(result);
 
-        _mockProfileService.GetProfileWasCalled.Should().BeTrue();
-        _mockProfileService.ProfileContext.RequestedClaimTypes.Should().BeEquivalentTo(new[] { "foo", "bar" });
+        _mockProfileService.GetProfileWasCalled.ShouldBeTrue();
+        _mockProfileService.ProfileContext.RequestedClaimTypes.ShouldBe(new[] { "foo", "bar" });
     }
 
     [Fact]
@@ -148,18 +148,18 @@ public class UserInfoResponseGeneratorTests
 
         var claims = await _subject.ProcessAsync(result);
 
-        claims.Should().ContainKey("email");
-        claims["email"].Should().Be("fred@gmail.com");
-        claims.Should().ContainKey("name");
-        claims["name"].Should().Be("fred jones");
+        claims.ShouldContainKey("email");
+        claims["email"].ShouldBe("fred@gmail.com");
+        claims.ShouldContainKey("name");
+        claims["name"].ShouldBe("fred jones");
             
         // this will be treated as a string because this is not valid JSON from the System.Text library point of view
-        claims.Should().ContainKey("address");
-        claims["address"].Should().Be("{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }");
+        claims.ShouldContainKey("address");
+        claims["address"].ShouldBe("{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }");
             
         // this is a JsonElement
-        claims.Should().ContainKey("address2");
-        claims["address2"].ToString().Should().Be("{\"street_address\":\"One Hacker Way\",\"locality\":\"Heidelberg\",\"postal_code\":69118,\"country\":\"Germany\"}");
+        claims.ShouldContainKey("address2");
+        claims["address2"].ToString().ShouldBe("{\"street_address\":\"One Hacker Way\",\"locality\":\"Heidelberg\",\"postal_code\":69118,\"country\":\"Germany\"}");
     }
 
     [Fact]
@@ -185,8 +185,8 @@ public class UserInfoResponseGeneratorTests
 
         var claims = await _subject.ProcessAsync(result);
 
-        claims.Should().ContainKey("sub");
-        claims["sub"].Should().Be("bob");
+        claims.ShouldContainKey("sub");
+        claims["sub"].ShouldBe("bob");
     }
 
     [Fact]
@@ -216,8 +216,7 @@ public class UserInfoResponseGeneratorTests
 
         Func<Task> act = () => _subject.ProcessAsync(result);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*subject*");
+        var exception = await act.ShouldThrowAsync<InvalidOperationException>();
+        exception.Message.ShouldMatch(".*subject.*");
     }
-
 }

@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
@@ -54,30 +54,30 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(12);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.custom");
-        payload["sub"].GetString().Should().Be("818727");
-        payload["idp"].GetString().Should().Be("local");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(12);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.custom");
+        payload["sub"].GetString().ShouldBe("818727");
+        payload["idp"].GetString().ShouldBe("local");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
 
         var amr = payload["amr"].EnumerateArray();
-        amr.Count().Should().Be(1);
-        amr.First().ToString().Should().Be("custom");
+        amr.Count().ShouldBe(1);
+        amr.First().ToString().ShouldBe("custom");
     }
 
     [Fact]
@@ -99,36 +99,36 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
         var unixNow = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var exp = payload["exp"].GetInt64();
-        exp.Should().BeLessThan(unixNow + 3620);
-        exp.Should().BeGreaterThan(unixNow + 3580);
+        exp.ShouldBeLessThan(unixNow + 3620);
+        exp.ShouldBeGreaterThan(unixNow + 3580);
 
-        payload.Count.Should().Be(13);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.custom");
-        payload["sub"].GetString().Should().Be("818727");
-        payload["idp"].GetString().Should().Be("local");
-        payload["extra_claim"].GetString().Should().Be("extra_value");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(13);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.custom");
+        payload["sub"].GetString().ShouldBe("818727");
+        payload["idp"].GetString().ShouldBe("local");
+        payload["extra_claim"].GetString().ShouldBe("extra_value");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
 
         var amr = payload["amr"].EnumerateArray();
-        amr.Count().Should().Be(1);
-        amr.First().ToString().Should().Be("custom");
+        amr.Count().ShouldBe(1);
+        amr.First().ToString().ShouldBe("custom");
             
     }
 
@@ -151,12 +151,12 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var refreshResponse = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -168,36 +168,36 @@ public class ExtensionGrantClient
             RefreshToken = response.RefreshToken
         });
 
-        refreshResponse.IsError.Should().BeFalse();
-        refreshResponse.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        refreshResponse.ExpiresIn.Should().Be(3600);
-        refreshResponse.TokenType.Should().Be("Bearer");
-        refreshResponse.IdentityToken.Should().BeNull();
-        refreshResponse.RefreshToken.Should().NotBeNull();
+        refreshResponse.IsError.ShouldBeFalse();
+        refreshResponse.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        refreshResponse.ExpiresIn.ShouldBe(3600);
+        refreshResponse.TokenType.ShouldBe("Bearer");
+        refreshResponse.IdentityToken.ShouldBeNull();
+        refreshResponse.RefreshToken.ShouldNotBeNull();
 
         var payload = GetPayload(refreshResponse);
 
         var unixNow = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var exp = payload["exp"].GetInt64();
-        exp.Should().BeLessThan(unixNow + 3620);
-        exp.Should().BeGreaterThan(unixNow + 3580);
+        exp.ShouldBeLessThan(unixNow + 3620);
+        exp.ShouldBeGreaterThan(unixNow + 3580);
 
-        payload.Count.Should().Be(13);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.custom");
-        payload["sub"].GetString().Should().Be("818727");
-        payload["idp"].GetString().Should().Be("local");
-        payload["extra_claim"].GetString().Should().Be("extra_value");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(13);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.custom");
+        payload["sub"].GetString().ShouldBe("818727");
+        payload["idp"].GetString().ShouldBe("local");
+        payload["extra_claim"].GetString().ShouldBe("extra_value");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
 
         var amr = payload["amr"].EnumerateArray();
-        amr.Count().Should().Be(1);
-        amr.First().ToString().Should().Be("custom");
+        amr.Count().ShouldBe(1);
+        amr.First().ToString().ShouldBe("custom");
     }
 
     [Fact]
@@ -218,22 +218,22 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(8);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.custom");
+        payload.Count.ShouldBe(8);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.custom");
             
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
     }
 
     [Fact]
@@ -253,33 +253,33 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(12);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.custom");
-        payload["sub"].GetString().Should().Be("818727");
-        payload["idp"].GetString().Should().Be("local");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(12);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.custom");
+        payload["sub"].GetString().ShouldBe("818727");
+        payload["idp"].GetString().ShouldBe("local");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
             
         var amr = payload["amr"].EnumerateArray();
-        amr.Count().Should().Be(1);
-        amr.First().ToString().Should().Be("custom");
+        amr.Count().ShouldBe(1);
+        amr.First().ToString().ShouldBe("custom");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.Count().Should().Be(3);
-        scopes.First().ToString().Should().Be("api1");
-        scopes.Skip(1).First().ToString().Should().Be("api2");
-        scopes.Skip(2).First().ToString().Should().Be("offline_access");
+        scopes.Count().ShouldBe(3);
+        scopes.First().ToString().ShouldBe("api1");
+        scopes.Skip(1).First().ToString().ShouldBe("api2");
+        scopes.Skip(2).First().ToString().ShouldBe("offline_access");
     }
 
     [Fact]
@@ -299,10 +299,10 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().Be(true);
-        response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-        response.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
-        response.ErrorDescription.Should().Be("invalid_custom_credential");
+        response.IsError.ShouldBe(true);
+        response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+        response.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
+        response.ErrorDescription.ShouldBe("invalid_custom_credential");
     }
 
     [Fact]
@@ -323,10 +323,10 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().Be(true);
-        response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-        response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-        response.Error.Should().Be("unsupported_grant_type");
+        response.IsError.ShouldBe(true);
+        response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Error.ShouldBe("unsupported_grant_type");
     }
 
     [Fact]
@@ -347,10 +347,10 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().Be(true);
-        response.ErrorType.Should().Be(ResponseErrorType.Protocol);
-        response.HttpStatusCode.Should().Be(HttpStatusCode.BadRequest);
-        response.Error.Should().Be("unsupported_grant_type");
+        response.IsError.ShouldBe(true);
+        response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        response.Error.ShouldBe("unsupported_grant_type");
     }
 
     [Fact(Skip = "needs improvement")]
@@ -373,35 +373,35 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(5000);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(5000);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
         var unixNow = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var exp = payload["exp"].GetInt64();
-        exp.Should().BeLessThan(unixNow + 5020);
-        exp.Should().BeGreaterThan(unixNow + 4980);
+        exp.ShouldBeLessThan(unixNow + 5020);
+        exp.ShouldBeGreaterThan(unixNow + 4980);
 
-        payload.Count.Should().Be(10);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.dynamic");
-        payload["sub"].GetString().Should().Be("88421113");
-        payload["idp"].GetString().Should().Be("local");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(10);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.dynamic");
+        payload["sub"].GetString().ShouldBe("88421113");
+        payload["idp"].GetString().ShouldBe("local");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
 
         var amr = payload["amr"].EnumerateArray();
-        amr.Count().Should().Be(1);
-        amr.First().ToString().Should().Be("delegation");
+        amr.Count().ShouldBe(1);
+        amr.First().ToString().ShouldBe("delegation");
     }
 
     [Fact]
@@ -424,14 +424,14 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
-        response.AccessToken.Should().Contain(".");
+        response.AccessToken.ShouldContain(".");
     }
 
     [Fact]
@@ -455,17 +455,17 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
-        response.AccessToken.Should().Contain(".");
+        response.AccessToken.ShouldContain(".");
 
         var jwt = new JwtSecurityToken(response.AccessToken);
-        jwt.Payload["client_id"].Should().Be("impersonated_client_id");
+        jwt.Payload["client_id"].ShouldBe("impersonated_client_id");
     }
 
     [Fact]
@@ -488,14 +488,14 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
-        response.AccessToken.Should().NotContain(".");
+        response.AccessToken.ShouldNotContain(".");
     }
 
     [Fact]
@@ -518,31 +518,31 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(13);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.dynamic");
-        payload["sub"].GetString().Should().Be("818727");
-        payload["idp"].GetString().Should().Be("local");
-        payload["client_extra"].GetString().Should().Be("extra_claim");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(13);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.dynamic");
+        payload["sub"].GetString().ShouldBe("818727");
+        payload["idp"].GetString().ShouldBe("local");
+        payload["client_extra"].GetString().ShouldBe("extra_claim");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
 
         var amr = payload["amr"].EnumerateArray();
-        amr.Count().Should().Be(1);
-        amr.First().ToString().Should().Be("delegation");
+        amr.Count().ShouldBe(1);
+        amr.First().ToString().ShouldBe("delegation");
     }
 
     [Fact]
@@ -564,25 +564,25 @@ public class ExtensionGrantClient
             }
         });
 
-        response.IsError.Should().BeFalse();
-        response.HttpStatusCode.Should().Be(HttpStatusCode.OK);
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().BeNull();
+        response.IsError.ShouldBeFalse();
+        response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
 
-        payload.Count.Should().Be(9);
-        payload["iss"].GetString().Should().Be("https://idsvr4");
-        payload["aud"].GetString().Should().Be("api");
-        payload["client_id"].GetString().Should().Be("client.dynamic");
-        payload["client_extra"].GetString().Should().Be("extra_claim");
-        payload.Keys.Should().Contain("jti");
-        payload.Keys.Should().Contain("iat");
+        payload.Count.ShouldBe(9);
+        payload["iss"].GetString().ShouldBe("https://idsvr4");
+        payload["aud"].GetString().ShouldBe("api");
+        payload["client_id"].GetString().ShouldBe("client.dynamic");
+        payload["client_extra"].GetString().ShouldBe("extra_claim");
+        payload.Keys.ShouldContain("jti");
+        payload.Keys.ShouldContain("iat");
 
         var scopes = payload["scope"].EnumerateArray();
-        scopes.First().ToString().Should().Be("api1");
+        scopes.First().ToString().ShouldBe("api1");
     }
 
     private Dictionary<string, JsonElement> GetPayload(TokenResponse response)

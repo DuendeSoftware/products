@@ -10,7 +10,7 @@ using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -47,7 +47,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
             var store = new IdentityProviderStore(context, FakeLogger<IdentityProviderStore>.Create(), new NoneCancellationTokenProvider());
             var item = await store.GetBySchemeAsync("scheme1");
 
-            item.Should().NotBeNull();
+            item.ShouldNotBeNull();
         }
     }
 
@@ -70,7 +70,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
             var store = new IdentityProviderStore(context, FakeLogger<IdentityProviderStore>.Create(), new NoneCancellationTokenProvider());
             var item = await store.GetBySchemeAsync("scheme2");
 
-            item.Should().BeNull();
+            item.ShouldBeNull();
         }
     }
 
@@ -93,7 +93,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
             var store = new IdentityProviderStore(context, FakeLogger<IdentityProviderStore>.Create(), new NoneCancellationTokenProvider());
             var item = await store.GetBySchemeAsync("scheme3");
 
-            item.Should().BeNull();
+            item.ShouldBeNull();
         }
     }
 }

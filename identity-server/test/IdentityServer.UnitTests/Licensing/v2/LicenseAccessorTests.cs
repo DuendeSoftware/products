@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Configuration;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Logging.Testing;
 using Xunit;
 
@@ -32,27 +32,27 @@ public class LicenseAccessorTests
 
         var l = _licenseAccessor.Current;
 
-        l.IsConfigured.Should().BeTrue();
-        l.Edition.Should().Be(edition);
-        l.Extras.Should().BeEmpty();
-        l.CompanyName.Should().Be("_test");
-        l.ContactInfo.Should().Be(contact);
-        l.SerialNumber.Should().Be(serialNumber);
-        l.Expiration!.Value.Date.Should().Be(new DateTime(2024, 11, 15));
-        l.Redistribution.Should().Be(isRedistribution);
+        l.IsConfigured.ShouldBeTrue();
+        l.Edition.ShouldBe(edition);
+        l.Extras.ShouldBeEmpty();
+        l.CompanyName.ShouldBe("_test");
+        l.ContactInfo.ShouldBe(contact);
+        l.SerialNumber.ShouldBe(serialNumber);
+        l.Expiration!.Value.Date.ShouldBe(new DateTime(2024, 11, 15));
+        l.Redistribution.ShouldBe(isRedistribution);
         
         var enterpriseFeaturesEnabled = edition == LicenseEdition.Enterprise || edition == LicenseEdition.Community;
         var businessFeaturesEnabled = enterpriseFeaturesEnabled || edition == LicenseEdition.Business;
         
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.DynamicProviders).Should().Be(enterpriseFeaturesEnabled || addDynamicProviders);
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.ResourceIsolation).Should().Be(enterpriseFeaturesEnabled);
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.DPoP).Should().Be(enterpriseFeaturesEnabled);
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.CIBA).Should().Be(enterpriseFeaturesEnabled);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.DynamicProviders).ShouldBe(enterpriseFeaturesEnabled || addDynamicProviders);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.ResourceIsolation).ShouldBe(enterpriseFeaturesEnabled);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.DPoP).ShouldBe(enterpriseFeaturesEnabled);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.CIBA).ShouldBe(enterpriseFeaturesEnabled);
 
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.KeyManagement).Should().Be(businessFeaturesEnabled || addKeyManagement);
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.PAR).Should().Be(businessFeaturesEnabled);
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.DCR).Should().Be(businessFeaturesEnabled);
-        _licenseAccessor.Current.IsEnabled(LicenseFeature.ServerSideSessions).Should().Be(businessFeaturesEnabled);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.KeyManagement).ShouldBe(businessFeaturesEnabled || addKeyManagement);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.PAR).ShouldBe(businessFeaturesEnabled);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.DCR).ShouldBe(businessFeaturesEnabled);
+        _licenseAccessor.Current.IsEnabled(LicenseFeature.ServerSideSessions).ShouldBe(businessFeaturesEnabled);
     }
 
 
@@ -83,8 +83,8 @@ public class LicenseAccessorTests
     public void keys_that_cannot_be_parsed_are_treated_the_same_as_an_absent_license()
     {
         _options.LicenseKey = "invalid key";
-        _licenseAccessor.Current.IsConfigured.Should().BeFalse();
-        _logger.Collector.GetSnapshot().Should().Contain(r => 
+        _licenseAccessor.Current.IsConfigured.ShouldBeFalse();
+        _logger.Collector.GetSnapshot().ShouldContain(r => 
             r.Message == "Error validating the Duende software license key");
     }
 }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -90,8 +90,8 @@ public class CorsTests
         var message = new HttpRequestMessage(HttpMethod.Options, url);
         var response = await _pipeline.BackChannelClient.SendAsync(message);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        response.Headers.Contains("Access-Control-Allow-Origin").Should().BeTrue();
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        response.Headers.Contains("Access-Control-Allow-Origin").ShouldBeTrue();
     }
 
     [Theory]
@@ -110,7 +110,7 @@ public class CorsTests
         var message = new HttpRequestMessage(HttpMethod.Options, url);
         var response = await _pipeline.BackChannelClient.SendAsync(message);
 
-        response.Headers.Contains("Access-Control-Allow-Origin").Should().BeFalse();
+        response.Headers.Contains("Access-Control-Allow-Origin").ShouldBeFalse();
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class CorsTests
         var message = new HttpRequestMessage(HttpMethod.Options, IdentityServerPipeline.DiscoveryEndpoint);
         var response = await _pipeline.BackChannelClient.SendAsync(message);
 
-        policy.WasCalled.Should().BeTrue();
+        policy.WasCalled.ShouldBeTrue();
     }
 }
 

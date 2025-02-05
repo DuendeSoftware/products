@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -32,8 +32,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
     }
 
     [Fact]
@@ -50,9 +50,9 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Select(x=>x.Name).Should().BeEquivalentTo(new[] { "api", "urn:api1", "urn:api2", "urn:api3" });
-        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Select(x=>x.Name).Should().BeEquivalentTo(new[] { "resource", "resource2", "scope1" });
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Select(x=>x.Name).ShouldBe(["api", "urn:api1", "urn:api2", "urn:api3"]);
+        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Select(x=>x.Name).ShouldBe(["resource", "resource2", "scope1"]);
     }
 
     [Fact]
@@ -68,8 +68,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -85,8 +85,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -102,8 +102,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -119,8 +119,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -138,8 +138,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -155,8 +155,8 @@ public class TokenRequestValidation_ClientCredentials_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
 
@@ -175,23 +175,23 @@ public class TokenRequestValidation_ClientCredentials_Invalid
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1" + new string('x', 512);
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be(OidcConstants.TokenErrors.InvalidTarget);
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidTarget);
         }
         {
             parameters[OidcConstants.TokenRequest.Resource] = "api";
 
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
         {
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1";
             parameters.Add(OidcConstants.TokenRequest.Resource, "urn:api2");
 
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
@@ -71,6 +71,6 @@ public class DefaultBackChannelLogoutServiceTests
 
 
         var payload = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(Base64Url.Decode(rawToken.Split('.')[1]));
-        payload["iss"].GetString().Should().Be(expected);
+        payload["iss"].GetString().ShouldBe(expected);
     }
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -39,8 +39,8 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.UserName.Should().Be("bob_no_password");
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.UserName.ShouldBe("bob_no_password");
     }
         
     [Fact]
@@ -75,7 +75,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -162,7 +162,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -179,7 +179,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -198,7 +198,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -217,7 +217,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -236,7 +236,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -253,7 +253,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -290,7 +290,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -322,7 +322,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
         
     [Fact]
@@ -352,6 +352,6 @@ public class TokenRequestValidation_Valid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 }

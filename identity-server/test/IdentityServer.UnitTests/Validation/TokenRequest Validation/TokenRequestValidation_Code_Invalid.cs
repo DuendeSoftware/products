@@ -12,7 +12,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
@@ -55,8 +55,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -88,8 +88,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -123,8 +123,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -156,8 +156,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        OidcConstants.TokenErrors.InvalidRequest.Should().Be(result.Error);
+        result.IsError.ShouldBeTrue();
+        OidcConstants.TokenErrors.InvalidRequest.ShouldBe(result.Error);
     }
 
     [Fact]
@@ -189,8 +189,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
     }
 
     [Fact]
@@ -223,8 +223,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client2.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -255,8 +255,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
     }
 
     [Fact]
@@ -288,8 +288,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -321,8 +321,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -359,7 +359,7 @@ public class TokenRequestValidation_Code_Invalid
         // request first time
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
 
         // request second time
         validator = Factory.CreateTokenRequestValidator(
@@ -367,8 +367,8 @@ public class TokenRequestValidation_Code_Invalid
             
         result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -404,8 +404,8 @@ public class TokenRequestValidation_Code_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -443,30 +443,30 @@ public class TokenRequestValidation_Code_Invalid
         {
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
         {
             parameters[OidcConstants.TokenRequest.Resource] = "api";
 
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
         {
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api3";
 
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
         {
             parameters[OidcConstants.TokenRequest.Resource] = "urn:api1";
             parameters.Add(OidcConstants.TokenRequest.Resource, "urn:api2");
 
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
     }
 
@@ -508,8 +508,8 @@ public class TokenRequestValidation_Code_Invalid
             };
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_scope");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_scope");
         }
 
         {
@@ -542,8 +542,8 @@ public class TokenRequestValidation_Code_Invalid
             };
             var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
     }
 }

@@ -12,7 +12,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
 using Xunit;
@@ -118,7 +118,7 @@ public class ResourceTests
     //////////////////////////////////////////////////////////////////
     private IEnumerable<Claim> ParseAccessTokenClaims(TokenResponse tokenResponse)
     {
-        tokenResponse.IsError.Should().BeFalse();
+        tokenResponse.IsError.ShouldBeFalse();
 
         var handler = new JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(tokenResponse.AccessToken);
@@ -126,10 +126,10 @@ public class ResourceTests
     }
     private string GetCode(HttpResponseMessage response)
     {
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         var url = response.Headers.Location.ToString();
         var idx = url.IndexOf("code=", StringComparison.Ordinal);
-        idx.Should().BeGreaterThan(-1);
+        idx.ShouldBeGreaterThan(-1);
         var code = url.Substring(idx + 5);
         idx = code.IndexOf("&", StringComparison.Ordinal);
         if (idx >= 0)
@@ -172,8 +172,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1", "urn:resource2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:resource1", "urn:resource2" });
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access" });
         }
     }
 
@@ -211,8 +211,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1", "urn:resource2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1", "urn:resource2"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access"]);
         }
     }
 
@@ -251,8 +251,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1", "urn:resource2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1", "urn:resource2"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access"]);
         }
     }
 
@@ -291,8 +291,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope1", "scope2", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope2", "offline_access"]);
         }
     }
 
@@ -339,8 +339,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope1", "scope2", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope2", "offline_access"]);
         }
     }
 
@@ -383,8 +383,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1", "urn:resource2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1", "urn:resource2"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access"]);
         }
     }
 
@@ -422,8 +422,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope1", "scope2" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope2"]);
         }
     }
 
@@ -461,8 +461,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1", "urn:resource2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope1", "scope2", "scope3" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1", "urn:resource2"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope2", "scope3"]);
         }
     }
 
@@ -500,8 +500,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource1" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope1", "scope3", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope3", "offline_access"]);
         }
         
         tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
@@ -518,8 +518,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource3" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope3", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource3"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope3", "offline_access"]);
         }
     }
 
@@ -557,8 +557,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).Should().BeEquivalentTo(new[] { "urn:resource3" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).Should().BeEquivalentTo(new[] { "scope3" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource3"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope3"]);
         }
     }
 
@@ -579,7 +579,7 @@ public class ResourceTests
         url += "&resource=urn:resource3";
 
         await _mockPipeline.BrowserClient.GetAsync(url);
-        _mockPipeline.ErrorWasCalled.Should().BeTrue();
-        _mockPipeline.ErrorMessage.Error.Should().Be("invalid_target");
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+        _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_target");
     }
 }

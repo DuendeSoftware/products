@@ -8,7 +8,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using Microsoft.Extensions.Logging;
@@ -44,7 +44,7 @@ public class MutualTlsSecretValidation
 
         var result = await validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class MutualTlsSecretValidation
         };
 
         Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret);
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.ShouldThrowAsync<InvalidOperationException>();
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class MutualTlsSecretValidation
 
         var result = await validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class MutualTlsSecretValidation
 
         var result = await validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 
     ///////////////////
@@ -131,7 +131,7 @@ public class MutualTlsSecretValidation
 
         var result = await validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -151,7 +151,7 @@ public class MutualTlsSecretValidation
         };
 
         Func<Task> act = async () => await validator.ValidateAsync(client.ClientSecrets, secret);
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.ShouldThrowAsync<InvalidOperationException>();
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public class MutualTlsSecretValidation
 
         var result = await validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -193,6 +193,6 @@ public class MutualTlsSecretValidation
 
         var result = await validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 }

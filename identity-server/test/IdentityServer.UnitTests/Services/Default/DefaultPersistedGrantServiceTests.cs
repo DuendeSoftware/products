@@ -13,7 +13,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -182,16 +182,16 @@ public class DefaultPersistedGrantServiceTests
 
         var grants = await _subject.GetAllGrantsAsync("123");
 
-        grants.Count().Should().Be(2);
+        grants.Count().ShouldBe(2);
         var grant1 = grants.First(x => x.ClientId == "client1");
-        grant1.SubjectId.Should().Be("123");
-        grant1.ClientId.Should().Be("client1");
-        grant1.Scopes.Should().BeEquivalentTo(new string[] { "foo1", "foo2", "bar1", "bar2", "baz1", "baz2", "quux1", "quux2" });
+        grant1.SubjectId.ShouldBe("123");
+        grant1.ClientId.ShouldBe("client1");
+        grant1.Scopes.ShouldBe(["foo1", "foo2", "bar1", "bar2", "baz1", "baz2", "quux1", "quux2"], true);
 
         var grant2 = grants.First(x => x.ClientId == "client2");
-        grant2.SubjectId.Should().Be("123");
-        grant2.ClientId.Should().Be("client2");
-        grant2.Scopes.Should().BeEquivalentTo(new string[] { "foo3", "bar3", "baz3", "quux3" });
+        grant2.SubjectId.ShouldBe("123");
+        grant2.ClientId.ShouldBe("client2");
+        grant2.Scopes.ShouldBe(["foo3", "bar3", "baz3", "quux3"], true);
     }
 
     [Fact]
@@ -322,15 +322,15 @@ public class DefaultPersistedGrantServiceTests
 
         await _subject.RemoveAllGrantsAsync("123", "client1");
 
-        (await _referenceTokens.GetReferenceTokenAsync(handle1)).Should().BeNull();
-        (await _referenceTokens.GetReferenceTokenAsync(handle2)).Should().NotBeNull();
-        (await _referenceTokens.GetReferenceTokenAsync(handle3)).Should().NotBeNull();
-        (await _refreshTokens.GetRefreshTokenAsync(handle4)).Should().BeNull();
-        (await _refreshTokens.GetRefreshTokenAsync(handle5)).Should().NotBeNull();
-        (await _refreshTokens.GetRefreshTokenAsync(handle6)).Should().NotBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle7)).Should().BeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle8)).Should().NotBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle9)).Should().NotBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle1)).ShouldBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle2)).ShouldNotBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle3)).ShouldNotBeNull();
+        (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldBeNull();
+        (await _refreshTokens.GetRefreshTokenAsync(handle5)).ShouldNotBeNull();
+        (await _refreshTokens.GetRefreshTokenAsync(handle6)).ShouldNotBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle7)).ShouldBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle8)).ShouldNotBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle9)).ShouldNotBeNull();
     }
     [Fact]
     public async Task RemoveAllGrantsAsync_should_filter_on_session_id()
@@ -366,9 +366,9 @@ public class DefaultPersistedGrantServiceTests
 
             await _subject.RemoveAllGrantsAsync("123");
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).Should().BeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).Should().BeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).Should().BeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldBeNull();
             await _refreshTokens.RemoveRefreshTokenAsync(handle1);
             await _refreshTokens.RemoveRefreshTokenAsync(handle2);
             await _refreshTokens.RemoveRefreshTokenAsync(handle3);
@@ -404,9 +404,9 @@ public class DefaultPersistedGrantServiceTests
 
             await _subject.RemoveAllGrantsAsync("123", "client1");
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).Should().BeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).Should().NotBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).Should().NotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldNotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldNotBeNull();
             await _refreshTokens.RemoveRefreshTokenAsync(handle1);
             await _refreshTokens.RemoveRefreshTokenAsync(handle2);
             await _refreshTokens.RemoveRefreshTokenAsync(handle3);
@@ -450,10 +450,10 @@ public class DefaultPersistedGrantServiceTests
             });
             await _subject.RemoveAllGrantsAsync("123", "client1", "session1");
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).Should().BeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).Should().NotBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).Should().NotBeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle4)).Should().NotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldNotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldNotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldNotBeNull();
             await _refreshTokens.RemoveRefreshTokenAsync(handle1);
             await _refreshTokens.RemoveRefreshTokenAsync(handle2);
             await _refreshTokens.RemoveRefreshTokenAsync(handle3);
@@ -498,10 +498,10 @@ public class DefaultPersistedGrantServiceTests
             });
             await _subject.RemoveAllGrantsAsync("123", sessionId:"session1");
 
-            (await _refreshTokens.GetRefreshTokenAsync(handle1)).Should().BeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle2)).Should().BeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle3)).Should().BeNull();
-            (await _refreshTokens.GetRefreshTokenAsync(handle4)).Should().NotBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle3)).ShouldBeNull();
+            (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldNotBeNull();
             await _refreshTokens.RemoveRefreshTokenAsync(handle1);
             await _refreshTokens.RemoveRefreshTokenAsync(handle2);
             await _refreshTokens.RemoveRefreshTokenAsync(handle3);
@@ -521,8 +521,8 @@ public class DefaultPersistedGrantServiceTests
 
         var grants = await _subject.GetAllGrantsAsync("123");
 
-        grants.Count().Should().Be(1);
-        grants.First().Scopes.Should().Contain(new string[] { "foo1", "foo2" });
+        grants.Count().ShouldBe(1);
+        grants.First().Scopes.ShouldBe(["foo1", "foo2"]);
 
         var handle9 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -538,8 +538,8 @@ public class DefaultPersistedGrantServiceTests
 
         grants = await _subject.GetAllGrantsAsync("123");
 
-        grants.Count().Should().Be(1);
-        grants.First().Scopes.Should().Contain(new string[] { "foo1", "foo2", "quux3" });
+        grants.Count().ShouldBe(1);
+        grants.First().Scopes.ShouldBe(["foo1", "foo2", "quux3"]);
     }
 
     [Fact]
@@ -570,8 +570,8 @@ public class DefaultPersistedGrantServiceTests
 
         var grants = await _subject.GetAllGrantsAsync("123");
 
-        grants.Count().Should().Be(1);
-        grants.First().Scopes.Should().Contain(new string[] { "foo1", "foo2" });
+        grants.Count().ShouldBe(1);
+        grants.First().Scopes.ShouldBe(["foo1", "foo2"]);
     }
 
     class CorruptingPersistedGrantStore : IPersistedGrantStore

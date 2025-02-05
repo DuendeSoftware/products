@@ -4,7 +4,7 @@
 using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using UnitTests.Services.Default.KeyManagement;
 using Xunit;
@@ -33,7 +33,7 @@ public class DefaultEventServiceTests
 
         await sut.RaiseAsync(evt);
 
-        sink.Events.Should().Contain(e => e.Id == 123);
+        sink.Events.ShouldContain(e => e.Id == 123);
     }
 
    

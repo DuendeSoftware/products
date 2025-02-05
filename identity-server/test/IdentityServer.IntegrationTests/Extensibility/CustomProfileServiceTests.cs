@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,18 +69,18 @@ public class CustomProfileServiceTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client/callback");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
-        authorization.IdentityToken.Should().NotBeNull();
+        authorization.IsError.ShouldBeFalse();
+        authorization.IdentityToken.ShouldNotBeNull();
 
         var payload = authorization.IdentityToken.Split('.')[1];
         var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
         var obj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
-        obj["foo"].GetString().Should().Be("bar");
+        obj["foo"].GetString().ShouldBe("bar");
     }
 }
 

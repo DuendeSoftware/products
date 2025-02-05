@@ -9,7 +9,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
@@ -48,8 +48,8 @@ public class TokenRequestValidation_DeviceCode_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidRequest);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
     }
         
     [Fact]
@@ -69,8 +69,8 @@ public class TokenRequestValidation_DeviceCode_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -88,8 +88,8 @@ public class TokenRequestValidation_DeviceCode_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
     }
 
     [Fact]
@@ -107,8 +107,8 @@ public class TokenRequestValidation_DeviceCode_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeTrue();
-        result.Error.Should().NotBeNull();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldNotBeNull();
     }
 
     [Fact]
@@ -127,8 +127,8 @@ public class TokenRequestValidation_DeviceCode_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_target");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_target");
     }
 
     [Fact]
@@ -147,7 +147,7 @@ public class TokenRequestValidation_DeviceCode_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_target");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_target");
     }
 }

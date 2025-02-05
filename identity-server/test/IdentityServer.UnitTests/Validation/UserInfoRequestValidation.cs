@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -38,8 +38,8 @@ public class UserInfoRequestValidation
 
         var result = await validator.ValidateRequestAsync("token");
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class UserInfoRequestValidation
 
         var result = await validator.ValidateRequestAsync("token");
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class UserInfoRequestValidation
 
         var result = await validator.ValidateRequestAsync("token");
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 }

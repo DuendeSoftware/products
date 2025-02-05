@@ -16,7 +16,7 @@ using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -69,7 +69,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.FirstOrDefault(x => x.Key == expiredGrant.Key).Should().BeNull();
+            context.PersistedGrants.FirstOrDefault(x => x.Key == expiredGrant.Key).ShouldBeNull();
         }
     }
 
@@ -96,7 +96,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.FirstOrDefault(x => x.Key == validGrant.Key).Should().NotBeNull();
+            context.PersistedGrants.FirstOrDefault(x => x.Key == validGrant.Key).ShouldNotBeNull();
         }
     }
 
@@ -142,8 +142,8 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         {
             var remaining = context.PersistedGrants.ToList();
 
-            remaining.Count.Should().Be(15);
-            remaining.All(r => r.Key.StartsWith("valid-")).Should().BeTrue();
+            remaining.Count.ShouldBe(15);
+            remaining.All(r => r.Key.StartsWith("valid-")).ShouldBeTrue();
         }
     }
 
@@ -171,7 +171,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == expiredGrant.DeviceCode).Should().BeNull();
+            context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == expiredGrant.DeviceCode).ShouldBeNull();
         }
     }
 
@@ -199,7 +199,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == validGrant.DeviceCode).Should().NotBeNull();
+            context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == validGrant.DeviceCode).ShouldNotBeNull();
         }
     }
 
@@ -228,7 +228,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.FirstOrDefault(x => x.Id == consumedGrant.Id).Should().BeNull();
+            context.PersistedGrants.FirstOrDefault(x => x.Id == consumedGrant.Id).ShouldBeNull();
         }
     }
 
@@ -256,7 +256,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.FirstOrDefault(x => x.Id == consumedGrant.Id).Should().NotBeNull();
+            context.PersistedGrants.FirstOrDefault(x => x.Id == consumedGrant.Id).ShouldNotBeNull();
         }
     }
 
@@ -270,7 +270,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         using (var context = new PersistedGrantDbContext(options))
         {
 
-            context.PersistedGrants.ToList().Should().BeEmpty();
+            context.PersistedGrants.ToList().ShouldBeEmpty();
 
             for(int i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
             {
@@ -287,7 +287,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             }           
             context.SaveChanges();
 
-            context.PersistedGrants.Count().Should().Be(StoreOptions.TokenCleanupBatchSize * expectedPageCount);
+            context.PersistedGrants.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize * expectedPageCount);
 
         }
 
@@ -298,18 +298,18 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         }).CleanupGrantsAsync();
 
         // The right number of batches executed
-        mockNotifications.PersistedGrantNotifications.Count.Should().Be(expectedPageCount);
+        mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount);
         
         // Each batch contained the expected number of grants
         foreach(var notification in mockNotifications.PersistedGrantNotifications)
         {
-            notification.Count().Should().Be(StoreOptions.TokenCleanupBatchSize);
+            notification.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize);
         }
 
         // All grants are removed because they were all expired
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.ToList().Should().BeEmpty();
+            context.PersistedGrants.ToList().ShouldBeEmpty();
         }
     }
 
@@ -366,16 +366,16 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         // Each batch created an extra grant, so we do an extra batch to clean up
         // the extras
-        mockNotifications.PersistedGrantNotifications.Count.Should().Be(expectedPageCount + 1);
+        mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount + 1);
         
         // Each batch had the expected number of grants. Most batches had the batch size grants
         for(int i = 0; i < expectedPageCount; i++)
         {
-            mockNotifications.PersistedGrantNotifications[i].Count().Should().Be(StoreOptions.TokenCleanupBatchSize);
+            mockNotifications.PersistedGrantNotifications[i].Count().ShouldBe(StoreOptions.TokenCleanupBatchSize);
         }
 
         // The last batch had the extras - there is one extra per page
-        mockNotifications.PersistedGrantNotifications.Last().Count().Should().Be(expectedPageCount);
+        mockNotifications.PersistedGrantNotifications.Last().Count().ShouldBe(expectedPageCount);
 
         // In the end, all but one get deleted
         // One final grant will be left behind, created by the last notification to fire
@@ -383,7 +383,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         // we just are able to observe it because it was created in the final batch's notification
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.Count().Should().Be(1);
+            context.PersistedGrants.Count().ShouldBe(1);
         }
     }
 
@@ -427,8 +427,8 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.PersistedGrants.FirstOrDefault(x => x.Id == newConsumedGrant.Id).Should().NotBeNull();
-            context.PersistedGrants.FirstOrDefault(x => x.Id == oldConsumedGrant.Id).Should().BeNull();
+            context.PersistedGrants.FirstOrDefault(x => x.Id == newConsumedGrant.Id).ShouldNotBeNull();
+            context.PersistedGrants.FirstOrDefault(x => x.Id == oldConsumedGrant.Id).ShouldBeNull();
         }
 
     }

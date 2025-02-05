@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Duende.IdentityServer;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -30,7 +30,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(false);
+        result.IsError.ShouldBe(false);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -148,7 +148,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -164,7 +164,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -181,7 +181,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -199,7 +199,7 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.ValidatedRequest.SessionId.Should().NotBeNull();
+        result.ValidatedRequest.SessionId.ShouldNotBeNull();
     }
         
     [Fact]
@@ -217,9 +217,9 @@ public class Authorize_ProtocolValidation_Valid
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
 
-        result.ValidatedRequest.PromptModes.Count().Should().Be(2);
-        result.ValidatedRequest.PromptModes.Should().Contain(OidcConstants.PromptModes.Login);
-        result.ValidatedRequest.PromptModes.Should().Contain(OidcConstants.PromptModes.Consent);
+        result.ValidatedRequest.PromptModes.Count().ShouldBe(2);
+        result.ValidatedRequest.PromptModes.ShouldContain(OidcConstants.PromptModes.Login);
+        result.ValidatedRequest.PromptModes.ShouldContain(OidcConstants.PromptModes.Consent);
     }
 
     [Fact]
@@ -238,23 +238,23 @@ public class Authorize_ProtocolValidation_Valid
         {
             parameters[OidcConstants.AuthorizeRequest.Prompt] = "consent login";
             var result = await validator.ValidateAsync(parameters);
-            result.ValidatedRequest.PromptModes.Should().BeEquivalentTo(new[] { OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login });
+            result.ValidatedRequest.PromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login]);
         }
         {
             parameters[OidcConstants.AuthorizeRequest.Prompt] = "consent login";
             parameters[Constants.ProcessedPrompt] = "login";
             var result = await validator.ValidateAsync(parameters);
-            result.ValidatedRequest.PromptModes.Should().BeEquivalentTo(new[] { OidcConstants.PromptModes.Consent });
-            result.ValidatedRequest.OriginalPromptModes.Should().BeEquivalentTo(new[] { OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login });
-            result.ValidatedRequest.ProcessedPromptModes.Should().BeEquivalentTo(new[] { OidcConstants.PromptModes.Login });
+            result.ValidatedRequest.PromptModes.ShouldBe([OidcConstants.PromptModes.Consent]);
+            result.ValidatedRequest.OriginalPromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login]);
+            result.ValidatedRequest.ProcessedPromptModes.ShouldBe([OidcConstants.PromptModes.Login]);
         }
         {
             parameters[OidcConstants.AuthorizeRequest.Prompt] = "consent login";
             parameters[Constants.ProcessedPrompt] = "login consent";
             var result = await validator.ValidateAsync(parameters);
-            result.ValidatedRequest.PromptModes.Should().BeEmpty();
-            result.ValidatedRequest.OriginalPromptModes.Should().BeEquivalentTo(new[] { OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login });
-            result.ValidatedRequest.ProcessedPromptModes.Should().BeEquivalentTo(new[] { OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login });
+            result.ValidatedRequest.PromptModes.ShouldBeEmpty();
+            result.ValidatedRequest.OriginalPromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login]);
+            result.ValidatedRequest.ProcessedPromptModes.ShouldBe([OidcConstants.PromptModes.Consent, OidcConstants.PromptModes.Login], true);
         }
     }
 }

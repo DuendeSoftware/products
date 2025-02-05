@@ -6,7 +6,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using IntegrationTests.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -133,10 +133,10 @@ public class ServerSideSessionTests
     [Trait("Category", Category)]
     public async Task login_should_create_server_side_session()
     {
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().BeEmpty();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).ShouldBeEmpty();
         await _pipeline.LoginAsync("bob");
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().NotBeEmpty();
-        (await IsLoggedIn()).Should().BeTrue();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).ShouldNotBeEmpty();
+        (await IsLoggedIn()).ShouldBeTrue();
     }
 
     [Fact]
@@ -146,9 +146,9 @@ public class ServerSideSessionTests
         await _pipeline.LoginAsync("bob");
         
         ShouldRenewCookie = true;
-        (await IsLoggedIn()).Should().BeTrue();
+        (await IsLoggedIn()).ShouldBeTrue();
         
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().NotBeEmpty();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -158,9 +158,9 @@ public class ServerSideSessionTests
         await _pipeline.LoginAsync("bob");
 
         await _sessionStore.DeleteSessionsAsync(new SessionFilter { SubjectId = "bob" });
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().BeEmpty();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).ShouldBeEmpty();
 
-        (await IsLoggedIn()).Should().BeFalse();
+        (await IsLoggedIn()).ShouldBeFalse();
     }
     
     [Fact]
@@ -170,9 +170,9 @@ public class ServerSideSessionTests
         await _pipeline.LoginAsync("bob");
         await _pipeline.LogoutAsync();
 
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().BeEmpty();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).ShouldBeEmpty();
 
-        (await IsLoggedIn()).Should().BeFalse();
+        (await IsLoggedIn()).ShouldBeFalse();
     }
 
     [Fact]
@@ -186,8 +186,8 @@ public class ServerSideSessionTests
         session.Ticket = "invalid";
         await _sessionStore.UpdateSessionAsync(session);
 
-        (await IsLoggedIn()).Should().BeFalse();
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).Should().BeEmpty();
+        (await IsLoggedIn()).ShouldBeFalse();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" })).ShouldBeEmpty();
     }
 
     [Fact]
@@ -200,9 +200,9 @@ public class ServerSideSessionTests
 
         await _pipeline.LoginAsync("bob");
 
-        (await IsLoggedIn()).Should().BeTrue();
+        (await IsLoggedIn()).ShouldBeTrue();
         var sessions = await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "bob" });
-        sessions.First().Key.Should().Be(key);
+        sessions.First().Key.ShouldBe(key);
     }
 
     [Fact]
@@ -216,12 +216,12 @@ public class ServerSideSessionTests
         await Task.Delay(1000);
         await _pipeline.LoginAsync("alice");
 
-        (await IsLoggedIn()).Should().BeTrue();
+        (await IsLoggedIn()).ShouldBeTrue();
         var alice_session = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single();
 
-        alice_session.Key.Should().Be(bob_session.Key);
-        (alice_session.Created > bob_session.Created).Should().BeTrue();
-        alice_session.SessionId.Should().NotBe(bob_session.SessionId);
+        alice_session.Key.ShouldBe(bob_session.Key);
+        (alice_session.Created > bob_session.Created).ShouldBeTrue();
+        alice_session.SessionId.ShouldNotBe(bob_session.SessionId);
     }
 
     [Fact]
@@ -238,7 +238,7 @@ public class ServerSideSessionTests
         var tickets = await _ticketService.GetSessionsAsync(new SessionFilter { SubjectId = "alice" });
         var sessions = await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" });
 
-        tickets.Select(x => x.SessionId).Should().BeEquivalentTo(sessions.Select(x => x.SessionId));
+        tickets.Select(x => x.SessionId).ShouldBe(sessions.Select(x => x.SessionId));
     }
 
     [Fact]
@@ -253,18 +253,18 @@ public class ServerSideSessionTests
         _pipeline.RemoveLoginCookie();
 
         var tickets = await _ticketService.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
-        tickets.TotalCount.Should().Be(2);
+        tickets.TotalCount.ShouldBe(2);
         var sessions = await _sessionStore.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
-        sessions.TotalCount.Should().Be(2);
+        sessions.TotalCount.ShouldBe(2);
 
-        tickets.ResultsToken.Should().Be(sessions.ResultsToken);
-        tickets.HasPrevResults.Should().Be(sessions.HasPrevResults);
-        tickets.HasNextResults.Should().Be(sessions.HasNextResults);
-        tickets.TotalCount.Should().Be(sessions.TotalCount);
-        tickets.TotalPages.Should().Be(sessions.TotalPages);
-        tickets.CurrentPage.Should().Be(sessions.CurrentPage);
+        tickets.ResultsToken.ShouldBe(sessions.ResultsToken);
+        tickets.HasPrevResults.ShouldBe(sessions.HasPrevResults);
+        tickets.HasNextResults.ShouldBe(sessions.HasNextResults);
+        tickets.TotalCount.ShouldBe(sessions.TotalCount);
+        tickets.TotalPages.ShouldBe(sessions.TotalPages);
+        tickets.CurrentPage.ShouldBe(sessions.CurrentPage);
 
-        tickets.Results.Select(x => x.SessionId).Should().BeEquivalentTo(sessions.Results.Select(x => x.SessionId));
+        tickets.Results.Select(x => x.SessionId).ShouldBe(sessions.Results.Select(x => x.SessionId));
     }
 
     [Fact]
@@ -281,14 +281,14 @@ public class ServerSideSessionTests
         var sessions = await _sessionMgmt.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
         var tickets = await _ticketService.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
 
-        tickets.ResultsToken.Should().Be(sessions.ResultsToken);
-        tickets.HasPrevResults.Should().Be(sessions.HasPrevResults);
-        tickets.HasNextResults.Should().Be(sessions.HasNextResults);
-        tickets.TotalCount.Should().Be(sessions.TotalCount);
-        tickets.TotalPages.Should().Be(sessions.TotalPages);
-        tickets.CurrentPage.Should().Be(sessions.CurrentPage);
+        tickets.ResultsToken.ShouldBe(sessions.ResultsToken);
+        tickets.HasPrevResults.ShouldBe(sessions.HasPrevResults);
+        tickets.HasNextResults.ShouldBe(sessions.HasNextResults);
+        tickets.TotalCount.ShouldBe(sessions.TotalCount);
+        tickets.TotalPages.ShouldBe(sessions.TotalPages);
+        tickets.CurrentPage.ShouldBe(sessions.CurrentPage);
 
-        tickets.Results.Select(x => x.SessionId).Should().BeEquivalentTo(sessions.Results.Select(x => x.SessionId));
+        tickets.Results.Select(x => x.SessionId).ShouldBe(sessions.Results.Select(x => x.SessionId));
     }
 
     [Fact]
@@ -306,7 +306,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().NotBeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
         {
@@ -317,7 +317,7 @@ public class ServerSideSessionTests
             SendBackchannelLogoutNotification = false
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().BeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldBeEmpty();
     }
 
     [Fact]
@@ -335,7 +335,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().NotBeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
         {
@@ -347,7 +347,7 @@ public class ServerSideSessionTests
             ClientIds = new[] { "foo" }
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().NotBeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -365,7 +365,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeFalse();
+        _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeFalse();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
         {
@@ -376,7 +376,7 @@ public class ServerSideSessionTests
             SendBackchannelLogoutNotification = true
         });
 
-        _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeTrue();
+        _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeTrue();
     }
 
 
@@ -395,7 +395,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeFalse();
+        _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeFalse();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
         {
@@ -407,7 +407,7 @@ public class ServerSideSessionTests
             ClientIds = new List<string>{ "foo" }
         });
 
-        _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeFalse();
+        _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeFalse();
     }
 
     [Fact]
@@ -425,9 +425,9 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeFalse();
+        _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeFalse();
         
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Should().NotBeEmpty();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
         {
@@ -438,7 +438,7 @@ public class ServerSideSessionTests
             SendBackchannelLogoutNotification = false
         });
 
-        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Should().BeEmpty();
+        (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).ShouldBeEmpty();
     }
 
     [Fact]
@@ -464,10 +464,10 @@ public class ServerSideSessionTests
             var jwt = form.Substring("login_token=".Length + 1);
             var handler = new JsonWebTokenHandler();
             var token = handler.ReadJsonWebToken(jwt);
-            token.Issuer.Should().Be(IdentityServerPipeline.BaseUrl);
-            token.GetClaim("sub").Value.Should().Be("alice");
+            token.Issuer.ShouldBe(IdentityServerPipeline.BaseUrl);
+            token.GetClaim("sub").Value.ShouldBe("alice");
         };
-        _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeFalse();
+        _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeFalse();
 
         var session = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single();
         session.Expires = System.DateTime.UtcNow.AddMinutes(-1);
@@ -475,7 +475,7 @@ public class ServerSideSessionTests
 
         await Task.Delay(1000);
 
-        _pipeline.BackChannelMessageHandler.InvokeWasCalled.Should().BeTrue();
+        _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeTrue();
     }
 
     [Fact]
@@ -493,7 +493,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().NotBeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
 
         var session = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single();
         session.Expires = System.DateTime.UtcNow.AddMinutes(-1);
@@ -501,7 +501,7 @@ public class ServerSideSessionTests
 
         await Task.Delay(1000);
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().BeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldBeEmpty();
     }
 
     [Fact]
@@ -519,11 +519,11 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().NotBeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
 
         await _pipeline.LogoutAsync();
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).Should().BeEmpty();
+        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldBeEmpty();
     }
 
     [Fact]
@@ -559,8 +559,8 @@ public class ServerSideSessionTests
         var expiration2 = ticket2.GetExpiration();
         var issued2 = ticket2.GetIssued();
 
-        issued2.Should().BeAfter(issued1);
-        expiration2.Value.Should().BeAfter(expiration1.Value);
+        issued2.ShouldBeGreaterThan(issued1);
+        expiration2!.Value.ShouldBeGreaterThan(expiration1.Value);
     }
 
     [Fact]
@@ -588,7 +588,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldNotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -617,7 +617,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldNotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -645,7 +645,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldNotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -673,7 +673,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().ContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -703,7 +703,7 @@ public class ServerSideSessionTests
 
         var expiration2 = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single().Expires.Value;
 
-        expiration2.Should().BeAfter(expiration1);
+        expiration2.ShouldBeGreaterThan(expiration1);
     }
     
     [Fact]
@@ -733,7 +733,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldNotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -764,7 +764,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldNotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -794,7 +794,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldNotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -824,7 +824,7 @@ public class ServerSideSessionTests
         
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
-        ticket.Properties.Items.Should().ContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+        ticket.Properties.Items.ShouldContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]
@@ -852,7 +852,7 @@ public class ServerSideSessionTests
                 ClientId = "client",
                 RefreshToken = tokenResponse.RefreshToken
             });
-            refreshResponse.IsError.Should().BeFalse();
+            refreshResponse.IsError.ShouldBeFalse();
         }
 
 
@@ -867,7 +867,7 @@ public class ServerSideSessionTests
                 ClientId = "client",
                 RefreshToken = tokenResponse.RefreshToken
             });
-            refreshResponse.IsError.Should().BeFalse();
+            refreshResponse.IsError.ShouldBeFalse();
         }
 
 
@@ -882,7 +882,7 @@ public class ServerSideSessionTests
                 ClientId = "client",
                 RefreshToken = tokenResponse.RefreshToken
             });
-            refreshResponse.IsError.Should().BeTrue();
+            refreshResponse.IsError.ShouldBeTrue();
         }
 
 
@@ -895,7 +895,7 @@ public class ServerSideSessionTests
                 ClientId = "client",
                 RefreshToken = tokenResponse.RefreshToken
             });
-            refreshResponse.IsError.Should().BeTrue();
+            refreshResponse.IsError.ShouldBeTrue();
         }
     }
 
@@ -925,7 +925,7 @@ public class ServerSideSessionTests
                 ClientCredentialStyle = ClientCredentialStyle.PostBody,
                 Token = tokenResponse.AccessToken
             });
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
         }
 
 
@@ -941,7 +941,7 @@ public class ServerSideSessionTests
                 ClientCredentialStyle = ClientCredentialStyle.PostBody,
                 Token = tokenResponse.AccessToken
             });
-            response.IsError.Should().BeFalse();
+            response.IsError.ShouldBeFalse();
         }
 
 
@@ -957,7 +957,7 @@ public class ServerSideSessionTests
                 ClientCredentialStyle = ClientCredentialStyle.PostBody,
                 Token = tokenResponse.AccessToken
             });
-            response.IsError.Should().BeTrue();
+            response.IsError.ShouldBeTrue();
         }
 
 
@@ -971,7 +971,7 @@ public class ServerSideSessionTests
                 ClientCredentialStyle = ClientCredentialStyle.PostBody,
                 Token = tokenResponse.AccessToken
             });
-            response.IsError.Should().BeTrue();
+            response.IsError.ShouldBeTrue();
         }
     }
 
@@ -991,7 +991,7 @@ public class ServerSideSessionTests
         var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
             .Deserialize(_protector, null);
         var claims = ticket.Principal.Claims;
-        claims.Should().Contain(c => c.Issuer == "Custom Issuer" && c.Type == "Test");
-        claims.Should().Contain(c => c.Issuer == ClaimsIdentity.DefaultIssuer && c.Type == "Test");
+        claims.ShouldContain(c => c.Issuer == "Custom Issuer" && c.Type == "Test");
+        claims.ShouldContain(c => c.Issuer == ClaimsIdentity.DefaultIssuer && c.Type == "Test");
     }
 }

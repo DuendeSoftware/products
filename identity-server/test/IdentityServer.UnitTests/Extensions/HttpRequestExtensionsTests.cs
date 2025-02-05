@@ -3,7 +3,7 @@
 
 
 using Duende.IdentityServer.Extensions;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Http;
 using Xunit;
 
@@ -19,7 +19,7 @@ public class HttpRequestExtensionsTests
         ctx.Request.Host = new HostString("foo");
         ctx.Request.Headers.Append("Origin", "http://bar");
 
-        ctx.Request.GetCorsOrigin().Should().Be("http://bar");
+        ctx.Request.GetCorsOrigin().ShouldBe("http://bar");
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public class HttpRequestExtensionsTests
         ctx.Request.Host = new HostString("foo");
         ctx.Request.Headers.Append("Origin", "http://foo");
 
-        ctx.Request.GetCorsOrigin().Should().BeNull();
+        ctx.Request.GetCorsOrigin().ShouldBeNull();
     }
 
     [Fact]
@@ -40,6 +40,6 @@ public class HttpRequestExtensionsTests
         ctx.Request.Scheme = "http";
         ctx.Request.Host = new HostString("foo");
 
-        ctx.Request.GetCorsOrigin().Should().BeNull();
+        ctx.Request.GetCorsOrigin().ShouldBeNull();
     }
 }

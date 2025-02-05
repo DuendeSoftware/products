@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Xunit;
 
@@ -43,7 +43,7 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeTrue();
+        ctx.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -58,8 +58,8 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeFalse();
-        ctx.ErrorMessage.Should().Contain("registered");
+        ctx.IsValid.ShouldBeFalse();
+        ctx.ErrorMessage.ShouldContain("registered");
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeTrue();
+        ctx.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -96,8 +96,8 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeFalse();
-        ctx.ErrorMessage.ToLowerInvariant().Should().Contain("scheme");
+        ctx.IsValid.ShouldBeFalse();
+        ctx.ErrorMessage.ToLowerInvariant().ShouldContain("scheme");
     }
 
     [Fact]
@@ -117,8 +117,8 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeFalse();
-        ctx.ErrorMessage.ToLowerInvariant().Should().Contain("clientid");
+        ctx.IsValid.ShouldBeFalse();
+        ctx.ErrorMessage.ToLowerInvariant().ShouldContain("clientid");
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeTrue();
+        ctx.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -159,8 +159,8 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeFalse();
-        ctx.ErrorMessage.ToLowerInvariant().Should().Contain("authority");
+        ctx.IsValid.ShouldBeFalse();
+        ctx.ErrorMessage.ToLowerInvariant().ShouldContain("authority");
     }
 
     [Fact]
@@ -180,8 +180,8 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeFalse();
-        ctx.ErrorMessage.ToLowerInvariant().Should().Contain("responsetype");
+        ctx.IsValid.ShouldBeFalse();
+        ctx.ErrorMessage.ToLowerInvariant().ShouldContain("responsetype");
     }
 
     [Fact]
@@ -201,8 +201,8 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeFalse();
-        ctx.ErrorMessage.ToLowerInvariant().Should().Contain("scope");
+        ctx.IsValid.ShouldBeFalse();
+        ctx.ErrorMessage.ToLowerInvariant().ShouldContain("scope");
     }
 
     [Fact]
@@ -222,6 +222,6 @@ public class IdentityProviderConfigurationValidation
         var ctx = new IdentityProviderConfigurationValidationContext(idp);
         await _validator.ValidateAsync(ctx);
 
-        ctx.IsValid.Should().BeTrue();
+        ctx.IsValid.ShouldBeTrue();
     }
 }

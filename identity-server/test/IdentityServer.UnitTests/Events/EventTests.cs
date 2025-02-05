@@ -11,7 +11,7 @@ using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
@@ -39,7 +39,7 @@ public class EventTests
 
             var s = unhandledExceptionEvent.ToString();
 
-            s.Should().NotBeNullOrEmpty();
+            s.ShouldNotBeNullOrEmpty();
         }
     }
 }

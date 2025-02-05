@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -133,7 +133,7 @@ public class GenericHost
     public async Task RevokeSessionCookieAsync()
     {
         var response = await BrowserClient.GetAsync(Url("__signout"));
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
 
@@ -167,7 +167,7 @@ public class GenericHost
     {
         _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
         var response = await BrowserClient.GetAsync(Url("__signin"));
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
     public Task IssueSessionCookieAsync(AuthenticationProperties props, params Claim[] claims)
     {

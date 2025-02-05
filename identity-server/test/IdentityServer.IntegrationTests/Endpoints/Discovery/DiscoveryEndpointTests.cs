@@ -3,7 +3,7 @@
 
 
 using System.Collections.Generic;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +34,7 @@ public class DiscoveryEndpointTests
 
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        data["issuer"].GetString().Should().Be("https://server/root");
+        data["issuer"].GetString().ShouldBe("https://server/root");
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class DiscoveryEndpointTests
 
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        data["issuer"].GetString().Should().Be("https://server/ROOT");
+        data["issuer"].GetString().ShouldBe("https://server/ROOT");
     }
 
     private void Pipeline_OnPostConfigureServices(IServiceCollection obj)
@@ -81,9 +81,9 @@ public class DiscoveryEndpointTests
         var algorithmsSupported = data["id_token_signing_alg_values_supported"].EnumerateArray()
             .Select(x => x.GetString()).ToList();
 
-        algorithmsSupported.Count.Should().Be(2);
-        algorithmsSupported.Should().Contain(SecurityAlgorithms.RsaSha256);
-        algorithmsSupported.Should().Contain(SecurityAlgorithms.EcdsaSha256);
+        algorithmsSupported.Count.ShouldBe(2);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
     }
 
     [Fact]
@@ -122,15 +122,11 @@ public class DiscoveryEndpointTests
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         var keys = data["keys"].EnumerateArray().ToList();
-        keys.Should().NotBeNull();
-        keys.Count.Should().Be(2);
+        keys.Count.ShouldBe(2);
             
         var key = keys[1];
-        key.Should().NotBeNull();
-
         var crv = key.TryGetValue("crv");
-        crv.GetString().Should().Be(JsonWebKeyECTypes.P256);
-
+        crv.GetString().ShouldBe(JsonWebKeyECTypes.P256);
     }
 
     [Fact]
@@ -146,13 +142,10 @@ public class DiscoveryEndpointTests
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         var keys = data["keys"];
-        keys.Should().NotBeNull();
-
         var key = keys[0];
-        key.Should().NotBeNull();
 
         var alg = key.TryGetValue("alg");
-        alg.GetString().Should().Be(Constants.SigningAlgorithms.RSA_SHA_256);
+        alg.GetString().ShouldBe(Constants.SigningAlgorithms.RSA_SHA_256);
     }
 
     [Theory]
@@ -179,8 +172,8 @@ public class DiscoveryEndpointTests
         var parsedKeys = jwks.GetSigningKeys();
 
         var matchingKey = parsedKeys.FirstOrDefault(x => x.KeyId == key.KeyId);
-        matchingKey.Should().NotBeNull();
-        matchingKey.Should().BeOfType<ECDsaSecurityKey>();
+        matchingKey.ShouldNotBeNull();
+        matchingKey.ShouldBeOfType<ECDsaSecurityKey>();
     }
 
     [Fact]
@@ -203,8 +196,8 @@ public class DiscoveryEndpointTests
         var json = await result.Content.ReadAsStringAsync();
         var jwks = new JsonWebKeySet(json);
 
-        jwks.Keys.Should().Contain(x => x.KeyId == ecdsaKey.KeyId && x.Alg == "ES256");
-        jwks.Keys.Should().Contain(x => x.KeyId == rsaKey.KeyId && x.Alg == "RS256");
+        jwks.Keys.ShouldContain(x => x.KeyId == ecdsaKey.KeyId && x.Alg == "ES256");
+        jwks.Keys.ShouldContain(x => x.KeyId == rsaKey.KeyId && x.Alg == "RS256");
     }
 
     [Fact]
@@ -226,7 +219,7 @@ public class DiscoveryEndpointTests
             }
         });
 
-        result.Issuer.Should().Be("https://грант.рф");
+        result.Issuer.ShouldBe("https://грант.рф");
     }
 
 
@@ -243,7 +236,7 @@ public class DiscoveryEndpointTests
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         var prompts = data["prompt_values_supported"].EnumerateArray()
             .Select(x => x.GetString()).ToList();
-        prompts.Should().BeEquivalentTo(new[] { "none", "login", "consent", "select_account" });
+        prompts.ShouldBe(["none", "login", "consent", "select_account"]);
     }
 
     [Fact]
@@ -266,7 +259,7 @@ public class DiscoveryEndpointTests
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         var prompts = data["prompt_values_supported"].EnumerateArray()
             .Select(x => x.GetString()).ToList();
-        prompts.Should().Contain("create");
+        prompts.ShouldContain("create");
     }
 
     [Fact]
@@ -281,6 +274,6 @@ public class DiscoveryEndpointTests
 
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        data.ContainsKey("prompt_values_supported").Should().BeFalse();
+        data.ContainsKey("prompt_values_supported").ShouldBeFalse();
     }
 }

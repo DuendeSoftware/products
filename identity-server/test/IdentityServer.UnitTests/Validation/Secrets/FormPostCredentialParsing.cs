@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -38,7 +38,7 @@ public class FormPostCredentialExtraction
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -54,9 +54,9 @@ public class FormPostCredentialExtraction
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
-        secret.Id.Should().Be("client");
-        secret.Credential.Should().Be("secret");
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.SharedSecret);
+        secret.Id.ShouldBe("client");
+        secret.Credential.ShouldBe("secret");
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class FormPostCredentialExtraction
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class FormPostCredentialExtraction
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class FormPostCredentialExtraction
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public class FormPostCredentialExtraction
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().NotBeNull();
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.NoSecret);
+        secret.ShouldNotBeNull();
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.NoSecret);
     }
 
     [Fact]
@@ -139,6 +139,6 @@ public class FormPostCredentialExtraction
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 }

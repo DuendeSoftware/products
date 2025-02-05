@@ -3,7 +3,7 @@
 
 
 using Duende.IdentityServer.EntityFramework.Mappers;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using Models = Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
@@ -40,22 +40,22 @@ public class IdentityProviderMappersTests
 
 
         var mappedEntity = model.ToEntity();
-        mappedEntity.DisplayName.Should().Be("name");
-        mappedEntity.Scheme.Should().Be("scheme");
-        mappedEntity.Type.Should().Be("oidc");
-        mappedEntity.Properties.Should().NotBeNullOrEmpty();
+        mappedEntity.DisplayName.ShouldBe("name");
+        mappedEntity.Scheme.ShouldBe("scheme");
+        mappedEntity.Type.ShouldBe("oidc");
+        mappedEntity.Properties.ShouldNotBeNullOrEmpty();
 
 
         var mappedModel = new Models.OidcProvider(mappedEntity.ToModel());
 
-        mappedModel.Authority.Should().Be("auth");
-        mappedModel.ClientId.Should().Be("client");
-        mappedModel.ClientSecret.Should().Be("secret");
-        mappedModel.DisplayName.Should().Be("name");
-        mappedModel.ResponseType.Should().Be("rt");
-        mappedModel.Scheme.Should().Be("scheme");
-        mappedModel.Scope.Should().Be("scope");
-        mappedModel.Type.Should().Be("oidc");
+        mappedModel.Authority.ShouldBe("auth");
+        mappedModel.ClientId.ShouldBe("client");
+        mappedModel.ClientSecret.ShouldBe("secret");
+        mappedModel.DisplayName.ShouldBe("name");
+        mappedModel.ResponseType.ShouldBe("rt");
+        mappedModel.Scheme.ShouldBe("scheme");
+        mappedModel.Scope.ShouldBe("scope");
+        mappedModel.Type.ShouldBe("oidc");
     }
 
     [Fact]
@@ -75,8 +75,7 @@ public class IdentityProviderMappersTests
                 source => source.ToEntity(),
                 excludedProperties,
                 out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
     [Fact]
@@ -95,7 +94,6 @@ public class IdentityProviderMappersTests
                 },
                 source => source.ToModel(), 
                 out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 }

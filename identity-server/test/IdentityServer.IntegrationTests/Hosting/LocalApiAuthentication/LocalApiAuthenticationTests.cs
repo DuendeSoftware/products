@@ -16,7 +16,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Hosting.LocalApiAuthentication;
 using Duende.IdentityServer.Models;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
@@ -159,10 +159,10 @@ public class LocalApiAuthenticationTests
         }
 
         var result = await _pipeline.BackChannelClient.RequestClientCredentialsTokenAsync(req);
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
 
-        if (dpop) result.TokenType.Should().Be("DPoP");
-        else result.TokenType.Should().Be("Bearer");
+        if (dpop) result.TokenType.ShouldBe("DPoP");
+        else result.TokenType.ShouldBe("Bearer");
 
         return result.AccessToken;
     }
@@ -244,9 +244,9 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeTrue();
-        ApiWasCalled.Should().BeTrue();
-        ApiPrincipal.Identity.IsAuthenticated.Should().BeTrue();
+        response.IsSuccessStatusCode.ShouldBeTrue();
+        ApiWasCalled.ShouldBeTrue();
+        ApiPrincipal.Identity.IsAuthenticated.ShouldBeTrue();
     }
 
     [Fact]
@@ -261,9 +261,9 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeTrue();
-        ApiWasCalled.Should().BeTrue();
-        ApiPrincipal.Identity.IsAuthenticated.Should().BeTrue();
+        response.IsSuccessStatusCode.ShouldBeTrue();
+        ApiWasCalled.ShouldBeTrue();
+        ApiPrincipal.Identity.IsAuthenticated.ShouldBeTrue();
     }
 
     [Fact]
@@ -277,9 +277,9 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeTrue();
-        ApiWasCalled.Should().BeTrue();
-        ApiPrincipal.Identity.IsAuthenticated.Should().BeTrue();
+        response.IsSuccessStatusCode.ShouldBeTrue();
+        ApiWasCalled.ShouldBeTrue();
+        ApiPrincipal.Identity.IsAuthenticated.ShouldBeTrue();
     }
 
     [Fact]
@@ -309,12 +309,12 @@ public class LocalApiAuthenticationTests
         if (json.TryGetValue(JwtClaimTypes.ConfirmationMethods.JwkThumbprint, out var jktJson))
         {
             var accessTokenJkt = jktJson.ToString();
-            accessTokenJkt.Should().NotBeEquivalentTo(newJkt);
+            accessTokenJkt.ShouldNotBe(newJkt);
         }
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -342,19 +342,19 @@ public class LocalApiAuthenticationTests
             Token = at
         };
         var introspectionResponse = await _pipeline.BackChannelClient.IntrospectTokenAsync(introspectionRequest);
-        introspectionResponse.IsError.Should().BeFalse();
+        introspectionResponse.IsError.ShouldBeFalse();
         
         var cnf = introspectionResponse.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Confirmation);
         var json = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(cnf.Value);
         if (json.TryGetValue(JwtClaimTypes.ConfirmationMethods.JwkThumbprint, out var jktJson))
         {
             var accessTokenJkt = jktJson.ToString();
-            accessTokenJkt.Should().NotBeEquivalentTo(newJkt);
+            accessTokenJkt.ShouldNotBe(newJkt);
         }
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -369,8 +369,8 @@ public class LocalApiAuthenticationTests
         _client.DPoPValidationMode = DPoPTokenExpirationValidationMode.Nonce;
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
-        response.Headers.Contains("DPoP-Nonce").Should().BeTrue();
+        response.IsSuccessStatusCode.ShouldBeFalse();
+        response.Headers.Contains("DPoP-Nonce").ShouldBeTrue();
     }
     [Fact]
     [Trait("Category", Category)]
@@ -391,7 +391,7 @@ public class LocalApiAuthenticationTests
         req2.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at, nonce));
 
         var response2 = await _pipeline.BackChannelClient.SendAsync(req2);
-        response2.IsSuccessStatusCode.Should().BeTrue();
+        response2.IsSuccessStatusCode.ShouldBeTrue();
     }
 
     [Fact]
@@ -406,8 +406,8 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
-        response.Headers.WwwAuthenticate.Select(x => x.Scheme).Should().BeEquivalentTo(new[] { "Bearer" });
+        response.IsSuccessStatusCode.ShouldBeFalse();
+        response.Headers.WwwAuthenticate.Select(x => x.Scheme).ShouldBe(["Bearer"]);
 
     }
     
@@ -422,8 +422,8 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
-        response.Headers.WwwAuthenticate.Select(x => x.Scheme).Should().BeEquivalentTo(new[] { "DPoP" });
+        response.IsSuccessStatusCode.ShouldBeFalse();
+        response.Headers.WwwAuthenticate.Select(x => x.Scheme).ShouldBe(["DPoP"]);
     }
 
     [Fact]
@@ -434,8 +434,8 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
-        response.Headers.WwwAuthenticate.Select(x => x.Scheme).Should().BeEquivalentTo(new[] { "Bearer", "DPoP" });
+        response.IsSuccessStatusCode.ShouldBeFalse();
+        response.Headers.WwwAuthenticate.Select(x => x.Scheme).ShouldBe(["Bearer", "DPoP"]);
     }
     [Fact]
     [Trait("Category", Category)]
@@ -446,7 +446,7 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        response.IsSuccessStatusCode.ShouldBeFalse();
     }
     [Fact]
     [Trait("Category", Category)]
@@ -458,7 +458,7 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        response.IsSuccessStatusCode.ShouldBeFalse();
     }
 
     [Fact]
@@ -474,7 +474,7 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        response.IsSuccessStatusCode.ShouldBeFalse();
     }
 
     [Fact]
@@ -487,7 +487,7 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        response.IsSuccessStatusCode.ShouldBeFalse();
     }
     [Fact]
     [Trait("Category", Category)]
@@ -499,6 +499,6 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        response.IsSuccessStatusCode.ShouldBeFalse();
     }
 }

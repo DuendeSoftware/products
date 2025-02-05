@@ -13,7 +13,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -56,7 +56,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     public async Task ProcessAsync_when_validationresult_null_expect_exception()
     {
         Func<Task> act = () => generator.ProcessAsync(null, TestBaseUrl);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -64,14 +64,14 @@ public class DeviceAuthorizationResponseGeneratorTests
     {
         var validationResult = new DeviceAuthorizationRequestValidationResult(new ValidatedDeviceAuthorizationRequest());
         Func <Task> act = () => generator.ProcessAsync(validationResult, TestBaseUrl);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public async Task ProcessAsync_when_baseurl_null_expect_exception()
     {
         Func<Task> act = () => generator.ProcessAsync(testResult, null);
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.ShouldThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         var response = await generator.ProcessAsync(testResult, TestBaseUrl);
 
-        response.UserCode.Should().Be(FakeUserCodeGenerator.TestUniqueUserCode);
+        response.UserCode.ShouldBe(FakeUserCodeGenerator.TestUniqueUserCode);
     }
 
     [Fact]
@@ -115,17 +115,17 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         var response = await generator.ProcessAsync(testResult, TestBaseUrl);
 
-        response.UserCode.Should().NotBeNullOrWhiteSpace();
+        response.UserCode.ShouldNotBeNullOrWhiteSpace();
 
         var userCode = await deviceFlowCodeService.FindByUserCodeAsync(response.UserCode);
-        userCode.Should().NotBeNull();
-        userCode.ClientId.Should().Be(testResult.ValidatedRequest.Client.ClientId);
-        userCode.Lifetime.Should().Be(testResult.ValidatedRequest.Client.DeviceCodeLifetime);
-        userCode.CreationTime.Should().Be(creationTime);
-        userCode.Subject.Should().BeNull();
-        userCode.AuthorizedScopes.Should().BeNull();
+        userCode.ShouldNotBeNull();
+        userCode.ClientId.ShouldBe(testResult.ValidatedRequest.Client.ClientId);
+        userCode.Lifetime.ShouldBe(testResult.ValidatedRequest.Client.DeviceCodeLifetime);
+        userCode.CreationTime.ShouldBe(creationTime);
+        userCode.Subject.ShouldBeNull();
+        userCode.AuthorizedScopes.ShouldBeNull();
 
-        userCode.RequestedScopes.Should().Contain(testResult.ValidatedRequest.RequestedScopes);
+        userCode.RequestedScopes.ShouldContain(testResult.ValidatedRequest.RequestedScopes);
     }
 
     [Fact]
@@ -136,19 +136,19 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         var response = await generator.ProcessAsync(testResult, TestBaseUrl);
 
-        response.DeviceCode.Should().NotBeNullOrWhiteSpace();
-        response.Interval.Should().Be(options.DeviceFlow.Interval);
+        response.DeviceCode.ShouldNotBeNullOrWhiteSpace();
+        response.Interval.ShouldBe(options.DeviceFlow.Interval);
             
         var deviceCode = await deviceFlowCodeService.FindByDeviceCodeAsync(response.DeviceCode);
-        deviceCode.Should().NotBeNull();
-        deviceCode.ClientId.Should().Be(testResult.ValidatedRequest.Client.ClientId);
-        deviceCode.IsOpenId.Should().Be(testResult.ValidatedRequest.IsOpenIdRequest);
-        deviceCode.Lifetime.Should().Be(testResult.ValidatedRequest.Client.DeviceCodeLifetime);
-        deviceCode.CreationTime.Should().Be(creationTime);
-        deviceCode.Subject.Should().BeNull();
-        deviceCode.AuthorizedScopes.Should().BeNull();
+        deviceCode.ShouldNotBeNull();
+        deviceCode.ClientId.ShouldBe(testResult.ValidatedRequest.Client.ClientId);
+        deviceCode.IsOpenId.ShouldBe(testResult.ValidatedRequest.IsOpenIdRequest);
+        deviceCode.Lifetime.ShouldBe(testResult.ValidatedRequest.Client.DeviceCodeLifetime);
+        deviceCode.CreationTime.ShouldBe(creationTime);
+        deviceCode.Subject.ShouldBeNull();
+        deviceCode.AuthorizedScopes.ShouldBeNull();
             
-        response.DeviceCodeLifetime.Should().Be(deviceCode.Lifetime);
+        response.DeviceCodeLifetime.ShouldBe(deviceCode.Lifetime);
     }
 
     [Fact]
@@ -160,8 +160,8 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         var response = await generator.ProcessAsync(testResult, baseUrl);
 
-        response.VerificationUri.Should().Be("http://localhost:5000/device");
-        response.VerificationUriComplete.Should().StartWith("http://localhost:5000/device?userCode=");
+        response.VerificationUri.ShouldBe("http://localhost:5000/device");
+        response.VerificationUriComplete.ShouldStartWith("http://localhost:5000/device?userCode=");
     }
 
     [Fact]
@@ -173,8 +173,8 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         var response = await generator.ProcessAsync(testResult, baseUrl);
 
-        response.VerificationUri.Should().Be("http://short/device");
-        response.VerificationUriComplete.Should().StartWith("http://short/device?userCode=");
+        response.VerificationUri.ShouldBe("http://short/device");
+        response.VerificationUriComplete.ShouldStartWith("http://short/device?userCode=");
     }
 }
 

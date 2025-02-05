@@ -4,7 +4,7 @@
 
 using Xunit;
 using Duende.IdentityServer.Extensions;
-using FluentAssertions;
+using Shouldly;
 using System.Linq;
 
 namespace UnitTests.Extensions;
@@ -82,7 +82,7 @@ public class StringExtensionsTests
     public void ToSpaceSeparatedString_should_return_correct_value()
     {
         var value = new[] { "foo", "bar", "baz", "baz", "foo", "bar" }.ToSpaceSeparatedString();
-        value.Should().Be("foo bar baz baz foo bar");
+        value.ShouldBe("foo bar baz baz foo bar");
     }
 
     [Fact]
@@ -90,13 +90,13 @@ public class StringExtensionsTests
     public void FromSpaceSeparatedString_should_return_correct_values()
     {
         var values = "foo bar   baz baz     foo bar".FromSpaceSeparatedString().ToArray();
-        values.Length.Should().Be(6);
-        values[0].Should().Be("foo");
-        values[1].Should().Be("bar");
-        values[2].Should().Be("baz");
-        values[3].Should().Be("baz");
-        values[4].Should().Be("foo");
-        values[5].Should().Be("bar");
+        values.Length.ShouldBe(6);
+        values[0].ShouldBe("foo");
+        values[1].ShouldBe("bar");
+        values[2].ShouldBe("baz");
+        values[3].ShouldBe("baz");
+        values[4].ShouldBe("foo");
+        values[5].ShouldBe("bar");
     }
 
     [Fact]
@@ -104,11 +104,11 @@ public class StringExtensionsTests
     public void FromSpaceSeparatedString_should_only_process_spaces()
     {
         var values = "foo bar\tbaz baz\rfoo bar\r\nbar".FromSpaceSeparatedString().ToArray();
-        values.Length.Should().Be(4);
-        values[0].Should().Be("foo");
-        values[1].Should().Be("bar\tbaz");
-        values[2].Should().Be("baz\rfoo");
-        values[3].Should().Be("bar\r\nbar");
+        values.Length.ShouldBe(4);
+        values[0].ShouldBe("foo");
+        values[1].ShouldBe("bar\tbaz");
+        values[2].ShouldBe("baz\rfoo");
+        values[3].ShouldBe("bar\r\nbar");
     }
 
 
@@ -120,7 +120,7 @@ public class StringExtensionsTests
     {
         var scopes = string.Empty.ParseScopesString();
 
-        scopes.Should().BeNull();
+        scopes.ShouldBeNull();
     }
 
     [Fact]
@@ -129,11 +129,11 @@ public class StringExtensionsTests
     {
         var scopes = "scope3 scope2 scope1".ParseScopesString();
 
-        scopes.Count.Should().Be(3);
+        scopes.Count.ShouldBe(3);
 
-        scopes[0].Should().Be("scope1");
-        scopes[1].Should().Be("scope2");
-        scopes[2].Should().Be("scope3");
+        scopes[0].ShouldBe("scope1");
+        scopes[1].ShouldBe("scope2");
+        scopes[2].ShouldBe("scope3");
     }
 
     [Fact]
@@ -142,11 +142,11 @@ public class StringExtensionsTests
     {
         var scopes = "   scope3     scope2     scope1   ".ParseScopesString();
 
-        scopes.Count.Should().Be(3);
+        scopes.Count.ShouldBe(3);
 
-        scopes[0].Should().Be("scope1");
-        scopes[1].Should().Be("scope2");
-        scopes[2].Should().Be("scope3");
+        scopes[0].ShouldBe("scope1");
+        scopes[1].ShouldBe("scope2");
+        scopes[2].ShouldBe("scope3");
     }
 
     [Fact]
@@ -155,19 +155,19 @@ public class StringExtensionsTests
     {
         var scopes = "scope2 scope1 scope2".ParseScopesString();
 
-        scopes.Count.Should().Be(2);
+        scopes.Count.ShouldBe(2);
 
-        scopes[0].Should().Be("scope1");
-        scopes[1].Should().Be("scope2");
+        scopes[0].ShouldBe("scope1");
+        scopes[1].ShouldBe("scope2");
     }
 
     [Fact]
     [Trait("Category", Category)]
     public void IsUri_should_allow_uris()
     {
-        "https://path".IsUri().Should().BeTrue();
-        "https://path?foo=[x]".IsUri().Should().BeTrue();
-        "file://path".IsUri().Should().BeTrue();
+        "https://path".IsUri().ShouldBeTrue();
+        "https://path?foo=[x]".IsUri().ShouldBeTrue();
+        "file://path".IsUri().ShouldBeTrue();
     }
 
     [Fact]
@@ -176,12 +176,12 @@ public class StringExtensionsTests
     {
         // especially on linux
         // https://github.com/DuendeSoftware/Support/issues/148
-        " /path".IsUri().Should().BeFalse();
-        "/path".IsUri().Should().BeFalse();
-        " //".IsUri().Should().BeFalse();
-        "//".IsUri().Should().BeFalse();
-        "://".IsUri().Should().BeFalse();
-        " ://".IsUri().Should().BeFalse();
-        " file://path".IsUri().Should().BeFalse();
+        " /path".IsUri().ShouldBeFalse();
+        "/path".IsUri().ShouldBeFalse();
+        " //".IsUri().ShouldBeFalse();
+        "//".IsUri().ShouldBeFalse();
+        "://".IsUri().ShouldBeFalse();
+        " ://".IsUri().ShouldBeFalse();
+        " file://path".IsUri().ShouldBeFalse();
     }
 }

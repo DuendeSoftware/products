@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
+using Shouldly;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text.Json;
@@ -211,7 +211,7 @@ public class DPoPTokenEndpointTests
 
     private IEnumerable<Claim> ParseAccessTokenClaims(TokenResponse tokenResponse)
     {
-        tokenResponse.IsError.Should().BeFalse(tokenResponse.Error);
+        tokenResponse.IsError.ShouldBeFalse(tokenResponse.Error);
 
         var handler = new JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(tokenResponse.AccessToken);
@@ -248,10 +248,10 @@ public class DPoPTokenEndpointTests
         request.Headers.Add("DPoP", dpopToken);
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeFalse();
-        response.TokenType.Should().Be("DPoP");
+        response.IsError.ShouldBeFalse();
+        response.TokenType.ShouldBe("DPoP");
         var jkt = GetJKTFromAccessToken(response);
-        jkt.Should().Be(_JKT);
+        jkt.ShouldBe(_JKT);
     }
 
     [Fact]
@@ -273,10 +273,10 @@ public class DPoPTokenEndpointTests
         request.Headers.Add("DPoP", dpopToken);
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeFalse();
-        response.TokenType.Should().Be("DPoP");
+        response.IsError.ShouldBeFalse();
+        response.TokenType.ShouldBe("DPoP");
         var jkt = GetJKTFromAccessToken(response);
-        jkt.Should().Be(_JKT);
+        jkt.ShouldBe(_JKT);
     }
 
     [Fact]
@@ -296,7 +296,7 @@ public class DPoPTokenEndpointTests
         request.Headers.Add("DPoP", dpopToken);
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeTrue();
+        response.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -316,10 +316,10 @@ public class DPoPTokenEndpointTests
             request.Headers.Add("DPoP", dpopToken);
 
             var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-            response.IsError.Should().BeFalse();
-            response.TokenType.Should().Be("DPoP");
+            response.IsError.ShouldBeFalse();
+            response.TokenType.ShouldBe("DPoP");
             var jkt = GetJKTFromAccessToken(response);
-            jkt.Should().Be(_JKT);
+            jkt.ShouldBe(_JKT);
         }
 
         {
@@ -333,7 +333,7 @@ public class DPoPTokenEndpointTests
             request.Headers.Add("DPoP", dpopToken);
 
             var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-            response.IsError.Should().BeTrue();
+            response.IsError.ShouldBeTrue();
         }
     }
 
@@ -351,8 +351,8 @@ public class DPoPTokenEndpointTests
         request.Headers.Add("DPoP", "malformed");
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeTrue();
-        response.Error.Should().Be("invalid_dpop_proof");
+        response.IsError.ShouldBeTrue();
+        response.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -370,8 +370,8 @@ public class DPoPTokenEndpointTests
         };
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeTrue();
-        response.Error.Should().Be("invalid_dpop_proof");
+        response.IsError.ShouldBeTrue();
+        response.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -390,8 +390,8 @@ public class DPoPTokenEndpointTests
         request.Headers.Add("DPoP", dpopToken);
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeTrue();
-        response.Error.Should().Be("invalid_dpop_proof");
+        response.IsError.ShouldBeTrue();
+        response.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -410,11 +410,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -427,9 +427,9 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        codeResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        codeResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
 
         var rtRequest = new RefreshTokenRequest
         {
@@ -441,9 +441,9 @@ public class DPoPTokenEndpointTests
         rtRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
-        rtResponse.IsError.Should().BeFalse();
-        rtResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(rtResponse).Should().Be(_JKT);
+        rtResponse.IsError.ShouldBeFalse();
+        rtResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(rtResponse).ShouldBe(_JKT);
     }
 
     [Fact]
@@ -462,11 +462,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -479,9 +479,9 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        codeResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        codeResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
 
         var rtRequest = new RefreshTokenRequest
         {
@@ -493,8 +493,8 @@ public class DPoPTokenEndpointTests
         // no DPoP header passed here
 
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
-        rtResponse.IsError.Should().BeTrue();
-        rtResponse.Error.Should().Be("invalid_request");
+        rtResponse.IsError.ShouldBeTrue();
+        rtResponse.Error.ShouldBe("invalid_request");
     }
 
     [Fact]
@@ -515,11 +515,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -532,9 +532,9 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        codeResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        codeResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
 
         var rtRequest = new RefreshTokenRequest
         {
@@ -546,8 +546,8 @@ public class DPoPTokenEndpointTests
         // no DPoP header passed here
 
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
-        rtResponse.IsError.Should().BeTrue();
-        rtResponse.Error.Should().Be("invalid_request");
+        rtResponse.IsError.ShouldBeTrue();
+        rtResponse.Error.ShouldBe("invalid_request");
     }
 
     [Fact]
@@ -566,11 +566,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -584,7 +584,7 @@ public class DPoPTokenEndpointTests
         // no dpop here
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
+        codeResponse.IsError.ShouldBeFalse();
 
         var rtRequest = new RefreshTokenRequest
         {
@@ -599,7 +599,7 @@ public class DPoPTokenEndpointTests
         rtRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
-        rtResponse.IsError.Should().BeTrue();
+        rtResponse.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -618,11 +618,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -635,9 +635,9 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        codeResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        codeResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
 
         var rtRequest = new RefreshTokenRequest
         {
@@ -651,9 +651,9 @@ public class DPoPTokenEndpointTests
         rtRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
-        rtResponse.IsError.Should().BeFalse();
-        rtResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(rtResponse).Should().Be(_JKT);
+        rtResponse.IsError.ShouldBeFalse();
+        rtResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(rtResponse).ShouldBe(_JKT);
     }
 
     [Fact]
@@ -674,11 +674,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -691,9 +691,9 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        codeResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        codeResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
 
         var rtRequest = new RefreshTokenRequest
         {
@@ -711,8 +711,8 @@ public class DPoPTokenEndpointTests
         rtRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
-        rtResponse.IsError.Should().BeTrue();
-        rtResponse.Error.Should().Be("invalid_dpop_proof");
+        rtResponse.IsError.ShouldBeTrue();
+        rtResponse.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -733,11 +733,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -750,9 +750,9 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        codeResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        codeResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
 
         var firstRefreshRequest = new RefreshTokenRequest
         {
@@ -764,9 +764,9 @@ public class DPoPTokenEndpointTests
         firstRefreshRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var firstRefreshResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(firstRefreshRequest);
-        firstRefreshResponse.IsError.Should().BeFalse();
-        firstRefreshResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(firstRefreshResponse).Should().Be(_JKT);
+        firstRefreshResponse.IsError.ShouldBeFalse();
+        firstRefreshResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(firstRefreshResponse).ShouldBe(_JKT);
 
         var secondRefreshRequest = new RefreshTokenRequest
         {
@@ -777,13 +777,13 @@ public class DPoPTokenEndpointTests
         };
         secondRefreshRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
-        firstRefreshRequest.Headers.GetValues("DPoP").FirstOrDefault().Should().NotBe(
+        firstRefreshRequest.Headers.GetValues("DPoP").FirstOrDefault().ShouldNotBe(
             secondRefreshRequest.Headers.GetValues("DPoP").FirstOrDefault());
 
         var secondRefreshResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(secondRefreshRequest);
-        secondRefreshResponse.IsError.Should().BeFalse(secondRefreshResponse.Error);
-        secondRefreshResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(secondRefreshResponse).Should().Be(_JKT);
+        secondRefreshResponse.IsError.ShouldBeFalse(secondRefreshResponse.Error);
+        secondRefreshResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(secondRefreshResponse).ShouldBe(_JKT);
     }
 
 
@@ -805,11 +805,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -822,9 +822,9 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        codeResponse.TokenType.Should().Be("DPoP");
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        codeResponse.TokenType.ShouldBe("DPoP");
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
 
         var rtRequest = new RefreshTokenRequest
         {
@@ -835,8 +835,8 @@ public class DPoPTokenEndpointTests
         };
 
         var rtResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
-        rtResponse.IsError.Should().BeTrue();
-        rtResponse.Error.Should().Be("invalid_dpop_proof");
+        rtResponse.IsError.ShouldBeTrue();
+        rtResponse.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -857,11 +857,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -883,8 +883,8 @@ public class DPoPTokenEndpointTests
             Token = codeResponse.AccessToken,
         };
         var introspectionResponse = await _mockPipeline.BackChannelClient.IntrospectTokenAsync(introspectionRequest);
-        introspectionResponse.IsError.Should().BeFalse();
-        GetJKTFromCnfClaim(introspectionResponse.Claims).Should().Be(_JKT);
+        introspectionResponse.IsError.ShouldBeFalse();
+        GetJKTFromCnfClaim(introspectionResponse.Claims).ShouldBe(_JKT);
     }
 
     [Fact]
@@ -903,11 +903,11 @@ public class DPoPTokenEndpointTests
             redirectUri: "https://client1/callback");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -929,8 +929,8 @@ public class DPoPTokenEndpointTests
             Token = codeResponse.AccessToken,
         };
         var introspectionResponse = await _mockPipeline.BackChannelClient.IntrospectTokenAsync(introspectionRequest);
-        introspectionResponse.IsError.Should().BeFalse();
-        GetJKTFromCnfClaim(introspectionResponse.Claims).Should().Be(_JKT);
+        introspectionResponse.IsError.ShouldBeFalse();
+        GetJKTFromCnfClaim(introspectionResponse.Claims).ShouldBe(_JKT);
     }
 
     [Fact]
@@ -953,11 +953,11 @@ public class DPoPTokenEndpointTests
             });
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -970,8 +970,8 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeFalse();
-        GetJKTFromAccessToken(codeResponse).Should().Be(_JKT);
+        codeResponse.IsError.ShouldBeFalse();
+        GetJKTFromAccessToken(codeResponse).ShouldBe(_JKT);
     }
 
     [Fact]
@@ -994,7 +994,7 @@ public class DPoPTokenEndpointTests
             });
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
         
-        _mockPipeline.ErrorWasCalled.Should().BeTrue();
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
     }
 
     [Fact]
@@ -1017,11 +1017,11 @@ public class DPoPTokenEndpointTests
             });
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -1034,8 +1034,8 @@ public class DPoPTokenEndpointTests
         codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeTrue();
-        codeResponse.Error.Should().Be("invalid_dpop_proof");
+        codeResponse.IsError.ShouldBeTrue();
+        codeResponse.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -1072,11 +1072,11 @@ public class DPoPTokenEndpointTests
             });
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://client1/callback");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.Should().BeFalse();
+        authorization.IsError.ShouldBeFalse();
 
         var codeRequest = new AuthorizationCodeTokenRequest
         {
@@ -1091,9 +1091,9 @@ public class DPoPTokenEndpointTests
         nonce = "nonce";
 
         var codeResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
-        codeResponse.IsError.Should().BeTrue();
-        codeResponse.Error.Should().Be("invalid_dpop_proof");
-        codeResponse.HttpResponse.Headers.GetValues("DPoP-Nonce").Single().Should().Be("nonce");
+        codeResponse.IsError.ShouldBeTrue();
+        codeResponse.Error.ShouldBe("invalid_dpop_proof");
+        codeResponse.HttpResponse.Headers.GetValues("DPoP-Nonce").Single().ShouldBe("nonce");
         // TODO: make IdentityModel expose the response headers?
     }
 
@@ -1142,10 +1142,10 @@ public class DPoPTokenEndpointTests
         request.Headers.Add("DPoP", proofToken);
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeFalse();
-        response.TokenType.Should().Be("DPoP");
+        response.IsError.ShouldBeFalse();
+        response.TokenType.ShouldBe("DPoP");
         var jkt = GetJKTFromAccessToken(response);
-        jkt.Should().Be(_JKT);
+        jkt.ShouldBe(_JKT);
     }
 
     [Theory]
@@ -1168,10 +1168,10 @@ public class DPoPTokenEndpointTests
         request.Headers.Add("DPoP", proofToken);
 
         var response = await _mockPipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
-        response.IsError.Should().BeFalse();
-        response.TokenType.Should().Be("DPoP");
+        response.IsError.ShouldBeFalse();
+        response.TokenType.ShouldBe("DPoP");
         var jkt = GetJKTFromAccessToken(response);
-        jkt.Should().Be(_JKT);
+        jkt.ShouldBe(_JKT);
     }
 
 }

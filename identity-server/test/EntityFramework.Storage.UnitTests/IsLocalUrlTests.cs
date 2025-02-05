@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using Duende.IdentityServer.EntityFramework.Extensions;
 
@@ -57,6 +57,6 @@ public class IsLocalUrlTests
     [MemberData(nameof(TestCases))]
     public void IsLocalUrl(string returnUrl, bool expected)
     {
-        returnUrl.IsLocalUrl().Should().Be(expected);
+        returnUrl.IsLocalUrl().ShouldBe(expected);
     }
 }

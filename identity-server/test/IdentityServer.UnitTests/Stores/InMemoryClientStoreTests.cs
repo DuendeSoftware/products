@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 namespace UnitTests.Stores;
 
@@ -24,7 +24,7 @@ public class InMemoryClientStoreTests
         };
 
         Action act = () => new InMemoryClientStore(clients);
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
     }
 
     [Fact]

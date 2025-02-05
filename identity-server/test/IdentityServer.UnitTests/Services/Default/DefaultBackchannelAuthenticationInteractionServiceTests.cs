@@ -11,7 +11,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -63,8 +63,8 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         });
 
         var results = await _subject.GetPendingLoginRequestsForCurrentUserAsync();
-        results.Count().Should().Be(1);
-        results.First().InternalId.Should().Be(req.InternalId);
+        results.Count().ShouldBe(1);
+        results.First().InternalId.ShouldBe(req.InternalId);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         });
 
         var result = await _subject.GetLoginRequestByInternalIdAsync(req.InternalId);
-        result.InternalId.Should().Be(req.InternalId);
+        result.InternalId.ShouldBe(req.InternalId);
     }
         
     [Fact]
@@ -115,17 +115,17 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         });
 
         var item = _mockStore.Items[requestId];
-        item.IsComplete.Should().BeTrue();
-        item.Description.Should().Be("desc");
-        item.SessionId.Should().Be("sid");
-        item.AuthorizedScopes.Should().BeEquivalentTo(new[] { "scope2", "scope1" });
+        item.IsComplete.ShouldBeTrue();
+        item.Description.ShouldBe("desc");
+        item.SessionId.ShouldBe("sid");
+        item.AuthorizedScopes.ShouldBe(["scope2", "scope1"], true);
 
-        item.Subject.HasClaim("sub", "123").Should().BeTrue();
-        item.Subject.HasClaim("foo", "bar").Should().BeTrue();
-        item.Subject.HasClaim("amr", "phone").Should().BeTrue();
-        item.Subject.HasClaim("amr", "pin").Should().BeTrue();
-        item.Subject.HasClaim("idp", "idp").Should().BeTrue();
-        item.Subject.HasClaim("auth_time", new DateTimeOffset(new DateTime(2000, 02, 03, 8, 15, 00, DateTimeKind.Utc)).ToUnixTimeSeconds().ToString()).Should().BeTrue();
+        item.Subject.HasClaim("sub", "123").ShouldBeTrue();
+        item.Subject.HasClaim("foo", "bar").ShouldBeTrue();
+        item.Subject.HasClaim("amr", "phone").ShouldBeTrue();
+        item.Subject.HasClaim("amr", "pin").ShouldBeTrue();
+        item.Subject.HasClaim("idp", "idp").ShouldBeTrue();
+        item.Subject.HasClaim("auth_time", new DateTimeOffset(new DateTime(2000, 02, 03, 8, 15, 00, DateTimeKind.Utc)).ToUnixTimeSeconds().ToString()).ShouldBeTrue();
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         var requestId = await _mockStore.CreateRequestAsync(req);
 
         Func<Task> f = async () => await _subject.CompleteLoginRequestAsync(null);
-        await f.Should().ThrowAsync<ArgumentNullException>();
+        await f.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -170,7 +170,8 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
         });
-        await f.Should().ThrowAsync<InvalidOperationException>().WithMessage("More scopes consented than originally requested.");
+        var exception = await f.ShouldThrowAsync<InvalidOperationException>();
+        exception.Message.ShouldBe("More scopes consented than originally requested.");
     }
 
     [Fact]
@@ -199,7 +200,8 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
         });
-        await f.Should().ThrowAsync<InvalidOperationException>().WithMessage("User's subject id: 'invalid' does not match subject id for backchannel authentication request: '123'.");
+        var exception = await f.ShouldThrowAsync<InvalidOperationException>();
+        exception.Message.ShouldBe("User's subject id: 'invalid' does not match subject id for backchannel authentication request: '123'.");
     }
 
     [Fact]
@@ -227,7 +229,8 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             //    AuthenticationMethods = { "phone", "pin" }
             //}.CreatePrincipal()
         });
-        await f.Should().ThrowAsync<InvalidOperationException>().WithMessage("Invalid subject.");
+        var exception = await f.ShouldThrowAsync<InvalidOperationException>();
+        exception.Message.ShouldBe("Invalid subject.");
     }
 
     [Fact]
@@ -255,7 +258,8 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
         });
-        await f.Should().ThrowAsync<InvalidOperationException>().WithMessage("Invalid backchannel authentication request id.");
+        var exception = await f.ShouldThrowAsync<InvalidOperationException>();
+        exception.Message.ShouldBe("Invalid backchannel authentication request id.");
     }
 
     [Fact]
@@ -289,14 +293,14 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         });
 
         var item = _mockStore.Items[requestId];
-        item.SessionId.Should().Be("session id");
+        item.SessionId.ShouldBe("session id");
 
-        item.Subject.HasClaim("sub", "123").Should().BeTrue();
-        item.Subject.HasClaim("foo", "bar").Should().BeTrue();
-        item.Subject.HasClaim("amr", "phone").Should().BeTrue();
-        item.Subject.HasClaim("amr", "pin").Should().BeTrue();
-        item.Subject.HasClaim("idp", "idp").Should().BeTrue();
-        item.Subject.HasClaim("auth_time", new DateTimeOffset(new DateTime(2000, 02, 03, 8, 15, 00, DateTimeKind.Utc)).ToUnixTimeSeconds().ToString()).Should().BeTrue();
+        item.Subject.HasClaim("sub", "123").ShouldBeTrue();
+        item.Subject.HasClaim("foo", "bar").ShouldBeTrue();
+        item.Subject.HasClaim("amr", "phone").ShouldBeTrue();
+        item.Subject.HasClaim("amr", "pin").ShouldBeTrue();
+        item.Subject.HasClaim("idp", "idp").ShouldBeTrue();
+        item.Subject.HasClaim("auth_time", new DateTimeOffset(new DateTime(2000, 02, 03, 8, 15, 00, DateTimeKind.Utc)).ToUnixTimeSeconds().ToString()).ShouldBeTrue();
     }
 
     [Fact]
@@ -327,7 +331,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         });
 
         var item = _mockStore.Items[requestId];
-        item.Subject.HasClaim("idp", "local").Should().BeTrue();
-        item.Subject.HasClaim("auth_time", _mockSystemClock.UtcNow.ToUnixTimeSeconds().ToString()).Should().BeTrue();
+        item.Subject.HasClaim("idp", "local").ShouldBeTrue();
+        item.Subject.HasClaim("auth_time", _mockSystemClock.UtcNow.ToUnixTimeSeconds().ToString()).ShouldBeTrue();
     }
 }

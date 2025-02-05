@@ -12,7 +12,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.KeyManagement;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Logging;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -111,7 +111,7 @@ public class KeyManagerTests
                 new LoggerFactory().CreateLogger<KeyManager>(),
                 new TestIssuerNameService());
         };
-        a.Should().Throw<Exception>();
+        a.ShouldThrow<Exception>();
     }
 
     // GetCurrentKeysAsync
@@ -123,7 +123,7 @@ public class KeyManagerTests
 
         var keys = await _subject.GetCurrentKeysAsync();
         var key = keys.Single();
-        key.Id.Should().Be(id);
+        key.Id.ShouldBe(id);
     }
 
     // GetAllKeysInternalAsync
@@ -136,7 +136,7 @@ public class KeyManagerTests
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
         var key = signgingKeys.Single();
-        key.Id.Should().Be(id);
+        key.Id.ShouldBe(id);
     }
 
     [Fact]
@@ -148,9 +148,9 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Should().NotBeNull();
-        _mockKeyStore.Keys.Count.Should().Be(1);
-        _mockKeyStore.Keys.Single().Id.Should().Be(key.Id);
+        key.ShouldNotBeNull();
+        _mockKeyStore.Keys.Count.ShouldBe(1);
+        _mockKeyStore.Keys.Single().Id.ShouldBe(key.Id);
     }
 
     [Fact]
@@ -162,9 +162,9 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Should().NotBeNull();
-        _mockKeyStore.Keys.Count.Should().Be(1);
-        _mockKeyStore.Keys.Single().Id.Should().Be(key.Id);
+        key.ShouldNotBeNull();
+        _mockKeyStore.Keys.Count.ShouldBe(1);
+        _mockKeyStore.Keys.Single().Id.ShouldBe(key.Id);
     }
 
     [Fact]
@@ -174,9 +174,9 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Should().NotBeNull();
-        _mockKeyStore.Keys.Count.Should().Be(1);
-        _mockKeyStore.Keys.Single().Id.Should().Be(key.Id);
+        key.ShouldNotBeNull();
+        _mockKeyStore.Keys.Count.ShouldBe(1);
+        _mockKeyStore.Keys.Single().Id.ShouldBe(key.Id);
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class KeyManagerTests
 
         var (keys, key) = await _subject.GetAllKeysInternalAsync();
 
-        keys.Should().NotBeEmpty();
+        keys.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -198,9 +198,9 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Should().NotBeNull();
-        _mockKeyStore.Keys.Count.Should().Be(2);
-        key.Id.Should().NotBe(id);
+        key.ShouldNotBeNull();
+        _mockKeyStore.Keys.Count.ShouldBe(2);
+        key.Id.ShouldNotBe(id);
     }
 
     [Fact]
@@ -213,8 +213,8 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Should().NotBeNull();
-        key.Id.Should().Be(id2);
+        key.ShouldNotBeNull();
+        key.Id.ShouldBe(id2);
     }
 
     [Fact]
@@ -229,9 +229,9 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Should().NotBeNull();
-        _mockKeyStore.Keys.Count.Should().Be(4);
-        key.Id.Should().Be(key1);
+        key.ShouldNotBeNull();
+        _mockKeyStore.Keys.Count.ShouldBe(4);
+        key.Id.ShouldBe(key1);
     }
 
     [Fact]
@@ -244,9 +244,9 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Should().NotBeNull();
-        _mockKeyStore.Keys.Count.Should().Be(2);
-        key.Id.Should().Be(key1);
+        key.ShouldNotBeNull();
+        _mockKeyStore.Keys.Count.ShouldBe(2);
+        key.Id.ShouldBe(key1);
     }
 
     [Fact]
@@ -260,7 +260,7 @@ public class KeyManagerTests
 
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
-        allKeys.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1, key2, key3, key4 });
+        allKeys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
     }
 
     [Fact]
@@ -276,7 +276,7 @@ public class KeyManagerTests
 
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
-        allKeys.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1, key2, key3, key4 });
+        allKeys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
     }
 
     [Fact]
@@ -286,11 +286,11 @@ public class KeyManagerTests
 
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
-        allKeys.Count().Should().Be(1);
-        allKeys.Single().Id.Should().Be(key);
-        _mockKeyStoreCache.StoreKeysAsyncWasCalled.Should().BeTrue();
-        _mockKeyStoreCache.Cache.Count.Should().Be(1);
-        _mockKeyStoreCache.Cache.Single().Id.Should().Be(key);
+        allKeys.Count().ShouldBe(1);
+        allKeys.Single().Id.ShouldBe(key);
+        _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeTrue();
+        _mockKeyStoreCache.Cache.Count.ShouldBe(1);
+        _mockKeyStoreCache.Cache.Single().Id.ShouldBe(key);
     }
 
     [Fact]
@@ -304,9 +304,9 @@ public class KeyManagerTests
 
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
-        allKeys.Count().Should().Be(1);
-        allKeys.Single().Id.Should().Be(key.Id);
-        _mockKeyStore.LoadKeysAsyncWasCalled.Should().BeFalse();
+        allKeys.Count().ShouldBe(1);
+        allKeys.Single().Id.ShouldBe(key.Id);
+        _mockKeyStore.LoadKeysAsyncWasCalled.ShouldBeFalse();
     }
 
     [Fact]
@@ -318,9 +318,9 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
             
-        key.Should().NotBeNull();
-        key.Id.Should().Be(key1);
-        _mockKeyStore.Keys.Count.Should().Be(2);
+        key.ShouldNotBeNull();
+        key.Id.ShouldBe(key1);
+        _mockKeyStore.Keys.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -331,7 +331,7 @@ public class KeyManagerTests
 
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
-        _mockKeyStore.Keys.Count.Should().Be(2);
+        _mockKeyStore.Keys.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -343,8 +343,8 @@ public class KeyManagerTests
 
         var key = signgingKeys.Single();
 
-        key.Id.Should().Be(key1);
-        _mockKeyStore.Keys.Count.Should().Be(1);
+        key.Id.ShouldBe(key1);
+        _mockKeyStore.Keys.Count.ShouldBe(1);
     }
 
     // GetKeysFromCacheAsync
@@ -356,9 +356,9 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromCacheAsync();
 
-        keys.Count().Should().Be(1);
-        keys.Single().Id.Should().Be(id);
-        _mockKeyStore.LoadKeysAsyncWasCalled.Should().BeFalse();
+        keys.Count().ShouldBe(1);
+        keys.Single().Id.ShouldBe(id);
+        _mockKeyStore.LoadKeysAsyncWasCalled.ShouldBeFalse();
     }
 
     // AreAllKeysWithinInitializationDuration
@@ -373,7 +373,7 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key1, key2, key3 });
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
         {
             var key1 = CreateKey(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromSeconds(1)));
@@ -382,7 +382,7 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key1, key2, key3 });
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -394,21 +394,21 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key1 });
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
         {
             var key1 = CreateKey(_options.KeyManagement.InitializationDuration);
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key1 });
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
         {
             var key1 = CreateKey();
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key1 });
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
         {
             var key1 = CreateKey(_options.KeyManagement.InitializationDuration);
@@ -417,7 +417,7 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key1, key2, key3 });
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -429,7 +429,7 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key0 });
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
         {
             var key0 = CreateKey(_options.KeyManagement.InitializationDuration.Add(TimeSpan.FromSeconds(1)));
@@ -437,7 +437,7 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key0, key1 });
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
         {
             var key0 = CreateKey(_options.KeyManagement.InitializationDuration.Add(TimeSpan.FromSeconds(1)));
@@ -445,7 +445,7 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key0, key1 });
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
         {
             var key0 = CreateKey(_options.KeyManagement.InitializationDuration.Add(TimeSpan.FromSeconds(1)));
@@ -453,7 +453,7 @@ public class KeyManagerTests
 
             var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key0, key1 });
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
         {
             var key0 = CreateKey(_options.KeyManagement.InitializationDuration.Add(TimeSpan.FromSeconds(1)));
@@ -461,9 +461,9 @@ public class KeyManagerTests
             var key2 = CreateKey(_options.KeyManagement.InitializationDuration.Add(-TimeSpan.FromSeconds(1)));
             var key3 = CreateKey();
 
-            var result = _subject.AreAllKeysWithinInitializationDuration(new[] { key0, key1, key2, key3 });
+            var result = _subject.AreAllKeysWithinInitializationDuration([key0, key1, key2, key3]);
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
     }
 
@@ -479,9 +479,9 @@ public class KeyManagerTests
         var key5 = CreateSerializedKey(_options.KeyManagement.PropagationTime);
         var key6 = CreateSerializedKey(_options.KeyManagement.PropagationTime.Subtract(TimeSpan.FromSeconds(1)));
 
-        var result = await _subject.FilterAndDeleteRetiredKeysAsync(new[] { key1, key2, key3, key4, key5, key6 });
+        var result = await _subject.FilterAndDeleteRetiredKeysAsync([key1, key2, key3, key4, key5, key6]);
 
-        result.Select(x => x.Id).Should().BeEquivalentTo(new[] { key3.Id, key4.Id, key5.Id, key6.Id });
+        result.Select(x => x.Id).ShouldBe([key3.Id, key4.Id, key5.Id, key6.Id]);
     }
 
     [Fact]
@@ -498,8 +498,8 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysAsync();
 
-        _mockKeyStore.DeleteWasCalled.Should().BeTrue();
-        _mockKeyStore.Keys.Select(x => x.Id).Should().BeEquivalentTo(new[] { key3, key4, key5, key6 });
+        _mockKeyStore.DeleteWasCalled.ShouldBeTrue();
+        _mockKeyStore.Keys.Select(x => x.Id).ShouldBe([key3, key4, key5, key6]);
     }
 
     [Fact]
@@ -516,8 +516,8 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysAsync();
 
-        _mockKeyStore.DeleteWasCalled.Should().BeFalse();
-        _mockKeyStore.Keys.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1, key2, key3, key4, key5, key6 });
+        _mockKeyStore.DeleteWasCalled.ShouldBeFalse();
+        _mockKeyStore.Keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4, key5, key6]);
     }
 
     // FilterExpiredKeys
@@ -534,7 +534,7 @@ public class KeyManagerTests
 
         var result = _subject.FilterExpiredKeys(new[] { key1, key2, key3, key4, key5, key6 });
 
-        result.Select(x => x.Id).Should().BeEquivalentTo(new[] { key3.Id, key4.Id, key5.Id, key6.Id });
+        result.Select(x => x.Id).ShouldBe(new[] { key3.Id, key4.Id, key5.Id, key6.Id });
     }
 
     // CacheKeysAsync
@@ -545,13 +545,13 @@ public class KeyManagerTests
         {
             await _subject.CacheKeysAsync(null);
 
-            _mockKeyStoreCache.StoreKeysAsyncWasCalled.Should().BeFalse();
+            _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeFalse();
         }
 
         {
             await _subject.CacheKeysAsync(new RsaKeyContainer[0]);
 
-            _mockKeyStoreCache.StoreKeysAsyncWasCalled.Should().BeFalse();
+            _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeFalse();
         }
     }
 
@@ -563,10 +563,10 @@ public class KeyManagerTests
 
         await _subject.CacheKeysAsync(new[] { key1, key2 });
 
-        _mockKeyStoreCache.StoreKeysAsyncWasCalled.Should().BeTrue();
-        _mockKeyStoreCache.StoreKeysAsyncDuration.Should().Be(_options.KeyManagement.KeyCacheDuration);
+        _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeTrue();
+        _mockKeyStoreCache.StoreKeysAsyncDuration.ShouldBe(_options.KeyManagement.KeyCacheDuration);
 
-        _mockKeyStoreCache.Cache.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1.Id, key2.Id });
+        _mockKeyStoreCache.Cache.Select(x => x.Id).ShouldBe(new[] { key1.Id, key2.Id });
     }
 
     [Fact]
@@ -576,8 +576,8 @@ public class KeyManagerTests
 
         await _subject.CacheKeysAsync(new[] { key1 });
 
-        _mockKeyStoreCache.StoreKeysAsyncWasCalled.Should().BeTrue();
-        _mockKeyStoreCache.StoreKeysAsyncDuration.Should().Be(_options.KeyManagement.InitializationKeyCacheDuration);
+        _mockKeyStoreCache.StoreKeysAsyncWasCalled.ShouldBeTrue();
+        _mockKeyStoreCache.StoreKeysAsyncDuration.ShouldBe(_options.KeyManagement.InitializationKeyCacheDuration);
     }
 
     // GetKeysFromStoreAsync
@@ -589,9 +589,9 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromStoreAsync();
 
-        keys.Should().NotBeNull();
-        keys.Single().Id.Should().Be(key);
-        _mockKeyStoreCache.GetKeysAsyncWasCalled.Should().BeFalse();
+        keys.ShouldNotBeNull();
+        keys.Single().Id.ShouldBe(key);
+        _mockKeyStoreCache.GetKeysAsyncWasCalled.ShouldBeFalse();
     }
 
     [Fact]
@@ -605,7 +605,7 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromStoreAsync();
 
-        keys.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1, key2, key3, key4 });
+        keys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
     }
 
     [Fact]
@@ -619,11 +619,11 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromStoreAsync();
 
-        keys.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1, key2, key3, key4 });
+        keys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
 
-        _mockKeyStore.DeleteWasCalled.Should().BeTrue();
+        _mockKeyStore.DeleteWasCalled.ShouldBeTrue();
         var keysInStore = await _mockKeyStore.LoadKeysAsync();
-        keysInStore.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1, key2, key3, key4 });
+        keysInStore.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
     }
 
     [Fact]
@@ -634,7 +634,7 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromStoreAsync();
 
-        keys.Select(x => x.Id).Should().BeEquivalentTo(new[] { key1 });
+        keys.Select(x => x.Id).ShouldBe(new[] { key1 });
     }
 
     // CreateNewKeysAndAddToCacheAsync
@@ -644,7 +644,7 @@ public class KeyManagerTests
     {
         var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
         var key = signingKeys.Single();
-        _mockKeyStore.Keys.Single().Id.Should().Be(key.Id);
+        _mockKeyStore.Keys.Single().Id.ShouldBe(key.Id);
     }
 
     [Fact]
@@ -655,10 +655,10 @@ public class KeyManagerTests
         var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
         var key = signingKeys.Single();
 
-        allKeys.Count().Should().Be(2);
-        _mockKeyStore.Keys.Count.Should().Be(2);
+        allKeys.Count().ShouldBe(2);
+        _mockKeyStore.Keys.Count.ShouldBe(2);
 
-        key.Id.Should().Be(key1);
+        key.Id.ShouldBe(key1);
     }
 
     [Fact]
@@ -668,7 +668,7 @@ public class KeyManagerTests
 
         var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
 
-        allKeys.Select(x => x.Id).Should().BeEquivalentTo(_mockKeyStore.Keys.Select(x => x.Id));
+        allKeys.Select(x => x.Id).ShouldBe(_mockKeyStore.Keys.Select(x => x.Id));
     }
 
     [Fact]
@@ -683,9 +683,9 @@ public class KeyManagerTests
         var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
         sw.Stop();
 
-        sw.Elapsed.Should().BeGreaterOrEqualTo(_options.KeyManagement.InitializationSynchronizationDelay);
+        sw.Elapsed.ShouldBeGreaterThanOrEqualTo(_options.KeyManagement.InitializationSynchronizationDelay);
 
-        allKeys.Select(x => x.Id).Should().BeEquivalentTo(_mockKeyStore.Keys.Select(x => x.Id));
+        allKeys.Select(x => x.Id).ShouldBe(_mockKeyStore.Keys.Select(x => x.Id));
     }
 
     [Fact]
@@ -700,9 +700,9 @@ public class KeyManagerTests
         var (allKeys, signingKeys) = await _subject.CreateNewKeysAndAddToCacheAsync();
         sw.Stop();
 
-        sw.Elapsed.Should().BeLessThan(_options.KeyManagement.InitializationSynchronizationDelay);
+        sw.Elapsed.ShouldBeLessThan(_options.KeyManagement.InitializationSynchronizationDelay);
 
-        allKeys.Select(x => x.Id).Should().BeEquivalentTo(_mockKeyStore.Keys.Select(x => x.Id));
+        allKeys.Select(x => x.Id).ShouldBe(_mockKeyStore.Keys.Select(x => x.Id));
     }
 
     // GetCurrentSigningKey
@@ -712,11 +712,11 @@ public class KeyManagerTests
     {
         {
             var key = _subject.GetAllCurrentSigningKeys(null);
-            key.Should().BeEmpty();
+            key.ShouldBeEmpty();
         }
         {
             var key = _subject.GetAllCurrentSigningKeys(new RsaKeyContainer[0]);
-            key.Should().BeEmpty();
+            key.ShouldBeEmpty();
         }
     }
 
@@ -732,8 +732,8 @@ public class KeyManagerTests
 
         var key = _subject.GetCurrentSigningKeyInternal(new[] { key1, key2, key3, key4 });
 
-        key.Should().NotBeNull();
-        key.Id.Should().Be(key1.Id);
+        key.ShouldNotBeNull();
+        key.Id.ShouldBe(key1.Id);
     }
 
     [Fact]
@@ -746,15 +746,15 @@ public class KeyManagerTests
             _rsaOptions.UseX509Certificate = false;
             var key = _subject.GetCurrentSigningKeyInternal(new[] { rsaKey1, x509Key1 });
 
-            key.Should().NotBeNull();
-            key.Id.Should().Be(x509Key1.Id);
+            key.ShouldNotBeNull();
+            key.Id.ShouldBe(x509Key1.Id);
         }
         {
             _rsaOptions.UseX509Certificate = true;
             var key = _subject.GetCurrentSigningKeyInternal(new[] { rsaKey1, x509Key1 });
 
-            key.Should().NotBeNull();
-            key.Id.Should().Be(x509Key1.Id);
+            key.ShouldNotBeNull();
+            key.Id.ShouldBe(x509Key1.Id);
         }
 
         {
@@ -763,8 +763,8 @@ public class KeyManagerTests
             _rsaOptions.UseX509Certificate = false;
             var key = _subject.GetCurrentSigningKeyInternal(new[] { rsaKey1, x509Key1, rsaKey2 });
 
-            key.Should().NotBeNull();
-            key.Id.Should().Be(rsaKey2.Id);
+            key.ShouldNotBeNull();
+            key.Id.ShouldBe(rsaKey2.Id);
         }
     }
 
@@ -778,7 +778,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
 
         {
@@ -786,7 +786,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
 
         {
@@ -794,7 +794,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
     }
 
@@ -806,7 +806,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -814,7 +814,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -822,7 +822,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -830,7 +830,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -842,7 +842,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
     }
 
@@ -854,7 +854,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key, true);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -862,7 +862,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key, true);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -870,7 +870,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key, true);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -882,7 +882,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key, true);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -890,7 +890,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key, true);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -898,7 +898,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key, true);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -906,7 +906,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key);
 
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -918,7 +918,7 @@ public class KeyManagerTests
 
             var result = _subject.CanBeUsedAsCurrentSigningKey(key, true);
 
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
     }
 
@@ -929,11 +929,11 @@ public class KeyManagerTests
     {
         var result = await _subject.CreateAndStoreNewKeyAsync(_rsaOptions);
 
-        _mockKeyProtector.ProtectWasCalled.Should().BeTrue();
-        _mockKeyStore.Keys.Count.Should().Be(1);
-        _mockKeyStore.Keys.Single().Id.Should().Be(result.Id);
-        result.Created.Should().Be(_mockClock.UtcNow.UtcDateTime);
-        result.Algorithm.Should().Be("RS256");
+        _mockKeyProtector.ProtectWasCalled.ShouldBeTrue();
+        _mockKeyStore.Keys.Count.ShouldBe(1);
+        _mockKeyStore.Keys.Single().Id.ShouldBe(result.Id);
+        result.Created.ShouldBe(_mockClock.UtcNow.UtcDateTime);
+        result.Algorithm.ShouldBe("RS256");
     }
 
     // IsKeyRotationRequired
@@ -943,11 +943,11 @@ public class KeyManagerTests
     {
         {
             var result = _subject.IsKeyRotationRequired(null);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
         {
             var result = _subject.IsKeyRotationRequired(new RsaKeyContainer[0]);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -959,7 +959,7 @@ public class KeyManagerTests
                 CreateKey(_options.KeyManagement.KeyRetirementAge.Add(TimeSpan.FromDays(1))),
             };
             var result = _subject.IsKeyRotationRequired(keys);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
 
         {
@@ -968,7 +968,7 @@ public class KeyManagerTests
             };
 
             var result = _subject.IsKeyRotationRequired(keys);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -980,7 +980,7 @@ public class KeyManagerTests
         };
 
         var result = _subject.IsKeyRotationRequired(keys);
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -992,7 +992,7 @@ public class KeyManagerTests
             };
 
             var result = _subject.IsKeyRotationRequired(keys);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
         {
             var keys = new[] {
@@ -1000,7 +1000,7 @@ public class KeyManagerTests
             };
 
             var result = _subject.IsKeyRotationRequired(keys);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 
@@ -1014,7 +1014,7 @@ public class KeyManagerTests
             };
 
             var result = _subject.IsKeyRotationRequired(keys);
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
         {
             var keys = new[] {
@@ -1023,7 +1023,7 @@ public class KeyManagerTests
             };
 
             var result = _subject.IsKeyRotationRequired(keys);
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
         }
     }
 
@@ -1038,7 +1038,7 @@ public class KeyManagerTests
             };
 
             var result = _subject.IsKeyRotationRequired(keys);
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
         }
     }
 }

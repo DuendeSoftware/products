@@ -3,7 +3,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -36,19 +36,19 @@ public class LicenseUsageTests
 
         var summary = _licenseUsageTracker.GetSummary();
 
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.KeyManagement.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.PAR.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.ServerSideSessions.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.DCR.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.KeyManagement.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.KeyManagement.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.PAR.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.ServerSideSessions.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.DCR.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.KeyManagement.ToString());
 
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.ResourceIsolation.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.DynamicProviders.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.CIBA.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.DPoP.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.ResourceIsolation.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.DynamicProviders.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.CIBA.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.DPoP.ToString());
 
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.ISV.ToString());
-        summary.FeaturesUsed.Should().Contain(LicenseFeature.Redistribution.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.ISV.ToString());
+        summary.FeaturesUsed.ShouldContain(LicenseFeature.Redistribution.ToString());
     }
 
     [Fact]
@@ -59,9 +59,9 @@ public class LicenseUsageTests
 
         var summary = _licenseUsageTracker.GetSummary();
 
-        summary.ClientsUsed.Count.Should().Be(2);
-        summary.ClientsUsed.Should().Contain("mvc.code");
-        summary.ClientsUsed.Should().Contain("mvc.dpop");
+        summary.ClientsUsed.Count.ShouldBe(2);
+        summary.ClientsUsed.ShouldContain("mvc.code");
+        summary.ClientsUsed.ShouldContain("mvc.dpop");
     }
 
     [Fact]
@@ -72,8 +72,8 @@ public class LicenseUsageTests
 
         var summary = _licenseUsageTracker.GetSummary();
 
-        summary.IssuersUsed.Count.Should().Be(2);
-        summary.IssuersUsed.Should().Contain("https://localhost:5001");
-        summary.IssuersUsed.Should().Contain("https://acme.com");
+        summary.IssuersUsed.Count.ShouldBe(2);
+        summary.IssuersUsed.ShouldContain("https://localhost:5001");
+        summary.IssuersUsed.ShouldContain("https://acme.com");
     }
 }

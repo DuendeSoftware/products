@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
@@ -58,19 +58,19 @@ public class AccessTokenValidation
 
         var result = await validator.ValidateAccessTokenAsync(handle);
 
-        result.IsError.Should().BeFalse();
-        result.Claims.Count().Should().Be(9);
-        result.Claims.First(c => c.Type == JwtClaimTypes.ClientId).Value.Should().Be("roclient");
+        result.IsError.ShouldBeFalse();
+        result.Claims.Count().ShouldBe(9);
+        result.Claims.First(c => c.Type == JwtClaimTypes.ClientId).Value.ShouldBe("roclient");
 
         var claimTypes = result.Claims.Select(c => c.Type).ToList();
-        claimTypes.Should().Contain("iss");
-        claimTypes.Should().Contain("aud");
-        claimTypes.Should().Contain("iat");
-        claimTypes.Should().Contain("nbf");
-        claimTypes.Should().Contain("exp");
-        claimTypes.Should().Contain("client_id");
-        claimTypes.Should().Contain("sub");
-        claimTypes.Should().Contain("scope");
+        claimTypes.ShouldContain("iss");
+        claimTypes.ShouldContain("aud");
+        claimTypes.ShouldContain("iat");
+        claimTypes.ShouldContain("nbf");
+        claimTypes.ShouldContain("exp");
+        claimTypes.ShouldContain("client_id");
+        claimTypes.ShouldContain("sub");
+        claimTypes.ShouldContain("scope");
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class AccessTokenValidation
 
         var result = await validator.ValidateAccessTokenAsync(handle, "read");
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -102,8 +102,8 @@ public class AccessTokenValidation
 
         var result = await validator.ValidateAccessTokenAsync(handle, "missing");
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InsufficientScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InsufficientScope);
     }
 
     [Fact]
@@ -114,8 +114,8 @@ public class AccessTokenValidation
 
         var result = await validator.ValidateAccessTokenAsync("unknown");
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -128,8 +128,8 @@ public class AccessTokenValidation
         var longToken = "x".Repeat(options.InputLengthRestrictions.TokenHandle + 1);
         var result = await validator.ValidateAccessTokenAsync(longToken);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -150,8 +150,8 @@ public class AccessTokenValidation
 
         var result = await validator.ValidateAccessTokenAsync(handle);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.ExpiredToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.ExpiredToken);
     }
 
     [Fact]
@@ -162,8 +162,8 @@ public class AccessTokenValidation
 
         var result = await validator.ValidateAccessTokenAsync("unk.nown");
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public class AccessTokenValidation
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
         
     [Theory]
@@ -194,15 +194,15 @@ public class AccessTokenValidation
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt);
 
-        result.IsError.Should().BeFalse();
-        result.Jwt.Should().NotBeNullOrEmpty();
-        result.Client.ClientId.Should().Be("roclient");
+        result.IsError.ShouldBeFalse();
+        result.Jwt.ShouldNotBeNullOrEmpty();
+        result.Client.ClientId.ShouldBe("roclient");
 
-        result.Claims.Count().Should().Be(9);
+        result.Claims.Count().ShouldBe(9);
         var scopes = result.Claims.Where(c => c.Type == "scope").Select(c => c.Value).ToArray();
-        scopes.Length.Should().Be(2);
-        scopes[0].Should().Be("read");
-        scopes[1].Should().Be("write");
+        scopes.Length.ShouldBe(2);
+        scopes[0].ShouldBe("read");
+        scopes[1].ShouldBe("write");
     }
         
     [Fact]
@@ -217,8 +217,8 @@ public class AccessTokenValidation
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -231,8 +231,8 @@ public class AccessTokenValidation
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -248,6 +248,6 @@ public class AccessTokenValidation
 
         var result = await validator.ValidateAccessTokenAsync(handle);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 }

@@ -9,7 +9,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 using static Duende.IdentityModel.OidcConstants;
@@ -57,8 +57,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -84,8 +84,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -107,8 +107,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -131,8 +131,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -154,7 +154,7 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 }

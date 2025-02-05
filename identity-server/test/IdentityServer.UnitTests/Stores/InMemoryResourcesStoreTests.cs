@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Xunit;
-using FluentAssertions;
+using Shouldly;
 
 namespace UnitTests.Stores;
 
@@ -38,13 +38,13 @@ public class InMemoryResourcesStoreTests
         };
 
         Action act = () => new InMemoryResourcesStore(identityResources, null, null);
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
 
         act = () => new InMemoryResourcesStore(null, apiResources, null);
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
             
         act = () => new InMemoryResourcesStore(null, null, scopes);
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
     }
 
     [Fact]

@@ -1,27 +1,20 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -136,8 +129,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeFalse();
-        result.JsonWebKeyThumbprint.Should().Be(_JKT);
+        result.IsError.ShouldBeFalse();
+        result.JsonWebKeyThumbprint.ShouldBe(_JKT);
     }
 
     [Fact]
@@ -153,9 +146,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeFalse();
-        result.JsonWebKeyThumbprint.Should().Be(_JKT);
-        result.AccessTokenHash.Should().Be(accessTokenHash);
+        result.IsError.ShouldBeFalse();
+        result.JsonWebKeyThumbprint.ShouldBe(_JKT);
+        result.AccessTokenHash.ShouldBe(accessTokenHash);
     }
 
     private Claim CnfClaim(string jwkString = null )
@@ -185,9 +178,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
-        result.ErrorDescription.Should().Be("Invalid 'ath' value.");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("Invalid 'ath' value.");
     }
 
     [Fact]
@@ -202,9 +195,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.ErrorDescription.Should().Be("Invalid 'ath' value.");
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.IsError.ShouldBeTrue();
+        result.ErrorDescription.ShouldBe("Invalid 'ath' value.");
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
     }
 
     [Fact]
@@ -213,17 +206,16 @@ public class DPoPProofValidatorTests
     {
         _context.ValidateAccessToken = true;
         _context.AccessToken = "access_token";
-        _context.AccessTokenClaims.Should()
-            .NotContain(c => c.Type == JwtClaimTypes.Confirmation);
+        _context.AccessTokenClaims.ShouldNotContain(c => c.Type == JwtClaimTypes.Confirmation);
         var accessTokenHash = HashAccessToken();
         _payload["ath"] = accessTokenHash;
         _context.ProofToken = CreateDPoPProofToken();
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
-        result.ErrorDescription.Should().Be("Missing 'cnf' value.");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("Missing 'cnf' value.");
     }
     
     [Fact]
@@ -240,9 +232,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
-        result.ErrorDescription.Should().Be("Missing 'cnf' value.");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("Missing 'cnf' value.");
     }
 
     [Fact]
@@ -258,9 +250,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
-        result.ErrorDescription.Should().Be("Invalid 'cnf' value.");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("Invalid 'cnf' value.");
     }
     
     [Fact]
@@ -276,9 +268,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
-        result.ErrorDescription.Should().Be("Missing 'cnf' value.");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("Missing 'cnf' value.");
     }
     
     [Fact]
@@ -298,9 +290,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
-        result.ErrorDescription.Should().Be("Invalid 'cnf' value.");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("Invalid 'cnf' value.");
     }
 
     [Fact]
@@ -316,9 +308,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidDPoPProof);
-        result.ErrorDescription.Should().Be("Invalid 'cnf' value.");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
+        result.ErrorDescription.ShouldBe("Invalid 'cnf' value.");
     }
     
     private static string GenerateJwk()
@@ -346,7 +338,7 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(5);
 
             var result = await _subject.ValidateAsync(_context);
-            result.IsError.Should().BeFalse();
+            result.IsError.ShouldBeFalse();
         }
 
         {
@@ -357,7 +349,7 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(-5);
 
             var result = await _subject.ValidateAsync(_context);
-            result.IsError.Should().BeFalse();
+            result.IsError.ShouldBeFalse();
         }
     }
 
@@ -379,11 +371,11 @@ public class DPoPProofValidatorTests
 
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeFalse();
+                result.IsError.ShouldBeFalse();
             }
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeTrue();
+                result.IsError.ShouldBeTrue();
             }
         }
 
@@ -396,11 +388,11 @@ public class DPoPProofValidatorTests
             
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeFalse();
+                result.IsError.ShouldBeFalse();
             }
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeTrue();
+                result.IsError.ShouldBeTrue();
             }
         }
     }
@@ -420,7 +412,7 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(5);
 
             var result = await _subject.ValidateAsync(_context);
-            result.IsError.Should().BeFalse();
+            result.IsError.ShouldBeFalse();
         }
 
         {
@@ -430,7 +422,7 @@ public class DPoPProofValidatorTests
             _now = _now.AddMinutes(-5);
 
             var result = await _subject.ValidateAsync(_context);
-            result.IsError.Should().BeFalse();
+            result.IsError.ShouldBeFalse();
         }
     }
 
@@ -450,11 +442,11 @@ public class DPoPProofValidatorTests
 
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeFalse();
+                result.IsError.ShouldBeFalse();
             }
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeTrue();
+                result.IsError.ShouldBeTrue();
             }
         }
 
@@ -466,11 +458,11 @@ public class DPoPProofValidatorTests
 
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeFalse();
+                result.IsError.ShouldBeFalse();
             }
             {
                 var result = await _subject.ValidateAsync(_context);
-                result.IsError.Should().BeTrue();
+                result.IsError.ShouldBeTrue();
             }
         }
     }
@@ -486,11 +478,11 @@ public class DPoPProofValidatorTests
 
         {
             var result = await _subject.ValidateAsync(_context);
-            result.IsError.Should().BeFalse();
+            result.IsError.ShouldBeFalse();
         }
         {
             var result = await _subject.ValidateAsync(_context);
-            result.IsError.Should().BeTrue();
+            result.IsError.ShouldBeTrue();
         }
     }
 
@@ -501,8 +493,8 @@ public class DPoPProofValidatorTests
         _context.ProofToken = "";
 
         var result = await _subject.ValidateAsync(_context);
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -513,8 +505,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -527,8 +519,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -543,8 +535,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
         
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -558,8 +550,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -572,8 +564,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -586,8 +578,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -600,8 +592,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -616,8 +608,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
         
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -630,8 +622,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -644,8 +636,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -658,8 +650,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -672,8 +664,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -686,8 +678,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -700,8 +692,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -714,8 +706,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -728,8 +720,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -743,7 +735,7 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -758,8 +750,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -774,7 +766,7 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -789,8 +781,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     [Fact]
@@ -804,8 +796,8 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
     }
 
     // nonce validation
@@ -818,9 +810,9 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("use_dpop_nonce");
-        result.ServerIssuedNonce.Should().NotBeNullOrEmpty();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("use_dpop_nonce");
+        result.ServerIssuedNonce.ShouldNotBeNullOrEmpty();
     }
     
     [Fact]
@@ -832,7 +824,7 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
         
         _payload["nonce"] = result.ServerIssuedNonce;
 
@@ -840,8 +832,8 @@ public class DPoPProofValidatorTests
         
         result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeFalse();
-        result.JsonWebKeyThumbprint.Should().Be(_JKT);
+        result.IsError.ShouldBeFalse();
+        result.JsonWebKeyThumbprint.ShouldBe(_JKT);
     }
 
     [Fact]
@@ -853,7 +845,7 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
 
         _payload["nonce"] = result.ServerIssuedNonce + "invalid_stuff";
 
@@ -861,9 +853,9 @@ public class DPoPProofValidatorTests
 
         result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
-        result.ServerIssuedNonce.Should().NotBeNullOrEmpty();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
+        result.ServerIssuedNonce.ShouldNotBeNullOrEmpty();
     }
 
     [Fact]
@@ -875,7 +867,7 @@ public class DPoPProofValidatorTests
 
         var result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
 
         _payload["nonce"] = result.ServerIssuedNonce;
         // too late
@@ -885,9 +877,9 @@ public class DPoPProofValidatorTests
 
         result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
-        result.ServerIssuedNonce.Should().NotBeNullOrEmpty();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
+        result.ServerIssuedNonce.ShouldNotBeNullOrEmpty();
 
 
         _payload["nonce"] = result.ServerIssuedNonce;
@@ -898,8 +890,8 @@ public class DPoPProofValidatorTests
 
         result = await _subject.ValidateAsync(_context);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_dpop_proof");
-        result.ServerIssuedNonce.Should().NotBeNullOrEmpty();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_dpop_proof");
+        result.ServerIssuedNonce.ShouldNotBeNullOrEmpty();
     }
 }

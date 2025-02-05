@@ -6,7 +6,7 @@ using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -37,7 +37,7 @@ public class Authorize_ProtocolValidation_CustomValidator
 
         var result = await _subject.ValidateAsync(parameters);
 
-        _stubAuthorizeRequestValidator.WasCalled.Should().BeTrue();
+        _stubAuthorizeRequestValidator.WasCalled.ShouldBeTrue();
     }
 
     [Fact]
@@ -56,9 +56,9 @@ public class Authorize_ProtocolValidation_CustomValidator
         };
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("foo");
-        result.ErrorDescription.Should().Be("bar");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("foo");
+        result.ErrorDescription.ShouldBe("bar");
     }
 }
 

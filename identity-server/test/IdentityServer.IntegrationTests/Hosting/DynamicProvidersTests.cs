@@ -7,7 +7,7 @@ using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -240,8 +240,8 @@ public class DynamicProvidersTests
     {
         var response = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp1"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://idp1/connect/authorize");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://idp1/connect/authorize");
     }
         
     [Fact]
@@ -249,8 +249,8 @@ public class DynamicProvidersTests
     {
         var response = await _host.HttpClient.GetAsync(_host.Url("/logout?scheme=idp1"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://idp1/connect/endsession");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://idp1/connect/endsession");
     }
 
     [Fact]
@@ -258,8 +258,8 @@ public class DynamicProvidersTests
     {
         var response = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp2"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://idp2/connect/authorize");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://idp2/connect/authorize");
     }
 
 #if NET5_0_OR_GREATER
@@ -275,15 +275,15 @@ public class DynamicProvidersTests
         await _idp1.BrowserClient.GetAsync(_idp1.Url("/signin"));
         response = await _idp1.BrowserClient.GetAsync(authzUrl);
         var redirectUri = response.Headers.Location.ToString();
-        redirectUri.Should().StartWith("https://server/federation/idp1/signin");
+        redirectUri.ShouldStartWith("https://server/federation/idp1/signin");
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
-        response.Headers.Location.ToString().Should().StartWith("/callback");
+        response.Headers.Location.ToString().ShouldStartWith("/callback");
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/callback"));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var body = await response.Content.ReadAsStringAsync();
-        body.Should().Be("1"); // sub
+        body.ShouldBe("1"); // sub
     }
 
     [Fact]
@@ -295,13 +295,13 @@ public class DynamicProvidersTests
         await _idp2.BrowserClient.GetAsync(_idp2.Url("/signin"));
         response = await _idp2.BrowserClient.GetAsync(authzUrl);
         var redirectUri = response.Headers.Location.ToString();
-        redirectUri.Should().StartWith("https://server/signin-oidc");
+        redirectUri.ShouldStartWith("https://server/signin-oidc");
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
         response = await _host.BrowserClient.GetAsync(_host.Url(response.Headers.Location.ToString())); // ~/callback
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var body = await response.Content.ReadAsStringAsync();
-        body.Should().Be("2"); // sub
+        body.ShouldBe("2"); // sub
     }
 
     [Fact]
@@ -313,7 +313,7 @@ public class DynamicProvidersTests
         await _idp1.BrowserClient.GetAsync(_idp1.Url("/signin"));
         response = await _idp1.BrowserClient.GetAsync(authzUrl);
         var redirectUri = response.Headers.Location.ToString();
-        redirectUri.Should().StartWith("https://server/federation/idp1/signin");
+        redirectUri.ShouldStartWith("https://server/federation/idp1/signin");
 
         var cache = _host.Resolve<ICache<IdentityProvider>>() as DefaultCache<IdentityProvider>;
         await cache.RemoveAsync("test");
@@ -321,9 +321,9 @@ public class DynamicProvidersTests
         response = await _host.BrowserClient.GetAsync(redirectUri);
             
         response = await _host.BrowserClient.GetAsync(_host.Url(response.Headers.Location.ToString()));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var body = await response.Content.ReadAsStringAsync();
-        body.Should().Be("1"); // sub
+        body.ShouldBe("1"); // sub
     }
 
     [Fact]
@@ -340,7 +340,7 @@ public class DynamicProvidersTests
         response = await _host.BrowserClient.GetAsync(_host.Url("/callback")); // signs the user in
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/user"));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/logout?scheme=idp1"));
@@ -353,14 +353,14 @@ public class DynamicProvidersTests
         var iframeUrl = await _idp1.BrowserClient.ReadElementAttributeAsync("iframe", "src");
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/user"));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        iframeUrl.Should().StartWith(_host.Url("/federation/idp1/signout"));
+        iframeUrl.ShouldStartWith(_host.Url("/federation/idp1/signout"));
         response = await _host.BrowserClient.GetAsync(iframeUrl); // ~/federation/idp1/signout
-        response.IsSuccessStatusCode.Should().BeTrue();
+        response.IsSuccessStatusCode.ShouldBeTrue();
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/user"));
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 #endif
 
@@ -368,12 +368,12 @@ public class DynamicProvidersTests
     public async Task missing_segments_in_redirect_uri_should_return_not_found()
     {
         var response = await _host.HttpClient.GetAsync(_host.Url("/federation/idp1"));
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
     [Fact]
     public async Task federation_endpoint_with_no_scheme_should_return_not_found()
     {
         var response = await _host.HttpClient.GetAsync(_host.Url("/federation"));
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 }

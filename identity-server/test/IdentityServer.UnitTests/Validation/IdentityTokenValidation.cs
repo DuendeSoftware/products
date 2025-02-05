@@ -7,7 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -34,7 +34,7 @@ public class IdentityTokenValidation
         var validator = Factory.CreateTokenValidator();
         var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient");
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class IdentityTokenValidation
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient");
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class IdentityTokenValidation
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt);
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -70,8 +70,8 @@ public class IdentityTokenValidation
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt, "invalid");
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -83,8 +83,8 @@ public class IdentityTokenValidation
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient");
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.ProtectedResourceErrors.InvalidToken);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
 
     [Fact]
@@ -102,6 +102,6 @@ public class IdentityTokenValidation
         var payload = jwt.Split('.')[1];
         var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
         var values = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        values["aud"].GetString().Should().Be("roclient");
+        values["aud"].GetString().ShouldBe("roclient");
     }
 }

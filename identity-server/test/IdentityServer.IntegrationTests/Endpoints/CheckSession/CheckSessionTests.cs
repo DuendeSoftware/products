@@ -4,7 +4,7 @@
 
 using System.Net;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using IntegrationTests.Common;
 using Xunit;
 
@@ -27,6 +27,6 @@ public class CheckSessionTests
     {
         var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.CheckSessionEndpoint);
 
-        response.StatusCode.Should().NotBe(HttpStatusCode.NotFound);
+        response.StatusCode.ShouldNotBe(HttpStatusCode.NotFound);
     }
 }

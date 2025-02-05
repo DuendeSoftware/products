@@ -13,8 +13,7 @@
         <PackageReference Include="Microsoft.AspNetCore.TestHost" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
         <PackageReference Include="AngleSharp" />
-        <PackageReference Include="FluentAssertions" />
-        <PackageReference Include="FluentAssertions.Web" />
+    
     </ItemGroup>
 
     <ItemGroup>
@@ -41,6 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
         <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
     </ItemGroup>
 </Project>

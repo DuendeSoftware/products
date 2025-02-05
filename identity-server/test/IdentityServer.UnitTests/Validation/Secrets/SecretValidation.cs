@@ -8,7 +8,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 using Microsoft.Extensions.Logging;
@@ -49,7 +49,7 @@ public class SecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class SecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -86,19 +86,19 @@ public class SecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
 
         secret.Credential = "foobar";
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
 
         secret.Credential = "quux";
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
 
         secret.Credential = "notexpired";
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class SecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public class SecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -153,7 +153,7 @@ public class SecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -170,6 +170,6 @@ public class SecretValidation
         };
             
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 }

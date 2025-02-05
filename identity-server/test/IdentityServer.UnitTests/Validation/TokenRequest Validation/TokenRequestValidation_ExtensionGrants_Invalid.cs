@@ -5,7 +5,7 @@
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
 using Xunit;
@@ -33,8 +33,8 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 
     [Fact]
@@ -53,8 +53,8 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 
     [Fact]
@@ -73,9 +73,9 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
-        result.ErrorDescription.Should().Be("custom error description");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
+        result.ErrorDescription.ShouldBe("custom error description");
     }
 
     [Fact]
@@ -97,6 +97,6 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
             parameters, 
             client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 }

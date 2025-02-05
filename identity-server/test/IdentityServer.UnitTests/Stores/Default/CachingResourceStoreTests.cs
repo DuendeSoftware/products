@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -51,12 +51,12 @@ public class CachingResourceStoreTests
         _apiScopes.Add(new ApiScope("scope3"));
         _apiScopes.Add(new ApiScope("scope4")); 
         
-        _scopeCache.Items.Count.Should().Be(0);
+        _scopeCache.Items.Count.ShouldBe(0);
 
         var items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope1", "scope2", "invalid" });
-        items.Count().Should().Be(3);
+        items.Count().ShouldBe(3);
 
-        _scopeCache.Items.Count.Should().Be(3);
+        _scopeCache.Items.Count.ShouldBe(3);
     }
         
     [Fact]
@@ -67,27 +67,27 @@ public class CachingResourceStoreTests
         _apiScopes.Add(new ApiScope("scope3"));
         _apiScopes.Add(new ApiScope("scope4")); 
         
-        _scopeCache.Items.Count.Should().Be(0);
+        _scopeCache.Items.Count.ShouldBe(0);
 
         var items = await _subject.FindApiScopesByNameAsync(new[] { "scope1" });
-        items.Count().Should().Be(1);
-        _scopeCache.Items.Count.Should().Be(1);
+        items.Count().ShouldBe(1);
+        _scopeCache.Items.Count.ShouldBe(1);
 
         _apiScopes.Remove(_apiScopes.Single(x => x.Name == "scope1"));
         items = await _subject.FindApiScopesByNameAsync(new[] { "scope1", "scope2" });
-        items.Count().Should().Be(2);
-        _scopeCache.Items.Count.Should().Be(2);
+        items.Count().ShouldBe(2);
+        _scopeCache.Items.Count.ShouldBe(2);
 
         _apiScopes.Remove(_apiScopes.Single(x => x.Name == "scope2"));
         items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope2", "scope4" });
-        items.Count().Should().Be(3);
-        _scopeCache.Items.Count.Should().Be(4);
+        items.Count().ShouldBe(3);
+        _scopeCache.Items.Count.ShouldBe(4);
 
         // this shows we will find it in the cache, even if removed from the DB
         _apiScopes.Remove(_apiScopes.Single(x => x.Name == "scope3"));
         items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope1", "scope2" });
-        items.Count().Should().Be(3);
-        _scopeCache.Items.Count.Should().Be(4);
+        items.Count().ShouldBe(3);
+        _scopeCache.Items.Count.ShouldBe(4);
     }
 
     [Fact]
@@ -101,12 +101,12 @@ public class CachingResourceStoreTests
         _apiScopes.Add(new ApiScope("bar1"));
 
         {
-            _apiCache.Items.Count.Should().Be(0);
-            _apiResourceNamesCache.Items.Count.Should().Be(0);
+            _apiCache.Items.Count.ShouldBe(0);
+            _apiResourceNamesCache.Items.Count.ShouldBe(0);
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "invalid" });
-            items.Count().Should().Be(0);
-            _apiCache.Items.Count.Should().Be(0);
-            _apiResourceNamesCache.Items.Count.Should().Be(1);
+            items.Count().ShouldBe(0);
+            _apiCache.Items.Count.ShouldBe(0);
+            _apiResourceNamesCache.Items.Count.ShouldBe(1);
         }
 
         {
@@ -114,37 +114,37 @@ public class CachingResourceStoreTests
             _apiResourceNamesCache.Items.Clear();
             _resourceCache.Items.Clear();
 
-            _apiCache.Items.Count.Should().Be(0);
-            _apiResourceNamesCache.Items.Count.Should().Be(0);
+            _apiCache.Items.Count.ShouldBe(0);
+            _apiResourceNamesCache.Items.Count.ShouldBe(0);
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo1" });
-            items.Count().Should().Be(1);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo" });
-            _apiCache.Items.Count.Should().Be(1);
-            _apiResourceNamesCache.Items.Count.Should().Be(1);
+            items.Count().ShouldBe(1);
+            items.Select(x => x.Name).ShouldBe(new[] { "foo" });
+            _apiCache.Items.Count.ShouldBe(1);
+            _apiResourceNamesCache.Items.Count.ShouldBe(1);
         }
 
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2" });
-            items.Count().Should().Be(1);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo" });
-            _apiCache.Items.Count.Should().Be(1);
-            _apiResourceNamesCache.Items.Count.Should().Be(2);
+            items.Count().ShouldBe(1);
+            items.Select(x => x.Name).ShouldBe(new[] { "foo" });
+            _apiCache.Items.Count.ShouldBe(1);
+            _apiResourceNamesCache.Items.Count.ShouldBe(2);
         }
 
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo1", "bar1" });
-            items.Count().Should().Be(2);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo", "bar" });
-            _apiCache.Items.Count.Should().Be(2);
-            _apiResourceNamesCache.Items.Count.Should().Be(3);
+            items.Count().ShouldBe(2);
+            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            _apiCache.Items.Count.ShouldBe(2);
+            _apiResourceNamesCache.Items.Count.ShouldBe(3);
         }
 
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
-            items.Count().Should().Be(2);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo", "bar" });
-            _apiCache.Items.Count.Should().Be(2);
-            _apiResourceNamesCache.Items.Count.Should().Be(4);
+            items.Count().ShouldBe(2);
+            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            _apiCache.Items.Count.ShouldBe(2);
+            _apiResourceNamesCache.Items.Count.ShouldBe(4);
         }
 
         {
@@ -153,10 +153,10 @@ public class CachingResourceStoreTests
             _resourceCache.Items.Clear();
 
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
-            items.Count().Should().Be(2);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo", "bar" });
-            _apiCache.Items.Count.Should().Be(2);
-            _apiResourceNamesCache.Items.Count.Should().Be(4);
+            items.Count().ShouldBe(2);
+            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            _apiCache.Items.Count.ShouldBe(2);
+            _apiResourceNamesCache.Items.Count.ShouldBe(4);
         }
 
         {
@@ -166,10 +166,10 @@ public class CachingResourceStoreTests
             _identityResources.Clear();
 
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
-            items.Count().Should().Be(2);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo", "bar" });
-            _apiCache.Items.Count.Should().Be(2);
-            _apiResourceNamesCache.Items.Count.Should().Be(4);
+            items.Count().ShouldBe(2);
+            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            _apiCache.Items.Count.ShouldBe(2);
+            _apiResourceNamesCache.Items.Count.ShouldBe(4);
         }
     }
 
@@ -185,13 +185,13 @@ public class CachingResourceStoreTests
 
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo", "foo1", "bar", "bar1" });
-            items.Count().Should().Be(2);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo", "bar" });
+            items.Count().ShouldBe(2);
+            items.Select(x => x.Name).ShouldBe(["foo", "bar"], true);
         }
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo", "foo1", "bar", "bar1" });
-            items.Count().Should().Be(2);
-            items.Select(x => x.Name).Should().BeEquivalentTo(new[] { "foo", "bar" });
+            items.Count().ShouldBe(2);
+            items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
         }
     }
 }

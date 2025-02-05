@@ -4,7 +4,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Logging;
 using UnitTests.Common;
 using UnitTests.Endpoints.Authorize;
@@ -69,11 +69,11 @@ public class IsLocalUrlTests
         var actual = await interactionService.GetAuthorizationContextAsync(returnUrl);
         if (expected)
         {
-            actual.Should().NotBeNull();
+            actual.ShouldNotBeNull();
         }
         else
         {
-            actual.Should().BeNull();
+            actual.ShouldBeNull();
         }
     }
 
@@ -81,7 +81,7 @@ public class IsLocalUrlTests
     [MemberData(nameof(TestCases))]
     public void IsLocalUrl(string returnUrl, bool expected)
     {
-        returnUrl.IsLocalUrl().Should().Be(expected);
+        returnUrl.IsLocalUrl().ShouldBe(expected);
     }
 
     [Theory]
@@ -96,11 +96,11 @@ public class IsLocalUrlTests
         var actual = serverUrls.GetIdentityServerRelativeUrl(returnUrl);
         if (expected)
         {
-            actual.Should().NotBeNull();
+            actual.ShouldNotBeNull();
         }
         else
         {
-            actual.Should().BeNull();
+            actual.ShouldBeNull();
         }
     }
 
@@ -112,11 +112,11 @@ public class IsLocalUrlTests
         var actual = await oidcParser.ParseAsync(returnUrl);
         if (expected)
         {
-            actual.Should().NotBeNull();
+            actual.ShouldNotBeNull();
         }
         else
         {
-            actual.Should().BeNull();
+            actual.ShouldBeNull();
         }
     }
 
@@ -125,7 +125,7 @@ public class IsLocalUrlTests
     public void OidcReturnUrlParser_IsValidReturnUrl(string returnUrl, bool expected)
     {
         var oidcParser = GetOidcReturnUrlParser();
-        oidcParser.IsValidReturnUrl(returnUrl).Should().Be(expected);
+        oidcParser.IsValidReturnUrl(returnUrl).ShouldBe(expected);
     }
 
 
@@ -134,7 +134,7 @@ public class IsLocalUrlTests
     public void ReturnUrlParser_IsValidReturnUrl(string returnUrl, bool expected)
     {
         var parser = GetReturnUrlParser();
-        parser.IsValidReturnUrl(returnUrl).Should().Be(expected);
+        parser.IsValidReturnUrl(returnUrl).ShouldBe(expected);
     }
 
     [Theory]
@@ -145,11 +145,11 @@ public class IsLocalUrlTests
         var actual = await parser.ParseAsync(returnUrl);
         if (expected)
         {
-            actual.Should().NotBeNull();
+            actual.ShouldNotBeNull();
         }
         else
         {
-            actual.Should().BeNull();
+            actual.ShouldBeNull();
         }
     }
 

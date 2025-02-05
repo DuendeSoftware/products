@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using Xunit;
@@ -31,16 +31,16 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
 
     private void AssertUpdateConsentNotCalled()
     {
-        _mockConsent.ConsentClient.Should().BeNull();
-        _mockConsent.ConsentSubject.Should().BeNull();
-        _mockConsent.ConsentScopes.Should().BeNull();
+        _mockConsent.ConsentClient.ShouldBeNull();
+        _mockConsent.ConsentSubject.ShouldBeNull();
+        _mockConsent.ConsentScopes.ShouldBeNull();
     }
 
     private void AssertUpdateConsentCalled(Client client, ClaimsPrincipal user, params string[] scopes)
     {
-        _mockConsent.ConsentClient.Should().BeSameAs(client);
-        _mockConsent.ConsentSubject.Should().BeSameAs(user);
-        _mockConsent.ConsentScopes.Should().BeEquivalentTo(scopes);
+        _mockConsent.ConsentClient.ShouldBeSameAs(client);
+        _mockConsent.ConsentSubject.ShouldBeSameAs(user);
+        _mockConsent.ConsentScopes.ShouldBe(scopes);
     }
 
     private static IEnumerable<IdentityResource> GetIdentityScopes()
@@ -112,8 +112,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
     {
         Func<Task> act = () => _subject.ProcessConsentAsync(null, new ConsentResponse());
 
-        (await act.Should().ThrowAsync<ArgumentNullException>())
-            .And.ParamName.Should().Be("request");
+        var exception = await act.ShouldThrowAsync<ArgumentNullException>();
+        exception.ParamName.ShouldBe("request");
     }
         
     [Fact]
@@ -147,8 +147,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
 
         Func<Task> act = () => _subject.ProcessConsentAsync(request);
 
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*PromptMode*");
+        var exception = await act.ShouldThrowAsync<ArgumentException>();
+        exception.Message.ShouldMatch(".*PromptMode.*");
     }
 
     [Fact]
@@ -167,8 +167,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
 
         Func<Task> act = () => _subject.ProcessConsentAsync(request);
 
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*PromptMode*");
+        var exception = await act.ShouldThrowAsync<ArgumentException>();
+        exception.Message.ShouldMatch(".*PromptMode.*");
     }
 
 
@@ -187,9 +187,9 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         };
         var result = await _subject.ProcessConsentAsync(request);
 
-        request.WasConsentShown.Should().BeFalse();
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.ConsentRequired);
+        request.WasConsentShown.ShouldBeFalse();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.ConsentRequired);
         AssertUpdateConsentNotCalled();
     }
         
@@ -206,8 +206,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
         var result = await _subject.ProcessConsentAsync(request);
-        request.WasConsentShown.Should().BeFalse();
-        result.IsConsent.Should().BeTrue();
+        request.WasConsentShown.ShouldBeFalse();
+        result.IsConsent.ShouldBeTrue();
         AssertUpdateConsentNotCalled();
     }
 
@@ -225,8 +225,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
         var result = await _subject.ProcessConsentAsync(request);
-        request.WasConsentShown.Should().BeFalse();
-        result.IsConsent.Should().BeTrue();
+        request.WasConsentShown.ShouldBeFalse();
+        result.IsConsent.ShouldBeTrue();
         AssertUpdateConsentNotCalled();
     }
 
@@ -249,9 +249,9 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ScopesValuesConsented = new string[] {}
         };
         var result = await _subject.ProcessConsentAsync(request, consent);
-        request.WasConsentShown.Should().BeTrue();
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.AccessDenied);
+        request.WasConsentShown.ShouldBeTrue();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.AccessDenied);
         AssertUpdateConsentNotCalled();
     }
 
@@ -273,9 +273,9 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ScopesValuesConsented = new string[] {}
         };
         var result = await _subject.ProcessConsentAsync(request, consent);
-        request.WasConsentShown.Should().BeTrue();
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.AccessDenied);
+        request.WasConsentShown.ShouldBeTrue();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.AccessDenied);
         AssertUpdateConsentNotCalled();
     }
 
@@ -301,8 +301,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         };
 
         var result = await _subject.ProcessConsentAsync(request, consent);
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.AccessDenied);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.AccessDenied);
         AssertUpdateConsentNotCalled();
     }
 
@@ -327,12 +327,12 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ScopesValuesConsented = new string[] { "openid", "read" }
         };
         var result = await _subject.ProcessConsentAsync(request, consent);
-        request.ValidatedResources.Resources.IdentityResources.Count.Should().Be(1);
-        request.ValidatedResources.Resources.ApiScopes.Count.Should().Be(1);
-        "openid".Should().Be(request.ValidatedResources.Resources.IdentityResources.Select(x => x.Name).First());
-        "read".Should().Be(request.ValidatedResources.Resources.ApiScopes.First().Name);
-        request.WasConsentShown.Should().BeTrue();
-        result.IsConsent.Should().BeFalse();
+        request.ValidatedResources.Resources.IdentityResources.Count.ShouldBe(1);
+        request.ValidatedResources.Resources.ApiScopes.Count.ShouldBe(1);
+        "openid".ShouldBe(request.ValidatedResources.Resources.IdentityResources.Select(x => x.Name).First());
+        "read".ShouldBe(request.ValidatedResources.Resources.ApiScopes.First().Name);
+        request.WasConsentShown.ShouldBeTrue();
+        result.IsConsent.ShouldBeFalse();
         AssertUpdateConsentNotCalled();
     }
         
@@ -357,11 +357,11 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ScopesValuesConsented = new string[] { "openid", "read" }
         };
         var result = await _subject.ProcessConsentAsync(request, consent);
-        request.ValidatedResources.Resources.IdentityResources.Count.Should().Be(1);
-        request.ValidatedResources.Resources.ApiScopes.Count.Should().Be(1);
-        "read".Should().Be(request.ValidatedResources.Resources.ApiScopes.First().Name);
-        request.WasConsentShown.Should().BeTrue();
-        result.IsConsent.Should().BeFalse();
+        request.ValidatedResources.Resources.IdentityResources.Count.ShouldBe(1);
+        request.ValidatedResources.Resources.ApiScopes.Count.ShouldBe(1);
+        "read".ShouldBe(request.ValidatedResources.Resources.ApiScopes.First().Name);
+        request.WasConsentShown.ShouldBeTrue();
+        result.IsConsent.ShouldBeFalse();
         AssertUpdateConsentNotCalled();
     }
 

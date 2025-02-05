@@ -9,7 +9,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Licensing.V2;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -38,7 +38,7 @@ public class EndpointRouterTests
     public void Endpoint_ctor_requires_path_to_start_with_slash()
     {
         Action a = () => new Duende.IdentityServer.Hosting.Endpoint("ep1", "ep1", typeof(MyEndpointHandler));
-        a.Should().Throw<ArgumentException>();
+        a.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeOfType<MyEndpointHandler>();
+        result.ShouldBeOfType<MyEndpointHandler>();
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeOfType<MyEndpointHandler>();
+        result.ShouldBeOfType<MyEndpointHandler>();
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     private class MyEndpointHandler : IEndpointHandler

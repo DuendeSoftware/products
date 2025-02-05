@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
@@ -34,8 +34,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnauthorizedClient);
     }
 
     [Fact]
@@ -53,8 +53,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -72,8 +72,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -91,8 +91,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -110,8 +110,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidScope);
     }
 
     [Fact]
@@ -127,8 +127,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -145,8 +145,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -164,9 +164,9 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
-        result.ErrorDescription.Should().Be("invalid_username_or_password");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
+        result.ErrorDescription.ShouldBe("invalid_username_or_password");
     }
         
     [Fact]
@@ -183,7 +183,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -201,9 +201,9 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
-        result.ErrorDescription.Should().BeNull();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.ErrorDescription.ShouldBeNull();
     }
 
     [Fact]
@@ -221,8 +221,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -240,9 +240,9 @@ public class TokenRequestValidation_ResourceOwner_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
-        result.ErrorDescription.Should().Be("custom error description");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
+        result.ErrorDescription.ShouldBe("custom error description");
     }
 
     [Fact]
@@ -267,8 +267,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
             };
             var result = await validator.ValidateRequestAsync(parameters, client);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_scope");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_scope");
         }
 
         {
@@ -278,8 +278,8 @@ public class TokenRequestValidation_ResourceOwner_Invalid
             };
             var result = await validator.ValidateRequestAsync(parameters, client);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
     }
 }

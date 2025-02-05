@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using IntegrationTests.Common;
 using Xunit;
 
@@ -84,13 +84,13 @@ public class SessionIdTests
     {
         await _mockPipeline.LoginAsync("bob");
         var sid1 = _mockPipeline.GetSessionCookie().Value;
-        sid1.Should().NotBeNull();
+        sid1.ShouldNotBeNull();
 
         _mockPipeline.RemoveSessionCookie();
 
         await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint);
 
         var sid2 = _mockPipeline.GetSessionCookie().Value;
-        sid2.Should().Be(sid1);
+        sid2.ShouldBe(sid1);
     }
 }

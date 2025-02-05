@@ -10,7 +10,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Xunit;
 
@@ -62,7 +62,7 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.GetLogoutContextAsync("id");
 
-        context.SignOutIFrameUrl.Should().BeNull();
+        context.SignOutIFrameUrl.ShouldBeNull();
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.GetLogoutContextAsync(null);
 
-        context.SignOutIFrameUrl.Should().NotBeNull();
+        context.SignOutIFrameUrl.ShouldNotBeNull();
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.GetLogoutContextAsync("id");
 
-        context.SignOutIFrameUrl.Should().BeNull();
+        context.SignOutIFrameUrl.ShouldBeNull();
     }
 
     [Fact]
@@ -93,8 +93,8 @@ public class DefaultIdentityServerInteractionServiceTests
     {
         var context = await _subject.CreateLogoutContextAsync();
 
-        context.Should().BeNull();
-        _mockLogoutMessageStore.Messages.Should().BeEmpty();
+        context.ShouldBeNull();
+        _mockLogoutMessageStore.Messages.ShouldBeEmpty();
     }
 
     [Fact]
@@ -106,8 +106,8 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.CreateLogoutContextAsync();
 
-        context.Should().NotBeNull();
-        _mockLogoutMessageStore.Messages.Should().NotBeEmpty();
+        context.ShouldNotBeNull();
+        _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -118,8 +118,8 @@ public class DefaultIdentityServerInteractionServiceTests
             new ConsentResponse() { ScopesValuesConsented = new[] { "openid" } }, 
             null);
         
-        await act.Should().ThrowAsync<ArgumentNullException>()
-            .WithMessage("*subject*");
+        var exception = await act.ShouldThrowAsync<ArgumentNullException>();
+        exception.ParamName!.ShouldMatch(".*subject.*");
     }
 
     [Fact]
@@ -144,8 +144,8 @@ public class DefaultIdentityServerInteractionServiceTests
         };
         await _subject.GrantConsentAsync(req, new ConsentResponse(), null);
 
-        _mockConsentStore.Messages.Should().NotBeEmpty();
+        _mockConsentStore.Messages.ShouldNotBeEmpty();
         var consentRequest = new ConsentRequest(req, "bob");
-        _mockConsentStore.Messages.First().Key.Should().Be(consentRequest.Id);
+        _mockConsentStore.Messages.First().Key.ShouldBe(consentRequest.Id);
     }
 }

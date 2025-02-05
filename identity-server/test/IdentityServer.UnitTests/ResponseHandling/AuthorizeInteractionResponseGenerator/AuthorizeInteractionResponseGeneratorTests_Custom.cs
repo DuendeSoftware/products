@@ -9,7 +9,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -90,8 +90,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsRedirect.Should().BeTrue();
-        result.RedirectUrl.Should().Be("/custom");
+        result.IsRedirect.ShouldBeTrue();
+        result.RedirectUrl.ShouldBe("/custom");
     }
 
     [Fact]
@@ -117,8 +117,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("login_required");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("login_required");
     }
 
     [Fact]
@@ -144,9 +144,9 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("interaction_required");
-        result.RedirectUrl.Should().BeNull();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("interaction_required");
+        result.RedirectUrl.ShouldBeNull();
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("consent_required");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("consent_required");
     }
 }

@@ -5,7 +5,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Validation.Setup;
 using Microsoft.AspNetCore.Http;
 using Xunit;
@@ -30,8 +30,8 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeFalse();
-        result.Client.ClientId.Should().Be("roclient");
+        result.IsError.ShouldBeFalse();
+        result.Client.ClientId.ShouldBe("roclient");
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -65,9 +65,9 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeFalse();
-        result.Client.ClientId.Should().Be("roclient.public");
-        result.Client.RequireClientSecret.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
+        result.Client.ClientId.ShouldBe("roclient.public");
+        result.Client.RequireClientSecret.ShouldBeFalse();
     }
 
     [Fact]
@@ -84,8 +84,8 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeFalse();
-        result.Client.ClientId.Should().Be("client.implicit");
+        result.IsError.ShouldBeFalse();
+        result.Client.ClientId.ShouldBe("client.implicit");
     }
 
     [Fact]
@@ -102,6 +102,6 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 }

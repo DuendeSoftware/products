@@ -9,7 +9,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Licensing.V2;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -74,8 +74,8 @@ public class Authorize_ProtocolValidation_Resources
 
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().Be(false);
-        result.ValidatedRequest.RequestedResourceIndicators.Should().BeEmpty();
+        result.IsError.ShouldBe(false);
+        result.ValidatedRequest.RequestedResourceIndicators.ShouldBeEmpty();
     }
 
     [Fact]
@@ -91,8 +91,8 @@ public class Authorize_ProtocolValidation_Resources
 
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_target");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_target");
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public class Authorize_ProtocolValidation_Resources
 
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -124,8 +124,8 @@ public class Authorize_ProtocolValidation_Resources
 
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_target");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_target");
     }
 
     [Fact]
@@ -141,8 +141,8 @@ public class Authorize_ProtocolValidation_Resources
 
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_target");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_target");
     }
 
     [Fact]
@@ -158,8 +158,8 @@ public class Authorize_ProtocolValidation_Resources
 
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("invalid_target");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("invalid_target");
     }
 
     [Fact]
@@ -177,9 +177,9 @@ public class Authorize_ProtocolValidation_Resources
 
         var result = await _subject.ValidateAsync(parameters);
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.RequestedResourceIndicators.Should()
-            .BeEquivalentTo(new[] { "urn:test1", "http://resource1", "http://resource2" });
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.RequestedResourceIndicators
+            .ShouldBe(["urn:test1", "http://resource1", "http://resource2"], true);
     }
         
     [Fact]
@@ -200,8 +200,8 @@ public class Authorize_ProtocolValidation_Resources
             };
             var result = await _subject.ValidateAsync(parameters);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_scope");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_scope");
         }
 
         {
@@ -211,8 +211,8 @@ public class Authorize_ProtocolValidation_Resources
             };
             var result = await _subject.ValidateAsync(parameters);
 
-            result.IsError.Should().BeTrue();
-            result.Error.Should().Be("invalid_target");
+            result.IsError.ShouldBeTrue();
+            result.Error.ShouldBe("invalid_target");
         }
     }
 }

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -42,14 +42,14 @@ public class DiscoveryClientTests
         });
 
         // endpoints
-        doc.TokenEndpoint.Should().Be("https://server/connect/token");
-        doc.AuthorizeEndpoint.Should().Be("https://server/connect/authorize");
-        doc.IntrospectionEndpoint.Should().Be("https://server/connect/introspect");
-        doc.EndSessionEndpoint.Should().Be("https://server/connect/endsession");
+        doc.TokenEndpoint.ShouldBe("https://server/connect/token");
+        doc.AuthorizeEndpoint.ShouldBe("https://server/connect/authorize");
+        doc.IntrospectionEndpoint.ShouldBe("https://server/connect/introspect");
+        doc.EndSessionEndpoint.ShouldBe("https://server/connect/endsession");
 
         // jwk
-        doc.KeySet.Keys.Count.Should().Be(1);
-        doc.KeySet.Keys.First().E.Should().NotBeNull();
-        doc.KeySet.Keys.First().N.Should().NotBeNull();
+        doc.KeySet.Keys.Count.ShouldBe(1);
+        doc.KeySet.Keys.First().E.ShouldNotBeNull();
+        doc.KeySet.Keys.First().N.ShouldNotBeNull();
     }
 }

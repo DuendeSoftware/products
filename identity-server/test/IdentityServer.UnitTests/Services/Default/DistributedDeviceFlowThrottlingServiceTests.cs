@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
+using Shouldly;
 using UnitTests.Common;
 using Microsoft.Extensions.Caching.Distributed;
 using Xunit;
@@ -46,7 +46,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
 
         CheckCacheEntry(handle);
     }
@@ -61,7 +61,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
             
         CheckCacheEntry(handle);
     }
@@ -77,7 +77,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
 
         CheckCacheEntry(handle);
     }
@@ -95,21 +95,21 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
             
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
 
-        cache.Items.TryGetValue(CacheKey + handle, out var values).Should().BeTrue();
-        values?.Item2.AbsoluteExpiration.Should().BeOnOrAfter(testDate);
+        cache.Items.TryGetValue(CacheKey + handle, out var values).ShouldBeTrue();
+        values?.Item2.AbsoluteExpiration.Value.ShouldBeGreaterThanOrEqualTo(testDate);
     }
 
     private void CheckCacheEntry(string handle)
     {
-        cache.Items.TryGetValue(CacheKey + handle, out var values).Should().BeTrue();
+        cache.Items.TryGetValue(CacheKey + handle, out var values).ShouldBeTrue();
 
         var dateTimeAsString = Encoding.UTF8.GetString(values?.Item1);
         var dateTime = DateTime.Parse(dateTimeAsString).ToUniversalTime();
-        dateTime.Should().Be(testDate);
+        dateTime.ShouldBe(testDate);
 
-        values?.Item2.AbsoluteExpiration.Should().BeCloseTo(testDate.AddSeconds(deviceCode.Lifetime), TimeSpan.FromMicroseconds(1));
+        values?.Item2.AbsoluteExpiration.Value.ShouldBeCloseTo(testDate.AddSeconds(deviceCode.Lifetime), TimeSpan.FromMicroseconds(1));
     }
 }
 

@@ -14,7 +14,7 @@ using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Serialization;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Microsoft.EntityFrameworkCore.InMemory.Infrastructure.Internal;
 using Xunit;
@@ -57,9 +57,9 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         {
             var foundDeviceFlowCodes = context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == deviceCode);
 
-            foundDeviceFlowCodes.Should().NotBeNull();
-            foundDeviceFlowCodes?.DeviceCode.Should().Be(deviceCode);
-            foundDeviceFlowCodes?.UserCode.Should().Be(userCode);
+            foundDeviceFlowCodes.ShouldNotBeNull();
+            foundDeviceFlowCodes?.DeviceCode.ShouldBe(deviceCode);
+            foundDeviceFlowCodes?.UserCode.ShouldBe(userCode);
         }
     }
 
@@ -85,12 +85,12 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         {
             var foundDeviceFlowCodes = context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == deviceCode);
 
-            foundDeviceFlowCodes.Should().NotBeNull();
+            foundDeviceFlowCodes.ShouldNotBeNull();
             var deserializedData = new PersistentGrantSerializer().Deserialize<DeviceCode>(foundDeviceFlowCodes?.Data);
 
-            deserializedData.CreationTime.Should().BeCloseTo(data.CreationTime, TimeSpan.FromMicroseconds(1));
-            deserializedData.ClientId.Should().Be(data.ClientId);
-            deserializedData.Lifetime.Should().Be(data.Lifetime);
+            deserializedData.CreationTime.ShouldBeCloseTo(data.CreationTime, TimeSpan.FromMicroseconds(1));
+            deserializedData.ClientId.ShouldBe(data.ClientId);
+            deserializedData.Lifetime.ShouldBe(data.Lifetime);
         }
     }
 
@@ -222,11 +222,11 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             code = await store.FindByUserCodeAsync(testUserCode);
         }
-            
-        code.Should().BeEquivalentTo(expectedDeviceCodeData, 
-            assertionOptions => assertionOptions.Excluding(x=> x.Subject));
 
-        code.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).Should().NotBeNull();
+        code.ShouldBeEquivalentTo(expectedDeviceCodeData);
+        //assertionOptions => assertionOptions.Excluding(x=> x.Subject));
+
+        code.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).ShouldNotBeNull();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -236,7 +236,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             var code = await store.FindByUserCodeAsync($"user_{Guid.NewGuid().ToString()}");
-            code.Should().BeNull();
+            code.ShouldBeNull();
         }
     }
 
@@ -279,10 +279,10 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             code = await store.FindByDeviceCodeAsync(testDeviceCode);
         }
 
-        code.Should().BeEquivalentTo(expectedDeviceCodeData,
-            assertionOptions => assertionOptions.Excluding(x => x.Subject));
+        code.ShouldBeEquivalentTo(expectedDeviceCodeData);
+        //assertionOptions => assertionOptions.Excluding(x => x.Subject));
 
-        code.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).Should().NotBeNull();
+        code.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).ShouldNotBeNull();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -292,7 +292,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             var code = await store.FindByDeviceCodeAsync($"device_{Guid.NewGuid().ToString()}");
-            code.Should().BeNull();
+            code.ShouldBeNull();
         }
     }
 
@@ -351,15 +351,16 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         }
 
         // should be unchanged
-        updatedCodes.DeviceCode.Should().Be(testDeviceCode);
-        updatedCodes.ClientId.Should().Be(unauthorizedDeviceCode.ClientId);
-        updatedCodes.CreationTime.Should().Be(unauthorizedDeviceCode.CreationTime);
-        updatedCodes.Expiration.Should().Be(unauthorizedDeviceCode.CreationTime.AddSeconds(authorizedDeviceCode.Lifetime));
+        updatedCodes.DeviceCode.ShouldBe(testDeviceCode);
+        updatedCodes.ClientId.ShouldBe(unauthorizedDeviceCode.ClientId);
+        updatedCodes.CreationTime.ShouldBe(unauthorizedDeviceCode.CreationTime);
+        updatedCodes.Expiration.ShouldBe(unauthorizedDeviceCode.CreationTime.AddSeconds(authorizedDeviceCode.Lifetime));
 
         // should be changed
         var parsedCode = serializer.Deserialize<DeviceCode>(updatedCodes.Data);
-        parsedCode.Should().BeEquivalentTo(authorizedDeviceCode, assertionOptions => assertionOptions.Excluding(x => x.Subject));
-        parsedCode.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).Should().NotBeNull();
+        parsedCode.ShouldBeEquivalentTo(authorizedDeviceCode);
+        //parsedCode.ShouldBe(authorizedDeviceCode, assertionOptions => assertionOptions.Excluding(x => x.Subject));
+        parsedCode.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).ShouldNotBeNull();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -399,7 +400,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             
         using (var context = new PersistedGrantDbContext(options))
         {
-            context.DeviceFlowCodes.FirstOrDefault(x => x.UserCode == testUserCode).Should().BeNull();
+            context.DeviceFlowCodes.FirstOrDefault(x => x.UserCode == testUserCode).ShouldBeNull();
         }
     }
     [Theory, MemberData(nameof(TestDatabaseProviders))]

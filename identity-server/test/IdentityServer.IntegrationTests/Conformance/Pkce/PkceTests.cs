@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
+using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
@@ -179,8 +179,8 @@ public class PkceTests
             codeChallenge: code_challenge,
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Plain);
 
-        _pipeline.ErrorWasCalled.Should().BeTrue();
-        _pipeline.ErrorMessage.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+        _pipeline.ErrorWasCalled.ShouldBeTrue();
+        _pipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }
 
     [Theory]
@@ -201,7 +201,7 @@ public class PkceTests
             codeChallenge: code_challenge,
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Plain);
 
-        authorizeResponse.IsError.Should().BeFalse();
+        authorizeResponse.IsError.ShouldBeFalse();
 
         var code = authorizeResponse.Code;
 
@@ -216,11 +216,11 @@ public class PkceTests
             CodeVerifier = code_verifier
         });
 
-        tokenResponse.IsError.Should().BeFalse();
-        tokenResponse.TokenType.Should().Be("Bearer");
-        tokenResponse.AccessToken.Should().NotBeNull();
-        tokenResponse.IdentityToken.Should().NotBeNull();
-        tokenResponse.ExpiresIn.Should().BeGreaterThan(0);
+        tokenResponse.IsError.ShouldBeFalse();
+        tokenResponse.TokenType.ShouldBe("Bearer");
+        tokenResponse.AccessToken.ShouldNotBeNull();
+        tokenResponse.IdentityToken.ShouldNotBeNull();
+        tokenResponse.ExpiresIn.ShouldBeGreaterThan(0);
     }
 
     [Theory]
@@ -241,7 +241,7 @@ public class PkceTests
             codeChallenge: code_challenge,
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Sha256);
 
-        authorizeResponse.IsError.Should().BeFalse();
+        authorizeResponse.IsError.ShouldBeFalse();
 
         var code = authorizeResponse.Code;
 
@@ -256,11 +256,11 @@ public class PkceTests
             CodeVerifier = code_verifier
         });
 
-        tokenResponse.IsError.Should().BeFalse();
-        tokenResponse.TokenType.Should().Be("Bearer");
-        tokenResponse.AccessToken.Should().NotBeNull();
-        tokenResponse.IdentityToken.Should().NotBeNull();
-        tokenResponse.ExpiresIn.Should().BeGreaterThan(0);
+        tokenResponse.IsError.ShouldBeFalse();
+        tokenResponse.TokenType.ShouldBe("Bearer");
+        tokenResponse.AccessToken.ShouldNotBeNull();
+        tokenResponse.IdentityToken.ShouldNotBeNull();
+        tokenResponse.ExpiresIn.ShouldBeGreaterThan(0);
     }
 
     [Theory]
@@ -278,7 +278,7 @@ public class PkceTests
             redirect_uri,
             nonce: nonce);
 
-        authorizeResponse.Should().BeNull();
+        authorizeResponse.ShouldBeNull();
     }
         
     [Fact]
@@ -294,7 +294,7 @@ public class PkceTests
             redirect_uri,
             nonce: nonce);
 
-        authorizeResponse.IsError.Should().BeFalse();
+        authorizeResponse.IsError.ShouldBeFalse();
 
         var code = authorizeResponse.Code;
 
@@ -309,7 +309,7 @@ public class PkceTests
             CodeVerifier = code_verifier
         });
 
-        tokenResponse.IsError.Should().BeTrue();
+        tokenResponse.IsError.ShouldBeTrue();
     }
 
     [Theory]
@@ -331,8 +331,8 @@ public class PkceTests
             nonce: nonce,
             codeChallenge:"a");
 
-        _pipeline.ErrorWasCalled.Should().BeTrue();
-        _pipeline.ErrorMessage.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+        _pipeline.ErrorWasCalled.ShouldBeTrue();
+        _pipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }
 
     [Theory]
@@ -355,8 +355,8 @@ public class PkceTests
             codeChallenge: new string('a', _pipeline.Options.InputLengthRestrictions.CodeChallengeMaxLength + 1)
         );
 
-        _pipeline.ErrorWasCalled.Should().BeTrue();
-        _pipeline.ErrorMessage.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidRequest);
+        _pipeline.ErrorWasCalled.ShouldBeTrue();
+        _pipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }
 
     [Theory]
@@ -380,7 +380,7 @@ public class PkceTests
             codeChallengeMethod: "unknown_code_challenge_method"
         );
 
-        authorizeResponse.Should().BeNull();
+        authorizeResponse.ShouldBeNull();
     }
 
     [Theory]
@@ -401,7 +401,7 @@ public class PkceTests
             codeChallenge: code_challenge,
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Plain);
 
-        authorizeResponse.IsError.Should().BeFalse();
+        authorizeResponse.IsError.ShouldBeFalse();
 
         var code = authorizeResponse.Code;
 
@@ -415,8 +415,8 @@ public class PkceTests
             RedirectUri = redirect_uri,
         });
 
-        tokenResponse.IsError.Should().BeTrue();
-        tokenResponse.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        tokenResponse.IsError.ShouldBeTrue();
+        tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Theory]
@@ -437,7 +437,7 @@ public class PkceTests
             codeChallenge: code_challenge,
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Plain);
 
-        authorizeResponse.IsError.Should().BeFalse();
+        authorizeResponse.IsError.ShouldBeFalse();
 
         var code = authorizeResponse.Code;
 
@@ -452,8 +452,8 @@ public class PkceTests
             CodeVerifier = "a"
         });
 
-        tokenResponse.IsError.Should().BeTrue();
-        tokenResponse.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        tokenResponse.IsError.ShouldBeTrue();
+        tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Theory]
@@ -474,7 +474,7 @@ public class PkceTests
             codeChallenge: code_challenge,
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Plain);
 
-        authorizeResponse.IsError.Should().BeFalse();
+        authorizeResponse.IsError.ShouldBeFalse();
 
         var code = authorizeResponse.Code;
 
@@ -489,8 +489,8 @@ public class PkceTests
             CodeVerifier = new string('a', _pipeline.Options.InputLengthRestrictions.CodeVerifierMaxLength + 1)
         });
 
-        tokenResponse.IsError.Should().BeTrue();
-        tokenResponse.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        tokenResponse.IsError.ShouldBeTrue();
+        tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Theory]
@@ -511,7 +511,7 @@ public class PkceTests
             codeChallenge: code_challenge,
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Plain);
 
-        authorizeResponse.IsError.Should().BeFalse();
+        authorizeResponse.IsError.ShouldBeFalse();
 
         var code = authorizeResponse.Code;
 
@@ -526,8 +526,8 @@ public class PkceTests
             CodeVerifier = "mismatched_code_verifier"
         });
 
-        tokenResponse.IsError.Should().BeTrue();
-        tokenResponse.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        tokenResponse.IsError.ShouldBeTrue();
+        tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     private static string Sha256OfCodeVerifier(string codeVerifier)

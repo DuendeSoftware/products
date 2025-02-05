@@ -7,7 +7,7 @@ using System.Linq;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Models = Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace EntityFramework.Storage.UnitTests.Mappers;
@@ -35,8 +35,7 @@ public class PushedAuthorizationRequestMappersTests
 
         MapperTestHelpers
             .AllPropertiesAreMapped<Models.PushedAuthorizationRequest, Entities.PushedAuthorizationRequest>(source => source.ToEntity(), excludedProperties, out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
     [Fact]
@@ -44,7 +43,6 @@ public class PushedAuthorizationRequestMappersTests
     {
         MapperTestHelpers
             .AllPropertiesAreMapped<Entities.PushedAuthorizationRequest, Models.PushedAuthorizationRequest>(source => source.ToModel(), out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 }
