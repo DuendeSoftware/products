@@ -20,7 +20,8 @@
       "identity-server\\test\\EntityFramework.Storage.IntegrationTests\\EntityFramework.Storage.IntegrationTests.csproj",
       "identity-server\\test\\EntityFramework.Storage.UnitTests\\EntityFramework.Storage.UnitTests.csproj",
       "identity-server\\test\\IdentityServer.IntegrationTests\\IdentityServer.IntegrationTests.csproj",
-      "identity-server\\test\\IdentityServer.UnitTests\\IdentityServer.UnitTests.csproj"
+      "identity-server\\test\\IdentityServer.UnitTests\\IdentityServer.UnitTests.csproj",
+      "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj"
     ]
   }
 }

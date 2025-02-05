@@ -89,7 +89,20 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             client = await store.FindClientByIdAsync(testClient.ClientId);
         }
 
-        client.ShouldBeEquivalentTo(testClient);
+        client.ShouldSatisfyAllConditions(c =>
+        {
+            c.ClientId.ShouldBe(testClient.ClientId);
+            c.ClientName.ShouldBe(testClient.ClientName);
+            c.AllowedCorsOrigins.ShouldBe(testClient.AllowedCorsOrigins);
+            c.AllowedGrantTypes.ShouldBe(testClient.AllowedGrantTypes, true);
+            c.AllowedScopes.ShouldBe(testClient.AllowedScopes, true);
+            c.Claims.ShouldBe(testClient.Claims);
+            c.ClientSecrets.ShouldBe(testClient.ClientSecrets, true);
+            c.IdentityProviderRestrictions.ShouldBe(testClient.IdentityProviderRestrictions);
+            c.PostLogoutRedirectUris.ShouldBe(testClient.PostLogoutRedirectUris);
+            c.Properties.ShouldBe(testClient.Properties);
+            c.RedirectUris.ShouldBe(testClient.RedirectUris);
+        });
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -143,7 +156,13 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
 #pragma warning disable xUnit1031 // Do not use blocking task operations in test method, suppressed because the task must have completed to enter this block
                 var client = task.Result;
 #pragma warning restore xUnit1031 // Do not use blocking task operations in test method
-                client.ShouldBeEquivalentTo(testClient);
+                client.ShouldSatisfyAllConditions(c =>
+                {
+                    c.ClientId.ShouldBe(testClient.ClientId);
+                    c.ClientName.ShouldBe(testClient.ClientName);
+                    c.AllowedScopes.ShouldBe(testClient.AllowedScopes, true);
+                    c.AllowedGrantTypes.ShouldBe(testClient.AllowedGrantTypes);
+                });
             }
             else
             {

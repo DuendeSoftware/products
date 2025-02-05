@@ -9,8 +9,7 @@ public static class ShouldlyExtensions
     /// <param name="expected">The expected DateTime value.</param>
     /// <param name="tolerance">The allowed TimeSpan difference.</param>
     /// <param name="customMessage">A custom error message if the assertion fails.</param>
-    public static void ShouldBeCloseTo(this DateTime actual, DateTime expected, TimeSpan tolerance,
-        string?                                      customMessage = null)
+    public static void ShouldBeCloseTo(this DateTime actual, DateTime expected, TimeSpan tolerance, string? customMessage = null)
     {
         var difference = (actual - expected).Duration();
 
@@ -18,7 +17,6 @@ public static class ShouldlyExtensions
         {
             return;
         }
-
         var errorMessage = customMessage ??
                            $"Expected {actual} to be within {tolerance} of {expected}, but the difference was {difference}.";
         throw new ShouldAssertException(errorMessage);
@@ -31,8 +29,7 @@ public static class ShouldlyExtensions
     /// <param name="expected">The expected DateTime value.</param>
     /// <param name="tolerance">The allowed TimeSpan difference.</param>
     /// <param name="customMessage">A custom error message if the assertion fails.</param>
-    public static void ShouldBeCloseTo(this DateTimeOffset actual, DateTimeOffset expected, TimeSpan tolerance,
-        string?                                            customMessage = null)
+    public static void ShouldBeCloseTo(this DateTimeOffset actual, DateTimeOffset expected, TimeSpan tolerance, string? customMessage = null)
     {
         var difference = (actual - expected).Duration();
 

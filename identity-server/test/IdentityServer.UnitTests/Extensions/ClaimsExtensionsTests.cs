@@ -2,7 +2,6 @@ using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Extensions;
-using FluentAssertions;
 
 namespace UnitTests.Extensions;
 
@@ -24,6 +23,6 @@ public class ClaimsExtensionsTests
 
         var result = claims.ToClaimsDictionary();
 
-        result["claim"].Should().BeOfType<JsonElement>();
+        result["claim"].ShouldBeOfType<JsonElement>();
     }
 }

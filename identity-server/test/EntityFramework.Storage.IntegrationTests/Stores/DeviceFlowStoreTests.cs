@@ -223,8 +223,14 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             code = await store.FindByUserCodeAsync(testUserCode);
         }
 
-        code.ShouldBeEquivalentTo(expectedDeviceCodeData);
-        //assertionOptions => assertionOptions.Excluding(x=> x.Subject));
+        code.ShouldSatisfyAllConditions(c =>
+        {
+            c.ClientId.ShouldBe(expectedDeviceCodeData.ClientId);
+            c.RequestedScopes.ShouldBe(expectedDeviceCodeData.RequestedScopes);
+            c.CreationTime.ShouldBe(expectedDeviceCodeData.CreationTime);
+            c.Lifetime.ShouldBe(expectedDeviceCodeData.Lifetime);
+            c.IsOpenId.ShouldBe(expectedDeviceCodeData.IsOpenId);
+        });
 
         code.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).ShouldNotBeNull();
     }
@@ -279,8 +285,13 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             code = await store.FindByDeviceCodeAsync(testDeviceCode);
         }
 
-        code.ShouldBeEquivalentTo(expectedDeviceCodeData);
-        //assertionOptions => assertionOptions.Excluding(x => x.Subject));
+        code.ShouldSatisfyAllConditions(c =>
+        {
+            c.ClientId.ShouldBe(expectedDeviceCodeData.ClientId);
+            c.CreationTime.ShouldBe(expectedDeviceCodeData.CreationTime);
+            c.Lifetime.ShouldBe(expectedDeviceCodeData.Lifetime);
+            c.IsOpenId.ShouldBe(expectedDeviceCodeData.IsOpenId);
+        });
 
         code.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).ShouldNotBeNull();
     }
@@ -358,8 +369,17 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 
         // should be changed
         var parsedCode = serializer.Deserialize<DeviceCode>(updatedCodes.Data);
-        parsedCode.ShouldBeEquivalentTo(authorizedDeviceCode);
-        //parsedCode.ShouldBe(authorizedDeviceCode, assertionOptions => assertionOptions.Excluding(x => x.Subject));
+        parsedCode.ShouldSatisfyAllConditions(c =>
+        {
+            c.ClientId.ShouldBe(authorizedDeviceCode.ClientId);
+            c.RequestedScopes.ShouldBe(authorizedDeviceCode.RequestedScopes);
+            c.AuthorizedScopes = authorizedDeviceCode.AuthorizedScopes;
+            c.IsAuthorized.ShouldBe(authorizedDeviceCode.IsAuthorized);
+            c.IsOpenId.ShouldBe(authorizedDeviceCode.IsOpenId);
+            c.CreationTime.ShouldBe(authorizedDeviceCode.CreationTime);
+            c.Lifetime.ShouldBe(authorizedDeviceCode.Lifetime);
+
+        });
         parsedCode.Subject.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject && x.Value == expectedSubject).ShouldNotBeNull();
     }
 

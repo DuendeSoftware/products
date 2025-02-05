@@ -29,7 +29,6 @@
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.0.0" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="9.0.0" />
     <PackageVersion Include="BullsEye" Version="5.0.0" />
-    <PackageVersion Include="CompareNETObjects" Version="5.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="Duende.AccessTokenManagement" Version="3.1.1" />
     <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="3.1.1" />

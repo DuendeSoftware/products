@@ -215,13 +215,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerEntityFramewo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerInMem", "templates\src\IdentityServerInMem\IdentityServerInMem.csproj", "{CA8CF57A-FD33-40D7-8A26-77EC1F213D01}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{68BD9E61-031E-4786-A99A-B2351F3D1C90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShouldlyExtensions", "shared\ShouldlyExtensions\ShouldlyExtensions.csproj", "{BA2C8EB7-B47C-4793-B0DF-38473A3F5E20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{289021B3-A9CF-45F1-9AF1-A04C89D7C5AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -564,6 +565,13 @@ Global
 		{CA8CF57A-FD33-40D7-8A26-77EC1F213D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA8CF57A-FD33-40D7-8A26-77EC1F213D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA8CF57A-FD33-40D7-8A26-77EC1F213D01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA2C8EB7-B47C-4793-B0DF-38473A3F5E20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA2C8EB7-B47C-4793-B0DF-38473A3F5E20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA2C8EB7-B47C-4793-B0DF-38473A3F5E20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA2C8EB7-B47C-4793-B0DF-38473A3F5E20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{289021B3-A9CF-45F1-9AF1-A04C89D7C5AC} = {AB3F26FD-7B62-45AF-B9AF-C7E104CBE218}
@@ -668,5 +676,6 @@ Global
 		{35CCD99B-B7C0-41AC-B2ED-AE2FAA8674EB} = {FFB680B2-630C-4150-9874-2F3C59CDAB3C}
 		{2F87093A-8A01-4BB0-9DA3-14B90E081554} = {FFB680B2-630C-4150-9874-2F3C59CDAB3C}
 		{CA8CF57A-FD33-40D7-8A26-77EC1F213D01} = {FFB680B2-630C-4150-9874-2F3C59CDAB3C}
+		{BA2C8EB7-B47C-4793-B0DF-38473A3F5E20} = {68BD9E61-031E-4786-A99A-B2351F3D1C90}
 	EndGlobalSection
 EndGlobal
