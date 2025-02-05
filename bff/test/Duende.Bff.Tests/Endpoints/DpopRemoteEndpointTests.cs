@@ -1,16 +1,12 @@
-// // Copyright (c) Duende Software. All rights reserved.
-// // See LICENSE in the project root for license information.
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;

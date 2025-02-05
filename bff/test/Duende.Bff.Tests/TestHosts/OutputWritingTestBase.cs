@@ -12,7 +12,10 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
 
     public void WriteLine(string message)
     {
-        _output.AppendLine(message);
+        lock (_output)
+        {
+            _output.AppendLine(message);
+        }
     }
 
     public virtual Task InitializeAsync()
@@ -22,7 +25,12 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
 
     public virtual Task DisposeAsync()
     {
-        testOutputHelper.WriteLine(_output.ToString());
+        lock (_output)
+        {
+            testOutputHelper.WriteLine(_output.ToString());
+        }
+
+        
         return Task.CompletedTask;
     }
 }

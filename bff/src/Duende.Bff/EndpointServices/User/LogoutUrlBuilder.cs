@@ -1,5 +1,5 @@
-// // Copyright (c) Duende Software. All rights reserved.
-// // See LICENSE in the project root for license information.
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Components;
@@ -31,7 +31,7 @@ internal static class LogoutUrlBuilder
         return new Uri(logoutUrl, UriKind.Relative);
     }
 
-    internal static Uri Build(NavigationManager navigation, BffOptions options, string sessionId)
+    internal static Uri Build(NavigationManager navigation, BffOptions options, string? sessionId)
     {
         PathString prefix = navigation.ToBaseRelativePath(navigation.BaseUri);
         return Build(prefix, options, sessionId);
