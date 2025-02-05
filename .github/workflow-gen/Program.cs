@@ -77,9 +77,7 @@ void GenerateCiWorkflow(Component component)
         job.StepPack(project);
     }
 
-    job.StepSign()
-        .OnlyIfOnBranch()
-        ;
+    job.StepSign();
 
     job.StepPush("MyGet", "https://www.myget.org/F/duende_identityserver/api/v2/package", "MYGET");
 
@@ -193,7 +191,7 @@ public static class StepExtensions
     /// Only run this if the build is triggered on a branch IN the same repo
     /// this means it's from a trusted contributor.
     /// </summary>
-    public static Step OnlyIfOnBranch(this Step step)
+    public static Step IfGithubEventIsPush(this Step step)
         => step.If("github.event == 'push'");
 
     public static void StepTestAndReport(this Job job, string componentName, string testProject)
@@ -243,7 +241,7 @@ public static class StepExtensions
                     "--azure-key-vault-certificate NuGetPackageSigning";
         return job.Step()
             .Name("Sign packages")
-            .OnlyIfOnBranch()
+            .IfGithubEventIsPush()
             .Run($"""
                  for file in artifacts/*.nupkg; do
                     dotnet NuGetKeyVaultSignTool sign "$file" {flags}
