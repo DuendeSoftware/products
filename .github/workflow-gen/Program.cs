@@ -39,13 +39,14 @@ void GenerateCiWorkflow(Component component)
         .Push()
         .Paths(paths);
     workflow.On
-        .PullRequestTarget()
+        .PullRequest()
         .Paths(paths);
 
     workflow.EnvDefaults();
 
     var job = workflow
         .Job("build")
+        .RunEitherOnBranchOrAsPR()
         .Name("Build")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
         .Defaults().Run("bash", component.Name)
@@ -76,7 +77,9 @@ void GenerateCiWorkflow(Component component)
         job.StepPack(project);
     }
 
-    job.StepSign();
+    job.StepSign()
+        .OnlyIfOnBranch()
+        ;
 
     job.StepPush("MyGet", "https://www.myget.org/F/duende_identityserver/api/v2/package", "MYGET");
 
@@ -180,8 +183,18 @@ public static class StepExtensions
             .Name("Setup .NET")
             .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["6.0.x", "8.0.x", "9.0.x"]); // v4.1.0
 
+    /// <summary>
+    /// Only run this for a main build
+    /// </summary>
     public static Step IfRefMain(this Step step) 
         => step.If("github.ref == 'refs/heads/main'");
+
+    /// <summary>
+    /// Only run this if the build is triggered on a branch IN the same repo
+    /// this means it's from a trusted contributor.
+    /// </summary>
+    public static Step OnlyIfOnBranch(this Step step)
+        => step.If("github.event == 'push'");
 
     public static void StepTestAndReport(this Job job, string componentName, string testProject)
     {
@@ -219,7 +232,7 @@ public static class StepExtensions
             .Run($"dotnet pack -c Release {path} -o artifacts");
     }
 
-    public static void StepSign(this Job job)
+    public static Step StepSign(this Job job)
     {
         var flags = "--file-digest sha256 "                                                +
                     "--timestamp-rfc3161 http://timestamp.digicert.com "                   +
@@ -228,8 +241,9 @@ public static class StepExtensions
                     "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 "    +
                     "--azure-key-vault-client-secret ${{ secrets.SignClientSecret }} "     +
                     "--azure-key-vault-certificate NuGetPackageSigning";
-        job.Step()
+        return job.Step()
             .Name("Sign packages")
+            .OnlyIfOnBranch()
             .Run($"""
                  for file in artifacts/*.nupkg; do
                     dotnet NuGetKeyVaultSignTool sign "$file" {flags}
@@ -246,10 +260,10 @@ public static class StepExtensions
             .Run($"dotnet nuget push artifacts/*.nupkg --source {sourceUrl} --api-key {apiKey} --skip-duplicate");
     }
 
-    public static void StepUploadArtifacts(this Job job, string componentName)
+    public static Step StepUploadArtifacts(this Job job, string componentName)
     {
         var path = $"{componentName}/artifacts/*.nupkg";
-        job.Step()
+        return job.Step()
             .Name("Upload Artifacts")
             .IfRefMain()
             .Uses("actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882") // 4.4.3
@@ -259,6 +273,25 @@ public static class StepExtensions
                 ("overwrite", "true"),
                 ("retention-days", "15"));
     }
+
+    /// <summary>
+    /// The build triggers both on branch AND on pull_request.
+    ///
+    /// Only (trusted) contributors can open branches in the main repo, so these builds can run with a higher trust level.
+    /// So, they are running with trigger 'push'. These builds have access to the secrets and thus they can do things like
+    /// sign, push the packages, etc..
+    /// 
+    /// External contributors can only create branches on external repo's. These builds run with a lower trust level.
+    /// So, they are running with trigger 'pull_request'. These builds do not have access to the secrets and thus they can't
+    /// sign, push the packages, etc..
+    ///
+    /// Now, if a trusted contributor creates a branch in the main repo, then creates a PR, we don't want to run the build twice.
+    /// This prevents that. The build will only run once, on the branch with the higher trust level.
+    /// 
+    /// </summary>
+    public static Job RunEitherOnBranchOrAsPR(this Job job)
+        => job.If(
+            "(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push')");
 }
 
 public class GitHubContexts

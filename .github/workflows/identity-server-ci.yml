@@ -8,7 +8,7 @@ on:
     - .github/workflows/identity-server-**
     - identity-server/**
     - Directory.Packages.props
-  pull_request_target:
+  pull_request:
     paths:
     - .github/workflows/identity-server-**
     - identity-server/**
@@ -19,6 +19,7 @@ env:
 jobs:
   build:
     name: Build
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push')
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -125,6 +126,7 @@ jobs:
     - name: Pack Storage
       run: dotnet pack -c Release src/Storage -o artifacts
     - name: Sign packages
+      if: github.event == 'push'
       run: |-
         for file in artifacts/*.nupkg; do
            dotnet NuGetKeyVaultSignTool sign "$file" --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ --azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 --azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 --azure-key-vault-client-secret ${{ secrets.SignClientSecret }} --azure-key-vault-certificate NuGetPackageSigning
