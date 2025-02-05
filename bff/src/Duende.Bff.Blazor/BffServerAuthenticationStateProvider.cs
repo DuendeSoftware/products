@@ -5,10 +5,12 @@ using System.Diagnostics;
 using System.Security.Claims;
 using Duende.Bff.Blazor.Client;
 using Duende.IdentityModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -30,6 +32,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
     private readonly IUserSessionStore _sessionStore;
     private readonly PersistentComponentState _state;
     private readonly NavigationManager _navigation;
+    private readonly BffOptions _bffOptions;
     private readonly ILogger<BffServerAuthenticationStateProvider> _logger;
 
     private readonly PersistingComponentStateSubscription _subscription;
@@ -42,17 +45,19 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         IUserSessionStore sessionStore,
         PersistentComponentState persistentComponentState,
         NavigationManager navigation,
-        IOptions<BffBlazorOptions> options,
+        IOptions<BffBlazorOptions> blazorOptions,
+        IOptions<BffOptions> bffOptions,
         ILoggerFactory loggerFactory)
         : base(loggerFactory)
     {
         _sessionStore = sessionStore;
         _state = persistentComponentState;
         _navigation = navigation;
+        _bffOptions = bffOptions.Value;
         _logger = loggerFactory.CreateLogger<BffServerAuthenticationStateProvider>();
 
         // TODO - Consider separate options for server and client
-        RevalidationInterval = TimeSpan.FromMilliseconds(options.Value.StateProviderPollingInterval);
+        RevalidationInterval = TimeSpan.FromMilliseconds(blazorOptions.Value.StateProviderPollingInterval);
 
         AuthenticationStateChanged += OnAuthenticationStateChanged;
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
@@ -78,14 +83,23 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
                 Type = c.Type,
                 Value = c.Value?.ToString() ?? string.Empty,
                 ValueType = c.ValueType == ClaimValueTypes.String ? null : c.ValueType
-            }).ToArray();
+            }).ToList();
+
+
+        if (claims.All(x => x.Type != Constants.ClaimTypes.LogoutUrl))
+        {
+            var sessionId = authenticationState.User.FindFirst(JwtClaimTypes.SessionId)?.Value;
+            claims.Add(new ClaimRecord(
+                Constants.ClaimTypes.LogoutUrl,
+                LogoutUrlBuilder.Build(_navigation, _bffOptions, sessionId)));
+        }
 
         var principal = new ClaimsPrincipalRecord
         {
             AuthenticationType = authenticationState.User.Identity!.AuthenticationType,
             NameClaimType = authenticationState.User.Identities.First().NameClaimType,
             RoleClaimType = authenticationState.User.Identities.First().RoleClaimType,
-            Claims = claims
+            Claims = claims.ToArray()
         };
 
         _logger.LogDebug("Persisting Authentication State");
@@ -94,12 +108,19 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
     }
 
 
+    /// <inheritdoc />
     public void Dispose()
     {
         _subscription.Dispose();
         AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
 
+    /// <summary>
+    /// Validates the current authentication state by checking if the user session exists in the session store.
+    /// </summary>
+    /// <param name="authenticationState">The current authentication state.</param>
+    /// <param name="cancellationToken">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <returns>A boolean indicating whether the authentication state is valid.</returns>
     protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, CancellationToken cancellationToken)
     {
         var sid = authenticationState.User.FindFirstValue(JwtClaimTypes.SessionId);
@@ -109,7 +130,8 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         {
             SessionId = sid,
             SubjectId = sub
-        });
+        },
+        cancellationToken);
         return sessions.Count != 0;
     }
 }

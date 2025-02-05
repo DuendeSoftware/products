@@ -25,7 +25,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
 
             var data = await BffHost.CallUserEndpointAsync();
 
-            data.Count.ShouldBe(4);
+            data.Count.ShouldBe(5);
             data.First(d => d.Type == "sub").Value.GetString().ShouldBe("alice");
 
             var foos = data.Where(d => d.Type == "foo");
@@ -34,6 +34,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
             foos.Skip(1).First().Value.GetString().ShouldBe("foo2");
 
             data.First(d => d.Type == Constants.ClaimTypes.SessionExpiresIn).Value.GetInt32().ShouldBePositive();
+            data.First(d => d.Type == Constants.ClaimTypes.LogoutUrl).Value.GetString().ShouldBe("/bff/logout");
         }
         
         [Fact]

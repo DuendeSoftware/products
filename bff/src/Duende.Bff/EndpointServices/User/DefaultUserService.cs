@@ -11,11 +11,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Duende.Bff.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff;
@@ -106,15 +106,10 @@ public class DefaultUserService : IUserService
     {
         var claims = new List<ClaimRecord>();
 
-        var pathBase = context.Request.PathBase;
-
         var sessionId = authenticateResult.Principal?.FindFirst(JwtClaimTypes.SessionId)?.Value;
-        if (!String.IsNullOrWhiteSpace(sessionId))
-        {
-            claims.Add(new ClaimRecord(
-                Constants.ClaimTypes.LogoutUrl,
-                pathBase + Options.LogoutPath.Value + $"?sid={UrlEncoder.Default.Encode(sessionId)}"));
-        }
+        claims.Add(new ClaimRecord(
+            Constants.ClaimTypes.LogoutUrl,
+            LogoutUrlBuilder.Build(context.Request.PathBase, Options, sessionId)));
 
         if (authenticateResult.Properties != null)
         {

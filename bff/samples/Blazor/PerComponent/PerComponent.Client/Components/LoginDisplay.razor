@@ -1,6 +1,6 @@
 ﻿@using Duende.Bff.Blazor.Client
 @using Microsoft.Extensions.Options
-@using System.Text.Encodings.Web
+@using Duende.Bff
 
 @rendermode InteractiveAuto
 
@@ -25,9 +25,9 @@
 @code {
     string BffLogoutUrl(AuthenticationState context)
     {
-        var sid = context.User.FindFirst("sid");
-        if (sid == null) throw new InvalidOperationException("The session id is missing");
-        return $"{Options.Value.StateProviderBaseAddress}/bff/logout?sid={UrlEncoder.Default.Encode(sid.Value)}";
+        var logoutUrl = context.User.FindFirst(Constants.ClaimTypes.LogoutUrl);
+        if (logoutUrl == null) throw new InvalidOperationException("The logout url is missing");
+        return $"{Options.Value.StateProviderBaseAddress}{logoutUrl}";
     }
 
     void LogoutUsingBffManagementEndpoint(AuthenticationState context)
