@@ -43,62 +43,28 @@ jobs:
           6.0.x
           8.0.x
           9.0.x
-    - name: Test - Bff.Tests
-      run: dotnet test -c Release test/Bff.Tests --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
-    - name: Test report - Bff.Tests
+    - name: Build
+      run: dotnet build bff.sln -c Release
+    - name: Dotnet devcerts
+      run: dotnet dev-certs https --trust
+    - name: Test
+      run: dotnet test bff.sln -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
+    - name: test
+      run: 'ls '
+      working-directory: test
+    - name: Test report
       if: success() || failure()
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
       with:
-        name: Test Report - Bff.Tests
-        path: bff/test/Bff.Tests/TestResults/Tests.trx
-        reporter: dotnet-trx
-        fail-on-error: true
-        fail-on-empty: true
-    - name: Test - Bff.EntityFramework.Tests
-      run: dotnet test -c Release test/Bff.EntityFramework.Tests --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
-    - name: Test report - Bff.EntityFramework.Tests
-      if: success() || failure()
-      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
-      with:
-        name: Test Report - Bff.EntityFramework.Tests
-        path: bff/test/Bff.EntityFramework.Tests/TestResults/Tests.trx
-        reporter: dotnet-trx
-        fail-on-error: true
-        fail-on-empty: true
-    - name: Test - Bff.Blazor.UnitTests
-      run: dotnet test -c Release test/Bff.Blazor.UnitTests --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
-    - name: Test report - Bff.Blazor.UnitTests
-      if: success() || failure()
-      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
-      with:
-        name: Test Report - Bff.Blazor.UnitTests
-        path: bff/test/Bff.Blazor.UnitTests/TestResults/Tests.trx
-        reporter: dotnet-trx
-        fail-on-error: true
-        fail-on-empty: true
-    - name: Test - Bff.Blazor.Client.UnitTests
-      run: dotnet test -c Release test/Bff.Blazor.Client.UnitTests --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
-    - name: Test report - Bff.Blazor.Client.UnitTests
-      if: success() || failure()
-      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
-      with:
-        name: Test Report - Bff.Blazor.Client.UnitTests
-        path: bff/test/Bff.Blazor.Client.UnitTests/TestResults/Tests.trx
+        name: Test Report
+        path: '**/Tests.trx'
         reporter: dotnet-trx
         fail-on-error: true
         fail-on-empty: true
     - name: Tool restore
       run: dotnet tool restore
-    - name: Pack Bff
-      run: dotnet pack -c Release src/Bff -o artifacts
-    - name: Pack Bff.Blazor
-      run: dotnet pack -c Release src/Bff.Blazor -o artifacts
-    - name: Pack Bff.Blazor.Client
-      run: dotnet pack -c Release src/Bff.Blazor.Client -o artifacts
-    - name: Pack Bff.EntityFramework
-      run: dotnet pack -c Release src/Bff.EntityFramework -o artifacts
-    - name: Pack Bff.Yarp
-      run: dotnet pack -c Release src/Bff.Yarp -o artifacts
+    - name: Pack bff.sln
+      run: dotnet pack -c Release bff.sln -o artifacts
     - name: Sign packages
       if: github.event == 'push'
       run: |-

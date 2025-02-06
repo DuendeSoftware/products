@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
+    <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
     <!-- This line is needed because:
     
     Aspire needs a single target framework 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
+     <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+
 	  <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
   <Import Project="../../samples.props" />
