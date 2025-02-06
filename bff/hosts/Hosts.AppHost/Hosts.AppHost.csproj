@@ -21,17 +21,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
-    <ProjectReference Include="..\Apis\Api.DPoP\Api.DPoP.csproj" />
-    <ProjectReference Include="..\Apis\Api.Isolated\Api.Isolated.csproj" />
-    <ProjectReference Include="..\Apis\Api\Api.csproj" />
-    <ProjectReference Include="..\Bff.DPoP\Bff.DPoP.csproj" />
-    <ProjectReference Include="..\Bff.EF\Bff.EF.csproj" />
-    <ProjectReference Include="..\Bff\Bff.csproj" />
-    <ProjectReference Include="..\Blazor\PerComponent\PerComponent.Client\PerComponent.Client.csproj" />
-    <ProjectReference Include="..\Blazor\PerComponent\PerComponent\PerComponent.csproj" />
-    <ProjectReference Include="..\Blazor\WebAssembly\WebAssembly.Client\WebAssembly.Client.csproj" />
-    <ProjectReference Include="..\Blazor\WebAssembly\WebAssembly\WebAssembly.csproj" />
-    <ProjectReference Include="..\IdentityServer\IdentityServer.csproj" />
+    <ProjectReference Include="..\RemoteApis\RemoteApi.DPoP\RemoteApi.DPoP.csproj" />
+    <ProjectReference Include="..\RemoteApis\RemoteApi.Isolated\RemoteApi.Isolated.csproj" />
+    <ProjectReference Include="..\RemoteApis\RemoteApi\RemoteApi.csproj" />
+    <ProjectReference Include="..\Hosts.Bff.DPoP\Hosts.Bff.DPoP.csproj" />
+    <ProjectReference Include="..\Hosts.Bff.EF\Hosts.Bff.EF.csproj" />
+    <ProjectReference Include="..\Hosts.Bff.InMemory\Hosts.Bff.InMemory.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.BFF.Blazor.PerComponent.Client\Hosts.BFF.Blazor.PerComponent.Client.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.BFF.Blazor.PerComponent\Hosts.BFF.Blazor.PerComponent.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.BFF.Blazor.WebAssembly.Client\Hosts.BFF.Blazor.WebAssembly.Client.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.BFF.Blazor.WebAssembly\Hosts.BFF.Blazor.WebAssembly.csproj" />
+    <ProjectReference Include="..\Hosts.IdentityServer\Hosts.IdentityServer.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,17 +3,17 @@
     "Name": "PerComponent",
     "Projects": [
       {
-        "Name": "samples\\IdentityServer\\IdentityServer.csproj",
+        "Name": "hosts\\Hosts.IdentityServer\\Hosts.IdentityServer.csproj",
         "Action": "Start",
         "DebugTarget": ""
       },
       {
-        "Name": "samples\\Apis\\Api\\Api.csproj",
+        "Name": "hosts\\RemoteApis\\Hosts.RemoteApi\\Hosts.RemoteApi.csproj",
         "Action": "Start",
         "DebugTarget": ""
       },
       {
-        "Name": "samples\\Blazor\\PerComponent\\PerComponent\\PerComponent.csproj",
+        "Name": "hosts\\Blazor\\PerComponent\\Hosts.BFF.Blazor.PerComponent\\Hosts.BFF.Blazor.PerComponent.csproj",
         "Action": "Start",
         "DebugTarget": ""
       }
@@ -23,15 +23,15 @@
     "Name": "WebAssembly",
     "Projects": [
       {
-        "Name": "samples\\IdentityServer\\IdentityServer.csproj",
+        "Name": "hosts\\Hosts.IdentityServer\\Hosts.IdentityServer.csproj",
         "Action": "Start"
       },
       {
-        "Name": "samples\\Apis\\Api\\Api.csproj",
+        "Name": "hosts\\RemoteApis\\Hosts.RemoteApi\\Hosts.RemoteApi.csproj",
         "Action": "Start"
       },
       {
-        "Name": "samples\\Blazor\\WebAssembly\\WebAssembly\\WebAssembly.csproj",
+        "Name": "hosts\\Blazor\\PerComponent\\Hosts.BFF.Blazor.PerComponent\\Hosts.BFF.Blazor.PerComponent.csproj",
         "Action": "Start"
       }
     ]

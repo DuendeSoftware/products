@@ -19,7 +19,7 @@
         "command": "dotnet",
         "args": [
             "build",
-            "${workspaceFolder}/samples/IdentityServer/IdentityServer.csproj",
+            "${workspaceFolder}/hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -31,7 +31,7 @@
         "command": "dotnet",
         "args": [
             "build",
-            "${workspaceFolder}/samples/Apis/Api/Api.csproj",
+            "${workspaceFolder}/hosts/RemoteApis/RemoteApi/RemoteApi.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -43,7 +43,7 @@
         "command": "dotnet",
         "args": [
             "build",
-            "${workspaceFolder}/samples/Apis/Api.DPoP/Api.DPoP.csproj",
+            "${workspaceFolder}/hosts/RemoteApis/RemoteApi.DPoP/RemoteApi.DPoP.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -55,7 +55,7 @@
         "command": "dotnet",
         "args": [
             "build",
-            "${workspaceFolder}/samples/Apis/Api.Isolated/Api.Isolated.csproj",
+            "${workspaceFolder}/hosts/RemoteApis/RemoteApi.Isolated/RemoteApi.Isolated.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -68,7 +68,7 @@
         "args": [
             "build",
             "--framework=net8.0",
-            "${workspaceFolder}/samples/Bff/Bff.csproj",
+            "${workspaceFolder}/hosts/Bff/Bff.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -81,7 +81,7 @@
         "args": [
             "build",
             "--framework=net9.0",
-            "${workspaceFolder}/samples/Bff/Bff.csproj",
+            "${workspaceFolder}/hosts/Bff/Bff.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -94,7 +94,7 @@
         "args": [
             "build",
             "--framework=net8.0",
-            "${workspaceFolder}/samples/Bff.DPoP/Bff.DPoP.csproj",
+            "${workspaceFolder}/hosts/Bff.DPoP/Bff.DPoP.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -107,7 +107,7 @@
         "args": [
             "build",
             "--framework=net9.0",
-            "${workspaceFolder}/samples/Bff.DPoP/Bff.DPoP.csproj",
+            "${workspaceFolder}/hosts/Bff.DPoP/Bff.DPoP.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -120,7 +120,7 @@
         "args": [
             "build",
             "--framework=net8.0",
-            "${workspaceFolder}/samples/Bff.EF/Bff.EF.csproj",
+            "${workspaceFolder}/hosts/Bff.EF/Bff.EF.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -133,7 +133,7 @@
         "args": [
             "build",
             "--framework=net9.0",
-            "${workspaceFolder}/samples/Bff.EF/Bff.EF.csproj",
+            "${workspaceFolder}/hosts/Bff.EF/Bff.EF.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
@@ -145,8 +145,8 @@
         "command": "dotnet",
         "args": [
             "build",
-            "${workspaceFolder}/samples/Blazor/PerComponent/PerComponent/PerComponent.csproj",
             "/property:GenerateFullPaths=true",
+            "${workspaceFolder}/hosts/Blazor/PerComponent/Hosts.BFF.Blazor.PerComponent/Hosts.BFF.Blazor.PerComponent.csproj",
             "/consoleloggerparameters:NoSummary"
         ],
         "problemMatcher": "$msCompile"
@@ -158,7 +158,7 @@
         "command": "dotnet",
         "args": [
             "build",
-            "${workspaceFolder}/samples/Blazor/WebAssembly/WebAssembly/WebAssembly.csproj",
+            "${workspaceFolder}/hosts/Blazor/WebAssembly/Hosts.BFF.Blazor.WebAssembly/Hosts.BFF.Blazor.WebAssembly.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],

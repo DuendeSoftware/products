@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\PerComponent.Client\PerComponent.Client.csproj" />
+    <ProjectReference Include="..\Hosts.BFF.Blazor.PerComponent.Client\Hosts.BFF.Blazor.PerComponent.Client.csproj" />
     <ProjectReference Include="..\..\..\..\src\Duende.Bff\Duende.Bff.csproj" />
     <ProjectReference Include="..\..\..\..\src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj" />
     <ProjectReference Include="..\..\..\..\src\Duende.Bff.Blazor\Duende.Bff.Blazor.csproj" />
