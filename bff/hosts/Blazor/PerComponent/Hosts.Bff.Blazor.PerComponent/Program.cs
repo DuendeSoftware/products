@@ -1,9 +1,9 @@
-using PerComponent;
-using PerComponent.Client;
-using PerComponent.Components;
+using Hosts.Bff.Blazor.PerComponent.Components;
 using Duende.Bff;
 using Duende.Bff.Blazor;
 using Duende.Bff.Yarp;
+using Hosts.Bff.Blazor.PerComponent;
+using Hosts.Bff.Blazor.PerComponent.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +99,6 @@ app.MapRemoteBffApiEndpoint("/remote-apis/user-token", "https://localhost:5010")
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(PerComponent.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(Hosts.Bff.Blazor.PerComponent.Client._Imports).Assembly);
 
 app.Run();

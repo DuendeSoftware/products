@@ -21,16 +21,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
-    <ProjectReference Include="..\RemoteApis\RemoteApi.DPoP\RemoteApi.DPoP.csproj" />
-    <ProjectReference Include="..\RemoteApis\RemoteApi.Isolated\RemoteApi.Isolated.csproj" />
-    <ProjectReference Include="..\RemoteApis\RemoteApi\RemoteApi.csproj" />
+    <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi.DPoP\Hosts.RemoteApi.DPoP.csproj" />
+    <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi.Isolated\Hosts.RemoteApi.Isolated.csproj" />
+    <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi\Hosts.RemoteApi.csproj" />
     <ProjectReference Include="..\Hosts.Bff.DPoP\Hosts.Bff.DPoP.csproj" />
     <ProjectReference Include="..\Hosts.Bff.EF\Hosts.Bff.EF.csproj" />
     <ProjectReference Include="..\Hosts.Bff.InMemory\Hosts.Bff.InMemory.csproj" />
-    <ProjectReference Include="..\Blazor\PerComponent\Hosts.BFF.Blazor.PerComponent.Client\Hosts.BFF.Blazor.PerComponent.Client.csproj" />
-    <ProjectReference Include="..\Blazor\PerComponent\Hosts.BFF.Blazor.PerComponent\Hosts.BFF.Blazor.PerComponent.csproj" />
-    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.BFF.Blazor.WebAssembly.Client\Hosts.BFF.Blazor.WebAssembly.Client.csproj" />
-    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.BFF.Blazor.WebAssembly\Hosts.BFF.Blazor.WebAssembly.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent.Client\Hosts.Bff.Blazor.PerComponent.Client.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent\Hosts.Bff.Blazor.PerComponent.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly.Client\Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly\Hosts.Bff.Blazor.WebAssembly.csproj" />
     <ProjectReference Include="..\Hosts.IdentityServer\Hosts.IdentityServer.csproj" />
   </ItemGroup>
 

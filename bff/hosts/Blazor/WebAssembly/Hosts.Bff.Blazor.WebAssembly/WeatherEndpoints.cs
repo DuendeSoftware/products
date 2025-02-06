@@ -1,4 +1,4 @@
-﻿namespace WebAssembly;
+﻿namespace Hosts.Bff.Blazor.WebAssembly;
 
 public static class WeatherEndpoints
 {

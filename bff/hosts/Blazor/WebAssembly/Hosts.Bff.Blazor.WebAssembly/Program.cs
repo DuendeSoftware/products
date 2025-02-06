@@ -1,5 +1,5 @@
-using WebAssembly;
-using WebAssembly.Components;
+using Hosts.Bff.Blazor.WebAssembly;
+using Hosts.Bff.Blazor.WebAssembly.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 
@@ -77,7 +77,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(WebAssembly.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(Hosts.Bff.Blazor.WebAssembly.Client._Imports).Assembly);
 
 app.MapBffManagementEndpoints();
 WeatherEndpoints.Map(app);

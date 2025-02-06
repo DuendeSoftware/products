@@ -1,6 +1,6 @@
-﻿using PerComponent.Client;
+﻿using Hosts.Bff.Blazor.PerComponent.Client;
 
-namespace PerComponent;
+namespace Hosts.Bff.Blazor.PerComponent;
 
 public class ServerRenderModeContext(IHttpContextAccessor accessor) : IRenderModeContext
 {

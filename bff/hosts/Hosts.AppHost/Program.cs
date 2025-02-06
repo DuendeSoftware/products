@@ -3,40 +3,40 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var idServer = builder.AddProject<Projects.IdentityServer>(AppHostServices.IdentityServer);
+var idServer = builder.AddProject<Projects.Hosts_IdentityServer>(AppHostServices.IdentityServer);
 
-var api = builder.AddProject<Projects.Api>(AppHostServices.Api);
-var isolatedApi = builder.AddProject<Projects.Api_Isolated>(AppHostServices.IsolatedApi);
+var api = builder.AddProject<Projects.Hosts_RemoteApi>(AppHostServices.Api);
+var isolatedApi = builder.AddProject<Projects.Hosts_RemoteApi_Isolated>(AppHostServices.IsolatedApi);
 
-var bff = builder.AddProject<Projects.Bff>(AppHostServices.Bff)
+var bff = builder.AddProject<Projects.Hosts_Bff_InMemory>(AppHostServices.Bff)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api)
     ;
 
-var bffEf = builder.AddProject<Projects.Bff_EF>(AppHostServices.BffEf)
+var bffEf = builder.AddProject<Projects.Hosts_Bff_EF>(AppHostServices.BffEf)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
-var bffBlazorWebAssembly = builder.AddProject<Projects.WebAssembly>(AppHostServices.BffBlazorWebassembly)
+var bffBlazorWebAssembly = builder.AddProject<Projects.Hosts_Bff_Blazor_WebAssembly>(AppHostServices.BffBlazorWebassembly)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
 
-var bffBlazorPerComponent = builder.AddProject<Projects.PerComponent>(AppHostServices.BffBlazorPerComponent)
+var bffBlazorPerComponent = builder.AddProject<Projects.Hosts_Bff_Blazor_PerComponent>(AppHostServices.BffBlazorPerComponent)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api);
 
-var apiDPop = builder.AddProject<Projects.Api_DPoP>(AppHostServices.ApiDpop);
+var apiDPop = builder.AddProject<Projects.Hosts_RemoteApi_DPoP>(AppHostServices.ApiDpop);
 
-var bffDPop = builder.AddProject<Projects.Bff_DPoP>(AppHostServices.BffDpop)
+var bffDPop = builder.AddProject<Projects.Hosts_Bff_DPoP>(AppHostServices.BffDpop)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(apiDPop);
