@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Duende.Bff", "src\Duende.Bf
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3C549079-A502-4B40-B051-5278915AE91B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{E14F66D1-EA3E-40C6-835A-91A4382D4646}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hosts", "hosts", "{E14F66D1-EA3E-40C6-835A-91A4382D4646}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "samples\IdentityServer\IdentityServer.csproj", "{CE1159B9-F763-4C32-828A-77529A820415}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "src\hosts\IdentityServer\IdentityServer.csproj", "{CE1159B9-F763-4C32-828A-77529A820415}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B2A776DB-385B-4AD4-96A5-61746FD909C3}"
 EndProject
@@ -25,11 +25,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserSessionDb", "migrations
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Duende.Bff.Yarp", "src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj", "{E2D87CB5-8F05-4629-84FF-4B44CF86EDA4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bff", "samples\Bff\Bff.csproj", "{B37CA136-3F20-4D8A-9677-E3A9C9D893EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bff", "src\hosts\Bff\Bff.csproj", "{B37CA136-3F20-4D8A-9677-E3A9C9D893EF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bff.DPoP", "samples\Bff.DPoP\Bff.DPoP.csproj", "{D8757F0F-254E-495F-961F-0192F8C97E3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bff.DPoP", "src\hosts\Bff.DPoP\Bff.DPoP.csproj", "{D8757F0F-254E-495F-961F-0192F8C97E3F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bff.EF", "samples\Bff.EF\Bff.EF.csproj", "{CBB98134-92F5-487D-8CA3-84C19FF46775}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bff.EF", "src\hosts\Bff.EF\Bff.EF.csproj", "{CBB98134-92F5-487D-8CA3-84C19FF46775}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Duende.Bff.Blazor", "src\Duende.Bff.Blazor\Duende.Bff.Blazor.csproj", "{E02DF032-C17F-4D0C-9CAA-3BD3CC9E4F84}"
 EndProject
@@ -37,35 +37,35 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Duende.Bff.Blazor.Client", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apis", "Apis", "{9C2A66C4-D695-4159-9F80-8BCE03303758}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "samples\Apis\Api\Api.csproj", "{E6D2B82A-023E-4B8C-9E21-B924C9C918AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "src\hosts\Apis\Api\Api.csproj", "{E6D2B82A-023E-4B8C-9E21-B924C9C918AD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Isolated", "samples\Apis\Api.Isolated\Api.Isolated.csproj", "{D63F8FA3-A0BD-43CA-ABA0-81DBF98646DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Isolated", "src\hosts\Apis\Api.Isolated\Api.Isolated.csproj", "{D63F8FA3-A0BD-43CA-ABA0-81DBF98646DF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.DPoP", "samples\Apis\Api.DPoP\Api.DPoP.csproj", "{AAAAE630-8218-4769-9686-5BA07D043D0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.DPoP", "src\hosts\Apis\Api.DPoP\Api.DPoP.csproj", "{AAAAE630-8218-4769-9686-5BA07D043D0C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blazor", "Blazor", "{F60AD9DD-A9AB-4181-8DBA-6A3D641D0398}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebAssembly", "WebAssembly", "{0811690F-9155-44BF-A116-647834E28FF3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAssembly", "samples\Blazor\WebAssembly\WebAssembly\WebAssembly.csproj", "{DA867CC2-89FB-467C-8005-41AF388F12E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAssembly", "src\hosts\Blazor\WebAssembly\WebAssembly\WebAssembly.csproj", "{DA867CC2-89FB-467C-8005-41AF388F12E3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAssembly.Client", "samples\Blazor\WebAssembly\WebAssembly.Client\WebAssembly.Client.csproj", "{B8998F8F-A753-49BB-A168-4DF18B6049AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAssembly.Client", "src\hosts\Blazor\WebAssembly\WebAssembly.Client\WebAssembly.Client.csproj", "{B8998F8F-A753-49BB-A168-4DF18B6049AD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PerComponent", "PerComponent", "{8A0FCD30-A6D9-4622-B4D5-90010DE0795E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerComponent", "samples\Blazor\PerComponent\PerComponent\PerComponent.csproj", "{CA4A9971-654A-4852-8FEB-81414952CF5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerComponent", "src\hosts\Blazor\PerComponent\PerComponent\PerComponent.csproj", "{CA4A9971-654A-4852-8FEB-81414952CF5B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerComponent.Client", "samples\Blazor\PerComponent\PerComponent.Client\PerComponent.Client.csproj", "{40EDC041-C262-414C-B374-631BF2D1BD97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerComponent.Client", "src\hosts\Blazor\PerComponent\PerComponent.Client\PerComponent.Client.csproj", "{40EDC041-C262-414C-B374-631BF2D1BD97}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Duende.Bff.Blazor.Client.UnitTests", "test\Duende.Bff.Blazor.Client.UnitTests\Duende.Bff.Blazor.Client.UnitTests.csproj", "{001840D4-8B83-4A8C-AF2C-5429D4F9A370}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Duende.Bff.Blazor.UnitTests", "test\Duende.Bff.Blazor.UnitTests\Duende.Bff.Blazor.UnitTests.csproj", "{2A04808A-A06C-4F10-87B9-2D12E065F729}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hosts.AppHost", "samples\Hosts.AppHost\Hosts.AppHost.csproj", "{8B943A54-F50C-4946-8D0E-DA1B886F13D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hosts.AppHost", "src\hosts\Hosts.AppHost\Hosts.AppHost.csproj", "{8B943A54-F50C-4946-8D0E-DA1B886F13D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hosts.ServiceDefaults", "samples\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj", "{2740EDB1-6F59-4A99-B0EE-808D8F61BEC0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hosts.ServiceDefaults", "src\hosts\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj", "{2740EDB1-6F59-4A99-B0EE-808D8F61BEC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hosts.Tests", "samples\Hosts.Tests\Hosts.Tests.csproj", "{A0B771BA-ACF9-4DE2-A2A6-430F6E6E8C07}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hosts.Tests", "src\hosts\Hosts.Tests\Hosts.Tests.csproj", "{A0B771BA-ACF9-4DE2-A2A6-430F6E6E8C07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
