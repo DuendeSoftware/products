@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Duende.Bff.Blazor\Duende.Bff.Blazor.csproj" />
+    <ProjectReference Include="..\..\src\Bff.Blazor\Bff.Blazor.csproj" />
   </ItemGroup>
 
 </Project>

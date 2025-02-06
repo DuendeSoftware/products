@@ -45,25 +45,25 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserSessionDb", "migrations
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E30076DC-4045-4E7C-92EB-6C7A8FC4CDA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff", "src\Duende.Bff\Duende.Bff.csproj", "{06C62719-236F-42A0-B095-F21D6E4A0032}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff", "src\Bff\Bff.csproj", "{06C62719-236F-42A0-B095-F21D6E4A0032}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.Blazor", "src\Duende.Bff.Blazor\Duende.Bff.Blazor.csproj", "{4B5DA434-B707-413C-B623-128FDDF2EB7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.Blazor", "src\Bff.Blazor\Bff.Blazor.csproj", "{4B5DA434-B707-413C-B623-128FDDF2EB7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.Blazor.Client", "src\Duende.Bff.Blazor.Client\Duende.Bff.Blazor.Client.csproj", "{A3EE6A92-2DB2-4B43-A05A-05646CCE2320}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.Blazor.Client", "src\Bff.Blazor.Client\Bff.Blazor.Client.csproj", "{A3EE6A92-2DB2-4B43-A05A-05646CCE2320}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.EntityFramework", "src\Duende.Bff.EntityFramework\Duende.Bff.EntityFramework.csproj", "{5B218CEC-7427-4941-94F8-A72D2AD4D65C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.EntityFramework", "src\Bff.EntityFramework\Bff.EntityFramework.csproj", "{5B218CEC-7427-4941-94F8-A72D2AD4D65C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.Yarp", "src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj", "{1083C8D0-2C89-459A-97B7-99A434D75B54}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.Yarp", "src\Bff.Yarp\Bff.Yarp.csproj", "{1083C8D0-2C89-459A-97B7-99A434D75B54}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{76C757BA-3895-454C-A07B-EA948D20AF5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.Blazor.Client.UnitTests", "test\Duende.Bff.Blazor.Client.UnitTests\Duende.Bff.Blazor.Client.UnitTests.csproj", "{77241367-12AF-4BDB-BEE9-2F7DB7599BC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.Blazor.Client.UnitTests", "test\Bff.Blazor.Client.UnitTests\Bff.Blazor.Client.UnitTests.csproj", "{77241367-12AF-4BDB-BEE9-2F7DB7599BC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.Blazor.UnitTests", "test\Duende.Bff.Blazor.UnitTests\Duende.Bff.Blazor.UnitTests.csproj", "{9B8368DB-4D2B-44C7-8470-3EB241B3835B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.Blazor.UnitTests", "test\Bff.Blazor.UnitTests\Bff.Blazor.UnitTests.csproj", "{9B8368DB-4D2B-44C7-8470-3EB241B3835B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.EntityFramework.Tests", "test\Duende.Bff.EntityFramework.Tests\Duende.Bff.EntityFramework.Tests.csproj", "{A5D35277-EE34-43FB-B617-C5BF7C371836}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.EntityFramework.Tests", "test\Bff.EntityFramework.Tests\Bff.EntityFramework.Tests.csproj", "{A5D35277-EE34-43FB-B617-C5BF7C371836}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Duende.Bff.Tests", "test\Duende.Bff.Tests\Duende.Bff.Tests.csproj", "{6C98BD64-8006-4B36-89EC-8695779B2653}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bff.Tests", "test\Bff.Tests\Bff.Tests.csproj", "{6C98BD64-8006-4B36-89EC-8695779B2653}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hosts.Tests", "test\Hosts.Tests\Hosts.Tests.csproj", "{046EF4F9-6150-4DF9-BBEB-0275B80F1676}"
 EndProject

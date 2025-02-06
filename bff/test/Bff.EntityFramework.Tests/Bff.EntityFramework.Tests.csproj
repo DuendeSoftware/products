@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Duende.Bff.EntityFramework\Duende.Bff.EntityFramework.csproj" />
+        <ProjectReference Include="..\..\src\Bff.EntityFramework\Bff.EntityFramework.csproj" />
     </ItemGroup>
 
 </Project>

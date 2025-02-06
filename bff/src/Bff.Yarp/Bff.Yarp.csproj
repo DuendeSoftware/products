@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Duende.Bff\Duende.Bff.csproj" />
+        <ProjectReference Include="..\Bff\Bff.csproj" />
     </ItemGroup>
 
 </Project>

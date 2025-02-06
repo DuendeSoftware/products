@@ -41,16 +41,16 @@ jobs:
         git config --global user.name "Duende Software GitHub Bot"
         git tag -a bff-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin bff-${{ github.event.inputs.version }}
-    - name: Pack Duende.Bff
-      run: dotnet pack -c Release src/Duende.Bff -o artifacts
-    - name: Pack Duende.Bff.Blazor
-      run: dotnet pack -c Release src/Duende.Bff.Blazor -o artifacts
-    - name: Pack Duende.Bff.Blazor.Client
-      run: dotnet pack -c Release src/Duende.Bff.Blazor.Client -o artifacts
-    - name: Pack Duende.Bff.EntityFramework
-      run: dotnet pack -c Release src/Duende.Bff.EntityFramework -o artifacts
-    - name: Pack Duende.Bff.Yarp
-      run: dotnet pack -c Release src/Duende.Bff.Yarp -o artifacts
+    - name: Pack Bff
+      run: dotnet pack -c Release src/Bff -o artifacts
+    - name: Pack Bff.Blazor
+      run: dotnet pack -c Release src/Bff.Blazor -o artifacts
+    - name: Pack Bff.Blazor.Client
+      run: dotnet pack -c Release src/Bff.Blazor.Client -o artifacts
+    - name: Pack Bff.EntityFramework
+      run: dotnet pack -c Release src/Bff.EntityFramework -o artifacts
+    - name: Pack Bff.Yarp
+      run: dotnet pack -c Release src/Bff.Yarp -o artifacts
     - name: Tool restore
       run: dotnet tool restore
     - name: Sign packages

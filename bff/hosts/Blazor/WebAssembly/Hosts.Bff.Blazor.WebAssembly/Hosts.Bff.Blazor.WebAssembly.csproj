@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\Duende.Bff\Duende.Bff.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bff\Bff.csproj" />
     <ProjectReference Include="..\..\..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Hosts.Bff.Blazor.WebAssembly.Client\Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect"/>

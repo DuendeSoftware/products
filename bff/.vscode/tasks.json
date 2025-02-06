@@ -7,7 +7,7 @@
         "command": "dotnet",
         "args": [
             "build",
-            "${workspaceFolder}/src/Duende.Bff/Duende.Bff.csproj",
+            "${workspaceFolder}/src/Bff/Bff.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],

@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Duende.Bff\Shared\ClaimRecordExtensions.cs" Link="Shared\ClaimRecordExtensions.cs" />
-    <Compile Include="..\Duende.Bff\Shared\ClaimsPrincipalRecord.cs" Link="Shared\ClaimsPrincipalRecord.cs" />
+    <Compile Include="..\Bff\Shared\ClaimRecordExtensions.cs" Link="Shared\ClaimRecordExtensions.cs" />
+    <Compile Include="..\Bff\Shared\ClaimsPrincipalRecord.cs" Link="Shared\ClaimsPrincipalRecord.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Duende.Bff.Blazor.Client.UnitTests" />
+    <InternalsVisibleTo Include="Bff.Blazor.Client.UnitTests" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 

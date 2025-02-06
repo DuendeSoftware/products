@@ -13,8 +13,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
-		<ProjectReference Include="..\..\src\Duende.Bff.EntityFramework\Duende.Bff.EntityFramework.csproj" />
-		<ProjectReference Include="..\..\src\Duende.Bff.Yarp\Duende.Bff.Yarp.csproj" />
+		<ProjectReference Include="..\..\src\Bff.EntityFramework\Bff.EntityFramework.csproj" />
+		<ProjectReference Include="..\..\src\Bff.Yarp\Bff.Yarp.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" />

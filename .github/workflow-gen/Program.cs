@@ -7,8 +7,8 @@ using static GitHubContexts;
 var contexts = Instance;
 Component[] components = [
     new("bff",
-        ["Duende.Bff", "Duende.Bff.Blazor", "Duende.Bff.Blazor.Client", "Duende.Bff.EntityFramework", "Duende.Bff.Yarp"],
-        ["Duende.Bff.Tests", "Duende.Bff.EntityFramework.Tests", "Duende.Bff.Blazor.UnitTests", "Duende.Bff.Blazor.Client.UnitTests"],
+        ["Bff", "Bff.Blazor", "Bff.Blazor.Client", "Bff.EntityFramework", "Bff.Yarp"],
+        ["Bff.Tests", "Bff.EntityFramework.Tests", "Bff.Blazor.UnitTests", "Bff.Blazor.Client.UnitTests", "Hosts.Tests"],
         "bff"),
 
     new("identity-server", 
