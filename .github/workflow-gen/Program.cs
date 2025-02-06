@@ -8,7 +8,7 @@ var contexts = Instance;
 Component[] components = [
     new("bff",
         ["Bff", "Bff.Blazor", "Bff.Blazor.Client", "Bff.EntityFramework", "Bff.Yarp"],
-        ["Bff.Tests", "Bff.EntityFramework.Tests", "Bff.Blazor.UnitTests", "Bff.Blazor.Client.UnitTests", "Hosts.Tests"],
+        ["Bff.Tests", "Bff.EntityFramework.Tests", "Bff.Blazor.UnitTests", "Bff.Blazor.Client.UnitTests"],
         "bff"),
 
     new("identity-server", 
