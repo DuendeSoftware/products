@@ -46,7 +46,7 @@ public static class BffBuilderExtensions
         where TContext : DbContext, ISessionDbContext
     {
         bffBuilder.Services.AddDbContext<TContext>(action);
-        return bffBuilder.AddAddEntityFrameworkServerSideSessionsServices<TContext>();
+        return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext>();
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public static class BffBuilderExtensions
         where TContext : DbContext, ISessionDbContext
     {
         bffBuilder.Services.AddDbContext<TContext>(action);
-        return bffBuilder.AddAddEntityFrameworkServerSideSessionsServices<TContext>();
+        return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext>();
     }
 
 
@@ -69,7 +69,7 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="bffBuilder"></param>
     /// <returns></returns>
-    public static BffBuilder AddAddEntityFrameworkServerSideSessionsServices<TContext>(this BffBuilder bffBuilder)
+    public static BffBuilder AddEntityFrameworkServerSideSessionsServices<TContext>(this BffBuilder bffBuilder)
         where TContext : ISessionDbContext
     {
         bffBuilder.Services.AddTransient<IUserSessionStoreCleanup, UserSessionStore>();
