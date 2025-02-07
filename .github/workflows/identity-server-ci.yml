@@ -51,7 +51,7 @@ jobs:
       run: 'ls '
       working-directory: test
     - name: Test report
-      if: success() || failure()
+      if: github.event == 'push' && (success() || failure())
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
       with:
         name: Test Report

@@ -99,3 +99,7 @@ a custom IAccessTokenRetriever, then you should adjust their usage accordingly.
     /// The remote address of the API.
     /// </summary>
     public required Uri ApiAddress { get; set; }
+
+### AddAddEntityFrameworkServerSideSessionsServices has been renamed to AddEntityFrameworkServerSideSessionsServices
+
+If you used the method AddAddEntityFrameworkServerSideSessionsServices() in your code, please replace it with the corrected AddEntityFrameworkServerSideSessionsServices()
