@@ -1,0 +1,14 @@
+{
+  "solution": {
+    "path": "..\\products.sln",
+    "projects": [
+      "templates\\build\\build.csproj",
+      "templates\\src\\BffLocalApi\\BffLocalApi.csproj",
+      "templates\\src\\BffRemoteApi\\BffRemoteApi.csproj",
+      "templates\\src\\IdentityServerAspNetIdentity\\IdentityServerAspNetIdentity.csproj",
+      "templates\\src\\IdentityServerEmpty\\IdentityServerEmpty.csproj",
+      "templates\\src\\IdentityServerEntityFramework\\IdentityServerEntityFramework.csproj",
+      "templates\\src\\IdentityServerInMem\\IdentityServerInMem.csproj"
+    ]
+  }
+}
