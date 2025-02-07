@@ -41,8 +41,8 @@ jobs:
         git config --global user.name "Duende Software GitHub Bot"
         git tag -a bff-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin bff-${{ github.event.inputs.version }}
-    - name: Pack bff.sln
-      run: dotnet pack -c Release bff.sln -o artifacts
+    - name: Pack bff.slnf
+      run: dotnet pack -c Release bff.slnf -o artifacts
     - name: Tool restore
       run: dotnet tool restore
     - name: Sign packages

@@ -44,11 +44,11 @@ jobs:
           8.0.x
           9.0.x
     - name: Build
-      run: dotnet build bff.sln -c Release
+      run: dotnet build bff.slnf -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test
-      run: dotnet test bff.sln -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
+      run: dotnet test bff.slnf -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
     - name: test
       run: 'ls '
       working-directory: test
@@ -63,8 +63,8 @@ jobs:
         fail-on-empty: true
     - name: Tool restore
       run: dotnet tool restore
-    - name: Pack bff.sln
-      run: dotnet pack -c Release bff.sln -o artifacts
+    - name: Pack bff.slnf
+      run: dotnet pack -c Release bff.slnf -o artifacts
     - name: Sign packages
       if: github.event == 'push'
       run: |-

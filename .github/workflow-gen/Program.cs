@@ -7,13 +7,13 @@ using static GitHubContexts;
 var contexts = Instance;
 
 {
-    SystemDescription identityServer = new("identity-server", "Duende.IdentityServer.sln", "is");
+    SystemDescription identityServer = new("identity-server", "identity-server.slnf", "is");
     GenerateIdentityServerWorkflow(identityServer);
     GenerateIdentityServerReleaseWorkflow(identityServer);
 }
 
 {
-    SystemDescription bff = new("bff", "bff.sln", "bff");
+    SystemDescription bff = new("bff", "bff.slnf", "bff");
     GenerateBffWorkflow(bff);
     GenerateBffReleaseWorkflow(bff);
 }

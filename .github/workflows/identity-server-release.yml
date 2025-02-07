@@ -41,8 +41,8 @@ jobs:
         git config --global user.name "Duende Software GitHub Bot"
         git tag -a is-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin is-${{ github.event.inputs.version }}
-    - name: Pack Duende.IdentityServer.sln
-      run: dotnet pack -c Release Duende.IdentityServer.sln -o artifacts
+    - name: Pack identity-server.slnf
+      run: dotnet pack -c Release identity-server.slnf -o artifacts
     - name: Tool restore
       run: dotnet tool restore
     - name: Sign packages
