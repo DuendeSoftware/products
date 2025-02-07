@@ -1,0 +1,31 @@
+{
+  "solution": {
+    "path": "..\\products.sln",
+    "projects": [
+      "bff\\hosts\\Blazor\\PerComponent\\Hosts.Bff.Blazor.PerComponent.Client\\Hosts.Bff.Blazor.PerComponent.Client.csproj",
+      "bff\\hosts\\Blazor\\PerComponent\\Hosts.Bff.Blazor.PerComponent\\Hosts.Bff.Blazor.PerComponent.csproj",
+      "bff\\hosts\\Blazor\\WebAssembly\\Hosts.Bff.Blazor.WebAssembly.Client\\Hosts.Bff.Blazor.WebAssembly.Client.csproj",
+      "bff\\hosts\\Blazor\\WebAssembly\\Hosts.Bff.Blazor.WebAssembly\\Hosts.Bff.Blazor.WebAssembly.csproj",
+      "bff\\hosts\\Hosts.AppHost\\Hosts.AppHost.csproj",
+      "bff\\hosts\\Hosts.Bff.DPoP\\Hosts.Bff.DPoP.csproj",
+      "bff\\hosts\\Hosts.Bff.EF\\Hosts.Bff.EF.csproj",
+      "bff\\hosts\\Hosts.Bff.InMemory\\Hosts.Bff.InMemory.csproj",
+      "bff\\hosts\\Hosts.IdentityServer\\Hosts.IdentityServer.csproj",
+      "bff\\hosts\\Hosts.ServiceDefaults\\Hosts.ServiceDefaults.csproj",
+      "bff\\hosts\\RemoteApis\\Hosts.RemoteApi.DPoP\\Hosts.RemoteApi.DPoP.csproj",
+      "bff\\hosts\\RemoteApis\\Hosts.RemoteApi.Isolated\\Hosts.RemoteApi.Isolated.csproj",
+      "bff\\hosts\\RemoteApis\\Hosts.RemoteApi\\Hosts.RemoteApi.csproj",
+      "bff\\migrations\\UserSessionDb\\UserSessionDb.csproj",
+      "bff\\src\\Bff.Blazor.Client\\Bff.Blazor.Client.csproj",
+      "bff\\src\\Bff.Blazor\\Bff.Blazor.csproj",
+      "bff\\src\\Bff.EntityFramework\\Bff.EntityFramework.csproj",
+      "bff\\src\\Bff.Yarp\\Bff.Yarp.csproj",
+      "bff\\src\\Bff\\Bff.csproj",
+      "bff\\test\\Bff.Blazor.Client.UnitTests\\Bff.Blazor.Client.UnitTests.csproj",
+      "bff\\test\\Bff.Blazor.UnitTests\\Bff.Blazor.UnitTests.csproj",
+      "bff\\test\\Bff.EntityFramework.Tests\\Bff.EntityFramework.Tests.csproj",
+      "bff\\test\\Bff.Tests\\Bff.Tests.csproj",
+      "bff\\test\\Hosts.Tests\\Hosts.Tests.csproj"
+    ]
+  }
+}
