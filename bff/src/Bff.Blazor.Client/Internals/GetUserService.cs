@@ -45,7 +45,7 @@ internal class GetUserService : IGetUserService
     public async ValueTask<ClaimsPrincipal> GetUserAsync(bool useCache = true)
     {
         var now = _timeProvider.GetUtcNow();
-        if (useCache && now < _userLastCheck.AddMilliseconds(_options.StateProviderPollingDelay))
+        if (useCache && now < _userLastCheck.AddMilliseconds(_options.WebAssemblyStateProviderPollingDelay))
         {
             _logger.LogDebug("Taking user from cache");
             return _cachedUser;

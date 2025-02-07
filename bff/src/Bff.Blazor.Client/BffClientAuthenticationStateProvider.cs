@@ -69,8 +69,8 @@ public class BffClientAuthenticationStateProvider : AuthenticationStateProvider
 
             timer = _timeProvider.CreateTimer(TimerCallback, 
             null, 
-            TimeSpan.FromMilliseconds(_options.StateProviderPollingDelay), 
-            TimeSpan.FromMilliseconds(_options.StateProviderPollingInterval));
+            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingDelay), 
+            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingInterval));
         }
         return state;
     }

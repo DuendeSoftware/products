@@ -61,8 +61,8 @@ public class BffClientAuthenticationStateProviderTests
             time,
             TestMocks.MockOptions(new BffBlazorOptions
             {
-                StateProviderPollingDelay = 2000,
-                StateProviderPollingInterval = 10000
+                WebAssemblyStateProviderPollingDelay = 2000,
+                WebAssemblyStateProviderPollingInterval = 10000
                 
             }),
             Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());
@@ -122,8 +122,8 @@ public class BffClientAuthenticationStateProviderTests
             time,
             TestMocks.MockOptions(new BffBlazorOptions
             {
-                StateProviderPollingDelay = 2000,
-                StateProviderPollingInterval = 10000
+                ServerStateProviderPollingDelay = 2000,
+                ServerStateProviderPollingInterval = 10000
                 
             }),
             Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());

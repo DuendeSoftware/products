@@ -27,15 +27,28 @@ public class BffBlazorOptions
     public string? StateProviderBaseAddress { get; set; } = null;
 
     /// <summary>
-    /// The delay, in milliseconds, before the AuthenticationStateProvider will
+    /// The delay, in milliseconds, before the BffClientAuthenticationStateProvider will
     /// start polling the /bff/user endpoint. Defaults to 1000 ms.
     /// </summary>
-    public int StateProviderPollingDelay { get; set; } = 1000;
+    public int WebAssemblyStateProviderPollingDelay { get; set; } = 1000;
 
     /// <summary>
     /// The delay, in milliseconds, between polling requests by the
-    /// AuthenticationStateProvider to the /bff/user endpoint. Defaults to 5000
+    /// BffClientAuthenticationStateProvider to the /bff/user endpoint. Defaults to 5000
     /// ms.
     /// </summary>
-    public int StateProviderPollingInterval { get; set; } = 5000;
+    public int WebAssemblyStateProviderPollingInterval { get; set; } = 5000;
+
+    /// <summary>
+    /// The delay, in milliseconds, before the BffServerAuthenticationStateProvider will
+    /// start polling the /bff/user endpoint. Defaults to 1000 ms.
+    /// </summary>
+    public int ServerStateProviderPollingDelay { get; set; } = 1000;
+
+    /// <summary>
+    /// The delay, in milliseconds, between polling requests by the
+    /// BffServerAuthenticationStateProvider to the /bff/user endpoint. Defaults to 5000
+    /// ms.
+    /// </summary>
+    public int ServerStateProviderPollingInterval { get; set; } = 5000;
 }

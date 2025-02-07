@@ -54,8 +54,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         _bffOptions = bffOptions.Value;
         _logger = loggerFactory.CreateLogger<BffServerAuthenticationStateProvider>();
 
-        // TODO - Consider separate options for server and client
-        RevalidationInterval = TimeSpan.FromMilliseconds(blazorOptions.Value.StateProviderPollingInterval);
+        RevalidationInterval = TimeSpan.FromMilliseconds(blazorOptions.Value.ServerStateProviderPollingInterval);
 
         AuthenticationStateChanged += OnAuthenticationStateChanged;
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
