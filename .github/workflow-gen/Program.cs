@@ -351,7 +351,7 @@ public static class StepExtensions
             .Name("Test report")
             .WorkingDirectory("test")
             .Uses("dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5") // v1.9.1
-            .If("success() || failure()")
+            .If("github.event == 'push' && (success() || failure())")
             .With(
                 ("name", "Test Report"),
                 ("path", "**/Tests.trx"),
