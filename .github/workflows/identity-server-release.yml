@@ -41,20 +41,8 @@ jobs:
         git config --global user.name "Duende Software GitHub Bot"
         git tag -a is-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin is-${{ github.event.inputs.version }}
-    - name: Pack AspNetIdentity
-      run: dotnet pack -c Release src/AspNetIdentity -o artifacts
-    - name: Pack Configuration
-      run: dotnet pack -c Release src/Configuration -o artifacts
-    - name: Pack Configuration.EntityFramework
-      run: dotnet pack -c Release src/Configuration.EntityFramework -o artifacts
-    - name: Pack EntityFramework
-      run: dotnet pack -c Release src/EntityFramework -o artifacts
-    - name: Pack EntityFramework.Storage
-      run: dotnet pack -c Release src/EntityFramework.Storage -o artifacts
-    - name: Pack IdentityServer
-      run: dotnet pack -c Release src/IdentityServer -o artifacts
-    - name: Pack Storage
-      run: dotnet pack -c Release src/Storage -o artifacts
+    - name: Pack identity-server.slnf
+      run: dotnet pack -c Release identity-server.slnf -o artifacts
     - name: Tool restore
       run: dotnet tool restore
     - name: Sign packages
