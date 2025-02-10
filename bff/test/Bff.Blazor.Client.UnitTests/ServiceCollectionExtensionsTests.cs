@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Shouldly;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
@@ -36,9 +35,10 @@ public class ServiceCollectionExtensionsTests
 
         var sut = new ServiceCollection();
         sut.AddBffBlazorClient();
-        var env = Substitute.For<IWebAssemblyHostEnvironment>();
-        env.BaseAddress.Returns(expectedBaseAddress);
-        sut.AddSingleton(env);
+        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        {
+            BaseAddress = expectedBaseAddress
+        });
 
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
@@ -46,6 +46,36 @@ public class ServiceCollectionExtensionsTests
         httpClient.ShouldNotBeNull();
         httpClient.BaseAddress.ShouldNotBeNull();
         httpClient.BaseAddress.AbsoluteUri.ShouldBe(expectedBaseAddress);
+    }
+
+    [Fact]
+
+    public void AddLocalApiHttpClient_configures_HttpClient_base_address()
+    {
+        var sut = new ServiceCollection();
+        
+        sut.AddBffBlazorClient();
+        sut.AddLocalApiHttpClient("clientName");
+        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment());
+        sut.Configure<BffBlazorOptions>(opt =>
+        {
+            opt.RemoteApiBaseAddress = "Should_not_be_used";
+            opt.RemoteApiPath = "should_not_be_used";
+        });
+
+
+        var sp = sut.BuildServiceProvider();
+        var httpClientFactory = sp.GetService<IHttpClientFactory>();
+        var httpClient = httpClientFactory?.CreateClient("clientName");
+        httpClient.ShouldNotBeNull();
+        httpClient.BaseAddress.ShouldNotBeNull();
+        httpClient.BaseAddress.AbsoluteUri.ShouldBe(new FakeWebAssemblyHostEnvironment().BaseAddress);
+    }
+
+    private record FakeWebAssemblyHostEnvironment : IWebAssemblyHostEnvironment
+    {
+        public string Environment { get; set; } = "Development";
+        public string BaseAddress { get; set; } = "https://example.com/";
     }
 
     [Theory]
@@ -58,7 +88,7 @@ public class ServiceCollectionExtensionsTests
     [InlineData("https://example.com/with/base/path", "/custom/route/to/apis", "https://example.com/with/base/path/custom/route/to/apis/")]
     [InlineData("https://example.com/with/base/path/", "/custom/route/to/apis", "https://example.com/with/base/path/custom/route/to/apis/")]
     [InlineData("https://example.com/with/base/path", null, "https://example.com/with/base/path/remote-apis/")]
-    public void AddRemoteApiHttpClient_configures_HttpClient_base_address(string configuredRemoteAddress, string? configuredRemotePath, string expectedBaseAddress)
+    public void AddRemoteApiHttpClient_configures_HttpClient_base_address(string? configuredRemoteAddress, string? configuredRemotePath, string expectedBaseAddress)
     {
         var sut = new ServiceCollection();
         sut.AddBffBlazorClient();
@@ -93,9 +123,10 @@ public class ServiceCollectionExtensionsTests
         var sut = new ServiceCollection();
         sut.AddBffBlazorClient();
         sut.AddRemoteApiHttpClient("clientName");
-        var env = Substitute.For<IWebAssemblyHostEnvironment>();
-        env.BaseAddress.Returns(hostBaseAddress);
-        sut.AddSingleton(env);
+        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        {
+            BaseAddress = hostBaseAddress
+        });
 
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
@@ -114,9 +145,10 @@ public class ServiceCollectionExtensionsTests
         var sut = new ServiceCollection();
         sut.AddBffBlazorClient();
         sut.AddRemoteApiHttpClient("clientName", c => c.Timeout = TimeSpan.FromSeconds(321));
-        var env = Substitute.For<IWebAssemblyHostEnvironment>();
-        env.BaseAddress.Returns(hostBaseAddress);
-        sut.AddSingleton(env);
+        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        {
+            BaseAddress = hostBaseAddress
+        });
 
         var sp = sut.BuildServiceProvider();
         var httpClientFactory = sp.GetService<IHttpClientFactory>();
@@ -137,9 +169,10 @@ public class ServiceCollectionExtensionsTests
         sut.AddBffBlazorClient();
         sut.AddTransient<ResolvesTypedClients>();
         sut.AddRemoteApiHttpClient<ResolvesTypedClients>();
-        var env = Substitute.For<IWebAssemblyHostEnvironment>();
-        env.BaseAddress.Returns(hostBaseAddress);
-        sut.AddSingleton(env);
+        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        {
+            BaseAddress = hostBaseAddress
+        });
 
         var sp = sut.BuildServiceProvider();
         var wrapper = sp.GetService<ResolvesTypedClients>();
@@ -159,9 +192,10 @@ public class ServiceCollectionExtensionsTests
         sut.AddBffBlazorClient();
         sut.AddTransient<ResolvesTypedClients>();
         sut.AddRemoteApiHttpClient<ResolvesTypedClients>(c => c.Timeout = TimeSpan.FromSeconds(321));
-        var env = Substitute.For<IWebAssemblyHostEnvironment>();
-        env.BaseAddress.Returns(hostBaseAddress);
-        sut.AddSingleton(env);
+        sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment()
+        {
+            BaseAddress = hostBaseAddress
+        });
 
         var sp = sut.BuildServiceProvider();
         var wrapper = sp.GetService<ResolvesTypedClients>();

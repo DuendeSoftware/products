@@ -56,7 +56,7 @@ public static class ServiceCollectionExtensions
         }
     }
 
-    private static string GetBaseAddress(IServiceProvider sp)
+    private static string GetRemoteBaseAddress(IServiceProvider sp)
     {
         var opt = sp.GetRequiredService<IOptions<BffBlazorOptions>>();
         if (opt.Value.RemoteApiBaseAddress != null)
@@ -65,9 +65,14 @@ public static class ServiceCollectionExtensions
         }
         else
         {
-            var hostEnv = sp.GetRequiredService<IWebAssemblyHostEnvironment>();
-            return hostEnv.BaseAddress;
+            return GetLocalBaseAddress(sp);
         }
+    }
+
+    private static string GetLocalBaseAddress(IServiceProvider sp)
+    {
+        var hostEnv = sp.GetRequiredService<IWebAssemblyHostEnvironment>();
+        return hostEnv.BaseAddress;
     }
 
     private static string GetRemoteApiPath(IServiceProvider sp)
@@ -76,29 +81,60 @@ public static class ServiceCollectionExtensions
         return opt.Value.RemoteApiPath;
     }
 
-    private static Action<IServiceProvider, HttpClient> SetBaseAddress(
+    private static Action<IServiceProvider, HttpClient> SetRemoteApiBaseAddress(
         Action<IServiceProvider, HttpClient>? configureClient)
     {
         return (sp, client) =>
         {
-            SetBaseAddress(sp, client);
+            SetRemoteApiBaseAddress(sp, client);
             configureClient?.Invoke(sp, client);
         };
     }
 
-    private static Action<IServiceProvider, HttpClient> SetBaseAddress(
+    private static Action<IServiceProvider, HttpClient> SetRemoteApiBaseAddress(
         Action<HttpClient>? configureClient)
     {
         return (sp, client) =>
         {
-            SetBaseAddress(sp, client);
+            SetRemoteApiBaseAddress(sp, client);
             configureClient?.Invoke(client);
         };
     }
 
-    private static void SetBaseAddress(IServiceProvider sp, HttpClient client)
+    private static void SetLocalApiBaseAddress(IServiceProvider sp, HttpClient client)
     {
-        var baseAddress = GetBaseAddress(sp);
+        var baseAddress = GetLocalBaseAddress(sp);
+        if (!baseAddress.EndsWith("/"))
+        {
+            baseAddress += "/";
+        }
+
+        client.BaseAddress = new Uri(baseAddress);
+
+    }
+
+    private static Action<IServiceProvider, HttpClient> SetLocalApiBaseAddress(
+        Action<HttpClient>? configureClient)
+    {
+        return (sp, client) =>
+        {
+            SetLocalApiBaseAddress(sp, client);
+            configureClient?.Invoke(client);
+        };
+    }
+
+    private static Action<IServiceProvider, HttpClient> SetLocalApiBaseAddress(
+        Action<IServiceProvider, HttpClient>? configureClient)
+    {
+        return (sp, client) =>
+        {
+            SetLocalApiBaseAddress(sp, client);
+            configureClient?.Invoke(sp, client);
+        };
+    }
+    private static void SetRemoteApiBaseAddress(IServiceProvider sp, HttpClient client)
+    {
+        var baseAddress = GetRemoteBaseAddress(sp);
         if (!baseAddress.EndsWith("/"))
         {
             baseAddress += "/";
@@ -121,6 +157,61 @@ public static class ServiceCollectionExtensions
         client.BaseAddress = new Uri(new Uri(baseAddress), remoteApiPath);
     }
 
+
+    /// <summary>
+    /// Adds a named <see cref="HttpClient"/> for use when invoking local APIs
+    /// and configures the client with a callback.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="clientName">The name of that <see cref="HttpClient"/> to
+    /// configure. A common use case is to use the same named client in multiple
+    /// render contexts that are automatically switched between via interactive
+    /// render modes. In that case, ensure both the client and server project
+    /// define the HttpClient appropriately.</param>
+    /// <param name="configureClient">A configuration callback used to set up
+    /// the <see cref="HttpClient"/>.</param>
+    public static IHttpClientBuilder AddLocalApiHttpClient(this IServiceCollection services, string clientName,
+        Action<HttpClient> configureClient)
+    {
+        return services.AddHttpClient(clientName, SetLocalApiBaseAddress(configureClient))
+            .AddHttpMessageHandler<AntiforgeryHandler>();
+    }
+
+    /// <summary>
+    /// Adds a named <see cref="HttpClient"/> for use when invoking local APIs
+    /// and configures the client with a callback.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="clientName">The name of that <see cref="HttpClient"/> to
+    /// configure. A common use case is to use the same named client in multiple
+    /// render contexts that are automatically switched between via interactive
+    /// render modes. In that case, ensure both the client and server project
+    /// define the HttpClient appropriately.</param>
+    /// <param name="configureClient">A configuration callback used to set up
+    /// the <see cref="HttpClient"/>.</param>
+    public static IHttpClientBuilder AddLocalApiHttpClient(this IServiceCollection services, string clientName,
+        Action<IServiceProvider, HttpClient>? configureClient = null)
+    {
+        return services.AddHttpClient(clientName, SetLocalApiBaseAddress(configureClient))
+            .AddHttpMessageHandler<AntiforgeryHandler>();
+    }
+
+    /// <summary>
+    /// Adds a typed <see cref="HttpClient"/> for use when invoking remote APIs
+    /// proxied through Duende.Bff and configures the client with a callback
+    /// that has access to the underlying service provider.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configureClient">A configuration callback used to set up
+    /// the <see cref="HttpClient"/>.</param>
+    public static IHttpClientBuilder AddLocalApiHttpClient<T>(this IServiceCollection services,
+        Action<IServiceProvider, HttpClient>? configureClient = null)
+        where T : class
+    {
+        return services.AddHttpClient<T>(SetLocalApiBaseAddress(configureClient))
+            .AddHttpMessageHandler<AntiforgeryHandler>();
+    }
+
     /// <summary>
     /// Adds a named <see cref="HttpClient"/> for use when invoking remote APIs
     /// proxied through Duende.Bff and configures the client with a callback.
@@ -136,7 +227,7 @@ public static class ServiceCollectionExtensions
     public static IHttpClientBuilder AddRemoteApiHttpClient(this IServiceCollection services, string clientName,
         Action<HttpClient> configureClient)
     {
-        return services.AddHttpClient(clientName, SetBaseAddress(configureClient))
+        return services.AddHttpClient(clientName, SetRemoteApiBaseAddress(configureClient))
             .AddHttpMessageHandler<AntiforgeryHandler>();
     }
 
@@ -156,7 +247,7 @@ public static class ServiceCollectionExtensions
     public static IHttpClientBuilder AddRemoteApiHttpClient(this IServiceCollection services, string clientName,
         Action<IServiceProvider, HttpClient>? configureClient = null)
     {
-        return services.AddHttpClient(clientName, SetBaseAddress(configureClient))
+        return services.AddHttpClient(clientName, SetRemoteApiBaseAddress(configureClient))
             .AddHttpMessageHandler<AntiforgeryHandler>();
     }
 
@@ -171,7 +262,7 @@ public static class ServiceCollectionExtensions
         Action<HttpClient> configureClient)
         where T : class
     {
-        return services.AddHttpClient<T>(SetBaseAddress(configureClient))
+        return services.AddHttpClient<T>(SetRemoteApiBaseAddress(configureClient))
             .AddHttpMessageHandler<AntiforgeryHandler>();
     }
 
@@ -187,7 +278,7 @@ public static class ServiceCollectionExtensions
         Action<IServiceProvider, HttpClient>? configureClient = null)
         where T : class
     {
-        return services.AddHttpClient<T>(SetBaseAddress(configureClient))
+        return services.AddHttpClient<T>(SetRemoteApiBaseAddress(configureClient))
             .AddHttpMessageHandler<AntiforgeryHandler>();
     }
 }

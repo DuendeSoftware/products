@@ -1,5 +1,5 @@
 ﻿@page "/weather"
-@inject HttpClient Http
+@inject WeatherHttpClient Http
 
 @attribute [Authorize]
 
@@ -43,14 +43,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        _forecasts = await Http.GetWeatherForecasts();
     }
 
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
 }

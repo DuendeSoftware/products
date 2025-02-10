@@ -1,4 +1,4 @@
-using NSubstitute;
+using System.Net;
 using Shouldly;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
@@ -10,7 +10,7 @@ public class AntiforgeryHandlerTests
     {
         var sut = new TestAntiforgeryHandler()
         {
-            InnerHandler = Substitute.For<HttpMessageHandler>()
+            InnerHandler = new NoOpHttpMessageHandler()
         };
 
         var request = new HttpRequestMessage();
@@ -26,5 +26,13 @@ public class TestAntiforgeryHandler : AntiforgeryHandler
     public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         return base.SendAsync(request, cancellationToken);
+    }
+}
+
+public class NoOpHttpMessageHandler : HttpMessageHandler
+{
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
     }
 }
