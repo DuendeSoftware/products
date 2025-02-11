@@ -126,7 +126,7 @@ public class CachingResourceStoreTests
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2" });
             items.Count().ShouldBe(1);
-            items.Select(x => x.Name).ShouldBe(new[] { "foo" });
+            items.Select(x => x.Name).ShouldBe(["foo"]);
             _apiCache.Items.Count.ShouldBe(1);
             _apiResourceNamesCache.Items.Count.ShouldBe(2);
         }
@@ -134,7 +134,7 @@ public class CachingResourceStoreTests
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo1", "bar1" });
             items.Count().ShouldBe(2);
-            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
             _apiResourceNamesCache.Items.Count.ShouldBe(3);
         }
@@ -142,7 +142,7 @@ public class CachingResourceStoreTests
         {
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
             items.Count().ShouldBe(2);
-            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
             _apiResourceNamesCache.Items.Count.ShouldBe(4);
         }
@@ -154,7 +154,7 @@ public class CachingResourceStoreTests
 
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
             items.Count().ShouldBe(2);
-            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
             _apiResourceNamesCache.Items.Count.ShouldBe(4);
         }
@@ -167,7 +167,7 @@ public class CachingResourceStoreTests
 
             var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
             items.Count().ShouldBe(2);
-            items.Select(x => x.Name).ShouldBe(new[] { "foo", "bar" });
+            items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
             _apiResourceNamesCache.Items.Count.ShouldBe(4);
         }

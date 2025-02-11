@@ -260,7 +260,7 @@ public class KeyManagerTests
 
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
-        allKeys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
+        allKeys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
 
     [Fact]
@@ -276,7 +276,7 @@ public class KeyManagerTests
 
         var (allKeys, signgingKeys) = await _subject.GetAllKeysInternalAsync();
 
-        allKeys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
+        allKeys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
 
     [Fact]
@@ -534,7 +534,7 @@ public class KeyManagerTests
 
         var result = _subject.FilterExpiredKeys(new[] { key1, key2, key3, key4, key5, key6 });
 
-        result.Select(x => x.Id).ShouldBe(new[] { key3.Id, key4.Id, key5.Id, key6.Id });
+        result.Select(x => x.Id).ShouldBe([key3.Id, key4.Id, key5.Id, key6.Id]);
     }
 
     // CacheKeysAsync
@@ -605,7 +605,7 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromStoreAsync();
 
-        keys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
+        keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
 
     [Fact]
@@ -619,11 +619,11 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromStoreAsync();
 
-        keys.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
+        keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
 
         _mockKeyStore.DeleteWasCalled.ShouldBeTrue();
         var keysInStore = await _mockKeyStore.LoadKeysAsync();
-        keysInStore.Select(x => x.Id).ShouldBe(new[] { key1, key2, key3, key4 });
+        keysInStore.Select(x => x.Id).ShouldBe([key1, key2, key3, key4]);
     }
 
     [Fact]
@@ -634,7 +634,7 @@ public class KeyManagerTests
 
         var keys = await _subject.GetAllKeysFromStoreAsync();
 
-        keys.Select(x => x.Id).ShouldBe(new[] { key1 });
+        keys.Select(x => x.Id).ShouldBe([key1]);
     }
 
     // CreateNewKeysAndAddToCacheAsync

@@ -172,8 +172,8 @@ public class ResourceTests
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:resource1", "urn:resource2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:resource1", "urn:resource2"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["openid", "profile", "scope1", "scope2", "scope3", "scope4", "offline_access"]);
         }
     }
 

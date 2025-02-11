@@ -132,6 +132,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         (await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client }))
+            .ShouldNotBeNull()
             .ShouldNotBe(handle);
     }
 
@@ -253,7 +254,7 @@ public class DefaultRefreshTokenServiceTests
         var refreshToken = await _store.GetRefreshTokenAsync(handle);
         var newHandle = await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client });
 
-        newHandle.ShouldNotBe(handle);
+        newHandle.ShouldNotBeNull().ShouldNotBe(handle);
 
         var newRefreshToken = await _store.GetRefreshTokenAsync(newHandle);
 

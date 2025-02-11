@@ -26,7 +26,8 @@ public class IResourceStoreExtensionsTests
         };
 
         Func<Task> a = () => store.GetAllEnabledResourcesAsync();
-        await a.ShouldThrowAsync<Exception>("duplicate identity scopes*");
+        var exception = await a.ShouldThrowAsync<Exception>();
+        exception.Message.ShouldMatch("Duplicate identity scopes*");
     }
 
     [Fact]
@@ -51,7 +52,8 @@ public class IResourceStoreExtensionsTests
         };
 
         Func<Task> a = () => store.GetAllEnabledResourcesAsync();
-        await a.ShouldThrowAsync<Exception>("duplicate api resources*");
+        var exception = await a.ShouldThrowAsync<Exception>();
+        exception.Message.ShouldMatch("Duplicate api resources*");
     }
 
     [Fact]
@@ -76,7 +78,8 @@ public class IResourceStoreExtensionsTests
         };
 
         Func<Task> a = () => store.FindResourcesByScopeAsync(new string[] { "A" });
-        await a.ShouldThrowAsync<Exception>("duplicate identity scopes*");
+        var exception = await a.ShouldThrowAsync<Exception>();
+        exception.Message.ShouldMatch("Duplicate identity scopes*");
     }
 
     [Fact]

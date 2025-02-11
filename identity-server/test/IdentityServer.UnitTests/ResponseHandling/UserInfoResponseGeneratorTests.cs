@@ -106,14 +106,14 @@ public class UserInfoResponseGeneratorTests
         var claims = await _subject.ProcessAsync(result);
 
         _mockProfileService.GetProfileWasCalled.ShouldBeTrue();
-        _mockProfileService.ProfileContext.RequestedClaimTypes.ShouldBe(new[] { "foo", "bar" });
+        _mockProfileService.ProfileContext.RequestedClaimTypes.ShouldBe(["foo", "bar"]);
     }
 
     [Fact]
     public async Task ProcessAsync_should_return_claims_issued_by_profile_service()
     {
-        _identityResources.Add(new IdentityResource("id1", new[] { "foo" }));
-        _identityResources.Add(new IdentityResource("id2", new[] { "bar" }));
+        _identityResources.Add(new IdentityResource("id1", ["foo"]));
+        _identityResources.Add(new IdentityResource("id2", ["bar"]));
             
         var address = new
         {

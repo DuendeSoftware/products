@@ -244,9 +244,9 @@ public class ResourceValidation
         });
 
         result.Succeeded.ShouldBeTrue();
-        result.Resources.IdentityResources.Select(x => x.Name).ShouldBe(new[] { "openid" });
-        result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1" });
-        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1" });
+        result.Resources.IdentityResources.Select(x => x.Name).ShouldBe(["openid"]);
+        result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope1"]);
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1"]);
     }
 
     [Fact]
@@ -263,7 +263,7 @@ public class ResourceValidation
         result.Succeeded.ShouldBeTrue();
         result.Resources.IdentityResources.ShouldBeEmpty();
         result.Resources.ApiScopes.Select(x => x.Name).ShouldContain("scope1");
-        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1" });
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1"]);
     }
 
     [Fact]
@@ -303,9 +303,9 @@ public class ResourceValidation
 
         result.Succeeded.ShouldBeTrue();
         result.Resources.ApiResources.Count.ShouldBe(2);
-        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "r1", "r2" });
+        result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["r1", "r2"]);
         result.RawScopeValues.Count().ShouldBe(1);
-        result.RawScopeValues.ShouldBe(new[] { "s" });
+        result.RawScopeValues.ShouldBe(["s"]);
     }
 
     // resource indicators
@@ -408,36 +408,36 @@ public class ResourceValidation
 
         {
             var result = subject.FilterByResourceIndicator(null);
-            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1", "resource2" });
-            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1", "scope2", "scope3" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1", "resource2"]);
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope1", "scope2", "scope3"]);
             result.Resources.OfflineAccess.ShouldBeFalse();
         }
         {
             resources.OfflineAccess = true;
             var result = subject.FilterByResourceIndicator(null);
-            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1", "resource2" });
-            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1", "scope2", "scope3" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1", "resource2"]);
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope1", "scope2", "scope3"]);
             result.Resources.OfflineAccess.ShouldBeTrue();
         }
         {
             var result = subject.FilterByResourceIndicator("resource1");
-            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource1" });
-            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1", "scope2" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1"]);
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope1", "scope2"]);
         }
         {
             var result = subject.FilterByResourceIndicator("resource2");
-            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "resource2" });
-            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope1" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource2"]);
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope1"]);
         }
         {
             var result = subject.FilterByResourceIndicator("isolated1");
-            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "isolated1" });
-            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope2", "scope3" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["isolated1"]);
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope2", "scope3"]);
         }
         {
             var result = subject.FilterByResourceIndicator("isolated2");
-            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(new[] { "isolated2" });
-            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(new[] { "scope3" });
+            result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["isolated2"]);
+            result.Resources.ApiScopes.Select(x => x.Name).ShouldBe(["scope3"]);
         }
     }
 }

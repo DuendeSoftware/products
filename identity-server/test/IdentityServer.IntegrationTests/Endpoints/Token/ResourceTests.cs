@@ -386,8 +386,8 @@ public class ResourceTests
         });
 
         var claims = ParseAccessTokenClaims(tokenResponse);
-        claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:api1" });
-        claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "scope1", "offline_access" });
+        claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
+        claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "offline_access"]);
     }
     [Fact]
     [Trait("Category", Category)]
@@ -409,8 +409,8 @@ public class ResourceTests
             });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:api1" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "scope1", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "offline_access"]);
         }
         {
             var tokenResponse = await _mockPipeline.BackChannelClient.RequestPasswordTokenAsync(new PasswordTokenRequest
@@ -428,8 +428,8 @@ public class ResourceTests
             });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:api3" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "scope1", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api3"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "offline_access"]);
         }
     }
     [Fact]
@@ -532,8 +532,8 @@ public class ResourceTests
             });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:api1", "urn:api2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "scope1", "scope2", "scope3", "scope4", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1", "urn:api2"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope2", "scope3", "scope4", "offline_access"]);
         }
         {
             tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
@@ -549,8 +549,8 @@ public class ResourceTests
             });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:api1" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "scope1", "scope3", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope3", "offline_access"]);
         }
         {
             tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
@@ -566,8 +566,8 @@ public class ResourceTests
             });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
-            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:api2" });
-            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "scope2", "offline_access" });
+            claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api2"]);
+            claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope2", "offline_access"]);
         }
         {
             tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest

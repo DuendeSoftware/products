@@ -215,7 +215,7 @@ public class AuthorizeTests
         _mockPipeline.LoginRequest.LoginHint.ShouldBe("login_hint_value");
         _mockPipeline.LoginRequest.AcrValues.ShouldBe([ "acr_1", "acr_2"]);
         _mockPipeline.LoginRequest.Parameters.AllKeys.ShouldContain("foo");
-        _mockPipeline.LoginRequest.Parameters.GetValues("foo").ShouldBe(new[] { "foo1", "foo2" });
+        _mockPipeline.LoginRequest.Parameters.GetValues("foo").ShouldBe(["foo1", "foo2"]);
     }
 
     [Fact]

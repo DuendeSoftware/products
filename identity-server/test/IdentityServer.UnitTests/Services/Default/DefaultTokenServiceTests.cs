@@ -77,7 +77,7 @@ public class DefaultTokenServiceTests
         var result = await _subject.CreateAccessTokenAsync(request);
 
         result.Audiences.Count.ShouldBe(3);
-        result.Audiences.ShouldBe(new[] { "api1", "api2", "api3" });
+        result.Audiences.ShouldBe(["api1", "api2", "api3"]);
     }
 
     [Fact]
