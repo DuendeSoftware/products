@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageVersion>1.0</PackageVersion>
+    <PackageId>Duende.Templates</PackageId>
+    <Title>Duende Templates</Title>
+    <Authors>Duende Software</Authors>
+    <Company>Duende Software</Company>
+    <Copyright>Duende Software</Copyright>    
+    <Description>Templates for duende.</Description>
+    <PackageTags>dotnet-new;templates;duende;identity-server;bff;</PackageTags>
+    <language>en-US</language>
+    <icon>feed/icon.png</icon>
+    <license type="file">feed/LICENSE.txt</license>
+    <projectUrl>https://github.com/DuendeSoftware/products</projectUrl>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+  
+</Project>
