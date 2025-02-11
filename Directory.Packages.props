@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <AspNetCoreVersion>8.0.1</AspNetCoreVersion>
+    <AspNetCoreVersion>8.0.11</AspNetCoreVersion>
     <!-- EF must be at least 8.0.10 so that 'Microsoft.Extensions.Caching.Memory'
           is at least 8.0.1, which addresses a known high severity vulnerability.
           The SQL Server EF provider that is commonly used has a transitive
