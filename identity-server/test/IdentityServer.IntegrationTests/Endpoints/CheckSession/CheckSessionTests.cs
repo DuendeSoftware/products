@@ -27,6 +27,6 @@ public class CheckSessionTests
     {
         var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.CheckSessionEndpoint);
 
-        response.StatusCode.Should().NotBe(HttpStatusCode.NotFound);
+        response.Should().NotHaveHttpStatusCode(HttpStatusCode.NotFound);
     }
 }

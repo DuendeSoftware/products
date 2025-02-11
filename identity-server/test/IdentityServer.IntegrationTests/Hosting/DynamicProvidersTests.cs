@@ -281,7 +281,7 @@ public class DynamicProvidersTests
         response.Headers.Location.ToString().Should().StartWith("/callback");
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/callback"));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         var body = await response.Content.ReadAsStringAsync();
         body.Should().Be("1"); // sub
     }
@@ -299,7 +299,7 @@ public class DynamicProvidersTests
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
         response = await _host.BrowserClient.GetAsync(_host.Url(response.Headers.Location.ToString())); // ~/callback
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         var body = await response.Content.ReadAsStringAsync();
         body.Should().Be("2"); // sub
     }
@@ -321,7 +321,7 @@ public class DynamicProvidersTests
         response = await _host.BrowserClient.GetAsync(redirectUri);
             
         response = await _host.BrowserClient.GetAsync(_host.Url(response.Headers.Location.ToString()));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         var body = await response.Content.ReadAsStringAsync();
         body.Should().Be("1"); // sub
     }
@@ -340,7 +340,7 @@ public class DynamicProvidersTests
         response = await _host.BrowserClient.GetAsync(_host.Url("/callback")); // signs the user in
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/user"));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
 
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/logout?scheme=idp1"));
@@ -353,11 +353,11 @@ public class DynamicProvidersTests
         var iframeUrl = await _idp1.BrowserClient.ReadElementAttributeAsync("iframe", "src");
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/user"));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
 
         iframeUrl.Should().StartWith(_host.Url("/federation/idp1/signout"));
         response = await _host.BrowserClient.GetAsync(iframeUrl); // ~/federation/idp1/signout
-        response.IsSuccessStatusCode.Should().BeTrue();
+        response.Should().Be2XXSuccessful();
 
         response = await _host.BrowserClient.GetAsync(_host.Url("/user"));
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

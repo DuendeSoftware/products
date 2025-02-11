@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using FluentAssertions;
 
 namespace Duende.Bff.Tests.Endpoints
 {
@@ -59,7 +60,7 @@ namespace Duende.Bff.Tests.Endpoints
             var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/local_anon"));
             var response = await BffHost.BrowserClient.SendAsync(req);
 
-            response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+            response.Should().Be401Unauthorized();
         }
 
 
@@ -109,7 +110,7 @@ namespace Duende.Bff.Tests.Endpoints
             req.Headers.Add("x-csrf", "1");
             var response = await BffHost.BrowserClient.SendAsync(req);
 
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location
                 .ShouldNotBeNull()
                 .ToString()

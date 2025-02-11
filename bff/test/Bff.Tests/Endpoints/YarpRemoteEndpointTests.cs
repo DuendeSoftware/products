@@ -9,6 +9,7 @@ using Duende.Bff.Tests.TestFramework;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using FluentAssertions;
 
 namespace Duende.Bff.Tests.Endpoints
 {
@@ -29,7 +30,7 @@ namespace Duende.Bff.Tests.Endpoints
             var req = new HttpRequestMessage(HttpMethod.Get, YarpBasedBffHost.Url("/api_anon/test"));
             var response = await YarpBasedBffHost.BrowserClient.SendAsync(req);
 
-            response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+            response.Should().Be401Unauthorized();
         }
 
 

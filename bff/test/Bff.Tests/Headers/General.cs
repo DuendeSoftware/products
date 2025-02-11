@@ -19,7 +19,7 @@ namespace Duende.Bff.Tests.Headers
             req.Headers.Add("x-csrf", "1");
             var response = await BffHost.BrowserClient.SendAsync(req);
 
-            response.IsSuccessStatusCode.ShouldBeTrue();
+            response.Should().Be2XXSuccessful();
             var json = await response.Content.ReadAsStringAsync();
             var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
@@ -38,7 +38,7 @@ namespace Duende.Bff.Tests.Headers
             req.Headers.Add("x-custom", "custom");
             var response = await BffHost.BrowserClient.SendAsync(req);
 
-            response.IsSuccessStatusCode.ShouldBeTrue();
+            response.Should().Be2XXSuccessful();
             var json = await response.Content.ReadAsStringAsync();
             var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
@@ -56,7 +56,7 @@ namespace Duende.Bff.Tests.Headers
             req.Headers.Add("x-custom", "custom");
             var response = await BffHost.BrowserClient.SendAsync(req);
 
-            response.IsSuccessStatusCode.ShouldBeTrue();
+            response.Should().Be2XXSuccessful();
             var json = await response.Content.ReadAsStringAsync();
             var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
             

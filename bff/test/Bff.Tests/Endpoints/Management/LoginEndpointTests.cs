@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using FluentAssertions;
 
 namespace Duende.Bff.Tests.Endpoints.Management
 {
@@ -37,16 +38,16 @@ namespace Duende.Bff.Tests.Endpoints.Management
         public async Task login_endpoint_should_challenge_and_redirect_to_root()
         {
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
 
             await IdentityServerHost.IssueSessionCookieAsync("alice");
             response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
 
             response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldBe("/");
         }
         
@@ -61,16 +62,16 @@ namespace Duende.Bff.Tests.Endpoints.Management
             await BffHost.InitializeAsync();
             
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/custom/bff/login"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
 
             await IdentityServerHost.IssueSessionCookieAsync("alice");
             response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
 
             response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldBe("/");
         }
         
@@ -85,16 +86,16 @@ namespace Duende.Bff.Tests.Endpoints.Management
             await BffHost.InitializeAsync();
             
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/custom/bff/login"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
 
             await IdentityServerHost.IssueSessionCookieAsync("alice");
             response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
 
             response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldBe("/");
         }
         
@@ -109,16 +110,16 @@ namespace Duende.Bff.Tests.Endpoints.Management
             await BffHost.InitializeAsync();
             
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/login"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
 
             await IdentityServerHost.IssueSessionCookieAsync("alice");
             response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
 
             response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldBe("/");
         }
         
@@ -128,7 +129,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
             await BffHost.BffLoginAsync("alice");
 
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
         }
 
@@ -136,16 +137,16 @@ namespace Duende.Bff.Tests.Endpoints.Management
         public async Task login_endpoint_should_accept_returnUrl()
         {
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login") + "?returnUrl=/foo");
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
 
             await IdentityServerHost.IssueSessionCookieAsync("alice");
             response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
 
             response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+            response.Should().Be302Redirect();
             response.Headers.Location!.ToString().ShouldBe("/foo");
         }
 

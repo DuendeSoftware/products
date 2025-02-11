@@ -81,7 +81,7 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Contain("https://server/connect/endsession/callback?endSessionId=");
@@ -102,7 +102,7 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.PostAsync(IdentityServerPipeline.FederatedSignOutUrl, new FormUrlEncodedContent(new Dictionary<string, string> { { "sid", "123" } }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Contain("https://server/connect/endsession/callback?endSessionId=");
@@ -115,7 +115,7 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         response.Content.Headers.ContentType.Should().BeNull();
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Be(String.Empty);
@@ -126,7 +126,7 @@ public class FederatedSignoutTests
     {
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         response.Content.Headers.ContentType.Should().BeNull();
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Be(String.Empty);
@@ -152,7 +152,7 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         response.Content.Headers.ContentType.Should().BeNull();
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Be(String.Empty);

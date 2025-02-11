@@ -1,5 +1,5 @@
 using Hosts.Tests.TestInfra;
-using Shouldly;
+using FluentAssertions;
 using Xunit.Abstractions;
 
 namespace Hosts.Tests;
@@ -19,7 +19,7 @@ public class BffTests : IntegrationTestBase
     public async Task Can_invoke_home()
     {
         var response = await _httpClient.GetAsync("/");
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Should().Be200Ok();
     }
 
     [SkippableFact]

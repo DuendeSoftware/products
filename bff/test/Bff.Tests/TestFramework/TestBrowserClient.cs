@@ -5,9 +5,11 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Shouldly;
 
 namespace Duende.Bff.Tests.TestFramework;
@@ -97,18 +99,22 @@ public class TestBrowserClient : HttpClient
 
         if (expectedStatusCode == null)
         {
-            response.IsSuccessStatusCode.ShouldBeTrue();
-            response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
-            var json = await response.Content.ReadAsStringAsync(ct);
-            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
+            response.Should().Be2XXSuccessful();
+            response.Should().HaveHeader("Content-Type", "application/json");
+            ApiResponse? apiResult = null;
+            response.Should().Satisfy<ApiResponse>(model =>
+            {
+                model.Should().NotBeNull();
+                model.Method.ShouldBe("GET", StringCompareShould.IgnoreCase);
+                apiResult = model;
 
-            apiResult.Method.ShouldBe("GET", StringCompareShould.IgnoreCase);
+            });
 
-            return new (response, apiResult);
+            return new (response, apiResult!);
         }
         else
         {
-            response.StatusCode.ToString().ShouldBe(expectedStatusCode.ToString());
+            response.Should().HaveHttpStatusCode(expectedStatusCode.Value);
             return new (response, null!);
         }
 
@@ -130,17 +136,22 @@ public class TestBrowserClient : HttpClient
         var response = await SendAsync(req, ct);
         if (expectedStatusCode == null)
         {
-            response.IsSuccessStatusCode.ShouldBeTrue();
-            response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
-            var json = await response.Content.ReadAsStringAsync(ct);
-            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
+            response.Should().Be2XXSuccessful();
+            response.Should().HaveHeader("Content-Type", "application/json");
+            ApiResponse? apiResult = null;
+            response.Should().Satisfy<ApiResponse>(model =>
+            {
+                model.Should().NotBeNull();
+                model.Method.ShouldBe(method.ToString(), StringCompareShould.IgnoreCase);
+                apiResult = model;
 
-            apiResult.Method.ShouldBe(method.ToString(), StringCompareShould.IgnoreCase);
-            return new(response, apiResult);
+            });
+
+            return new(response, apiResult!);
         }
         else
         {
-            response.StatusCode.ToString().ShouldBe(expectedStatusCode.ToString());
+            response.Should().HaveHttpStatusCode(expectedStatusCode.Value);
             return new(response, null!);
         }
     }

@@ -46,7 +46,7 @@ public class DeviceAuthorizationTests
     public async Task get_should_return_InvalidRequest()
     {
         var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DeviceAuthorization);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
 
         var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
 
@@ -65,7 +65,7 @@ public class DeviceAuthorizationTests
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization,
             new StringContent(@"{""client_id"": ""client1""}", Encoding.UTF8, "application/json"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
 
         var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
 
@@ -80,7 +80,7 @@ public class DeviceAuthorizationTests
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization,
             new FormUrlEncodedContent(new Dictionary<string, string>()));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
 
         var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
 
@@ -98,7 +98,7 @@ public class DeviceAuthorizationTests
         };
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization, new FormUrlEncodedContent(form));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
 
         var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
 
@@ -117,8 +117,8 @@ public class DeviceAuthorizationTests
         };
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization, new FormUrlEncodedContent(form));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.MediaType.Should().Be("application/json");
+        response.Should().Be200Ok();
+        response.Should().HaveHeader("Content-Type", "application/json");
             
         var resultDto = ParseJsonBody<ResultDto>(await response.Content.ReadAsStreamAsync());
 

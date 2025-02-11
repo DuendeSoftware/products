@@ -14,7 +14,8 @@
 
 	<ItemGroup>
 
-		<PackageReference Include="AngleSharp" />
+        <PackageReference Include="AngleSharp" />
+        <PackageReference Include="FluentAssertions.Web" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Extensions.Logging" />
 		<PackageReference Include="Serilog.Sinks.TextWriter" />

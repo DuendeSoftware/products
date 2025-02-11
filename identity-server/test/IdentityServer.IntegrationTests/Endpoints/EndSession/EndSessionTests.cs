@@ -106,7 +106,7 @@ public class EndSessionTests
     {
         var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.EndSessionEndpoint);
 
-        response.StatusCode.Should().NotBe(HttpStatusCode.NotFound);
+        response.Should().NotHaveHttpStatusCode(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -282,7 +282,7 @@ public class EndSessionTests
     {
         var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.EndSessionCallbackEndpoint);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
     }
 
     [Fact]
@@ -372,7 +372,7 @@ public class EndSessionTests
         var signoutFrameUrl = _mockPipeline.LogoutRequest.SignOutIFrameUrl;
 
         response = await _mockPipeline.BrowserClient.GetAsync(signoutFrameUrl);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
     }
 

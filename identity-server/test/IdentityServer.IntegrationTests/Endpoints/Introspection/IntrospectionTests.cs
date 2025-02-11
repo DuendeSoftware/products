@@ -84,7 +84,7 @@ public class IntrospectionTests
         _client.SetBasicAuthentication("api1", "secret");
         var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class IntrospectionTests
 
         var client = new HttpClient(_handler);
         var response = await client.PostAsync(IntrospectionEndpoint, new StringContent(json, Encoding.UTF8, "application/json"));
-        response.StatusCode.Should().Be(HttpStatusCode.UnsupportedMediaType);
+        response.Should().Be415UnsupportedMediaType();
     }
 
     [Fact]

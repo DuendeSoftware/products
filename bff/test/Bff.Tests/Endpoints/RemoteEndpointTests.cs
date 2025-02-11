@@ -3,6 +3,7 @@
 
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
+using FluentAssertions;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -272,7 +273,7 @@ namespace Duende.Bff.Tests.Endpoints
             var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user_or_client/test"));
             var response = await BffHost.BrowserClient.SendAsync(req);
 
-            response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+            response.Should().Be401Unauthorized();
         }
 
         [Fact]
@@ -300,13 +301,13 @@ namespace Duende.Bff.Tests.Endpoints
             req.Headers.Add("my-header-to-be-copied-by-yarp", "copied-value");
             var response = await BffHost.BrowserClient.SendAsync(req);
 
-            response.IsSuccessStatusCode.ShouldBeTrue();
-            response.Content.Headers.ContentType!.MediaType.ShouldBe("application/json");
+            response.Should().Be2XXSuccessful();
+            response.Should().HaveHeader("Content-Type", "application/json");
             var json = await response.Content.ReadAsStringAsync();
             ApiResponse apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
             apiResult.RequestHeaders["my-header-to-be-copied-by-yarp"].First().ShouldBe("copied-value");
 
-            response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform", 
+            response.Should().NotHaveHeader("added-by-custom-default-transform", 
                 "a custom transform doesn't run the defaults");
         }
     }

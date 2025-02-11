@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using FluentAssertions;
 
 namespace Duende.Bff.Tests.Endpoints.Management
 {
@@ -62,7 +63,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
             BffHost.BffOptions.RequireLogoutSessionId = false;
 
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
+            response.Should().Be302Redirect(); // endsession
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
         }
 
@@ -80,7 +81,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
             await BffHost.IssueSessionCookieAsync("alice");
 
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
+            response.Should().Be302Redirect(); // endsession
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
         }
 
@@ -88,7 +89,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
         public async Task logout_endpoint_for_anonymous_user_without_sid_should_succeed()
         {
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
+            response.Should().Be302Redirect(); // endsession
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
         }
 
@@ -114,19 +115,19 @@ namespace Duende.Bff.Tests.Endpoints.Management
             await BffHost.BffLoginAsync("alice", "sid123");
 
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout") + "?sid=sid123&returnUrl=/foo");
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
+            response.Should().Be302Redirect(); // endsession
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
 
             response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location!.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // logout
+            response.Should().Be302Redirect(); // logout
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/account/logout"));
 
             response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location!.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // post logout redirect uri
+            response.Should().Be302Redirect(); // post logout redirect uri
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(BffHost.Url("/signout-callback-oidc"));
 
             response = await BffHost.BrowserClient.GetAsync(response.Headers.Location!.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
+            response.Should().Be302Redirect(); // root
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/foo");
         }
 

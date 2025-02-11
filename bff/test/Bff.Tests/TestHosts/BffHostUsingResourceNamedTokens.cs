@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Yarp.ReverseProxy.Forwarder;
+using FluentAssertions;
 
 namespace Duende.Bff.Tests.TestHosts
 {
@@ -182,15 +183,15 @@ namespace Duende.Bff.Tests.TestHosts
         public async Task<HttpResponseMessage> BffOidcLoginAsync()
         {
             var response = await BrowserClient.GetAsync(Url("/bff/login"));
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // authorize
+            response.Should().Be302Redirect(); // authorize
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
 
             response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // client callback
+            response.Should().Be302Redirect(); // client callback
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
 
             response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
+            response.Should().Be302Redirect(); // root
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
             (await GetIsUserLoggedInAsync()).ShouldBeTrue();
@@ -202,19 +203,19 @@ namespace Duende.Bff.Tests.TestHosts
         public async Task<HttpResponseMessage> BffLogoutAsync(string? sid = null)
         {
             var response = await BrowserClient.GetAsync(Url("/bff/logout") + "?sid=" + sid);
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
+            response.Should().Be302Redirect(); // endsession
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
 
             response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // logout
+            response.Should().Be302Redirect(); // logout
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
 
             response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // post logout redirect uri
+            response.Should().Be302Redirect(); // post logout redirect uri
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
 
             response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
-            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // root
+            response.Should().Be302Redirect(); // root
             response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
             (await GetIsUserLoggedInAsync()).ShouldBeFalse();

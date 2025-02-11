@@ -146,7 +146,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // user auth/consent
@@ -180,7 +180,7 @@ public class CibaTokenEndpointTests
             IdentityServerPipeline.TokenEndpoint,
             new FormUrlEncodedContent(tokenBody));
 
-        tokenResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        tokenResponse.Should().Be200Ok();
     }
 
         
@@ -204,7 +204,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
 
@@ -224,7 +224,7 @@ public class CibaTokenEndpointTests
             IdentityServerPipeline.TokenEndpoint,
             new FormUrlEncodedContent(tokenBody));
 
-        tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        tokenResponse.Should().Be400BadRequest();
 
         var json = await tokenResponse.Content.ReadAsStringAsync();
         values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -253,7 +253,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // user auth/consent
@@ -287,7 +287,7 @@ public class CibaTokenEndpointTests
             IdentityServerPipeline.TokenEndpoint,
             new FormUrlEncodedContent(tokenBody));
 
-        tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        tokenResponse.Should().Be400BadRequest();
 
         var json = await tokenResponse.Content.ReadAsStringAsync();
         values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -316,7 +316,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // user auth/consent
@@ -350,7 +350,7 @@ public class CibaTokenEndpointTests
             IdentityServerPipeline.TokenEndpoint,
             new FormUrlEncodedContent(tokenBody));
 
-        tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        tokenResponse.Should().Be400BadRequest();
 
         var json = await tokenResponse.Content.ReadAsStringAsync();
         values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -379,7 +379,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // user auth/consent
@@ -413,7 +413,7 @@ public class CibaTokenEndpointTests
             IdentityServerPipeline.TokenEndpoint,
             new FormUrlEncodedContent(tokenBody));
 
-        tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        tokenResponse.Should().Be400BadRequest();
 
         var json = await tokenResponse.Content.ReadAsStringAsync();
         values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -442,7 +442,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // user auth/consent
@@ -478,7 +478,7 @@ public class CibaTokenEndpointTests
             IdentityServerPipeline.TokenEndpoint,
             new FormUrlEncodedContent(tokenBody));
 
-        tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        tokenResponse.Should().Be400BadRequest();
 
         var json = await tokenResponse.Content.ReadAsStringAsync();
         values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -511,7 +511,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // user auth/consent
@@ -547,7 +547,7 @@ public class CibaTokenEndpointTests
             IdentityServerPipeline.TokenEndpoint,
             new FormUrlEncodedContent(tokenBody));
 
-        tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        tokenResponse.Should().Be400BadRequest();
 
         var json = await tokenResponse.Content.ReadAsStringAsync();
         values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -580,7 +580,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // token request
@@ -600,7 +600,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -621,7 +621,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -655,7 +655,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // token request
@@ -675,7 +675,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -696,7 +696,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -720,7 +720,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -741,7 +741,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -777,7 +777,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // token request
@@ -797,7 +797,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -818,7 +818,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -842,7 +842,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -866,7 +866,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -887,7 +887,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -923,7 +923,7 @@ public class CibaTokenEndpointTests
         var cibaResponse = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
             new FormUrlEncodedContent(cibaBody));
-        cibaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        cibaResponse.Should().Be200Ok();
 
 
         // token request
@@ -943,7 +943,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
@@ -967,7 +967,7 @@ public class CibaTokenEndpointTests
                 IdentityServerPipeline.TokenEndpoint,
                 new FormUrlEncodedContent(tokenBody));
 
-            tokenResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            tokenResponse.Should().Be400BadRequest();
 
             var json = await tokenResponse.Content.ReadAsStringAsync();
             values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);

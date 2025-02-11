@@ -207,7 +207,7 @@ public class RevocationTests
     {
         var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.RevocationEndpoint);
 
-        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
+        response.Should().Be405MethodNotAllowed();
     }
 
     [Fact]
@@ -216,7 +216,7 @@ public class RevocationTests
     {
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, null);
 
-        response.StatusCode.Should().Be(HttpStatusCode.UnsupportedMediaType);
+        response.Should().Be415UnsupportedMediaType();
     }
 
     [Fact]
@@ -442,7 +442,7 @@ public class RevocationTests
         };
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
 
         var result = await ProtocolResponse.FromHttpResponseAsync<TokenRevocationResponse>(response);
         result.IsError.Should().BeTrue();
@@ -465,7 +465,7 @@ public class RevocationTests
         };
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
 
         var result = await ProtocolResponse.FromHttpResponseAsync<TokenRevocationResponse>(response);
         result.IsError.Should().BeTrue();
@@ -487,7 +487,7 @@ public class RevocationTests
         };
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
 
         (await IsAccessTokenValidAsync(tokens)).Should().BeFalse();
     }
@@ -507,7 +507,7 @@ public class RevocationTests
         };
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
 
         (await UseRefreshTokenAsync(tokens)).Should().BeFalse();
     }
@@ -527,7 +527,7 @@ public class RevocationTests
         (await IsAccessTokenValidAsync(token)).Should().BeTrue();
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
         (await IsAccessTokenValidAsync(token)).Should().BeFalse();
     }
 
@@ -546,7 +546,7 @@ public class RevocationTests
         (await IsAccessTokenValidAsync(token)).Should().BeTrue();
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Should().Be400BadRequest();
         (await IsAccessTokenValidAsync(token)).Should().BeTrue();
     }
 }

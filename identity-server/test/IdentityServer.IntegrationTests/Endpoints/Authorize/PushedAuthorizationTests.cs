@@ -230,10 +230,10 @@ public class PushedAuthorizationTests
         var returnUrl = new Uri(new Uri(IdentityServerPipeline.BaseUrl), returnPath);
         await _mockPipeline.LoginAsync("bob");
         var authorizeCallbackResponse = await _mockPipeline.BrowserClient.GetAsync(returnUrl);
-        
+
         // The authorize callback should continue back to the application (the prompt parameter is processed so we don't go back to the UI)
-        authorizeCallbackResponse.Should().Be302Found();
-        authorizeCallbackResponse.Headers.Location.Should().Be(expectedCallback);
+        authorizeCallbackResponse.Should().Be302Found()
+            .And.HaveHeader("Location", expectedCallback);
     }
 
     private void ConfigureScopesAndResources()

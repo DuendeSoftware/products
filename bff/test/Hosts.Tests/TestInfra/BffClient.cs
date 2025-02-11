@@ -4,7 +4,7 @@
 using System.Text.Json;
 using AngleSharp;
 using AngleSharp.Html.Dom;
-using Shouldly;
+using FluentAssertions;
 
 namespace Hosts.Tests.TestInfra;
 
@@ -27,11 +27,14 @@ public class BffClient
     {
         var triggerLoginResponse = await _client.GetAsync("/bff/login");
 
-        triggerLoginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-        var loginPage = triggerLoginResponse.RequestMessage?.RequestUri ??
-                        throw new InvalidOperationException("Can't find the login page.");
-        loginPage.AbsolutePath.ShouldBe("/Account/Login");
+        Uri loginPage = null!;
+        triggerLoginResponse.Should().Be200Ok()
+            .And.Satisfy(response =>
+            {
+                loginPage = triggerLoginResponse.RequestMessage?.RequestUri ??
+                      throw new InvalidOperationException("Can't find the login page.");
+                loginPage.AbsolutePath.Should().Be("/Account/Login");
+            });
 
         var html = await triggerLoginResponse.Content.ReadAsStringAsync();
         var form = await ExtractFormFieldsAsync(html);
@@ -43,9 +46,8 @@ public class BffClient
         var postLoginResponse =
             await _client.PostAsync(new Uri(loginPage, form.FormUrl), new FormUrlEncodedContent(form.Fields), ct);
 
-        postLoginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        postLoginResponse.RequestMessage?.RequestUri?.Authority.ShouldBe(_client.BaseAddress?.Authority,
-            await postLoginResponse.Content.ReadAsStringAsync(ct));
+        postLoginResponse.Should().Be200Ok()
+            .And.Satisfy(response => response.RequestMessage?.RequestUri?.Authority.Should().Be(_client.BaseAddress?.Authority));
     }
 
     private async Task<Form> ExtractFormFieldsAsync(string htmlContent)
@@ -100,7 +102,7 @@ public class BffClient
                          ?? throw new InvalidOperationException("Failed to find logout link claim");
 
         var logoutResponse = await _client.GetAsync(logoutLink.Value.ToString());
-        logoutResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        logoutResponse.Should().Be200Ok();
     }
 
     public async Task<UserClaim[]> GetUserClaims()

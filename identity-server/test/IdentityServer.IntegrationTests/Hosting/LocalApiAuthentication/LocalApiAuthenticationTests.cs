@@ -244,7 +244,7 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeTrue();
+        response.Should().Be2XXSuccessful();
         ApiWasCalled.Should().BeTrue();
         ApiPrincipal.Identity.IsAuthenticated.Should().BeTrue();
     }
@@ -261,7 +261,7 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeTrue();
+        response.Should().Be2XXSuccessful();
         ApiWasCalled.Should().BeTrue();
         ApiPrincipal.Identity.IsAuthenticated.Should().BeTrue();
     }
@@ -277,7 +277,7 @@ public class LocalApiAuthenticationTests
 
         var response = await _pipeline.BackChannelClient.SendAsync(req);
 
-        response.IsSuccessStatusCode.Should().BeTrue();
+        response.Should().Be2XXSuccessful();
         ApiWasCalled.Should().BeTrue();
         ApiPrincipal.Identity.IsAuthenticated.Should().BeTrue();
     }

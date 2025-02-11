@@ -124,7 +124,7 @@ public class AuthorizeTests
     {
         var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.AuthorizeEndpoint);
 
-        response.StatusCode.Should().NotBe(HttpStatusCode.NotFound);
+        response.Should().NotHaveHttpStatusCode(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class AuthorizeTests
     {
         var response = await _mockPipeline.BrowserClient.PostAsync(IdentityServerPipeline.AuthorizeEndpoint, new StringContent("foo"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.UnsupportedMediaType);
+        response.Should().Be415UnsupportedMediaType();
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public class AuthorizeTests
             new FormUrlEncodedContent(
                 new Dictionary<string, string> { }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().Be200Ok();
     }
 
     [Fact]
@@ -153,7 +153,7 @@ public class AuthorizeTests
     {
         var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.AuthorizeEndpoint);
 
-        ((int)response.StatusCode).Should().BeLessThan(500);
+        response.Should().Satisfy(response => ((int) response.StatusCode).Should().BeLessThan(500));
     }
 
     [Fact]

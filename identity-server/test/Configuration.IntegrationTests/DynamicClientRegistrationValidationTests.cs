@@ -18,7 +18,7 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
     public async Task http_get_method_should_fail()
     {
         var response = await ConfigurationHost.HttpClient!.GetAsync("/connect/dcr");
-        response.StatusCode.Should().Be(HttpStatusCode.MethodNotAllowed);
+        response.Should().Be405MethodNotAllowed();
     }
 
     [Fact]
@@ -29,7 +29,7 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
             { "grant_types", "authorization_code" }
         });
         var response = await ConfigurationHost.HttpClient!.PostAsync("/connect/dcr", content);
-        response.StatusCode.Should().Be(HttpStatusCode.UnsupportedMediaType);
+        response.Should().Be415UnsupportedMediaType();
     }
 
     [Fact]
@@ -39,10 +39,8 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
         {
             redirect_uris = new[] { "https://example.com/callback" }
         });
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
-        error?.Error.Should().Be("invalid_client_metadata");
+        response.Should().Be400BadRequest()
+            .And.Satisfy<DynamicClientRegistrationError>(model => model?.Error.Should().Be("invalid_client_metadata"));
     }
 
     [Fact]
@@ -53,10 +51,8 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
             redirect_uris = new[] { "https://example.com/callback" },
             grant_types = new[] { "password" }
         });
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
-        error?.Error.Should().Be("invalid_client_metadata");
+        response.Should().Be400BadRequest()
+            .And.Satisfy<DynamicClientRegistrationError>(model => model?.Error.Should().Be("invalid_client_metadata"));
     }
 
     [Fact]
@@ -67,10 +63,8 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
             redirect_uris = new[] { "https://example.com/callback" },
             grant_types = new[] { "client_credentials" }
         });
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
-        error?.Error.Should().Be("invalid_redirect_uri");
+        response.Should().Be400BadRequest()
+            .And.Satisfy<DynamicClientRegistrationError>(model => model?.Error.Should().Be("invalid_redirect_uri"));
     }
 
     [Fact]
@@ -80,10 +74,8 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
         {
             grant_types = new[] { "authorization_code", "client_credentials" }
         });
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
-        error?.Error.Should().Be("invalid_redirect_uri");
+        response.Should().Be400BadRequest()
+            .And.Satisfy<DynamicClientRegistrationError>(model => model?.Error.Should().Be("invalid_redirect_uri"));
     }
 
     [Fact]
@@ -93,10 +85,8 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
         {
             grant_types = new[] { "client_credentials", "refresh_token" }
         });
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
-        error?.Error.Should().Be("invalid_client_metadata");
+        response.Should().Be400BadRequest()
+            .And.Satisfy<DynamicClientRegistrationError>(model => model?.Error.Should().Be("invalid_client_metadata"));
     }
 
     [Fact]
@@ -110,9 +100,7 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
                 JwksUri = new Uri("https://example.com")
             }
         );
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
-        error?.Error.Should().Be("invalid_client_metadata");
+        response.Should().Be400BadRequest()
+            .And.Satisfy<DynamicClientRegistrationError>(model => model?.Error.Should().Be("invalid_client_metadata"));
     }
 }
