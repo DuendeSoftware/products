@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>616547e2-3a28-4c9d-8685-f4ac02581162</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost"/>
+  </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" IsAspireProjectResource="false" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
+    <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi.DPoP\Hosts.RemoteApi.DPoP.csproj" />
+    <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi.Isolated\Hosts.RemoteApi.Isolated.csproj" />
+    <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi\Hosts.RemoteApi.csproj" />
+    <ProjectReference Include="..\Hosts.Bff.DPoP\Hosts.Bff.DPoP.csproj" />
+    <ProjectReference Include="..\Hosts.Bff.EF\Hosts.Bff.EF.csproj" />
+    <ProjectReference Include="..\Hosts.Bff.InMemory\Hosts.Bff.InMemory.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent.Client\Hosts.Bff.Blazor.PerComponent.Client.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent\Hosts.Bff.Blazor.PerComponent.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly.Client\Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly\Hosts.Bff.Blazor.WebAssembly.csproj" />
+    <ProjectReference Include="..\Hosts.IdentityServer\Hosts.IdentityServer.csproj" />
+  </ItemGroup>
+
+</Project>

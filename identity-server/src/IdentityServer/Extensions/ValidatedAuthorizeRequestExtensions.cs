@@ -195,6 +195,16 @@ public static class ValidatedAuthorizeRequestExtensions
     [Obsolete("This method is obsolete and will be removed in a future version.")]
     public static IDictionary<string, string[]> ToOptimizedFullDictionary(this ValidatedAuthorizeRequest request)
     {
-        return request.ToOptimizedRawValues().ToFullDictionary();
+        var collection = request.ToOptimizedRawValues();
+        
+        // Filter client authentication out of the dictionary that we're building
+        // It's possible for a PAR request to include client auth and we don't want
+        // that to cause these values to get passed into the (obsolete) authorization
+        // parameters message store, where they might get logged or otherwise stored
+        // insecurely.
+        collection.Remove(OidcConstants.TokenRequest.ClientAssertion);
+        collection.Remove(OidcConstants.TokenRequest.ClientSecret);
+        
+        return collection.ToFullDictionary();
     }
 }

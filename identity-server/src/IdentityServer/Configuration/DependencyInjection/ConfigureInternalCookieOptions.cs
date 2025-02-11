@@ -3,6 +3,7 @@
 
 
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Stores.Default;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -38,6 +39,8 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
             {
                 options.ReturnUrlParameter = _idsrv.UserInteraction.LoginReturnUrlParameter;
             }
+
+            options.Events.OnCheckSlidingExpiration = CreateCheckSlidingExpirationCallback(options.Events.OnCheckSlidingExpiration);
         }
 
         if (name == IdentityServerConstants.ExternalCookieAuthenticationScheme)
@@ -67,6 +70,18 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
         }
 
         return null;
+    }
+
+    private Func<CookieSlidingExpirationContext, Task> CreateCheckSlidingExpirationCallback(
+        Func<CookieSlidingExpirationContext, Task> inner)
+    {
+        return Callback;
+
+        async Task Callback(CookieSlidingExpirationContext context)
+        {
+            await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
+            await inner?.Invoke(context)!;
+        }
     }
 }
 

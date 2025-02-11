@@ -30,6 +30,10 @@ public class TokenExtensionsTests
         "\"test_json_array\":[\"value1\",\"value2\",\"value3\"]")]
     [InlineData("test_json_obj", " { \"value1\": \"value2\" , \"value3\": [ \"value4\", \"value5\" ] } ", "json", 
         "\"test_json_obj\":{\"value1\":\"value2\",\"value3\":[\"value4\",\"value5\"]}")]
+    [InlineData("test_json_array", " [ \"value1\" , \"value2\" , \"value3\" ] ", "JSON", 
+        "\"test_json_array\":[\"value1\",\"value2\",\"value3\"]")]
+    [InlineData("test_json_obj", " { \"value1\": \"value2\" , \"value3\": [ \"value4\", \"value5\" ] } ", "JSON", 
+        "\"test_json_obj\":{\"value1\":\"value2\",\"value3\":[\"value4\",\"value5\"]}")]
     [InlineData("test_any", "raw\"string\tspecial char", "any", "\"test_any\":\"raw\\u0022string\\tspecial char\"")]
     public void TestClaimValueTypes(string type, string value, string valueType, string expected)
     {

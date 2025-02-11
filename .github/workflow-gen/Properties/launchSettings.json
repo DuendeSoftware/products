@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "workflow-gen": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

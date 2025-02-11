@@ -153,7 +153,8 @@ public static class TokenExtensions
             return double.Parse(claim.Value);
         }
         
-        if (claim.ValueType == IdentityServerConstants.ClaimValueTypes.Json)
+        // Ignore case here so that we also match System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.Json ("JSON")
+        if (claim.ValueType.Equals(IdentityServerConstants.ClaimValueTypes.Json, StringComparison.OrdinalIgnoreCase))
         {
             return JsonSerializer.Deserialize<JsonElement>(claim.Value);
         }

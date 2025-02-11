@@ -22,6 +22,8 @@ public static class IdentityServerConstants
 
     public const string PushedAuthorizationRequestUri = "urn:ietf:params:oauth:request_uri";
 
+    public const string ForceCookieRenewalFlag = "idsrv.renew";
+
     /// <summary>
     /// Constants for local IdentityServer access token authentication.
     /// </summary>

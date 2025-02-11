@@ -47,4 +47,23 @@ public class ValidatedAuthorizeRequestExtensionsTests
 
         Assert.Equal(2, res[OidcConstants.AuthorizeRequest.Resource].Length);
     }
+
+    [Theory]
+    [Obsolete]
+    [InlineData(OidcConstants.TokenRequest.ClientAssertion)]
+    [InlineData(OidcConstants.TokenRequest.ClientSecret)]
+    public void ToOptimizedFullDictionary_should_filter_client_credentials(string filteredClaimType)
+    {
+        var request = new ValidatedAuthorizeRequest()
+        {
+            Raw = new System.Collections.Specialized.NameValueCollection
+            {
+                { filteredClaimType, "" },
+            }
+        };
+
+        var result = request.ToOptimizedFullDictionary();
+
+        Assert.Empty(result);
+    }
 }

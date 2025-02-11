@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
@@ -12,16 +10,14 @@ using FluentAssertions;
 using IntegrationTests.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using Duende.IdentityModel.Client;
-using System.Collections.Generic;
-using System;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Duende.IdentityServer;
 using Microsoft.AspNetCore.DataProtection;
 using Duende.IdentityServer.Extensions;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace IntegrationTests.Hosting;
 
@@ -569,6 +565,119 @@ public class ServerSideSessionTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task using_refresh_token_without_sliding_cookie_expiration_should_not_flag_for_cookie_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = false;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = true });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            RefreshToken = tokenResponse.RefreshToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task
+        using_refresh_token_with_persistent_cookie_which_does_not_allow_renewal_should_not_flag_for_cookie_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = true;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = true, AllowRefresh = false });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            RefreshToken = tokenResponse.RefreshToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task using_refresh_token_with_non_persistent_cookie_should_not_flag_for_cookie_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = true;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = false });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            RefreshToken = tokenResponse.RefreshToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task using_refresh_token_with_persistent_cookie_should_flag_cookie_for_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = true;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = true });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            RefreshToken = tokenResponse.RefreshToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().ContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task using_access_token_should_extend_session()
     {
         await _pipeline.LoginAsync("alice");
@@ -595,6 +704,127 @@ public class ServerSideSessionTests
         var expiration2 = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single().Expires.Value;
 
         expiration2.Should().BeAfter(expiration1);
+    }
+    
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task using_access_token_without_sliding_cookie_expiration_should_not_flag_for_cookie_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = false;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = true });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.GetUserInfoAsync(new UserInfoRequest
+        {
+            Address = IdentityServerPipeline.UserInfoEndpoint,
+            ClientId = "client",
+            ClientCredentialStyle = ClientCredentialStyle.PostBody,
+            Token = tokenResponse.AccessToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task
+        using_access_token_with_persistent_cookie_which_does_not_allow_renewal_should_not_flag_for_cookie_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = true;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = true, AllowRefresh = false });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.GetUserInfoAsync(new UserInfoRequest
+        {
+            Address = IdentityServerPipeline.UserInfoEndpoint,
+            ClientId = "client",
+            ClientCredentialStyle = ClientCredentialStyle.PostBody,
+            Token = tokenResponse.AccessToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task using_access_token_with_non_persistent_cookie_should_not_flag_for_cookie_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = true;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = false });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.GetUserInfoAsync(new UserInfoRequest
+        {
+            Address = IdentityServerPipeline.UserInfoEndpoint,
+            ClientId = "client",
+            ClientCredentialStyle = ClientCredentialStyle.PostBody,
+            Token = tokenResponse.AccessToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().NotContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task using_access_token_with_persistent_cookie_should_flag_cookie_for_renewal()
+    {
+        _pipeline.Options.Authentication.CookieSlidingExpiration = true;
+        
+        await _pipeline.LoginAsync("alice", new AuthenticationProperties { IsPersistent = true });
+        
+        var authzResponse = await _pipeline.RequestAuthorizationEndpointAsync("client", "code", "openid api offline_access", "https://client/callback");
+        var tokenResponse = await _pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = "client",
+            Code = authzResponse.Code,
+            RedirectUri = "https://client/callback"
+        });
+        
+        await _pipeline.BackChannelClient.GetUserInfoAsync(new UserInfoRequest
+        {
+            Address = IdentityServerPipeline.UserInfoEndpoint,
+            ClientId = "client",
+            ClientCredentialStyle = ClientCredentialStyle.PostBody,
+            Token = tokenResponse.AccessToken
+        });
+        
+        var ticket = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single()
+            .Deserialize(_protector, null);
+        ticket.Properties.Items.Should().ContainKey(IdentityServerConstants.ForceCookieRenewalFlag);
     }
 
     [Fact]

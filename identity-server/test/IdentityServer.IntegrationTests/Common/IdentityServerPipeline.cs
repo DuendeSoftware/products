@@ -205,6 +205,7 @@ public class IdentityServerPipeline
     public string LoginReturnUrl { get; set; }
     public AuthorizationRequest LoginRequest { get; set; }
     public ClaimsPrincipal Subject { get; set; }
+    public AuthenticationProperties AuthenticationProperties { get; set; }
 
     private async Task OnLogin(HttpContext ctx)
     {
@@ -236,7 +237,7 @@ public class IdentityServerPipeline
     {
         if (Subject != null)
         {
-            var props = new AuthenticationProperties();
+            var props = AuthenticationProperties ?? new AuthenticationProperties();
             await ctx.SignInAsync(Subject, props);
             Subject = null;
             var url = ctx.Request.Query[Options.UserInteraction.LoginReturnUrlParameter].FirstOrDefault();
@@ -321,20 +322,21 @@ public class IdentityServerPipeline
     }
 
     /* helpers */
-    public async Task LoginAsync(ClaimsPrincipal subject)
+    public async Task LoginAsync(ClaimsPrincipal subject, AuthenticationProperties authenticationProperties = null)
     {
         var old = BrowserClient.AllowAutoRedirect;
         BrowserClient.AllowAutoRedirect = false;
 
         Subject = subject;
+        AuthenticationProperties = authenticationProperties;
         await BrowserClient.GetAsync(LoginPage);
 
         BrowserClient.AllowAutoRedirect = old;
     }
 
-    public async Task LoginAsync(string subject)
+    public async Task LoginAsync(string subject, AuthenticationProperties authenticationProperties = null)
     {
-        await LoginAsync(new IdentityServerUser(subject).CreatePrincipal());
+        await LoginAsync(new IdentityServerUser(subject).CreatePrincipal(), authenticationProperties);
     }
     public async Task LogoutAsync()
     {

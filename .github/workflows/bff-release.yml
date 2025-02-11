@@ -41,19 +41,12 @@ jobs:
         git config --global user.name "Duende Software GitHub Bot"
         git tag -a bff-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin bff-${{ github.event.inputs.version }}
-    - name: Pack Duende.Bff
-      run: dotnet pack -c Release src/Duende.Bff -o artifacts
-    - name: Pack Duende.Bff.Blazor
-      run: dotnet pack -c Release src/Duende.Bff.Blazor -o artifacts
-    - name: Pack Duende.Bff.Blazor.Client
-      run: dotnet pack -c Release src/Duende.Bff.Blazor.Client -o artifacts
-    - name: Pack Duende.Bff.EntityFramework
-      run: dotnet pack -c Release src/Duende.Bff.EntityFramework -o artifacts
-    - name: Pack Duende.Bff.Yarp
-      run: dotnet pack -c Release src/Duende.Bff.Yarp -o artifacts
+    - name: Pack bff.slnf
+      run: dotnet pack -c Release bff.slnf -o artifacts
     - name: Tool restore
       run: dotnet tool restore
     - name: Sign packages
+      if: github.event == 'push'
       run: |-
         for file in artifacts/*.nupkg; do
            dotnet NuGetKeyVaultSignTool sign "$file" --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ --azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 --azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 --azure-key-vault-client-secret ${{ secrets.SignClientSecret }} --azure-key-vault-certificate NuGetPackageSigning
