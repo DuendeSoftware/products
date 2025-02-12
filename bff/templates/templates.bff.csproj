@@ -1,84 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <PackageType>Template</PackageType>
-    <PackageVersion>1.0</PackageVersion>
-    <PackageId>Duende.Templates</PackageId>
-    <Description>Templates for duende.</Description>
-    <PackageTags>dotnet-new;templates;duende;identity-server;bff;</PackageTags>
-    <language>en-US</language>
-    <IncludeContentInPack>true</IncludeContentInPack>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <ContentTargetFolders>content</ContentTargetFolders>
+    <PackageId>Duende.Templates.BFF</PackageId>
+    <Description>Templates for duende BFF</Description>
+    <PackageTags>dotnet-new;templates;duende;bff;</PackageTags>
+    <MinVerTagPrefix>templates-bff-</MinVerTagPrefix>
   </PropertyGroup>
+
+  <Import Project="../../templates.props" />
 
   <PropertyGroup>
-    <Authors>Duende Software</Authors>
-    <Company>Duende Software</Company>
-    <Copyright>Duende Software</Copyright>
-
-
-    <!-- TODO - This is different between foss and is/bff -->
-    <!-- This is what foss does -->
-    <!-- <DebugType>full</DebugType> --> 
-    <!-- This is what is/bff do -->
-    <DebugType Condition="'$(GITHUB_ACTIONS)' == 'true'">embedded</DebugType>
-    
-    <!-- TODO - we want to enable nullable everywhere eventually -->
-    <!-- <Nullable>enable</Nullable> -->
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>true</ImplicitUsings>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">True</ContinuousIntegrationBuild>
-    <Deterministic>true</Deterministic>
-    <NoWarn>$(NoWarn);CS1591,NU1507</NoWarn>
-    <IsTestProject>false</IsTestProject>
-    <IsPackable>true</IsPackable>
-
-    <!--NuGet-->
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <!-- TODO - Verify that license is included in nuget packages -->
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/duendesoftware/products</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/duendesoftware/products/releases</PackageReleaseNotes>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-
-    <!--Minver-->
-    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
-    <MinVerBuildMetadata>build.$(BUILD_NUMBER)</MinVerBuildMetadata>
-    <MinVerAutoIncrement>patch</MinVerAutoIncrement>
-
-    <!--SourceLink-->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-
     <PackageReadmePath>README.md</PackageReadmePath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="MinVer">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
     <Compile Remove="**\*" />
   </ItemGroup>
   
-  <ItemGroup>
-    <None Include="../icon.png" Pack="true" Visible="false" PackagePath="" />
-    <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
-    <None Include="../LICENSE" Pack="true" PackagePath="" />
-  </ItemGroup>
+
 </Project>

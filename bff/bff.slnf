@@ -22,7 +22,6 @@
       "bff\\src\\Bff.EntityFramework\\Bff.EntityFramework.csproj",
       "bff\\src\\Bff.Yarp\\Bff.Yarp.csproj",
       "bff\\src\\Bff\\Bff.csproj",
-      "bff\\templates\\templates.bff.csproj",
       "bff\\templates\\templates\\BffLocalApi\\BffLocalApi.csproj",
       "bff\\templates\\templates\\BffRemoteApi\\BffRemoteApi.csproj",
       "bff\\test\\Bff.Blazor.Client.UnitTests\\Bff.Blazor.Client.UnitTests.csproj",

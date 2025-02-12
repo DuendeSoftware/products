@@ -15,7 +15,6 @@
       "identity-server\\src\\EntityFramework\\Duende.IdentityServer.EntityFramework.csproj",
       "identity-server\\src\\IdentityServer\\Duende.IdentityServer.csproj",
       "identity-server\\src\\Storage\\Duende.IdentityServer.Storage.csproj",
-      "identity-server\\templates\\templates.identity-server.csproj",
       "identity-server\\templates\\templates\\IdentityServerAspNetIdentity\\IdentityServerAspNetIdentity.csproj",
       "identity-server\\templates\\templates\\IdentityServerEmpty\\IdentityServerEmpty.csproj",
       "identity-server\\templates\\templates\\IdentityServerEntityFramework\\IdentityServerEntityFramework.csproj",

@@ -11,6 +11,8 @@ var contexts = Instance;
     GenerateIdentityServerWorkflow(identityServer);
     GenerateIdentityServerReleaseWorkflow(identityServer);
     GenerateCodeQlWorkflow(identityServer, "38 15 * * 0");
+    
+    GenerateTemplatesReleaseWorkflow(identityServer);
 }
 
 {
@@ -18,6 +20,8 @@ var contexts = Instance;
     GenerateBffWorkflow(bff);
     GenerateBffReleaseWorkflow(bff);
     GenerateCodeQlWorkflow(bff, "38 16 * * 0");
+
+    GenerateTemplatesReleaseWorkflow(bff);
 }
 
 
@@ -69,7 +73,9 @@ void GenerateIdentityServerWorkflow(SystemDescription system)
 
     job.StepToolRestore();
 
-    job.StepPackSolution(system.Solution);
+    job.StepPack(system.Solution);
+
+    job.StepPack(system.TemplateProject);
 
     job.StepSign();
 
@@ -114,7 +120,7 @@ git config --global user.name ""Duende Software GitHub Bot""
 git tag -a {system.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
 git push origin {system.TagPrefix}-{contexts.Event.Input.Version}");
 
-    job.StepPackSolution(system.Solution);
+    job.StepPack(system.Solution);
 
     job.StepToolRestore();
 
@@ -200,7 +206,10 @@ void GenerateBffWorkflow(SystemDescription system)
 
     job.StepToolRestore();
 
-    job.StepPackSolution(system.Solution);
+    job.StepPack(system.Solution);
+
+    job.StepPack(system.TemplateProject);
+
 
     job.StepSign();
 
@@ -239,7 +248,8 @@ void GenerateBffReleaseWorkflow(SystemDescription system)
 
     job.StepSetupDotNet();
 
-    job.StepPackSolution(system.Solution);
+    job.StepPack(system.Solution);
+    job.StepPack(system.TemplateProject);
 
     job.StepToolRestore();
 
@@ -315,6 +325,69 @@ void GenerateCodeQlWorkflow(SystemDescription system, string cronSchedule)
     WriteWorkflow(workflow, fileName);
 }
 
+void GenerateTemplatesReleaseWorkflow(SystemDescription system)
+{
+    var workflow = new Workflow($"{system.Name}/templates/release");
+
+    workflow.On
+        .WorkflowDispatch()
+        .Inputs(new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0"));
+
+    workflow.EnvDefaults();
+
+    var job = workflow
+        .Job("tag")
+        .Name("Tag and Pack")
+        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .Permissions(contents: Permission.Write, packages: Permission.Write)
+        .Defaults().Run("bash", system.Name).Job;
+
+    job.Step()
+        .ActionsCheckout();
+
+    job.StepSetupDotNet();
+
+    job.Step()
+        .Name("Git tag")
+        .Run($@"git config --global user.email ""github-bot@duendesoftware.com""
+git config --global user.name ""Duende Software GitHub Bot""
+git tag -a templates-{system.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
+git push origin templates-{system.TagPrefix}-{contexts.Event.Input.Version}");
+
+    job.StepPack(system.TemplateProject);
+
+    job.StepToolRestore();
+
+    job.StepSign();
+
+    job.StepPushToMyGet();
+
+    job.StepPushToGithub(contexts);
+
+    job.StepUploadArtifacts(system.Name);
+
+    var publishJob = workflow.Job("publish")
+        .Name("Publish to nuget.org")
+        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .Needs("tag")
+        .Environment("nuget.org", "");
+
+    publishJob.Step()
+        .Uses("actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16") // 4.1.8
+        .With(("name", "artifacts"), ("path", "artifacts"));
+
+    publishJob.StepSetupDotNet();
+
+    publishJob.Step()
+        .Name("List files")
+        .Shell("bash")
+        .Run("tree");
+
+    publishJob.StepPushToNuget();
+
+    var fileName = $"{system.Name}-templates-release";
+    WriteWorkflow(workflow, fileName);
+}
 
 void WriteWorkflow(Workflow workflow, string fileName)
 {
@@ -323,7 +396,10 @@ void WriteWorkflow(Workflow workflow, string fileName)
     Console.WriteLine($"Wrote workflow to {filePath}");
 }
 
-record SystemDescription(string Name, string Solution, string TagPrefix);
+record SystemDescription(string Name, string Solution, string TagPrefix)
+{
+    public string TemplateProject => $"templates/templates.{Name}.csproj";
+}
 
 public static class StepExtensions
 {
@@ -365,11 +441,11 @@ public static class StepExtensions
             .Name("Tool restore")
             .Run("dotnet tool restore");
 
-    public static void StepPackSolution(this Job job, string solution)
+    public static void StepPack(this Job job, string target)
     {
         job.Step()
-            .Name($"Pack {solution}")
-            .Run($"dotnet pack -c Release {solution} -o artifacts");
+            .Name($"Pack {target}")
+            .Run($"dotnet pack -c Release {target} -o artifacts");
     }
 
     public static Step StepBuild(this Job job, string solution)
