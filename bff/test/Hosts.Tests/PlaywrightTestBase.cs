@@ -4,10 +4,13 @@
 using Hosts.Tests.TestInfra;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using System.Reflection;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Hosts.Tests;
 
+[WithTestName]
 [Collection(AppHostCollection.CollectionName)]
 public class PlaywrightTestBase : PageTest, IDisposable
 {
@@ -31,6 +34,40 @@ public class PlaywrightTestBase : PageTest, IDisposable
             Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
 #endif
         }
+    }
+
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+        await Context.Tracing.StartAsync(new()
+        {
+            Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
+            Screenshots = true,
+            Snapshots = true,
+            Sources = true
+        });
+    }
+
+    public override async Task DisposeAsync()
+    {
+        var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? Environment.CurrentDirectory;
+        // if path ends with /bin/{build configuration}/{dotnetversion}, then strip that from the path. 
+        var bin = Path.GetFullPath(Path.Combine(path, "../../"));
+        if (bin.EndsWith("\\bin\\") || bin.EndsWith("/bin/"))
+        {
+            path = Path.GetFullPath(Path.Combine(path, "../../../"));
+        }
+
+
+        await Context.Tracing.StopAsync(new()
+        {
+            Path = Path.Combine(
+                path,
+                "playwright-traces",
+                $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}.zip"
+            )
+        });
+        await base.DisposeAsync();
     }
 
     public override BrowserNewContextOptions ContextOptions()
@@ -72,5 +109,21 @@ public class PlaywrightTestBase : PageTest, IDisposable
     public HttpClient CreateHttpClient(string clientName)
     {
         return Fixture.CreateHttpClient(clientName);
+    }
+}
+
+public class WithTestNameAttribute : BeforeAfterTestAttribute
+{
+    public static string CurrentTestName = string.Empty;
+    public static string CurrentClassName = string.Empty;
+
+    public override void Before(MethodInfo methodInfo)
+    {
+        CurrentTestName = methodInfo.Name;
+        CurrentClassName = methodInfo.DeclaringType!.Name;
+    }
+
+    public override void After(MethodInfo methodInfo)
+    {
     }
 }
