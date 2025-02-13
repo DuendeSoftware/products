@@ -3,8 +3,7 @@
   "classifications": [
     "Web",
     "Duende",
-    "BFF",
-    "Security"
+    "BFF"
   ],
   "name": "Duende BFF Host using a Remote API",
   "identity": "Duende.BFF.RemoteApi",

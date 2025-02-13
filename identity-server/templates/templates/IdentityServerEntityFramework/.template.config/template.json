@@ -2,6 +2,7 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
+    "Duende",
     "IdentityServer"
   ],
   "name": "Duende IdentityServer with Entity Framework Stores",

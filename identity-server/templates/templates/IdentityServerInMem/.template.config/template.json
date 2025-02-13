@@ -2,9 +2,8 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
-    "IdentityServer",
     "Duende",
-    "Security"
+    "IdentityServer"
   ],
   "name": "Duende IdentityServer with In-Memory Stores and Test Users",
   "identity": "Duende.IdentityServer.InMem",

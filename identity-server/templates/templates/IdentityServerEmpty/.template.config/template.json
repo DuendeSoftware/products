@@ -2,9 +2,8 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
-    "IdentityServer",
     "Duende",
-    "Security"
+    "IdentityServer"
   ],
   "name": "Duende IdentityServer Empty",
   "identity": "Duende.IdentityServer.Empty",
