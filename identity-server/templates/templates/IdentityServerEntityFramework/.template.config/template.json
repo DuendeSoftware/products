@@ -5,9 +5,9 @@
     "IdentityServer"
   ],
   "name": "Duende IdentityServer with Entity Framework Stores",
-  "identity": "IdentityServer.EntityFramework",
-  "groupIdentity": "IdentityServer.EntityFramework",
-  "shortName": "isef",
+  "identity": "Duende.IdentityServer.EntityFramework",
+  "groupIdentity": "Duende.IdentityServer.EntityFramework",
+  "shortName": "is-ef",
   "tags": {
     "language": "C#",
     "type": "project"

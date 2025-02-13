@@ -2,12 +2,14 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
-    "IdentityServer"
+    "IdentityServer",
+    "Duende",
+    "Security"
   ],
   "name": "Duende IdentityServer with ASP.NET Core Identity",
-  "identity": "IdentityServer.AspNetIdentity",
-  "groupIdentity": "IdentityServer.AspNetIdentity",
-  "shortName": "isaspid",
+  "identity": "Duende.IdentityServer.AspNetIdentity",
+  "groupIdentity": "Duende.IdentityServer.AspNetIdentity",
+  "shortName": "is-asp-id",
   "tags": {
     "language": "C#",
     "type": "project"

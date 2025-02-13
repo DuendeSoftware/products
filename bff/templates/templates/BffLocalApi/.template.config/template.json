@@ -2,11 +2,13 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
-    "IdentityServer"
+    "Duende",
+    "BFF",
+    "Security"
   ],
   "name": "Duende BFF using a Local API",
-  "identity": "IdentityServer.BFF.LocalApi",
-  "groupIdentity": "IdentityServer.BFF.LocalApi",
+  "identity": "Duende.BFF.LocalApi",
+  "groupIdentity": "Duende.BFF.LocalApi",
   "shortName": "bff-localapi",
   "tags": {
     "language": "C#",

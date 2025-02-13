@@ -2,12 +2,14 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
-    "IdentityServer"
+    "IdentityServer",
+    "Duende",
+    "Security"
   ],
   "name": "Duende IdentityServer Empty",
-  "identity": "IdentityServer.Empty",
-  "groupIdentity": "IdentityServer.Empty",
-  "shortName": "isempty",
+  "identity": "Duende.IdentityServer.Empty",
+  "groupIdentity": "Duende.IdentityServer.Empty",
+  "shortName": "is-empty",
   "tags": {
     "language": "C#",
     "type": "project"

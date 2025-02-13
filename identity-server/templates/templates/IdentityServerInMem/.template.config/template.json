@@ -2,12 +2,14 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
-    "IdentityServer"
+    "IdentityServer",
+    "Duende",
+    "Security"
   ],
   "name": "Duende IdentityServer with In-Memory Stores and Test Users",
-  "identity": "IdentityServer.InMem",
-  "groupIdentity": "IdentityServer.InMem",
-  "shortName": "isinmem",
+  "identity": "Duende.IdentityServer.InMem",
+  "groupIdentity": "Duende.IdentityServer.InMem",
+  "shortName": "is-inmem",
   "tags": {
     "language": "C#",
     "type": "project"

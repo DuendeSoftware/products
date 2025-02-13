@@ -2,11 +2,13 @@
   "author": "Duende Software",
   "classifications": [
     "Web",
-    "IdentityServer"
+    "Duende",
+    "BFF",
+    "Security"
   ],
   "name": "Duende BFF Host using a Remote API",
-  "identity": "IdentityServer.BFF.RemoteApi",
-  "groupIdentity": "IdentityServer.BFF.RemoteApi",
+  "identity": "Duende.BFF.RemoteApi",
+  "groupIdentity": "Duende.BFF.RemoteApi",
   "shortName": "bff-remoteapi",
   "tags": {
     "language": "C#",
@@ -19,5 +21,4 @@
       "path": "BffRemoteApi.csproj"
     }
   ]
-}
 }
