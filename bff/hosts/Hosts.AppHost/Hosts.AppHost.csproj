@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
 
@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost"/>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
   </ItemGroup>
 
     <ItemGroup>
@@ -32,6 +32,11 @@
     <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly.Client\Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
     <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly\Hosts.Bff.Blazor.WebAssembly.csproj" />
     <ProjectReference Include="..\Hosts.IdentityServer\Hosts.IdentityServer.csproj" />
+
+
+    <ProjectReference Include="..\..\templates\templates\BffLocalApi\BffLocalApi.csproj" />
+    <ProjectReference Include="..\..\templates\templates\BffRemoteApi\BffRemoteApi.csproj" />
+
   </ItemGroup>
 
 </Project>

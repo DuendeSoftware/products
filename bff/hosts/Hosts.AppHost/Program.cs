@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Hosts.ServiceDefaults;
 using Projects;
 
@@ -49,8 +50,13 @@ idServer
     .WithReference(bffBlazorPerComponent)
     .WithReference(bffBlazorWebAssembly)
     .WithReference(apiDPop)
-    .WithReference(bffDPop)
-    ;
+    .WithReference(bffDPop);
+
+builder.AddProject<BffLocalApi>("templates-bff-local", launchProfileName: null)
+    .WithHttpsEndpoint(5300, name: "bff-local");
+
+builder.AddProject<BffRemoteApi>("templates-bff-remote", launchProfileName: null)
+    .WithHttpsEndpoint(5310, name: "bff-remote");
 
 builder.Build().Run();
 
