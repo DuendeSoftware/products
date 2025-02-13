@@ -60,6 +60,14 @@ jobs:
         reporter: dotnet-trx
         fail-on-error: true
         fail-on-empty: true
+    - name: Upload playwright traces
+      if: success() || failure()
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+      with:
+        name: playwright-traces
+        path: bff/test/**/playwright-traces/*.zip
+        overwrite: true
+        retention-days: 15
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack bff.slnf

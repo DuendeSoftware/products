@@ -204,6 +204,8 @@ void GenerateBffWorkflow(Product product)
 
     job.StepTest(product.Solution);
 
+    job.StepUploadPlaywrightTestTraces(product.Name);
+
     job.StepToolRestore();
 
     job.StepPack(product.Solution);
@@ -568,6 +570,21 @@ public static class StepExtensions
             new StringInput("branch", "(Optional) the name of the branch to release from", false, "main"),
             new BooleanInput("remove-tag-if-exists", "If set, will remove the existing tag. Use this if you have issues with the previous release action", false, false));
     }
+
+    public static Step StepUploadPlaywrightTestTraces(this Job job, string componentName)
+    {
+        var path = $"{componentName}/test/**/playwright-traces/*.zip";
+        return job.Step()
+            .Name("Upload playwright traces")
+            .If("success() || failure()")
+            .Uses("actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882") // 4.4.3
+            .With(
+                ("name", "playwright-traces"),
+                ("path", path),
+                ("overwrite", "true"),
+                ("retention-days", "15"));
+    }
+
 
     public static void StepUploadArtifacts(this Job job, string componentName, bool uploadAlways = false)
     {

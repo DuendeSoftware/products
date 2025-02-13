@@ -39,6 +39,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
+        Context.SetDefaultTimeout(10_000);
         await Context.Tracing.StartAsync(new()
         {
             Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
@@ -81,7 +82,6 @@ public class PlaywrightTestBase : PageTest, IDisposable
             // Even though we use dotnet dev-certs https --trust on the build agent,
             // it still claims the certs are invalid. 
             IgnoreHTTPSErrors = true,
-            
         };
     }
 

@@ -26,9 +26,7 @@ public class CallApiPageModel : PerComponentPageModel
 {
     protected override async Task Verify()
     {
-        await Page.WaitForLoadStateAsync();
-
-        (await Page.TitleAsync()).ShouldBe("Call API");
+        await Expect(Page.GetByText("InteractiveServer")).ToBeVisibleAsync();
     }
 
     public async Task InvokeCallApi(string headingName)
