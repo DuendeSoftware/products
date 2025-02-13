@@ -7,7 +7,7 @@ using static GitHubContexts;
 var contexts = Instance;
 
 {
-    SystemDescription identityServer = new("identity-server", "identity-server.slnf", "is");
+    Product identityServer = new("identity-server", "identity-server.slnf", "is");
     GenerateIdentityServerWorkflow(identityServer);
     GenerateIdentityServerReleaseWorkflow(identityServer);
     GenerateCodeQlWorkflow(identityServer, "38 15 * * 0");
@@ -16,7 +16,7 @@ var contexts = Instance;
 }
 
 {
-    SystemDescription bff = new("bff", "bff.slnf", "bff");
+    Product bff = new("bff", "bff.slnf", "bff");
     GenerateBffWorkflow(bff);
     GenerateBffReleaseWorkflow(bff);
     GenerateCodeQlWorkflow(bff, "38 16 * * 0");
@@ -25,13 +25,13 @@ var contexts = Instance;
 }
 
 
-void GenerateIdentityServerWorkflow(SystemDescription system)
+void GenerateIdentityServerWorkflow(Product product)
 {
-    var workflow = new Workflow($"{system.Name}/ci");
+    var workflow = new Workflow($"{product.Name}/ci");
     var paths = new[]
     {
-        $".github/workflows/{system.Name}-**",
-        $"{system.Name}/**",
+        $".github/workflows/{product.Name}-**",
+        $"{product.Name}/**",
         "Directory.Packages.props"
     };
 
@@ -51,7 +51,7 @@ void GenerateIdentityServerWorkflow(SystemDescription system)
         .RunEitherOnBranchOrAsPR()
         .Name("Build")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
-        .Defaults().Run("bash", system.Name)
+        .Defaults().Run("bash", product.Name)
         .Job;
 
     job.Permissions(
@@ -67,28 +67,28 @@ void GenerateIdentityServerWorkflow(SystemDescription system)
 
     job.StepSetupDotNet();
 
-    job.StepBuild(system.Solution);
+    job.StepBuild(product.Solution);
 
-    job.StepTest(system.Solution);
+    job.StepTest(product.Solution);
 
     job.StepToolRestore();
 
-    job.StepPack(system.Solution);
+    job.StepPack(product.Solution);
 
-    job.StepPack(system.TemplateProject);
+    job.StepPack(product.TemplateProject);
 
     job.StepSign();
 
     job.StepPushToGithub(contexts);
 
-    job.StepUploadArtifacts(system.Name);
+    job.StepUploadArtifacts(product.Name);
 
-    var fileName = $"{system.Name}-ci";
+    var fileName = $"{product.Name}-ci";
     WriteWorkflow(workflow, fileName);
 }
-void GenerateIdentityServerReleaseWorkflow(SystemDescription system)
+void GenerateIdentityServerReleaseWorkflow(Product product)
 {
-    var workflow = new Workflow($"{system.Name}/release");
+    var workflow = new Workflow($"{product.Name}/release");
 
     workflow.On
         .WorkflowDispatch()
@@ -101,7 +101,7 @@ void GenerateIdentityServerReleaseWorkflow(SystemDescription system)
         .Name("Tag and Pack")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
         .Permissions(contents: Permission.Write, packages: Permission.Write)
-        .Defaults().Run("bash", system.Name).Job;
+        .Defaults().Run("bash", product.Name).Job;
 
     job.Step()
         .ActionsCheckout();
@@ -117,10 +117,10 @@ void GenerateIdentityServerReleaseWorkflow(SystemDescription system)
         .Name("Git tag")
         .Run($@"git config --global user.email ""github-bot@duendesoftware.com""
 git config --global user.name ""Duende Software GitHub Bot""
-git tag -a {system.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
-git push origin {system.TagPrefix}-{contexts.Event.Input.Version}");
+git tag -a {product.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
+git push origin {product.TagPrefix}-{contexts.Event.Input.Version}");
 
-    job.StepPack(system.Solution);
+    job.StepPack(product.Solution);
 
     job.StepToolRestore();
 
@@ -128,7 +128,7 @@ git push origin {system.TagPrefix}-{contexts.Event.Input.Version}");
 
     job.StepPushToGithub(contexts, pushAlways: true);
 
-    job.StepUploadArtifacts(system.Name, uploadAlways: true);
+    job.StepUploadArtifacts(product.Name, uploadAlways: true);
 
     var publishJob = workflow.Job("publish")
         .Name("Publish to nuget.org")
@@ -149,17 +149,17 @@ git push origin {system.TagPrefix}-{contexts.Event.Input.Version}");
 
     publishJob.StepPushToNuget(pushAlways: true);
 
-    var fileName = $"{system.Name}-release";
+    var fileName = $"{product.Name}-release";
     WriteWorkflow(workflow, fileName);
 }
 
-void GenerateBffWorkflow(SystemDescription system)
+void GenerateBffWorkflow(Product product)
 {
-    var workflow = new Workflow($"{system.Name}/ci");
+    var workflow = new Workflow($"{product.Name}/ci");
     var paths = new[]
     {
-        $".github/workflows/{system.Name}-**",
-        $"{system.Name}/**",
+        $".github/workflows/{product.Name}-**",
+        $"{product.Name}/**",
         "Directory.Packages.props"
     };
 
@@ -179,7 +179,7 @@ void GenerateBffWorkflow(SystemDescription system)
         .RunEitherOnBranchOrAsPR()
         .Name("Build")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
-        .Defaults().Run("bash", system.Name)
+        .Defaults().Run("bash", product.Name)
         .Job;
 
     job.Permissions(
@@ -195,34 +195,34 @@ void GenerateBffWorkflow(SystemDescription system)
 
     job.StepSetupDotNet();
 
-    job.StepBuild(system.Solution);
+    job.StepBuild(product.Solution);
 
     // Devcerts are needed because some tests run start an a http server with https. 
     job.StepDotNetDevCerts();
 
     job.StepInstallPlayWright();
 
-    job.StepTest(system.Solution);
+    job.StepTest(product.Solution);
 
     job.StepToolRestore();
 
-    job.StepPack(system.Solution);
+    job.StepPack(product.Solution);
 
-    job.StepPack(system.TemplateProject);
+    job.StepPack(product.TemplateProject);
 
 
     job.StepSign();
 
     job.StepPushToGithub(contexts);
 
-    job.StepUploadArtifacts(system.Name);
+    job.StepUploadArtifacts(product.Name);
 
-    var fileName = $"{system.Name}-ci";
+    var fileName = $"{product.Name}-ci";
     WriteWorkflow(workflow, fileName);
 }
-void GenerateBffReleaseWorkflow(SystemDescription system)
+void GenerateBffReleaseWorkflow(Product product)
 {
-    var workflow = new Workflow($"{system.Name}/release");
+    var workflow = new Workflow($"{product.Name}/release");
 
     workflow.On
         .WorkflowDispatch()
@@ -235,7 +235,7 @@ void GenerateBffReleaseWorkflow(SystemDescription system)
         .Name("Tag and Pack")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
         .Permissions(contents: Permission.Write, packages: Permission.Write)
-        .Defaults().Run("bash", system.Name).Job;
+        .Defaults().Run("bash", product.Name).Job;
 
     job.Step()
         .ActionsCheckout();
@@ -245,11 +245,10 @@ void GenerateBffReleaseWorkflow(SystemDescription system)
     job.StepGitRemoveExistingTagIfConfigured(system, contexts);
     job.StepGitPushTag(system, contexts);
 
-
     job.StepSetupDotNet();
 
-    job.StepPack(system.Solution);
-    job.StepPack(system.TemplateProject);
+    job.StepPack(product.Solution);
+    job.StepPack(product.TemplateProject);
 
     job.StepToolRestore();
 
@@ -278,11 +277,11 @@ void GenerateBffReleaseWorkflow(SystemDescription system)
 
     publishJob.StepPushToNuget(pushAlways: true);
 
-    var fileName = $"{system.Name}-release";
+    var fileName = $"{product.Name}-release";
     WriteWorkflow(workflow, fileName);
 }
 
-void GenerateCodeQlWorkflow(SystemDescription system, string cronSchedule)
+void GenerateCodeQlWorkflow(Product system, string cronSchedule)
 {
     var workflow = new Workflow($"{system.Name}/codeql");
     var branches = new[] { "main" };
@@ -325,9 +324,9 @@ void GenerateCodeQlWorkflow(SystemDescription system, string cronSchedule)
     WriteWorkflow(workflow, fileName);
 }
 
-void GenerateTemplatesReleaseWorkflow(SystemDescription system)
+void GenerateTemplatesReleaseWorkflow(Product product)
 {
-    var workflow = new Workflow($"{system.Name}/templates/release");
+    var workflow = new Workflow($"{product.Name}/templates/release");
 
     workflow.On
         .WorkflowDispatch()
@@ -340,7 +339,7 @@ void GenerateTemplatesReleaseWorkflow(SystemDescription system)
         .Name("Tag and Pack")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
         .Permissions(contents: Permission.Write, packages: Permission.Write)
-        .Defaults().Run("bash", system.Name).Job;
+        .Defaults().Run("bash", product.Name).Job;
 
     job.Step()
         .ActionsCheckout();
@@ -351,10 +350,10 @@ void GenerateTemplatesReleaseWorkflow(SystemDescription system)
         .Name("Git tag")
         .Run($@"git config --global user.email ""github-bot@duendesoftware.com""
 git config --global user.name ""Duende Software GitHub Bot""
-git tag -a templates-{system.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
-git push origin templates-{system.TagPrefix}-{contexts.Event.Input.Version}");
+git tag -a templates-{product.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
+git push origin templates-{product.TagPrefix}-{contexts.Event.Input.Version}");
 
-    job.StepPack(system.TemplateProject);
+    job.StepPack(product.TemplateProject);
 
     job.StepToolRestore();
 
@@ -364,7 +363,7 @@ git push origin templates-{system.TagPrefix}-{contexts.Event.Input.Version}");
 
     job.StepPushToGithub(contexts);
 
-    job.StepUploadArtifacts(system.Name);
+    job.StepUploadArtifacts(product.Name);
 
     var publishJob = workflow.Job("publish")
         .Name("Publish to nuget.org")
@@ -385,7 +384,7 @@ git push origin templates-{system.TagPrefix}-{contexts.Event.Input.Version}");
 
     publishJob.StepPushToNuget();
 
-    var fileName = $"{system.Name}-templates-release";
+    var fileName = $"{product.Name}-templates-release";
     WriteWorkflow(workflow, fileName);
 }
 
@@ -396,7 +395,7 @@ void WriteWorkflow(Workflow workflow, string fileName)
     Console.WriteLine($"Wrote workflow to {filePath}");
 }
 
-record SystemDescription(string Name, string Solution, string TagPrefix)
+record Product(string Name, string Solution, string TagPrefix)
 {
     public string TemplateProject => $"templates/templates.{Name}.csproj";
 }
