@@ -55,7 +55,25 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
         }
         catch (DbUpdateException ex)
         {
-            _logger.LogWarning("Exception creating new server-side session in database: {error}", ex.Message);
+            var exception = ex.ToString();
+
+            // There is a known race condition when two requests are trying to create a session at the same time.
+            // First, we delete the old session, then we insert the new session without the overhead of a transaction. 
+            // It's safe to ignore this exception IF it's a unique exception. The problem is, how do you check for
+            // unique constraint violations in a database-agnostic way? Here, we do that by looking at the exception message (ugh).
+
+            // SQLite would send:  ---> Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 19: 'UNIQUE constraint failed: UserSessions.ApplicationName, UserSessions.SessionId'.
+            // SQL Server would send:  ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'Session.UserSessions' with unique index 'IX_UserSessions_ApplicationName_SessionId'. The duplicate key value is (<AppName>, <SessionIdValue>).
+            // Postgres would send:  ---> Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "IX_UserSessions_ApplicationName_SessionId"
+            // MySQL would send:    ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Duplicate entry '<AppName>-<SessionIdValue>' for key 'IX_UserSessions_ApplicationName_SessionId'
+            if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) || exception.Contains("IX_UserSessions_ApplicationName_SessionId"))
+            {
+                _logger.LogDebug(ex, "Failed to save session in database due to Unique constraint error. This is likely due to a race condition between deleting the old session and inserting a new session and can safely be ignored.");
+            }
+            else
+            {
+                _logger.LogWarning(ex, "Exception creating new server-side session in database: {error}. Should this be a duplicate key error it's safe to ignore.", ex.Message);
+            }
         }
     }
 
