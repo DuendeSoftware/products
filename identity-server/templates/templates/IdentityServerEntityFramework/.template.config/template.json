@@ -8,7 +8,7 @@
   "name": "Duende IdentityServer with Entity Framework Stores",
   "identity": "Duende.IdentityServer.EntityFramework",
   "groupIdentity": "Duende.IdentityServer.EntityFramework",
-  "shortName": "is-ef",
+  "shortName": ["is-ef", "isef"],
   "tags": {
     "language": "C#",
     "type": "project"

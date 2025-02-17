@@ -8,7 +8,7 @@
   "name": "Duende IdentityServer with In-Memory Stores and Test Users",
   "identity": "Duende.IdentityServer.InMem",
   "groupIdentity": "Duende.IdentityServer.InMem",
-  "shortName": "is-inmem",
+  "shortName": ["is-inmem", "isinmem"],
   "tags": {
     "language": "C#",
     "type": "project"

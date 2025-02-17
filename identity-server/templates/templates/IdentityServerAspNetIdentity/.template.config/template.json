@@ -8,7 +8,7 @@
   "name": "Duende IdentityServer with ASP.NET Core Identity",
   "identity": "Duende.IdentityServer.AspNetIdentity",
   "groupIdentity": "Duende.IdentityServer.AspNetIdentity",
-  "shortName": "is-asp-id",
+  "shortName": ["is-asp-id", "isaspid"],
   "tags": {
     "language": "C#",
     "type": "project"
