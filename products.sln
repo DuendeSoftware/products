@@ -205,23 +205,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShouldlyExtensions", "share
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{C930B0F7-928F-4331-ACEF-273DD02532DE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{D564DCB7-9CB0-452E-990F-D98F172F0D73}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D564DCB7-9CB0-452E-990F-D98F172F0D73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BffLocalApi", "bff\templates\templates\BffLocalApi\BffLocalApi.csproj", "{3905EE35-043F-4CB1-84BF-965CA80CD6BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BffLocalApi", "bff\templates\src\BffLocalApi\BffLocalApi.csproj", "{3905EE35-043F-4CB1-84BF-965CA80CD6BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BffRemoteApi", "bff\templates\templates\BffRemoteApi\BffRemoteApi.csproj", "{592508C2-1A4A-4168-8214-4AD1C76A129C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BffRemoteApi", "bff\templates\src\BffRemoteApi\BffRemoteApi.csproj", "{592508C2-1A4A-4168-8214-4AD1C76A129C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{39208BF0-E432-4D23-BD38-B4DDD2027E16}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{4E48DFFF-31D6-4729-BE98-2835163DA73C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E48DFFF-31D6-4729-BE98-2835163DA73C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerAspNetIdentity", "identity-server\templates\templates\IdentityServerAspNetIdentity\IdentityServerAspNetIdentity.csproj", "{D4993654-07CD-4AE8-A20B-70229BABD9D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerAspNetIdentity", "identity-server\templates\src\IdentityServerAspNetIdentity\IdentityServerAspNetIdentity.csproj", "{D4993654-07CD-4AE8-A20B-70229BABD9D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerEmpty", "identity-server\templates\templates\IdentityServerEmpty\IdentityServerEmpty.csproj", "{255217AE-C852-4327-ABA0-5A5F3DFBDEBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerEmpty", "identity-server\templates\src\IdentityServerEmpty\IdentityServerEmpty.csproj", "{255217AE-C852-4327-ABA0-5A5F3DFBDEBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerEntityFramework", "identity-server\templates\templates\IdentityServerEntityFramework\IdentityServerEntityFramework.csproj", "{EEE5F529-1412-4726-A42F-D0BCB2269A13}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerEntityFramework", "identity-server\templates\src\IdentityServerEntityFramework\IdentityServerEntityFramework.csproj", "{EEE5F529-1412-4726-A42F-D0BCB2269A13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerInMem", "identity-server\templates\templates\IdentityServerInMem\IdentityServerInMem.csproj", "{790877FC-45BC-493D-9274-254BE39D875D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServerInMem", "identity-server\templates\src\IdentityServerInMem\IdentityServerInMem.csproj", "{790877FC-45BC-493D-9274-254BE39D875D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

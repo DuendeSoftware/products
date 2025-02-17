@@ -34,8 +34,8 @@
     <ProjectReference Include="..\Hosts.IdentityServer\Hosts.IdentityServer.csproj" />
 
 
-    <ProjectReference Include="..\..\templates\templates\BffLocalApi\BffLocalApi.csproj" />
-    <ProjectReference Include="..\..\templates\templates\BffRemoteApi\BffRemoteApi.csproj" />
+    <ProjectReference Include="..\..\templates\src\BffLocalApi\BffLocalApi.csproj" />
+    <ProjectReference Include="..\..\templates\src\BffRemoteApi\BffRemoteApi.csproj" />
 
   </ItemGroup>
 
