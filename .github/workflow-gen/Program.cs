@@ -108,8 +108,8 @@ void GenerateIdentityServerReleaseWorkflow(Product product)
 
     job.StepGitCheckoutCustomBranch();
     job.StepGitConfig();
-    job.StepGitRemoveExistingTagIfConfigured(system, contexts);
-    job.StepGitPushTag(system, contexts);
+    job.StepGitRemoveExistingTagIfConfigured(product, contexts);
+    job.StepGitPushTag(product, contexts);
 
     job.StepSetupDotNet();
 
@@ -244,8 +244,8 @@ void GenerateBffReleaseWorkflow(Product product)
 
     job.StepGitCheckoutCustomBranch();
     job.StepGitConfig();
-    job.StepGitRemoveExistingTagIfConfigured(system, contexts);
-    job.StepGitPushTag(system, contexts);
+    job.StepGitRemoveExistingTagIfConfigured(product, contexts);
+    job.StepGitPushTag(product, contexts);
 
     job.StepSetupDotNet();
 
@@ -258,7 +258,7 @@ void GenerateBffReleaseWorkflow(Product product)
 
     job.StepPushToGithub(contexts, pushAlways: true);
 
-    job.StepUploadArtifacts(system.Name, uploadAlways: true);
+    job.StepUploadArtifacts(product.Name, uploadAlways: true);
 
     var publishJob = workflow.Job("publish")
         .Name("Publish to nuget.org")
@@ -348,24 +348,20 @@ void GenerateTemplatesReleaseWorkflow(Product product)
 
     job.StepSetupDotNet();
 
-    job.Step()
-        .Name("Git tag")
-        .Run($@"git config --global user.email ""github-bot@duendesoftware.com""
-git config --global user.name ""Duende Software GitHub Bot""
-git tag -a templates-{product.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
-git push origin templates-{product.TagPrefix}-{contexts.Event.Input.Version}");
+    job.StepGitCheckoutCustomBranch();
+    job.StepGitConfig();
+    job.StepGitRemoveExistingTagIfConfigured(product, contexts);
+    job.StepGitPushTag(product, contexts);
 
     job.StepPack(product.TemplateProject);
 
     job.StepToolRestore();
 
-    job.StepSign();
+    job.StepSign(always: true);
 
-    job.StepPushToMyGet();
+    job.StepPushToGithub(contexts, pushAlways: true);
 
-    job.StepPushToGithub(contexts);
-
-    job.StepUploadArtifacts(product.Name);
+    job.StepUploadArtifacts(product.Name, uploadAlways: true);
 
     var publishJob = workflow.Job("publish")
         .Name("Publish to nuget.org")
@@ -384,7 +380,7 @@ git push origin templates-{product.TagPrefix}-{contexts.Event.Input.Version}");
         .Shell("bash")
         .Run("tree");
 
-    publishJob.StepPushToNuget();
+    publishJob.StepPushToNuget(pushAlways: true);
 
     var fileName = $"{product.Name}-templates-release";
     WriteWorkflow(workflow, fileName);
@@ -539,7 +535,7 @@ public static class StepExtensions
                  git config --global user.name "Duende Software GitHub Bot"
                  """);
     }
-    internal static Step StepGitRemoveExistingTagIfConfigured(this Job job, SystemDescription component, GitHubContexts contexts)
+    internal static Step StepGitRemoveExistingTagIfConfigured(this Job job, Product component, GitHubContexts contexts)
     {
         return job.Step()
             .Name("Git Config")
@@ -553,7 +549,7 @@ public static class StepExtensions
                  fi
                  """);
     }
-    internal static Step StepGitPushTag(this Job job, SystemDescription component, GitHubContexts contexts)
+    internal static Step StepGitPushTag(this Job job, Product component, GitHubContexts contexts)
     {
         return job.Step()
             .Name("Git Config")
