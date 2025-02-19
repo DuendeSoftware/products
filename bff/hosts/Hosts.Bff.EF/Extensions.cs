@@ -1,3 +1,4 @@
+using System;
 using Duende.Bff;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Builder;
@@ -46,7 +47,7 @@ namespace Bff.EF
                 {
                     // host prefixed cookie name
                     options.Cookie.Name = "__Host-spa-ef";
-
+                    options.ExpireTimeSpan  = TimeSpan.FromMinutes(5);
                     // strict SameSite handling
                     options.Cookie.SameSite = SameSiteMode.Strict;
                 })

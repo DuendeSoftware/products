@@ -42,7 +42,7 @@ internal static class Extensions
             .AddCookie("cookie", options =>
             {
                 // set session lifetime
-                options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(8);
 
                 // sliding or absolute
                 options.SlidingExpiration = false;

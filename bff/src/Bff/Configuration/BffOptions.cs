@@ -106,7 +106,7 @@ public class BffOptions
     /// Interval at which expired sessions are cleaned up.
     /// Defaults to 10 minutes.
     /// </summary>
-    public TimeSpan SessionCleanupInterval { get; set; } = TimeSpan.FromMinutes(10);
+    public TimeSpan SessionCleanupInterval { get; set; } = TimeSpan.FromSeconds(10);
 
     ///// <summary>
     ///// Batch size expired sessions are deleted.
