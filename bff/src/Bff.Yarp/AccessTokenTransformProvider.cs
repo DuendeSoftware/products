@@ -110,6 +110,7 @@ public class AccessTokenTransformProvider : ITransformProvider
             transformContext.HttpContext.CheckForBffMiddleware(_options);
 
             var accessTokenTransform = new AccessTokenRequestTransform(
+                Options.Create(_options),
                 _dPoPProofService,
                 _loggerFactory.CreateLogger<AccessTokenRequestTransform>());
 

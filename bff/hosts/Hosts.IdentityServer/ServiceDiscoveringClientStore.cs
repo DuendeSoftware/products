@@ -59,7 +59,9 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
 
-                    AccessTokenLifetime = 75 // Force refresh
+                    RefreshTokenExpiration = TokenExpiration.Absolute,
+                    AbsoluteRefreshTokenLifetime = 60,
+                    AccessTokenLifetime = 15 // Force refresh
                 },
                 new Client
                 {
@@ -103,6 +105,7 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
 
                     AccessTokenLifetime = 75 // Force refresh
+
                 },
 
                 new Client

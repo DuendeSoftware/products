@@ -134,6 +134,11 @@ public class BffOptions
     /// null, which is appropriate when not using DPoP.
     /// </summary>
     public string? DPoPJsonWebKey { get; set; }
+
+    /// <summary>
+    /// Should an user session be removed after we detect that user access tokens have expired. 
+    /// </summary>
+    public bool RemoveSessionAfterTokenExpiration { get; set; } = true;
 }
 
 /// <summary>

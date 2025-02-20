@@ -1,18 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Logging;
 using Duende.IdentityModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Model;
 using Yarp.ReverseProxy.Transforms;
 
@@ -22,6 +21,7 @@ namespace Duende.Bff.Yarp;
 /// Adds an access token to outgoing requests
 /// </summary>
 public class AccessTokenRequestTransform(
+    IOptions<BffOptions> options,
     IDPoPProofService proofService,
     ILogger<AccessTokenRequestTransform> logger) : RequestTransform
 {
@@ -76,6 +76,16 @@ public class AccessTokenRequestTransform(
                 await ApplyDPoPToken(context, dpopToken);
                 break;
             case AccessTokenRetrievalError tokenError:
+
+                if (ShouldSignOutUser(tokenError, metadata))
+                {
+                    // see if we need to sign out
+                    var authenticationSchemeProvider = context.HttpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+                    // get rid of local cookie first
+                    var signInScheme = await authenticationSchemeProvider.GetDefaultSignInSchemeAsync();
+                    await context.HttpContext.SignOutAsync(signInScheme?.Name);
+                }
+
                 ApplyError(context, tokenError, metadata.RequiredTokenType);
                 break;
             case NoAccessTokenResult noToken:
@@ -83,6 +93,25 @@ public class AccessTokenRequestTransform(
             default:
                 break;
         }
+    }
+
+    private bool ShouldSignOutUser(AccessTokenRetrievalError tokenError, BffRemoteApiEndpointMetadata metadata)
+    {
+        if (tokenError is NoAccessTokenReturnedError && metadata.RequiredTokenType == TokenType.User ||
+            metadata.RequiredTokenType == TokenType.UserOrClient)
+        {
+            if (!options.Value.RemoveSessionAfterTokenExpiration)
+            {
+                logger.FailedToRequestNewUserAccessToken(tokenError.Error);
+                return false;
+            }
+
+            logger.UserSessionRevoked(tokenError.Error);
+            return true;
+
+        }
+
+        return false;
     }
 
     private static BffRemoteApiEndpointMetadata? GetBffMetadataFromYarp(Endpoint endpoint)

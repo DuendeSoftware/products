@@ -23,4 +23,9 @@ public class AccessTokenRetrievalError : AccessTokenResult
     /// Gets or sets the error message.
     /// </summary>
     public string Error { get; set; }
+
 }
+
+public class NoAccessTokenReturnedError(string error) : AccessTokenRetrievalError(error);
+public class MissingDPopTokenError(string error) : AccessTokenRetrievalError(error);
+public class UnexpectedAccessTokenError(string error) : AccessTokenRetrievalError(error);

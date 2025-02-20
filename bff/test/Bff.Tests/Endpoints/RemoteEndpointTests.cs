@@ -40,12 +40,14 @@ namespace Duende.Bff.Tests.Endpoints
         }
 
         [Fact]
-        public async Task calls_to_remote_endpoint_with_useraccesstokenparameters_having_stored_named_token_should_forward_user_to_api()
+        public async Task
+            calls_to_remote_endpoint_with_useraccesstokenparameters_having_stored_named_token_should_forward_user_to_api()
         {
             await BffHostWithNamedTokens.BffLoginAsync("alice");
 
             ApiResponse apiResult = await BffHostWithNamedTokens.BrowserClient.CallBffHostApi(
-                url: BffHostWithNamedTokens.Url("/api_user_with_useraccesstokenparameters_having_stored_named_token/test")
+                url: BffHostWithNamedTokens.Url(
+                    "/api_user_with_useraccesstokenparameters_having_stored_named_token/test")
             );
 
             apiResult.Method.ShouldBe("GET");
@@ -55,12 +57,14 @@ namespace Duende.Bff.Tests.Endpoints
         }
 
         [Fact]
-        public async Task calls_to_remote_endpoint_with_useraccesstokenparameters_having_not_stored_corresponding_named_token_finds_no_matching_token_should_fail()        
+        public async Task
+            calls_to_remote_endpoint_with_useraccesstokenparameters_having_not_stored_corresponding_named_token_finds_no_matching_token_should_fail()
         {
             await BffHostWithNamedTokens.BffLoginAsync("alice");
 
             await BffHostWithNamedTokens.BrowserClient.CallBffHostApi(
-                url: BffHostWithNamedTokens.Url("/api_user_with_useraccesstokenparameters_having_not_stored_named_token/test"),
+                url: BffHostWithNamedTokens.Url(
+                    "/api_user_with_useraccesstokenparameters_having_not_stored_named_token/test"),
                 expectedStatusCode: HttpStatusCode.Unauthorized
             );
         }
@@ -153,6 +157,32 @@ namespace Duende.Bff.Tests.Endpoints
 
             await BffHost.BrowserClient.CallBffHostApi(
                 url: BffHost.Url("/api_with_access_token_retrieval_that_fails"),
+                expectedStatusCode: HttpStatusCode.Unauthorized
+            );
+
+            // user should be signed out
+            var result = await BffHost.GetIsUserLoggedInAsync();
+            result.ShouldBeFalse();
+        }
+
+        [Fact]
+        public async Task calls_to_remote_api_that_returns_forbidden_will_return_forbidden()
+        {
+            await BffHost.BffLoginAsync("alice");
+
+            await BffHost.BrowserClient.CallBffHostApi(
+                url: BffHost.Url("/api_forbidden"),
+                expectedStatusCode: HttpStatusCode.Forbidden
+            );
+        }
+
+        [Fact]
+        public async Task calls_to_remote_api_that_returns_unauthorized_will_return_unauthorized()
+        {
+            await BffHost.BffLoginAsync("alice");
+
+            await BffHost.BrowserClient.CallBffHostApi(
+                url: BffHost.Url("/api_unauthenticated"),
                 expectedStatusCode: HttpStatusCode.Unauthorized
             );
         }

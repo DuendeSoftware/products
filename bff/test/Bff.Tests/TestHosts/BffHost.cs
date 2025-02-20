@@ -428,6 +428,16 @@ public class BffHost : GenericHost
                 .RequireAccessToken(TokenType.UserOrClient);
 
             endpoints.MapRemoteBffApiEndpoint(
+                    "/api_unauthenticated", _apiHost.Url() + "return_unauthenticated")
+                .RequireAccessToken(TokenType.UserOrClient);
+
+
+            endpoints.MapRemoteBffApiEndpoint(
+                    "/api_forbidden", _apiHost.Url() + "return_forbidden")
+                .RequireAccessToken(TokenType.UserOrClient);
+
+
+            endpoints.MapRemoteBffApiEndpoint(
                     "/api_user_or_anon", _apiHost.Url())
                 .WithOptionalUserAccessToken();
 

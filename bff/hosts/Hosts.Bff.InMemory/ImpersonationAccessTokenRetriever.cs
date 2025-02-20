@@ -34,17 +34,15 @@ public class ImpersonationAccessTokenRetriever : DefaultAccessTokenRetriever
                 SubjectToken = bearerToken.AccessToken,
                 SubjectTokenType = OidcConstants.TokenTypeIdentifiers.AccessToken
             });
-            if(exchangeResponse.IsError)
+            if(exchangeResponse.AccessToken is null)
+            {
+                return new NoAccessTokenReturnedError("Token exchanged failed. Access token is null");
+            }
+            if (exchangeResponse.IsError)
             {
                 return new AccessTokenRetrievalError($"Token exchanged failed: {exchangeResponse.ErrorDescription}");
             }
-            if(exchangeResponse.AccessToken is null)
-            {
-                return new AccessTokenRetrievalError("Token exchanged failed. Access token is null");
-            } else
-            {
-                return new BearerTokenResult(exchangeResponse.AccessToken);
-            }
+            return new BearerTokenResult(exchangeResponse.AccessToken);
         }
 
         return result;
