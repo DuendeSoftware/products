@@ -1,0 +1,147 @@
+@page
+@model IdentityServerHost.Pages.ServerSideSessions.IndexModel
+
+    <div class="users-page">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>User Sessions</h2>
+                    </div>
+                
+                    <div class="card-body">
+
+                    @if (Model.UserSessions != null)
+                    {
+                        <div class="row">
+                            <div class="col-1 text-center">
+                                @if (Model.UserSessions.HasPrevResults)
+                                {
+                                    <a class="btn btn-primary" asp-page="/ServerSideSessions/Index"
+                                         asp-route-prev="true" 
+                                         asp-route-token="@Model.UserSessions.ResultsToken"
+                                         asp-route-DisplayNameFilter="@Model.DisplayNameFilter"
+                                         asp-route-SubjectIdFilter="@Model.SubjectIdFilter"
+                                         asp-route-SessionIdFilter="@Model.SessionIdFilter"
+                                    >Prev</a>
+                                }
+                            </div>
+                            <div class="col">
+                                <form class="form">
+                                    <div class="form-group row">
+                                        <label asp-for="@Model.DisplayNameFilter" class="col-2 col-form-label">Name:</label>
+                                        <input type="search" asp-for="@Model.DisplayNameFilter" class="col form-control" autofocus />
+                                    </div>
+                                    <div class="form-group row">
+                                        <label asp-for="@Model.SessionIdFilter" class="col-2 col-form-label">Session Id:</label>
+                                        <input type="search" asp-for="@Model.SessionIdFilter" class="col form-control" autofocus />
+                                    </div>
+                                    <div class="form-group row">
+                                        <label asp-for="@Model.SubjectIdFilter" class="col-2 col-form-label">Subject Id:</label>
+                                        <input type="search" asp-for="@Model.SubjectIdFilter" class="col form-control" autofocus />
+                                    </div>
+                                    <div class="form-group row justify-content-end">
+                                        <button type="submit" class="form-control btn btn-success col-1">Filter</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-1 text-center">
+                                @if (Model.UserSessions.HasNextResults)
+                                {
+                                    <a class="btn btn-primary" asp-page="/ServerSideSessions/Index"
+                                         asp-route-token="@Model.UserSessions.ResultsToken"
+                                         asp-route-DisplayNameFilter="@Model.DisplayNameFilter"
+                                         asp-route-SubjectIdFilter="@Model.SubjectIdFilter"
+                                         asp-route-SessionIdFilter="@Model.SessionIdFilter"
+                                    >Next</a>
+                                }
+                            </div>
+                        </div>
+
+                        @if (Model.UserSessions.TotalCount.HasValue)
+                        {
+                            <div class="text-center">
+                                @if (Model.UserSessions.CurrentPage.HasValue && Model.UserSessions.TotalPages.HasValue)
+                                {
+                                    <text>
+                                        Total Results: @Model.UserSessions.TotalCount,
+                                        Page @Model.UserSessions.CurrentPage of @Model.UserSessions.TotalPages
+                                    </text>
+                                }
+                                else
+                                {
+                                    <text>
+                                        Total Results: @Model.UserSessions.TotalCount
+                                    </text>
+                                }
+                            </div>
+                        }
+
+                        <br />
+                    
+                        @if (Model.UserSessions.Results.Any())
+                        {
+                            <div>
+                                <table class="table table-bordered table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Subject Id</th>
+                                            <th>Session Id</th>
+                                            <th>Display Name</th>
+                                            <th>Created</th>
+                                            <th>Expires</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var session in Model.UserSessions.Results)
+                                        {
+                                            <tr>
+                                                <td>@session.SubjectId</td>
+                                                <td>@session.SessionId</td>
+                                                <td>@session.DisplayName</td>
+                                                <td>@session.Created</td>
+                                                <td>@session.Expires</td>
+                                                <td>
+                                                    <form method="post">
+                                                        <input type="hidden" name="SessionId" value="@session.SessionId" />
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <tr><td colspan="6">
+                                                <strong>Clients:</strong>
+                                                @if (session.ClientIds?.Any() == true)
+                                                {
+                                                    @(session.ClientIds.Aggregate((x, y) => $"{x}, {y}"))
+                                                }
+                                                else
+                                                {
+                                                    @("None")
+                                                }
+                                            </td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center">No User Sessions</div>
+                        }
+                    }
+                    else
+                    { 
+                        <div class="row">
+                            <div class="col">
+                                You do not have server-side sessions enabled.
+                                To do so, use <i>AddServerSideSessions</i> on your IdentityServer configuration.
+                                See the <a href="https://docs.duendesoftware.com/identityserver/v6/ui/server_side_sessions">documentation</a> for more information.
+                            </div>
+                        </div>
+                    }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
