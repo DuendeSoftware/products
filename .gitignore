@@ -220,3 +220,5 @@ keys
 test/Configuration.IntegrationTests/CoverageReports
 nCrunchTemp_*
 playwright-traces
+
+artifacts
