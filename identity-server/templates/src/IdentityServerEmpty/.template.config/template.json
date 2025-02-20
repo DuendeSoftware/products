@@ -8,7 +8,7 @@
   "name": "Duende IdentityServer Empty",
   "identity": "Duende.IdentityServer.Empty",
   "groupIdentity": "Duende.IdentityServer.Empty",
-  "shortName": ["is-empty", "isempty"],
+  "shortName": ["duende-is-empty"],
   "tags": {
     "language": "C#",
     "type": "project"

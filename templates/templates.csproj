@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>Duende.Templates.BFF</PackageId>
-    <Description>Templates for duende BFF</Description>
+    <PackageId>Duende.Templates</PackageId>
+    <Description>Templates for Duende Identity Server and Duende BFF </Description>
     <PackageTags>dotnet-new;templates;duende;bff;</PackageTags>
-    <MinVerTagPrefix>templates-bff-</MinVerTagPrefix>
+    <MinVerTagPrefix>templates-</MinVerTagPrefix>
   </PropertyGroup>
 
   <Import Project="../templates.props" />

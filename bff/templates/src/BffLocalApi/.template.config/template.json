@@ -8,7 +8,7 @@
   "name": "Duende BFF using a Local API",
   "identity": "Duende.BFF.LocalApi",
   "groupIdentity": "Duende.BFF.LocalApi",
-  "shortName": "bff-localapi",
+  "shortName": "duende-bff-localapi",
   "tags": {
     "language": "C#",
     "type": "project"

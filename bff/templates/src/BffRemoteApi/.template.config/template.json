@@ -8,7 +8,7 @@
   "name": "Duende BFF Host using a Remote API",
   "identity": "Duende.BFF.RemoteApi",
   "groupIdentity": "Duende.BFF.RemoteApi",
-  "shortName": "bff-remoteapi",
+  "shortName": "duende-bff-remoteapi",
   "tags": {
     "language": "C#",
     "type": "project"
