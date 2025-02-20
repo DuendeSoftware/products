@@ -60,8 +60,6 @@ jobs:
       run: dotnet tool restore
     - name: Pack identity-server.slnf
       run: dotnet pack -c Release identity-server.slnf -o artifacts
-    - name: Pack templates/templates.identity-server.csproj
-      run: dotnet pack -c Release templates/templates.identity-server.csproj -o artifacts
     - name: Sign packages
       if: github.event == 'push'
       run: |-

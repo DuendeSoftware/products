@@ -72,8 +72,6 @@ jobs:
       run: dotnet tool restore
     - name: Pack bff.slnf
       run: dotnet pack -c Release bff.slnf -o artifacts
-    - name: Pack templates/templates.bff.csproj
-      run: dotnet pack -c Release templates/templates.bff.csproj -o artifacts
     - name: Sign packages
       if: github.event == 'push'
       run: |-

@@ -11,8 +11,6 @@ var contexts = Instance;
     GenerateIdentityServerWorkflow(identityServer);
     GenerateIdentityServerReleaseWorkflow(identityServer);
     GenerateCodeQlWorkflow(identityServer, "38 15 * * 0");
-    
-    GenerateTemplatesReleaseWorkflow(identityServer);
 }
 
 {
@@ -20,9 +18,9 @@ var contexts = Instance;
     GenerateBffWorkflow(bff);
     GenerateBffReleaseWorkflow(bff);
     GenerateCodeQlWorkflow(bff, "38 16 * * 0");
-
-    GenerateTemplatesReleaseWorkflow(bff);
 }
+
+GenerateTemplatesReleaseWorkflow(new Product("templates", "../artifacts/templates.csproj", "templates"));
 
 
 void GenerateIdentityServerWorkflow(Product product)
@@ -74,8 +72,6 @@ void GenerateIdentityServerWorkflow(Product product)
     job.StepToolRestore();
 
     job.StepPack(product.Solution);
-
-    job.StepPack(product.TemplateProject);
 
     job.StepSign();
 
@@ -210,9 +206,6 @@ void GenerateBffWorkflow(Product product)
 
     job.StepPack(product.Solution);
 
-    job.StepPack(product.TemplateProject);
-
-
     job.StepSign();
 
     job.StepPushToGithub(contexts);
@@ -250,7 +243,6 @@ void GenerateBffReleaseWorkflow(Product product)
     job.StepSetupDotNet();
 
     job.StepPack(product.Solution);
-    job.StepPack(product.TemplateProject);
 
     job.StepToolRestore();
 
@@ -328,7 +320,7 @@ void GenerateCodeQlWorkflow(Product system, string cronSchedule)
 
 void GenerateTemplatesReleaseWorkflow(Product product)
 {
-    var workflow = new Workflow($"{product.Name}/templates/release");
+    var workflow = new Workflow($"{product.Name}/release");
 
     workflow.On
         .WorkflowDispatch()
@@ -353,7 +345,9 @@ void GenerateTemplatesReleaseWorkflow(Product product)
     job.StepGitRemoveExistingTagIfConfigured(product, contexts);
     job.StepGitPushTag(product, contexts);
 
-    job.StepPack(product.TemplateProject);
+    job.Step()
+        .Name("build templates")
+        .Run("dotnet run --project build");
 
     job.StepToolRestore();
 
@@ -382,7 +376,7 @@ void GenerateTemplatesReleaseWorkflow(Product product)
 
     publishJob.StepPushToNuget(pushAlways: true);
 
-    var fileName = $"{product.Name}-templates-release";
+    var fileName = $"{product.Name}-release";
     WriteWorkflow(workflow, fileName);
 }
 
@@ -395,7 +389,6 @@ void WriteWorkflow(Workflow workflow, string fileName)
 
 record Product(string Name, string Solution, string TagPrefix)
 {
-    public string TemplateProject => $"templates/templates.{Name}.csproj";
 }
 
 public static class StepExtensions
