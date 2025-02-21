@@ -100,7 +100,7 @@ public class AccessTokenRequestTransform(
         if (tokenError is NoAccessTokenReturnedError && metadata.RequiredTokenType == TokenType.User ||
             metadata.RequiredTokenType == TokenType.UserOrClient)
         {
-            if (!options.Value.RemoveSessionAfterTokenExpiration)
+            if (!options.Value.RemoveSessionAfterRefreshTokenExpiration)
             {
                 logger.FailedToRequestNewUserAccessToken(tokenError.Error);
                 return false;
