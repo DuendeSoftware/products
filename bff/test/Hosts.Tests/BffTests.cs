@@ -1,3 +1,4 @@
+using Hosts.ServiceDefaults;
 using Hosts.Tests.TestInfra;
 using Shouldly;
 using Xunit.Abstractions;
@@ -11,8 +12,8 @@ public class BffTests : IntegrationTestBase
 
     public BffTests(ITestOutputHelper output, AppHostFixture fixture) : base(output: output, fixture: fixture)
     {
-        _httpClient = CreateHttpClient("bff");
-        _bffClient = new BffClient(CreateHttpClient("bff"));
+        _httpClient = CreateHttpClient(AppHostServices.Bff);
+        _bffClient = new BffClient(CreateHttpClient(AppHostServices.Bff));
     }
 
     [SkippableFact]
@@ -25,6 +26,10 @@ public class BffTests : IntegrationTestBase
     [SkippableFact]
     public async Task Can_initiate_login()
     {
+
+        var response = await _httpClient.GetAsync("/");
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
         await _bffClient.TriggerLogin();
 
         // Verify that there are user claims

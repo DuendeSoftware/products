@@ -2,6 +2,7 @@
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
 using Microsoft.Playwright;
+using System.Net.Http;
 using Xunit.Abstractions;
 
 namespace Hosts.Tests;
@@ -21,6 +22,9 @@ public class BffBlazorWebAssemblyTests(ITestOutputHelper output, AppHostFixture 
     [SkippableFact]
     public async Task Can_login_and_load_local_api()
     {
+        await Warmup();
+
+
         var homePage = await GoToHome();
 
         await homePage.VerifyNotLoggedIn();
@@ -37,6 +41,11 @@ public class BffBlazorWebAssemblyTests(ITestOutputHelper output, AppHostFixture 
 
     }
 
-
-
+    private async Task Warmup()
+    {
+        // there have been issues where playwright hangs on the first test run.
+        // maybe warming up the app will help?
+        var httpClient = CreateHttpClient(AppHostServices.BffBlazorWebassembly);
+        (await httpClient.GetAsync("/")).StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
 }
