@@ -310,7 +310,9 @@ void GenerateCodeQlWorkflow(Product system, string cronSchedule)
     
     job.StepInitializeCodeQl();
     
-    job.StepAutoBuildCodeQl();
+    job.StepSetupDotNet();
+
+    job.StepBuild(system.Solution);
     
     job.StepPerformCodeQlAnalysis();
     
@@ -619,14 +621,8 @@ public static class StepExtensions
             .Name("Initialize CodeQL")
             .Uses("github/codeql-action/init@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0") // 3.28.9
             .With(
-                ("languages", "csharp"));
-    }
-    
-    public static void StepAutoBuildCodeQl(this Job job)
-    {
-        job.Step()
-            .Name("Auto Build")
-            .Uses("github/codeql-action/autobuild@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0"); // 3.28.9
+                ("languages", "csharp"),
+                ("build-mode", "manual"));
     }
     
     public static void StepPerformCodeQlAnalysis(this Job job)
