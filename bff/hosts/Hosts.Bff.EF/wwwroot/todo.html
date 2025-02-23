@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="libs/bootstrap.min.css" rel="stylesheet" />
+    <link href="StyleSheet.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <h1>TODOs</h1>
+            <div>
+                <a href="/bff/login?returnUrl=/todo.html">Login</a>
+                <a href="/bff/logout?returnUrl=/todo.html">Logout</a>
+            </div>
+        </header>
+
+        <div class="row">
+            <h2>Add New</h2>
+            <div>
+                <label>Todo Date</label>
+                <input id="date" type="datetime" value="2021-03-01" />
+                <label>Todo Name</label>
+                <input id="name" value="Do something" />
+                <button id="createNewButton">Create</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Id</th>
+                        <th>Date</th>
+                        <th>Note</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody id="todos"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="todo.js"></script>
+</body>
+</html>

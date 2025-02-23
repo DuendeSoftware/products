@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+        
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="identityserver_testing.cer">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="identityserver_testing.pfx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
+        <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Licensing\v2\licenses\" />
+    </ItemGroup>
+
+
+</Project>

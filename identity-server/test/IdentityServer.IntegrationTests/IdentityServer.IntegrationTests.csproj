@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+        <PackageReference Include="AngleSharp" />
+    
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Net.Http" />
+        <PackageReference Include="System.Text.RegularExpressions" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="identityserver_testing.cer">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="identityserver_testing.pfx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="xunit.runner.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="TestLicenses\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
+        <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    </ItemGroup>
+</Project>

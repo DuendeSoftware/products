@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+﻿@using Microsoft.AspNetCore.Authentication
+
+<h2>Claims</h2>
+
+<div class="panel">
+    <a class="btn btn-primary" href="~/home/callapi">Call API</a>
+    <a class="btn btn-primary" href="~/home/renewtokens">Renew Tokens</a>
+</div>
+
+
+<dl>
+    @foreach (var claim in User.Claims)
+    {
+        <dt>@claim.Type</dt>
+        <dd>@claim.Value</dd>
+    }
+</dl>
+
+<h2>Properties</h2>
+
+<dl>
+    @foreach (var prop in (await Context.AuthenticateAsync()).Properties.Items)
+    {
+        <dt>@prop.Key</dt>
+        <dd>@prop.Value</dd>
+    }
+</dl>

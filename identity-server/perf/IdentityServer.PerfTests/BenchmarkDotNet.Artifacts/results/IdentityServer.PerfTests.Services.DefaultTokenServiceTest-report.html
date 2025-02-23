@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>IdentityServer.PerfTests.Services.DefaultTokenServiceTest-20210929-104542</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.13.1, OS=Windows 10.0.19043.1237 (21H1/May2021Update)
+Intel Core i9-9980HK CPU 2.40GHz, 1 CPU, 16 logical and 8 physical cores
+.NET SDK=6.0.100-rc.1.21458.32
+  [Host]     : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
+  DefaultJob : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>     Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th>
+</tr>
+</thead><tbody><tr><td>TestTokenCreation</td><td>908.2 &mu;s</td><td>26.35 &mu;s</td><td>76.45 &mu;s</td><td>1.00</td>
+</tr></tbody></table>
+</body>
+</html>

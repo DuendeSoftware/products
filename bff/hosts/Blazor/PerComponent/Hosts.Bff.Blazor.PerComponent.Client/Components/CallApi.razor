@@ -1,0 +1,62 @@
+@inject IRenderModeContext RenderModeContext
+@inject IHttpClientFactory Factory
+
+<div class="card">
+    <h3 class="card-header">@Header</h3>
+    <div class="card-body">
+        <AuthorizeView>
+            <NotAuthorized>
+                <p>You are not logged in.</p>
+            </NotAuthorized>
+            <Authorized>
+                <h5 class="card-subtitle">@RenderModeContext.WhereAmI()</h5>
+
+                @if(_apiResult != null)
+                {
+                        <p class="card-text">
+                            Token ID: @_apiResult.Jti
+                            <br />Retrieved at @_apiResult.Time
+                        </p>
+                } else
+                {
+                    <p class="card-text">API Result: not called yet</p>
+                }
+
+                <button class="btn btn-primary" disabled="@DisableUi" @onclick="CallApiAsync">Call API</button>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Header { get; set; } = string.Empty;
+
+    [Parameter] public bool DisableUi { get; set; } = true;
+
+    private HttpClient _http = null!;
+
+    private ApiResult? _apiResult;
+
+    protected override void OnInitialized()
+    {
+        _http = Factory.CreateClient("callApi");
+    }
+
+    protected async Task CallApiAsync()
+    {
+        DisableUi = true;
+        _apiResult = await _http.GetFromJsonAsync<ApiResult>("user-token");
+        DisableUi = false;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if(firstRender)
+        {
+            DisableUi = false;
+            StateHasChanged();
+        }
+    }
+
+    public record ApiResult(string Jti, string Time);
+}

@@ -1,0 +1,547 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    //-----------------
+    // Full solution
+    //-----------------
+    {
+      "label": "build",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/Duende.IdentityServer.sln",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+
+    //-------
+    // Hosts
+    //-------
+    {
+      "label": "build-host-main-8",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net8.0",
+          "${workspaceFolder}/hosts/main/Host.Main.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-host-main",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net9.0",
+          "${workspaceFolder}/hosts/main/Host.Main.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-host-entityframework-8",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net8.0",
+          "${workspaceFolder}/hosts/EntityFramework/Host.EntityFramework.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-host-entityframework",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net9.0",
+          "${workspaceFolder}/hosts/EntityFramework/Host.EntityFramework.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-host-aspnetidentity-8",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net8.0",
+          "${workspaceFolder}/hosts/AspNetIdentity/Host.AspNetIdentity.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-host-aspnetidentity",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net9.0",
+          "${workspaceFolder}/hosts/AspNetIdentity/Host.AspNetIdentity.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-host-configuration-8",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net8.0",
+          "${workspaceFolder}/hosts/Configuration/Host.Configuration.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-host-configuration",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "--framework=net9.0",
+          "${workspaceFolder}/hosts/Configuration/Host.Configuration.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    //------------
+    // Migrations
+    //------------
+    {
+      "label": "build-migration-identityServerDb",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/migrations/IdentityServerDb/IdentityServerDb.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-migration-aspNetIdentityDb",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/migrations/AspNetIdentityDb/AspNetIdentityDb.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    
+    //---------
+    // Clients
+    //---------
+    {
+      "label": "build-client-ConsoleCibaClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleCibaClient/ConsoleCibaClient.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleClientCredentialsFlow",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlow/ConsoleClientCredentialsFlow.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleClientCredentialsFlowCallingIdentityServerApi",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowCallingIdentityServerApi/ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleClientCredentialsFlowDPoP",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowDPoP/ConsoleClientCredentialsFlowDPoP.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleClientCredentialsFlowPostBody",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowPostBody/ConsoleClientCredentialsFlowPostBody.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleCode",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleCode/ConsoleCode.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleCustomGrant",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleCustomGrant/ConsoleExtensionGrant.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleDcrClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleDcrClient/ConsoleDcrClient.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleDeviceFlow",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleDeviceFlow/ConsoleDeviceFlow.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleEphemeralMtlsClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleEphemeralMtlsClient/ConsoleEphemeralMtlsClient.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleIntrospectionClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleIntrospectionClient/ConsoleIntrospectionClient.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleMTLSClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleMTLSClient/ConsoleMTLSClient.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleParameterizedScopeClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleParameterizedScopeClient/ConsoleParameterizedScopeClient.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsolePrivateKeyJwtClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsolePrivateKeyJwtClient/ConsolePrivateKeyJwtClient.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleResourceIndicators",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleResourceIndicators/ConsoleResourceIndicators.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleResourceOwnerFlow",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlow/ConsoleResourceOwnerFlow.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleResourceOwnerFlowPublic",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowPublic/ConsoleResourceOwnerFlowPublic.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleResourceOwnerFlowReference",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowReference/ConsoleResourceOwnerFlowReference.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleResourceOwnerFlowRefreshToken",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowRefreshToken/ConsoleResourceOwnerFlowRefreshToken.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleResourceOwnerFlowUserInfo",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowUserInfo/ConsoleResourceOwnerFlowUserInfo.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-ConsoleScopesResources",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/ConsoleScopesResources/ConsoleScopesResources.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-JsOidc",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/JsOidc/JsOidc.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-MvcAutomaticTokenManagement",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/MvcAutomaticTokenManagement/MvcAutomaticTokenManagement.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-MvcCode",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/MvcCode/MvcCode.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-MvcDPoP",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/MvcDPoP/MvcDPoP.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-MvcHybridBackChannel",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/MvcHybridBackChannel/MvcHybridBackChannel.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-MvcJarJwt",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/MvcJarJwt/MvcJarJwt.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-MvcJarUriJwt",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/MvcJarUriJwt/MvcJarUriJwt.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-client-WindowsConsoleSystemBrowser",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+          "build",
+          "${workspaceFolder}/clients/src/WindowsConsoleSystemBrowser/WindowsConsoleSystemBrowser.csproj",
+          "/property:GenerateFullPaths=true",
+          "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+
+      //------
+      // APIs
+      //------
+      {
+        "label": "build-api-simple",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/clients/src/APIs/SimpleApi/SimpleApi.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-api-dpop",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/clients/src/APIs/DPoPApi/DPoPApi.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-api-resourceBased",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/clients/src/APIs/ResourceBasedApi/ResourceBasedApi.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      }
+  ]
+}

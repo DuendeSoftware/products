@@ -1,0 +1,42 @@
+name: practices\check-pr
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, labeled, unlabeled, edited, assigned, unassigned ]
+
+jobs:
+  check-pr:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check PR title and labels
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const prTitle = context.payload.pull_request.title;
+          const branchName = context.payload.pull_request.head.ref;
+
+          // Normalize branch name and PR title by replacing slashes and hyphens with spaces, and convert to lowercase
+          const normalizeString = (str) => str.replace(/[-\/]/g, ' ').toLowerCase();
+          const normalizedPrTitle = normalizeString(prTitle);
+          const normalizedBranchName = normalizeString(branchName);
+
+          // Check if the PR title is the same as the branch name
+          if (normalizedPrTitle === normalizedBranchName) {
+            core.setFailed('PR title should not be the same as the branch name. Please provide a more descriptive title.');
+          } else {
+            console.log('PR title check passed.');
+          }
+
+          if (context.payload.pull_request.labels.length === 0) {
+            core.setFailed(`This pull request does not have any labels. Please set the 'area' and 'impact' and any relavent others.`);
+          } else {
+            console.log('PR label check passed.');
+          }
+
+          if (context.payload.pull_request.assignees.length === 0) {
+            core.setFailed(`This pull request does not have any assignees. The assignee is responsible for merging, please set one.`);
+          } else {
+            console.log('PR assignee check passed.');
+          }
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

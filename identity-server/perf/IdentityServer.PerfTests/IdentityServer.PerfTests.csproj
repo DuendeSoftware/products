@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+      <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.12" />
+        <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.4.0" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="client.cer">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="client.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

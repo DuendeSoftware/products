@@ -1,0 +1,75 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Api.Isolated
+{
+    internal static class Extensions
+    {
+        public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
+        {
+            var services = builder.Services;
+            services.AddControllers();
+
+            services.AddAuthentication("token")
+                .AddJwtBearer("token", options =>
+                {
+                    options.Authority = "https://localhost:5001";
+                    options.MapInboundClaims = false;
+
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateAudience = true,
+                        ValidAudience = "urn:isolated-api",
+                        ValidTypes = new[] { "at+jwt" },
+
+                        NameClaimType = "name",
+                        RoleClaimType = "role"
+                    };
+                });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ApiCaller", policy =>
+                {
+                    policy.RequireClaim("scope", "scope-for-isolated-api");
+                });
+
+                options.AddPolicy("RequireInteractiveUser", policy =>
+                {
+                    policy.RequireClaim("sub");
+                });
+            });
+            return builder.Build();
+        }
+
+        public static WebApplication ConfigurePipeline(this WebApplication app)
+        {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost,
+            });
+
+            app.UseHttpLogging();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.MapControllers()
+                .RequireAuthorization("ApiCaller");
+            return app;
+
+        }
+    }
+}

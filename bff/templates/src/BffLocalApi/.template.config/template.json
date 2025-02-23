@@ -1,0 +1,20 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "BFF"
+  ],
+  "name": "Duende BFF using a Local API",
+  "identity": "Duende.BFF.LocalApi",
+  "groupIdentity": "Duende.BFF.LocalApi",
+  "shortName": "duende-bff-localapi",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+
+  "sourceName": "BffLocalApi",
+  "preferNameDirectory": "true",
+  "primaryOutputs": [ { "path": "BffLocalApi.csproj" } ]
+}

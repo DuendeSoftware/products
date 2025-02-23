@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Configuration\Duende.IdentityServer.Configuration.csproj" />
+        <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
+        <ProjectReference Include="..\EntityFramework.Storage\Duende.IdentityServer.EntityFramework.Storage.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    </ItemGroup>
+</Project>

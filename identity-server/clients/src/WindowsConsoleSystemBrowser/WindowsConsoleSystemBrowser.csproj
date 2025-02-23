@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.IdentityModel.OidcClient" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging"/>
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Constants\Constants.csproj" />
+  </ItemGroup>
+
+</Project>

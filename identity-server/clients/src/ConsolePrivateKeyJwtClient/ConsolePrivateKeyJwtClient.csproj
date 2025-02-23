@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="client.p12">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Constants\Constants.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+  </ItemGroup>
+
+</Project>

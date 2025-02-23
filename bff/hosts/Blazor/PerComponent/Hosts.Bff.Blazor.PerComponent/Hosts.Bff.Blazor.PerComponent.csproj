@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	<TargetFrameworks>net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Hosts.Bff.Blazor.PerComponent.Client\Hosts.Bff.Blazor.PerComponent.Client.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bff\Bff.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bff.Yarp\Bff.Yarp.csproj" />
+    <ProjectReference Include="..\..\..\..\src\Bff.Blazor\Bff.Blazor.csproj" />
+  </ItemGroup>
+
+</Project>

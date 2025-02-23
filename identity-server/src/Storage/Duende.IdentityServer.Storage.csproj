@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+
+        <PackageId>Duende.IdentityServer.Storage</PackageId>
+        <Description>Storage interfaces and models for Duende IdentityServer</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Duende.IdentityModel" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" />
+    </ItemGroup>
+
+</Project>

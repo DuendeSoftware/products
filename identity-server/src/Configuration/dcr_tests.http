@@ -1,0 +1,335 @@
+##### Wrong Verbs #####
+###
+GET https://localhost:5001/connect/dcr
+###
+PUT https://localhost:5001/connect/dcr
+###
+DELETE  https://localhost:5001/connect/dcr
+
+##### Malformed Requests ####
+###
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+}
+
+###
+POST https://localhost:5001/connect/dcr
+
+{ }
+
+###
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+null
+
+###
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+"bogus"
+
+
+##### Semantic Errors #####
+### Missing Grant Type
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"]
+}
+
+### Unsupported Grant Type
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["password"]
+}
+
+### Client creds with a redirect uri
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials"]
+}
+
+### Auth code without a redirect uri
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "grant_types": ["authorization_code"]
+}
+
+### Auth code without a redirect uri (multiple grant types)
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "grant_types": ["authorization_code", "client_credentials"]
+}
+
+### Client creds with refresh token
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials", "refresh_token"]
+}
+
+### private_key_jwt auth method without jwk
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials", "authorization_code", "refresh_token"],
+    "client_name": "example",
+    "client_uri": "https://example.com",
+    "default_max_age": 10000,
+    "token_endpoint_auth_method": "private_key_jwt"
+}
+
+### Malformed jwks
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials", "authorization_code", "refresh_token"],
+    "client_name": "example",
+    "client_uri": "https://example.com",
+    "token_endpoint_auth_method": "private_key_jwt",
+    "jwks": {"garbage": "nonsense"}
+}
+
+### Malformed jwks (null)
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials", "authorization_code", "refresh_token"],
+    "client_name": "example",
+    "client_uri": "https://example.com",
+    "token_endpoint_auth_method": "private_key_jwt",
+    "jwks": {"keys": [null]}
+}
+
+
+### Malformed jwks (empty string)
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials", "authorization_code", "refresh_token"],
+    "client_name": "example",
+    "client_uri": "https://example.com",
+    "token_endpoint_auth_method": "private_key_jwt",
+    "jwks": {"keys": [""]}
+}
+
+
+##### Valid Requests #####
+###
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["authorization_code"]
+}
+
+### Multiple grant types
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials", "authorization_code", "refresh_token"]
+}
+
+### JWK without private_key_jwt auth method
+# Note that the private_key_jwt is inferred in this case
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "redirect_uris": ["https://example.com/callback"],
+    "grant_types": ["client_credentials", "authorization_code", "refresh_token"],
+    "client_name": "example",
+    "client_uri": "https://example.com",
+    "default_max_age": 10000,
+    "jwks": {"keys":[
+        { "kty": "oct", "use": "sig", "kid": "1", "k": "nYA-IFt8xTsdBHe9hunvizcp3Dt7f6qGqudq18kZHNtvqEGjJ9Ud-9x3kbQ-LYfLHS3xM2MpFQFg1JzT_0U_F8DI40oby4TvBDGszP664UgA8_5GjB7Flnrlsap1NlitvNpgQX3lpyTvC2zVuQ-UVsXbBDAaSBUSlnw7SE4LM8Ye2WYZrdCCXL8yAX9vIR7vf77yvNTEcBCI6y4JlvZaqMB4YKVSfygs8XqGGCHjLpE5bvI-A4ESbAUX26cVFvCeDg9pR6HK7BmwPMlO96krgtKZcXEJtUELYPys6-rbwAIdmxJxKxpgRpt0FRv_9fm6YPwG7QivYBX-vRwaodL1TA", "alg": "HS256"}
+    ]}
+}
+
+### Console Client Credentials Flow Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "client",
+    "grant_types": ["client_credentials"],
+    "scope": "resource1.scope1 resource2.scope1 IdentityServerApi"
+}
+
+
+### Console Client Credentials Flow Sample - Reference Token
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "client.reference",
+    "grant_types": ["client_credentials"],
+    "scope": "resource1.scope1 resource2.scope1 IdentityServerApi",
+    "access_token_type": "Reference"
+}
+
+### Console Resources and Scopes Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "console.resource.scope",
+    "grant_types": ["client_credentials"],
+    "scope": "resource1.scope1 resource1.scope2 resource2.scope1 resource2.scope2 resource3.scope1 resource3.scope2 shared.scope transaction scope3 scope4 IdentityServerApi"
+}
+
+### Console Client Credentials Flow with client JWT assertion
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "client.jwt",
+    "jwks": { "keys":[ 
+        { "e":"AQAB","kid":"ZzAjSnraU3bkWGnnAqLapYGpT yNfLbjbzgAPbbW2GEA","kty":"RSA","n":"wWwQFtSzeRjjerpEM5Rmqz_DsNaZ9S1Bw6UbZkDLowuuTCjBWUax0vBMMxdy6XjEEK4Oq9lKMvx9JzjmeJf1knoqSNrox3Ka0rnxXpNAz6sATvme8p9mTXyp0cX4lF4U2J54xa2_S9NF5QWvpXvBeC4GAJx7QaSw4zrUkrc6XyaAiFnLhQEwKJCwUw4NOqIuYvYp_IXhw-5Ti_icDlZS-282PcccnBeOcX7vc21pozibIdmZJKqXNsL1Ibx5Nkx1F1jLnekJAmdaACDjYRLL_6n3W4wUp19UvzB1lGtXcJKLLkqB6YDiZNu16OSiSprfmrRXvYmvD8m6Fnl5aetgKw"}
+    ]
+    },
+    "grant_types": ["client_credentials"],
+    "scope": "resource1.scope1 resource2.scope1"
+}
+
+### Console Resource Indicators Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "Console Resource Indicators Sample",
+    "require_client_secret": false,
+    "grant_types": ["authorization_code", "refresh_token"],
+    "redirect_uris": ["http://127.0.0.1"],
+    "refresh_token_usage": "ReUse",
+    "scope": "openid resource1.scope1 resource1.scope2 resource2.scope1 resource2.scope2 resource3.scope1 resource3.scope2 shared.scope transaction scope3 scope4"
+}
+
+
+### WinConsole with PKCE Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "Windows Console with PKCE Sample",
+    "require_client_secret": false,
+    "grant_types": ["authorization_code", "refresh_token"],
+    "redirect_uris": ["sample-windows-client://callback"],
+    "scope": "openid profile email resource1.scope1 resource2.scope1",
+    "allowed_identity_token_signing_algorithms": ["ES256"]
+}
+
+
+### JS OIDC Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "JavaScript OIDC Client",
+    "client_uri": "http://identityserver.io",
+
+    "grant_types": ["authorization_code"],
+    "require_client_secret": false,
+
+    "redirect_uris": [
+        "https://localhost:44300/index.html",
+        "https://localhost:44300/callback.html",
+        "https://localhost:44300/silent.html",
+        "https://localhost:44300/popup.html"
+    ],
+    "post_logout_redirect_uris": ["https://localhost:44300/index.html"],
+    "allowed_cors_origins": ["https://localhost:44300"],
+    "scope": "openid profile email resource1.scope1 resource2.scope1 transaction"
+}
+
+### MVC Automatic Token Management Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "mvc.tokenmanagement",
+
+    "grant_types": ["authorization_code", "refresh_token"],
+
+    "access_token_lifetime": 75,
+
+    "redirect_uris": [
+        "https://localhost:44301/signin-oidc"
+    ],
+    "front_channel_logout_uri": "https://localhost:44301/signout-oidc",
+    "post_logout_redirect_uris": ["https://localhost:44301/signout-callback-oidc"],
+    "scope": "openid profile email resource1.scope1 resource2.scope1 transaction"
+}
+
+### MVC Code Flow Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "mvc.code",
+    "client_uri": "http://identityserver.io",
+
+    "grant_types": ["authorization_code", "refresh_token"],
+
+    "redirect_uris": [
+        "https://localhost:44302/signin-oidc"
+    ],
+    "front_channel_logout_uri": "https://localhost:44302/signout-oidc",
+    "post_logout_redirect_uris": ["https://localhost:44302/signout-callback-oidc"],
+    "scope": "openid profile email resource1.scope1 resource2.scope1 transaction",
+    "initiate_login_uri": "https://localhost:44302/Home/Secure" 
+}
+
+### MVC Code Flow with JAR/JWT Sample
+POST https://localhost:5001/connect/dcr
+Content-Type: application/json
+
+{
+    "client_name": "MVC Code Flow with JAR/JWT",
+
+    "jwks": {
+        "keys": [
+            {"e":"AQAB","kid":"ZzAjSnraU3bkWGnnAqLapYGpTyNfLbjbzgAPbbW2GEA","kty":"RSA","n":"wWwQFtSzeRjjerpEM5Rmqz_DsNaZ9S1Bw6UbZkDLowuuTCjBWUax0vBMMxdy6XjEEK4Oq9lKMvx9JzjmeJf1knoqSNrox3Ka0rnxXpNAz6sATvme8p9mTXyp0cX4lF4U2J54xa2_S9NF5QWvpXvBeC4GAJx7QaSw4zrUkrc6XyaAiFnLhQEwKJCwUw4NOqIuYvYp_IXhw-5Ti_icDlZS-282PcccnBeOcX7vc21pozibIdmZJKqXNsL1Ibx5Nkx1F1jLnekJAmdaACDjYRLL_6n3W4wUp19UvzB1lGtXcJKLLkqB6YDiZNu16OSiSprfmrRXvYmvD8m6Fnl5aetgKw"}
+        ]
+    },
+
+    "grant_types": ["authorization_code", "refresh_token"],
+    "require_signed_request_object": true,
+
+    "redirect_uris": [
+        "https://localhost:44304/signin-oidc"
+    ],
+    "front_channel_logout_uri": "https://localhost:44304/signout-oidc",
+    "post_logout_redirect_uris": ["https://localhost:44304/signout-callback-oidc"],
+   
+    "scope": "openid profile email resource1.scope1 resource2.scope1 transaction"
+}
+
+
+
