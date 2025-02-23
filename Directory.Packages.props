@@ -1,0 +1,38 @@
+<Project>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
+    <!-- We depend on the most permissive version of the JwtBearer handler 
+             that doesn't give us a transitive dependency on a vulnerable package. -->
+    <FrameworkVersion>8.0.1</FrameworkVersion>
+    <ExtensionsVersion>8.0.0</ExtensionsVersion>
+    <WilsonVersion>7.1.2</WilsonVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0'">
+    <!-- We depend on the most permissive version of the JwtBearer handler 
+             that doesn't give us a transitive dependency on a vulnerable package. -->
+    <FrameworkVersion>9.0.0</FrameworkVersion>
+    <ExtensionsVersion>9.0.0</ExtensionsVersion>
+    <WilsonVersion>8.0.1</WilsonVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- <PackageVersion Include="Duende.AccessTokenManagement" Version="3.0.0" /> -->
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="3.1.1" />
+    <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Duende.IdentityModel" Version="7.0.0" />
+    <!-- Build -->
+    <PackageVersion Include="MinVer" Version="6.0.0" />
+    <!-- Test -->
+    <PackageVersion Include="AngleSharp" Version="1.2.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.3" />
+    <PackageVersion Include="Duende.IdentityServer" Version="7.1.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.1.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.1" />
+    <PackageVersion Include="xunit.core" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.1" />
+  </ItemGroup>
+</Project>
