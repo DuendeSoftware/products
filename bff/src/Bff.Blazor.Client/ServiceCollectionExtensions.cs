@@ -27,8 +27,8 @@ public static class ServiceCollectionExtensions
         services
             .AddAuthorizationCore()
             // Most services for wasm are singletons, because DI scope doesn't exist in wasm
-            .AddSingleton<IPersistentUserService, PersistentUserService>()
-            .AddSingleton<IGetUserService, GetUserService>()
+            .AddSingleton<PersistentUserService>()
+            .AddSingleton<GetUserService>()
             .AddSingleton<AuthenticationStateProvider, BffClientAuthenticationStateProvider>()
             .AddSingleton(TimeProvider.System)
             // HttpMessageHandlers must be registered as transient

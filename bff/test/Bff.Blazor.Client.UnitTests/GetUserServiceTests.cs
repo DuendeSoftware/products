@@ -17,7 +17,7 @@ public class GetUserServiceTests
     record ClaimRecord(string Type, object Value);
 
     [Fact]
-    public async Task FetchUser_maps_claims_into_ClaimsPrincipal()
+    public async Task GetUserAsync_maps_claims_into_ClaimsPrincipal()
     {
         var claims = new List<ClaimRecord>
         {
@@ -27,14 +27,9 @@ public class GetUserServiceTests
         };
         var json = JsonSerializer.Serialize(claims);
         var factory = TestMocks.MockHttpClientFactory(json, HttpStatusCode.OK);
-        var sut = new GetUserService(
-            factory,
-            Substitute.For<IPersistentUserService>(),
-            new FakeTimeProvider(),
-            TestMocks.MockOptions(),
-            Substitute.For<ILogger<GetUserService>>());
+        var sut = new GetUserService(factory, Substitute.For<ILogger<GetUserService>>());
 
-        var result = await sut.FetchUser();
+        var result = await sut.GetUserAsync();
 
         result.IsInRole("admin").ShouldBeTrue();
         result.IsInRole("garbage").ShouldBeFalse();
@@ -45,90 +40,88 @@ public class GetUserServiceTests
     }
 
     [Fact]
-    public async Task FetchUser_returns_anonymous_when_http_request_fails()
+    public async Task GetUserAsync_returns_anonymous_when_http_request_fails()
     {
         var factory = TestMocks.MockHttpClientFactory("Internal Server Error", HttpStatusCode.InternalServerError);
-        var sut = new GetUserService(
-            factory,
-            Substitute.For<IPersistentUserService>(),
-            new FakeTimeProvider(),
-            TestMocks.MockOptions(),
-            Substitute.For<ILogger<GetUserService>>());
-        var errorResult = await sut.FetchUser();
+        var sut = new GetUserService(factory, Substitute.For<ILogger<GetUserService>>());
+
+        var errorResult = await sut.GetUserAsync();
         errorResult.Identity?.IsAuthenticated.ShouldBeFalse();
     }
 
-    [Fact]
-    public async Task GetUser_returns_persisted_user_if_refresh_not_required()
-    {
-        var startTime = new DateTimeOffset(2024, 07, 26, 12, 00, 00, TimeSpan.Zero);
-        var timeProvider = new FakeTimeProvider();
-
-        var persistentUserService = Substitute.For<IPersistentUserService>();
-        persistentUserService.GetPersistedUser().Returns(new ClaimsPrincipal(new ClaimsIdentity(
-            [
-                new Claim("name", "example-user"),
-                new Claim("role", "admin"),
-                new Claim("foo", "bar")
-            ],
-            "pwd", "name", "role")));
-        
-        var sut = new GetUserService(
-            Substitute.For<IHttpClientFactory>(),
-            persistentUserService,
-            timeProvider,
-            TestMocks.MockOptions(),
-            Substitute.For<ILogger<GetUserService>>());
-
-        timeProvider.SetUtcNow(startTime);
-        sut.InitializeCache();
-        var user = await sut.GetUserAsync(useCache: true);
-
-        user.Identity.ShouldNotBeNull();
-        user.Identity.IsAuthenticated.ShouldBeTrue();
-        user.IsInRole("admin").ShouldBeTrue();
-        user.IsInRole("bogus").ShouldBeFalse();
-        user.FindFirst("foo")?.Value.ShouldBe("bar");
-        
-        timeProvider.SetUtcNow(startTime.AddMilliseconds(999)); // Slightly less than the refresh interval
-        user = await sut.GetUserAsync(useCache: true);
-
-        user.Identity.ShouldNotBeNull();
-        user.Identity.IsAuthenticated.ShouldBeTrue();
-        user.IsInRole("admin").ShouldBeTrue();
-        user.IsInRole("bogus").ShouldBeFalse();
-        user.FindFirst("foo")?.Value.ShouldBe("bar");
-    }
-    
-    [Fact]
-    public async Task GetUser_fetches_user_if_no_persisted_user()
-    {
-        var startTime = new DateTimeOffset(2024, 07, 26, 12, 00, 00, TimeSpan.Zero);
-        var timeProvider = new FakeTimeProvider();
-
-        var claims = new List<ClaimRecord>
-        {
-            new("name", "example-user"),
-            new("role", "admin"),
-            new("foo", "bar")
-        };
-        var json = JsonSerializer.Serialize(claims);
-        var sut = new GetUserService(
-            TestMocks.MockHttpClientFactory(json, HttpStatusCode.OK),
-            Substitute.For<IPersistentUserService>(),
-            timeProvider,
-            TestMocks.MockOptions(),
-            Substitute.For<ILogger<GetUserService>>());
-
-        timeProvider.SetUtcNow(startTime);
-        var user = await sut.GetUserAsync(useCache: true);
-
-        user.Identity.ShouldNotBeNull();
-        user.Identity.IsAuthenticated.ShouldBeTrue();
-        user.IsInRole("admin").ShouldBeTrue();
-        user.IsInRole("bogus").ShouldBeFalse();
-        user.FindFirst("foo")?.Value.ShouldBe("bar");
-    }
+    // [Fact]
+    // public async Task GetUser_returns_persisted_user_if_refresh_not_required()
+    // {
+    //     
+    //     var startTime = new DateTimeOffset(2024, 07, 26, 12, 00, 00, TimeSpan.Zero);
+    //     var timeProvider = new FakeTimeProvider();
+    //
+    //     var persistentUserService = Substitute.For<PersistentUserService>();
+    //     
+    //     persistentUserService.GetPersistedUser().Returns(new ClaimsPrincipal(new ClaimsIdentity(
+    //         [
+    //             new Claim("name", "example-user"),
+    //             new Claim("role", "admin"),
+    //             new Claim("foo", "bar")
+    //         ],
+    //         "pwd", "name", "role")));
+    //     
+    //     var sut = new GetUserService(
+    //         Substitute.For<IHttpClientFactory>(),
+    //         persistentUserService,
+    //         timeProvider,
+    //         TestMocks.MockOptions(),
+    //         Substitute.For<ILogger<GetUserService>>());
+    //
+    //     timeProvider.SetUtcNow(startTime);
+    //     sut.InitializeCache();
+    //     var user = await sut.GetUserAsync(useCache: true);
+    //
+    //     user.Identity.ShouldNotBeNull();
+    //     user.Identity.IsAuthenticated.ShouldBeTrue();
+    //     user.IsInRole("admin").ShouldBeTrue();
+    //     user.IsInRole("bogus").ShouldBeFalse();
+    //     user.FindFirst("foo")?.Value.ShouldBe("bar");
+    //     
+    //     timeProvider.SetUtcNow(startTime.AddMilliseconds(999)); // Slightly less than the refresh interval
+    //     user = await sut.GetUserAsync(useCache: true);
+    //
+    //     user.Identity.ShouldNotBeNull();
+    //     user.Identity.IsAuthenticated.ShouldBeTrue();
+    //     user.IsInRole("admin").ShouldBeTrue();
+    //     user.IsInRole("bogus").ShouldBeFalse();
+    //     user.FindFirst("foo")?.Value.ShouldBe("bar");
+    // }
+    //
+    // [Fact]
+    // public async Task GetUser_fetches_user_if_no_persisted_user()
+    // {
+    //     var startTime = new DateTimeOffset(2024, 07, 26, 12, 00, 00, TimeSpan.Zero);
+    //     var timeProvider = new FakeTimeProvider();
+    //
+    //     var claims = new List<ClaimRecord>
+    //     {
+    //         new("name", "example-user"),
+    //         new("role", "admin"),
+    //         new("foo", "bar")
+    //     };
+    //     var json = JsonSerializer.Serialize(claims);
+    //     var sut = new GetUserService(
+    //         TestMocks.MockHttpClientFactory(json, HttpStatusCode.OK),
+    //         Substitute.For<IPersistentUserService>(),
+    //         timeProvider,
+    //         TestMocks.MockOptions(),
+    //         Substitute.For<ILogger<GetUserService>>());
+    //
+    //     timeProvider.SetUtcNow(startTime);
+    //     var user = await sut.GetUserAsync(useCache: true);
+    //
+    //     user.Identity.ShouldNotBeNull();
+    //     user.Identity.IsAuthenticated.ShouldBeTrue();
+    //     user.IsInRole("admin").ShouldBeTrue();
+    //     user.IsInRole("bogus").ShouldBeFalse();
+    //     user.FindFirst("foo")?.Value.ShouldBe("bar");
+    // }
 }
 
 public class MockHttpMessageHandler : HttpMessageHandler

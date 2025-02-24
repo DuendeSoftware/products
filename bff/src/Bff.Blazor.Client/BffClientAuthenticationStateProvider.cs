@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
 using Duende.Bff.Blazor.Client.Internals;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -8,87 +9,68 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.Blazor.Client;
 
-public class BffClientAuthenticationStateProvider : AuthenticationStateProvider
+internal class BffClientAuthenticationStateProvider : AuthenticationStateProvider
 {
     public const string HttpClientName = "Duende.Bff.Blazor.Client:StateProvider";
     
-    private readonly IGetUserService _getUserService;
+    private readonly GetUserService _getUserService;
+    private readonly PersistentUserService _persistentUserService;
     private readonly TimeProvider _timeProvider;
     private readonly BffBlazorOptions _options;
+    private readonly ITimer? _timer;
+    private ClaimsPrincipal _user;
     private readonly ILogger<BffClientAuthenticationStateProvider> _logger;
 
     /// <summary>
     /// An <see cref="AuthenticationStateProvider"/> intended for use in Blazor
     /// WASM. It polls the /bff/user endpoint to monitor session state.
     /// </summary>
-    public BffClientAuthenticationStateProvider(
-        IGetUserService getUserService,
+    public BffClientAuthenticationStateProvider(GetUserService getUserService,
+        PersistentUserService persistentUserService,
         TimeProvider timeProvider,
         IOptions<BffBlazorOptions> options,
         ILogger<BffClientAuthenticationStateProvider> logger)
     {
         _getUserService = getUserService;
+        _persistentUserService = persistentUserService;
         _timeProvider = timeProvider;
         _options = options.Value;
+        _timer = _timeProvider.CreateTimer(TimerCallback,
+            null,
+            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingDelay),
+            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingInterval));
         _logger = logger;
+        _user = _persistentUserService.GetPersistedUser(out var user)
+            ? user
+            : new ClaimsPrincipal(new ClaimsIdentity());
     }
-
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    
+    private async void TimerCallback(object? _)
     {
-        _getUserService.InitializeCache();
-        var user = await _getUserService.GetUserAsync();
-        var state = new AuthenticationState(user);
-
-        if (user.Identity is  { IsAuthenticated: true })
+        // We don't want to do any polling if we already know that the user is anonymous.
+        // There's no way for us to become authenticated without the server issuing a cookie
+        // and that can't happen while the WASM code is running.
+        
+        if (_user is { Identity.IsAuthenticated: true })
         {
-            _logger.LogInformation("starting background check..");
-            ITimer? timer = null;
+            var currentUser = await _getUserService.GetUserAsync();
+            // Always notify that auth state has changed, because the user
+            // management claims (usually) change over time. 
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(currentUser)));
 
-            async void TimerCallback(object? _)
+            // If the session ended, then we can stop polling
+            if (currentUser.Identity!.IsAuthenticated == false)
             {
-                var currentUser = await _getUserService.GetUserAsync(false);
-                // Always notify that auth state has changed, because the user
-                // management claims (usually) change over time. 
-                //
-                // Future TODO - Someday we may want an extensibility point. If the
-                // user management claims have been customized, then auth state
-                // might not always change. In that case, we'd want to only fire
-                // if the user actually had changed.
-                NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(currentUser)));
-
-                if (currentUser!.Identity!.IsAuthenticated == false)
+                if (_timer != null)
                 {
-                    _logger.LogInformation("user logged out");
-
-                    if (timer != null)
-                    {
-                        await timer.DisposeAsync();
-                    }
+                    await _timer.DisposeAsync();
                 }
             }
-
-            timer = _timeProvider.CreateTimer(TimerCallback, 
-            null, 
-            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingDelay), 
-            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingInterval));
         }
-        return state;
     }
-}
 
-/// <summary>
-/// Constants for Duende.BFF
-/// </summary>
-public static class Constants
-{
-    /// <summary>
-    /// Custom claim types used by Duende.BFF
-    /// </summary>
-    public static class ClaimTypes
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        /// <summary>
-        /// Claim type for logout URL including session id
-        /// </summary>
-        public const string LogoutUrl = "bff:logout_url";
+        return Task.FromResult(new AuthenticationState(_user));
     }
 }
