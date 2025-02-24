@@ -136,7 +136,7 @@ public class BffOptions
     public string? DPoPJsonWebKey { get; set; }
 
     /// <summary>
-    /// Should an user session be removed after an attempt to use a Refresh Token to acquire
+    /// Flag that specifies if a user session should be removed after an attempt to use a Refresh Token to acquire
     /// a new Access Token fails. This behavior is only triggered when proxying requests to remote
     /// APIs with TokenType.User or TokenType.UserOrClient. Defaults to True. 
     /// </summary>
