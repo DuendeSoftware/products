@@ -197,8 +197,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer.IntegrationT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer.UnitTests", "identity-server\test\IdentityServer.UnitTests\IdentityServer.UnitTests.csproj", "{C269F06D-A108-495D-8E47-EFDEE03F7515}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FFB680B2-630C-4150-9874-2F3C59CDAB3C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{68BD9E61-031E-4786-A99A-B2351F3D1C90}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShouldlyExtensions", "shared\ShouldlyExtensions\ShouldlyExtensions.csproj", "{BA2C8EB7-B47C-4793-B0DF-38473A3F5E20}"
@@ -226,6 +224,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{808186BE-9BD0-DD1D-D574-36EEAD1E7F8F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "build", "templates\build\build.csproj", "{86BA0704-CEAC-4265-AC80-481B3D06A1B2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnetcore-authentication-jwtbearer", "aspnetcore-authentication-jwtbearer", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3F3CC55E-6A3A-4D89-A6D5-EE9DB526B7CE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{455ED57B-4C3E-4B31-BF0C-54F598999716}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Authentication.JwtBearer", "aspnetcore-authentication-jwtbearer\src\AspNetCore.Authentication.JwtBearer\AspNetCore.Authentication.JwtBearer.csproj", "{0ACB297D-188B-308B-B469-43E2F84C9DB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestFramework", "aspnetcore-authentication-jwtbearer\test\TestFramework\TestFramework.csproj", "{08FF9A07-BC47-D758-FB04-A72C06421A69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Authentication.JwtBearer.Tests", "aspnetcore-authentication-jwtbearer\test\AspNetCore.Authentication.JwtBearer.Tests\AspNetCore.Authentication.JwtBearer.Tests.csproj", "{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1269,6 +1279,42 @@ Global
 		{86BA0704-CEAC-4265-AC80-481B3D06A1B2}.Release|x64.Build.0 = Release|Any CPU
 		{86BA0704-CEAC-4265-AC80-481B3D06A1B2}.Release|x86.ActiveCfg = Release|Any CPU
 		{86BA0704-CEAC-4265-AC80-481B3D06A1B2}.Release|x86.Build.0 = Release|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Debug|x64.Build.0 = Debug|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Debug|x86.Build.0 = Debug|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Release|x64.ActiveCfg = Release|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Release|x64.Build.0 = Release|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Release|x86.ActiveCfg = Release|Any CPU
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8}.Release|x86.Build.0 = Release|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Debug|x64.Build.0 = Debug|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Debug|x86.Build.0 = Debug|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Release|x64.ActiveCfg = Release|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Release|x64.Build.0 = Release|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Release|x86.ActiveCfg = Release|Any CPU
+		{08FF9A07-BC47-D758-FB04-A72C06421A69}.Release|x86.Build.0 = Release|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Debug|x64.Build.0 = Debug|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Debug|x86.Build.0 = Debug|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|x64.ActiveCfg = Release|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|x64.Build.0 = Release|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|x86.ActiveCfg = Release|Any CPU
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1380,5 +1426,13 @@ Global
 		{EEE5F529-1412-4726-A42F-D0BCB2269A13} = {4E48DFFF-31D6-4729-BE98-2835163DA73C}
 		{790877FC-45BC-493D-9274-254BE39D875D} = {4E48DFFF-31D6-4729-BE98-2835163DA73C}
 		{86BA0704-CEAC-4265-AC80-481B3D06A1B2} = {808186BE-9BD0-DD1D-D574-36EEAD1E7F8F}
+		{3F3CC55E-6A3A-4D89-A6D5-EE9DB526B7CE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{455ED57B-4C3E-4B31-BF0C-54F598999716} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{0ACB297D-188B-308B-B469-43E2F84C9DB8} = {3F3CC55E-6A3A-4D89-A6D5-EE9DB526B7CE}
+		{08FF9A07-BC47-D758-FB04-A72C06421A69} = {455ED57B-4C3E-4B31-BF0C-54F598999716}
+		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE} = {455ED57B-4C3E-4B31-BF0C-54F598999716}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {97A97DBA-6CF1-4AE9-9C47-DB9202619C0D}
 	EndGlobalSection
 EndGlobal

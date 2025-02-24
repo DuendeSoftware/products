@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer.Tests</AssemblyName>
+        <RootNameSpace>Duende.AspNetCore.Authentication.JwtBearer</RootNameSpace>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <!-- Ignore warning about package sources from central package management -->
+        <NoWarn>NU1507</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Shouldly"/>
+        <PackageReference Include="xunit.core" />
+        <PackageReference Include="xunit.runner.visualstudio" >
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\AspNetCore.Authentication.JwtBearer\AspNetCore.Authentication.JwtBearer.csproj" />
+        <ProjectReference Include="..\TestFramework\TestFramework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit" />
+    </ItemGroup>
+</Project>

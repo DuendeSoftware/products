@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0; net9.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Duende.AspNetCore.TestFramework</RootNamespace>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <!-- Ignore warning about package sources from central package management -->
+        <NoWarn>NU1507</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AngleSharp" />
+        <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
+        <PackageReference Include="Duende.IdentityServer" />
+        <PackageReference Include="Meziantou.Extensions.Logging.Xunit" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+        <PackageReference Include="RichardSzalay.MockHttp" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="System.Text.Json" />
+    </ItemGroup>
+
+</Project>
