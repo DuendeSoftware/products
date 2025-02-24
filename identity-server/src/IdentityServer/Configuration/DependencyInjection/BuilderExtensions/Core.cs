@@ -36,6 +36,7 @@ using Duende.IdentityServer.Stores.Empty;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -195,6 +196,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransient<IReturnUrlParser, OidcReturnUrlParser>();
         builder.Services.AddScoped<IUserSession, DefaultUserSession>();
         builder.Services.AddTransient(typeof(MessageCookie<>));
+        builder.Services.AddTransient(typeof(ISanitizedLogger<>), typeof(SanitizedLogger<>));
 
         builder.Services.AddCors();
         builder.Services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
