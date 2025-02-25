@@ -10,7 +10,7 @@ namespace Duende.Bff.Blazor.Client.Internals;
 /// <summary>
 /// Internal service that retrieves user info from the /bff/user endpoint.
 /// </summary>
-public class FetchUserService
+internal class FetchUserService
 {
     private readonly HttpClient _client;
     private readonly ILogger<FetchUserService> _logger;
