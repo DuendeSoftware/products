@@ -68,11 +68,11 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
             // MySQL would send:    ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Duplicate entry '<AppName>-<SessionIdValue>' for key 'IX_UserSessions_ApplicationName_SessionId'
             if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) || exception.Contains("IX_UserSessions_ApplicationName_SessionId"))
             {
-                _logger.LogDebug(ex, "Failed to save session in database due to Unique constraint error. This is likely due to a race condition between deleting the old session and inserting a new session and can safely be ignored.");
+                _logger.LogDebug(ex, "Detected a duplicate insert of the same session. This can happen when multiple browser tabs are open and can safely be ignored.");
             }
             else
             {
-                _logger.LogWarning(ex, "Exception creating new server-side session in database: {error}. If this is a duplicate key error, it's safe to ignore.", ex.Message);
+                _logger.LogWarning(ex, "Exception creating new server-side session in database: {error}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.", ex.Message);
             }
         }
     }
