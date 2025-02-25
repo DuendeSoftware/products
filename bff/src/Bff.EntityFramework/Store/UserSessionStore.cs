@@ -72,7 +72,7 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
             }
             else
             {
-                _logger.LogWarning(ex, "Exception creating new server-side session in database: {error}. Should this be a duplicate key error it's safe to ignore.", ex.Message);
+                _logger.LogWarning(ex, "Exception creating new server-side session in database: {error}. If this is a duplicate key error, it's safe to ignore.", ex.Message);
             }
         }
     }
