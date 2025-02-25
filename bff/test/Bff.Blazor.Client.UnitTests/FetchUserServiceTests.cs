@@ -2,13 +2,10 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
-using System.Security.Claims;
 using System.Text.Json;
 using Duende.Bff.Blazor.Client.Internals;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
-using Shouldly;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
 

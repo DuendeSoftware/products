@@ -6,7 +6,6 @@ using Duende.Bff.Blazor.Client.Internals;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
-using Shouldly;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
 
@@ -153,6 +152,5 @@ public class BffClientAuthenticationStateProviderTests
         time.Advance(TimeSpan.FromSeconds(50));
         persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
         await userService.Received(2).FetchUserAsync();
-
     }
 }
