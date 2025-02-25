@@ -10,18 +10,18 @@ namespace Duende.Bff.Blazor.Client.Internals;
 /// <summary>
 /// Internal service that retrieves user info from the /bff/user endpoint.
 /// </summary>
-internal class GetUserService
+internal class FetchUserService
 {
     private readonly HttpClient _client;
-    private readonly ILogger<GetUserService> _logger;
+    private readonly ILogger<FetchUserService> _logger;
 
     /// <summary>
     /// Internal service that retrieves user info from the /bff/user endpoint.
     /// </summary>
     /// <param name="clientFactory"></param>
     /// <param name="logger"></param>
-    internal GetUserService(IHttpClientFactory clientFactory,
-        ILogger<GetUserService> logger)
+    internal FetchUserService(IHttpClientFactory clientFactory,
+        ILogger<FetchUserService> logger)
     {
         _logger = logger;
         _client = clientFactory.CreateClient(BffClientAuthenticationStateProvider.HttpClientName);
@@ -30,13 +30,13 @@ internal class GetUserService
     /// <summary>
     /// Parameterless ctor for testing only.
     /// </summary>
-    internal GetUserService()
+    internal FetchUserService()
     {
         _client = new HttpClient();
-        _logger = new Logger<GetUserService>(new LoggerFactory());
+        _logger = new Logger<FetchUserService>(new LoggerFactory());
     }
 
-    public virtual async ValueTask<ClaimsPrincipal> GetUserAsync()
+    public virtual async ValueTask<ClaimsPrincipal> FetchUserAsync()
     {
         try
         {

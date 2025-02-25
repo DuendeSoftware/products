@@ -13,7 +13,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
 {
     public const string HttpClientName = "Duende.Bff.Blazor.Client:StateProvider";
     
-    private readonly GetUserService _getUserService;
+    private readonly FetchUserService _fetchUserService;
     private readonly PersistentUserService _persistentUserService;
     private readonly TimeProvider _timeProvider;
     private readonly BffBlazorOptions _options;
@@ -25,13 +25,13 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     /// An <see cref="AuthenticationStateProvider"/> intended for use in Blazor
     /// WASM. It polls the /bff/user endpoint to monitor session state.
     /// </summary>
-    public BffClientAuthenticationStateProvider(GetUserService getUserService,
+    public BffClientAuthenticationStateProvider(FetchUserService fetchUserService,
         PersistentUserService persistentUserService,
         TimeProvider timeProvider,
         IOptions<BffBlazorOptions> options,
         ILogger<BffClientAuthenticationStateProvider> logger)
     {
-        _getUserService = getUserService;
+        _fetchUserService = fetchUserService;
         _persistentUserService = persistentUserService;
         _timeProvider = timeProvider;
         _options = options.Value;
@@ -53,7 +53,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         
         if (_user is { Identity.IsAuthenticated: true })
         {
-            var currentUser = await _getUserService.GetUserAsync();
+            var currentUser = await _fetchUserService.FetchUserAsync();
             // Always notify that auth state has changed, because the user
             // management claims (usually) change over time. 
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(currentUser)));

@@ -12,7 +12,7 @@ using Shouldly;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
 
-public class GetUserServiceTests
+public class FetchUserServiceTests
 {
     record ClaimRecord(string Type, object Value);
 
@@ -27,9 +27,9 @@ public class GetUserServiceTests
         };
         var json = JsonSerializer.Serialize(claims);
         var factory = TestMocks.MockHttpClientFactory(json, HttpStatusCode.OK);
-        var sut = new GetUserService(factory, Substitute.For<ILogger<GetUserService>>());
+        var sut = new FetchUserService(factory, Substitute.For<ILogger<FetchUserService>>());
 
-        var result = await sut.GetUserAsync();
+        var result = await sut.FetchUserAsync();
 
         result.IsInRole("admin").ShouldBeTrue();
         result.IsInRole("garbage").ShouldBeFalse();
@@ -43,9 +43,9 @@ public class GetUserServiceTests
     public async Task GetUserAsync_returns_anonymous_when_http_request_fails()
     {
         var factory = TestMocks.MockHttpClientFactory("Internal Server Error", HttpStatusCode.InternalServerError);
-        var sut = new GetUserService(factory, Substitute.For<ILogger<GetUserService>>());
+        var sut = new FetchUserService(factory, Substitute.For<ILogger<FetchUserService>>());
 
-        var errorResult = await sut.GetUserAsync();
+        var errorResult = await sut.FetchUserAsync();
         errorResult.Identity?.IsAuthenticated.ShouldBeFalse();
     }
 
