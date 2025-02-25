@@ -18,7 +18,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     private readonly TimeProvider _timeProvider;
     private readonly BffBlazorOptions _options;
     private readonly ITimer? _timer;
-    private ClaimsPrincipal _user;
+    private ClaimsPrincipal? _user;
     private readonly ILogger<BffClientAuthenticationStateProvider> _logger;
 
     /// <summary>
@@ -35,14 +35,19 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         _persistentUserService = persistentUserService;
         _timeProvider = timeProvider;
         _options = options.Value;
+        _persistentUserService.GetPersistedUser(out var user);
+        _user = user;
+        // If there is no persistent user, ignore the polling delay. The point of the polling delay is
+        // "how long would like to use the user from persistent state?" which is only meaningful if there
+        // is a user from persistent state.
+        var pollingDelay = _user != null
+            ? TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingDelay)
+            : TimeSpan.Zero;
         _timer = _timeProvider.CreateTimer(TimerCallback,
             null,
-            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingDelay),
+            pollingDelay,
             TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingInterval));
         _logger = logger;
-        _user = _persistentUserService.GetPersistedUser(out var user)
-            ? user
-            : new ClaimsPrincipal(new ClaimsIdentity());
     }
     
     private async void TimerCallback(object? _)
@@ -50,27 +55,28 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         // We don't want to do any polling if we already know that the user is anonymous.
         // There's no way for us to become authenticated without the server issuing a cookie
         // and that can't happen while the WASM code is running.
-        
-        if (_user is { Identity.IsAuthenticated: true })
+        if (_user is { Identity.IsAuthenticated: false })
         {
-            var currentUser = await _fetchUserService.FetchUserAsync();
-            // Always notify that auth state has changed, because the user
-            // management claims (usually) change over time. 
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(currentUser)));
+            return;
+        }
 
-            // If the session ended, then we can stop polling
-            if (currentUser.Identity!.IsAuthenticated == false)
+        _user = await _fetchUserService.FetchUserAsync();
+        // Always notify that auth state has changed, because the user
+        // management claims (usually) change over time. 
+        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_user)));
+
+        // If the session ended, then we can stop polling
+        if (_user.Identity!.IsAuthenticated == false)
+        {
+            if (_timer != null)
             {
-                if (_timer != null)
-                {
-                    await _timer.DisposeAsync();
-                }
+                await _timer.DisposeAsync();
             }
         }
     }
 
     public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        return Task.FromResult(new AuthenticationState(_user));
+        return Task.FromResult(new AuthenticationState(_user ?? new ClaimsPrincipal(new ClaimsIdentity())));
     }
 }

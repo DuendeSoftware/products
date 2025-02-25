@@ -12,7 +12,7 @@ namespace Duende.Bff.Blazor.Client.UnitTests;
 public class BffClientAuthenticationStateProviderTests
 {
     [Fact]
-    public async Task when_no_user_in_persistent_state_GetAuthState_returns_anonymous_and_does_not_poll()
+    public async Task when_anonymous_user_in_persistent_state_GetAuthState_returns_anonymous_and_does_not_poll()
     {
         var userService = Substitute.For<FetchUserService>();
         var persistentUserService = Substitute.For<PersistentUserService>();
@@ -103,6 +103,54 @@ public class BffClientAuthenticationStateProviderTests
         await fetchUserService.Received(2).FetchUserAsync();
     }
 
+    [Fact]
+    public async Task when_no_user_in_persistent_state_GetAuthState_polls_user_endpoint()
+    {
+        var time = new FakeTimeProvider();
+        var expectedName = "test-user";
+        var fetchUserService = Substitute.For<FetchUserService>();
+        var persistentUserService = Substitute.For<PersistentUserService>();
+        var fetchedUser = new ClaimsPrincipal(new ClaimsIdentity(
+        [
+            new Claim("name", expectedName),
+            new Claim("source", "fetch")
+        ], "pwd", "name", "role"));        
+        persistentUserService.GetPersistedUser(out Arg.Any<ClaimsPrincipal?>())
+            .Returns(x =>
+            {
+                x[0] = null;
+                return true;
+            });
+        fetchUserService.FetchUserAsync().Returns(fetchedUser);
+
+        var sut = new BffClientAuthenticationStateProvider(
+            fetchUserService,
+            persistentUserService,
+            time,
+            TestMocks.MockOptions(new BffBlazorOptions
+            {
+                WebAssemblyStateProviderPollingDelay = 2000,
+                WebAssemblyStateProviderPollingInterval = 10000
+            }),
+    Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());
+        
+        var authState = await sut.GetAuthenticationStateAsync();
+        authState.User.Identity?.IsAuthenticated.ShouldBeTrue();
+        authState.User.Identity?.Name.ShouldBe(expectedName);
+        // We fail to get a persisted user and immediately start polling
+        persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+        await fetchUserService.Received(1).FetchUserAsync();
+        
+        // Repeatedly advance time past the polling interval, and note that we make an additional call
+        // each time.
+        for (int i = 0; i < 10; i++)
+        {
+            time.Advance(TimeSpan.FromSeconds(10));
+            persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());
+            await fetchUserService.Received(i + 2).FetchUserAsync();
+        }
+    }
+    
     [Fact]
     public async Task timer_stops_when_user_logs_out()
     {
