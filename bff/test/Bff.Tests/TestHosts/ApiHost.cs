@@ -61,6 +61,20 @@ namespace Duende.Bff.Tests.TestHosts
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.Map("/return_unauthenticated",
+                    context =>
+                    {
+                        context.Response.StatusCode = (int) System.Net.HttpStatusCode.Unauthorized;
+                        return Task.CompletedTask;
+                    });
+
+                endpoints.Map("/return_forbidden",
+                    context =>
+                    {
+                        context.Response.StatusCode = (int) System.Net.HttpStatusCode.Forbidden;
+                        return Task.CompletedTask;
+                    });
+
                 endpoints.Map("/{**catch-all}", async context =>
                 {
                     // capture body if present

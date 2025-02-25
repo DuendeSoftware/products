@@ -50,15 +50,15 @@ internal static class HttpContextExtensions
             null or { AccessToken: null } =>
                 optional ?
                     new NoAccessTokenResult() :
-                    new AccessTokenRetrievalError("Missing access token"),
+                    new NoAccessTokenReturnedError("Missing access token"),
             { AccessTokenType: OidcConstants.TokenResponse.BearerTokenType } =>
                 new BearerTokenResult(token.AccessToken),
             { AccessTokenType: OidcConstants.TokenResponse.DPoPTokenType, DPoPJsonWebKey: not null } =>
                  new DPoPTokenResult(token.AccessToken, token.DPoPJsonWebKey),
             { AccessTokenType: OidcConstants.TokenResponse.DPoPTokenType, DPoPJsonWebKey: null } =>
-                 new AccessTokenRetrievalError("Missing DPoP Json Web Key for DPoP token"),
+                 new MissingDPopTokenError("Missing DPoP Json Web Key for DPoP token"),
             { AccessTokenType: string accessTokenType } =>
-                new AccessTokenRetrievalError($"Unexpected access token type: {accessTokenType} - should be one of 'DPoP' or 'Bearer'"),
+                new UnexpectedAccessTokenError($"Unexpected access token type: {accessTokenType} - should be one of 'DPoP' or 'Bearer'"),
             { AccessTokenType: null } => 
                 // Fall back to bearer tokens when the access token type is absent.
                 // In some edge cases, we've seen bearer tokens not have their type specified.

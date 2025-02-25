@@ -1,0 +1,43 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "IdentityServer"
+  ],
+  "name": "Duende IdentityServer with ASP.NET Core Identity",
+  "identity": "Duende.IdentityServer.AspNetIdentity",
+  "groupIdentity": "Duende.IdentityServer.AspNetIdentity",
+  "shortName": ["duende-is-aspid"],
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+
+  "sourceName": "IdentityServerAspNetIdentity",
+  "preferNameDirectory": "true",
+  "primaryOutputs": [ { "path": "IdentityServerAspNetIdentity.csproj" } ],
+
+  "postActions": [{
+    "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+    "args": {
+      "executable": "dotnet",
+      "args": "run /seed"
+    },
+    "manualInstructions": [{
+       "text": "Seeds the initial user database"
+    }],
+    "continueOnError": "false",
+    "description ": "seeds the database"
+  }],
+  "symbols": {
+    "RenameCommonNamespace": {
+      "datatype": "string",
+      "displayName": "Fix common host namespace.",
+      "replaces": "IdentityServerHost",
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "safe_namespace"
+    }
+  }
+}

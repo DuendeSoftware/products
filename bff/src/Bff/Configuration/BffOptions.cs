@@ -134,6 +134,13 @@ public class BffOptions
     /// null, which is appropriate when not using DPoP.
     /// </summary>
     public string? DPoPJsonWebKey { get; set; }
+
+    /// <summary>
+    /// Flag that specifies if a user session should be removed after an attempt to use a Refresh Token to acquire
+    /// a new Access Token fails. This behavior is only triggered when proxying requests to remote
+    /// APIs with TokenType.User or TokenType.UserOrClient. Defaults to True. 
+    /// </summary>
+    public bool RemoveSessionAfterRefreshTokenExpiration { get; set; } = true;
 }
 
 /// <summary>

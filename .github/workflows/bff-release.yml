@@ -9,6 +9,16 @@ on:
         type: string
         required: true
         default: '0.0.0'
+      branch:
+        description: '(Optional) the name of the branch to release from'
+        type: string
+        required: false
+        default: 'main'
+      remove-tag-if-exists:
+        description: 'If set, will remove the existing tag. Use this if you have issues with the previous release action'
+        type: boolean
+        required: false
+        default: false
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -28,6 +38,26 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: Checkout target branch
+      if: github.event.inputs.branch != 'main'
+      run: git checkout ${{ github.event.inputs.branch }}
+    - name: Git Config
+      run: |-
+        git config --global user.email "github-bot@duendesoftware.com"
+        git config --global user.name "Duende Software GitHub Bot"
+    - name: Git Config
+      if: github.event.inputs['remove-tag-if-exists'] == 'true'
+      run: |-
+        if git rev-parse bff-${{ github.event.inputs.version }} >/dev/null 2>&1; then
+          git tag -d bff-${{ github.event.inputs.version }}
+          git push --delete origin bff-${{ github.event.inputs.version }}
+        else
+          echo 'Tag bff-${{ github.event.inputs.version }} does not exist.'
+        fi
+    - name: Git Config
+      run: |-
+        git tag -a bff-${{ github.event.inputs.version }} -m ""Release v${{ github.event.inputs.version }}""
+        git push origin bff-${{ github.event.inputs.version }}
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
@@ -35,33 +65,21 @@ jobs:
           6.0.x
           8.0.x
           9.0.x
-    - name: Git tag
-      run: |-
-        git config --global user.email "github-bot@duendesoftware.com"
-        git config --global user.name "Duende Software GitHub Bot"
-        git tag -a bff-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
-        git push origin bff-${{ github.event.inputs.version }}
     - name: Pack bff.slnf
       run: dotnet pack -c Release bff.slnf -o artifacts
     - name: Tool restore
       run: dotnet tool restore
     - name: Sign packages
-      if: github.event == 'push'
       run: |-
         for file in artifacts/*.nupkg; do
            dotnet NuGetKeyVaultSignTool sign "$file" --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ --azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 --azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 --azure-key-vault-client-secret ${{ secrets.SignClientSecret }} --azure-key-vault-certificate NuGetPackageSigning
         done
-    - name: Push packages to MyGet
-      if: github.ref == 'refs/heads/main'
-      run: dotnet nuget push artifacts/*.nupkg --source https://www.myget.org/F/duende_identityserver/api/v2/package --api-key ${{ secrets.MYGET }} --skip-duplicate
     - name: Push packages to GitHub
-      if: github.ref == 'refs/heads/main'
       run: dotnet nuget push artifacts/*.nupkg --source https://nuget.pkg.github.com/DuendeSoftware/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload Artifacts
-      if: github.ref == 'refs/heads/main'
       uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
       with:
         name: artifacts
@@ -91,5 +109,4 @@ jobs:
       run: tree
       shell: bash
     - name: Push packages to nuget.org
-      if: github.ref == 'refs/heads/main'
       run: dotnet nuget push artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_API_KEY }} --skip-duplicate

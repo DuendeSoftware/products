@@ -21,6 +21,8 @@ public class BlazorPerComponentTests(ITestOutputHelper output, AppHostFixture fi
     [SkippableFact]
     public async Task Can_load_blazor_webassembly_app()
     {
+        await Warmup();
+
         var homePage = await GoToHome();
         await homePage.Login();
         var callApiPage = await homePage.GoToCallApiPage();
@@ -31,6 +33,12 @@ public class BlazorPerComponentTests(ITestOutputHelper output, AppHostFixture fi
         await callApiPage.InvokeCallApi("InteractiveAuto");
 
     }
-
+    private async Task Warmup()
+    {
+        // there have been issues where playwright hangs on the first test run.
+        // maybe warming up the app will help?
+        var httpClient = CreateHttpClient(AppHostServices.BffBlazorPerComponent);
+        (await httpClient.GetAsync("/")).StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
 
 }

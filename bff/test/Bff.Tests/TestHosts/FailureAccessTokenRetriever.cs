@@ -9,6 +9,6 @@ public class FailureAccessTokenRetriever : IAccessTokenRetriever
 {
     public Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
     {
-        return Task.FromResult<AccessTokenResult>(new AccessTokenRetrievalError("Test"));
+        return Task.FromResult<AccessTokenResult>(new NoAccessTokenReturnedError("Test"));
     }
 }

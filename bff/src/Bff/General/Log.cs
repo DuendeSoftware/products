@@ -48,6 +48,16 @@ internal static class Log
         EventIds.InvalidRouteConfiguration,
         "Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{clusterId}', routeId: '{routeId}'");
 
+    private static readonly Action<ILogger, string, Exception?> FailedToRequestNewTokenMessage = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        EventIds.InvalidRouteConfiguration,
+        "Failed to request new User Access Token due to: {message}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.");
+
+    private static readonly Action<ILogger, string, Exception?> UserSessionRevokedMessage = LoggerMessage.Define<string>(
+        LogLevel.Warning,
+        EventIds.InvalidRouteConfiguration,
+        "Failed to request new User Access Token due to: {message}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.");
+
     public static void AntiForgeryValidationFailed(this ILogger logger, string localPath)
     {
         AntiForgeryValidationFailedMessage(logger, localPath, null);
@@ -71,5 +81,15 @@ internal static class Log
     public static void InvalidRouteConfiguration(this ILogger logger, string? clusterId, string routeId)
     {
         InvalidRouteConfigurationMessage(logger, clusterId ?? "no cluster id", routeId, null);
+    }
+
+    public static void FailedToRequestNewUserAccessToken(this ILogger logger, string message)
+    {
+        FailedToRequestNewTokenMessage(logger, message, null);
+    }
+
+    public static void UserSessionRevoked(this ILogger logger, string message)
+    {
+        UserSessionRevokedMessage(logger, message, null);
     }
 }

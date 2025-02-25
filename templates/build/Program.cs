@@ -1,127 +1,103 @@
-﻿using System;
-using System.IO;
-using static Bullseye.Targets;
-using static SimpleExec.Command;
+﻿
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
 
-namespace build
+string[] paths = [
+    "../bff/templates",
+        "../identity-server/templates"
+];
+
+if (!TryFindFile("templates.csproj", out var found))
 {
-    internal static class Program
+    Console.WriteLine("Failed to find templates.csproj");
+    return -1;
+}
+
+Environment.CurrentDirectory = found.Directory!.FullName;
+
+
+var artifactsDir = new DirectoryInfo(Path.GetFullPath("../artifacts"));
+if (artifactsDir.Exists)
+{
+    artifactsDir.Delete(true);
+}
+
+artifactsDir.Create();
+
+CopyFile(artifactsDir, new FileInfo("templates.csproj"));
+CopyFile(artifactsDir, new FileInfo("README.md"));
+
+// foreach path
+foreach (var path in paths.Select(Path.GetFullPath))
+{
+    var source = new DirectoryInfo(path);
+
+    CopyDir(source, artifactsDir);
+
+}
+
+Console.WriteLine($"Copied template files to {artifactsDir}");
+Console.WriteLine("");
+Console.WriteLine("dotnet pack -c Release {artifactsDir} -o ");
+
+return 0;
+
+void CopyDir(DirectoryInfo source, DirectoryInfo target)
+{
+    if (!target.Exists)
     {
-        private const string NugetPackageVersion = "7.0.4";
-        
-        private const string packOutput = "./artifacts";
-        private const string envVarMissing = " environment variable is missing. Aborting.";
-
-        private static class Targets
-        {
-            public const string CleanPackOutput = "clean-pack-output";
-            public const string Copy = "copy";
-            public const string Build = "build";
-            public const string Pack = "pack";
-            public const string SignPackage = "sign-package";
-        }
-
-        internal static void Main(string[] args)
-        {
-            Target(Targets.Build, () =>
-            {
-                Run("dotnet", $"build -c Release --nologo");
-            });
-
-            Target(Targets.CleanPackOutput, () =>
-            {
-                if (Directory.Exists(packOutput))
-                {
-                    Directory.Delete(packOutput, true);
-                }
-            });
-
-            Target(Targets.Copy, () =>
-            {
-                DirectoryCopy("./src", "./feed/content", true);
-                DirectoryCopy("./ui", "./feed/content/ui", true);
-            });
-
-            Target(Targets.Pack, DependsOn(Targets.Copy, Targets.CleanPackOutput), () =>
-            {
-                var directory = Directory.CreateDirectory(packOutput).FullName;
-                
-                Run("./tools/nuget.exe", $"pack ./feed/Duende.IdentityServer.Templates.nuspec -OutputDirectory {directory} -Version {NugetPackageVersion}");
-            });
-
-            Target(Targets.SignPackage, DependsOn(Targets.Pack), () =>
-            {
-                SignNuGet();
-            });
-
-            Target("default", DependsOn(Targets.Build));
-
-            Target("sign", DependsOn(Targets.SignPackage));
-
-            RunTargetsAndExit(args, ex => ex is SimpleExec.NonZeroExitCodeException || ex.Message.EndsWith(envVarMissing));
-        }
-
-        private static void SignNuGet()
-        {
-            var signClientSecret = Environment.GetEnvironmentVariable("SignClientSecret");
-
-            if (string.IsNullOrWhiteSpace(signClientSecret))
-            {
-                throw new Exception($"SignClientSecret{envVarMissing}");
-            }
-
-            foreach (var file in Directory.GetFiles(packOutput, "*.nupkg", SearchOption.AllDirectories))
-            {
-                Console.WriteLine($"  Signing {file}");
-
-                Run("dotnet",
-                        "NuGetKeyVaultSignTool " +
-                        $"sign {file} " +
-                        "--file-digest sha256 " +
-                        "--timestamp-rfc3161 http://timestamp.digicert.com " +
-                        "--azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ " +
-                        "--azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 " +
-                        "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 " +
-                        $"--azure-key-vault-client-secret {signClientSecret} " +
-                        "--azure-key-vault-certificate NuGetPackageSigning"
-                        ,noEcho: true);
-            }
-        }
-
-        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-        {
-            // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-
-            if (!dir.Exists)
-            {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + sourceDirName);
-            }
-
-            DirectoryInfo[] dirs = dir.GetDirectories();
-
-            // If the destination directory doesn't exist, create it.       
-            Directory.CreateDirectory(destDirName);
-
-            // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                string tempPath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(tempPath, true);
-            }
-
-            // If copying subdirectories, copy them and their contents to new location.
-            if (copySubDirs)
-            {
-                foreach (DirectoryInfo subdir in dirs)
-                {
-                    string tempPath = Path.Combine(destDirName, subdir.Name);
-                    DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
-                }
-            }
-        }
+        target.Create();
     }
+
+    foreach (var file in source.EnumerateFiles())
+    {
+        if (file.Name == "Directory.Build.props")
+        {
+            continue;
+        }
+
+        CopyFile(target, file);
+    }
+
+
+    foreach (var child in source.GetDirectories())
+    {
+        if (child.Name == "obj" || child.Name == "bin")
+        {
+            continue;
+        }
+
+        CopyDir(child,  new DirectoryInfo(Path.Combine(target.FullName, child.Name)));
+    }
+
+}
+
+void CopyFile(DirectoryInfo directoryInfo, FileInfo fileInfo)
+{
+    var destFileName = Path.Combine(directoryInfo.FullName, fileInfo.Name);
+    fileInfo.CopyTo(destFileName, true);
+}
+
+bool TryFindFile(string fileName, [NotNullWhen(true)]out FileInfo? found)
+{
+
+
+    var currentDir = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) 
+                                       ?? throw new InvalidOperationException("Failed to find directory for current assembly"));
+
+    while (currentDir != null && currentDir.Exists)
+    {
+        var lookingFor = Path.Combine(currentDir.FullName, fileName);
+        if (File.Exists(lookingFor))
+        {
+            found = new FileInfo(lookingFor);
+            return true;
+        }
+
+        currentDir = currentDir.Parent;
+    }
+
+    found = null;
+    return false;
 }

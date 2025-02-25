@@ -4,10 +4,13 @@
 using Hosts.Tests.TestInfra;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
+using System.Reflection;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Hosts.Tests;
 
+[WithTestName]
 [Collection(AppHostCollection.CollectionName)]
 public class PlaywrightTestBase : PageTest, IDisposable
 {
@@ -33,6 +36,41 @@ public class PlaywrightTestBase : PageTest, IDisposable
         }
     }
 
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+        Context.SetDefaultTimeout(10_000);
+        await Context.Tracing.StartAsync(new()
+        {
+            Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
+            Screenshots = true,
+            Snapshots = true,
+            Sources = true
+        });
+    }
+
+    public override async Task DisposeAsync()
+    {
+        var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? Environment.CurrentDirectory;
+        // if path ends with /bin/{build configuration}/{dotnetversion}, then strip that from the path. 
+        var bin = Path.GetFullPath(Path.Combine(path, "../../"));
+        if (bin.EndsWith("\\bin\\") || bin.EndsWith("/bin/"))
+        {
+            path = Path.GetFullPath(Path.Combine(path, "../../../"));
+        }
+
+
+        await Context.Tracing.StopAsync(new()
+        {
+            Path = Path.Combine(
+                path,
+                "playwright-traces",
+                $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}.zip"
+            )
+        });
+        await base.DisposeAsync();
+    }
+
     public override BrowserNewContextOptions ContextOptions()
     {
         return new()
@@ -44,7 +82,6 @@ public class PlaywrightTestBase : PageTest, IDisposable
             // Even though we use dotnet dev-certs https --trust on the build agent,
             // it still claims the certs are invalid. 
             IgnoreHTTPSErrors = true,
-            
         };
     }
 
@@ -72,5 +109,21 @@ public class PlaywrightTestBase : PageTest, IDisposable
     public HttpClient CreateHttpClient(string clientName)
     {
         return Fixture.CreateHttpClient(clientName);
+    }
+}
+
+public class WithTestNameAttribute : BeforeAfterTestAttribute
+{
+    public static string CurrentTestName = string.Empty;
+    public static string CurrentClassName = string.Empty;
+
+    public override void Before(MethodInfo methodInfo)
+    {
+        CurrentTestName = methodInfo.Name;
+        CurrentClassName = methodInfo.DeclaringType!.Name;
+    }
+
+    public override void After(MethodInfo methodInfo)
+    {
     }
 }

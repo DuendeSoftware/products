@@ -1,14 +1,10 @@
-﻿using Microsoft.Playwright;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Playwright;
 
 namespace Hosts.Tests.PageModels;
 
 public class PerComponentPageModel : BlazorModel
 {
-    protected override async Task Verify()
-    {
-        (await Page.TitleAsync()).ShouldBe("Home");
-    }
-
     public async Task<WebAssemblyPageModel> LogOut()
     {
         // Log out again
@@ -28,6 +24,11 @@ public class PerComponentPageModel : BlazorModel
 
 public class CallApiPageModel : PerComponentPageModel
 {
+    protected override async Task Verify()
+    {
+        await Expect(Page.GetByText("InteractiveServer")).ToBeVisibleAsync();
+    }
+
     public async Task InvokeCallApi(string headingName)
     {
         // Get the heading with the name "InteractiveServer"

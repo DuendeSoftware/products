@@ -1,0 +1,30 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "IdentityServer"
+  ],
+  "name": "Duende IdentityServer with In-Memory Stores and Test Users",
+  "identity": "Duende.IdentityServer.InMem",
+  "groupIdentity": "Duende.IdentityServer.InMem",
+  "shortName": ["duende-is-inmem"],
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+
+  "sourceName": "IdentityServerInMem",
+  "preferNameDirectory": "true",
+  "primaryOutputs": [ { "path": "IdentityServerInMem.csproj" } ],
+  "symbols": {
+    "RenameCommonNamespace": {
+      "datatype": "string",
+      "displayName": "Fix common host namespace.",
+      "replaces": "IdentityServerHost",
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "safe_namespace"
+    }
+  }
+}
