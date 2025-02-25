@@ -53,7 +53,7 @@ jobs:
         fi
     - name: Git Config
       run: |-
-        git tag -a templates-${{ github.event.inputs.version }} -m ""Release v${{ github.event.inputs.version }}""
+        git tag -a templates-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin templates-${{ github.event.inputs.version }}
     - name: build templates
       run: dotnet run --project build

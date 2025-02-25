@@ -56,7 +56,7 @@ jobs:
         fi
     - name: Git Config
       run: |-
-        git tag -a bff-${{ github.event.inputs.version }} -m ""Release v${{ github.event.inputs.version }}""
+        git tag -a bff-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin bff-${{ github.event.inputs.version }}
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25

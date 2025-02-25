@@ -549,7 +549,7 @@ public static class StepExtensions
         return job.Step()
             .Name("Git Config")
             .Run($"""
-                 git tag -a {component.TagPrefix}-{contexts.Event.Input.Version} -m ""Release v{contexts.Event.Input.Version}""
+                 git tag -a {component.TagPrefix}-{contexts.Event.Input.Version} -m "Release v{contexts.Event.Input.Version}"
                  git push origin {component.TagPrefix}-{contexts.Event.Input.Version}
                  """);
     }
