@@ -109,6 +109,21 @@ namespace Duende.Bff.Tests.Endpoints.Management
         }
 
         [Fact]
+        public async Task can_logout_twice()
+        {
+            await BffHost.BffLoginAsync("alice", "sid123");
+
+            await BffHost.BffLogoutAsync("sid123");
+
+            var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout") + "?sid=123" );
+            response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
+            response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServerHost.Url("/connect/endsession"));
+
+
+            (await BffHost.GetIsUserLoggedInAsync()).ShouldBeFalse();
+        }
+
+        [Fact]
         public async Task logout_endpoint_should_accept_returnUrl()
         {
             await BffHost.BffLoginAsync("alice", "sid123");

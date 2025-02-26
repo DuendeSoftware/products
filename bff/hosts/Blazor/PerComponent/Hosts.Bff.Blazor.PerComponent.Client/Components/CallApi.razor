@@ -1,5 +1,11 @@
+@using System.Net
+@using Duende.Bff.Blazor.Client
+@using Microsoft.Extensions.Options
 @inject IRenderModeContext RenderModeContext
 @inject IHttpClientFactory Factory
+@inject IOptions<BffBlazorOptions> Options
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
 
 <div class="card">
     <h3 class="card-header">@Header</h3>
@@ -13,10 +19,10 @@
 
                 @if(_apiResult != null)
                 {
-                        <p class="card-text">
-                            Token ID: @_apiResult.Jti
-                            <br />Retrieved at @_apiResult.Time
-                        </p>
+                    <p class="card-text">
+                        Token ID: @_apiResult.Jti
+                        <br />Retrieved at @_apiResult.Time
+                    </p>
                 } else
                 {
                     <p class="card-text">API Result: not called yet</p>
@@ -45,8 +51,28 @@
     protected async Task CallApiAsync()
     {
         DisableUi = true;
-        _apiResult = await _http.GetFromJsonAsync<ApiResult>("user-token");
+        try
+        {
+            _apiResult = await _http.GetFromJsonAsync<ApiResult>("user-token");
+        }
+        catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            // The user is not authenticated. This can happen if the authentication cookie
+            // is valid longer than the refresh token. The server already logs the user
+            // out. In theory, we could just 'refresh' the page, but this might cause 
+            // an endless auth loop. 
+            Navigation.NavigateTo(await BffLogoutUrl(), forceLoad: true);
+        }
+
         DisableUi = false;
+    }
+
+    async Task<string> BffLogoutUrl()
+    {
+        var context = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var logoutUrl =  context.User.FindFirst(Constants.ClaimTypes.LogoutUrl);
+        if (logoutUrl == null) throw new InvalidOperationException("The logout url is missing");
+        return $"{Options.Value.StateProviderBaseAddress}{logoutUrl.Value}";
     }
 
     protected override void OnAfterRender(bool firstRender)

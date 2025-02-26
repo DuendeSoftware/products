@@ -78,7 +78,7 @@ public class DefaultLogoutService : ILogoutService
                 }
             }
         }
-            
+
         var returnUrl = context.Request.Query[Constants.RequestParameters.ReturnUrl].FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(returnUrl))
         {

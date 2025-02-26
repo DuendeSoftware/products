@@ -83,7 +83,10 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
 
-                    AccessTokenLifetime = 75 // Force refresh
+                    // Intentionally set lifetime short to see what happens when access and refresh tokens expire
+                    AccessTokenLifetime = 15,
+                    RefreshTokenExpiration = TokenExpiration.Absolute,
+                    AbsoluteRefreshTokenLifetime = 60
                 },
                 new Client
                 {
@@ -104,7 +107,10 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
 
-                    AccessTokenLifetime = 75 // Force refresh
+                    // Intentionally set lifetime short to see what happens when access and refresh tokens expire
+                    AccessTokenLifetime = 15,
+                    RefreshTokenExpiration = TokenExpiration.Absolute,
+                    AbsoluteRefreshTokenLifetime = 60
 
                 },
 
@@ -129,7 +135,10 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
 
-                    AccessTokenLifetime = 75
+                    // Intentionally set lifetime short to see what happens when access and refresh tokens expire
+                    AccessTokenLifetime = 15,
+                    RefreshTokenExpiration = TokenExpiration.Absolute,
+                    AbsoluteRefreshTokenLifetime = 60
                 }
             ];
         }

@@ -45,6 +45,10 @@ public class ServerSideTokenStore(
 
     private async Task<UserSession?> GetSession(ClaimsPrincipal user)
     {
+        if (user.Identity?.IsAuthenticated == false)
+        {
+            return null;
+        }
         var sub = user.FindFirst("sub")?.Value ?? throw new InvalidOperationException("no sub claim");
         var sid = user.FindFirst("sid")?.Value ?? throw new InvalidOperationException("no sid claim");
 
