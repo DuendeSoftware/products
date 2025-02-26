@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+     <AssemblyName>Duende.BFF.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
