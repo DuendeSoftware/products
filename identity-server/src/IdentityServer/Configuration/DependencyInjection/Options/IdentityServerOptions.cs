@@ -207,4 +207,9 @@ public class IdentityServerOptions
     /// Options for Pushed Authorization Requests (PAR).
     /// </summary>
     public PushedAuthorizationOptions PushedAuthorization { get; set; } = new PushedAuthorizationOptions();
+    
+    /// <summary>
+    /// The allowed clock skew for JWT validation.
+    /// </summary>
+    public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromSeconds(10);
 }
