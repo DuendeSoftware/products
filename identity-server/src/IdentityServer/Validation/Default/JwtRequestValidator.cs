@@ -170,7 +170,9 @@ public class JwtRequestValidator : IJwtRequestValidator
             ValidateAudience = true,
 
             RequireSignedTokens = true,
-            RequireExpirationTime = true
+            RequireExpirationTime = true,
+            
+            ClockSkew = Options.JwtValidationClockSkew
         };
 
         var strictJarValidation = context.StrictJarValidation.HasValue ? context.StrictJarValidation.Value : Options.StrictJarValidation;
