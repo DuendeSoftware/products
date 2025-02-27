@@ -58,6 +58,21 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
 
         AuthenticationStateChanged += OnAuthenticationStateChanged;
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
+
+        CheckLicense(loggerFactory, _bffOptions);
+    }
+
+
+    internal static bool LicenseChecked;
+    internal static void CheckLicense(ILoggerFactory loggerFactory, BffOptions options)
+    {
+        if (LicenseChecked == false)
+        {
+            LicenseValidator.Initalize(loggerFactory, options);
+            LicenseValidator.ValidateLicense();
+        }
+
+        LicenseChecked = true;
     }
 
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
@@ -131,4 +146,6 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         cancellationToken);
         return sessions.Count != 0;
     }
+
+
 }
