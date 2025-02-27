@@ -1,0 +1,20 @@
+﻿@page "/"
+
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, Blazor BFF!</h1>
+
+<AuthorizeView>
+    <Authorized>
+      <strong>Hello, @context.User.Identity?.Name</strong>
+    </Authorized>
+    <Authorizing>
+      <div>logging in</div>
+    </Authorizing>
+    <NotAuthorized>
+      <div>not logged in</div>
+    </NotAuthorized>
+</AuthorizeView>
+

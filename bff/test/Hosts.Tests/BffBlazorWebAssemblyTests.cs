@@ -13,7 +13,7 @@ public class BffBlazorWebAssemblyTests(ITestOutputHelper output, AppHostFixture 
 {
     public async Task<WebAssemblyPageModel> GoToHome()
     {
-        await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorWebassembly).ToString());
+        await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorWebassembly).ToString(), Defaults.PageGotoOptions);
         return new WebAssemblyPageModel()
         {
             Page = Page

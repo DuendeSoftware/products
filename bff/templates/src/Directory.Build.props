@@ -2,5 +2,6 @@
 <Project>
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <WarningsAsErrors>true</WarningsAsErrors>
   </PropertyGroup>
 </Project>

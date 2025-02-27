@@ -54,11 +54,13 @@ idServer
     .WithReference(apiDPop)
     .WithReference(bffDPop);
 
-builder.AddProject<BffLocalApi>("templates-bff-local", launchProfileName: null)
+builder.AddProject<BffLocalApi>(AppHostServices.TemplateBffLocal, launchProfileName: null)
     .WithHttpsEndpoint(5300, name: "bff-local");
 
-builder.AddProject<BffRemoteApi>("templates-bff-remote", launchProfileName: null)
+builder.AddProject<BffRemoteApi>(AppHostServices.TemplateBffRemote, launchProfileName: null)
     .WithHttpsEndpoint(5310, name: "bff-remote");
+
+builder.AddProject<BffBlazor>(AppHostServices.TemplateBffBlazor);
 
 builder.Build().Run();
 

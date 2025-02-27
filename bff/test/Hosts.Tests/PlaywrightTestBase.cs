@@ -10,6 +10,12 @@ using Xunit.Sdk;
 
 namespace Hosts.Tests;
 
+public class Defaults
+{
+    public static readonly PageGotoOptions PageGotoOptions = new PageGotoOptions()
+    { WaitUntil = WaitUntilState.NetworkIdle };
+}
+
 [WithTestName]
 [Collection(AppHostCollection.CollectionName)]
 public class PlaywrightTestBase : PageTest, IDisposable
