@@ -47,6 +47,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -63,7 +65,10 @@ else
 
 app.UseHttpsRedirection();
 
-
+app.UseRouting();
+app.UseAuthentication();
+app.UseBff();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
@@ -71,4 +76,28 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BffBlazor.Client._Imports).Assembly);
 
+app.MapBffManagementEndpoints();
+app.MapWeatherEndpoints();
 app.Run();
+
+public static class WeatherEndpoints
+{
+    public static void MapWeatherEndpoints(this WebApplication app)
+    {
+        app.MapGet("/WeatherForecast", () =>
+        {
+            var startDate = DateOnly.FromDateTime(DateTime.Now);
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Date = startDate.AddDays(index),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            }).ToArray();
+        }).RequireAuthorization().AsBffApiEndpoint();
+    }
+
+    private static readonly string[] Summaries =
+    [
+        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+    ];
+}
