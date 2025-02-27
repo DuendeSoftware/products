@@ -21,7 +21,6 @@
       "identity-server\\templates\\src\\IdentityServerInMem\\IdentityServerInMem.csproj",
       "identity-server\\test\\Configuration.IntegrationTests\\Configuration.IntegrationTests.csproj",
       "identity-server\\test\\EntityFramework.IntegrationTests\\EntityFramework.IntegrationTests.csproj",
-      "identity-server\\test\\EntityFramework.Storage.IntegrationTests\\EntityFramework.Storage.IntegrationTests.csproj",
       "identity-server\\test\\EntityFramework.Storage.UnitTests\\EntityFramework.Storage.UnitTests.csproj",
       "identity-server\\test\\IdentityServer.IntegrationTests\\IdentityServer.IntegrationTests.csproj",
       "identity-server\\test\\IdentityServer.UnitTests\\IdentityServer.UnitTests.csproj",
