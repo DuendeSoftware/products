@@ -6,13 +6,10 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
 using System.Text;
 using System.Security.Cryptography;
-using System.Linq;
-using System.Collections.Generic;
+using Duende.IdentityServer.Logging;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -47,6 +44,8 @@ public class DefaultGrantStore<T>
     /// </summary>
     protected IHandleGenerationService HandleGenerationService { get; }
 
+    private readonly ISanitizedLogger _sanitizedLogger;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultGrantStore{T}"/> class.
     /// </summary>
@@ -69,6 +68,7 @@ public class DefaultGrantStore<T>
         Serializer = serializer;
         HandleGenerationService = handleGenerationService;
         Logger = logger;
+        _sanitizedLogger = new SanitizedLogger<DefaultGrantStore<T>>(logger);
     }
 
     private const string KeySeparator = ":";
@@ -118,7 +118,7 @@ public class DefaultGrantStore<T>
         var item = await GetItemByHashedKeyAsync(hashedKey);
         if (item == null)
         {
-            Logger.LogDebug("{grantType} grant with value: {key} not found in store.", GrantType, key);
+            _sanitizedLogger.LogDebug("{grantType} grant with value: {key} not found in store.", GrantType, key);
         }
         return item;
     }

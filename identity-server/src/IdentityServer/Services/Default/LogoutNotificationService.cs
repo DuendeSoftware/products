@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Services;
@@ -20,7 +21,7 @@ public class LogoutNotificationService : ILogoutNotificationService
 {
     private readonly IClientStore _clientStore;
     private readonly IIssuerNameService _issuerNameService;
-    private readonly ILogger<LogoutNotificationService> _logger;
+    private readonly ISanitizedLogger<LogoutNotificationService> _sanitizedLogger;
 
 
     /// <summary>
@@ -33,7 +34,7 @@ public class LogoutNotificationService : ILogoutNotificationService
     {
         _clientStore = clientStore;
         _issuerNameService = issuerNameService;
-        _logger = logger;
+        _sanitizedLogger = new SanitizedLogger<LogoutNotificationService>(logger);
     }
 
     /// <inheritdoc/>
@@ -73,11 +74,11 @@ public class LogoutNotificationService : ILogoutNotificationService
         if (frontChannelUrls.Any())
         {
             var msg = frontChannelUrls.Aggregate((x, y) => x + ", " + y);
-            _logger.LogDebug("Client front-channel logout URLs: {0}", msg);
+            _sanitizedLogger.LogDebug("Client front-channel logout URLs: {0}", msg);
         }
         else
         {
-            _logger.LogDebug("No client front-channel logout URLs");
+            _sanitizedLogger.LogDebug("No client front-channel logout URLs");
         }
 
         return frontChannelUrls;
@@ -115,11 +116,11 @@ public class LogoutNotificationService : ILogoutNotificationService
         if (backChannelLogouts.Any())
         {
             var msg = backChannelLogouts.Select(x => x.LogoutUri).Aggregate((x, y) => x + ", " + y);
-            _logger.LogDebug("Client back-channel logout URLs: {0}", msg);
+            _sanitizedLogger.LogDebug("Client back-channel logout URLs: {0}", msg);
         }
         else
         {
-            _logger.LogDebug("No client back-channel logout URLs");
+            _sanitizedLogger.LogDebug("No client back-channel logout URLs");
         }
 
         return backChannelLogouts;

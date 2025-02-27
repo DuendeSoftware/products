@@ -2,20 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.AuthorizeRequest_Validation;
 
@@ -59,7 +56,7 @@ public class Authorize_ProtocolValidation_Resources
             _mockUserSession,
             Factory.CreateRequestObjectValidator(),
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance)),
-            TestLogger.Create<AuthorizeRequestValidator>());
+            new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
     }
 
     [Fact]
