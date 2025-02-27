@@ -102,7 +102,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             RequireSignedTokens = true,
             RequireExpirationTime = true,
 
-            ClockSkew = TimeSpan.FromMinutes(5)
+            ClockSkew = _options.JwtValidationClockSkew
         };
         
         if (_options.StrictClientAssertionAudienceValidation)
