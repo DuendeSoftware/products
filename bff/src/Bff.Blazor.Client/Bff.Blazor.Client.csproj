@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-     <AssemblyName>Duende.BFF.Client</AssemblyName>
+     <AssemblyName>Duende.BFF.Blazor.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
