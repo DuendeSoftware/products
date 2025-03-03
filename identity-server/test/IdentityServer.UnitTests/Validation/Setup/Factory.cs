@@ -175,10 +175,11 @@ internal static class Factory
         return new DefaultResourceValidator(store, new DefaultScopeParser(TestLogger.Create<DefaultScopeParser>()), TestLogger.Create<DefaultResourceValidator>());
     }
 
-    internal static ITokenCreationService CreateDefaultTokenCreator(IdentityServerOptions options = null)
+    internal static ITokenCreationService CreateDefaultTokenCreator(IdentityServerOptions options = null,
+        IClock clock = null)
     {
         return new DefaultTokenCreationService(
-            new StubClock(),
+            clock ?? new StubClock(),
             new DefaultKeyMaterialService(
                 new IValidationKeysStore[] { },
                 new ISigningCredentialStore[] { new InMemorySigningCredentialsStore(TestCert.LoadSigningCredentials()) },

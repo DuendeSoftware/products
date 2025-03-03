@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -231,6 +226,45 @@ public class AccessTokenValidation
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt);
 
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task JWT_respects_clock_skew_setting_to_allow_token_with_off_time()
+    {
+        var futureClock = new StubClock();
+        var definitelyNotNow = DateTime.UtcNow.AddSeconds(9);
+        futureClock.UtcNowFunc = () => definitelyNotNow;
+        var signer = Factory.CreateDefaultTokenCreator(clock: futureClock);
+        var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
+        var jwt = await signer.CreateTokenAsync(token);
+        
+        var options = TestIdentityServerOptions.Create();
+        options.JwtValidationClockSkew = TimeSpan.FromSeconds(10);
+        var validator = Factory.CreateTokenValidator(options: options);
+        var result = await validator.ValidateAccessTokenAsync(jwt);
+        
+        result.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Jwt_when_token_time_outside_of_configured_clock_skew_token_is_considered_invalid()
+    {
+        var futureClock = new StubClock();
+        var definitelyNotNow = DateTime.UtcNow.AddSeconds(10);
+        futureClock.UtcNowFunc = () => definitelyNotNow;
+        var signer = Factory.CreateDefaultTokenCreator(clock: futureClock);
+        var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
+        var jwt = await signer.CreateTokenAsync(token);
+
+        var options = TestIdentityServerOptions.Create();
+        options.JwtValidationClockSkew = TimeSpan.FromSeconds(5);
+        var validator = Factory.CreateTokenValidator(options: options);
+        var result = await validator.ValidateAccessTokenAsync(jwt);
+        
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
