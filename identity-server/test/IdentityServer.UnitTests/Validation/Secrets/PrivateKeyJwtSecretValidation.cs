@@ -2,26 +2,21 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Services.Default;
 using UnitTests.Validation.Setup;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Xunit;
 
 namespace UnitTests.Validation.Secrets;
 
@@ -350,5 +345,47 @@ public class PrivateKeyJwtSecretValidation
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
         result.Success.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Invalid_Not_Yet_Valid_Token()
+    {
+        var clientId = "certificate_base64_valid";
+        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+
+        var token = CreateToken(clientId, nowOverride: DateTime.UtcNow.AddSeconds(30));
+        var secret = new ParsedSecret
+        {
+            Id = clientId,
+            Credential = new JwtSecurityTokenHandler().WriteToken(token),
+            Type = IdentityServerConstants.ParsedSecretTypes.JwtBearer
+        };
+
+        _options.JwtValidationClockSkew = TimeSpan.FromSeconds(5);
+
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+
+        result.Success.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Configuration_Allows_For_Clock_Skew_In_Token()
+    {
+        var clientId = "certificate_base64_valid";
+        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+
+        var token = CreateToken(clientId, nowOverride: DateTime.UtcNow.AddSeconds(5));
+        var secret = new ParsedSecret
+        {
+            Id = clientId,
+            Credential = new JwtSecurityTokenHandler().WriteToken(token),
+            Type = IdentityServerConstants.ParsedSecretTypes.JwtBearer
+        };
+
+        _options.JwtValidationClockSkew = TimeSpan.FromSeconds(10);
+
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+
+        result.Success.ShouldBeTrue();
     }
 }
