@@ -1,10 +1,7 @@
-using Duende.Bff.Blazor.Client;
-using Hosts.Bff.Blazor.WebAssembly.Client;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Duende.Bff.Blazor.Client;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
-
-builder.Services.AddSingleton<WeatherHttpClient>();
 
 builder.Services
     .AddBffBlazorClient() // Provides auth state provider that polls the /bff/user endpoint
