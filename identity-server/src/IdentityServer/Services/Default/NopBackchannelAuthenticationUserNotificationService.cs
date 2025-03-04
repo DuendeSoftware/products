@@ -5,6 +5,7 @@
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Duende.IdentityServer.Logging;
 
 namespace Duende.IdentityServer.Services;
 
@@ -14,7 +15,7 @@ namespace Duende.IdentityServer.Services;
 public class NopBackchannelAuthenticationUserNotificationService : IBackchannelAuthenticationUserNotificationService
 {
     private readonly IIssuerNameService _issuerNameService;
-    private readonly ILogger<NopBackchannelAuthenticationUserNotificationService> _logger;
+    private readonly SanitizedLogger<NopBackchannelAuthenticationUserNotificationService> _sanitizedLogger;
 
     /// <summary>
     /// Ctor
@@ -22,7 +23,7 @@ public class NopBackchannelAuthenticationUserNotificationService : IBackchannelA
     public NopBackchannelAuthenticationUserNotificationService(IIssuerNameService issuerNameService, ILogger<NopBackchannelAuthenticationUserNotificationService> logger)
     {
         _issuerNameService = issuerNameService;
-        _logger = logger;
+        _sanitizedLogger = new SanitizedLogger<NopBackchannelAuthenticationUserNotificationService>(logger);
     }
 
     /// <inheritdoc/>
@@ -30,6 +31,6 @@ public class NopBackchannelAuthenticationUserNotificationService : IBackchannelA
     {
         var url = await _issuerNameService.GetCurrentAsync();
         url += "/ciba?id=" + request.InternalId;
-        _logger.LogWarning("IBackchannelAuthenticationUserNotificationService not implemented. But for testing, visit {url} to simulate what a user might need to do to complete the request.", url);
+        _sanitizedLogger.LogWarning("IBackchannelAuthenticationUserNotificationService not implemented. But for testing, visit {url} to simulate what a user might need to do to complete the request.", url);
     }
 }

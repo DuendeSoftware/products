@@ -6,13 +6,9 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
 using System.Text;
 using System.Security.Cryptography;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -118,7 +114,7 @@ public class DefaultGrantStore<T>
         var item = await GetItemByHashedKeyAsync(hashedKey);
         if (item == null)
         {
-            Logger.LogDebug("{grantType} grant with value: {key} not found in store.", GrantType, key);
+            Logger.LogDebug("{grantType} grant with value: {key} not found in store.", GrantType, key.SanitizeLogParameter());
         }
         return item;
     }

@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using Duende.IdentityServer.Services.KeyManagement;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace UnitTests.Validation.Setup;
@@ -276,7 +277,7 @@ internal static class Factory
             userSession,
             requestObjectValidator,
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance)),
-            TestLogger.Create<AuthorizeRequestValidator>());
+            new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
     }
 
     public static RequestObjectValidator CreateRequestObjectValidator(        

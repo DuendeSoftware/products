@@ -13,6 +13,7 @@ using Duende.IdentityServer.Models;
 using System.Linq;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Hosting;
@@ -23,7 +24,7 @@ namespace Duende.IdentityServer.Hosting;
 public class IdentityServerMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger _logger;
+    private readonly SanitizedLogger<IdentityServerMiddleware> _sanitizedLogger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="IdentityServerMiddleware"/> class.
@@ -33,7 +34,7 @@ public class IdentityServerMiddleware
     public IdentityServerMiddleware(RequestDelegate next, ILogger<IdentityServerMiddleware> logger)
     {
         _next = next;
-        _logger = logger;
+        _sanitizedLogger = new SanitizedLogger<IdentityServerMiddleware>(logger);
     }
 
     /// <summary>
@@ -64,7 +65,7 @@ public class IdentityServerMiddleware
         {
             if (context.GetSignOutCalled())
             {
-                _logger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
+                _sanitizedLogger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
 
                 // this clears our session id cookie so JS clients can detect the user has signed out
                 await userSession.RemoveSessionIdCookieAsync();
@@ -86,7 +87,7 @@ public class IdentityServerMiddleware
 
             if (context.TryGetExpiredUserSession(out var expiredUserSession))
             {
-                _logger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
+                _sanitizedLogger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
                 
                 await sessionCoordinationService.ProcessExpirationAsync(expiredUserSession);
             }
@@ -111,13 +112,13 @@ public class IdentityServerMiddleware
                     licenseUsage.IssuerUsed(issuer);
                     IdentityServerLicenseValidator.Instance.ValidateIssuer(issuer);
 
-                    _logger.LogInformation("Invoking IdentityServer endpoint: {endpointType} for {url}", endpointType, requestPath);
+                    _sanitizedLogger.LogInformation("Invoking IdentityServer endpoint: {endpointType} for {url}", endpointType, requestPath);
 
                     var result = await endpoint.ProcessAsync(context);
 
                     if (result != null)
                     {
-                        _logger.LogTrace("Invoking result: {type}", result.GetType().FullName);
+                        _sanitizedLogger.LogTrace("Invoking result: {type}", result.GetType().FullName);
                         await result.ExecuteAsync(context);
                     }
 
@@ -133,7 +134,7 @@ public class IdentityServerMiddleware
         {
             await events.RaiseAsync(new UnhandledExceptionEvent(ex));
             Telemetry.Metrics.UnHandledException(ex);
-            _logger.LogCritical(ex, "Unhandled exception: {exception}", ex.Message);
+            _sanitizedLogger.LogCritical(ex, "Unhandled exception: {exception}", ex.Message);
 
             throw;
         }
