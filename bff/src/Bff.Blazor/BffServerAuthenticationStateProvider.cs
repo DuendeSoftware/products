@@ -37,6 +37,12 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
 
     private Task<AuthenticationState>? _authenticationStateTask;
 
+    /// <summary>
+    /// The interval at which the authentication state is revalidated.
+    ///
+    /// This actually implements the retrieval of the revalidation interval from the
+    /// base class RevalidatingServerAuthenticationStateProvider. 
+    /// </summary>
     protected override TimeSpan RevalidationInterval { get; }
 
     public BffServerAuthenticationStateProvider(

@@ -1,7 +1,6 @@
-using BffBlazor.Client.Pages;
+using BffBlazor;
 using BffBlazor.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server;
+using Duende.Bff.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddBff();
+// BFF setup for blazor
+builder.Services.AddBff()
+    .AddServerSideSessions() // Add in-memory implementation of server side sessions
+    .AddBlazorServer();
 
+// Configure the authentication
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = "cookie";
@@ -44,8 +47,8 @@ builder.Services.AddAuthentication(options =>
         options.TokenValidationParameters.RoleClaimType = "role";
     });
 
+// Make sure authentication state is available to all components. 
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 
 builder.Services.AddAuthorization();
 
@@ -67,37 +70,24 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseAuthentication();
+
+// Add the BFF middleware which performs anti forgery protection
 app.UseBff();
 app.UseAuthorization();
 app.UseAntiforgery();
+
+// Add the BFF management endpoints, such as login, logout, etc.
+app.MapBffManagementEndpoints();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BffBlazor.Client._Imports).Assembly);
 
-app.MapBffManagementEndpoints();
+
+
+// Example of local api endpoints. 
 app.MapWeatherEndpoints();
+
+
 app.Run();
-
-public static class WeatherEndpoints
-{
-    public static void MapWeatherEndpoints(this WebApplication app)
-    {
-        app.MapGet("/WeatherForecast", () =>
-        {
-            var startDate = DateOnly.FromDateTime(DateTime.Now);
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = startDate.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            }).ToArray();
-        }).RequireAuthorization().AsBffApiEndpoint();
-    }
-
-    private static readonly string[] Summaries =
-    [
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    ];
-}
