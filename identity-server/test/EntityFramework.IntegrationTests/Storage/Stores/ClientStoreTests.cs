@@ -11,7 +11,7 @@ using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Sdk;
 
-namespace EntityFramework.Storage.IntegrationTests.Stores;
+namespace EntityFramework.IntegrationTests.Storage.Stores;
 
 public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {

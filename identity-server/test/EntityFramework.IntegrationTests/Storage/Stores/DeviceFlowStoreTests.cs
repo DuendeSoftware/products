@@ -3,24 +3,18 @@
 
 
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores.Serialization;
-using Shouldly;
 using Duende.IdentityModel;
 using Microsoft.EntityFrameworkCore.InMemory.Infrastructure.Internal;
-using Xunit;
 using Duende.IdentityServer.Services;
 
-namespace EntityFramework.Storage.IntegrationTests.Stores;
+namespace EntityFramework.IntegrationTests.Storage.Stores;
 
 public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, PersistedGrantDbContext, OperationalStoreOptions>
 {

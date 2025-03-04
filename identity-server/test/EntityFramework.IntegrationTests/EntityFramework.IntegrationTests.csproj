@@ -23,6 +23,7 @@ Microsoft.EntityFrameworkCore.SqlServer that don't have this problem exist). -->
 
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
         <ProjectReference Include="..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
     </ItemGroup>
 </Project>
