@@ -118,7 +118,7 @@ public class DiscoveryEndpointTests
 
         var keys = data["keys"].EnumerateArray().ToList();
         keys.Count.ShouldBe(2);
-
+            
         var key = keys[1];
         var crv = key.TryGetValue("crv");
         crv.GetString().ShouldBe(JsonWebKeyECTypes.P256);
