@@ -1,8 +1,6 @@
-﻿@page "/"
-
-<PageTitle>Home</PageTitle>
-
-<h1>Hello, Blazor BFF!</h1>
+﻿@page "/secure"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 
 <AuthorizeView>

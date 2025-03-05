@@ -48,10 +48,23 @@ namespace Bff.Blazor.UnitTests
         [Fact]
         public async Task Can_get_home()
         {
-            var response = await BffHost.HttpClient.GetAsync("/");
+            var response = await BffHost.BrowserClient.GetAsync("/");
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
         }
+        [Fact]
+        public async Task Cannot_get_secure_without_loggin_in()
+        {
+            var response = await BffHost.BrowserClient.GetAsync("/secure");
+            response.StatusCode.ShouldBe(HttpStatusCode.Found, "this indicates we are redirecting to the login page");
+        }
 
+        [Fact]
+        public async Task Can_get_secure_when_logged_in()
+        {
+            await BffHost.BffLoginAsync("sub");
+            var response = await BffHost.BrowserClient.GetAsync("/secure");
+            response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        }
 
         public override async Task InitializeAsync()
         {
