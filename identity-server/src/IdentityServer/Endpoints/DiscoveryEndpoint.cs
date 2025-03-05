@@ -3,13 +3,14 @@
 
 
 using System.Net;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
@@ -39,8 +40,9 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
-        using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
-        
+        using var activity =
+            Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
+
         _logger.LogTrace("Processing discovery request.");
 
         // validate HTTP
@@ -63,8 +65,29 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
         // generate response
         _logger.LogTrace("Calling into discovery response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
 
+        if (_options.Preview.EnableDiscoveryDocumentCache)
+        {
+            // we need a cache but since this is preview, we don't
+            // want to force folks to register IMemoryCache if they aren't caching.
+            // This requires we use the service locator pattern :(
+            var cache = context.RequestServices.GetService<IMemoryCache>();
+
+            if (cache is not null)
+            {
+                // the cache key accounts for multi-tenancy in Enterprise instances 
+                return await cache.GetOrCreateAsync($"discoveryDocument/{baseUrl}/{issuerUri}", async entry =>
+                {
+                    entry.AbsoluteExpirationRelativeToNow = _options.Preview.DiscoveryDocumentCacheDuration;
+                    var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
+                    return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);
+                });
+            } 
+
+            _logger.LogWarning("Unable to create discovery document cache. Add IMemoryCache by calling services.AddMemoryCache().");
+        }
+
+        var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
         return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);
     }
 }
