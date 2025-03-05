@@ -40,8 +40,7 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
-        using var activity =
-            Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
+        using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
 
         _logger.LogTrace("Processing discovery request.");
 
@@ -91,7 +90,6 @@ internal class DiscoveryEndpoint : IEndpointHandler
         }
 
         var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
-
         return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);
     }
 }

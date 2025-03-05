@@ -279,12 +279,12 @@ public class DiscoveryEndpointTests
     {
         IdentityServerPipeline pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/root");
-        
+
 #pragma warning disable DUENDEPREVIEW001
         pipeline.Options.Preview.EnableDiscoveryDocumentCache = true;
 #pragma warning restore DUENDEPREVIEW001
         pipeline.Options.Preview.DiscoveryDocumentCacheDuration = TimeSpan.FromSeconds(1);
-        
+
         // cache
         _ = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
 
@@ -298,7 +298,7 @@ public class DiscoveryEndpointTests
 
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        
+
         // we got a result back
         data.ShouldNotContainKey("after_cache_key");
     }

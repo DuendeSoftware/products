@@ -15,17 +15,20 @@ namespace Duende.IdentityServer.Endpoints.Results;
 public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
 {
     /// <summary>
+    /// Gets the entries.
+    /// </summary>
+    /// <value>
+    /// The entries.
+    /// </value>
+    public Dictionary<string, object> Entries { get; }
+
+    /// <summary>
     /// Gets the maximum age.
     /// </summary>
     /// <value>
     /// The maximum age.
     /// </value>
     public int? MaxAge { get; }
-
-    /// <summary>
-    /// The Entries used to serialize the JSON property
-    /// </summary>
-    public Dictionary<string, object> Entries { get; set; }
 
     /// <summary>
     /// The JSON version of the Discovery
