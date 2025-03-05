@@ -128,7 +128,6 @@ public class IdentityServerPipeline
             return handler;
         });
 
-        services.AddMemoryCache();
         services.AddIdentityServer(options =>
             {
                 options.Events = new EventsOptions

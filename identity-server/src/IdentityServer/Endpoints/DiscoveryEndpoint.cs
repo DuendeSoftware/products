@@ -23,13 +23,15 @@ internal class DiscoveryEndpoint : IEndpointHandler
     private readonly IIssuerNameService _issuerNameService;
     private readonly IServerUrls _urls;
     private readonly IDiscoveryResponseGenerator _responseGenerator;
+    private readonly IMemoryCache _cache;
 
     public DiscoveryEndpoint(
         IdentityServerOptions options,
         IIssuerNameService issuerNameService,
         IDiscoveryResponseGenerator responseGenerator,
         IServerUrls urls,
-        ILogger<DiscoveryEndpoint> logger)
+        ILogger<DiscoveryEndpoint> logger,
+        IMemoryCache cache)
     {
         _logger = logger;
         _options = options;
