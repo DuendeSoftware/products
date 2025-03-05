@@ -216,8 +216,7 @@ public class IdentityServerOptions
     /// used in private_key_jwt authentication, JWT secured authorization
     /// requests (JAR), and custom usage of the <see cref="TokenValidator"/>,
     /// such as in a token exchange implementation. Defaults to ten seconds.
-    /// Task<JwtRequestValidationResult>
-    /// ValidateAsync(JwtRequestValidationContext context);
     /// </summary>
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromSeconds(10);
+    
 }
