@@ -1,14 +1,14 @@
 <Project>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <AspNetCoreVersion>8.0.1</AspNetCoreVersion>
+    <AspNetCoreVersion>8.0.11</AspNetCoreVersion>
     <!-- EF must be at least 8.0.10 so that 'Microsoft.Extensions.Caching.Memory'
           is at least 8.0.1, which addresses a known high severity vulnerability.
           The SQL Server EF provider that is commonly used has a transitive
           vulnerability in 8.0.10 that is fixed in 8.0.11, so going to 8.0.11 seems 
           prudent. -->
-    <EntityFrameworkVersion>8.0.11</EntityFrameworkVersion> 
+    <EntityFrameworkVersion>9.0.2</EntityFrameworkVersion> 
     <IdentityServerVersion>7.1.0</IdentityServerVersion>
-    <MicrosoftExtensionsVersion>8.0.1</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion>9.0.2</MicrosoftExtensionsVersion>
     <OpenTelemetryVersion>1.11.0</OpenTelemetryVersion>
     <WilsonVersion>7.1.2</WilsonVersion> 
     <YarpVersion>2.1.0</YarpVersion>
@@ -16,9 +16,9 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
       <AspNetCoreVersion>9.0.0</AspNetCoreVersion>
-      <EntityFrameworkVersion>9.0.0</EntityFrameworkVersion>
+      <EntityFrameworkVersion>9.0.2</EntityFrameworkVersion>
       <IdentityServerVersion>7.1.0</IdentityServerVersion>
-      <MicrosoftExtensionsVersion>9.0.0</MicrosoftExtensionsVersion>
+      <MicrosoftExtensionsVersion>9.0.2</MicrosoftExtensionsVersion>
       <OpenTelemetryVersion>1.11.0</OpenTelemetryVersion>
       <WilsonVersion>8.0.1</WilsonVersion>
       <YarpVersion>2.1.0</YarpVersion>
@@ -100,7 +100,7 @@
     <PackageVersion Include="SimpleExec" Version="12.0.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="$(WilsonVersion)" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.2" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.core" Version="2.9.2" />
