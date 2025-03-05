@@ -9,6 +9,7 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
@@ -21,19 +22,22 @@ internal class DiscoveryEndpoint : IEndpointHandler
     private readonly IIssuerNameService _issuerNameService;
     private readonly IServerUrls _urls;
     private readonly IDiscoveryResponseGenerator _responseGenerator;
+    private readonly IMemoryCache _cache;
 
     public DiscoveryEndpoint(
         IdentityServerOptions options,
         IIssuerNameService issuerNameService,
         IDiscoveryResponseGenerator responseGenerator,
         IServerUrls urls,
-        ILogger<DiscoveryEndpoint> logger)
+        ILogger<DiscoveryEndpoint> logger,
+        IMemoryCache cache)
     {
         _logger = logger;
         _options = options;
         _issuerNameService = issuerNameService;
         _urls = urls;
         _responseGenerator = responseGenerator;
+        _cache = cache;
     }
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
@@ -62,6 +66,18 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
         // generate response
         _logger.LogTrace("Calling into discovery response generator: {type}", _responseGenerator.GetType().FullName);
+
+        if (_options.Preview.EnableDiscoveryDocumentCache)
+        {
+            // the cache key accounts for multi-tenancy in Enterprise instances 
+            return await _cache.GetOrCreateAsync($"discoveryDocument/{baseUrl}/{issuerUri}", async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = _options.Preview.DiscoveryDocumentCacheDuration;
+                var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
+                return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);
+            });
+        }
+
         var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
 
         return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);

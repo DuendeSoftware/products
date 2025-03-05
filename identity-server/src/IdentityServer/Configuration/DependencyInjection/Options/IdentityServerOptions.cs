@@ -220,4 +220,9 @@ public class IdentityServerOptions
     /// </summary>
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromSeconds(10);
 
+
+    /// <summary>
+    /// Preview Features. Warning these can be removed and may break in future release
+    /// </summary>
+    public PreviewFeaturesOptions Preview { get; set; } = new PreviewFeaturesOptions();
 }
