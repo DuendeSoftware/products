@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
@@ -8,6 +10,7 @@ public class PreviewFeaturesOptions
     /// <summary>
     /// Enables Caching of Discovery Document based on ResponseCaching Interval 
     /// </summary>
+    [Experimental("DUENDEPREVIEW001", UrlFormat = "https://duende.link/previewfeatures?id={0}")]
     public bool EnableDiscoveryDocumentCache { get; set; } = false;
     
     /// <summary>

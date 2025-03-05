@@ -209,7 +209,7 @@ public class IdentityServerOptions
     public PushedAuthorizationOptions PushedAuthorization { get; set; } = new PushedAuthorizationOptions();
 
     /// <summary>
-    /// Preview Features. Warning these can be removed and may break in future release
+    /// Preview Features. Warning: these can be removed and may break in future releases.
     /// </summary>
     public PreviewFeaturesOptions Preview { get; set; } = new PreviewFeaturesOptions();
 }

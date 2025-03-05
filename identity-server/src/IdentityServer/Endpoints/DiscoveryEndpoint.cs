@@ -68,8 +68,10 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
         // generate response
         _logger.LogTrace("Calling into discovery response generator: {type}", _responseGenerator.GetType().FullName);
-
+    
+#pragma warning disable DUENDEPREVIEW001
         if (_options.Preview.EnableDiscoveryDocumentCache)
+#pragma warning restore DUENDEPREVIEW001
         {
             // the cache key accounts for multi-tenancy in Enterprise instances 
             return await _cache.GetOrCreateAsync($"discoveryDocument/{baseUrl}/{issuerUri}", async entry =>
