@@ -135,7 +135,6 @@ public class IdentityServerPipeline
             return handler;
         });
 
-        services.AddMemoryCache();
         services.AddIdentityServer(options =>
             {
                 options.Events = new EventsOptions
@@ -149,6 +148,7 @@ public class IdentityServerPipeline
 
                 Options = options;
             })
+            .AddInMemoryCaching()
             .AddInMemoryClients(Clients)
             .AddInMemoryIdentityResources(IdentityScopes)
             .AddInMemoryApiResources(ApiResources)
