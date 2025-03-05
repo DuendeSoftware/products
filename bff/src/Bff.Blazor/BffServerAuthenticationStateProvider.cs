@@ -43,7 +43,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         IUserSessionStore sessionStore,
         PersistentComponentState persistentComponentState,
         NavigationManager navigation,
-        IOptions<BffBlazorOptions> blazorOptions,
+        IOptions<BffBlazorServerOptions> blazorOptions,
         IOptions<BffOptions> bffOptions,
         ILoggerFactory loggerFactory)
         : base(loggerFactory)

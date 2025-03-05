@@ -13,7 +13,7 @@ public class ServiceCollectionExtensionsTests
     {
         var sut = new ServiceCollection();
         sut.AddBffBlazorClient();
-        sut.Configure<BffBlazorOptions>(opt =>
+        sut.Configure<BffClientBlazorOptions>(opt =>
         {
             opt.StateProviderBaseAddress = configuredRemoteAddress;
         });
@@ -56,7 +56,7 @@ public class ServiceCollectionExtensionsTests
         sut.AddBffBlazorClient();
         sut.AddLocalApiHttpClient("clientName");
         sut.AddSingleton<IWebAssemblyHostEnvironment>(new FakeWebAssemblyHostEnvironment());
-        sut.Configure<BffBlazorOptions>(opt =>
+        sut.Configure<BffClientBlazorOptions>(opt =>
         {
             opt.RemoteApiBaseAddress = "Should_not_be_used";
             opt.RemoteApiPath = "should_not_be_used";
@@ -92,7 +92,7 @@ public class ServiceCollectionExtensionsTests
         var sut = new ServiceCollection();
         sut.AddBffBlazorClient();
         sut.AddRemoteApiHttpClient("clientName");
-        sut.Configure<BffBlazorOptions>(opt =>
+        sut.Configure<BffClientBlazorOptions>(opt =>
         {
             if (configuredRemoteAddress != null)
             {
@@ -217,7 +217,7 @@ public class ServiceCollectionExtensionsTests
         var sut = new ServiceCollection();
         sut.AddBffBlazorClient(opt => opt.RemoteApiPath = expectedConfiguredValue);
         var sp = sut.BuildServiceProvider();
-        var opts = sp.GetService<IOptions<BffBlazorOptions>>();
+        var opts = sp.GetService<IOptions<BffClientBlazorOptions>>();
         opts.ShouldNotBeNull();
         opts.Value.RemoteApiPath.ShouldBe(expectedConfiguredValue);
     }
