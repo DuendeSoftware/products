@@ -5,6 +5,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Stores.Serialization;
+using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Configuration;
 
