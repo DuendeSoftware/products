@@ -10,6 +10,7 @@ using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
@@ -22,22 +23,19 @@ internal class DiscoveryEndpoint : IEndpointHandler
     private readonly IIssuerNameService _issuerNameService;
     private readonly IServerUrls _urls;
     private readonly IDiscoveryResponseGenerator _responseGenerator;
-    private readonly IMemoryCache _cache;
 
     public DiscoveryEndpoint(
         IdentityServerOptions options,
         IIssuerNameService issuerNameService,
         IDiscoveryResponseGenerator responseGenerator,
         IServerUrls urls,
-        ILogger<DiscoveryEndpoint> logger,
-        IMemoryCache cache)
+        ILogger<DiscoveryEndpoint> logger)
     {
         _logger = logger;
         _options = options;
         _issuerNameService = issuerNameService;
         _urls = urls;
         _responseGenerator = responseGenerator;
-        _cache = cache;
     }
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
@@ -69,13 +67,23 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
         if (_options.Preview.EnableDiscoveryDocumentCache)
         {
-            // the cache key accounts for multi-tenancy in Enterprise instances 
-            return await _cache.GetOrCreateAsync($"discoveryDocument/{baseUrl}/{issuerUri}", async entry =>
+            // we need a cache but since this is preview, we don't
+            // want to force folks to register IMemoryCache if they aren't caching.
+            // This requires we use the service locator pattern :(
+            var cache = context.RequestServices.GetService<IMemoryCache>();
+
+            if (cache is not null)
             {
-                entry.AbsoluteExpirationRelativeToNow = _options.Preview.DiscoveryDocumentCacheDuration;
-                var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
-                return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);
-            });
+                // the cache key accounts for multi-tenancy in Enterprise instances 
+                return await cache.GetOrCreateAsync($"discoveryDocument/{baseUrl}/{issuerUri}", async entry =>
+                {
+                    entry.AbsoluteExpirationRelativeToNow = _options.Preview.DiscoveryDocumentCacheDuration;
+                    var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
+                    return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);
+                });
+            } 
+
+            _logger.LogWarning("Unable to create discovery document cache. Add IMemoryCache by calling services.AddMemoryCache().");
         }
 
         var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);

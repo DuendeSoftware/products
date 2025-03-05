@@ -6,7 +6,8 @@ namespace Duende.IdentityServer.Configuration;
 public class PreviewFeaturesOptions
 {
     /// <summary>
-    /// Enables Caching of Discovery Document based on ResponseCaching Interval 
+    /// Enables Caching of Discovery Document based on ResponseCaching Interval.
+    /// Important: Requires in memory caching be enabled (services.AddInMemoryCaching())
     /// </summary>
     public bool EnableDiscoveryDocumentCache { get; set; } = false;
     
