@@ -4,9 +4,9 @@
 namespace Duende.Bff.Blazor.Client;
 
 /// <summary>
-/// Options for Blazor BFF
+/// Options for Blazor BFF Client. These options are only used in the client or browser. 
 /// </summary>
-public class BffBlazorOptions
+public class BffClientBlazorOptions
 {
     /// <summary>
     /// The base path to use for remote APIs.
@@ -39,12 +39,14 @@ public class BffBlazorOptions
     /// </summary>
     public int WebAssemblyStateProviderPollingInterval { get; set; } = 5000;
 
-    /// <summary>
-    /// The delay, in milliseconds, before the BffServerAuthenticationStateProvider will
-    /// start polling the /bff/user endpoint. Defaults to 1000 ms.
-    /// </summary>
-    public int ServerStateProviderPollingDelay { get; set; } = 1000;
 
+}
+
+/// <summary>
+/// Options for Blazor BFF on the server. 
+/// </summary>
+public class BffBlazorServerOptions
+{
     /// <summary>
     /// The delay, in milliseconds, between polling requests by the
     /// BffServerAuthenticationStateProvider to the /bff/user endpoint. Defaults to 5000
