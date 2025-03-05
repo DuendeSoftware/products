@@ -280,7 +280,9 @@ public class DiscoveryEndpointTests
         IdentityServerPipeline pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/root");
         
+#pragma warning disable DUENDEPREVIEW001
         pipeline.Options.Preview.EnableDiscoveryDocumentCache = true;
+#pragma warning restore DUENDEPREVIEW001
         pipeline.Options.Preview.DiscoveryDocumentCacheDuration = TimeSpan.FromSeconds(1);
         
         // cache

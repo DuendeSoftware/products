@@ -64,8 +64,10 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
         // generate response
         _logger.LogTrace("Calling into discovery response generator: {type}", _responseGenerator.GetType().FullName);
-
+    
+#pragma warning disable DUENDEPREVIEW001
         if (_options.Preview.EnableDiscoveryDocumentCache)
+#pragma warning restore DUENDEPREVIEW001
         {
             // we need a cache but since this is preview, we don't
             // want to force folks to register IMemoryCache if they aren't caching.
