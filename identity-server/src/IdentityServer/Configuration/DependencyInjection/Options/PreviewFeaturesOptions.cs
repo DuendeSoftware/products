@@ -11,7 +11,7 @@ public class PreviewFeaturesOptions
     public bool EnableDiscoveryDocumentCache { get; set; } = false;
     
     /// <summary>
-    /// DiscoveryDocument Cache in Seconds
+    /// DiscoveryDocument Cache Duration
     /// </summary>
-    public TimeSpan DiscoveryDocumentCacheDuration{ get; set; } = TimeSpan.FromSeconds(60);
+    public TimeSpan DiscoveryDocumentCacheDuration{ get; set; } = TimeSpan.FromMinutes(1);
 }
