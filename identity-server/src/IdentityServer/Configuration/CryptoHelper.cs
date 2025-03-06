@@ -101,6 +101,18 @@ public static class CryptoHelper
         return (hashFunction, hashLength);
     }
 
+    internal static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithmOptimized(string signingAlgorithm)
+    {
+        var span = signingAlgorithm.AsSpan();
+        return span[^3..] switch
+        {
+            "256" => (SHA256.HashData, 256),
+            "384" => (SHA384.HashData, 384),
+            "512" => (SHA512.HashData, 512),
+            _ => throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}"),
+        };
+    }
+
     /// <summary>
     /// Returns the matching hashing algorithm for a token signing algorithm
     /// </summary>
