@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <AspNetCoreVersion>8.0.1</AspNetCoreVersion>
+    <AspNetCoreVersion>8.0.13</AspNetCoreVersion>
     <!-- EF must be at least 8.0.10 so that 'Microsoft.Extensions.Caching.Memory'
           is at least 8.0.1, which addresses a known high severity vulnerability.
           The SQL Server EF provider that is commonly used has a transitive
@@ -10,7 +10,7 @@
     <IdentityServerVersion>7.1.0</IdentityServerVersion>
     <MicrosoftExtensionsVersion>8.0.1</MicrosoftExtensionsVersion>
     <OpenTelemetryVersion>1.11.0</OpenTelemetryVersion>
-    <WilsonVersion>7.1.2</WilsonVersion> 
+    <WilsonVersion>8.4.0</WilsonVersion> 
     <YarpVersion>2.1.0</YarpVersion>
   </PropertyGroup>
 
@@ -20,7 +20,7 @@
       <IdentityServerVersion>7.1.0</IdentityServerVersion>
       <MicrosoftExtensionsVersion>9.0.0</MicrosoftExtensionsVersion>
       <OpenTelemetryVersion>1.11.0</OpenTelemetryVersion>
-      <WilsonVersion>8.0.1</WilsonVersion>
+      <WilsonVersion>8.4.0</WilsonVersion>
       <YarpVersion>2.1.0</YarpVersion>
   </PropertyGroup>
 
