@@ -111,14 +111,15 @@ public class DiscoveryEndpointTests
 
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result =
+            await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
 
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         var keys = data["keys"].EnumerateArray().ToList();
         keys.Count.ShouldBe(2);
-            
+
         var key = keys[1];
         var crv = key.TryGetValue("crv");
         crv.GetString().ShouldBe(JsonWebKeyECTypes.P256);
@@ -131,7 +132,8 @@ public class DiscoveryEndpointTests
         IdentityServerPipeline pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result =
+            await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
 
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
@@ -160,7 +162,8 @@ public class DiscoveryEndpointTests
         };
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result =
+            await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
 
         var json = await result.Content.ReadAsStringAsync();
         var jwks = new JsonWebKeySet(json);
@@ -186,7 +189,8 @@ public class DiscoveryEndpointTests
         };
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result =
+            await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
 
         var json = await result.Content.ReadAsStringAsync();
         var jwks = new JsonWebKeySet(json);
@@ -289,7 +293,8 @@ public class DiscoveryEndpointTests
         _ = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
 
         // add new entry
-        pipeline.Options.Discovery.CustomEntries = new() {
+        pipeline.Options.Discovery.CustomEntries = new()
+        {
             { "after_cache_key", "test_value" }
         };
 
