@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.12" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.13" />
         <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.4.0" />
     </ItemGroup>
 
