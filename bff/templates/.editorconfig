@@ -1,3 +1,4 @@
 [*.cs]
 
+# Copyright Header
 file_header_template=unset
