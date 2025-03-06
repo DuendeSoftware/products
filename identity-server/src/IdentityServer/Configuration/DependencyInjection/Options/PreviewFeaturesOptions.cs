@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Diagnostics.CodeAnalysis;
 
 namespace Duende.IdentityServer.Configuration;
@@ -13,9 +16,9 @@ public class PreviewFeaturesOptions
     /// </summary>
     [Experimental("DUENDEPREVIEW001", UrlFormat = "https://duende.link/previewfeatures?id={0}")]
     public bool EnableDiscoveryDocumentCache { get; set; } = false;
-    
+
     /// <summary>
     /// DiscoveryDocument Cache Duration
     /// </summary>
-    public TimeSpan DiscoveryDocumentCacheDuration{ get; set; } = TimeSpan.FromMinutes(1);
+    public TimeSpan DiscoveryDocumentCacheDuration { get; set; } = TimeSpan.FromMinutes(1);
 }

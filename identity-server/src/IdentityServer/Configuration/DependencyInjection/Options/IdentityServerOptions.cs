@@ -5,6 +5,7 @@
 #nullable enable
 
 using Duende.IdentityServer.Stores.Serialization;
+using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -47,22 +48,22 @@ public class IdentityServerOptions
     /// Emits an aud claim with the format issuer/resources. That's needed for some older access token validation plumbing. Defaults to false.
     /// </summary>
     public bool EmitStaticAudienceClaim { get; set; } = false;
-        
+
     /// <summary>
     /// Specifies whether scopes in JWTs are emitted as array or string
     /// </summary>
     public bool EmitScopesAsSpaceDelimitedStringInJwt { get; set; } = false;
-    
+
     /// <summary>
     /// Specifies whether authorize responses contain the iss parameter (https://www.rfc-editor.org/rfc/rfc9207.html)
     /// </summary>
     public bool EmitIssuerIdentificationResponseParameter { get; set; } = true;
-        
+
     /// <summary>
     /// Specifies whether the s_hash claim gets emitted in identity tokens. Defaults to false.
     /// </summary>
     public bool EmitStateHash { get; set; } = false;
-        
+
     /// <summary>
     /// Specifies whether the JWT typ and content-type for JWT secured authorization requests is checked according to IETF spec.
     /// This might break older OIDC conformant request objects.
@@ -172,7 +173,7 @@ public class IdentityServerOptions
     /// Gets or sets the mutual TLS options.
     /// </summary>
     public MutualTlsOptions MutualTls { get; set; } = new MutualTlsOptions();
-        
+
     /// <summary>
     /// Gets or sets the signing key management options.
     /// </summary>
@@ -218,7 +219,7 @@ public class IdentityServerOptions
     /// such as in a token exchange implementation. Defaults to ten seconds.
     /// </summary>
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromSeconds(10);
-    
+
     /// <summary>
     /// Preview Features. Warning: these can be removed and may break in future releases.
     /// </summary>

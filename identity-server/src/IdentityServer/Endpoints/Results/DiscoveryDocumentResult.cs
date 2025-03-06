@@ -21,7 +21,12 @@ public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
     /// The maximum age.
     /// </value>
     public int? MaxAge { get; }
-    
+
+    /// <summary>
+    /// The Entries used to serialize the JSON property
+    /// </summary>
+    public Dictionary<string, object> Entries { get; set; }
+
     /// <summary>
     /// The JSON version of the Discovery
     /// </summary>
@@ -38,6 +43,8 @@ public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
         ArgumentNullException.ThrowIfNull(entries);
 
         MaxAge = maxAge;
+        Entries = entries;
+
         // serialize in advance of writing this result
         Json = ObjectSerializer.ToString(entries);
     }
