@@ -128,7 +128,7 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
 
                     RedirectUris =
                     {
-                        $"{bffBlazorWebAssemblyUrl}signin-oidc", 
+                        $"{bffBlazorWebAssemblyUrl}signin-oidc",
                         $"{bffBlazorPerComponentUrl}signin-oidc",
                         "https://localhost:7035/signin-oidc"
                     },
