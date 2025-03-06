@@ -3,7 +3,6 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +35,7 @@ public class DefaultDiagnosticsService : IDiagnosticsService
         Environment = environment;
         Options = options;
     }
-        
+
     /// <inheritdoc />
     public virtual async Task ProcessRequestAsync(HttpContext context)
     {
@@ -54,7 +53,7 @@ public class DefaultDiagnosticsService : IDiagnosticsService
             UserAccessToken = usertoken.AccessToken,
             ClientAccessToken = clientToken.AccessToken
         };
-            
+
         var options = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull

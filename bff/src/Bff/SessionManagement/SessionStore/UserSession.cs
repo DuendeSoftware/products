@@ -23,7 +23,7 @@ public class UserSession : UserSessionUpdate
         CopyTo(other);
         return other;
     }
-        
+
     /// <summary>
     /// Copies this instance into another
     /// </summary>

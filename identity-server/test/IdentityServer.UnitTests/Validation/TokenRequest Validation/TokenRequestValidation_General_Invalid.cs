@@ -2,17 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Collections.Specialized;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Shouldly;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.TokenRequest_Validation;
 
@@ -91,7 +87,7 @@ public class TokenRequestValidation_General_Invalid
         var codeStore = Factory.CreateAuthorizationCodeStore();
 
         var validator = Factory.CreateTokenRequestValidator(
-            authorizationCodeStore:codeStore);
+            authorizationCodeStore: codeStore);
 
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.TokenRequest.GrantType, "client_credentials");

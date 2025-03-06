@@ -2,18 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using Shouldly;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Validation.EndSessionRequestValidation;
 
@@ -67,7 +63,7 @@ public class EndSessionRequestValidatorTests
         {
             IsError = false,
             Claims = new Claim[] { new Claim("sub", _user.GetSubjectId()) },
-            Client = new Client() { ClientId = "client"}
+            Client = new Client() { ClientId = "client" }
         };
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
@@ -146,7 +142,7 @@ public class EndSessionRequestValidatorTests
 
         result.ValidatedRequest.Client.ClientId.ShouldBe("client");
         result.ValidatedRequest.Subject.GetSubjectId().ShouldBe(_user.GetSubjectId());
-            
+
         result.ValidatedRequest.State.ShouldBeNull();
         result.ValidatedRequest.PostLogOutUri.ShouldBeNull();
     }

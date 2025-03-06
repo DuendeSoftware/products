@@ -4,17 +4,15 @@
 
 #nullable enable
 
+using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
-using System.Net.Http;
-using Duende.IdentityServer;
-using Duende.IdentityServer.Configuration;
 using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Hosting.DynamicProviders;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -88,7 +86,7 @@ public static class IdentityServerBuilderExtensionsAdditional
 
         return builder;
     }
-        
+
     /// <summary>
     /// Adds a resource validator.
     /// </summary>
@@ -300,7 +298,7 @@ public static class IdentityServerBuilderExtensionsAdditional
 
         return builder;
     }
-        
+
 
 
     /// <summary>
@@ -447,7 +445,8 @@ public static class IdentityServerBuilderExtensionsAdditional
         else
         {
             httpBuilder = builder.Services.AddHttpClient(name)
-                .ConfigureHttpClient(client => {
+                .ConfigureHttpClient(client =>
+                {
                     client.Timeout = TimeSpan.FromSeconds(IdentityServerConstants.HttpClients.DefaultTimeoutSeconds);
                 });
         }
@@ -457,7 +456,7 @@ public static class IdentityServerBuilderExtensionsAdditional
             var httpClientFactory = s.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient(name);
             var loggerFactory = s.GetRequiredService<ILoggerFactory>();
-                
+
             return new DefaultBackChannelLogoutHttpClient(httpClient, loggerFactory, new NoneCancellationTokenProvider());
         });
 
@@ -482,11 +481,12 @@ public static class IdentityServerBuilderExtensionsAdditional
         else
         {
             httpBuilder = builder.Services.AddHttpClient(name)
-                .ConfigureHttpClient(client => {
+                .ConfigureHttpClient(client =>
+                {
                     client.Timeout = TimeSpan.FromSeconds(IdentityServerConstants.HttpClients.DefaultTimeoutSeconds);
                 });
         }
-            
+
         builder.Services.AddTransient<IJwtRequestUriHttpClient, DefaultJwtRequestUriHttpClient>(s =>
         {
             var httpClientFactory = s.GetRequiredService<IHttpClientFactory>();

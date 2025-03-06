@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using BenchmarkDotNet.Attributes;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using BenchmarkDotNet.Attributes;
 
 namespace IdentityServer.PerfTest.Infrastructure
 {
-    public class TestBase<T> 
+    public class TestBase<T>
         where T : IdentityServerContainer, new()
     {
         public static X509Certificate2 Cert { get; }

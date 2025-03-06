@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using Shouldly;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using IntegrationTests.Common;
-using Xunit;
-using Duende.IdentityModel.Client;
-using Duende.IdentityModel;
 
 namespace IntegrationTests.Endpoints.Token;
 
@@ -112,7 +107,7 @@ public class RefreshTokenTests
             ClientId = client_id,
             ClientSecret = client_secret,
             ClientCredentialStyle = ClientCredentialStyle.PostBody,
-            
+
             RefreshToken = tokenResult1.RefreshToken
         });
 

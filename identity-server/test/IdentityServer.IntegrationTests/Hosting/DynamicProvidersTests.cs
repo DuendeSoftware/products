@@ -2,23 +2,18 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Net;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Shouldly;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace IdentityServer.IntegrationTests.Hosting;
 
@@ -29,7 +24,7 @@ public class DynamicProvidersTests
     private GenericHost _idp2;
 
     List<OidcProvider> _oidcProviders = new List<OidcProvider>()
-    { 
+    {
         new OidcProvider
         {
             Scheme = "idp1",
@@ -53,7 +48,7 @@ public class DynamicProvidersTests
             services.AddIdentityServer()
                 .AddInMemoryClients(new Client[] {
                     new Client
-                    { 
+                    {
                         ClientId = "client",
                         ClientSecrets = { new Secret("secret".Sha256()) },
                         AllowedGrantTypes = GrantTypes.Code,
@@ -146,7 +141,7 @@ public class DynamicProvidersTests
 
 
         _host = new GenericHost("https://server");
-        _host.OnConfigureServices += services => 
+        _host.OnConfigureServices += services =>
         {
             services.AddRouting();
             services.AddAuthorization();
@@ -165,7 +160,7 @@ public class DynamicProvidersTests
             });
 
             services.AddAuthentication()
-                .AddOpenIdConnect("idp2", options => 
+                .AddOpenIdConnect("idp2", options =>
                 {
                     options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
                     options.Authority = "https://idp2";
@@ -184,13 +179,13 @@ public class DynamicProvidersTests
                 options.AddFilter("Duende", LogLevel.Debug);
             });
         };
-        _host.OnConfigure += app => 
+        _host.OnConfigure += app =>
         {
             app.UseRouting();
-                
+
             app.UseIdentityServer();
             app.UseAuthorization();
-                
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/user", async ctx =>
@@ -222,7 +217,7 @@ public class DynamicProvidersTests
                 });
                 endpoints.MapGet("/challenge", async ctx =>
                 {
-                    await ctx.ChallengeAsync(ctx.Request.Query["scheme"], 
+                    await ctx.ChallengeAsync(ctx.Request.Query["scheme"],
                         new AuthenticationProperties { RedirectUri = "/callback" });
                 });
                 endpoints.MapGet("/logout", async ctx =>
@@ -243,7 +238,7 @@ public class DynamicProvidersTests
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://idp1/connect/authorize");
     }
-        
+
     [Fact]
     public async Task signout_should_trigger_endsession_request_to_dynamic_idp()
     {
@@ -319,7 +314,7 @@ public class DynamicProvidersTests
         await cache.RemoveAsync("test");
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
-            
+
         response = await _host.BrowserClient.GetAsync(_host.Url(response.Headers.Location.ToString()));
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var body = await response.Content.ReadAsStringAsync();

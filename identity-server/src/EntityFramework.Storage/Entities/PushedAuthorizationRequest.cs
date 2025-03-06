@@ -4,8 +4,6 @@
 
 #pragma warning disable 1591
 
-using System;
-
 namespace Duende.IdentityServer.EntityFramework.Entities;
 
 public class PushedAuthorizationRequest

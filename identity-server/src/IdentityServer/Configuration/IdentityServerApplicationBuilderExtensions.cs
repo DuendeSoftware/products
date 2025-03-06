@@ -4,23 +4,20 @@
 
 #nullable enable
 
-using Duende;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
+using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Stores;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Licensing.V2;
 
 namespace Microsoft.AspNetCore.Builder;
 
@@ -63,10 +60,10 @@ public static class IdentityServerApplicationBuilderExtensions
     {
         var loggerFactory = app.ApplicationServices.GetService<ILoggerFactory>();
         ArgumentNullException.ThrowIfNull(loggerFactory);
-      
+
         var logger = loggerFactory.CreateLogger("Duende.IdentityServer.Startup");
-        logger.LogInformation("Starting Duende IdentityServer version {version} ({netversion})", 
-            typeof(IdentityServerMiddleware).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion, 
+        logger.LogInformation("Starting Duende IdentityServer version {version} ({netversion})",
+            typeof(IdentityServerMiddleware).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion,
             RuntimeInformation.FrameworkDescription);
 
         var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
@@ -153,7 +150,7 @@ public static class IdentityServerApplicationBuilderExtensions
     private static void ValidateOptions(IdentityServerOptions options, ILogger logger)
     {
         if (options.IssuerUri.IsPresent()) logger.LogDebug("Custom IssuerUri set to {0}", options.IssuerUri);
-            
+
         // these three are dynamically populated later from the cookie handler options
         //if (options.UserInteraction.LoginUrl.IsMissing()) throw new InvalidOperationException("LoginUrl is not configured");
         //if (options.UserInteraction.LoginReturnUrlParameter.IsMissing()) throw new InvalidOperationException("LoginReturnUrlParameter is not configured");

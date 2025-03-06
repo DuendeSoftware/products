@@ -1,20 +1,19 @@
-﻿using Clients;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 
 namespace ConsolePrivateKeyJwtClient
 {
     public class Program
     {
-        private static string rsaKey = 
+        private static string rsaKey =
             """
             {
                 "d":"GmiaucNIzdvsEzGjZjd43SDToy1pz-Ph-shsOUXXh-dsYNGftITGerp8bO1iryXh_zUEo8oDK3r1y4klTonQ6bLsWw4ogjLPmL3yiqsoSjJa1G2Ymh_RY_sFZLLXAcrmpbzdWIAkgkHSZTaliL6g57vA7gxvd8L4s82wgGer_JmURI0ECbaCg98JVS0Srtf9GeTRHoX4foLWKc1Vq6NHthzqRMLZe-aRBNU9IMvXNd7kCcIbHCM3GTD_8cFj135nBPP2HOgC_ZXI1txsEf-djqJj8W5vaM7ViKU28IDv1gZGH3CatoysYx6jv1XJVvb2PH8RbFKbJmeyUm3Wvo-rgQ",
@@ -61,7 +60,7 @@ namespace ConsolePrivateKeyJwtClient
             var jwk = new JsonWebKey(rsaKey);
             response = await RequestTokenAsync(new SigningCredentials(jwk, "RS256"));
             response.Show();
-            
+
             Console.ReadLine();
             await CallServiceAsync(response.AccessToken);
 
@@ -69,7 +68,7 @@ namespace ConsolePrivateKeyJwtClient
             jwk = new JsonWebKey(ecKey);
             response = await RequestTokenAsync(new SigningCredentials(jwk, "ES256"));
             response.Show();
-            
+
             Console.ReadLine();
             await CallServiceAsync(response.AccessToken);
 
@@ -82,7 +81,7 @@ namespace ConsolePrivateKeyJwtClient
             var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
             if (disco.IsError) throw new Exception(disco.Error);
 
-            var clientToken = CreateClientToken(credential,"client.jwt", disco.TokenEndpoint);
+            var clientToken = CreateClientToken(credential, "client.jwt", disco.TokenEndpoint);
 
             var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {
@@ -118,7 +117,7 @@ namespace ConsolePrivateKeyJwtClient
 
         private static string CreateClientToken(SigningCredentials credential, string clientId, string audience)
         {
-            
+
             var now = DateTime.UtcNow;
 
             var token = new JwtSecurityToken(

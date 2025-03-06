@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Validation;
 
 /// <summary>
@@ -22,7 +20,7 @@ public class DPoPProofValidatonResult : ValidationResult
     /// The JWK thumbprint from the validated DPoP proof token.
     /// </summary>
     public string? JsonWebKeyThumbprint { get; set; }
-    
+
     /// <summary>
     /// The 'cnf' value for the DPoP proof token.
     /// </summary>
@@ -42,7 +40,7 @@ public class DPoPProofValidatonResult : ValidationResult
     /// The 'jti' value read from the payload.
     /// </summary>
     public string? TokenId { get; set; }
-    
+
     /// <summary>
     /// The 'nonce' value read from the payload.
     /// </summary>
@@ -51,7 +49,7 @@ public class DPoPProofValidatonResult : ValidationResult
     /// <summary>
     /// The 'iat' value read from the payload.
     /// </summary>
-    public long? IssuedAt{ get; set; }
+    public long? IssuedAt { get; set; }
 
     /// <summary>
     /// The 'nonce' value issued by the server that should be emitted on the response.

@@ -3,8 +3,6 @@
 
 
 using Duende.IdentityServer.Extensions;
-using System.Collections.Generic;
-using System.Linq;
 using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Events;
@@ -33,7 +31,7 @@ public class TokenIntrospectionSuccessEvent : Event
         {
             Token = Obfuscate(result.Token);
         }
-            
+
         if (!IEnumerableExtensions.IsNullOrEmpty(result.Claims))
         {
             ClaimTypes = result.Claims.Select(c => c.Type).Distinct();
@@ -48,7 +46,7 @@ public class TokenIntrospectionSuccessEvent : Event
     /// The name of the API.
     /// </value>
     public string ApiName { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the name of the client.
     /// </summary>

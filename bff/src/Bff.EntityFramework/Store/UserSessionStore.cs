@@ -7,11 +7,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Duende.Bff.EntityFramework;
 
@@ -168,7 +163,7 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
         if (item != null)
         {
             _logger.LogDebug("Getting user session record from store for sub {sub} sid {sid}", item.SubjectId, item.SessionId);
-            
+
             result = new UserSession();
             item.CopyTo(result);
         }

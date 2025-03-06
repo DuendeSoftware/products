@@ -1,9 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Threading.Tasks;
-
 namespace Duende.Bff.Tests.TestHosts;
 
 public class TestAccessTokenRetriever : IAccessTokenRetriever
@@ -17,6 +14,6 @@ public class TestAccessTokenRetriever : IAccessTokenRetriever
 
     public async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
     {
-        return  await _accessTokenGetter();
+        return await _accessTokenGetter();
     }
 }

@@ -3,13 +3,10 @@
 
 
 using System.Collections.Specialized;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Shouldly;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.AuthorizeRequest_Validation;
 
@@ -31,7 +28,7 @@ public class Authorize_ClientValidation_Valid
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
+
         result.IsError.ShouldBeFalse();
     }
 
@@ -47,7 +44,7 @@ public class Authorize_ClientValidation_Valid
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
+
         result.IsError.ShouldBeFalse();
     }
 
@@ -63,7 +60,7 @@ public class Authorize_ClientValidation_Valid
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
+
         result.IsError.ShouldBeFalse();
     }
 
@@ -79,7 +76,7 @@ public class Authorize_ClientValidation_Valid
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
+
         result.IsError.ShouldBeFalse();
     }
 
@@ -181,7 +178,7 @@ public class Authorize_ClientValidation_Valid
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
+
         result.IsError.ShouldBeFalse();
     }
 
@@ -198,7 +195,7 @@ public class Authorize_ClientValidation_Valid
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
+
         result.IsError.ShouldBeFalse();
     }
 
@@ -214,7 +211,7 @@ public class Authorize_ClientValidation_Valid
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
+
         result.IsError.ShouldBeFalse();
     }
 

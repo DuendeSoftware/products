@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.ResponseHandling;

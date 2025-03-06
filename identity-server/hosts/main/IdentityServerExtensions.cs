@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Cryptography.X509Certificates;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityModel;
 using IdentityServerHost.Configuration;
 using IdentityServerHost.Extensions;
 using Microsoft.IdentityModel.Tokens;
@@ -99,7 +99,7 @@ internal static class IdentityServerExtensions
 
             var ecCert = store.Certificates
                 .Find(X509FindType.FindBySubjectName, "identityserver.test.ecdsa", true)
-                .Single();  
+                .Single();
             var key = new ECDsaSecurityKey(ecCert.GetECDsaPrivateKey())
             {
                 KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)

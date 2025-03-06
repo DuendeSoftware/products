@@ -6,6 +6,6 @@ namespace Duende.IdentityServer;
 
 internal static class Constants
 {
-    public const string IdentityServerName               = "Duende.IdentityServer";
+    public const string IdentityServerName = "Duende.IdentityServer";
     public const string IdentityServerAuthenticationType = IdentityServerName;
 }

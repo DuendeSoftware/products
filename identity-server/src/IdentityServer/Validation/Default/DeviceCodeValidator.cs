@@ -2,12 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
@@ -53,7 +51,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
     public async Task ValidateAsync(DeviceCodeValidationContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceCodeValidator.Validate");
-        
+
         var deviceCode = await _devices.FindByDeviceCodeAsync(context.DeviceCode);
 
         if (deviceCode == null)
@@ -62,7 +60,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }
-            
+
         // validate client binding
         if (deviceCode.ClientId != context.Request.Client.ClientId)
         {

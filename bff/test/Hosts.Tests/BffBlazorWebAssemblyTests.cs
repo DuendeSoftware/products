@@ -1,8 +1,9 @@
-﻿using Hosts.ServiceDefaults;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
-using Microsoft.Playwright;
-using System.Net.Http;
 using Xunit.Abstractions;
 
 namespace Hosts.Tests;

@@ -15,7 +15,7 @@ public static class TestMocks
         {
             // Just have to set something that looks reasonably like a URL so that the HttpClient's internal validation
             // doesn't blow up
-            BaseAddress = new Uri("https://example.com") 
+            BaseAddress = new Uri("https://example.com")
         };
         var factory = Substitute.For<IHttpClientFactory>();
         factory.CreateClient(BffClientAuthenticationStateProvider.HttpClientName).Returns(httpClient);

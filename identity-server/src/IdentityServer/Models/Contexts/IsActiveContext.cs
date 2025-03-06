@@ -4,9 +4,8 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Extensions;
-using System;
 using System.Security.Claims;
+using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Models;
 
@@ -27,7 +26,7 @@ public class IsActiveContext
         Subject = subject;
         Client = client;
         Caller = caller;
-            
+
         IsActive = true;
     }
 

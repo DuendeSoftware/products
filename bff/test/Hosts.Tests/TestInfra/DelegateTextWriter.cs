@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.Text;
 
 namespace Hosts.Tests.TestInfra;
 
@@ -18,7 +21,7 @@ public class DelegateTextWriter : TextWriter
     public override void Write(char value)
     {
         if (value == '\r')
-            // let's ignore carriage returns
+        // let's ignore carriage returns
         {
             return;
         }

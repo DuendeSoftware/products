@@ -1,14 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Threading;
 using Duende.Bff;
 using Duende.Bff.Yarp;
 using Hosts.ServiceDefaults;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.ServiceDiscovery;
 
 namespace Bff;
@@ -17,7 +12,7 @@ internal static class Extensions
 {
     public static WebApplication ConfigureServices(
         this WebApplicationBuilder builder,
-        
+
         // The serviceprovider is needed to do service discovery
         Func<IServiceProvider> getServiceProvider
     )

@@ -3,7 +3,6 @@
 
 
 using Microsoft.IdentityModel.Tokens;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Stores;
 

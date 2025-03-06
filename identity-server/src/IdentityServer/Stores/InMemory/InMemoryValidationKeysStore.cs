@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores;
@@ -34,7 +31,7 @@ public class InMemoryValidationKeysStore : IValidationKeysStore
     public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryValidationKeysStore.GetValidationKeys");
-        
+
         return Task.FromResult(_keys);
     }
 }

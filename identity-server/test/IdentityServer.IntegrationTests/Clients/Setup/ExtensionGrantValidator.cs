@@ -3,7 +3,6 @@
 
 
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 
@@ -39,5 +38,5 @@ public class ExtensionGrantValidator : IExtensionGrantValidator
         return Task.CompletedTask;
     }
 
-    public string GrantType =>  "custom";
+    public string GrantType => "custom";
 }

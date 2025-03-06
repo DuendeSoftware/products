@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System;
-
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -76,7 +74,7 @@ public class PersistedGrant
     /// The expiration.
     /// </value>
     public DateTime? Expiration { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the consumed time.
     /// </summary>

@@ -4,11 +4,7 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Configuration;
@@ -44,14 +40,14 @@ public class KeyManagementOptions
     /// Defaults to 5 minutes.
     /// </summary>
     public TimeSpan InitializationDuration { get; set; } = TimeSpan.FromMinutes(5);
-        
+
     /// <summary>
     /// Delay used when re-loading from the store when the initialization period. It allows
     /// other servers more time to write new keys so other servers can include them.
     /// Defaults to 5 seconds.
     /// </summary>
     public TimeSpan InitializationSynchronizationDelay { get; set; } = TimeSpan.FromSeconds(5);
-        
+
     /// <summary>
     /// Cache duration when within the initialization period.
     /// Defaults to 1 minute.
@@ -69,7 +65,7 @@ public class KeyManagementOptions
     /// Defaults to 14 days.
     /// </summary>
     public TimeSpan PropagationTime { get; set; } = TimeSpan.FromDays(14);
-        
+
     /// <summary>
     /// Age at which keys will no longer be used for signing, but will still be used in discovery for validation.
     /// Defaults to 90 days.
@@ -167,7 +163,7 @@ public class SigningAlgorithmOptions
     /// </summary>
     public SigningAlgorithmOptions()
     {
-        
+
     }
 
     /// <summary>

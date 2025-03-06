@@ -4,9 +4,8 @@
 
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Extensions;
-using Xunit;
+using Duende.IdentityServer.Hosting;
 
 namespace UnitTests.Extensions;
 
@@ -155,7 +154,7 @@ public class EndpointOptionsExtensionsTests
             expectedIsEndpointEnabled,
             _options.IsEndpointEnabled(
                 CreateTestEndpoint(IdentityServerConstants.EndpointNames.BackchannelAuthentication)));
-    }    
+    }
 
     private Endpoint CreateTestEndpoint(string name)
     {

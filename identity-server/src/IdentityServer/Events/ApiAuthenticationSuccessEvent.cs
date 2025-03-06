@@ -16,9 +16,9 @@ public class ApiAuthenticationSuccessEvent : Event
     /// <param name="apiName">Name of the API.</param>
     /// <param name="authenticationMethod">The authentication method.</param>
     public ApiAuthenticationSuccessEvent(string apiName, string authenticationMethod)
-        : base(EventCategories.Authentication, 
+        : base(EventCategories.Authentication,
             "API Authentication Success",
-            EventTypes.Success, 
+            EventTypes.Success,
             EventIds.ApiAuthenticationSuccess)
     {
         ApiName = apiName;

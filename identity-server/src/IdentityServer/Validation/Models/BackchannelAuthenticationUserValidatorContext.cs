@@ -4,9 +4,8 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Models;
-using System.Collections.Generic;
 using System.Security.Claims;
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Validation;
 

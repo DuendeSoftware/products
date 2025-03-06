@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -28,7 +31,7 @@ namespace IdentityServerHost.Pages.Ciba
         }
 
         public ViewModel View { get; set; }
-        
+
         [BindProperty]
         public InputModel Input { get; set; }
 

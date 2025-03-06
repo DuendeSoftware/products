@@ -1,14 +1,10 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Hosting;
-using Shouldly;
 using IntegrationTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 
 namespace IntegrationTests.Hosting;
@@ -23,7 +19,7 @@ public class FailRouter : IEndpointRouter
 
     public IEndpointHandler Find(HttpContext context)
     {
-        throw (Exception) _exceptionType.GetConstructor([]).Invoke(null);
+        throw (Exception)_exceptionType.GetConstructor([]).Invoke(null);
     }
 }
 

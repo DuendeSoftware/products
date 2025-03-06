@@ -1,8 +1,9 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Clients;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Clients;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace MvcJarJwt.Controllers;
 

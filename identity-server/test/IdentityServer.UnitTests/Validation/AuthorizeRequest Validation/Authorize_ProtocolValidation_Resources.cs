@@ -2,27 +2,24 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Shouldly;
-using Duende.IdentityModel;
-using Duende.IdentityServer.Licensing.V2;
 using Microsoft.Extensions.Logging.Abstractions;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.AuthorizeRequest_Validation;
 
 public class Authorize_ProtocolValidation_Resources
 {
     private const string Category = "AuthorizeRequest Protocol Validation - Resources";
-        
+
     private readonly AuthorizeRequestValidator _subject;
 
     private readonly IdentityServerOptions _options = new IdentityServerOptions();
@@ -59,7 +56,7 @@ public class Authorize_ProtocolValidation_Resources
             _mockUserSession,
             Factory.CreateRequestObjectValidator(),
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance)),
-            TestLogger.Create<AuthorizeRequestValidator>());
+            new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
     }
 
     [Fact]
@@ -181,7 +178,7 @@ public class Authorize_ProtocolValidation_Resources
         result.ValidatedRequest.RequestedResourceIndicators
             .ShouldBe(["urn:test1", "http://resource1", "http://resource2"], true);
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task failed_resource_validation_should_fail()

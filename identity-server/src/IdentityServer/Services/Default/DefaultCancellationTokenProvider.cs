@@ -3,7 +3,6 @@
 
 
 using Microsoft.AspNetCore.Http;
-using System.Threading;
 
 namespace Duende.IdentityServer.Services.Default;
 

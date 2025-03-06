@@ -2,14 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Net;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Net;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -38,7 +35,7 @@ internal class PushedAuthorizationHttpWriter : IHttpResponseWriter<PushedAuthori
     public async Task WriteHttpResponse(PushedAuthorizationResult result, HttpContext context)
     {
         context.Response.SetNoCache();
-        context.Response.StatusCode = (int) HttpStatusCode.Created;
+        context.Response.StatusCode = (int)HttpStatusCode.Created;
         var dto = new ResultDto
         {
             request_uri = result.Response.RequestUri,

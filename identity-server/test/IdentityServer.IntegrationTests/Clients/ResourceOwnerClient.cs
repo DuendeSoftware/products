@@ -2,20 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 
@@ -64,7 +58,7 @@ public class ResourceOwnerClient
         payload["idp"].GetString().ShouldBe("local");
         payload.Keys.ShouldContain("jti");
         payload.Keys.ShouldContain("iat");
-            
+
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
         scopes.Count.ShouldBe(1);
         scopes.ShouldContain("api1");
@@ -94,7 +88,7 @@ public class ResourceOwnerClient
         response.RefreshToken.ShouldNotBeNull();
 
         var payload = GetPayload(response);
-            
+
         payload["iss"].GetString().ShouldBe("https://idsvr4");
         payload["aud"].GetString().ShouldBe("api");
         payload["client_id"].GetString().ShouldBe("roclient");
@@ -102,11 +96,11 @@ public class ResourceOwnerClient
         payload["idp"].GetString().ShouldBe("local");
         payload.Keys.ShouldContain("jti");
         payload.Keys.ShouldContain("iat");
-            
+
         var amr = payload["amr"].EnumerateArray().ToList();
         amr.Count.ShouldBe(1);
         amr.First().GetString().ShouldBe("pwd");
-            
+
         var scopes = payload["scope"].EnumerateArray().Select(x => x.ToString()).ToList();
         scopes.Count.ShouldBe(8);
 
@@ -192,7 +186,7 @@ public class ResourceOwnerClient
         payload["idp"].GetString().ShouldBe("local");
         payload.Keys.ShouldContain("jti");
         payload.Keys.ShouldContain("iat");
-            
+
         var amr = payload["amr"].EnumerateArray().ToList();
         amr.Count.ShouldBe(1);
         amr.First().ToString().ShouldBe("pwd");
@@ -224,7 +218,7 @@ public class ResourceOwnerClient
         response.HttpStatusCode.ShouldBe(HttpStatusCode.BadRequest);
         response.Error.ShouldBe("invalid_grant");
     }
-        
+
     [Fact]
     public async Task User_with_empty_password_should_succeed()
     {

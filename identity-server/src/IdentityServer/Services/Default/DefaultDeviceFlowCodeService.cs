@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 
@@ -38,7 +37,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     public async Task<string> StoreDeviceAuthorizationAsync(string userCode, DeviceCode data)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.SendLogoutNotifStoreDeviceAuthorization");
-        
+
         var deviceCode = await _handleGenerationService.GenerateAsync();
 
         await _store.StoreDeviceAuthorizationAsync(deviceCode.Sha256(), userCode.Sha256(), data);
@@ -54,7 +53,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     public Task<DeviceCode> FindByUserCodeAsync(string userCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.FindByUserCode");
-        
+
         return _store.FindByUserCodeAsync(userCode.Sha256());
     }
 
@@ -66,7 +65,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.FindByDeviceCode");
-        
+
         return _store.FindByDeviceCodeAsync(deviceCode.Sha256());
     }
 
@@ -79,7 +78,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     public Task UpdateByUserCodeAsync(string userCode, DeviceCode data)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.UpdateByUserCode");
-        
+
         return _store.UpdateByUserCodeAsync(userCode.Sha256(), data);
     }
 
@@ -91,7 +90,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     public Task RemoveByDeviceCodeAsync(string deviceCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.RemoveByDeviceCode");
-        
+
         return _store.RemoveByDeviceCodeAsync(deviceCode.Sha256());
     }
 }

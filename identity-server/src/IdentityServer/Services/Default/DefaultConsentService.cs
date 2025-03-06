@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Security.Claims;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 
@@ -87,7 +83,7 @@ public class DefaultConsentService : IConsentService
             Logger.LogDebug("Client is configured to not allow remembering consent, consent is required");
             return true;
         }
-            
+
         if (parsedScopes.Any(x => x.ParsedName != x.RawValue))
         {
             Logger.LogDebug("Scopes contains parameterized values, consent is required");

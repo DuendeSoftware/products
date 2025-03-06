@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Security.Claims;
-using Duende;
 using Duende.IdentityServer;
-using Shouldly;
-using Xunit;
 using static Duende.License;
 
 namespace UnitTests.Licensing;

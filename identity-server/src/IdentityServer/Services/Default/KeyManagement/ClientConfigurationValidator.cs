@@ -4,7 +4,6 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Validation;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services.KeyManagement;
 
@@ -30,7 +29,7 @@ public class ClientConfigurationValidator : DefaultClientConfigurationValidator
     protected override async Task ValidateLifetimesAsync(ClientConfigurationValidationContext context)
     {
         await base.ValidateLifetimesAsync(context);
-            
+
         if (context.IsValid)
         {
             if (_keyManagerOptions == null) throw new System.Exception("KeyManagerOptions not configured.");

@@ -1,4 +1,7 @@
-﻿using BffLocalApi;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using BffLocalApi;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -19,7 +22,7 @@ try
     var app = builder
         .ConfigureServices()
         .ConfigurePipeline();
-    
+
     app.Run();
 }
 catch (Exception ex)

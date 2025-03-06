@@ -1,8 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff;
@@ -22,7 +20,7 @@ public class NopSessionRevocationService : ISessionRevocationService
     {
         _logger = logger;
     }
-        
+
     /// <inheritdoc />
     public Task RevokeSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
     {

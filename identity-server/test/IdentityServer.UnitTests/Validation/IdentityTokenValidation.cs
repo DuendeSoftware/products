@@ -2,15 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Shouldly;
 using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation;
 

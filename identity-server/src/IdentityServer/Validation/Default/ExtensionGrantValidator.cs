@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -70,7 +66,7 @@ public class ExtensionGrantValidator
             {
                 Request = request
             };
-            
+
             await validator.ValidateAsync(context);
             return context.Result;
         }

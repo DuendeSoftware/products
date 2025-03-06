@@ -17,17 +17,17 @@ public class ServerSideSessionCookieEventsTests
     public async Task OnCheckSlidingExpiration_if_force_renewal_cookie_flag_not_present_does_not_change_should_renew()
     {
         var context = CreateSlidingExpirationContext(DateTime.UtcNow.AddMinutes(1));
-        
+
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
 
         context.ShouldRenew.ShouldBeFalse();
     }
-    
+
     [Fact]
     public async Task OnCheckSlidingExpiration_if_force_renewal_cookie_flag_present_sets_should_renew_true()
     {
         var context = CreateSlidingExpirationContext(DateTime.UtcNow.AddMinutes(5), true);
-        
+
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
 
         context.ShouldRenew.ShouldBeTrue();
@@ -37,7 +37,7 @@ public class ServerSideSessionCookieEventsTests
     public async Task OnCheckSlidingExpiration_if_force_renewal_cookie_flag_present_removes_flag()
     {
         var context = CreateSlidingExpirationContext(DateTime.UtcNow.AddMinutes(5), true);
-        
+
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
 
         context.Properties.Items.Keys.ShouldNotContain(IdentityServerConstants.ForceCookieRenewalFlag);
@@ -48,9 +48,9 @@ public class ServerSideSessionCookieEventsTests
         OnCheckSlidingExpiration_if_force_renewal_cookie_flag_present_but_ticket_has_expired_should_not_change_renew()
     {
         var context = CreateSlidingExpirationContext(DateTime.UtcNow.AddMinutes(-1), true);
-        
+
         await ServerSideSessionCookieEvents.OnCheckSlidingExpiration(context);
-        
+
         context.ShouldRenew.ShouldBeFalse();
     }
 
@@ -67,7 +67,7 @@ public class ServerSideSessionCookieEventsTests
         {
             authProperties.SetString(IdentityServerConstants.ForceCookieRenewalFlag, String.Empty);
         }
-        
+
         var authTicket = new AuthenticationTicket(new ClaimsPrincipal([]), authProperties, "Test")
         {
             Properties =

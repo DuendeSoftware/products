@@ -1,14 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
+using System.Security.Claims;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts
@@ -23,7 +20,7 @@ namespace Duende.Bff.Tests.TestHosts
         protected YarpBffIntegrationTestBase(ITestOutputHelper output) : base(output)
         {
             _identityServerHost = new IdentityServerHost(WriteLine);
-            
+
             _identityServerHost.Clients.Add(new Client
             {
                 ClientId = "spa",
@@ -35,16 +32,17 @@ namespace Duende.Bff.Tests.TestHosts
                 AllowOfflineAccess = true,
                 AllowedScopes = { "openid", "profile", "scope1" }
             });
-            
-            
-            _identityServerHost.OnConfigureServices += services => {
-                services.AddTransient<IBackChannelLogoutHttpClient>(provider => 
+
+
+            _identityServerHost.OnConfigureServices += services =>
+            {
+                services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
                     new DefaultBackChannelLogoutHttpClient(
-                        YarpBasedBffHost!.HttpClient, 
-                        provider.GetRequiredService<ILoggerFactory>(), 
+                        YarpBasedBffHost!.HttpClient,
+                        provider.GetRequiredService<ILoggerFactory>(),
                         provider.GetRequiredService<ICancellationTokenProvider>()));
             };
-            
+
             ApiHost = new ApiHost(WriteLine, _identityServerHost, "scope1");
 
             YarpBasedBffHost = new YarpBffHost(output.WriteLine, _identityServerHost, ApiHost, "spa");

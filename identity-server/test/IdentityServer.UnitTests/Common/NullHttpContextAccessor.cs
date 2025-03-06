@@ -12,12 +12,12 @@ namespace UnitTests.Common;
 /// </summary>
 internal class NullHttpContextAccessor : IHttpContextAccessor
 {
-    public HttpContext HttpContext 
-    { 
+    public HttpContext HttpContext
+    {
         get
         {
             return null;
-        } 
+        }
         set
         {
             // Deliberate no-op

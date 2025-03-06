@@ -1,12 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Duende.Bff;
 
@@ -49,7 +44,7 @@ public class InMemoryUserSessionStore : IUserSessionStore
         _store.TryRemove(key, out _);
         return Task.CompletedTask;
     }
-        
+
     /// <inheritdoc />
     public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
     {
@@ -86,7 +81,7 @@ public class InMemoryUserSessionStore : IUserSessionStore
 
         var keys = query.Select(x => x.Key).ToArray();
 
-        foreach(var key in keys)
+        foreach (var key in keys)
         {
             _store.TryRemove(key, out _);
         }

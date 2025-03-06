@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Logging.Models;
 
 internal class TokenValidationLog

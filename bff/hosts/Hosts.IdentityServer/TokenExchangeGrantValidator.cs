@@ -1,6 +1,9 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using Duende.IdentityModel;
 
 namespace IdentityServerHost;
 
@@ -15,30 +18,30 @@ public class TokenExchangeGrantValidator : IExtensionGrantValidator
 
     // register for urn:ietf:params:oauth:grant-type:token-exchange
     public string GrantType => OidcConstants.GrantTypes.TokenExchange;
-    
+
     public async Task ValidateAsync(ExtensionGrantValidationContext context)
     {
         // default response is error
         context.Result = new GrantValidationResult(TokenRequestErrors.InvalidRequest);
-        
+
         // the spec allows for various token types, most commonly you return an access token
         var customResponse = new Dictionary<string, object>
         {
             { OidcConstants.TokenResponse.IssuedTokenType, OidcConstants.TokenTypeIdentifiers.AccessToken }
         };
-        
+
         // read the incoming token
         var subjectToken = context.Request.Raw.Get(OidcConstants.TokenRequest.SubjectToken);
-        
+
         // and the token type
         var subjectTokenType = context.Request.Raw.Get(OidcConstants.TokenRequest.SubjectTokenType);
-        
+
         // mandatory parameters
         if (string.IsNullOrWhiteSpace(subjectToken))
         {
             return;
         }
-        
+
         // for our impersonation/delegation scenario we require an access token
         if (!string.Equals(subjectTokenType, OidcConstants.TokenTypeIdentifiers.AccessToken))
         {
@@ -63,7 +66,7 @@ public class TokenExchangeGrantValidator : IExtensionGrantValidator
 
         // create response
         context.Result = new GrantValidationResult(
-            subject: impersonateSub, 
+            subject: impersonateSub,
             authenticationMethod: "swap-alice-and-bob",
             claims: impersonateClaims);
     }

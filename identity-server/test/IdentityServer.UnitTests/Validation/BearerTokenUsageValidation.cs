@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Validation;
-using Shouldly;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
-using Xunit;
+using UnitTests.Common;
 
 namespace UnitTests.Validation;
 
@@ -24,7 +20,7 @@ public class BearerTokenUsageValidation
         var ctx = new DefaultHttpContext();
         ctx.Request.Method = "GET";
 
-        var validator = new BearerTokenUsageValidator(TestLogger.Create< BearerTokenUsageValidator>());
+        var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
         result.TokenFound.ShouldBeFalse();

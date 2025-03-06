@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 
@@ -17,7 +16,7 @@ public class AccessTokenRetrievalContext
     /// the remote API.
     /// </summary>
     public required HttpContext HttpContext { get; set; }
-    
+
     /// <summary>
     /// Metadata that describes the remote API.
     /// </summary>

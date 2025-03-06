@@ -1,21 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using Duende.Bff.Tests.TestFramework;
-using Shouldly;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Yarp;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Yarp.ReverseProxy.Forwarder;
 
@@ -34,10 +26,10 @@ namespace Duende.Bff.Tests.TestHosts
 
         public BffHostUsingResourceNamedTokens(
             WriteTestOutput output,
-            IdentityServerHost identityServerHost, 
-            ApiHost apiHost, 
+            IdentityServerHost identityServerHost,
+            ApiHost apiHost,
             string clientId,
-            string baseAddress = "https://app", 
+            string baseAddress = "https://app",
             bool useForwardedHeaders = false)
             : base(output, baseAddress)
         {
@@ -55,8 +47,9 @@ namespace Duende.Bff.Tests.TestHosts
             services.AddRouting();
             services.AddAuthorization();
 
-            var bff = services.AddBff(options => { 
-                BffOptions = options; 
+            var bff = services.AddBff(options =>
+            {
+                BffOptions = options;
             });
 
             services.AddSingleton<IForwarderHttpClientFactory>(
@@ -80,7 +73,7 @@ namespace Duende.Bff.Tests.TestHosts
                 {
                     options.Events.OnUserInformationReceived = context =>
                     {
-                        StoreNamedTokens((context.ProtocolMessage.AccessToken, context.ProtocolMessage.RefreshToken), context.Properties 
+                        StoreNamedTokens((context.ProtocolMessage.AccessToken, context.ProtocolMessage.RefreshToken), context.Properties
                             ?? throw new NullReferenceException("AuthenticationProperties are not set"));
                         return Task.CompletedTask;
                     };
@@ -120,8 +113,8 @@ namespace Duende.Bff.Tests.TestHosts
         public static void StoreNamedTokens((string accessToken, string refreshToken) userTokens, AuthenticationProperties authenticationProperties)
         {
             var tokens = new List<AuthenticationToken>();
-            tokens.Add(new AuthenticationToken { Name = $"{OpenIdConnectParameterNames.AccessToken}::named_token_stored", Value = userTokens.accessToken,  });
-            tokens.Add(new AuthenticationToken { Name = $"{OpenIdConnectParameterNames.TokenType}::named_token_stored", Value = "Bearer",  });
+            tokens.Add(new AuthenticationToken { Name = $"{OpenIdConnectParameterNames.AccessToken}::named_token_stored", Value = userTokens.accessToken, });
+            tokens.Add(new AuthenticationToken { Name = $"{OpenIdConnectParameterNames.TokenType}::named_token_stored", Value = "Bearer", });
             authenticationProperties.StoreTokens(tokens);
         }
 
@@ -224,10 +217,10 @@ namespace Duende.Bff.Tests.TestHosts
         }
     }
 
-    public class BackChannelHttpMessageInvokerFactory(HttpMessageHandler backChannel) 
+    public class BackChannelHttpMessageInvokerFactory(HttpMessageHandler backChannel)
         : IForwarderHttpClientFactory
     {
-        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => 
+        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) =>
             new HttpMessageInvoker(backChannel);
     }
 }

@@ -2,21 +2,19 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Collections.Specialized;
+using System.Net;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Validation;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Specialized;
-using System.Net;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Licensing.V2;
 
 namespace Duende.IdentityServer.Endpoints;
 internal class PushedAuthorizationEndpoint : IEndpointHandler
@@ -55,7 +53,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
         NameValueCollection values;
         IFormCollection form;
-        if(HttpMethods.IsPost(context.Request.Method))
+        if (HttpMethods.IsPost(context.Request.Method))
         {
             form = await context.Request.ReadFormAsync();
             values = form.AsNameValueCollection();
@@ -67,7 +65,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
         // Authenticate Client
         var client = await _clientValidator.ValidateAsync(context);
-        if(client.IsError)
+        if (client.IsError)
         {
             return CreateErrorResult(
                 logMessage: "Client secret validation failed",
@@ -89,7 +87,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
         var response = await _responseGenerator.CreateResponseAsync(parValidationResult.ValidatedRequest);
 
-        switch(response)
+        switch (response)
         {
             case PushedAuthorizationSuccess success:
                 Telemetry.Metrics.PushedAuthorizationRequest(parValidationResult.ValidatedRequest.Client.ClientId);

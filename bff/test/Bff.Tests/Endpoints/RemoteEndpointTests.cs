@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Tests.TestFramework;
-using Duende.Bff.Tests.TestHosts;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Duende.Bff.Tests.TestFramework;
+using Duende.Bff.Tests.TestHosts;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints
@@ -336,7 +336,7 @@ namespace Duende.Bff.Tests.Endpoints
             ApiResponse apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
             apiResult.RequestHeaders["my-header-to-be-copied-by-yarp"].First().ShouldBe("copied-value");
 
-            response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform", 
+            response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform",
                 "a custom transform doesn't run the defaults");
         }
     }

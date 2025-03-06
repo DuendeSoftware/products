@@ -4,9 +4,6 @@
 
 using Duende.IdentityServer;
 using Duende.IdentityServer.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace UnitTests.Common;
 

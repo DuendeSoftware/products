@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.AccessTokenManagement.OpenIdConnect;
 
 namespace Duende.Bff;
@@ -15,9 +18,9 @@ public class BffUserAccessTokenParameters
     /// <param name="forceRenewal"></param>
     /// <param name="resource"></param>
     public BffUserAccessTokenParameters(
-        string? signInScheme = null, 
+        string? signInScheme = null,
         string? challengeScheme = null,
-        bool forceRenewal = false, 
+        bool forceRenewal = false,
         string? resource = null)
     {
         SignInScheme = signInScheme;

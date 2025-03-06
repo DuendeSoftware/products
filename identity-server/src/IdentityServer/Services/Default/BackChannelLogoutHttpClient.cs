@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Services;
@@ -42,18 +38,18 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
     public async Task PostAsync(string url, Dictionary<string, string> payload)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackChannelLogoutHttpClient.Post");
-        
+
         try
         {
             var response = await _client.PostAsync(url, new FormUrlEncodedContent(payload), _cancellationTokenProvider.CancellationToken);
             if (response.IsSuccessStatusCode)
             {
-                _logger.LogDebug("Response from back-channel logout endpoint: {url} status code: {status}", url, (int) response.StatusCode);
+                _logger.LogDebug("Response from back-channel logout endpoint: {url} status code: {status}", url, (int)response.StatusCode);
             }
             else
             {
                 BackChannelError err = null;
-                
+
                 var errorjson = await response.Content.ReadAsStringAsync();
                 try
                 {
@@ -63,11 +59,11 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
 
                 if (err == null)
                 {
-                    _logger.LogWarning("Response from back-channel logout endpoint: {url} status code: {status}", url, (int) response.StatusCode);
+                    _logger.LogWarning("Response from back-channel logout endpoint: {url} status code: {status}", url, (int)response.StatusCode);
                 }
                 else
                 {
-                    _logger.LogWarning("Response from back-channel logout endpoint: {url} status code: {status}, error: {error}, error_description: {error_description}", url, (int) response.StatusCode, err.error, err.error_description);
+                    _logger.LogWarning("Response from back-channel logout endpoint: {url} status code: {status}, error: {error}, error_description: {error_description}", url, (int)response.StatusCode, err.error, err.error_description);
                 }
             }
         }

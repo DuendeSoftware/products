@@ -3,8 +3,8 @@
 
 
 using System.Text.Json.Serialization;
-using Duende.IdentityServer.Models;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 
@@ -39,7 +39,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
 
         //// Grant Types
         GrantTypes = client.AllowedGrantTypes;
-        if(client.AllowOfflineAccess)
+        if (client.AllowOfflineAccess)
         {
             GrantTypes.Add(OidcConstants.GrantTypes.RefreshToken);
             // Sliding refresh tokens can use both absolute and sliding lifetime,
@@ -71,7 +71,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
         JwksUri = request.JwksUri;
         Jwks = request.Jwks;
         TokenEndpointAuthenticationMethod = request.TokenEndpointAuthenticationMethod;
-        RequireSignedRequestObject = InteractiveFlowsEnabled(client) ? 
+        RequireSignedRequestObject = InteractiveFlowsEnabled(client) ?
             client.RequireRequestObject : null;
 
         //// Client Name
@@ -174,7 +174,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
     private static Uri? ToUri(string? s) =>
         s != null ? new Uri(s) : null;
 
-    private static bool InteractiveFlowsEnabled(Client c) => 
+    private static bool InteractiveFlowsEnabled(Client c) =>
         c.AllowedGrantTypes.Contains(GrantType.AuthorizationCode);
 
     /// <summary>

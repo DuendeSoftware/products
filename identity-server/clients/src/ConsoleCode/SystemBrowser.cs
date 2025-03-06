@@ -1,16 +1,15 @@
-using Duende.IdentityModel.OidcClient.Browser;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using System;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using Duende.IdentityModel.OidcClient.Browser;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace ConsoleResourceIndicators
 {
@@ -174,7 +173,7 @@ namespace ConsoleResourceIndicators
 
                 _source.TrySetResult(value);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
                 ctx.Response.StatusCode = 400;

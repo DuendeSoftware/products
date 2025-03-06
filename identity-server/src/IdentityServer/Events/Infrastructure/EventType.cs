@@ -23,7 +23,7 @@ public enum EventTypes
     /// Information event
     /// </summary>
     Information = 3,
-        
+
     /// <summary>
     /// Error event
     /// </summary>

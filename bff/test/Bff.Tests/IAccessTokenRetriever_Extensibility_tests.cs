@@ -1,16 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
 using Duende.Bff.Tests.TestHosts;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Xunit;
-using Xunit.Abstractions;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shouldly;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
 

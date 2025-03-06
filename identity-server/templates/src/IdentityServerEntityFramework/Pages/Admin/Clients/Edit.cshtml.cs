@@ -32,7 +32,7 @@ public class EditModel : PageModel
         }
         else
         {
-            InputModel = model; 
+            InputModel = model;
             return Page();
         }
     }

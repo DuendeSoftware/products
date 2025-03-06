@@ -1,11 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.AccessTokenManagement;
 using Duende.Bff.Logging;
 using Microsoft.Extensions.Logging;
@@ -79,7 +75,7 @@ public class AccessTokenTransformProvider : ITransformProvider
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
-        if(GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))
+        if (GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))
         {
             if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
             {
@@ -92,7 +88,7 @@ public class AccessTokenTransformProvider : ITransformProvider
                 });
                 return;
             }
-        } 
+        }
         else if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
         {
             if (!Enum.TryParse<TokenType>(tokenTypeMetadata, true, out _))

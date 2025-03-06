@@ -21,5 +21,5 @@ public class BearerTokenResult : AccessTokenResult
     /// <summary>
     /// The access token.
     /// </summary>
-    public string AccessToken { get; private set; } 
+    public string AccessToken { get; private set; }
 }

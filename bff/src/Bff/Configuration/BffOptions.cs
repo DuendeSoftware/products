@@ -3,8 +3,6 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
 
 namespace Duende.Bff;
 
@@ -70,7 +68,7 @@ public class BffOptions
     /// Silent login endpoint
     /// </summary>
     public PathString SilentLoginPath => ManagementBasePath.Add(Constants.ManagementEndpoints.SilentLogin);
-        
+
     /// <summary>
     /// Silent login callback endpoint
     /// </summary>
@@ -80,17 +78,17 @@ public class BffOptions
     /// Logout endpoint
     /// </summary>
     public PathString LogoutPath => ManagementBasePath.Add(Constants.ManagementEndpoints.Logout);
-        
+
     /// <summary>
     /// User endpoint
     /// </summary>
     public PathString UserPath => ManagementBasePath.Add(Constants.ManagementEndpoints.User);
-        
+
     /// <summary>
     /// Back channel logout endpoint
     /// </summary>
     public PathString BackChannelLogoutPath => ManagementBasePath.Add(Constants.ManagementEndpoints.BackChannelLogout);
-        
+
     /// <summary>
     /// Diagnostics endpoint
     /// </summary>
@@ -113,7 +111,7 @@ public class BffOptions
     ///// Defaults to 100.
     ///// </summary>
     //public int SessionCleanupBatchSize { get; set; } = 100;
-        
+
     /// <summary>
     /// Controls the response behavior from the ~/bff/user endpoint when the user is anonymous.
     /// Defaults to Response401.

@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using Shouldly;
+using System.Net;
+using System.Reflection;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,13 +12,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Reflection;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.IntegrationTests.TestFramework;
 
@@ -107,7 +102,7 @@ public class GenericHost
     void ConfigureApp(IApplicationBuilder app)
     {
         _appServices = app.ApplicationServices;
-            
+
         OnConfigure(app);
 
         ConfigureSignin(app);
@@ -150,7 +145,7 @@ public class GenericHost
 
                 var props = _propsToSignIn ?? new AuthenticationProperties();
                 await ctx.SignInAsync(_userToSignIn, props);
-                    
+
                 _userToSignIn = null;
                 _propsToSignIn = null;
 

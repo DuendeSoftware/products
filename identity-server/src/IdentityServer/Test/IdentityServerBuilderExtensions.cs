@@ -3,7 +3,6 @@
 
 
 using Duende.IdentityServer.Test;
-using System.Collections.Generic;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -23,7 +22,7 @@ public static class IdentityServerBuilderExtensions
         builder.Services.AddSingleton(new TestUserStore(users));
         builder.AddProfileService<TestUserProfileService>();
         builder.AddResourceOwnerValidator<TestUserResourceOwnerPasswordValidator>();
-            
+
         builder.AddBackchannelAuthenticationUserValidator<TestBackchannelLoginUserValidator>();
 
         return builder;

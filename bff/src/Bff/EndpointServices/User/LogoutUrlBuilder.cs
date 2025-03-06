@@ -27,7 +27,7 @@ internal static class LogoutUrlBuilder
         {
             logoutUrl += $"?sid={UrlEncoder.Default.Encode(sessionId)}";
         }
-        
+
         return new Uri(logoutUrl, UriKind.Relative);
     }
 

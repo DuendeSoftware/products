@@ -2,11 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Stores;
-using Xunit;
 
 namespace IdentityServer.UnitTests.Storage
 {
@@ -33,9 +31,9 @@ namespace IdentityServer.UnitTests.Storage
             filter = new PersistedGrantFilter { SubjectId = "sub" };
             filter.Validate();
 
-            filter = new PersistedGrantFilter 
-            { 
-                SessionId  = "sid",
+            filter = new PersistedGrantFilter
+            {
+                SessionId = "sid",
                 SubjectId = "sub",
                 ClientId = "client-id",
                 Type = IdentityServerConstants.PersistedGrantTypes.RefreshToken

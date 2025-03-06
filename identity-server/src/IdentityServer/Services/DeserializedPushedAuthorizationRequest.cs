@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System;
 using System.Collections.Specialized;
 
 namespace Duende.IdentityServer.Services;
@@ -19,12 +18,12 @@ public class DeserializedPushedAuthorizationRequest
     /// identifier within the request_uri.
     /// </summary>
     public required string ReferenceValue { get; set; }
-    
+
     /// <summary>
     /// The pushed parameters. 
     /// </summary>
     public required NameValueCollection PushedParameters { get; set; }
-    
+
     /// <summary>
     /// The expiration time.
     /// </summary>

@@ -2,19 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.Logging;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using System;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -90,7 +87,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     public async Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("EndSessionRequestValidator.Validate");
-        
+
         Logger.LogDebug("Start end session request validation");
 
         var isAuthenticated = subject.IsAuthenticated();

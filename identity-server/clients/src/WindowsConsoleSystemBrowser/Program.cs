@@ -1,15 +1,15 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.Diagnostics;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Clients;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient;
 using Microsoft.IdentityModel.Logging;
 using Serilog;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
 
 namespace WindowsConsoleSystemBrowser
 {

@@ -2,14 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.Extensions.Hosting;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
-using Microsoft.Extensions.Logging;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -52,7 +49,7 @@ public class ServerSideSessionCleanupHost : IHostedService
 
             Task.Factory.StartNew(() => StartInternalAsync(_source.Token), cancellationToken);
         }
-            
+
         return Task.CompletedTask;
     }
 
@@ -76,7 +73,7 @@ public class ServerSideSessionCleanupHost : IHostedService
 
     private async Task StartInternalAsync(CancellationToken cancellationToken)
     {
-        var removalFrequencySeconds = (int) _options.ServerSideSessions.RemoveExpiredSessionsFrequency.TotalSeconds;
+        var removalFrequencySeconds = (int)_options.ServerSideSessions.RemoveExpiredSessionsFrequency.TotalSeconds;
 
         // Start the first run at a random interval.
         var delay = _options.ServerSideSessions.FuzzExpiredSessionRemovalStart

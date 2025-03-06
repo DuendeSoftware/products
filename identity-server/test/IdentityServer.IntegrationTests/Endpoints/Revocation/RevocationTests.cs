@@ -2,17 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using Shouldly;
-using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Endpoints.Revocation;
 

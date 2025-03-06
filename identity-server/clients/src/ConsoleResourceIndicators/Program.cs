@@ -1,20 +1,19 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.Text;
 using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleResourceIndicators
 {
     public class Program
     {
         static OidcClient _oidcClient;
-        
+
         public static async Task Main()
         {
             Console.WriteLine("+------------------------------+");
@@ -43,7 +42,7 @@ namespace ConsoleResourceIndicators
                 };
 
                 var a = ConsoleKey.A;
-                foreach(var test in tests)
+                foreach (var test in tests)
                 {
                     var resources = test.Item2 != null ? test.Item2.Aggregate((x, y) => $"{x}, {y}") : "-none-";
                     (a++.ToString() + ") SCOPES: " + test.Item1 + ", RESOURCES: " + resources).ConsoleGreen();
@@ -60,7 +59,7 @@ namespace ConsoleResourceIndicators
                     {
                         await FrontChannel(item.Item1, item.Item2);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Console.WriteLine($"Exception: {ex.Message}");
                     }
@@ -89,7 +88,7 @@ namespace ConsoleResourceIndicators
                 FilterClaims = false,
                 LoadProfile = false,
                 Browser = browser,
-                
+
                 Policy =
                 {
                     RequireIdentityTokenSignature = false
@@ -130,7 +129,7 @@ namespace ConsoleResourceIndicators
         {
             Console.WriteLine("\n\n");
             Console.WriteLine("Refresh with resource parameter");
-            
+
             while (true)
             {
                 Console.WriteLine("\n\n");
@@ -138,7 +137,7 @@ namespace ConsoleResourceIndicators
                 "a) urn:resource1".ConsoleGreen();
                 "b) urn:resource2".ConsoleGreen();
                 "c) urn:resource3".ConsoleGreen();
-                
+
                 "x) exit".ConsoleGreen();
                 var key = Console.ReadKey();
 
@@ -175,14 +174,14 @@ namespace ConsoleResourceIndicators
                 Console.ReadLine();
                 return;
             }
-            
+
             Console.WriteLine();
             Console.WriteLine("down-scoped access token:");
-            
+
             var parts = result.AccessToken.Split('.');
             var header = parts[0];
             var payload = parts[1];
-            
+
             Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(header)).PrettyPrintJson());
             Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(payload)).PrettyPrintJson());
 

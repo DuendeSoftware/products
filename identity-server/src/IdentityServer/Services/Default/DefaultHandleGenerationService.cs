@@ -3,7 +3,6 @@
 
 
 using Duende.IdentityModel;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 

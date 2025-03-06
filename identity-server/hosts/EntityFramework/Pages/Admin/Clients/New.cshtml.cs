@@ -27,7 +27,7 @@ public class NewModel : PageModel
     public void OnGet()
     {
         InputModel = new CreateClientModel
-        { 
+        {
             Secret = Convert.ToBase64String(CryptoRandom.CreateRandomKey(16))
         };
     }

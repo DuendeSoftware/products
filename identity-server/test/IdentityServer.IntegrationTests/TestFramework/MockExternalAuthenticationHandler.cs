@@ -2,22 +2,20 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Text.Encodings.Web;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.IntegrationTests.TestFramework
 {
     public class MockExternalAuthenticationHandler : RemoteAuthenticationHandler<MockExternalAuthenticationOptions>, IAuthenticationSignOutHandler
     {
         public MockExternalAuthenticationHandler(
-            IOptionsMonitor<MockExternalAuthenticationOptions> options, 
-            ILoggerFactory logger, 
-            UrlEncoder encoder) 
+            IOptionsMonitor<MockExternalAuthenticationOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder)
             : base(options, logger, encoder)
         {
         }

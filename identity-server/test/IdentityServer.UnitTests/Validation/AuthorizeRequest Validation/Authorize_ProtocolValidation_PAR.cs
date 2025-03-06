@@ -2,19 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Stores;
-using Duende.IdentityServer.Validation;
-using Shouldly;
 using Duende.IdentityModel;
-using UnitTests.Common;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Validation;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.AuthorizeRequest_Validation;
 
@@ -49,7 +41,7 @@ public class Authorize_ProtocolValidation_Valid_PAR
         result.IsError.ShouldBe(true);
         result.ErrorDescription.ShouldBe("invalid client for pushed authorization request");
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public void expired_par_requests_should_fail()

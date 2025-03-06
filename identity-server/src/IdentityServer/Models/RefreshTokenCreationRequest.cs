@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace Duende.IdentityServer.Models;
@@ -18,7 +17,7 @@ public class RefreshTokenCreationRequest
     /// The client.
     /// </summary>
     public Client Client { get; set; } = default!;
-        
+
     /// <summary>
     /// The subject.
     /// </summary>
@@ -39,7 +38,7 @@ public class RefreshTokenCreationRequest
     /// Non-null means there was an authorization step, and subsequent requested resource indicators must be in the original list.
     /// </summary>
     public IEnumerable<string>? AuthorizedResourceIndicators { get; set; }
-        
+
     /// <summary>
     /// The requested resource indicator.
     /// </summary>

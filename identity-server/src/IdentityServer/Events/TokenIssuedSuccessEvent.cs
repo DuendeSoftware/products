@@ -4,7 +4,6 @@
 
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
-using System.Collections.Generic;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Validation;
 

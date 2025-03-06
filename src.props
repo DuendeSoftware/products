@@ -18,7 +18,6 @@
     <ImplicitUsings>true</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">True</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
     <NoWarn>$(NoWarn);CS1591,NU1507</NoWarn>
@@ -46,6 +45,17 @@
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
 
     <PackageReadmePath>../../README.md</PackageReadmePath>
+  </PropertyGroup>
+
+  <!--Release builds do more work and are stricter. This allows for faster
+      development: devs can be messy/experimental initially and verify their
+      code easily by running a build in Release mode, and we also enforce
+      stricter rules in CI with the Release configuration. We can also move
+      any slow actions to the Release configuration to speed up test runs, etc.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

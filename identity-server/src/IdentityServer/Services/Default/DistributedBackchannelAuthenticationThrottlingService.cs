@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
@@ -37,12 +35,12 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
         _clock = clock;
         _options = options;
     }
-        
+
     /// <inheritdoc/>
     public async Task<bool> ShouldSlowDown(string requestId, BackChannelAuthenticationRequest details)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DistributedBackchannelAuthenticationThrottlingService.ShouldSlowDown");
-        
+
         ArgumentNullException.ThrowIfNull(requestId);
 
         var key = KeyPrefix + requestId;

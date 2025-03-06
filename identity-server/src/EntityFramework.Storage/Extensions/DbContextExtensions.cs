@@ -7,9 +7,6 @@
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.EntityFramework.Extensions;
 
@@ -22,7 +19,7 @@ public static class DbContextExtensions
     /// Saves changes and handles concurrency exceptions.
     /// </summary>
     public static async Task<ICollection<T>> SaveChangesWithConcurrencyCheckAsync<T>(this IPersistedGrantDbContext context, ILogger logger, CancellationToken cancellationToken = default)
-        where T: class
+        where T : class
     {
         var list = new List<T>();
 

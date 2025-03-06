@@ -1,0 +1,19 @@
+[*.cs]
+
+# Copyright Header
+file_header_template=Copyright (c) Duende Software. All rights reserved.\nSee LICENSE in the project root for license information.
+dotnet_diagnostic.IDE0073.severity = warning
+
+
+## Basic Formatting ##
+indent_style = space
+indent_size = 4
+dotnet_diagnostic.IDE0055.severity = warning
+
+
+## Usings ##
+# Remove unnecessary usings
+dotnet_diagnostic.IDE0005.severity = warning
+# Sort system usings first
+dotnet_sort_system_directives_first = true
+

@@ -4,9 +4,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Models;
 
 /// <summary>

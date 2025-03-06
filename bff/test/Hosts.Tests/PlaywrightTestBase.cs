@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Reflection;
 using Hosts.Tests.TestInfra;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
-using System.Reflection;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 

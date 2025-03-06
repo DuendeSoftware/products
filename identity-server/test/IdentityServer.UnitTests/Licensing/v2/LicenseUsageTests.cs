@@ -3,9 +3,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
-using Shouldly;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
 
 namespace IdentityServer.UnitTests.Licensing.V2;
 

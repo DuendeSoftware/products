@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Duende.IdentityModel;
+using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Models;
 

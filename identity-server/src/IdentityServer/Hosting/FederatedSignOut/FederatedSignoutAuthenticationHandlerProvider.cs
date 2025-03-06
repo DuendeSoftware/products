@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -21,7 +20,7 @@ internal class FederatedSignoutAuthenticationHandlerProvider : IAuthenticationHa
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public FederatedSignoutAuthenticationHandlerProvider(
-        Decorator<IAuthenticationHandlerProvider> decorator, 
+        Decorator<IAuthenticationHandlerProvider> decorator,
         IHttpContextAccessor httpContextAccessor)
     {
         _provider = decorator.Instance;

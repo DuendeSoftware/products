@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
             .AddSingleton<AuthenticationStateProvider, BffClientAuthenticationStateProvider>()
             .AddSingleton(TimeProvider.System)
             // HttpMessageHandlers must be registered as transient
-            .AddTransient<AntiforgeryHandler>() 
+            .AddTransient<AntiforgeryHandler>()
             .AddHttpClient(BffClientAuthenticationStateProvider.HttpClientName, (sp, client) =>
             {
                 var baseAddress = GetStateProviderBaseAddress(sp);

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Net.Http;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using Clients;
 using Duende.IdentityModel.Client;
 
@@ -11,18 +11,18 @@ namespace ConsoleEphemeralMtlsClient
     class Program
     {
         private static X509Certificate2 ClientCertificate;
-        
+
         static async Task Main(string[] args)
         {
             ClientCertificate = CreateClientCertificate("client");
-            
+
             var response = await RequestTokenAsync();
             response.Show();
 
             Console.ReadLine();
             await CallServiceAsync(response.AccessToken);
         }
-        
+
         static async Task<TokenResponse> RequestTokenAsync()
         {
             var client = new HttpClient(GetHandler(ClientCertificate));
@@ -56,17 +56,17 @@ namespace ConsoleEphemeralMtlsClient
             "\n\nService claims:".ConsoleGreen();
             Console.WriteLine(response.PrettyPrintJson());
         }
-        
+
         static X509Certificate2 CreateClientCertificate(string name)
         {
             X500DistinguishedName distinguishedName = new X500DistinguishedName($"CN={name}");
 
             using (var rsa = RSA.Create(2048))
             {
-                var request = new CertificateRequest(distinguishedName, rsa, HashAlgorithmName.SHA256,RSASignaturePadding.Pkcs1);
+                var request = new CertificateRequest(distinguishedName, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
                 request.CertificateExtensions.Add(
-                    new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature , false));
+                    new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, false));
 
                 request.CertificateExtensions.Add(
                     new X509EnhancedKeyUsageExtension(
@@ -75,7 +75,7 @@ namespace ConsoleEphemeralMtlsClient
                 return request.CreateSelfSigned(new DateTimeOffset(DateTime.UtcNow.AddDays(-1)), new DateTimeOffset(DateTime.UtcNow.AddDays(3650)));
             }
         }
-        
+
         static SocketsHttpHandler GetHandler(X509Certificate2 certificate)
         {
             var handler = new SocketsHttpHandler

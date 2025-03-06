@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Extensions;
 using Duende.IdentityServer.EntityFramework.Interfaces;
@@ -66,7 +65,7 @@ public class PersistedGrantDbContext<TContext> : DbContext, IPersistedGrantDbCon
     public DbSet<ServerSideSession> ServerSideSessions { get; set; }
 
     /// <inheritdoc/>
-    public DbSet<PushedAuthorizationRequest> PushedAuthorizationRequests { get; set; } 
+    public DbSet<PushedAuthorizationRequest> PushedAuthorizationRequests { get; set; }
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -80,7 +79,7 @@ public class PersistedGrantDbContext<TContext> : DbContext, IPersistedGrantDbCon
                 throw new ArgumentNullException(nameof(StoreOptions), "OperationalStoreOptions must be configured in the DI system.");
             }
         }
-        
+
         modelBuilder.ConfigurePersistedGrantContext(StoreOptions);
 
         base.OnModelCreating(modelBuilder);

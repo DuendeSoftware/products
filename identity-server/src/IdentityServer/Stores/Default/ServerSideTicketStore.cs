@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -91,7 +91,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     public async Task<AuthenticationTicket> RetrieveAsync(string key)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.Retrieve");
-        
+
         ArgumentNullException.ThrowIfNull(key);
 
         _logger.LogDebug("Retrieve AuthenticationTicket for key {key}", key);
@@ -121,7 +121,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     public async Task RenewAsync(string key, AuthenticationTicket ticket)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.Renew");
-        
+
         ArgumentNullException.ThrowIfNull(ticket);
 
         var session = await _store.GetSessionAsync(key);
@@ -163,11 +163,11 @@ public class ServerSideTicketStore : IServerSideTicketStore
     public async Task RemoveAsync(string key)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.Remove");
-        
+
         ArgumentNullException.ThrowIfNull(key);
 
         _logger.LogDebug("Removing AuthenticationTicket from store for key {key}", key);
-        
+
         // There is a somewhat rare scenario where a session has expired and a request to IdentityServer happens prior
         // to the cleanup job running. When that happens, the session is removed but none of the processing to trigger
         // backchannel logouts, etc. happens so we need a way to kick that off and are doing so here.
@@ -180,7 +180,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
                 _httpContextAccessor.HttpContext?.SetExpiredUserSession(userSession);
             }
         }
-        
+
         await _store.DeleteSessionAsync(key);
     }
 
@@ -188,7 +188,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     public async Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CancellationToken cancellationToken = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetSessions");
-        
+
         var sessions = await _store.GetSessionsAsync(filter, cancellationToken);
 
         return AsUserSessions(sessions);
@@ -199,7 +199,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     public async Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CancellationToken cancellationToken = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.QuerySessions");
-        
+
         var results = await _store.QuerySessionsAsync(filter, cancellationToken);
 
         var tickets = AsUserSessions(results.Results);
@@ -222,7 +222,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
     public async Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CancellationToken cancellationToken = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetAndRemoveExpiredSessions");
-        
+
         var sessions = await _store.GetAndRemoveExpiredSessionsAsync(count, cancellationToken);
 
         return AsUserSessions(sessions);

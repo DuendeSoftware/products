@@ -2,17 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Security.Cryptography;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 
 namespace Duende.IdentityServer;
 
@@ -25,9 +22,9 @@ internal class MessageCookie<TModel>
     private readonly IDataProtector _protector;
 
     public MessageCookie(
-        ILogger<MessageCookie<TModel>> logger, 
+        ILogger<MessageCookie<TModel>> logger,
         IdentityServerOptions options,
-        IHttpContextAccessor context, 
+        IHttpContextAccessor context,
         IServerUrls urls,
         IDataProtectionProvider provider)
     {
@@ -117,7 +114,7 @@ internal class MessageCookie<TModel>
             {
                 return Unprotect(data);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error unprotecting message cookie");
                 ClearByCookieName(name);
@@ -148,7 +145,7 @@ internal class MessageCookie<TModel>
     }
 
     private long GetCookieRank(string name)
-    {   
+    {
         // empty and invalid cookies are considered to be the oldest:
         var rank = DateTime.MinValue.Ticks;
 
@@ -162,11 +159,11 @@ internal class MessageCookie<TModel>
             }
         }
         catch (CryptographicException e)
-        {   
+        {
             // cookie was protected with a different key/algorithm
             _logger.LogDebug(e, "Unable to unprotect cookie {0}", name);
         }
-            
+
         return rank;
     }
 

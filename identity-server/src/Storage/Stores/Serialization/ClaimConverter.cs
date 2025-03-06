@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;

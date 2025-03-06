@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-
 namespace Duende.IdentityServer;
 
 /// <summary>

@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.Configuration.Models;
 /// Represents the result of a step in dynamic client registration validation or
 /// processing.
 /// </summary>
-public interface IStepResult 
+public interface IStepResult
 {
 }
 

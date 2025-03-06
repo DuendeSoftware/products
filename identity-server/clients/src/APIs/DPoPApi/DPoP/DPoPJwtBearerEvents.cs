@@ -1,10 +1,11 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.Text;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using static Duende.IdentityModel.OidcConstants;
 
 namespace DPoPApi;
@@ -133,7 +134,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
 
         context.Response.Headers.Append(HeaderNames.WWWAuthenticate, sb.ToString());
 
-        
+
         if (context.HttpContext.Items.ContainsKey("DPoP-Nonce"))
         {
             var nonce = context.HttpContext.Items["DPoP-Nonce"] as string;

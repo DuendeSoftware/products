@@ -1,5 +1,6 @@
-using System;
-using System.Collections.Generic;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Clients;

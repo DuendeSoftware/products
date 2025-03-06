@@ -3,7 +3,6 @@
 
 
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace EntityFramework.IntegrationTests;
 

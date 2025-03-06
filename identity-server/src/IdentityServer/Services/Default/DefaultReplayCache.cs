@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace Duende.IdentityServer.Services;
@@ -14,9 +12,9 @@ namespace Duende.IdentityServer.Services;
 public class DefaultReplayCache : IReplayCache
 {
     private const string Prefix = nameof(DefaultReplayCache) + "-";
-        
+
     private readonly IDistributedCache _cache;
-        
+
     /// <summary>
     /// ctor
     /// </summary>
@@ -25,17 +23,17 @@ public class DefaultReplayCache : IReplayCache
     {
         _cache = cache;
     }
-        
+
     /// <inheritdoc />
     public async Task AddAsync(string purpose, string handle, DateTimeOffset expiration)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultReplayCache.Add");
-        
+
         var options = new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = expiration
         };
-            
+
         await _cache.SetAsync(Prefix + purpose + handle, new byte[] { }, options);
     }
 
@@ -43,7 +41,7 @@ public class DefaultReplayCache : IReplayCache
     public async Task<bool> ExistsAsync(string purpose, string handle)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultReplayCache.Exists");
-        
+
         return (await _cache.GetAsync(Prefix + purpose + handle, default)) != null;
     }
 }

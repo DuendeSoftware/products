@@ -27,7 +27,7 @@ public class EditModel : PageModel
     {
         var model = await _repository.GetByIdAsync(id);
 
-        if(model == null)
+        if (model == null)
         {
             return RedirectToPage("/Admin/ApiScopes/Index");
         }

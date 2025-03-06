@@ -13,7 +13,7 @@ internal static class ObjectSerializer
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-        
+
     public static string ToString(object o)
     {
         return JsonSerializer.Serialize(o, Options);

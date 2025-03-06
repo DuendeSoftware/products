@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 namespace Duende.Bff;
 

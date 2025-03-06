@@ -1,8 +1,8 @@
-﻿using Clients;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Clients;
 using Duende.IdentityModel.Client;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace ConsoleClientCredentialsFlowCallingIdentityServerApi
 {
@@ -20,7 +20,7 @@ namespace ConsoleClientCredentialsFlowCallingIdentityServerApi
             Console.ReadLine();
             await CallServiceAsync(response.AccessToken);
             Console.ReadLine();
-            
+
             "Reference access token".ConsoleBox(ConsoleColor.Green);
             response = await RequestTokenAsync("client.reference");
             response.Show();

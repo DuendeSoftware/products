@@ -6,7 +6,6 @@
 
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Models;
-using System.Collections.Generic;
 
 namespace Microsoft.Extensions.DependencyInjection;
 /// <summary>

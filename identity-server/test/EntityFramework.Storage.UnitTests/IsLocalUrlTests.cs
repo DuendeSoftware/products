@@ -1,6 +1,6 @@
-using System.Collections.Generic;
-using Shouldly;
-using Xunit;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.IdentityServer.EntityFramework.Extensions;
 
 namespace UnitTests.Validation;

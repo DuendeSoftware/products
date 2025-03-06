@@ -2,19 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using Shouldly;
-using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Conformance.Pkce;
 
@@ -280,7 +275,7 @@ public class PkceTests
 
         authorizeResponse.ShouldBeNull();
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task Code_verifier_should_not_be_accepted_if_no_code_challenge_was_used()
@@ -329,7 +324,7 @@ public class PkceTests
             IdentityServerConstants.StandardScopes.OpenId,
             redirect_uri,
             nonce: nonce,
-            codeChallenge:"a");
+            codeChallenge: "a");
 
         _pipeline.ErrorWasCalled.ShouldBeTrue();
         _pipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);

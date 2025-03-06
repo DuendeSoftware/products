@@ -1,9 +1,12 @@
-using Hosts.Bff.Blazor.PerComponent.Components;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.Bff;
 using Duende.Bff.Blazor;
 using Duende.Bff.Yarp;
 using Hosts.Bff.Blazor.PerComponent;
 using Hosts.Bff.Blazor.PerComponent.Client;
+using Hosts.Bff.Blazor.PerComponent.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +18,7 @@ builder.Services.AddBff()
     .AddBlazorServer()
     .AddRemoteApis();
 
-builder.Services.AddUserAccessTokenHttpClient("callApi", 
+builder.Services.AddUserAccessTokenHttpClient("callApi",
     configureClient: client => client.BaseAddress = new Uri("https://localhost:5010/"));
 
 

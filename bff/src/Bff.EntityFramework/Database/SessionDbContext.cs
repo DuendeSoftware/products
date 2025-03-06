@@ -52,7 +52,7 @@ public class SessionDbContext<TContext> : DbContext, ISessionDbContext
         {
             StoreOptions = this.GetService<IOptions<SessionStoreOptions>>()?.Value ?? new SessionStoreOptions();
         }
-        
+
         ConfigureSchema(modelBuilder);
 
         base.OnModelCreating(modelBuilder);

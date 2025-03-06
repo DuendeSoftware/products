@@ -1,5 +1,8 @@
-using Duende.Bff.Yarp;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using BffRemoteApi;
+using Duende.Bff.Yarp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +28,7 @@ builder.Services.AddAuthentication(options =>
         options.Authority = config.Authority;
         options.ClientId = config.ClientId;
         options.ClientSecret = config.ClientSecret;
-        
+
         options.ResponseType = "code";
         options.ResponseMode = "query";
 

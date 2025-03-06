@@ -5,7 +5,6 @@
 #nullable enable
 
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Hosting;
 

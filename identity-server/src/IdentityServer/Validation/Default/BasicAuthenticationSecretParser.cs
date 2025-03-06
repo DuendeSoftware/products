@@ -2,16 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Text;
-using System.Threading.Tasks;
-using System.Linq;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -81,7 +78,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
 
         var idAndSecret = _options.InputLengthRestrictions.ClientId + _options.InputLengthRestrictions.ClientSecret; // *3 for the URL encoding
         var authorizationHeaderHeaderMaxLength = 4 * idAndSecret + 10;
-        
+
         if (authorizationHeader.Length > authorizationHeaderHeaderMaxLength)
         {
             _logger.LogError("Authorization header exceeds maximum length allowed.");

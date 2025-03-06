@@ -3,9 +3,7 @@
 
 
 using Duende.IdentityServer.Extensions;
-using Shouldly;
 using Microsoft.AspNetCore.Http;
-using Xunit;
 
 namespace UnitTests.Extensions;
 

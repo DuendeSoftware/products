@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Tests.TestHosts;
-using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.SessionManagement
@@ -30,7 +26,7 @@ namespace Duende.Bff.Tests.SessionManagement
 
             BffHost.BrowserClient.RemoveCookie("bff");
             (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);
-            
+
             await BffHost.BffOidcLoginAsync();
 
             (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);

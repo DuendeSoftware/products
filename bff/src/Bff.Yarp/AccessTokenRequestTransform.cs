@@ -45,7 +45,7 @@ public class AccessTokenRequestTransform(
             // or from yarp
             ?? GetBffMetadataFromYarp(endpoint)
             ?? throw new InvalidOperationException("API endpoint is missing BFF metadata");
-        
+
         if (metadata.BffUserAccessTokenParameters != null)
         {
             userAccessTokenParameters = metadata.BffUserAccessTokenParameters.ToUserAccessTokenRequestParameters();
@@ -165,7 +165,7 @@ public class AccessTokenRequestTransform(
             context.ProxyRequest.Headers.Add(OidcConstants.HttpHeaders.DPoP, proofToken.ProofToken);
             context.ProxyRequest.Headers.Authorization =
                 new AuthenticationHeaderValue(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP, token.AccessToken);
-        } 
+        }
         else
         {
             // The proof service can opt out of DPoP by returning null. If so,

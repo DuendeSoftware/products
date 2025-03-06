@@ -4,7 +4,6 @@
 
 using System.Collections.Specialized;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints;
@@ -13,13 +12,11 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Shouldly;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Xunit;
-using Duende.IdentityServer.Stores;
+using UnitTests.Common;
 
 namespace UnitTests.Endpoints.Authorize;
 
@@ -46,7 +43,7 @@ public class AuthorizeEndpointBaseTests
     private StubAuthorizeInteractionResponseGenerator _stubInteractionGenerator = new StubAuthorizeInteractionResponseGenerator();
 
     private MockConsentMessageStore _mockUserConsentResponseMessageStore = new MockConsentMessageStore();
-        
+
     private TestAuthorizeEndpoint _subject;
 
     private ClaimsPrincipal _user = new IdentityServerUser("bob").CreatePrincipal();

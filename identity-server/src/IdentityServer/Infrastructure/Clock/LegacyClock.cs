@@ -3,7 +3,6 @@
 
 
 using Microsoft.AspNetCore.Authentication;
-using System;
 
 namespace Duende.IdentityServer;
 

@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 namespace Duende.Bff;
 
 /// <summary>
@@ -16,7 +19,7 @@ public static class Constants
         /// Name of token type (User, Client, UserOrClient) metadata
         /// </summary>
         public const string TokenTypeMetadata = "Duende.Bff.Yarp.TokenType";
-            
+
         /// <summary>
         /// Name of Anti-forgery check metadata
         /// </summary>
@@ -27,7 +30,7 @@ public static class Constants
         /// </summary>
         public const string OptionalUserTokenMetadata = "Duende.Bff.Yarp.OptionalUserToken";
     }
-        
+
     /// <summary>
     /// Custom claim types used by Duende.BFF
     /// </summary>
@@ -37,7 +40,7 @@ public static class Constants
         /// Claim type for logout URL including session id
         /// </summary>
         public const string LogoutUrl = "bff:logout_url";
-            
+
         /// <summary>
         /// Claim type for session expiration in seconds
         /// </summary>
@@ -63,7 +66,7 @@ public static class Constants
         /// Silent login path
         /// </summary>
         public const string SilentLogin = "/silent-login";
-            
+
         /// <summary>
         /// Silent login callback path
         /// </summary>
@@ -73,17 +76,17 @@ public static class Constants
         /// Logout path
         /// </summary>
         public const string Logout = "/logout";
-            
+
         /// <summary>
         /// User path
         /// </summary>
         public const string User = "/user";
-            
+
         /// <summary>
         /// Back channel logout path
         /// </summary>
         public const string BackChannelLogout = "/backchannel";
-            
+
         /// <summary>
         /// Diagnostics path
         /// </summary>
@@ -99,7 +102,7 @@ public static class Constants
         /// Used to prevent cookie sliding on user endpoint
         /// </summary>
         public const string SlideCookie = "slide";
-            
+
         /// <summary>
         /// Used to pass a return URL to login/logout
         /// </summary>

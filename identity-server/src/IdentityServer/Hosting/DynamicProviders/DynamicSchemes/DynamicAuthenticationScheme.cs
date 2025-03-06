@@ -4,7 +4,6 @@
 
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication;
-using System;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 

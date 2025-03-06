@@ -3,10 +3,7 @@
 
 
 using System.Net;
-using System.Threading.Tasks;
-using Shouldly;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Endpoints.CheckSession;
 

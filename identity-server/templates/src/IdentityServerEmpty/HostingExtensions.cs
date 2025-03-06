@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Serilog;
 
 namespace IdentityServerEmpty;
@@ -20,11 +23,11 @@ internal static class HostingExtensions
 
         return builder.Build();
     }
-    
+
     public static WebApplication ConfigurePipeline(this WebApplication app)
-    { 
+    {
         app.UseSerilogRequestLogging();
-    
+
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -33,7 +36,7 @@ internal static class HostingExtensions
         // uncomment if you want to add a UI
         //app.UseStaticFiles();
         //app.UseRouting();
-            
+
         app.UseIdentityServer();
 
         // uncomment if you want to add a UI

@@ -2,10 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using Duende.IdentityServer.Validation;
 using Duende.IdentityModel;
-using Xunit;
+using Duende.IdentityServer.Validation;
 
 namespace UnitTests.Extensions;
 
@@ -23,7 +21,7 @@ public class ValidatedAuthorizeRequestExtensionsTests
         request.AuthenticationContextReferenceClasses.Add("c");
 
         var acrs = request.GetAcrValues();
-        foreach(var acr in acrs)
+        foreach (var acr in acrs)
         {
             request.RemoveAcrValue(acr);
         }

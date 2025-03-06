@@ -2,20 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Logging.Models;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Stores;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Validation;
@@ -31,7 +28,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly IUserSession _userSession;
     private readonly IRequestObjectValidator _requestObjectValidator;
     private readonly LicenseUsageTracker _licenseUsage;
-    private readonly ILogger _logger;
+    private readonly SanitizedLogger<AuthorizeRequestValidator> _sanitizedLogger;
 
     private readonly ResponseTypeEqualityComparer
         _responseTypeEqualityComparer = new ResponseTypeEqualityComparer();
@@ -47,7 +44,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         IUserSession userSession,
         IRequestObjectValidator requestObjectValidator,
         LicenseUsageTracker licenseUsage,
-        ILogger<AuthorizeRequestValidator> logger)
+        SanitizedLogger<AuthorizeRequestValidator> sanitizedLogger)
     {
         _options = options;
         _issuerNameService = issuerNameService;
@@ -58,17 +55,17 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _requestObjectValidator = requestObjectValidator;
         _userSession = userSession;
         _licenseUsage = licenseUsage;
-        _logger = logger;
+        _sanitizedLogger = sanitizedLogger;
     }
 
     public async Task<AuthorizeRequestValidationResult> ValidateAsync(
-        NameValueCollection parameters, 
-        ClaimsPrincipal subject = null, 
+        NameValueCollection parameters,
+        ClaimsPrincipal subject = null,
         AuthorizeRequestType authorizeRequestType = AuthorizeRequestType.Authorize)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeRequestValidator.Validate");
-        
-        _logger.LogDebug("Start authorize request protocol validation");
+
+        _sanitizedLogger.LogDebug("Start authorize request protocol validation");
 
         var request = new ValidatedAuthorizeRequest
         {
@@ -130,7 +127,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         // custom validator
-        _logger.LogDebug("Calling into custom validator: {type}", _customValidator.GetType().FullName);
+        _sanitizedLogger.LogDebug("Calling into custom validator: {type}", _customValidator.GetType().FullName);
         var context = new CustomAuthorizeRequestValidationContext
         {
             Result = new AuthorizeRequestValidationResult(request)
@@ -144,7 +141,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             return Invalid(request, customResult.Error, customResult.ErrorDescription);
         }
 
-        _logger.LogTrace("Authorize request protocol validation successful");
+        _sanitizedLogger.LogTrace("Authorize request protocol validation successful");
 
         _licenseUsage.ClientUsed(request.ClientId);
         IdentityServerLicenseValidator.Instance.ValidateClient(request.ClientId);
@@ -302,7 +299,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         if (request.GrantType == GrantType.AuthorizationCode || request.GrantType == GrantType.Hybrid)
         {
-            _logger.LogDebug("Checking for PKCE parameters");
+            _sanitizedLogger.LogDebug("Checking for PKCE parameters");
 
             /////////////////////////////////////////////////////////////////////////////
             // validate code_challenge and code_challenge_method
@@ -383,7 +380,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             }
             else
             {
-                _logger.LogDebug("No PKCE used.");
+                _sanitizedLogger.LogDebug("No PKCE used.");
                 return Valid(request);
             }
 
@@ -403,7 +400,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         var codeChallengeMethod = request.Raw.Get(OidcConstants.AuthorizeRequest.CodeChallengeMethod);
         if (codeChallengeMethod.IsMissing())
         {
-            _logger.LogDebug("Missing code_challenge_method, defaulting to plain");
+            _sanitizedLogger.LogDebug("Missing code_challenge_method, defaulting to plain");
             codeChallengeMethod = OidcConstants.CodeChallengeMethods.Plain;
         }
 
@@ -481,7 +478,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
                 return Invalid(request, OidcConstants.AuthorizeErrors.InvalidTarget, "Resource indicator maximum length exceeded");
             }
 
-            if (!resourceIndicators.AreValidResourceIndicatorFormat(_logger))
+            if (!resourceIndicators.AreValidResourceIndicatorFormat(_sanitizedLogger.ToILogger()))
             {
                 return Invalid(request, OidcConstants.AuthorizeErrors.InvalidTarget, "Invalid resource indicator format");
             }
@@ -542,21 +539,21 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             case Constants.ScopeRequirement.Identity:
                 if (!validatedResources.Resources.IdentityResources.Any())
                 {
-                    _logger.LogError("Requests for id_token response type must include identity scopes");
+                    _sanitizedLogger.LogError("Requests for id_token response type must include identity scopes");
                     responseTypeValidationCheck = false;
                 }
                 break;
             case Constants.ScopeRequirement.IdentityOnly:
                 if (!validatedResources.Resources.IdentityResources.Any() || validatedResources.Resources.ApiScopes.Any())
                 {
-                    _logger.LogError("Requests for id_token response type only must not include resource scopes");
+                    _sanitizedLogger.LogError("Requests for id_token response type only must not include resource scopes");
                     responseTypeValidationCheck = false;
                 }
                 break;
             case Constants.ScopeRequirement.ResourceOnly:
                 if (validatedResources.Resources.IdentityResources.Any() || !validatedResources.Resources.ApiScopes.Any())
                 {
-                    _logger.LogError("Requests for token response type only must include resource scopes, but no identity scopes.");
+                    _sanitizedLogger.LogError("Requests for token response type only must include resource scopes, but no identity scopes.");
                     responseTypeValidationCheck = false;
                 }
                 break;
@@ -681,7 +678,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
                 request.DisplayMode = display;
             }
 
-            _logger.LogDebug("Unsupported display mode - ignored: " + display);
+            _sanitizedLogger.LogDebug("Unsupported display mode - ignored: {display}", display);
         }
 
         //////////////////////////////////////////////////////////
@@ -710,7 +707,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         var processed_max_age = request.Raw.Get(Constants.ProcessedMaxAge);
-        if(processed_max_age.IsPresent())
+        if (processed_max_age.IsPresent())
         {
             request.MaxAge = null;
             // TODO - Consider adding an OriginalMaxAge property for consistency with prompt.
@@ -757,7 +754,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             {
                 if (!request.Client.IdentityProviderRestrictions.Contains(idp))
                 {
-                    _logger.LogWarning("idp requested ({idp}) is not in client restriction list.", idp);
+                    _sanitizedLogger.LogWarning("idp requested ({idp}) is not in client restriction list.", idp);
                     request.RemoveIdP();
                 }
             }
@@ -814,12 +811,12 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {
         var requestDetails = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
-        _logger.LogError(message + "\n{@requestDetails}", requestDetails);
+        _sanitizedLogger.LogError(message + "\n{@requestDetails}", requestDetails);
     }
 
     private void LogError(string message, string detail, ValidatedAuthorizeRequest request)
     {
         var requestDetails = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
-        _logger.LogError(message + ": {detail}\n{@requestDetails}", detail, requestDetails);
+        _sanitizedLogger.LogError(message + ": {detail}\n{@requestDetails}", detail, requestDetails);
     }
 }

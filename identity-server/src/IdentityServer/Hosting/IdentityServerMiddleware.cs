@@ -2,18 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Events;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Models;
-using System.Linq;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Hosting;
 
@@ -23,7 +21,7 @@ namespace Duende.IdentityServer.Hosting;
 public class IdentityServerMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger _logger;
+    private readonly SanitizedLogger<IdentityServerMiddleware> _sanitizedLogger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="IdentityServerMiddleware"/> class.
@@ -33,7 +31,7 @@ public class IdentityServerMiddleware
     public IdentityServerMiddleware(RequestDelegate next, ILogger<IdentityServerMiddleware> logger)
     {
         _next = next;
-        _logger = logger;
+        _sanitizedLogger = new SanitizedLogger<IdentityServerMiddleware>(logger);
     }
 
     /// <summary>
@@ -48,10 +46,10 @@ public class IdentityServerMiddleware
     /// <param name="sessionCoordinationService"></param>
     /// <returns></returns>
     public async Task Invoke(
-        HttpContext context, 
+        HttpContext context,
         IdentityServerOptions options,
-        IEndpointRouter router, 
-        IUserSession userSession, 
+        IEndpointRouter router,
+        IUserSession userSession,
         IEventService events,
         IIssuerNameService issuerNameService,
         ISessionCoordinationService sessionCoordinationService)
@@ -64,7 +62,7 @@ public class IdentityServerMiddleware
         {
             if (context.GetSignOutCalled())
             {
-                _logger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
+                _sanitizedLogger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
 
                 // this clears our session id cookie so JS clients can detect the user has signed out
                 await userSession.RemoveSessionIdCookieAsync();
@@ -86,8 +84,8 @@ public class IdentityServerMiddleware
 
             if (context.TryGetExpiredUserSession(out var expiredUserSession))
             {
-                _logger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
-                
+                _sanitizedLogger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
+
                 await sessionCoordinationService.ProcessExpirationAsync(expiredUserSession);
             }
         });
@@ -111,13 +109,13 @@ public class IdentityServerMiddleware
                     licenseUsage.IssuerUsed(issuer);
                     IdentityServerLicenseValidator.Instance.ValidateIssuer(issuer);
 
-                    _logger.LogInformation("Invoking IdentityServer endpoint: {endpointType} for {url}", endpointType, requestPath);
+                    _sanitizedLogger.LogInformation("Invoking IdentityServer endpoint: {endpointType} for {url}", endpointType, requestPath);
 
                     var result = await endpoint.ProcessAsync(context);
 
                     if (result != null)
                     {
-                        _logger.LogTrace("Invoking result: {type}", result.GetType().FullName);
+                        _sanitizedLogger.LogTrace("Invoking result: {type}", result.GetType().FullName);
                         await result.ExecuteAsync(context);
                     }
 
@@ -133,7 +131,7 @@ public class IdentityServerMiddleware
         {
             await events.RaiseAsync(new UnhandledExceptionEvent(ex));
             Telemetry.Metrics.UnHandledException(ex);
-            _logger.LogCritical(ex, "Unhandled exception: {exception}", ex.Message);
+            _sanitizedLogger.LogCritical(ex, "Unhandled exception: {exception}", ex.Message);
 
             throw;
         }

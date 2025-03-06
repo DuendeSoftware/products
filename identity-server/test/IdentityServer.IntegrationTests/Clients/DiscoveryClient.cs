@@ -2,15 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using Shouldly;
 using Duende.IdentityModel.Client;
+using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using IntegrationTests.Clients.Setup;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 

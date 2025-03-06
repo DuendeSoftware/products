@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System;
-
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>
@@ -19,7 +17,7 @@ public class DPoPOptions
     public TimeSpan ProofTokenValidityDuration { get; set; } = TimeSpan.FromMinutes(1);
 
     /// <summary>
-    /// Clock skew used in validating DPoP proof token expiration using a server-senerated nonce value. Defaults to zero.
+    /// Clock skew used in validating DPoP proof token expiration using a server-generated nonce value. Defaults to ten seconds.
     /// </summary>
-    public TimeSpan ServerClockSkew { get; set; } = TimeSpan.FromMinutes(0);
+    public TimeSpan ServerClockSkew { get; set; } = TimeSpan.FromSeconds(10);
 }

@@ -35,7 +35,7 @@ public class ServerSideTokenStore(
             var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
             var loggedOutTask = Task.FromResult(new AuthenticationState(user: anonymous));
             _authenticationStateProvider.SetAuthenticationState(loggedOutTask);
-            return new UserToken();   
+            return new UserToken();
         }
         var ticket = session.Deserialize(_protector, logger) ??
                      throw new InvalidOperationException("Failed to deserialize authentication ticket from session");

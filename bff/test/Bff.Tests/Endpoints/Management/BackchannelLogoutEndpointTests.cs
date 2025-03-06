@@ -1,13 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management
@@ -82,7 +78,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
                 var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
                 sessions.Count().ShouldBe(2);
             }
-            
+
             await IdentityServerHost.RevokeSessionCookieAsync();
 
             {

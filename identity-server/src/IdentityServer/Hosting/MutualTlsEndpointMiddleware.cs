@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Logging;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -18,7 +17,7 @@ namespace Duende.IdentityServer.Hosting;
 /// </summary>
 public class MutualTlsEndpointMiddleware
 {
-    private readonly ILogger<MutualTlsEndpointMiddleware> _logger;
+    private readonly SanitizedLogger<MutualTlsEndpointMiddleware> _sanitizedLogger;
     private readonly RequestDelegate _next;
     private readonly IdentityServerOptions _options;
 
@@ -33,7 +32,7 @@ public class MutualTlsEndpointMiddleware
     {
         _next = next;
         _options = options;
-        _logger = logger;
+        _sanitizedLogger = new SanitizedLogger<MutualTlsEndpointMiddleware>(logger);
     }
 
     /// <inheritdoc />
@@ -81,7 +80,7 @@ public class MutualTlsEndpointMiddleware
                                subPath.ToString().EnsureLeadingSlash();
                     path = path.EnsureLeadingSlash();
 
-                    _logger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
+                    _sanitizedLogger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
                         context.Request.Path.ToString(), path);
                     context.Request.Path = path;
                 }
@@ -91,7 +90,7 @@ public class MutualTlsEndpointMiddleware
                 }
             }
         }
-            
+
         await _next(context);
     }
 
@@ -102,7 +101,7 @@ public class MutualTlsEndpointMiddleware
 
         if (!x509AuthResult.Succeeded)
         {
-            _logger.LogDebug("MTLS authentication failed, error: {error}.",
+            _sanitizedLogger.LogDebug("MTLS authentication failed, error: {error}.",
                 x509AuthResult.Failure?.Message);
             await context.ForbidAsync(_options.MutualTls.ClientCertificateAuthenticationScheme);
         }

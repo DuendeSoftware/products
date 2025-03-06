@@ -31,7 +31,7 @@ public class EditModel : PageModel
             return RedirectToPage("/Admin/IdentityScopes/Index");
         }
         else
-        { 
+        {
             InputModel = model;
             return Page();
         }

@@ -2,20 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 
@@ -171,10 +165,10 @@ public class UserInfoEndpointClient
         });
 
         response.IsError.ShouldBeFalse();
-            
+
         var payload = GetPayload(response);
 
-        var scopes = ((JsonElement) payload["scope"]).ToStringList();
+        var scopes = ((JsonElement)payload["scope"]).ToStringList();
         scopes.Count.ShouldBe(5);
         scopes.ShouldContain("openid");
         scopes.ShouldContain("email");
@@ -182,11 +176,11 @@ public class UserInfoEndpointClient
         scopes.ShouldContain("api4.with.roles");
         scopes.ShouldContain("roles");
 
-        var roles = ((JsonElement) payload["role"]).ToStringList();
+        var roles = ((JsonElement)payload["role"]).ToStringList();
         roles.Count.ShouldBe(2);
         roles.ShouldContain("Geek");
         roles.ShouldContain("Developer");
-            
+
         var userInfo = await _client.GetUserInfoAsync(new UserInfoRequest
         {
             Address = UserInfoEndpoint,

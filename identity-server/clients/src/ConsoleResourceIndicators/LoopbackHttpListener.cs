@@ -1,5 +1,6 @@
-using System;
-using System.Threading.Tasks;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -49,7 +50,7 @@ namespace ConsoleResourceIndicators
                     await SetResultAsync(ctx.Request.QueryString.Value, ctx);
                     return;
                 }
-                
+
                 ctx.Response.StatusCode = 405;
             });
         }
@@ -57,7 +58,7 @@ namespace ConsoleResourceIndicators
         private async Task SetResultAsync(string value, HttpContext ctx)
         {
             _source.TrySetResult(value);
-            
+
             try
             {
                 ctx.Response.StatusCode = 200;

@@ -3,8 +3,6 @@
 
 
 using Duende.IdentityServer.Services;
-using System;
-using System.Threading.Tasks;
 
 namespace UnitTests.Common;
 

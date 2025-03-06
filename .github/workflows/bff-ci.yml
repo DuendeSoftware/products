@@ -43,8 +43,12 @@ jobs:
           6.0.x
           8.0.x
           9.0.x
+    - name: Restore
+      run: dotnet restore bff.slnf
+    - name: Verify Formatting
+      run: dotnet format bff.slnf --verify-no-changes --no-restore
     - name: Build
-      run: dotnet build bff.slnf -c Release
+      run: dotnet build bff.slnf --no-restore -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Install Playwright

@@ -3,9 +3,7 @@
 
 
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace EntityFramework.IntegrationTests.DI
 {

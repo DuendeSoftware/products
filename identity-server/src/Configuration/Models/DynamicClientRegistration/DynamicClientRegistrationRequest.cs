@@ -163,7 +163,7 @@ public class DynamicClientRegistrationRequest
     /// </remark>
     [JsonPropertyName(OidcConstants.ClientMetadata.SoftwareId)]
     public string? SoftwareId { get; set; }
-    
+
     /// <summary>
     /// A version identifier string for the client software identified by
     /// "software_id".  The value of the "software_version" SHOULD change on any

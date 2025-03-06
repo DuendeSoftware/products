@@ -2,18 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using UnitTests.Common;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
-using Shouldly;
+using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -37,7 +33,7 @@ public class DefaultRefreshTokenServiceTests
             TestLogger.Create<DefaultRefreshTokenStore>());
 
         _subject = new DefaultRefreshTokenService(
-            _store, 
+            _store,
             new TestProfileService(),
             _clock,
             _options,
@@ -82,7 +78,7 @@ public class DefaultRefreshTokenServiceTests
             ClientId = "client1",
             RefreshTokenUsage = TokenUsage.ReUse,
             RefreshTokenExpiration = TokenExpiration.Sliding,
-            SlidingRefreshTokenLifetime  = 100,
+            SlidingRefreshTokenLifetime = 100,
             AbsoluteRefreshTokenLifetime = 10
         };
 
@@ -297,7 +293,7 @@ public class DefaultRefreshTokenServiceTests
         newToken.Lifetime.ShouldBe(oldToken.Lifetime);
     }
 
-        [Fact]
+    [Fact]
     public async Task UpdateRefreshToken_one_time_use_with_delete_should_delete_on_use_token_and_create_new_one_with_correct_dates()
     {
         _options.DeleteOneTimeOnlyRefreshTokensOnUse = true;
@@ -331,7 +327,7 @@ public class DefaultRefreshTokenServiceTests
         newToken.CreationTime.ShouldBe(refreshToken.CreationTime);
         newToken.Lifetime.ShouldBe(refreshToken.Lifetime);
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_invalid_token_should_fail()
     {
@@ -345,7 +341,7 @@ public class DefaultRefreshTokenServiceTests
 
         result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_client_without_allow_offline_access_should_fail()
     {
@@ -372,7 +368,7 @@ public class DefaultRefreshTokenServiceTests
 
         result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_invalid_client_binding_should_fail()
     {
@@ -400,7 +396,7 @@ public class DefaultRefreshTokenServiceTests
 
         result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_expired_token_should_fail()
     {
@@ -428,7 +424,7 @@ public class DefaultRefreshTokenServiceTests
 
         result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_consumed_token_should_fail()
     {
@@ -457,7 +453,7 @@ public class DefaultRefreshTokenServiceTests
 
         result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_valid_token_should_succeed()
     {

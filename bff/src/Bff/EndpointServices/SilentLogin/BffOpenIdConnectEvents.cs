@@ -3,7 +3,6 @@
 
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace Duende.Bff;
 

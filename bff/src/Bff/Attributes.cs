@@ -3,4 +3,4 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly:InternalsVisibleTo("Duende.Bff.Yarp")]
+[assembly: InternalsVisibleTo("Duende.Bff.Yarp")]

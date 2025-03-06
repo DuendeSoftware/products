@@ -17,17 +17,17 @@ namespace IdentityServer.Endpoints.Token;
 public class TokenEndpointTests
 {
     private HttpContext _context;
-    
+
     private readonly IdentityServerOptions _identityServerOptions = new IdentityServerOptions();
-    
+
     private readonly StubClientSecretValidator _stubClientSecretValidator = new StubClientSecretValidator();
-    
+
     private readonly StubTokenRequestValidator _stubTokenRequestValidator = new StubTokenRequestValidator();
-    
+
     private readonly StubTokenResponseGenerator _stubTokenResponseGenerator = new StubTokenResponseGenerator();
-    
+
     private readonly TestEventService _fakeEventService = new TestEventService();
-    
+
     private readonly ILogger<TokenEndpoint> _fakeLogger = TestLogger.Create<TokenEndpoint>();
 
     private TokenEndpoint _subject;
@@ -61,7 +61,7 @@ public class TokenEndpointTests
             GrantType = OidcConstants.GrantTypes.AuthorizationCode
         };
         _stubTokenRequestValidator.Result = new TokenRequestValidationResult(validatedTokenRequest, OidcConstants.TokenErrors.UseDPoPNonce);
-        
+
         await _subject.ProcessAsync(_context);
 
         _fakeEventService.AssertEventWasNotRaised<TokenIssuedFailureEvent>();
@@ -70,7 +70,7 @@ public class TokenEndpointTests
     private void Init()
     {
         _context = new MockHttpContextAccessor().HttpContext;
-        
+
         _subject = new TokenEndpoint(
             _identityServerOptions,
             _stubClientSecretValidator,

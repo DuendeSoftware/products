@@ -1,10 +1,10 @@
-﻿using Clients;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Clients;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient;
 using Serilog;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace ConsoleResourceIndicators
 {

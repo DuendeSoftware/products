@@ -18,7 +18,7 @@ public class TokenRevocationRequestValidationResult : ValidationResult
     /// The token type hint.
     /// </value>
     public string TokenTypeHint { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the token.
     /// </summary>

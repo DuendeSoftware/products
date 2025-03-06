@@ -34,7 +34,7 @@ public static class PushedAuthorizationRequestMappers
     /// <returns></returns>
     public static Entities.PushedAuthorizationRequest ToEntity(this Models.PushedAuthorizationRequest model)
     {
-        return model == null ? null : 
+        return model == null ? null :
             new Entities.PushedAuthorizationRequest
             {
                 ReferenceValueHash = model.ReferenceValueHash,

@@ -1,14 +1,13 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using Shouldly;
 using Microsoft.Extensions.Logging;
 using UnitTests.Common;
 using UnitTests.Endpoints.Authorize;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -64,7 +63,7 @@ public class IsLocalUrlTests
     [MemberData(nameof(TestCases))]
     public async Task GetAuthorizationContextAsync(string returnUrl, bool expected)
     {
-        var interactionService = new DefaultIdentityServerInteractionService(null, null, null, null, null, null, null, 
+        var interactionService = new DefaultIdentityServerInteractionService(null, null, null, null, null, null, null,
             GetReturnUrlParser(), new LoggerFactory().CreateLogger<DefaultIdentityServerInteractionService>());
         var actual = await interactionService.GetAuthorizationContextAsync(returnUrl);
         if (expected)

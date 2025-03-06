@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using System;
-using System.Threading.Tasks;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Api.DPoP;
 

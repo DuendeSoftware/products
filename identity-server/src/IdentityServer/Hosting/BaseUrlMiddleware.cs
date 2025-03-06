@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Duende.IdentityServer.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 #pragma warning disable 1591
 

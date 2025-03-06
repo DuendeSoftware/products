@@ -8,34 +8,33 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
 using Duende.IdentityServer.Endpoints;
+using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Hosting.DynamicProviders;
+using Duende.IdentityServer.Hosting.FederatedSignOut;
+using Duende.IdentityServer.Internal;
+using Duende.IdentityServer.Licensing;
+using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Logging;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Services.Default;
+using Duende.IdentityServer.Services.KeyManagement;
 using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.Stores.Empty;
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Validation;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
-using Duende.IdentityServer.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using static Duende.IdentityServer.IdentityServerConstants;
-using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Hosting.FederatedSignOut;
-using Duende.IdentityServer.Services.Default;
-using Duende.IdentityServer.Services.KeyManagement;
 using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Hosting.DynamicProviders;
-using Duende.IdentityServer.Internal;
-using Duende.IdentityServer.Stores.Empty;
-using Duende.IdentityServer.Endpoints.Results;
-using Duende.IdentityServer.Licensing;
-using Duende.IdentityServer.Licensing.V2;
+using Microsoft.Extensions.Options;
+using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -195,6 +194,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransient<IReturnUrlParser, OidcReturnUrlParser>();
         builder.Services.AddScoped<IUserSession, DefaultUserSession>();
         builder.Services.AddTransient(typeof(MessageCookie<>));
+        builder.Services.AddTransient(typeof(SanitizedLogger<>));
 
         builder.Services.AddCors();
         builder.Services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
@@ -262,7 +262,7 @@ public static class IdentityServerBuilderExtensionsCore
 
         builder.Services.TryAddTransient<IBackchannelAuthenticationThrottlingService, DistributedBackchannelAuthenticationThrottlingService>();
         builder.Services.TryAddTransient<IBackchannelAuthenticationUserNotificationService, NopBackchannelAuthenticationUserNotificationService>();
-            
+
         builder.AddJwtRequestUriHttpClient();
         builder.AddBackChannelLogoutHttpClient();
 
@@ -348,7 +348,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<ICustomTokenValidator, DefaultCustomTokenValidator>();
         builder.Services.TryAddTransient<ICustomAuthorizeRequestValidator, DefaultCustomAuthorizeRequestValidator>();
         builder.Services.TryAddTransient<ICustomBackchannelAuthenticationValidator, DefaultCustomBackchannelAuthenticationValidator>();
-            
+
         return builder;
     }
 

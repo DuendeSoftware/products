@@ -2,17 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
+using Microsoft.Extensions.Logging;
 using static Duende.IdentityServer.Constants;
 
 namespace Duende.IdentityServer.Validation;
@@ -53,7 +50,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
     public async Task<BackchannelAuthenticationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestValidator.ValidateRequest");
-        
+
         if (clientValidationResult == null) throw new ArgumentNullException(nameof(clientValidationResult));
 
         _logger.LogDebug("Start backchannel authentication request validation");
@@ -219,7 +216,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         {
             _validatedRequest.Expiry = requestLifetime;
         }
-            
+
 
         //////////////////////////////////////////////////////////
         // check acr_values
@@ -253,7 +250,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 idp = idp.Substring(KnownAcrValues.HomeRealm.Length);
 
                 // check if idp is present but client does not allow it, and then ignore it
-                if (_validatedRequest.Client.IdentityProviderRestrictions != null && 
+                if (_validatedRequest.Client.IdentityProviderRestrictions != null &&
                     _validatedRequest.Client.IdentityProviderRestrictions.Any())
                 {
                     if (!_validatedRequest.Client.IdentityProviderRestrictions.Contains(idp))
@@ -430,10 +427,10 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
         _validatedRequest.Subject = userResult.Subject;
         var result = new BackchannelAuthenticationRequestValidationResult(_validatedRequest);
-        
+
         var customValidationContext = new CustomBackchannelAuthenticationRequestValidationContext(result);
         await _customValidator.ValidateAsync(customValidationContext);
-        if(customValidationContext.ValidationResult.IsError)
+        if (customValidationContext.ValidationResult.IsError)
         {
             LogError("Custom validation of backchannel authorize request failed");
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest);
@@ -451,8 +448,9 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         if (_validatedRequest.RequestObject.IsPresent())
         {
             // validate the request JWT for this client
-            var jwtRequestValidationResult = await _jwtRequestValidator.ValidateAsync(new JwtRequestValidationContext {
-                Client = _validatedRequest.Client, 
+            var jwtRequestValidationResult = await _jwtRequestValidator.ValidateAsync(new JwtRequestValidationContext
+            {
+                Client = _validatedRequest.Client,
                 JwtTokenString = _validatedRequest.RequestObject,
                 StrictJarValidation = false,
                 IncludeJti = true
@@ -480,7 +478,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             }
 
             // validate that no request params are in body, and merge them into the request collection
-            foreach(var claim in jwtRequestValidationResult.Payload)
+            foreach (var claim in jwtRequestValidationResult.Payload)
             {
                 // we already checked client_id above
                 if (claim.Type != JwtClaimTypes.ClientId)

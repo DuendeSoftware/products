@@ -1,13 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Duende.Bff;
 
@@ -24,7 +20,7 @@ public sealed class ActivityPropagationHandler : DelegatingHandler
 
     /// <inheritdoc />
     public ActivityPropagationHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
-        
+
     /// <inheritdoc />
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {

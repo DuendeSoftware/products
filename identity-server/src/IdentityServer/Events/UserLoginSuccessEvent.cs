@@ -121,7 +121,7 @@ public class UserLoginSuccessEvent : Event
     /// The endpoint.
     /// </value>
     public string Endpoint { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the client id.
     /// </summary>

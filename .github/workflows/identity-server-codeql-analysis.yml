@@ -42,8 +42,10 @@ jobs:
           6.0.x
           8.0.x
           9.0.x
+    - name: Restore
+      run: dotnet restore identity-server.slnf
     - name: Build
-      run: dotnet build identity-server.slnf -c Release
+      run: dotnet build identity-server.slnf --no-restore -c Release
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0
       with:

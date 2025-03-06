@@ -2,15 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Shouldly;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Stores.Default;
 
@@ -34,7 +29,7 @@ public class CachingResourceStoreTests
     {
         _store = new InMemoryResourcesStore(_identityResources, _apiResources, _apiScopes);
         _subject = new CachingResourceStore<InMemoryResourcesStore>(
-            _options, 
+            _options,
             _store,
             _identityCache,
             _apiCache,
@@ -49,8 +44,8 @@ public class CachingResourceStoreTests
         _apiScopes.Add(new ApiScope("scope1"));
         _apiScopes.Add(new ApiScope("scope2"));
         _apiScopes.Add(new ApiScope("scope3"));
-        _apiScopes.Add(new ApiScope("scope4")); 
-        
+        _apiScopes.Add(new ApiScope("scope4"));
+
         _scopeCache.Items.Count.ShouldBe(0);
 
         var items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope1", "scope2", "invalid" });
@@ -58,15 +53,15 @@ public class CachingResourceStoreTests
 
         _scopeCache.Items.Count.ShouldBe(3);
     }
-        
+
     [Fact]
     public async Task FindApiScopesByNameAsync_should_populate_missing_cache_items()
     {
         _apiScopes.Add(new ApiScope("scope1"));
         _apiScopes.Add(new ApiScope("scope2"));
         _apiScopes.Add(new ApiScope("scope3"));
-        _apiScopes.Add(new ApiScope("scope4")); 
-        
+        _apiScopes.Add(new ApiScope("scope4"));
+
         _scopeCache.Items.Count.ShouldBe(0);
 
         var items = await _subject.FindApiScopesByNameAsync(new[] { "scope1" });

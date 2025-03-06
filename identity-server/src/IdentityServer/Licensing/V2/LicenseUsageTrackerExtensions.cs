@@ -3,9 +3,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Duende.IdentityServer.Licensing.V2;
 
 internal static class LicenseUsageTrackerExtensions

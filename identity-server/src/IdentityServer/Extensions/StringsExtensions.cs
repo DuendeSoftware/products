@@ -3,14 +3,11 @@
 
 
 #nullable enable
-using Microsoft.AspNetCore.WebUtilities;
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityServer.Extensions;
 
@@ -23,7 +20,7 @@ internal static class StringExtensions
         {
             return string.Empty;
         }
-        
+
         return String.Join(' ', list);
     }
 
@@ -266,7 +263,7 @@ internal static class StringExtensions
             }
         }
 
-        return new NameValueCollection();           
+        return new NameValueCollection();
     }
 
     public static string? GetOrigin(this string? url)
@@ -288,7 +285,7 @@ internal static class StringExtensions
 
         return null;
     }
-        
+
     public static string Obfuscate(this string value)
     {
         var last4Chars = "****";

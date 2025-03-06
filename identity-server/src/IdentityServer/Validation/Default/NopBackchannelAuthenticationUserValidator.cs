@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-
 namespace Duende.IdentityServer.Validation;
 // todo: ciba perhaps make a default IBackchannelAuthenticationUserValidator based on the idtokenhint claims?
 // and maybe it calls into the profile service?
@@ -16,7 +14,8 @@ public class NopBackchannelAuthenticationUserValidator : IBackchannelAuthenticat
     /// <inheritdoc/>
     public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext)
     {
-        var result = new BackchannelAuthenticationUserValidationResult { 
+        var result = new BackchannelAuthenticationUserValidationResult
+        {
             Error = "not implemented"
         };
         return Task.FromResult(result);

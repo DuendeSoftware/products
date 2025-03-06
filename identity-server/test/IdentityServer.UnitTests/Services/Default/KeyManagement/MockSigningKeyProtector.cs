@@ -5,7 +5,6 @@
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.KeyManagement;
 using Microsoft.AspNetCore.DataProtection;
-using System;
 
 namespace UnitTests.Services.Default.KeyManagement;
 
@@ -13,7 +12,7 @@ class MockSigningKeyProtector : ISigningKeyProtector
 {
     private IDataProtector _dataProtector;
     public bool ProtectWasCalled { get; set; }
-    
+
     public MockSigningKeyProtector()
     {
         var provider = new EphemeralDataProtectionProvider();

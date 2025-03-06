@@ -10,7 +10,6 @@ using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.Logging;
@@ -11,28 +10,28 @@ internal static class LogCategories
     public const string ManagementEndpoints = "Duende.Bff.ManagementEndpoints";
     public const string RemoteApiEndpoints = "Duende.Bff.RemoteApiEndpoints";
 }
-    
+
 internal static class EventIds
 {
-    public static readonly EventId AntiForgeryValidationFailed = new (1, "AntiForgeryValidationFailed");
-    public static readonly EventId BackChannelLogout = new (2, "BackChannelLogout");
-    public static readonly EventId BackChannelLogoutError = new (3, "BackChannelLogoutError");
-    public static readonly EventId AccessTokenMissing = new (4, "AccessTokenMissing");
-    public static readonly EventId InvalidRouteConfiguration = new (5, "InvalidRouteConfiguration");
+    public static readonly EventId AntiForgeryValidationFailed = new(1, "AntiForgeryValidationFailed");
+    public static readonly EventId BackChannelLogout = new(2, "BackChannelLogout");
+    public static readonly EventId BackChannelLogoutError = new(3, "BackChannelLogoutError");
+    public static readonly EventId AccessTokenMissing = new(4, "AccessTokenMissing");
+    public static readonly EventId InvalidRouteConfiguration = new(5, "InvalidRouteConfiguration");
 }
-    
+
 internal static class Log
 {
     private static readonly Action<ILogger, string, Exception?> AntiForgeryValidationFailedMessage = LoggerMessage.Define<string>(
         LogLevel.Error,
         EventIds.AntiForgeryValidationFailed,
         "Anti-forgery validation failed. local path: '{localPath}'");
-        
+
     private static readonly Action<ILogger, string, string, Exception?> BackChannelLogoutMessage = LoggerMessage.Define<string, string>(
         LogLevel.Information,
         EventIds.BackChannelLogout,
         "Back-channel logout. sub: '{sub}', sid: '{sid}'");
-        
+
     private static readonly Action<ILogger, string, Exception?> BackChannelLogoutErrorMessage = LoggerMessage.Define<string>(
         LogLevel.Information,
         EventIds.BackChannelLogoutError,
@@ -62,14 +61,14 @@ internal static class Log
     {
         AntiForgeryValidationFailedMessage(logger, localPath, null);
     }
-        
+
     public static void BackChannelLogout(this ILogger logger, string sub, string sid)
-    { 
+    {
         BackChannelLogoutMessage(logger, sub, sid, null);
     }
-        
+
     public static void BackChannelLogoutError(this ILogger logger, string error)
-    { 
+    {
         BackChannelLogoutErrorMessage(logger, error, null);
     }
 

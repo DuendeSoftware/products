@@ -1,11 +1,9 @@
-using System.Linq;
-using System.Net.Http;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
-using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Headers
@@ -32,12 +30,12 @@ namespace Duende.Bff.Tests.Headers
             var host = apiResult.RequestHeaders["Host"].Single();
             host.ShouldBe("app");
         }
-        
+
         [Fact]
         public async Task forwarded_host_name_without_header_forwarding_propagate_to_api()
         {
             await BffHost.InitializeAsync();
-            
+
             var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
             req.Headers.Add("x-csrf", "1");
             req.Headers.Add("X-Forwarded-Host", "external");
@@ -50,12 +48,12 @@ namespace Duende.Bff.Tests.Headers
             var host = apiResult.RequestHeaders["Host"].Single();
             host.ShouldBe("external");
         }
-        
+
         [Fact]
         public async Task forwarded_host_name_with_header_forwarding_should_propagate_to_api()
         {
             await BffHost.InitializeAsync();
-            
+
             var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
             req.Headers.Add("x-csrf", "1");
             req.Headers.Add("X-Forwarded-Host", "external");

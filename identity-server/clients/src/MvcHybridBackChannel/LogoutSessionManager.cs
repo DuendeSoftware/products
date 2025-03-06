@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 namespace MvcHybrid
 {
@@ -10,7 +10,7 @@ namespace MvcHybrid
 
         public void Add(string sub, string sid)
         {
-            _sessions.Add(new Session { Sub = sub, Sid = sid }); 
+            _sessions.Add(new Session { Sub = sub, Sid = sid });
         }
 
         public bool IsLoggedOut(string sub, string sid)

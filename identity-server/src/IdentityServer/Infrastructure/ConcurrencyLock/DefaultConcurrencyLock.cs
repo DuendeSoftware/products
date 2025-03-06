@@ -2,10 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Duende.IdentityServer.Internal;
 
 /// <summary>
@@ -22,7 +18,7 @@ public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>
         {
             throw new ArgumentException("millisecondsTimeout must be greater than zero.");
         }
-            
+
         return Lock.WaitAsync(millisecondsTimeout);
     }
 

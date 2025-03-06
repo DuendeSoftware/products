@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Serilog;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Models;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace IdentityServerEntityFramework;
 

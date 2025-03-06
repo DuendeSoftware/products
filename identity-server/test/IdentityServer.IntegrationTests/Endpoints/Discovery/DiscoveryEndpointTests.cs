@@ -2,19 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using Shouldly;
-using Duende.IdentityModel.Client;
-using IntegrationTests.Common;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
-using Xunit;
+using IntegrationTests.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
 namespace IntegrationTests.Endpoints.Discovery;
@@ -123,7 +118,7 @@ public class DiscoveryEndpointTests
 
         var keys = data["keys"].EnumerateArray().ToList();
         keys.Count.ShouldBe(2);
-            
+
         var key = keys[1];
         var crv = key.TryGetValue("crv");
         crv.GetString().ShouldBe(JsonWebKeyECTypes.P256);
@@ -246,12 +241,13 @@ public class DiscoveryEndpointTests
         IdentityServerPipeline pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += services =>
         {
-            services.PostConfigure<IdentityServerOptions>(opts => { 
+            services.PostConfigure<IdentityServerOptions>(opts =>
+            {
                 opts.UserInteraction.CreateAccountUrl = "/account/create";
             });
         };
         pipeline.Initialize();
-        
+
 
         var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
 

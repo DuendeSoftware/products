@@ -2,13 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -67,7 +63,7 @@ public class JwtRequestValidator : IJwtRequestValidator
         Options = options;
         IssuerNameService = issuerNameService;
         Logger = logger;
-            
+
         Handler = new JsonWebTokenHandler
         {
             MaximumTokenSizeInBytes = options.InputLengthRestrictions.Jwt
@@ -80,7 +76,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     internal JwtRequestValidator(string audience, ILogger<JwtRequestValidator> logger)
     {
         _audienceUri = audience;
-            
+
         Logger = logger;
         Handler = new JsonWebTokenHandler();
     }
@@ -89,7 +85,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     public virtual async Task<JwtRequestValidationResult> ValidateAsync(JwtRequestValidationContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("JwtRequestValidator.Validate");
-        
+
         ArgumentNullException.ThrowIfNull(context);
         if (context.Client == null) throw new ArgumentNullException(nameof(context.Client));
         if (String.IsNullOrWhiteSpace(context.JwtTokenString)) throw new ArgumentNullException(nameof(context.JwtTokenString));
@@ -170,7 +166,9 @@ public class JwtRequestValidator : IJwtRequestValidator
             ValidateAudience = true,
 
             RequireSignedTokens = true,
-            RequireExpirationTime = true
+            RequireExpirationTime = true,
+
+            ClockSkew = Options.JwtValidationClockSkew
         };
 
         var strictJarValidation = context.StrictJarValidation.HasValue ? context.StrictJarValidation.Value : Options.StrictJarValidation;
@@ -203,7 +201,7 @@ public class JwtRequestValidator : IJwtRequestValidator
             // don't filter out the jti claim
             filter.Remove(JwtClaimTypes.JwtId);
         }
-            
+
         var filtered = token.Claims.Where(claim => !filter.Contains(claim.Type));
         return Task.FromResult(filtered.ToList());
     }

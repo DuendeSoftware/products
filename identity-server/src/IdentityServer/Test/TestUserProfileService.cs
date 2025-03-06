@@ -3,11 +3,9 @@
 
 
 using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Test;
 
@@ -21,7 +19,7 @@ public class TestUserProfileService : IProfileService
     /// The logger
     /// </summary>
     protected readonly ILogger Logger;
-        
+
     /// <summary>
     /// The users
     /// </summary>

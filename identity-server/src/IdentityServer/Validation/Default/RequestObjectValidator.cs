@@ -4,16 +4,11 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityModel;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
@@ -27,8 +22,8 @@ internal class RequestObjectValidator : IRequestObjectValidator
     private readonly ILogger<RequestObjectValidator> _logger;
 
     public RequestObjectValidator(
-        IJwtRequestValidator jwtRequestValidator, 
-        IJwtRequestUriHttpClient jwtRequestUriHttpClient, 
+        IJwtRequestValidator jwtRequestValidator,
+        IJwtRequestUriHttpClient jwtRequestUriHttpClient,
         IPushedAuthorizationService pushedAuthorizationService,
         IdentityServerOptions options,
         ILogger<RequestObjectValidator> logger)
@@ -64,10 +59,10 @@ internal class RequestObjectValidator : IRequestObjectValidator
                 return Invalid(request, error: OidcConstants.AuthorizeErrors.InvalidRequest, "Pushed authorization is required.");
             }
         }
-        
+
         if (requestUri.IsPresent())
         {
-            if(IsParRequestUri(requestUri))
+            if (IsParRequestUri(requestUri))
             {
                 var validationError = await ValidatePushedAuthorizationRequest(request);
                 if (validationError != null)
@@ -139,7 +134,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
             }
         }
         var pushedAuthorizationRequest = await GetPushedAuthorizationRequestAsync(request);
-        if(pushedAuthorizationRequest == null)
+        if (pushedAuthorizationRequest == null)
         {
             {
                 return Invalid(request, error: OidcConstants.AuthorizeErrors.InvalidRequestUri,
@@ -191,7 +186,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         }
         return null;
     }
-    
+
     public AuthorizeRequestValidationResult? ValidatePushedAuthorizationExpiration(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, ValidatedAuthorizeRequest authorizeRequest)
     {
         if (DateTime.UtcNow > pushedAuthorizationRequest.ExpiresAtUtc)
@@ -213,7 +208,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         }
         return null;
     }
-    
+
     private string? GetReferenceValue(ValidatedAuthorizeRequest request)
     {
         var requestUri = request.Raw.Get(OidcConstants.AuthorizeRequest.RequestUri);
@@ -236,17 +231,18 @@ internal class RequestObjectValidator : IRequestObjectValidator
         if (request.RequestObject.IsPresent())
         {
             // validate the request JWT for this client
-            var jwtRequestValidationResult = await _jwtRequestValidator.ValidateAsync(new JwtRequestValidationContext {
-                Client = request.Client, 
+            var jwtRequestValidationResult = await _jwtRequestValidator.ValidateAsync(new JwtRequestValidationContext
+            {
+                Client = request.Client,
                 JwtTokenString = request.RequestObject
             });
             if (jwtRequestValidationResult.IsError)
             {
                 LogError("request JWT validation failure", request);
                 return Invalid(request, error: OidcConstants.AuthorizeErrors.InvalidRequestObject, description: "Invalid JWT request");
-            } 
+            }
 
-            if(jwtRequestValidationResult.Payload == null)
+            if (jwtRequestValidationResult.Payload == null)
             {
                 throw new Exception("JwtRequestValidation succeeded but did not return a payload");
             }
@@ -287,13 +283,13 @@ internal class RequestObjectValidator : IRequestObjectValidator
                 LogError("client_id is missing in JWT payload", request);
                 return Invalid(request, error: OidcConstants.AuthorizeErrors.InvalidRequestObject, description: "Invalid JWT request");
             }
-                
+
             var ignoreKeys = new[]
             {
                 JwtClaimTypes.Issuer,
                 JwtClaimTypes.Audience
             };
-                
+
             // merge jwt payload values into original request parameters
             // 1. clear the keys in the raw collection for every key found in the request object
             foreach (var claimType in jwtRequestValidationResult.Payload.Select(c => c.Type).Distinct())
@@ -304,7 +300,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
                     request.Raw.Remove(claimType);
                 }
             }
-                
+
             // 2. copy over the value
             foreach (var claim in jwtRequestValidationResult.Payload)
             {
@@ -327,7 +323,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
 
         return Valid(request);
     }
-    
+
     private AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null)
     {
         return new AuthorizeRequestValidationResult(request, error, description);

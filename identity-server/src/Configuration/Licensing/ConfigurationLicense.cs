@@ -40,7 +40,7 @@ public class ConfigurationLicense : License
                 break;
         }
     }
-    
+
     /// <summary>
     /// The Configuration API.
     /// </summary>

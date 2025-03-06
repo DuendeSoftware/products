@@ -2,11 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-using Duende.IdentityServer.Validation;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Logging.Models;
 

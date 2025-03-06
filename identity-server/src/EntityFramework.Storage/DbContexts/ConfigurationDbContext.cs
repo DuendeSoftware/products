@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Extensions;
 using Duende.IdentityServer.EntityFramework.Interfaces;
@@ -44,7 +43,7 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
     /// The store options.
     /// </summary>
     public ConfigurationStoreOptions StoreOptions { get; set; }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigurationDbContext"/> class.
     /// </summary>
@@ -102,7 +101,7 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
     /// The identity providers.
     /// </value>
     public DbSet<IdentityProvider> IdentityProviders { get; set; }
-    
+
     /// <summary>
     /// Override this method to further configure the model that was discovered by convention from the entity types
     /// exposed in <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1" /> properties on your derived context. The resulting model may be cached

@@ -70,7 +70,7 @@ public class ClientCredentialsClient
         payload["client_id"].GetString().ShouldBe("client");
         payload.Keys.ShouldContain("jti");
         payload.Keys.ShouldContain("iat");
-            
+
         var scopes = payload["scope"].EnumerateArray();
         scopes.First().ToString().ShouldBe("api1");
     }

@@ -2,15 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Text;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Http;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Duende.IdentityServer.Services;
-using System;
 
 #pragma warning disable 1591
 
@@ -21,7 +16,7 @@ public static class HttpResponseExtensions
     public static async Task WriteJsonAsync(this HttpResponse response, object o, string contentType = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("WriteJson");
-        
+
         var json = ObjectSerializer.ToString(o);
         await response.WriteJsonAsync(json, contentType);
     }

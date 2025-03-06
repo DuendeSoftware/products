@@ -2,18 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Diagnostics;
+using System.Net;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using Shouldly;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.IntegrationTests.TestFramework;
 
@@ -54,7 +47,7 @@ public class TestBrowserClient : HttpClient
     }
 
     private CookieHandler _handler;
-        
+
     public CookieContainer CookieContainer => _handler.CookieContainer;
     public Uri CurrentUri => _handler.CurrentUri;
     public HttpResponseMessage LastResponse => _handler.LastResponse;

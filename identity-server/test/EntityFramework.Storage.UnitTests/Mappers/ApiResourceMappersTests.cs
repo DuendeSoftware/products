@@ -2,12 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Shouldly;
-using Xunit;
-using Models = Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
+using Models = Duende.IdentityServer.Models;
 
 namespace EntityFramework.Storage.UnitTests.Mappers;
 
@@ -44,10 +41,10 @@ public class ApiResourceMappersTests
         foo1.ShouldNotBeNull();
         var foo2 = mappedEntity.Scopes.FirstOrDefault(x => x.Scope == "foo2");
         foo2.ShouldNotBeNull();
-            
+
 
         var mappedModel = mappedEntity.ToModel();
-            
+
         mappedModel.Description.ShouldBe("description");
         mappedModel.DisplayName.ShouldBe("displayname");
         mappedModel.Enabled.ShouldBeFalse();
@@ -90,8 +87,8 @@ public class ApiResourceMappersTests
         MapperTestHelpers
             .AllPropertiesAreMapped<Models.ApiResource, Entities.ApiResource>(
                 source => source.AllowedAccessTokenSigningAlgorithms.Add("RS256"),
-                source => source.ToEntity(), 
-                excludedProperties, 
+                source => source.ToEntity(),
+                excludedProperties,
                 out var unmappedMembers)
             .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }

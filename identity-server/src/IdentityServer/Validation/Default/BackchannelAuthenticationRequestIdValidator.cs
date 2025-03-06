@@ -2,14 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using Duende.IdentityModel;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -42,7 +40,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
     public async Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestIdValidator.Validate");
-        
+
         var request = await _backchannelAuthenticationStore.GetByAuthenticationRequestIdAsync(context.AuthenticationRequestId);
 
         if (request == null)

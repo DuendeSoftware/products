@@ -5,15 +5,12 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Services;
-using Shouldly;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Cors;
 
@@ -48,7 +45,7 @@ public class PolicyProviderTests
 
 
         _subject = new CorsPolicyProvider(
-            TestLogger.Create<CorsPolicyProvider>(),
+            new SanitizedLogger<CorsPolicyProvider>(TestLogger.Create<CorsPolicyProvider>()),
             new Decorator<ICorsPolicyProvider>(_mockInner),
             _options, provider);
     }

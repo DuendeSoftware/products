@@ -3,7 +3,6 @@
 
 
 using Duende.IdentityModel;
-using System.Collections.Generic;
 
 namespace Duende.IdentityServer.ResponseHandling;
 

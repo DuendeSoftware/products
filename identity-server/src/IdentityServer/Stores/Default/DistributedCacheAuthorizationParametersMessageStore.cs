@@ -2,11 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityModel;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace Duende.IdentityServer.Stores.Default;
@@ -31,12 +29,12 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     }
 
     private string CacheKeyPrefix => "DistributedCacheAuthorizationParametersMessageStore";
-        
+
     /// <inheritdoc/>
     public virtual async Task<string> WriteAsync(Message<IDictionary<string, string[]>> message)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Write");
-        
+
         // since this store is trusted and the JWT request processing has provided redundant entries
         // in the NameValueCollection, we are removing the JWT "request_uri" param so that when they
         // are reloaded/revalidated we don't re-trigger outbound requests. we could possibly do the
@@ -45,7 +43,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
 
         var key = await _handleGenerationService.GenerateAsync();
         var cacheKey = $"{CacheKeyPrefix}-{key}";
-            
+
         var json = ObjectSerializer.ToString(message);
 
         var options = new DistributedCacheEntryOptions();
@@ -60,7 +58,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     public virtual async Task<Message<IDictionary<string, string[]>>> ReadAsync(string id)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Read");
-        
+
         var cacheKey = $"{CacheKeyPrefix}-{id}";
         var json = await _distributedCache.GetStringAsync(cacheKey);
 
@@ -76,7 +74,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     public virtual Task DeleteAsync(string id)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Delete");
-        
+
         var cacheKey = $"{CacheKeyPrefix}-{id}";
         return _distributedCache.RemoveAsync(cacheKey);
     }

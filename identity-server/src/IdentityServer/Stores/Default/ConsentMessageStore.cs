@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores;
@@ -19,7 +18,7 @@ internal class ConsentMessageStore : IConsentMessageStore
     public virtual Task DeleteAsync(string id)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ConsentMessageStore.Delete");
-        
+
         Cookie.Clear(id);
         return Task.CompletedTask;
     }
@@ -27,7 +26,7 @@ internal class ConsentMessageStore : IConsentMessageStore
     public virtual Task<Message<ConsentResponse>> ReadAsync(string id)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ConsentMessageStore.Read");
-        
+
         return Task.FromResult(Cookie.Read(id));
     }
 

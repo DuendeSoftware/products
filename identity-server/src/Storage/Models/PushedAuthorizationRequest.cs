@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -29,7 +27,7 @@ public class PushedAuthorizationRequest
     /// </summary>
 
     public DateTime ExpiresAtUtc { get; set; }
-    
+
     /// <summary>
     /// The data protected content of the pushed authorization request.  
     /// </summary>

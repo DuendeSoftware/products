@@ -2,19 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using Shouldly;
-using Duende.IdentityModel;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -70,7 +65,7 @@ public class DefaultConsentServiceTests
     {
         _client.AllowRememberConsent = false;
 
-        await _subject.UpdateConsentAsync(_user, _client, new [] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
         var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
         consent.ShouldBeNull();
@@ -157,7 +152,7 @@ public class DefaultConsentServiceTests
     {
         await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2"), new ParsedScopeValue("scope3") });
 
-        var result = await _subject.RequiresConsentAsync(_user, _client, new [] { new ParsedScopeValue("scope2") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope2") });
 
         result.ShouldBeFalse();
     }

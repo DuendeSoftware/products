@@ -47,7 +47,7 @@ internal static class ILoggerDevExtensions
             LoggerExtensions.LogTrace(logger, message, arg0, arg1, arg2, arg3);
         }
     }
-    
+
     public static void LogDebug(this ILogger logger, string message)
     {
         if (logger.IsEnabled(LogLevel.Debug))
@@ -71,7 +71,7 @@ internal static class ILoggerDevExtensions
             LoggerExtensions.LogDebug(logger, message, arg0, arg1);
         }
     }
-    
+
     public static void LogDebug<T0, T1, T2>(this ILogger logger, string message, T0 arg0, T1 arg1, T2 arg2)
     {
         if (logger.IsEnabled(LogLevel.Debug))
@@ -86,5 +86,10 @@ internal static class ILoggerDevExtensions
         {
             LoggerExtensions.LogDebug(logger, message, arg0, arg1, arg2, arg3);
         }
+    }
+
+    public static object SanitizeLogParameter(this object value)
+    {
+        return value?.GetType() == typeof(string) ? value.ToString()?.ReplaceLineEndings(string.Empty) : value;
     }
 }

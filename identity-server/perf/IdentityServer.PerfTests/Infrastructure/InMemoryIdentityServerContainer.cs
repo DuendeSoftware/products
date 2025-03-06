@@ -24,7 +24,7 @@ namespace IdentityServer.PerfTest.Infrastructure
 
         public InMemoryIdentityServerContainer()
         {
-            OnConfigureServices += services => 
+            OnConfigureServices += services =>
             {
                 services.AddIdentityServer(OnConfigureIdentityServerOptions)
                     .AddInMemoryClients(Clients)
@@ -33,7 +33,7 @@ namespace IdentityServer.PerfTest.Infrastructure
                     .AddInMemoryApiResources(ApiResources);
             };
 
-            OnConfigure += app => 
+            OnConfigure += app =>
             {
                 app.UseIdentityServer();
             };

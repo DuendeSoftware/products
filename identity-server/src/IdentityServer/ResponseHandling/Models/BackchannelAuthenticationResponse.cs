@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.ResponseHandling;
 
 /// <summary>
@@ -34,7 +31,7 @@ public class BackchannelAuthenticationResponse
     /// Indicates if this response represents an error.
     /// </summary>
     public bool IsError => !String.IsNullOrWhiteSpace(Error);
-        
+
     /// <summary>
     /// Gets or sets the error.
     /// </summary>
@@ -54,12 +51,12 @@ public class BackchannelAuthenticationResponse
     /// Gets or sets the expires in.
     /// </summary>
     public int ExpiresIn { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the interval.
     /// </summary>
     public int Interval { get; set; }
-    
+
     /// <summary> 
     /// Gets or sets a dictionary of custom properties that will be included in
     /// the response to the client. This dictionary is intended to be used to

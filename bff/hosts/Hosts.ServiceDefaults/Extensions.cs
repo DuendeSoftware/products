@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +42,7 @@ public static class Extensions
         // Uncomment the following to restrict the allowed schemes for service discovery.
         builder.Services.Configure<ServiceDiscoveryOptions>(options =>
         {
-             options.AllowedSchemes = ["https"];
+            options.AllowedSchemes = ["https"];
         });
 
         return builder;

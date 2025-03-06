@@ -1,13 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Xunit;
-using Duende.IdentityServer.Validation;
 using System.Collections.Specialized;
-using Shouldly;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Validation;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -87,7 +83,7 @@ public class ParRedirectUriValidatorTests
             RequestedUri = notThePushedRedirectUri,
             Client = new Client()
         });
-        
+
         result.ShouldBe(false);
     }
 
@@ -115,7 +111,7 @@ public class ParRedirectUriValidatorTests
                 RedirectUris = { "https://registered.example.com" }
             }
         });
-        
+
         registeredRedirectUri.ShouldNotBe(pushedRedirectUri);
         result.ShouldBe(true);
     }
@@ -144,7 +140,7 @@ public class ParRedirectUriValidatorTests
                 RedirectUris = { "https://registered.example.com" }
             }
         });
-        
+
         registeredRedirectUri.ShouldNotBe(requestedRedirectUri);
         result.ShouldBe(false);
     }

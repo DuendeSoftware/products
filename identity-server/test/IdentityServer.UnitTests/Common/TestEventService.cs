@@ -2,13 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Services;
-using Shouldly;
 
 namespace UnitTests.Common;
 
@@ -26,7 +21,7 @@ public class TestEventService : IEventService
         where T : class
     {
         _events.ContainsKey(typeof(T)).ShouldBeTrue();
-        return (T)_events.Where(x => x.Key == typeof(T)).Select(x=>x.Value).First();
+        return (T)_events.Where(x => x.Key == typeof(T)).Select(x => x.Value).First();
     }
 
     public void AssertEventWasNotRaised<T>()

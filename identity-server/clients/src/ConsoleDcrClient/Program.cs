@@ -1,5 +1,6 @@
-﻿using System;
-using System.Net.Http;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Text.Json;
 using Clients;
 using Duende.IdentityModel.Client;
@@ -42,7 +43,7 @@ static async Task RegisterClient()
 
     var clientJson = json.RootElement.GetProperty("client_id");
     var secretJson = json.RootElement.GetProperty("client_secret");
-    
+
     request.Document.Extensions!.Add("client_id", clientJson);
     request.Document.Extensions.Add("client_secret", secretJson);
 

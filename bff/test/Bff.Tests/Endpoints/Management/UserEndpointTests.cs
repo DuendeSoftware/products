@@ -1,9 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Tests.TestHosts;
-using System.Security.Claims;
 using System.Net;
+using System.Security.Claims;
+using Duende.Bff.Tests.TestHosts;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management
@@ -14,8 +14,8 @@ namespace Duende.Bff.Tests.Endpoints.Management
         public async Task user_endpoint_for_authenticated_user_should_return_claims()
         {
             await BffHost.IssueSessionCookieAsync(
-                new Claim("sub", "alice"), 
-                new Claim("foo", "foo1"), 
+                new Claim("sub", "alice"),
+                new Claim("foo", "foo1"),
                 new Claim("foo", "foo2"));
 
             var data = await BffHost.CallUserEndpointAsync();
@@ -31,14 +31,14 @@ namespace Duende.Bff.Tests.Endpoints.Management
             data.First(d => d.Type == Constants.ClaimTypes.SessionExpiresIn).Value.GetInt32().ShouldBePositive();
             data.First(d => d.Type == Constants.ClaimTypes.LogoutUrl).Value.GetString().ShouldBe("/bff/logout");
         }
-        
+
         [Fact]
         public async Task user_endpoint_for_authenticated_user_with_sid_should_return_claims_including_logout()
         {
             await BffHost.IssueSessionCookieAsync(
                 new Claim("sub", "alice"),
                 new Claim("sid", "123"));
-        
+
             var data = await BffHost.CallUserEndpointAsync();
 
             data.Count.ShouldBe(4);
@@ -55,7 +55,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
 
             var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/bff/user"));
             var response = await BffHost.BrowserClient.SendAsync(req);
-            
+
             response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         }
 

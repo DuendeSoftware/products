@@ -1,15 +1,13 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Duende.Bff;
 
@@ -22,7 +20,7 @@ public static class AuthenticationTicketExtensions
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-        
+
     /// <summary>
     /// Extracts a subject identifier
     /// </summary>
@@ -58,7 +56,7 @@ public static class AuthenticationTicketExtensions
     {
         return ticket.Properties.ExpiresUtc?.UtcDateTime;
     }
-        
+
     /// <summary>
     /// Serializes and AuthenticationTicket to a string
     /// </summary>
@@ -73,13 +71,13 @@ public static class AuthenticationTicketExtensions
 
         var payload = JsonSerializer.Serialize(data, JsonOptions);
         payload = protector.Protect(payload);
-            
+
         var envelope = new Envelope { Version = 1, Payload = payload };
         var value = JsonSerializer.Serialize(envelope, JsonOptions);
 
         return value;
     }
-        
+
     /// <summary>
     /// Deserializes a UserSession's Ticket to an AuthenticationTicket
     /// </summary>
@@ -99,7 +97,7 @@ public static class AuthenticationTicketExtensions
             {
                 payload = protector.Unprotect(envelope.Payload);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogDebug(ex, "Failed to unprotect AuthenticationTicket payload for key {key}", session.Key);
                 return null;

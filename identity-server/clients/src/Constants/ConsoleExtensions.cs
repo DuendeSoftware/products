@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Diagnostics;
 
 namespace Clients
@@ -19,6 +21,7 @@ namespace Clients
         /// Writes text to the console in a box.
         /// </summary>
         /// <param name="text">The text.</param>
+        /// <param name="color">The color of the text to write.</param>
         [DebuggerStepThrough]
         public static void ConsoleBox(this string text, ConsoleColor color)
         {

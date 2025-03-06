@@ -4,12 +4,9 @@
 
 #nullable enable
 
+using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 
 namespace Duende.IdentityServer;
 
@@ -83,7 +80,7 @@ public class IdentityServerUser
         {
             claims.Add(new Claim(JwtClaimTypes.IdentityProvider, IdentityProvider!));
         }
-            
+
         if (Tenant.IsPresent())
         {
             claims.Add(new Claim(IdentityServerConstants.ClaimTypes.Tenant, Tenant!));

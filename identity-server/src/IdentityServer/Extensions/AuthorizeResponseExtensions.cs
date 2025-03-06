@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Extensions;
 using System.Collections.Specialized;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.ResponseHandling;
 
 namespace Duende.IdentityServer.Models;
@@ -55,17 +55,17 @@ internal static class AuthorizeResponseExtensions
         {
             collection.Add("state", response.State);
         }
-            
+
         if (response.SessionState.IsPresent())
         {
             collection.Add("session_state", response.SessionState);
         }
-            
+
         if (response.Issuer.IsPresent())
         {
             if (options.EmitIssuerIdentificationResponseParameter)
             {
-                collection.Add("iss", response.Issuer);    
+                collection.Add("iss", response.Issuer);
             }
         }
 

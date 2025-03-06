@@ -20,7 +20,7 @@ public interface IServerUrls
     /// Gets or sets the base path of IdentityServer.
     /// </summary>
     string? BasePath { get; set; }
-        
+
     /// <summary>
     /// Gets the base URL for IdentityServer.
     /// </summary>

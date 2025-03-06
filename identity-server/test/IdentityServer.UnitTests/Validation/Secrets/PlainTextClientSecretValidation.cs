@@ -2,15 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Shouldly;
-using UnitTests.Validation.Setup;
 using Microsoft.Extensions.Logging;
-using Xunit;
+using UnitTests.Validation.Setup;
 
 namespace UnitTests.Validation.Secrets;
 

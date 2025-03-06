@@ -1,11 +1,10 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Clients;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using Microsoft.Extensions.Configuration;
 using Duende.AccessTokenManagement;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MvcJarJwt;
 
@@ -17,7 +16,7 @@ public class Startup
     {
         _configuration = configuration;
     }
-    
+
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<AssertionService>();
@@ -66,10 +65,10 @@ public class Startup
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
                 options.MapInboundClaims = false;
-                
+
                 // needed to add JWR / private_key_jwt support
                 options.EventsType = typeof(OidcEvents);
-                
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
@@ -88,7 +87,7 @@ public class Startup
         {
             client.BaseAddress = new Uri(Constants.SampleApi);
         });
-        
+
         // var apiKey = _configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";
         //

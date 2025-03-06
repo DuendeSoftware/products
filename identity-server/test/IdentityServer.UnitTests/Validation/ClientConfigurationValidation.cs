@@ -212,7 +212,7 @@ public class ClientConfigurationValidation
             RedirectUris = { "https://foo" },
             AllowedScopes = { "foo" }
         };
-        
+
         await ShouldFailAsync(client, "RequireClientSecret is false, but client is using client credentials grant type.");
     }
 
@@ -519,5 +519,5 @@ public class ClientConfigurationValidation
         GrantTypes.ClientCredentials,
         GrantTypes.ResourceOwnerPasswordAndClientCredentials
     ];
-    
+
 }

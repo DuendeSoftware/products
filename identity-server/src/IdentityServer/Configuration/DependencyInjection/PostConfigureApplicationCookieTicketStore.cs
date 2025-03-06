@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -60,7 +59,7 @@ public class PostConfigureApplicationCookieTicketStore : IPostConfigureOptions<C
     {
         if (name == _scheme)
         {
-            if(_httpContextAccessor.HttpContext == null)
+            if (_httpContextAccessor.HttpContext == null)
             {
                 _logger?.LogDebug("Failed to configure server side sessions for the authentication cookie scheme \"{scheme}\" because there is no current HTTP request");
                 return;

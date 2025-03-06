@@ -2,24 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Shouldly;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
-using IntegrationTests.Common;
 using IntegrationTests.Clients.Setup;
+using IntegrationTests.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.IdentityModel.Tokens;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 
@@ -102,7 +95,7 @@ public class ClientAssertionClient
 
         AssertValidToken(response);
     }
-        
+
     [Fact]
     public async Task Valid_client_with_token_replay_should_fail()
     {
@@ -124,7 +117,7 @@ public class ClientAssertionClient
         });
 
         AssertValidToken(response);
-            
+
         // replay
         response = await _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
         {
@@ -209,7 +202,7 @@ public class ClientAssertionClient
         response.RefreshToken.ShouldBeNull();
 
         var payload = GetPayload(response);
-            
+
         payload.Count.ShouldBe(8);
         payload["iss"].GetString().ShouldBe("https://idsvr4");
         payload["aud"].GetString().ShouldBe("api");

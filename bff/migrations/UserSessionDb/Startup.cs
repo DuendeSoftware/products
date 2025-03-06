@@ -1,9 +1,8 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.Bff.EntityFramework;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace UserSessionDb
 {
@@ -20,7 +19,8 @@ namespace UserSessionDb
         {
             var cn = Configuration.GetConnectionString("db");
 
-            services.AddDbContext<SessionDbContext>(options => {
+            services.AddDbContext<SessionDbContext>(options =>
+            {
                 //options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
                 options.UseSqlite(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
             });

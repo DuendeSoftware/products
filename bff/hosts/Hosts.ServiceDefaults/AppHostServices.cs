@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 namespace Hosts.ServiceDefaults;
-public static  class AppHostServices
+public static class AppHostServices
 {
     public const string IdentityServer = "identity-server";
     public const string Api = "api";

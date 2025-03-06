@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
@@ -93,7 +90,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
         var credentials = keyContainers.Select(x => new SigningCredentials(x.ToSecurityKey(), x.Algorithm));
         return credentials;
     }
-        
+
     /// <inheritdoc/>
     public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
     {
@@ -101,7 +98,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
         {
             return Enumerable.Empty<SecurityKeyInfo>();
         }
-            
+
         var containers = await _keyManager.GetAllKeysAsync();
         var keys = containers.Select(x => new SecurityKeyInfo
         {

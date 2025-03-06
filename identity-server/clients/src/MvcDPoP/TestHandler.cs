@@ -1,8 +1,5 @@
-using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 namespace MvcDPoP;
 
@@ -19,7 +16,7 @@ public class TestHandler : DelegatingHandler
         var response = await base.SendAsync(request, cancellationToken);
         if (response.Headers.Contains("WWW-Authenticate"))
         {
-            foreach(var value in response.Headers.WwwAuthenticate)
+            foreach (var value in response.Headers.WwwAuthenticate)
             {
                 _logger.LogInformation("Response from API {url}, WWW-Authenticate: {header}", request.RequestUri.AbsoluteUri, value.ToString());
             }

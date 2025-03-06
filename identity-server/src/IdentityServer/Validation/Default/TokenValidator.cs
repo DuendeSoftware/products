@@ -2,22 +2,18 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Microsoft.IdentityModel.Tokens;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -65,7 +61,7 @@ internal class TokenValidator : ITokenValidator
         bool validateLifetime = true)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateIdentityToken");
-        
+
         _logger.LogDebug("Start identity token validation");
 
         if (token.Length > _options.InputLengthRestrictions.Jwt)
@@ -127,7 +123,7 @@ internal class TokenValidator : ITokenValidator
     public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateAccessToken");
-        
+
         _logger.LogTrace("Start access token validation");
 
         _log.ExpectedScope = expectedScope;
@@ -275,14 +271,15 @@ internal class TokenValidator : ITokenValidator
         IEnumerable<SecurityKeyInfo> validationKeys, bool validateLifetime = true, string audience = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateJwt");
-        
+
         var handler = new JsonWebTokenHandler();
 
         var parameters = new TokenValidationParameters
         {
             ValidIssuer = await _issuerNameService.GetCurrentAsync(),
             IssuerSigningKeys = validationKeys.Select(k => k.Key),
-            ValidateLifetime = validateLifetime
+            ValidateLifetime = validateLifetime,
+            ClockSkew = _options.JwtValidationClockSkew
         };
 
         if (audience.IsPresent())
@@ -299,7 +296,7 @@ internal class TokenValidator : ITokenValidator
                 parameters.ValidTypes = new[] { _options.AccessTokenJwtType };
             }
         }
-            
+
         var result = await handler.ValidateTokenAsync(jwtString, parameters);
         if (!result.IsValid)
         {
@@ -369,7 +366,7 @@ internal class TokenValidator : ITokenValidator
     private async Task<TokenValidationResult> ValidateReferenceAccessTokenAsync(string tokenHandle)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateReferenceAccessToken");
-        
+
         _log.TokenHandle = tokenHandle;
         var token = await _referenceTokenStore.GetReferenceTokenAsync(tokenHandle);
 

@@ -2,18 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Test;
-using Shouldly;
-using Duende.IdentityModel;
-using IntegrationTests.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Xunit;
+using Duende.IdentityModel;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Test;
+using IntegrationTests.Common;
 
 namespace IntegrationTests.Endpoints.Authorize;
 
@@ -69,7 +63,7 @@ public class PushedAuthorizationTests
     public async Task using_pushed_authorization_when_it_is_globally_disabled_fails()
     {
         _mockPipeline.Options.Endpoints.EnablePushedAuthorizationEndpoint = false;
-        
+
         var (_, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync();
         statusCode.ShouldBe(HttpStatusCode.NotFound);
     }
@@ -91,7 +85,7 @@ public class PushedAuthorizationTests
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
-        response.Headers.Location!.ToString().ShouldMatch(".*/error.*"); 
+        response.Headers.Location!.ToString().ShouldMatch(".*/error.*");
     }
 
     [Fact]
@@ -113,7 +107,7 @@ public class PushedAuthorizationTests
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
-        response.Headers.Location!.ToString().ShouldMatch(".*/error.*"); 
+        response.Headers.Location!.ToString().ShouldMatch(".*/error.*");
     }
 
     [Fact]
@@ -230,7 +224,7 @@ public class PushedAuthorizationTests
         var returnUrl = new Uri(new Uri(IdentityServerPipeline.BaseUrl), returnPath);
         await _mockPipeline.LoginAsync("bob");
         var authorizeCallbackResponse = await _mockPipeline.BrowserClient.GetAsync(returnUrl);
-        
+
         // The authorize callback should continue back to the application (the prompt parameter is processed so we don't go back to the UI)
         authorizeCallbackResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
         authorizeCallbackResponse.Headers.Location!.ToString().ShouldStartWith(expectedCallback);

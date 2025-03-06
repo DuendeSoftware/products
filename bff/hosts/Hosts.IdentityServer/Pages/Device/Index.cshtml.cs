@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
@@ -56,7 +59,8 @@ namespace IdentityServerHost.Pages.Device
                 return Page();
             }
 
-            Input = new InputModel { 
+            Input = new InputModel
+            {
                 UserCode = userCode,
             };
 

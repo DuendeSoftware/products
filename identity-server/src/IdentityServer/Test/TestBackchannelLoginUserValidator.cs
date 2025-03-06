@@ -2,13 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Security.Claims;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Test;
 using Duende.IdentityServer.Validation;
-using Duende.IdentityModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -52,7 +49,7 @@ public class TestBackchannelLoginUserValidator : IBackchannelAuthenticationUserV
             var ci = new ClaimsIdentity(claims, "ciba");
             result.Subject = new ClaimsPrincipal(ci);
         }
- 
+
         return Task.FromResult(result);
     }
 }

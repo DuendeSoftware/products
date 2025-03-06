@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using Xunit;
 using Duende.IdentityServer.Extensions;
-using Shouldly;
-using System.Linq;
 
 namespace UnitTests.Extensions;
 

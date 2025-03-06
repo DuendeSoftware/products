@@ -1,8 +1,11 @@
-﻿using Duende.IdentityServer.Licensing;
-using IdentityServerEmpty;
-using Serilog;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Globalization;
 using System.Text;
+using Duende.IdentityServer.Licensing;
+using IdentityServerEmpty;
+using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()

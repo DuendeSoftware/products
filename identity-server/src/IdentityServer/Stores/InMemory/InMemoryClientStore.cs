@@ -4,10 +4,6 @@
 
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -42,12 +38,12 @@ public class InMemoryClientStore : IClientStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
-        
+
         var query =
             from client in _clients
             where client.ClientId == clientId
             select client;
-            
+
         return Task.FromResult(query.SingleOrDefault());
     }
 }

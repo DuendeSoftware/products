@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.ComponentModel.DataAnnotations;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
@@ -30,7 +33,7 @@ namespace IdentityServerHost.Pages.Grants
         }
 
         public ViewModel View { get; set; }
-        
+
         public async Task OnGet()
         {
             var grants = await _interaction.GetAllUserGrantsAsync();

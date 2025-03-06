@@ -32,7 +32,7 @@ public class Index : PageModel
     }
 
     public ViewModel View { get; set; } = default!;
-        
+
     public async Task OnGet()
     {
         var grants = await _interaction.GetAllUserGrantsAsync();

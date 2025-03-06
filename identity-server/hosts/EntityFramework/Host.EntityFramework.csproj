@@ -3,7 +3,6 @@
     <PropertyGroup>
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <RootNamespace>IdentityServerHost</RootNamespace>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AnalysisMode>all</AnalysisMode>
     </PropertyGroup>

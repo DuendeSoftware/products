@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Models;
-using System;
 using System.Collections.Concurrent;
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 // this is designed as a per-request cache is to ensure that a scheme loaded from the cache is still available later in the

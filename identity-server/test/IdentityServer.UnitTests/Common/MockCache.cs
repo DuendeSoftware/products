@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
 
 namespace UnitTests.Common;
@@ -13,7 +10,7 @@ public class MockCache<T> : ICache<T>
     where T : class
 {
     public Dictionary<string, T> Items { get; set; } = new Dictionary<string, T>();
-         
+
 
     public Task<T> GetAsync(string key)
     {

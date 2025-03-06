@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
+using System.Text.Json;
+using Duende.Bff.Logging;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -9,13 +12,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Duende.Bff.Logging;
 
 namespace Duende.Bff;
 
@@ -28,17 +24,17 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
     /// Authentication scheme provider
     /// </summary>
     protected readonly IAuthenticationSchemeProvider AuthenticationSchemeProvider;
-        
+
     /// <summary>
     /// OpenID Connect options monitor
     /// </summary>
     protected readonly IOptionsMonitor<OpenIdConnectOptions> OptionsMonitor;
-        
+
     /// <summary>
     /// Session revocation service
     /// </summary>
     protected readonly ISessionRevocationService UserSession;
-        
+
     /// <summary>
     /// Logger
     /// </summary>
@@ -67,7 +63,7 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
     public virtual async Task ProcessRequestAsync(HttpContext context)
     {
         Logger.LogDebug("Processing back-channel logout request");
-        
+
         context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
         context.Response.Headers.Append("Pragma", "no-cache");
 
@@ -76,7 +72,7 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
             if (context.Request.HasFormContentType)
             {
                 var logoutToken = context.Request.Form[OidcConstants.BackChannelLogoutRequest.LogoutToken].FirstOrDefault();
-                    
+
                 if (!String.IsNullOrWhiteSpace(logoutToken))
                 {
                     var user = await ValidateLogoutTokenAsync(logoutToken);
@@ -85,15 +81,15 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
                         // these are the sub & sid to signout
                         var sub = user.FindFirst("sub")?.Value;
                         var sid = user.FindFirst("sid")?.Value;
-                            
+
                         Logger.BackChannelLogout(sub ?? "missing", sid ?? "missing");
-                            
-                        await UserSession.RevokeSessionsAsync(new UserSessionsFilter 
-                        { 
+
+                        await UserSession.RevokeSessionsAsync(new UserSessionsFilter
+                        {
                             SubjectId = sub,
                             SessionId = sid
                         });
-                            
+
                         return;
                     }
                 }
@@ -107,7 +103,7 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
         {
             Logger.BackChannelLogoutError($"Failed to process backchannel logout request. '{ex.Message}'");
         }
-            
+
         Logger.BackChannelLogoutError($"Failed to process backchannel logout request.");
         context.Response.StatusCode = 400;
     }

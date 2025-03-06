@@ -4,23 +4,21 @@
 
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
-using System;
-using System.Collections.Generic;
 
 namespace Duende.IdentityServer;
 
 internal static class Constants
 {
-    public const string IdentityServerName               = "Duende.IdentityServer";
+    public const string IdentityServerName = "Duende.IdentityServer";
     public const string IdentityServerAuthenticationType = IdentityServerName;
-    public const string ExternalAuthenticationMethod     = "external";
-    public const string DefaultHashAlgorithm             = "SHA256";
+    public const string ExternalAuthenticationMethod = "external";
+    public const string DefaultHashAlgorithm = "SHA256";
 
     public static readonly TimeSpan DefaultCookieTimeSpan = TimeSpan.FromHours(10);
-    public static readonly TimeSpan DefaultCacheDuration  = TimeSpan.FromMinutes(60);
+    public static readonly TimeSpan DefaultCacheDuration = TimeSpan.FromMinutes(60);
 
-    public static readonly List<string> SupportedResponseTypes = new List<string> 
-    { 
+    public static readonly List<string> SupportedResponseTypes = new List<string>
+    {
         OidcConstants.ResponseTypes.Code,
         OidcConstants.ResponseTypes.Token,
         OidcConstants.ResponseTypes.IdToken,
@@ -56,8 +54,8 @@ internal static class Constants
 
     public enum ScopeRequirement
     {
-        None, 
-        ResourceOnly, 
+        None,
+        ResourceOnly,
         IdentityOnly,
         Identity
     }
@@ -72,7 +70,7 @@ internal static class Constants
         { OidcConstants.ResponseTypes.CodeToken, ScopeRequirement.Identity },
         { OidcConstants.ResponseTypes.CodeIdTokenToken, ScopeRequirement.Identity }
     };
-                            
+
     public static readonly Dictionary<string, IEnumerable<string>> AllowedResponseModesForGrantType = new Dictionary<string, IEnumerable<string>>
     {
         { GrantType.AuthorizationCode, new[] { OidcConstants.ResponseModes.Query, OidcConstants.ResponseModes.FormPost, OidcConstants.ResponseModes.Fragment } },
@@ -122,7 +120,7 @@ internal static class Constants
     /// </summary>
     [Obsolete("Use the ProcessedPrompt constant instead.")]
     public const string SuppressedPrompt = ProcessedPrompt;
-    
+
     /// <summary>
     /// The name of the parameter passed to the authorize callback to indicate
     /// prompt modes that have already been used. This constant replaces the
@@ -152,11 +150,11 @@ internal static class Constants
         { OidcConstants.ProtectedResourceErrors.InvalidRequest,    400 },
         { OidcConstants.ProtectedResourceErrors.InsufficientScope, 403 }
     };
-        
+
     public static readonly Dictionary<string, IEnumerable<string>> ScopeToClaimsMapping = new Dictionary<string, IEnumerable<string>>
     {
         { IdentityServerConstants.StandardScopes.Profile, new[]
-        { 
+        {
             JwtClaimTypes.Name,
             JwtClaimTypes.FamilyName,
             JwtClaimTypes.GivenName,
@@ -170,12 +168,12 @@ internal static class Constants
             JwtClaimTypes.BirthDate,
             JwtClaimTypes.ZoneInfo,
             JwtClaimTypes.Locale,
-            JwtClaimTypes.UpdatedAt 
+            JwtClaimTypes.UpdatedAt
         }},
         { IdentityServerConstants.StandardScopes.Email, new[]
-        { 
+        {
             JwtClaimTypes.Email,
-            JwtClaimTypes.EmailVerified 
+            JwtClaimTypes.EmailVerified
         }},
         { IdentityServerConstants.StandardScopes.Address, new[]
         {
@@ -229,7 +227,7 @@ internal static class Constants
     public static class TokenTypeHints
     {
         public const string RefreshToken = "refresh_token";
-        public const string AccessToken  = "access_token";
+        public const string AccessToken = "access_token";
     }
 
     public static List<string> SupportedTokenTypeHints = new List<string>

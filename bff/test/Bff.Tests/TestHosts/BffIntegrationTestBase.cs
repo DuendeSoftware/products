@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts
@@ -35,18 +35,19 @@ namespace Duende.Bff.Tests.TestHosts
                 AllowOfflineAccess = true,
                 AllowedScopes = { "openid", "profile", "scope1" }
             });
-            
-            
-            IdentityServerHost.OnConfigureServices += services => {
-                services.AddTransient<IBackChannelLogoutHttpClient>(provider => 
+
+
+            IdentityServerHost.OnConfigureServices += services =>
+            {
+                services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
                     new DefaultBackChannelLogoutHttpClient(
-                        BffHost!.HttpClient, 
-                        provider.GetRequiredService<ILoggerFactory>(), 
+                        BffHost!.HttpClient,
+                        provider.GetRequiredService<ILoggerFactory>(),
                         provider.GetRequiredService<ICancellationTokenProvider>()));
 
                 services.AddSingleton<DefaultAccessTokenRetriever>();
             };
-            
+
         }
 
         public async Task Login(string sub)

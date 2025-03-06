@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -22,7 +20,7 @@ public class LogoutNotificationContext
     /// The session Id of the user's authentication session.
     /// </summary>
     public string SessionId { get; set; } = default!;
-    
+
     /// <summary>
     /// The issuer for the back-channel logout
     /// </summary>

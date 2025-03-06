@@ -71,15 +71,15 @@ public class DynamicClientRegistrationEndpoint
         else
         {
             var processingResult = await _processor.ProcessAsync(dcrContext);
-            if(processingResult is DynamicClientRegistrationError processingFailure)
+            if (processingResult is DynamicClientRegistrationError processingFailure)
             {
                 await _responseGenerator.WriteError(httpContext, processingFailure);
-            } 
+            }
             else if (processingResult is DynamicClientRegistrationResponse success)
             {
                 await _responseGenerator.WriteSuccessResponse(httpContext, success);
             }
-            else 
+            else
             {
                 // This "can't happen" - if it does, something weird is going on.
                 throw new InvalidOperationException("Results of request processing where neither success or failure");

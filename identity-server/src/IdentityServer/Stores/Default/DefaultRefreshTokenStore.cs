@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -23,10 +22,10 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     /// <param name="handleGenerationService">The handle generation service.</param>
     /// <param name="logger">The logger.</param>
     public DefaultRefreshTokenStore(
-        IPersistedGrantStore store, 
-        IPersistentGrantSerializer serializer, 
+        IPersistedGrantStore store,
+        IPersistentGrantSerializer serializer,
         IHandleGenerationService handleGenerationService,
-        ILogger<DefaultRefreshTokenStore> logger) 
+        ILogger<DefaultRefreshTokenStore> logger)
         : base(IdentityServerConstants.PersistedGrantTypes.RefreshToken, store, serializer, handleGenerationService, logger)
     {
     }
@@ -39,7 +38,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     public async Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.StoreRefreshTokenAsync");
-        
+
         return await CreateItemAsync(refreshToken, refreshToken.ClientId, refreshToken.SubjectId, refreshToken.SessionId, refreshToken.Description, refreshToken.CreationTime, refreshToken.Lifetime);
     }
 
@@ -52,7 +51,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     public Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.UpdateRefreshToken");
-        
+
         return StoreItemAsync(handle, refreshToken, refreshToken.ClientId, refreshToken.SubjectId, refreshToken.SessionId, refreshToken.Description, refreshToken.CreationTime, refreshToken.CreationTime.AddSeconds(refreshToken.Lifetime), refreshToken.ConsumedTime);
     }
 
@@ -64,7 +63,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     public Task<RefreshToken> GetRefreshTokenAsync(string refreshTokenHandle)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.GetRefreshToken");
-        
+
         return GetItemAsync(refreshTokenHandle);
     }
 
@@ -76,7 +75,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     public Task RemoveRefreshTokenAsync(string refreshTokenHandle)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.RemoveRefreshToken");
-        
+
         return RemoveItemAsync(refreshTokenHandle);
     }
 
@@ -89,7 +88,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     public Task RemoveRefreshTokensAsync(string subjectId, string clientId)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.RemoveRefreshTokens");
-        
+
         return RemoveAllAsync(subjectId, clientId);
     }
 }

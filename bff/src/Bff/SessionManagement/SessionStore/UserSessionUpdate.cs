@@ -1,8 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-
 namespace Duende.Bff;
 
 /// <summary>
@@ -24,7 +22,7 @@ public class UserSessionUpdate
     /// The creation time
     /// </summary>
     public DateTime Created { get; set; }
-        
+
     /// <summary>
     /// The renewal time
     /// </summary>

@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.Bff;
 
 namespace BffRemoteApi;
@@ -8,9 +11,9 @@ namespace BffRemoteApi;
 public class Configuration
 {
     public string? Authority { get; set; }
-    
+
     public string? ClientId { get; set; }
-    
+
     /// <summary>
     /// should be supplied as a command line argument or environment variable, e.g.
     /// ./GenericBFF --BFF:ClientSecret=secret

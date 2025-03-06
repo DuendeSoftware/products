@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -26,7 +24,7 @@ public class Message<TModel>
     public Message()
     {
     }
-        
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Message{TModel}"/> class.
     /// </summary>

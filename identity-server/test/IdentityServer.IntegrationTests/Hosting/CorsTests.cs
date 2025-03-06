@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using Shouldly;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace IntegrationTests.Hosting;
 
@@ -86,7 +81,7 @@ public class CorsTests
     {
         _pipeline.BackChannelClient.DefaultRequestHeaders.Add("Origin", "https://client");
         _pipeline.BackChannelClient.DefaultRequestHeaders.Add("Access-Control-Request-Method", "GET");
-            
+
         var message = new HttpRequestMessage(HttpMethod.Options, url);
         var response = await _pipeline.BackChannelClient.SendAsync(message);
 

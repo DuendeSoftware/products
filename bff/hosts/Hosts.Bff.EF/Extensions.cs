@@ -1,11 +1,10 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.Bff;
 using Duende.Bff.Yarp;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using UserSessionDb.Migrations.UserSessions;
 
 namespace Bff.EF
@@ -24,10 +23,11 @@ namespace Bff.EF
             services.AddBff(options =>
             {
                 options.BackchannelLogoutAllUserSessions = true;
-                options.EnableSessionCleanup = true;    
+                options.EnableSessionCleanup = true;
             })
                 .AddRemoteApis()
-                .AddEntityFrameworkServerSideSessions(options=> {
+                .AddEntityFrameworkServerSideSessions(options =>
+                {
                     //options.UseSqlServer(cn);
                     options.UseSqlite(cn, opt => opt.MigrationsAssembly(typeof(UserSessions).Assembly.FullName));
                 });

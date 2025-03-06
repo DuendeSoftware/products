@@ -22,13 +22,13 @@ internal enum LicenseFeature : ulong
     /// </summary>
     [Description("par")]
     PAR = 2,
- 
+
     /// <summary>
     /// Resource Isolation
     /// </summary>
     [Description("resource_isolation")]
     ResourceIsolation = 4,
- 
+
     /// <summary>
     /// Dyanmic External Providers
     /// </summary>
@@ -58,13 +58,13 @@ internal enum LicenseFeature : ulong
     /// </summary>
     [Description("config_api")]
     DCR = 128,
-    
+
     /// <summary>
     /// ISV (same as Redistribution)
     /// </summary>
     [Description("isv")]
     ISV = 256,
-    
+
     /// <summary>
     /// Redistribution
     /// </summary>

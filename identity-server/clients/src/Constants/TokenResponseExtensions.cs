@@ -1,8 +1,10 @@
-﻿using Duende.IdentityModel;
-using Duende.IdentityModel.Client;
-using System;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Text;
 using System.Text.Json;
+using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
 
 namespace Clients
 {

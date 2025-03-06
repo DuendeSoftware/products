@@ -30,7 +30,7 @@ internal static class Extensions
 
         return builder.Build();
     }
-    
+
     public static WebApplication ConfigurePipeline(this WebApplication app)
     {
         app.UseHttpLogging();
@@ -42,7 +42,7 @@ internal static class Extensions
         app.UseAuthorization();
         app.MapRazorPages()
             .RequireAuthorization();
-        
+
         return app;
     }
 }

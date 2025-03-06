@@ -1,13 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Tests.TestHosts;
 using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Duende.Bff.Tests.TestFramework;
-using Shouldly;
-using Xunit;
+using Duende.Bff.Tests.TestHosts;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints

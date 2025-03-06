@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Duende.IdentityServer.Models;
@@ -31,7 +30,7 @@ public abstract class Resource
     /// Display name of the resource.
     /// </summary>
     public string? DisplayName { get; set; }
-        
+
     /// <summary>
     /// Description of the resource.
     /// </summary>

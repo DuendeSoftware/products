@@ -11,13 +11,13 @@ public enum TokenType
     /// <summary>
     /// User token
     /// </summary>
-    User, 
-        
+    User,
+
     /// <summary>
     /// Client token
     /// </summary>
     Client,
-        
+
     /// <summary>
     /// User or client token
     /// </summary>

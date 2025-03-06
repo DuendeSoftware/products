@@ -1,6 +1,5 @@
-using System;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
 namespace ResourceBasedApi
 {
@@ -30,7 +29,7 @@ namespace ResourceBasedApi
 
             return Select;
         }
-        
+
         /// <summary>
         /// Extracts scheme and credential from Authorization header (if present)
         /// </summary>

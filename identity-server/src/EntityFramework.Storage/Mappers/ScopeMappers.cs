@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
 using Duende.IdentityServer.EntityFramework.Entities;
 
 namespace Duende.IdentityServer.EntityFramework.Mappers;
@@ -20,7 +18,7 @@ public static class ScopeMappers
     /// <returns></returns>
     public static Models.ApiScope ToModel(this ApiScope entity)
     {
-        return entity == null ? null : 
+        return entity == null ? null :
             new Models.ApiScope
             {
                 Enabled = entity.Enabled,
@@ -43,7 +41,7 @@ public static class ScopeMappers
     /// <returns></returns>
     public static Entities.ApiScope ToEntity(this Models.ApiScope model)
     {
-        return model == null ? null : 
+        return model == null ? null :
             new Entities.ApiScope
             {
                 Enabled = model.Enabled,
@@ -57,9 +55,10 @@ public static class ScopeMappers
                 }).ToList() ?? new List<ApiScopeClaim>(),
                 Properties = model.Properties?.Select(p => new Entities.ApiScopeProperty
                 {
-                    Key = p.Key, Value = p.Value
+                    Key = p.Key,
+                    Value = p.Value
                 }).ToList() ?? new List<ApiScopeProperty>(),
-                
+
                 Required = model.Required,
                 Emphasize = model.Emphasize
             };

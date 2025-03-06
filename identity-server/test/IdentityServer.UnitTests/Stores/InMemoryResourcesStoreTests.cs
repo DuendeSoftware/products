@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Xunit;
-using Shouldly;
 
 namespace UnitTests.Stores;
 
@@ -42,7 +38,7 @@ public class InMemoryResourcesStoreTests
 
         act = () => new InMemoryResourcesStore(null, apiResources, null);
         act.ShouldThrow<ArgumentException>();
-            
+
         act = () => new InMemoryResourcesStore(null, null, scopes);
         act.ShouldThrow<ArgumentException>();
     }
@@ -70,7 +66,7 @@ public class InMemoryResourcesStoreTests
             new ApiScope { Name = "B" },
             new ApiScope { Name = "C" },
         };
-            
+
         new InMemoryResourcesStore(identityResources, null, null);
         new InMemoryResourcesStore(null, apiResources, null);
         new InMemoryResourcesStore(null, null, apiScopes);

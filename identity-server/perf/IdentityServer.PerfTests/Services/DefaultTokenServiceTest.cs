@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Security.Claims;
+using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using IdentityServer.PerfTest.Infrastructure;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace IdentityServer.PerfTests.Services
 {
@@ -22,7 +22,8 @@ namespace IdentityServer.PerfTests.Services
 
         public DefaultTokenServiceTest()
         {
-            Container.OnConfigureIdentityServerOptions += opts => {
+            Container.OnConfigureIdentityServerOptions += opts =>
+            {
                 opts.IssuerUri = "https://server";
             };
 
@@ -39,10 +40,10 @@ namespace IdentityServer.PerfTests.Services
 
             _subject = Container.ResolveService<ITokenService>();
 
-            _principal = new IdentityServerUser("sub") 
-            { 
-                AuthenticationTime = System.DateTime.Now, 
-                IdentityProvider = "local" 
+            _principal = new IdentityServerUser("sub")
+            {
+                AuthenticationTime = System.DateTime.Now,
+                IdentityProvider = "local"
             }.CreatePrincipal();
         }
 

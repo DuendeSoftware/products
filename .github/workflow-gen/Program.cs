@@ -65,6 +65,10 @@ void GenerateIdentityServerWorkflow(Product product)
 
     job.StepSetupDotNet();
 
+    job.StepRestore(product.Solution);
+
+    job.StepVerifyFormatting(product.Solution);
+
     job.StepBuild(product.Solution);
 
     job.StepTest(product.Solution);
@@ -82,6 +86,7 @@ void GenerateIdentityServerWorkflow(Product product)
     var fileName = $"{product.Name}-ci";
     WriteWorkflow(workflow, fileName);
 }
+
 void GenerateIdentityServerReleaseWorkflow(Product product)
 {
     var workflow = new Workflow($"{product.Name}/release");
@@ -191,6 +196,10 @@ void GenerateBffWorkflow(Product product)
 
     job.StepSetupDotNet();
 
+    job.StepRestore(product.Solution);
+
+    job.StepVerifyFormatting(product.Solution);
+
     job.StepBuild(product.Solution);
 
     // Devcerts are needed because some tests run start a http server with https. 
@@ -215,6 +224,7 @@ void GenerateBffWorkflow(Product product)
     var fileName = $"{product.Name}-ci";
     WriteWorkflow(workflow, fileName);
 }
+
 void GenerateBffReleaseWorkflow(Product product)
 {
     var workflow = new Workflow($"{product.Name}/release");
@@ -292,7 +302,7 @@ void GenerateCodeQlWorkflow(Product system, string cronSchedule)
         .Paths(paths);
     workflow.On
         .Schedule(cronSchedule);
-    
+
     var job = workflow
         .Job("analyze")
         .Name("Analyze")
@@ -307,15 +317,17 @@ void GenerateCodeQlWorkflow(Product system, string cronSchedule)
 
     job.Step()
         .ActionsCheckout();
-    
+
     job.StepInitializeCodeQl();
-    
+
     job.StepSetupDotNet();
 
+    job.StepRestore(system.Solution);
+
     job.StepBuild(system.Solution);
-    
+
     job.StepPerformCodeQlAnalysis();
-    
+
     var fileName = $"{system.Name}-codeql-analysis";
     WriteWorkflow(workflow, fileName);
 }
@@ -440,10 +452,20 @@ public static class StepExtensions
             .Run($"dotnet pack -c Release {target} -o artifacts");
     }
 
+    public static Step StepRestore(this Job job, string solution)
+        => job.Step()
+            .Name("Restore")
+            .Run($"dotnet restore {solution}");
+
+    public static Step StepVerifyFormatting(this Job job, string solution)
+        => job.Step()
+            .Name("Verify Formatting")
+            .Run($"dotnet format {solution} --verify-no-changes --no-restore");
+
     public static Step StepBuild(this Job job, string solution)
         => job.Step()
             .Name("Build")
-            .Run($"dotnet build {solution} -c Release");
+            .Run($"dotnet build {solution} --no-restore -c Release");
 
     public static void StepTest(this Job job, string solution)
     {
@@ -480,12 +502,12 @@ public static class StepExtensions
 
     public static void StepSign(this Job job, bool always = false)
     {
-        var flags = "--file-digest sha256 "                                                +
-                    "--timestamp-rfc3161 http://timestamp.digicert.com "                   +
+        var flags = "--file-digest sha256 " +
+                    "--timestamp-rfc3161 http://timestamp.digicert.com " +
                     "--azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ " +
-                    "--azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 "    +
-                    "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 "    +
-                    "--azure-key-vault-client-secret ${{ secrets.SignClientSecret }} "     +
+                    "--azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 " +
+                    "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 " +
+                    "--azure-key-vault-client-secret ${{ secrets.SignClientSecret }} " +
                     "--azure-key-vault-certificate NuGetPackageSigning";
         var step = job.Step()
             .Name("Sign packages");
@@ -614,7 +636,7 @@ public static class StepExtensions
     public static Job RunEitherOnBranchOrAsPR(this Job job)
         => job.If(
             "(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')");
-    
+
     public static void StepInitializeCodeQl(this Job job)
     {
         job.Step()
@@ -624,7 +646,7 @@ public static class StepExtensions
                 ("languages", "csharp"),
                 ("build-mode", "manual"));
     }
-    
+
     public static void StepPerformCodeQlAnalysis(this Job job)
     {
         job.Step()
@@ -637,10 +659,10 @@ public static class StepExtensions
 
 public class GitHubContexts
 {
-    public static  GitHubContexts Instance { get; } = new();
-    public virtual GitHubContext  GitHub   { get; } = new();
-    public virtual SecretsContext Secrets  { get; } = new();
-    public virtual EventContext   Event    { get; } = new();
+    public static GitHubContexts Instance { get; } = new();
+    public virtual GitHubContext GitHub { get; } = new();
+    public virtual SecretsContext Secrets { get; } = new();
+    public virtual EventContext Event { get; } = new();
 
     public abstract class Context(string name)
     {
@@ -660,7 +682,7 @@ public class GitHubContexts
 
     public class EventContext() : Context("github.event")
     {
-        public EventsInputContext Input { get; } = new ();
+        public EventsInputContext Input { get; } = new();
     }
 
     public class EventsInputContext() : Context("github.event.inputs")

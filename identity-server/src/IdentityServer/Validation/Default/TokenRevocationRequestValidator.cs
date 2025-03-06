@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Collections.Specialized;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Specialized;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -43,7 +41,7 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
     public Task<TokenRevocationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, Client client)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRevocationRequestValidator.ValidateRequest");
-        
+
         _logger.LogTrace("ValidateRequestAsync called");
 
         if (parameters == null)

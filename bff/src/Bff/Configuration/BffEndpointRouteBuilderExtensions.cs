@@ -1,15 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
+using Duende;
 using Duende.Bff;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Duende;
 
 namespace Microsoft.AspNetCore.Builder;
 
@@ -48,7 +46,7 @@ public static class BffEndpointRouteBuilderExtensions
     public static void MapBffManagementLoginEndpoint(this IEndpointRouteBuilder endpoints)
     {
         endpoints.CheckLicense();
-            
+
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
         endpoints.MapGet(options.LoginPath.Value!, ProcessWith<ILoginService>)
@@ -117,7 +115,7 @@ public static class BffEndpointRouteBuilderExtensions
         endpoints.MapPost(options.BackChannelLogoutPath.Value!, ProcessWith<IBackchannelLogoutService>)
             .AllowAnonymous();
     }
-        
+
     /// <summary>
     /// Adds the diagnostics BFF management endpoint
     /// </summary>
@@ -131,7 +129,7 @@ public static class BffEndpointRouteBuilderExtensions
         endpoints.MapGet(options.DiagnosticsPath.Value!, ProcessWith<IDiagnosticsService>)
             .AllowAnonymous();
     }
-        
+
     internal static void CheckLicense(this IEndpointRouteBuilder endpoints)
     {
         endpoints.ServiceProvider.CheckLicense();

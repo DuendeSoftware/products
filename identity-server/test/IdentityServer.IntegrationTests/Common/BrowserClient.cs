@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net.Http;
-
 namespace IntegrationTests.Common;
 
 public class BrowserClient : HttpClient

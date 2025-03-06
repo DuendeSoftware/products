@@ -3,12 +3,9 @@
 
 
 using System.Collections.Specialized;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Stores;
-using Shouldly;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Stores;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.TokenRequest_Validation;
 
@@ -94,7 +91,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(
-            parameters, 
+            parameters,
             client.ToValidationResult());
 
         result.IsError.ShouldBeTrue();

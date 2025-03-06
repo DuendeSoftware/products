@@ -1,8 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-
 namespace Duende.Bff;
 
 /// <summary>
@@ -19,7 +17,7 @@ public class BffRemoteApiEndpointMetadata : IBffApiEndpoint
     /// Optionally send a user token if present
     /// </summary>
     public bool OptionalUserToken { get; set; }
-        
+
     /// <summary>
     /// Maps to UserAccessTokenParameters and included if set
     /// </summary>

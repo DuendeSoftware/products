@@ -3,10 +3,8 @@
 
 
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Shouldly;
-using Xunit;
-using Models = Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
+using Models = Duende.IdentityServer.Models;
 
 namespace EntityFramework.Storage.UnitTests.Mappers;
 
@@ -85,14 +83,14 @@ public class IdentityProviderMappersTests
             .AllPropertiesAreMapped<Entities.IdentityProvider, Models.IdentityProvider>(
                 source =>
                 {
-                    source.Properties = 
+                    source.Properties =
                     """
                     {
                         "foo": "bar"
                     }
                     """;
                 },
-                source => source.ToModel(), 
+                source => source.ToModel(),
                 out var unmappedMembers)
             .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }

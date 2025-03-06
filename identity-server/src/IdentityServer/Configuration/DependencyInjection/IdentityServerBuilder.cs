@@ -5,7 +5,6 @@
 #nullable enable
 
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace Duende.IdentityServer.Configuration;
 

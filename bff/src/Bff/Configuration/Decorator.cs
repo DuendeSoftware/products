@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Linq;
 
 namespace Microsoft.AspNetCore.Builder;
 

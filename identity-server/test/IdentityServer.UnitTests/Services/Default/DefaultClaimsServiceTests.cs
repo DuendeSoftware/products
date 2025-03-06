@@ -2,18 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using Shouldly;
-using Duende.IdentityModel;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -178,7 +174,7 @@ public class DefaultClaimsServiceTests
         scopes.Count().ShouldBe(4);
         scopes.ToArray().ShouldBe(["api1", "api2", "id1", "id2"], true);
     }
-        
+
     [Fact]
     public async Task GetAccessTokenClaimsAsync_should_contain_parameterized_scope_values()
     {
@@ -206,7 +202,7 @@ public class DefaultClaimsServiceTests
         var scopes = claims.Where(x => x.Type == JwtClaimTypes.Scope).Select(x => x.Value);
         scopes.Count().ShouldBe(0);
     }
-        
+
     [Fact]
     public async Task GetAccessTokenClaimsAsync_should_only_consider_parsed_scope_values_and_not_ApiScope()
     {
@@ -245,7 +241,7 @@ public class DefaultClaimsServiceTests
         scopes.Count().ShouldBe(1);
         scopes.ToArray().ShouldBe(new string[] { "resource" });
     }
-        
+
     [Fact]
     public async Task GetAccessTokenClaimsAsync_should_contain_offline_scope()
     {
@@ -351,7 +347,7 @@ public class DefaultClaimsServiceTests
             new ApiResource("api")
             {
                 UserClaims = { "foo" },
-                Scopes = { "api1" } 
+                Scopes = { "api1" }
             }
         );
         _resources.ApiScopes.Add(

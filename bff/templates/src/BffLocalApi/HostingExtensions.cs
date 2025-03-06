@@ -1,4 +1,6 @@
-using Duende.Bff.Yarp;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Serilog;
 
 namespace BffLocalApi;
@@ -70,7 +72,7 @@ internal static class HostingExtensions
         // add CSRF protection and status code handling for API endpoints
         app.UseBff();
         app.UseAuthorization();
-        
+
         // local API endpoints
         app.MapControllers()
             .RequireAuthorization()

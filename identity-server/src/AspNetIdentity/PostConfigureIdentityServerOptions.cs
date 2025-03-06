@@ -38,7 +38,7 @@ public class UseAspNetIdentityCookieScheme : IPostConfigureOptions<IdentityServe
             options.DynamicProviders.SignOutScheme = IdentityConstants.ApplicationScheme;
         }
 
-        bool DefaultAuthSchemeIsAspNetIdentity() => 
+        bool DefaultAuthSchemeIsAspNetIdentity() =>
             _authOptions.Value.DefaultAuthenticateScheme == IdentityConstants.ApplicationScheme;
     }
 }

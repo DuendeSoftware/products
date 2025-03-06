@@ -2,21 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
-using Shouldly;
-using Duende.IdentityModel;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using UnitTests.Common;
 using UnitTests.Services.Default.KeyManagement;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -30,7 +25,7 @@ public class DefaultBackChannelLogoutServiceTests
             ILogoutNotificationService logoutNotificationService,
             IBackChannelLogoutHttpClient backChannelLogoutHttpClient,
             IIssuerNameService issuerNameService,
-            ILogger<IBackChannelLogoutService> logger) 
+            ILogger<IBackChannelLogoutService> logger)
             : base(clock, tools, logoutNotificationService, backChannelLogoutHttpClient, issuerNameService, logger)
         {
         }

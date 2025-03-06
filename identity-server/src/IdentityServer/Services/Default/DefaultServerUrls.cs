@@ -4,8 +4,6 @@
 
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Linq;
 
 namespace Duende.IdentityServer.Services;
 

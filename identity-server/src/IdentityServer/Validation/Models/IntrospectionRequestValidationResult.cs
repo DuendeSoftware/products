@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Models;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Security.Claims;
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -30,7 +29,7 @@ public class IntrospectionRequestValidationResult : ValidationResult
     /// The API.
     /// </value>
     public ApiResource Api { get; set; }
- 
+
     /// <summary>
     /// Gets or sets the client.
     /// </summary>

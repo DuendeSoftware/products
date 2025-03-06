@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Security.Claims;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
@@ -7,7 +10,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Shouldly;
 
 namespace Duende.Bff.Blazor.UnitTests;
 
@@ -20,7 +22,7 @@ public class ServerSideTokenStoreTests
             new Claim("sid", sid)
         ], "pwd", "name", "role"));
     }
-    
+
     [Fact]
     public async Task Can_add_retrieve_and_remove_tokens()
     {
@@ -30,7 +32,7 @@ public class ServerSideTokenStoreTests
         {
             AccessToken = "expected-access-token"
         };
-        
+
         // Create shared dependencies
         var sessionStore = new InMemoryUserSessionStore();
         var dataProtection = new EphemeralDataProtectionProvider();
@@ -43,7 +45,7 @@ public class ServerSideTokenStoreTests
             props,
             "test"
         ));
-        
+
         var tokensInProps = MockStoreTokensInAuthProps();
         var sut = new ServerSideTokenStore(
             tokensInProps,
@@ -54,7 +56,7 @@ public class ServerSideTokenStoreTests
 
         await sut.StoreTokenAsync(user, expectedToken);
         var actualToken = await sut.GetTokenAsync(user);
-        
+
         actualToken.ShouldNotBe(null);
         actualToken.AccessToken.ShouldBe(expectedToken.AccessToken);
 
@@ -69,14 +71,14 @@ public class ServerSideTokenStoreTests
         var tokenManagementOptionsMonitor = Substitute.For<IOptionsMonitor<UserTokenManagementOptions>>();
         var tokenManagementOptions = new UserTokenManagementOptions { UseChallengeSchemeScopedTokens = false };
         tokenManagementOptionsMonitor.CurrentValue.Returns(tokenManagementOptions);
-        
+
         var cookieOptionsMonitor = Substitute.For<IOptionsMonitor<CookieAuthenticationOptions>>();
         var cookieAuthenticationOptions = new CookieAuthenticationOptions();
         cookieOptionsMonitor.CurrentValue.Returns(cookieAuthenticationOptions);
-        
+
         var schemeProvider = Substitute.For<IAuthenticationSchemeProvider>();
         schemeProvider.GetDefaultSignInSchemeAsync().Returns(new AuthenticationScheme("TestScheme", null, typeof(IAuthenticationHandler)));
-        
+
         return new StoreTokensInAuthenticationProperties(
             tokenManagementOptionsMonitor,
             cookieOptionsMonitor,

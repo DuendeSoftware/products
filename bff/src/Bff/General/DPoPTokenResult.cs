@@ -24,8 +24,8 @@ public class DPoPTokenResult : AccessTokenResult
     /// <summary>
     /// The access token.
     /// </summary>
-    public string AccessToken { get; set; } 
-    
+    public string AccessToken { get; set; }
+
     /// <summary>
     /// The DPoP Json Web key
     /// </summary>

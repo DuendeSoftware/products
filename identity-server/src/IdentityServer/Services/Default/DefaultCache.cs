@@ -2,12 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
-using System;
-using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Internal;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Services;
 
@@ -70,7 +68,7 @@ public class DefaultCache<T> : ICache<T>
     public Task<T> GetAsync(string key)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Get");
-        
+
         key = GetKey(key);
         var item = Cache.Get<T>(key);
         return Task.FromResult(item);
@@ -80,7 +78,7 @@ public class DefaultCache<T> : ICache<T>
     public Task SetAsync(string key, T item, TimeSpan expiration)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Set");
-        
+
         key = GetKey(key);
         Cache.Set(key, item, expiration);
         return Task.CompletedTask;
@@ -90,7 +88,7 @@ public class DefaultCache<T> : ICache<T>
     public Task RemoveAsync(string key)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Remove");
-        
+
         key = GetKey(key);
         Cache.Remove(key);
         return Task.CompletedTask;

@@ -2,20 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
-using Shouldly;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -33,8 +26,8 @@ public class DefaultPersistedGrantServiceTests
     public DefaultPersistedGrantServiceTests()
     {
         _subject = new DefaultPersistedGrantService(
-            _store, 
-            new PersistentGrantSerializer(), 
+            _store,
+            new PersistentGrantSerializer(),
             TestLogger.Create<DefaultPersistedGrantService>());
         _codes = new DefaultAuthorizationCodeStore(_store,
             new PersistentGrantSerializer(),
@@ -496,7 +489,7 @@ public class DefaultPersistedGrantServiceTests
                 CreationTime = DateTime.UtcNow,
                 Lifetime = 10,
             });
-            await _subject.RemoveAllGrantsAsync("123", sessionId:"session1");
+            await _subject.RemoveAllGrantsAsync("123", sessionId: "session1");
 
             (await _refreshTokens.GetRefreshTokenAsync(handle1)).ShouldBeNull();
             (await _refreshTokens.GetRefreshTokenAsync(handle2)).ShouldBeNull();
@@ -545,7 +538,7 @@ public class DefaultPersistedGrantServiceTests
     [Fact]
     public async Task GetAllGrantsAsync_should_filter_items_with_corrupt_data_from_result()
     {
-        var mockStore = new CorruptingPersistedGrantStore(_store) 
+        var mockStore = new CorruptingPersistedGrantStore(_store)
         {
             ClientIdToCorrupt = "client2"
         };
@@ -591,7 +584,7 @@ public class DefaultPersistedGrantServiceTests
             if (ClientIdToCorrupt != null)
             {
                 var itemsToCorrupt = items.Where(x => x.ClientId == ClientIdToCorrupt);
-                foreach(var corruptItem in itemsToCorrupt)
+                foreach (var corruptItem in itemsToCorrupt)
                 {
                     corruptItem.Data = "corrupt";
                 }

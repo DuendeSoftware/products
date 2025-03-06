@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Duende.IdentityServer.EntityFramework.Mappers;
 
 /// <summary>
@@ -64,9 +61,10 @@ public static class ApiResourceMappers
                 }).ToList() ?? new List<Entities.ApiResourceClaim>(),
                 Properties = model.Properties?.Select(p => new Entities.ApiResourceProperty
                 {
-                    Key = p.Key, Value = p.Value
+                    Key = p.Key,
+                    Value = p.Value
                 }).ToList() ?? new List<Entities.ApiResourceProperty>(),
-                
+
                 RequireResourceIndicator = model.RequireResourceIndicator,
                 Secrets = model.ApiSecrets?.Select(s => new Entities.ApiResourceSecret
                 {

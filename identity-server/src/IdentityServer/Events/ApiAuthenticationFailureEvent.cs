@@ -16,10 +16,10 @@ public class ApiAuthenticationFailureEvent : Event
     /// <param name="apiName">Name of the API.</param>
     /// <param name="message">The message.</param>
     public ApiAuthenticationFailureEvent(string apiName, string message)
-        : base(EventCategories.Authentication, 
+        : base(EventCategories.Authentication,
             "API Authentication Failure",
-            EventTypes.Failure, 
-            EventIds.ApiAuthenticationFailure, 
+            EventTypes.Failure,
+            EventIds.ApiAuthenticationFailure,
             message)
     {
         ApiName = apiName;

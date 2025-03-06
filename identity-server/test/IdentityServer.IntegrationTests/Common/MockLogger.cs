@@ -1,8 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
 namespace IdentityServer.IntegrationTests.Common;
@@ -16,11 +14,11 @@ public class MockLogger : ILogger
     }
 
     public readonly List<string> LogMessages = new();
-    
-    
+
+
     private readonly LoggerExternalScopeProvider _scopeProvider;
-    
-    
+
+
     public IDisposable BeginScope<TState>(TState state) where TState : notnull => _scopeProvider.Push(state);
 
     public bool IsEnabled(LogLevel logLevel) => true;

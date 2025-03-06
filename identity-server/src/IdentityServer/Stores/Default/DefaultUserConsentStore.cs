@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -23,20 +22,21 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     /// <param name="handleGenerationService">The handle generation service.</param>
     /// <param name="logger">The logger.</param>
     public DefaultUserConsentStore(
-        IPersistedGrantStore store, 
+        IPersistedGrantStore store,
         IPersistentGrantSerializer serializer,
         IHandleGenerationService handleGenerationService,
-        ILogger<DefaultUserConsentStore> logger) 
+        ILogger<DefaultUserConsentStore> logger)
         : base(IdentityServerConstants.PersistedGrantTypes.UserConsent, store, serializer, handleGenerationService, logger)
     {
     }
 
     private string GetConsentKey(string subjectId, string clientId, bool useHexEncoding = true)
     {
-        if(useHexEncoding)
+        if (useHexEncoding)
         {
             return $"{clientId}|{subjectId}{HexEncodingFormatSuffix}";
-        } else 
+        }
+        else
         {
             return $"{clientId}|{subjectId}";
         }
@@ -50,7 +50,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     public Task StoreUserConsentAsync(Consent consent)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.StoreUserConsent");
-        
+
         var key = GetConsentKey(consent.SubjectId, consent.ClientId);
         return StoreItemAsync(key, consent, consent.ClientId, consent.SubjectId, null, null, consent.CreationTime, consent.Expiration);
     }
@@ -64,17 +64,17 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     public async Task<Consent> GetUserConsentAsync(string subjectId, string clientId)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.GetUserConsent");
-        
+
         var key = GetConsentKey(subjectId, clientId);
         var consent = await GetItemAsync(key);
-        if(consent == null)
+        if (consent == null)
         {
             var legacyKey = GetConsentKey(subjectId, clientId, useHexEncoding: false);
             consent = await GetItemAsync(legacyKey);
-            if(consent != null)
+            if (consent != null)
             {
                 await StoreUserConsentAsync(consent); // Write back the consent record to update its key
-                await RemoveItemAsync(legacyKey); 
+                await RemoveItemAsync(legacyKey);
             }
         }
 
@@ -90,7 +90,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     public Task RemoveUserConsentAsync(string subjectId, string clientId)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.RemoveUserConsent");
-        
+
         var key = GetConsentKey(subjectId, clientId);
         return RemoveItemAsync(key);
     }

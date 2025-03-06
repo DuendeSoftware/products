@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Models;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -50,7 +49,7 @@ public class ValidatingClientStore<T> : IClientStore
     public async Task<Client> FindClientByIdAsync(string clientId)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.FindClientById");
-        
+
         var client = await _inner.FindClientByIdAsync(clientId);
 
         if (client != null)
@@ -70,7 +69,7 @@ public class ValidatingClientStore<T> : IClientStore
             _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
             Telemetry.Metrics.ClientValidationFailure(clientId, context.ErrorMessage);
             await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage));
-                    
+
             return null;
         }
 

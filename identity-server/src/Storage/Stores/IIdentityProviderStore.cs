@@ -5,8 +5,6 @@
 #nullable enable
 
 using Duende.IdentityServer.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -19,7 +17,7 @@ public interface IIdentityProviderStore
     /// Gets all identity providers name.
     /// </summary>
     Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync();
-        
+
     /// <summary>
     /// Gets the identity provider by scheme name.
     /// </summary>

@@ -1,6 +1,8 @@
-﻿using IdentityServerHost;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using IdentityServerHost;
 using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
 
 namespace SqlServer;
 

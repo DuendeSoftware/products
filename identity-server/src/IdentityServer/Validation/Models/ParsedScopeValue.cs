@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System;
-
 namespace Duende.IdentityServer.Validation;
 
 /// <summary>

@@ -8,8 +8,6 @@ using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
@@ -28,7 +26,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     /// <summary>
     /// Ctor
     /// </summary>
-    public NonCachingIdentityProviderStore(T inner, 
+    public NonCachingIdentityProviderStore(T inner,
         IdentityServerOptions options,
         IHttpContextAccessor httpContextAccessor,
         ILogger<NonCachingIdentityProviderStore<T>> logger)
@@ -48,7 +46,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     /// <inheritdoc/>
     public async Task<IdentityProvider> GetBySchemeAsync(string scheme)
     {
-        if(_httpContextAccessor.HttpContext == null)
+        if (_httpContextAccessor.HttpContext == null)
         {
             _logger.LogDebug("Failed to retrieve the dynamic authentication scheme \"{scheme}\" because there is no current HTTP request", scheme);
             return null;

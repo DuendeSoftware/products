@@ -2,19 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
+using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Events;
-using Duende.IdentityModel;
-using System.IO;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -46,7 +44,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.BackchannelAuthentication + "Endpoint");
-        
+
         _logger.LogTrace("Processing backchannel authentication request.");
 
         // validate HTTP

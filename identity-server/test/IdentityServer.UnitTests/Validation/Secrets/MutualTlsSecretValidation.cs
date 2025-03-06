@@ -2,24 +2,20 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Shouldly;
+using Microsoft.Extensions.Logging;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Microsoft.Extensions.Logging;
-using Xunit;
 
 namespace UnitTests.Validation.Secrets;
 
 public class MutualTlsSecretValidation
 {
     private const string Category = "Secrets - MutualTls Secret Validation";
-       
+
     private IClientStore _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
 
     ///////////////////

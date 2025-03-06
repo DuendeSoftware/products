@@ -2,12 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
+using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Extensions;
 
@@ -67,7 +64,7 @@ internal static class ClaimsExtensions
                 return value;
             }
         }
-        
+
         if (claim.ValueType == ClaimValueTypes.Double)
         {
             if (Double.TryParse(claim.Value, out var value))

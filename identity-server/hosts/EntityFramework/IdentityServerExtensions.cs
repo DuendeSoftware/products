@@ -1,9 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.EntityFramework;
-using Duende.IdentityModel;
 using IdentityServerHost.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,7 +49,7 @@ internal static class IdentityServerExtensions
 
         builder.Services.AddIdentityServerConfiguration(opt =>
         {
-                // opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
+            // opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
         })
             .AddClientConfigurationStore();
 

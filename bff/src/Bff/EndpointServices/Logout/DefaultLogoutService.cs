@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Duende.Bff;
 
@@ -21,7 +18,7 @@ public class DefaultLogoutService : ILogoutService
     /// The BFF options
     /// </summary>
     protected readonly BffOptions Options;
-        
+
     /// <summary>
     /// The scheme provider
     /// </summary>
@@ -31,7 +28,7 @@ public class DefaultLogoutService : ILogoutService
     /// The return URL validator
     /// </summary>
     protected readonly IReturnUrlValidator ReturnUrlValidator;
-    
+
     /// <summary>
     /// The logger
     /// </summary>
@@ -44,8 +41,8 @@ public class DefaultLogoutService : ILogoutService
     /// <param name="authenticationAuthenticationSchemeProviderProvider"></param>
     /// <param name="returnUrlValidator"></param>
     /// <param name="logger"></param>
-    public DefaultLogoutService(IOptions<BffOptions> options, 
-        IAuthenticationSchemeProvider authenticationAuthenticationSchemeProviderProvider, 
+    public DefaultLogoutService(IOptions<BffOptions> options,
+        IAuthenticationSchemeProvider authenticationAuthenticationSchemeProviderProvider,
         IReturnUrlValidator returnUrlValidator,
         ILogger<DefaultLogoutService> logger)
     {
@@ -61,7 +58,7 @@ public class DefaultLogoutService : ILogoutService
         Logger.LogDebug("Processing logout request");
 
         context.CheckForBffMiddleware(Options);
-            
+
         var result = await context.AuthenticateAsync();
         if (result.Succeeded && result.Principal?.Identity?.IsAuthenticated == true)
         {
@@ -103,7 +100,7 @@ public class DefaultLogoutService : ILogoutService
                 returnUrl = "/";
             }
         }
-        
+
         var props = new AuthenticationProperties
         {
             RedirectUri = returnUrl

@@ -2,23 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using Shouldly;
-using Duende.IdentityModel.Client;
 using IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -394,7 +387,7 @@ public class IdentityServerPipeline
     }
     public async Task<(JsonDocument, HttpStatusCode)> PushAuthorizationRequestAsync(
         Dictionary<string, string> parameters)
-    { 
+    {
         var httpResponse = await BackChannelClient.PostAsync(ParEndpoint,
             new FormUrlEncodedContent(parameters));
         var statusCode = httpResponse.StatusCode;
@@ -425,9 +418,9 @@ public class IdentityServerPipeline
                 { "state", state }
             };
 
-        if(extra != null)
+        if (extra != null)
         {
-            foreach(var (key, value) in extra)
+            foreach (var (key, value) in extra)
             {
                 parameters[key] = value;
             }
@@ -503,7 +496,7 @@ public class MockMessageHandler : DelegatingHandler
     }
 }
 
-public class MockExternalAuthenticationHandler : 
+public class MockExternalAuthenticationHandler :
     IAuthenticationHandler,
     IAuthenticationSignInHandler,
     IAuthenticationRequestHandler
@@ -511,7 +504,7 @@ public class MockExternalAuthenticationHandler :
     private readonly IHttpContextAccessor _httpContextAccessor;
     private HttpContext HttpContext => _httpContextAccessor.HttpContext;
 
-    public Func<HttpContext, Task<bool>> OnFederatedSignout = 
+    public Func<HttpContext, Task<bool>> OnFederatedSignout =
         async context =>
         {
             await context.SignOutAsync();

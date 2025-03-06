@@ -1,13 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Net;
-using System.Threading.Tasks;
-using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management
@@ -32,7 +28,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login"));
             response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
         }
-        
+
         [Fact]
         public async Task login_endpoint_should_challenge_and_redirect_to_root()
         {
@@ -49,17 +45,19 @@ namespace Duende.Bff.Tests.Endpoints.Management
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             response.Headers.Location!.ToString().ShouldBe("/");
         }
-        
+
         [Fact]
         public async Task login_endpoint_should_challenge_and_redirect_to_root_with_custom_prefix()
         {
-            BffHost.OnConfigureServices += svcs => {
-                svcs.Configure<BffOptions>(options => { 
+            BffHost.OnConfigureServices += svcs =>
+            {
+                svcs.Configure<BffOptions>(options =>
+                {
                     options.ManagementBasePath = "/custom/bff";
                 });
             };
             await BffHost.InitializeAsync();
-            
+
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/custom/bff/login"));
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
@@ -73,17 +71,19 @@ namespace Duende.Bff.Tests.Endpoints.Management
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             response.Headers.Location!.ToString().ShouldBe("/");
         }
-        
+
         [Fact]
         public async Task login_endpoint_should_challenge_and_redirect_to_root_with_custom_prefix_trailing_slash()
         {
-            BffHost.OnConfigureServices += svcs => {
-                svcs.Configure<BffOptions>(options => {
+            BffHost.OnConfigureServices += svcs =>
+            {
+                svcs.Configure<BffOptions>(options =>
+                {
                     options.ManagementBasePath = "/custom/bff/";
                 });
             };
             await BffHost.InitializeAsync();
-            
+
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/custom/bff/login"));
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
@@ -97,17 +97,19 @@ namespace Duende.Bff.Tests.Endpoints.Management
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             response.Headers.Location!.ToString().ShouldBe("/");
         }
-        
+
         [Fact]
         public async Task login_endpoint_should_challenge_and_redirect_to_root_with_root_prefix()
         {
-            BffHost.OnConfigureServices += svcs => {
-                svcs.Configure<BffOptions>(options => {
+            BffHost.OnConfigureServices += svcs =>
+            {
+                svcs.Configure<BffOptions>(options =>
+                {
                     options.ManagementBasePath = "/";
                 });
             };
             await BffHost.InitializeAsync();
-            
+
             var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/login"));
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
@@ -121,7 +123,7 @@ namespace Duende.Bff.Tests.Endpoints.Management
             response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
             response.Headers.Location!.ToString().ShouldBe("/");
         }
-        
+
         [Fact]
         public async Task login_endpoint_with_existing_session_should_challenge()
         {

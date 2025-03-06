@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using Xunit;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Shouldly;
 
 namespace UnitTests.Stores;
 
@@ -51,149 +47,149 @@ public class InMemoryPersistedGrantStoreTests
 
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1"
-            }))
+        {
+            SubjectId = "sub1"
+        }))
             .Select(x => x.Key).ShouldBe(["key1", "key2", "key3", "key4", "key5", "key6"], true);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub2"
-            }))
+        {
+            SubjectId = "sub2"
+        }))
             .Select(x => x.Key).ShouldBe(["key7"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub3"
-            }))
+        {
+            SubjectId = "sub3"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client1"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client1"
+        }))
             .Select(x => x.Key).ShouldBe(["key1", "key3"], true);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client2"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client2"
+        }))
             .Select(x => x.Key).ShouldBe(["key2"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client3"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client3"
+        }))
             .Select(x => x.Key).ShouldBe(["key4"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client4"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client4"
+        }))
             .Select(x => x.Key).ShouldBe(["key5", "key6"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client5"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client5"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub2",
-                ClientId = "client1"
-            }))
+        {
+            SubjectId = "sub2",
+            ClientId = "client1"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub2",
-                ClientId = "client4"
-            }))
+        {
+            SubjectId = "sub2",
+            ClientId = "client4"
+        }))
             .Select(x => x.Key).ShouldBe(["key7"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub3",
-                ClientId = "client1"
-            }))
+        {
+            SubjectId = "sub3",
+            ClientId = "client1"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client1",
-                SessionId = "session1"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client1",
+            SessionId = "session1"
+        }))
             .Select(x => x.Key).ShouldBe(["key1"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client1",
-                SessionId = "session2"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client1",
+            SessionId = "session2"
+        }))
             .Select(x => x.Key).ShouldBe(["key3"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client1",
-                SessionId = "session3"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client1",
+            SessionId = "session3"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client2",
-                SessionId = "session1"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client2",
+            SessionId = "session1"
+        }))
             .Select(x => x.Key).ShouldBe(["key2"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client2",
-                SessionId = "session2"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client2",
+            SessionId = "session2"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub1",
-                ClientId = "client4",
-                SessionId = "session4"
-            }))
+        {
+            SubjectId = "sub1",
+            ClientId = "client4",
+            SessionId = "session4"
+        }))
             .Select(x => x.Key).ShouldBe(["key6"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub2",
-                ClientId = "client4",
-                SessionId = "session4"
-            }))
+        {
+            SubjectId = "sub2",
+            ClientId = "client4",
+            SessionId = "session4"
+        }))
             .Select(x => x.Key).ShouldBe(["key7"]);
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub2",
-                ClientId = "client4",
-                SessionId = "session1"
-            }))
+        {
+            SubjectId = "sub2",
+            ClientId = "client4",
+            SessionId = "session1"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
 
         (await _subject.GetAllAsync(new PersistedGrantFilter
-            {
-                SubjectId = "sub2",
-                ClientId = "client4",
-                SessionId = "session5"
-            }))
+        {
+            SubjectId = "sub2",
+            ClientId = "client4",
+            SessionId = "session5"
+        }))
             .Select(x => x.Key).ShouldBeEmpty();
     }
 

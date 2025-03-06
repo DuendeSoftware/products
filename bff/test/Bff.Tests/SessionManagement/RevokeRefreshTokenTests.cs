@@ -3,11 +3,7 @@
 
 using Duende.Bff.Tests.TestHosts;
 using Duende.IdentityServer.Stores;
-using Shouldly;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.SessionManagement
@@ -40,12 +36,14 @@ namespace Duende.Bff.Tests.SessionManagement
                 grants.ShouldBeEmpty();
             }
         }
-        
+
         [Fact]
         public async Task when_setting_disabled_logout_should_not_revoke_refreshtoken()
         {
-            BffHost.OnConfigureServices += svcs => {
-                svcs.Configure<BffOptions>(options => {
+            BffHost.OnConfigureServices += svcs =>
+            {
+                svcs.Configure<BffOptions>(options =>
+                {
                     options.RevokeRefreshTokenOnLogout = false;
                 });
             };
@@ -80,7 +78,7 @@ namespace Duende.Bff.Tests.SessionManagement
         public async Task backchannel_logout_endpoint_should_revoke_refreshtoken()
         {
             await BffHost.BffLoginAsync("alice", "sid123");
-            
+
             {
                 var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
                 var grants = await store.GetAllAsync(new PersistedGrantFilter
@@ -106,13 +104,15 @@ namespace Duende.Bff.Tests.SessionManagement
         [Fact]
         public async Task when_setting_disabled_backchannel_logout_endpoint_should_not_revoke_refreshtoken()
         {
-            BffHost.OnConfigureServices += svcs => {
-                svcs.Configure<BffOptions>(options => {
+            BffHost.OnConfigureServices += svcs =>
+            {
+                svcs.Configure<BffOptions>(options =>
+                {
                     options.RevokeRefreshTokenOnLogout = false;
                 });
             };
             await BffHost.InitializeAsync();
-            
+
             await BffHost.BffLoginAsync("alice", "sid123");
 
             {

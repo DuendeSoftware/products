@@ -10,7 +10,7 @@ namespace IdentityServerHost.Pages.Home;
 [AllowAnonymous]
 public class Index : PageModel
 {
-    public string Version 
+    public string Version
     {
         get => typeof(Duende.IdentityServer.Hosting.IdentityServerMiddleware).Assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()

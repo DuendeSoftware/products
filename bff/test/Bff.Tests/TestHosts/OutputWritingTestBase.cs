@@ -30,7 +30,7 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
             testOutputHelper.WriteLine(_output.ToString());
         }
 
-        
+
         return Task.CompletedTask;
     }
 }

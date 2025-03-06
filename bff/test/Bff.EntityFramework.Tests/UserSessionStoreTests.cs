@@ -16,9 +16,9 @@ namespace Duende.Bff.EntityFramework.Tests
         {
             var services = new ServiceCollection();
             services.AddBff()
-                .AddEntityFrameworkServerSideSessions(options=> options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
+                .AddEntityFrameworkServerSideSessions(options => options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
             var provider = services.BuildServiceProvider();
-            
+
             _subject = provider.GetRequiredService<IUserSessionStore>();
             _database = provider.GetRequiredService<SessionDbContext>();
         }
@@ -151,7 +151,8 @@ namespace Duende.Bff.EntityFramework.Tests
         [Fact]
         public async Task DeleteUserSessionAsync_for_valid_key_should_succeed()
         {
-            await _subject.CreateUserSessionAsync(new UserSession { 
+            await _subject.CreateUserSessionAsync(new UserSession
+            {
                 Key = "key123",
                 SubjectId = "sub",
                 SessionId = "session",
@@ -160,7 +161,7 @@ namespace Duende.Bff.EntityFramework.Tests
             _database.UserSessions.Count().ShouldBe(1);
 
             await _subject.DeleteUserSessionAsync("key123");
-            
+
             _database.UserSessions.Count().ShouldBe(0);
         }
         [Fact]
@@ -801,7 +802,7 @@ namespace Duende.Bff.EntityFramework.Tests
             Func<Task> f = () => _subject.DeleteUserSessionsAsync(new UserSessionsFilter());
             await f.ShouldThrowAsync<Exception>();
         }
-        
+
         [Fact]
         public async Task concurrent_deletes_with_exception_handler_and_detatching_should_succeed()
         {
@@ -814,7 +815,8 @@ namespace Duende.Bff.EntityFramework.Tests
             using var scope0 = provider.CreateScope();
             var ctx0 = scope0.ServiceProvider.GetRequiredService<SessionDbContext>();
             var key = Guid.NewGuid().ToString();
-            ctx0.UserSessions.Add(new UserSessionEntity { 
+            ctx0.UserSessions.Add(new UserSessionEntity
+            {
                 Key = key,
                 Ticket = "ticket",
                 ApplicationName = "app",
@@ -822,12 +824,12 @@ namespace Duende.Bff.EntityFramework.Tests
                 SessionId = "sid",
             });
             await ctx0.SaveChangesAsync();
-            
+
             using var scope1 = provider.CreateScope();
             var ctx1 = scope1.ServiceProvider.GetRequiredService<SessionDbContext>();
             var item1 = ctx1.UserSessions.Single(x => x.Key == key);
             ctx1.UserSessions.Remove(item1);
-            
+
             using var scope2 = provider.CreateScope();
             var ctx2 = scope2.ServiceProvider.GetRequiredService<SessionDbContext>();
             var item2 = ctx2.UserSessions.Single(x => x.Key == key);

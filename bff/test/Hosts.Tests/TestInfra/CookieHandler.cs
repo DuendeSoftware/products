@@ -1,4 +1,7 @@
-﻿using Microsoft.Net.Http.Headers;
+﻿// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Microsoft.Net.Http.Headers;
 
 namespace Hosts.Tests.TestInfra;
 

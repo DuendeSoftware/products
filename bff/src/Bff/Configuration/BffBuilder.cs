@@ -28,7 +28,7 @@ public class BffBuilder
     /// The service collection
     /// </summary>
     public IServiceCollection Services { get; }
-        
+
     /// <summary>
     /// Adds a server-side session store using the in-memory store
     /// </summary>

@@ -4,12 +4,10 @@
 
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Logging;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Services;
 
@@ -20,7 +18,7 @@ public class LogoutNotificationService : ILogoutNotificationService
 {
     private readonly IClientStore _clientStore;
     private readonly IIssuerNameService _issuerNameService;
-    private readonly ILogger<LogoutNotificationService> _logger;
+    private readonly SanitizedLogger<LogoutNotificationService> _sanitizedLogger;
 
 
     /// <summary>
@@ -33,14 +31,14 @@ public class LogoutNotificationService : ILogoutNotificationService
     {
         _clientStore = clientStore;
         _issuerNameService = issuerNameService;
-        _logger = logger;
+        _sanitizedLogger = new SanitizedLogger<LogoutNotificationService>(logger);
     }
 
     /// <inheritdoc/>
     public async Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetFrontChannelLogoutNotificationsUrls");
-        
+
         var frontChannelUrls = new List<string>();
         foreach (var clientId in context.ClientIds)
         {
@@ -73,11 +71,11 @@ public class LogoutNotificationService : ILogoutNotificationService
         if (frontChannelUrls.Any())
         {
             var msg = frontChannelUrls.Aggregate((x, y) => x + ", " + y);
-            _logger.LogDebug("Client front-channel logout URLs: {0}", msg);
+            _sanitizedLogger.LogDebug("Client front-channel logout URLs: {0}", msg);
         }
         else
         {
-            _logger.LogDebug("No client front-channel logout URLs");
+            _sanitizedLogger.LogDebug("No client front-channel logout URLs");
         }
 
         return frontChannelUrls;
@@ -87,7 +85,7 @@ public class LogoutNotificationService : ILogoutNotificationService
     public async Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetBackChannelLogoutNotifications");
-        
+
         var backChannelLogouts = new List<BackChannelLogoutRequest>();
         foreach (var clientId in context.ClientIds)
         {
@@ -115,11 +113,11 @@ public class LogoutNotificationService : ILogoutNotificationService
         if (backChannelLogouts.Any())
         {
             var msg = backChannelLogouts.Select(x => x.LogoutUri).Aggregate((x, y) => x + ", " + y);
-            _logger.LogDebug("Client back-channel logout URLs: {0}", msg);
+            _sanitizedLogger.LogDebug("Client back-channel logout URLs: {0}", msg);
         }
         else
         {
-            _logger.LogDebug("No client back-channel logout URLs");
+            _sanitizedLogger.LogDebug("No client back-channel logout URLs");
         }
 
         return backChannelLogouts;

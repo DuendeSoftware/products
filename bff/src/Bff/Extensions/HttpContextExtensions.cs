@@ -1,9 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.IdentityModel;
@@ -59,7 +56,7 @@ internal static class HttpContextExtensions
                  new MissingDPopTokenError("Missing DPoP Json Web Key for DPoP token"),
             { AccessTokenType: string accessTokenType } =>
                 new UnexpectedAccessTokenError($"Unexpected access token type: {accessTokenType} - should be one of 'DPoP' or 'Bearer'"),
-            { AccessTokenType: null } => 
+            { AccessTokenType: null } =>
                 // Fall back to bearer tokens when the access token type is absent.
                 // In some edge cases, we've seen bearer tokens not have their type specified.
                 // But that wouldn't be the case if you had a DPoP token.

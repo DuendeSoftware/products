@@ -1,8 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System;
-using System.Threading.Tasks;
 using Duende.Bff.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -39,7 +37,7 @@ public class AntiforgeryMiddleware
     public async Task Invoke(HttpContext context)
     {
         var route = context.GetRouteModel();
-            
+
         if (route.Config.Metadata != null)
         {
             if (route.Config.Metadata.TryGetValue(Constants.Yarp.AntiforgeryCheckMetadata, out var value))
