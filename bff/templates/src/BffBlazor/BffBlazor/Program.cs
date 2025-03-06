@@ -23,7 +23,13 @@ builder.Services.AddAuthentication(options =>
     .AddCookie("cookie", options =>
     {
         options.Cookie.Name = "__Host-blazor";
-        options.Cookie.SameSite = SameSiteMode.Strict;
+
+        // Because we use an identity server that's configured on a different site
+        // (duendesoftware.com vs localhost), we need to configure the SameSite property to Lax. 
+        // Setting it to Strict would cause the authentication cookie not to be sent after loggin in.
+        // The user would have to refresh the page to get the cookie.
+        // Recommendation: Set it to 'strict' if your IDP is on the same site as your BFF.
+        options.Cookie.SameSite = SameSiteMode.Lax;
     })
     .AddOpenIdConnect("oidc", options =>
     {
