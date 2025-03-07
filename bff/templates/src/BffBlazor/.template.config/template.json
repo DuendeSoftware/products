@@ -1,0 +1,23 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "BFF"
+  ],
+  "name": "Duende BFF using a Local API",
+  "identity": "Duende.BFF.BlazorWasm",
+  "groupIdentity": "Duende.BFF.BlazorWasm",
+  "shortName": "duende-bff-blazorwasm",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+
+  "sourceName": "BlazorWasm",
+  "preferNameDirectory": "true",
+  "primaryOutputs": [ 
+    { "path": "BffBlazor/BffBlazor.csproj" },
+    { "path": "BffBlazor.Client/BffBlazor.Client.csproj" } 
+  ]
+}
