@@ -64,7 +64,7 @@ jobs:
         dotnet-version: |-
           6.0.x
           8.0.x
-          9.0.x
+          9.0.103
     - name: Git tag
       run: |-
         git config --global user.email "github-bot@duendesoftware.com"
@@ -110,7 +110,7 @@ jobs:
         dotnet-version: |-
           6.0.x
           8.0.x
-          9.0.x
+          9.0.103
     - name: List files
       run: tree
       shell: bash
