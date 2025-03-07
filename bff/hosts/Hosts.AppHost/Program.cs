@@ -60,6 +60,8 @@ builder.AddProject<BffLocalApi>("templates-bff-local", launchProfileName: null)
 builder.AddProject<BffRemoteApi>("templates-bff-remote", launchProfileName: null)
     .WithHttpsEndpoint(5310, name: "bff-remote");
 
+builder.AddProject<BffBlazor>("templates-bff-blazor");
+
 builder.Build().Run();
 
 public static class Extensions
