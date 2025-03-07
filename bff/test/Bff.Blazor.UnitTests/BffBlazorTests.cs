@@ -1,4 +1,7 @@
-﻿using System.Net;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.Net;
 using Duende.Bff;
 using Duende.Bff.Tests.TestHosts;
 using Duende.IdentityServer.Models;
@@ -30,11 +33,10 @@ namespace Bff.Blazor.UnitTests
                 BackChannelLogoutUri = "https://app/bff/backchannel",
                 AllowOfflineAccess = true,
                 AllowedScopes = { "openid", "profile", "scope1" }
-            });
-
-
-
-            IdentityServerHost.OnConfigureServices += services => {
+            }
+            );
+            IdentityServerHost.OnConfigureServices += services =>
+            {
                 services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
                     new DefaultBackChannelLogoutHttpClient(
                         BffHost!.HttpClient,
@@ -51,6 +53,7 @@ namespace Bff.Blazor.UnitTests
             var response = await BffHost.BrowserClient.GetAsync("/");
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
         }
+
         [Fact]
         public async Task Cannot_get_secure_without_loggin_in()
         {
@@ -80,7 +83,6 @@ namespace Bff.Blazor.UnitTests
             await BffHost.DisposeAsync();
             await IdentityServerHost.DisposeAsync();
             await base.DisposeAsync();
-
         }
     }
 }

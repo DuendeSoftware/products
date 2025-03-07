@@ -75,7 +75,7 @@ namespace Duende.Bff.Tests.TestFramework
             BrowserClient = new TestBrowserClient(Server.CreateHandler());
             BrowserClient.BaseAddress = new Uri(this._baseAddress);
             HttpClient = Server.CreateClient();
-            BrowserClient.BaseAddress = new Uri(this._baseAddress);
+            HttpClient.BaseAddress = new Uri(this._baseAddress);
         }
 
         public event Action<IServiceCollection> OnConfigureServices = _ => { };

@@ -11,18 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-
-  </ItemGroup>
-
-
-  <ItemGroup>
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
-    
   </ItemGroup>
 
   <ItemGroup>

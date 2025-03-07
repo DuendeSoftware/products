@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics;
-using System.Security.Authentication;
 using System.Security.Claims;
 using Duende.Bff.Blazor.Client;
 using Duende.IdentityModel;
@@ -21,7 +20,6 @@ using Microsoft.Extensions.Options;
 // the template.
 
 namespace Duende.Bff.Blazor;
-
 
 // This is a server-side AuthenticationStateProvider that uses
 // PersistentComponentState to flow the authentication state to the client which
@@ -117,7 +115,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
 
         _logger.LogDebug("Persisting Authentication State");
 
-        //_state.PersistAsJson(nameof(ClaimsPrincipalRecord), principal);
+        _state.PersistAsJson(nameof(ClaimsPrincipalRecord), principal);
     }
 
 
