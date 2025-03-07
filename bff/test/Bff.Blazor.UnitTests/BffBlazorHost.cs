@@ -1,4 +1,7 @@
-﻿using System.Net;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.Net;
 using System.Text.Json;
 using Bff.Blazor.UnitTests.Components;
 using Duende.Bff;
@@ -6,10 +9,6 @@ using Duende.Bff.Blazor;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
 using Duende.Bff.Yarp;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;
@@ -57,8 +56,6 @@ public class BffBlazorHost : GenericHost
 
         services.AddRouting();
         services.AddAuthorization();
-
-            
 
         var bff = services.AddBff(options =>
             {
