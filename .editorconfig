@@ -8,6 +8,7 @@ dotnet_diagnostic.IDE0073.severity = warning
 ## Basic Formatting ##
 indent_style = space
 indent_size = 4
+charset = utf-8
 dotnet_diagnostic.IDE0055.severity = warning
 
 
