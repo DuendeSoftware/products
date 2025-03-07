@@ -34,6 +34,9 @@ try
         .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
         .Enrich.FromLogContext());
 
+    // Add ServiceDefaults from Aspire
+    builder.AddServiceDefaults();
+
     var app = builder
         .ConfigureServices()
         .ConfigurePipeline();

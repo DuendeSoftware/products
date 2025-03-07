@@ -22,6 +22,7 @@
     </ItemGroup>
     
     <ItemGroup>
+        <ProjectReference Include="..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
         <ProjectReference Include="..\..\src\EntityFramework.Storage\Duende.IdentityServer.EntityFramework.Storage.csproj" />
         <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
     </ItemGroup>
