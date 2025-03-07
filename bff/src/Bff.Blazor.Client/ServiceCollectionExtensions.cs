@@ -15,9 +15,9 @@ public static class ServiceCollectionExtensions
     /// Adds Duende.BFF services to a Blazor Client (wasm) application.
     /// </summary>
     /// <param name="services">The service collection.</param>
-    /// <param name="configureAction">A callback used to set <see cref="BffBlazorOptions"/>.</param>
+    /// <param name="configureAction">A callback used to set <see cref="BffClientBlazorOptions"/>.</param>
     public static IServiceCollection AddBffBlazorClient(this IServiceCollection services,
-        Action<BffBlazorOptions>? configureAction = null)
+        Action<BffClientBlazorOptions>? configureAction = null)
     {
         if (configureAction != null)
         {
@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
 
     private static string GetStateProviderBaseAddress(IServiceProvider sp)
     {
-        var opt = sp.GetRequiredService<IOptions<BffBlazorOptions>>();
+        var opt = sp.GetRequiredService<IOptions<BffClientBlazorOptions>>();
         if (opt.Value.StateProviderBaseAddress != null)
         {
             return opt.Value.StateProviderBaseAddress;
@@ -58,7 +58,7 @@ public static class ServiceCollectionExtensions
 
     private static string GetRemoteBaseAddress(IServiceProvider sp)
     {
-        var opt = sp.GetRequiredService<IOptions<BffBlazorOptions>>();
+        var opt = sp.GetRequiredService<IOptions<BffClientBlazorOptions>>();
         if (opt.Value.RemoteApiBaseAddress != null)
         {
             return opt.Value.RemoteApiBaseAddress;
@@ -77,7 +77,7 @@ public static class ServiceCollectionExtensions
 
     private static string GetRemoteApiPath(IServiceProvider sp)
     {
-        var opt = sp.GetRequiredService<IOptions<BffBlazorOptions>>();
+        var opt = sp.GetRequiredService<IOptions<BffClientBlazorOptions>>();
         return opt.Value.RemoteApiPath;
     }
 

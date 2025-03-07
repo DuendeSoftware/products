@@ -21,7 +21,6 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.Blazor;
 
-
 // This is a server-side AuthenticationStateProvider that uses
 // PersistentComponentState to flow the authentication state to the client which
 // is then used to initialize the authentication state in the WASM application. 
@@ -43,7 +42,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         IUserSessionStore sessionStore,
         PersistentComponentState persistentComponentState,
         NavigationManager navigation,
-        IOptions<BffBlazorOptions> blazorOptions,
+        IOptions<BffBlazorServerOptions> blazorOptions,
         IOptions<BffOptions> bffOptions,
         ILoggerFactory loggerFactory)
         : base(loggerFactory)
@@ -116,7 +115,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
 
         _logger.LogDebug("Persisting Authentication State");
 
-        _state.PersistAsJson(nameof(ClaimsPrincipalRecord), principal);
+        //_state.PersistAsJson(nameof(ClaimsPrincipalRecord), principal);
     }
 
 

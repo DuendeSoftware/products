@@ -67,7 +67,7 @@ public class BffClientAuthenticationStateProviderTests
             fetchUserService,
             persistentUserService,
             time,
-            TestMocks.MockOptions(new BffBlazorOptions
+            TestMocks.MockOptions(new BffClientBlazorOptions
             {
                 WebAssemblyStateProviderPollingDelay = 2000,
                 WebAssemblyStateProviderPollingInterval = 10000
@@ -127,7 +127,7 @@ public class BffClientAuthenticationStateProviderTests
             fetchUserService,
             persistentUserService,
             time,
-            TestMocks.MockOptions(new BffBlazorOptions
+            TestMocks.MockOptions(new BffClientBlazorOptions
             {
                 WebAssemblyStateProviderPollingDelay = 2000,
                 WebAssemblyStateProviderPollingInterval = 10000
