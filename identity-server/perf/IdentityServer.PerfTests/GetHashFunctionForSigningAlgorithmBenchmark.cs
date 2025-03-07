@@ -3,6 +3,7 @@
 
 using System;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Engines;
 using Duende.IdentityServer.Configuration;
 
 namespace IdentityServer.Benchmarks;
@@ -12,13 +13,9 @@ namespace IdentityServer.Benchmarks;
 public class GetHashFunctionForSigningAlgorithmBenchmark
 {
     private static string Hash =>
-        new[] { "RS256", "RS384", "RS512", "ES256", "ES384", "ES512" }[Random.Shared.Next(0, 6)];
+        new[] { "SHA256", "SHA384", "SHA512" }[Random.Shared.Next(0, 3)];
 
-    [Benchmark(Baseline = true, Description = "Non-optimized")]
+    [Benchmark]
     public void GetHashFunctionForSigningAlgorithm() =>
         CryptoHelper.GetHashFunctionForSigningAlgorithm(Hash);
-
-    [Benchmark(Baseline = false, Description = "Optimized")]
-    public void GetHashFunctionSigningAlgorithmOptimized() =>
-        CryptoHelper.GetHashFunctionForSigningAlgorithmOptimized(Hash);
 }

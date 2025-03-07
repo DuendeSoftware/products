@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -85,23 +86,9 @@ public static class CryptoHelper
     /// <param name="signingAlgorithm"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(string signingAlgorithm)
-    {
-        var hashLength = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
-
-        Func<byte[], byte[]> hashFunction = hashLength switch
-        {
-            256 => SHA256.HashData,
-            384 => SHA384.HashData,
-            512 => SHA512.HashData,
-            _ => throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}"),
-        };
-
-
-        return (hashFunction, hashLength);
-    }
-
-    internal static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithmOptimized(string signingAlgorithm)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(
+        string signingAlgorithm)
     {
         var span = signingAlgorithm.AsSpan();
         return span[^3..] switch
@@ -118,7 +105,8 @@ public static class CryptoHelper
     /// </summary>
     /// <param name="signingAlgorithm">The signing algorithm</param>
     /// <returns></returns>
-    [Obsolete("This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
+    [Obsolete(
+        "This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
     public static HashAlgorithm GetHashAlgorithmForSigningAlgorithm(string signingAlgorithm)
     {
         var signingAlgorithmBits = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
@@ -170,7 +158,8 @@ public static class CryptoHelper
             Constants.CurveOids.P256 => JsonWebKeyECTypes.P256,
             Constants.CurveOids.P384 => JsonWebKeyECTypes.P384,
             Constants.CurveOids.P521 => JsonWebKeyECTypes.P521,
-            _ => throw new InvalidOperationException($"Unsupported curve type of {curve.Oid.Value} - {curve.Oid.FriendlyName}"),
+            _ => throw new InvalidOperationException(
+                $"Unsupported curve type of {curve.Oid.Value} - {curve.Oid.FriendlyName}"),
         };
     }
 
@@ -187,6 +176,7 @@ public static class CryptoHelper
 
         return true;
     }
+
     internal static bool IsValidCrvValueForAlgorithm(string crv)
     {
         return crv == JsonWebKeyECTypes.P256 ||
@@ -228,7 +218,8 @@ public static class CryptoHelper
         {
             if (nameType == NameType.SubjectDistinguishedName)
             {
-                certificate = X509.LocalMachine.My.SubjectDistinguishedName.Find(name, validOnly: false).FirstOrDefault();
+                certificate = X509.LocalMachine.My.SubjectDistinguishedName.Find(name, validOnly: false)
+                    .FirstOrDefault();
             }
             else if (nameType == NameType.Thumbprint)
             {
@@ -239,7 +230,8 @@ public static class CryptoHelper
         {
             if (nameType == NameType.SubjectDistinguishedName)
             {
-                certificate = X509.CurrentUser.My.SubjectDistinguishedName.Find(name, validOnly: false).FirstOrDefault();
+                certificate = X509.CurrentUser.My.SubjectDistinguishedName.Find(name, validOnly: false)
+                    .FirstOrDefault();
             }
             else if (nameType == NameType.Thumbprint)
             {
