@@ -34,7 +34,7 @@ jobs:
         dotnet-version: |-
           6.0.x
           8.0.x
-          9.0.103
+          9.0.x
     - name: Checkout target branch
       if: github.event.inputs.branch != 'main'
       run: git checkout ${{ github.event.inputs.branch }}
@@ -94,7 +94,7 @@ jobs:
         dotnet-version: |-
           6.0.x
           8.0.x
-          9.0.103
+          9.0.x
     - name: List files
       run: tree
       shell: bash

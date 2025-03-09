@@ -20,7 +20,6 @@ foreach (var product in products)
 
 GenerateTemplatesReleaseWorkflow(new Product("templates", "../artifacts/templates.csproj", "templates"));
 
-
 void GenerateCiWorkflow(Product product)
 {
     var workflow = new Workflow($"{product.Name}/ci");

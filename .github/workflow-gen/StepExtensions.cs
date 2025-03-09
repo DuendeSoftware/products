@@ -13,7 +13,7 @@ public static class StepExtensions
     public static void StepSetupDotNet(this Job job)
         => job.Step()
             .Name("Setup .NET")
-            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["6.0.x", "8.0.x", "9.0.103"]); // v4.1.0
+            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["6.0.x", "8.0.x", "9.0.x"]); // v4.1.0
 
     /// <summary>
     /// Only run this for a main build
