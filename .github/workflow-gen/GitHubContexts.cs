@@ -3,10 +3,13 @@
 
 public class GitHubContexts
 {
-    public static  GitHubContexts Instance { get; } = new();
-    public virtual GitHubContext  GitHub   { get; } = new();
-    public virtual SecretsContext Secrets  { get; } = new();
-    public virtual EventContext   Event    { get; } = new();
+    public static GitHubContexts Instance { get; } = new();
+
+    public virtual GitHubContext GitHub { get; } = new();
+
+    public virtual SecretsContext Secrets { get; } = new();
+
+    public virtual EventContext Event { get; } = new();
 
     public abstract class Context(string name)
     {

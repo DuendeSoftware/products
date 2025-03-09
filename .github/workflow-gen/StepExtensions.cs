@@ -66,7 +66,7 @@ public static class StepExtensions
     public static void StepTest(this Job job, string solution)
     {
         var logFileName = "Tests.trx";
-        var loggingFlags = $"--logger \"console;verbosity=normal\" "      +
+        var loggingFlags = $"--logger \"console;verbosity=normal\" " +
                            $"--logger \"trx;LogFileName={logFileName}\" " +
                            $"--collect:\"XPlat Code Coverage\"";
 
@@ -98,12 +98,12 @@ public static class StepExtensions
 
     public static void StepSign(this Job job, bool always = false)
     {
-        var flags = "--file-digest sha256 "                                                +
-                    "--timestamp-rfc3161 http://timestamp.digicert.com "                   +
+        var flags = "--file-digest sha256 " +
+                    "--timestamp-rfc3161 http://timestamp.digicert.com " +
                     "--azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ " +
-                    "--azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 "    +
-                    "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 "    +
-                    "--azure-key-vault-client-secret ${{ secrets.SignClientSecret }} "     +
+                    "--azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 " +
+                    "--azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 " +
+                    "--azure-key-vault-client-secret ${{ secrets.SignClientSecret }} " +
                     "--azure-key-vault-certificate NuGetPackageSigning";
         var step = job.Step()
             .Name("Sign packages");
@@ -170,8 +170,8 @@ public static class StepExtensions
 
     public static WorkflowDispatch InputVersionBranchAndTagOverride(this WorkflowDispatch workflow) =>
         workflow.Inputs(
-            new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.",         true,  "0.0.0"),
-            new StringInput("branch",  "(Optional) the name of the branch to release from", false, "main"),
+            new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0"),
+            new StringInput("branch", "(Optional) the name of the branch to release from", false, "main"),
             new BooleanInput("remove-tag-if-exists", "If set, will remove the existing tag. Use this if you have issues with the previous release action", false, false));
 
     public static Step StepUploadPlaywrightTestTraces(this Job job, string componentName)
@@ -187,7 +187,6 @@ public static class StepExtensions
                 ("overwrite", "true"),
                 ("retention-days", "15"));
     }
-
 
     public static void StepUploadArtifacts(this Job job, string componentName, bool uploadAlways = false)
     {
