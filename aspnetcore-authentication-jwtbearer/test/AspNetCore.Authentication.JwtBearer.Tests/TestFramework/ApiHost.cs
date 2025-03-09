@@ -17,8 +17,8 @@ public class ApiHost : GenericHost
 
     private readonly IdentityServerHost _identityServerHost;
     public event Action<HttpContext> ApiInvoked = ctx => { };
-    
-    public ApiHost(IdentityServerHost identityServerHost, ITestOutputHelper testOutputHelper, string baseAddress = "https://api") 
+
+    public ApiHost(IdentityServerHost identityServerHost, ITestOutputHelper testOutputHelper, string baseAddress = "https://api")
         : base(testOutputHelper, baseAddress)
     {
         _identityServerHost = identityServerHost;
@@ -44,7 +44,7 @@ public class ApiHost : GenericHost
 
     private void Configure(IApplicationBuilder app)
     {
-        app.Use(async(context, next) => 
+        app.Use(async (context, next) =>
         {
             ApiInvoked.Invoke(context);
             if (ApiStatusCodeToReturn != null)

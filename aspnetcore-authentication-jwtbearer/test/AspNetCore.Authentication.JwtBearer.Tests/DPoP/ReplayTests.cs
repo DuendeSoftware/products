@@ -36,10 +36,10 @@ public class ReplayTests : DPoPProofValidatorTestBase
         Result.TokenIdHash = TokenIdHash;
 
         await ProofValidator.ValidateReplay(Context, Result);
-        
+
         Result.ShouldBeInvalidProofWithDescription("Detected DPoP proof token replay.");
     }
-    
+
     [Theory]
     [Trait("Category", "Unit")]
     [InlineData(true, false, ClockSkew, 0)]
@@ -50,15 +50,15 @@ public class ReplayTests : DPoPProofValidatorTestBase
     public async Task new_proof_tokens_are_added_to_replay_cache(bool validateIat, bool validateNonce, int clientClockSkew, int serverClockSkew)
     {
         ReplayCache.Exists(TokenIdHash).Returns(false);
-    
+
         Options.ValidationMode = (validateIat && validateNonce) ? ExpirationValidationMode.Both
             : validateIat ? ExpirationValidationMode.IssuedAt : ExpirationValidationMode.Nonce;
         Options.ClientClockSkew = TimeSpan.FromSeconds(clientClockSkew);
         Options.ServerClockSkew = TimeSpan.FromSeconds(serverClockSkew);
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
-        
+
         Result.TokenIdHash = TokenIdHash;
-    
+
         await ProofValidator.ValidateReplay(Context, Result);
 
         Result.IsError.ShouldBeFalse();

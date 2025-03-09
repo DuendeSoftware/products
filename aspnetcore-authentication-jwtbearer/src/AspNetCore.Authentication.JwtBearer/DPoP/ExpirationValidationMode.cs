@@ -21,4 +21,3 @@ public enum ExpirationValidationMode
     /// </summary>
     Both
 }
-

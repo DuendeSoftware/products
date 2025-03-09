@@ -13,9 +13,9 @@ public class HeaderTests : DPoPProofValidatorTestBase
     public async Task malformed_proof_tokens_fail()
     {
         Context = Context with { ProofToken = "This is obviously not a jwt" };
-       
+
         await ProofValidator.ValidateHeader(Context, Result);
-        
+
         Result.ShouldBeInvalidProofWithDescription("Malformed DPoP token.");
     }
 
@@ -24,12 +24,12 @@ public class HeaderTests : DPoPProofValidatorTestBase
     public async Task proof_tokens_with_incorrect_typ_header_fail()
     {
         Context = Context with { ProofToken = CreateDPoPProofToken(typ: "at+jwt") }; //Not dpop+jwt!
-       
+
         await ProofValidator.ValidateHeader(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'typ' value.");
     }
-    
+
     [Theory]
     [Trait("Category", "Unit")]
     [InlineData(SecurityAlgorithms.RsaSha256)]
@@ -44,14 +44,14 @@ public class HeaderTests : DPoPProofValidatorTestBase
     public async Task valid_algorithms_succeed(string alg)
     {
         var useECAlgorithm = alg.StartsWith("ES");
-        Context = Context with 
-        { 
+        Context = Context with
+        {
             ProofToken = CreateDPoPProofToken(alg: alg),
             AccessTokenClaims = [CnfClaim(useECAlgorithm ? PublicEcdsaJwk : PublicRsaJwk)]
-        }; 
-        
+        };
+
         await ProofValidator.ValidateHeader(Context, Result);
-        
+
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
     }
 
@@ -65,9 +65,9 @@ public class HeaderTests : DPoPProofValidatorTestBase
     public async Task disallowed_algorithms_fail(string alg)
     {
         Context = Context with { ProofToken = CreateDPoPProofToken(alg: alg) };
-        
+
         await ProofValidator.ValidateHeader(Context, Result);
-        
+
         Result.ShouldBeInvalidProofWithDescription("Invalid 'alg' value.");
     }
 }

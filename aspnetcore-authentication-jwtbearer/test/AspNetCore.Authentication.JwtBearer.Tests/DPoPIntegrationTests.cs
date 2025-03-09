@@ -38,13 +38,13 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
     public async Task missing_token_fails()
     {
         var api = await CreateDPoPApi();
-        
+
         var result = await api.HttpClient.GetAsync("/");
-        
+
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
-   
+
     [Fact]
     [Trait("Category", "Integration")]
     public async Task incorrect_token_type_fails()
@@ -54,7 +54,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         api.HttpClient.SetBearerToken(bearerToken);
 
         var result = await api.HttpClient.GetAsync("/");
-        
+
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
@@ -106,7 +106,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         {
             idsrv.Clients.Add(DPoPOnlyClient);
         });
-        
+
         var jwk = CreateJwk();
         var maxLength = 50;
         var api = await CreateDPoPApi(opt => opt.ProofTokenMaxLength = maxLength);

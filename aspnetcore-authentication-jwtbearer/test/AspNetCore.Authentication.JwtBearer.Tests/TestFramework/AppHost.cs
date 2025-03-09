@@ -23,8 +23,8 @@ public class AppHost : GenericHost
     private readonly Action<UserTokenManagementOptions>? _configureUserTokenManagementOptions;
 
     public AppHost(
-        IdentityServerHost identityServerHost, 
-        ApiHost apiHost, 
+        IdentityServerHost identityServerHost,
+        ApiHost apiHost,
         string clientId,
         ITestOutputHelper testOutputHelper,
         string baseAddress = "https://app",
@@ -79,13 +79,13 @@ public class AppHost : GenericHost
                     options.Scope.Add("offline_access");
                 }
 
-                var identityServerHandler = _identityServerHost.Server.CreateHandler();   
+                var identityServerHandler = _identityServerHost.Server.CreateHandler();
                 if (IdentityServerHttpHandler != null)
                 {
                     // allow discovery document
                     IdentityServerHttpHandler.When("/.well-known/*")
                         .Respond(identityServerHandler);
-                    
+
                     options.BackchannelHttpHandler = IdentityServerHttpHandler;
                 }
                 else
@@ -119,12 +119,12 @@ public class AppHost : GenericHost
                     RedirectUri = "/"
                 });
             });
-                
+
             endpoints.MapGet("/logout", async context =>
             {
                 await context.SignOutAsync();
             });
-            
+
             endpoints.MapGet("/user_token", async context =>
             {
                 var token = await context.GetUserAccessTokenAsync();
@@ -139,7 +139,7 @@ public class AppHost : GenericHost
                 });
                 await context.Response.WriteAsJsonAsync(token);
             });
-            
+
             endpoints.MapGet("/client_token", async context =>
             {
                 var token = await context.GetClientAccessTokenAsync();
@@ -157,7 +157,7 @@ public class AppHost : GenericHost
     public async Task<HttpResponseMessage> OidcLoginAsync(bool verifyDpopThumbprintSent)
     {
         var response = await BrowserClient.GetAsync(Url("/login"));
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // authorize
+        response.StatusCode.ShouldBe((HttpStatusCode) 302); // authorize
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
 
         if (verifyDpopThumbprintSent)
@@ -167,11 +167,11 @@ public class AppHost : GenericHost
         }
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // client callback
+        response.StatusCode.ShouldBe((HttpStatusCode) 302); // client callback
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
 
         response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // root
+        response.StatusCode.ShouldBe((HttpStatusCode) 302); // root
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
         response = await BrowserClient.GetAsync(Url(response.Headers.Location.ToString()));
@@ -181,19 +181,19 @@ public class AppHost : GenericHost
     public async Task<HttpResponseMessage> LogoutAsync(string? sid = null)
     {
         var response = await BrowserClient.GetAsync(Url("/logout") + "?sid=" + sid);
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // endsession
+        response.StatusCode.ShouldBe((HttpStatusCode) 302); // endsession
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // logout
+        response.StatusCode.ShouldBe((HttpStatusCode) 302); // logout
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // post logout redirect uri
+        response.StatusCode.ShouldBe((HttpStatusCode) 302); // post logout redirect uri
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
 
         response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe((HttpStatusCode)302); // root
+        response.StatusCode.ShouldBe((HttpStatusCode) 302); // root
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
         response = await BrowserClient.GetAsync(Url(response.Headers.Location.ToString()));

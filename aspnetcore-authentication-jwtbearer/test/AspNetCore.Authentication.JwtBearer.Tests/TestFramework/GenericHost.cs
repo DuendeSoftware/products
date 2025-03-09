@@ -120,7 +120,7 @@ public class GenericHost
         OnConfigureServices(services);
         _appServices = services.BuildServiceProvider();
     }
-    
+
     void Configure(WebApplication builder)
     {
         OnConfigure(builder);
@@ -143,11 +143,11 @@ public class GenericHost
             await next();
         });
     }
-        
+
     public async Task RevokeSessionCookieAsync()
     {
         var response = await BrowserClient.GetAsync(Url("__signout"));
-        response.StatusCode.ShouldBe((HttpStatusCode)204);
+        response.StatusCode.ShouldBe((HttpStatusCode) 204);
     }
 
     void ConfigureSignin(WebApplication app)
@@ -163,7 +163,7 @@ public class GenericHost
 
                 var props = _propsToSignIn ?? new AuthenticationProperties();
                 await ctx.SignInAsync(_userToSignIn, props);
-                    
+
                 _userToSignIn = null;
                 _propsToSignIn = null;
 
@@ -174,15 +174,15 @@ public class GenericHost
             await next();
         });
     }
-        
+
     ClaimsPrincipal? _userToSignIn;
     AuthenticationProperties? _propsToSignIn;
-    
+
     public async Task IssueSessionCookieAsync(params Claim[] claims)
     {
         _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
         var response = await BrowserClient.GetAsync(Url("__signin"));
-        response.StatusCode.ShouldBe((HttpStatusCode)204);
+        response.StatusCode.ShouldBe((HttpStatusCode) 204);
     }
     public Task IssueSessionCookieAsync(AuthenticationProperties props, params Claim[] claims)
     {
