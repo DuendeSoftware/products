@@ -10,7 +10,7 @@ using Shouldly;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
-public class AccessTokenCnfTests : DPoPProofValidatorTestBase 
+public class AccessTokenCnfTests : DPoPProofValidatorTestBase
 {
     [Fact]
     [Trait("Category", "Unit")]

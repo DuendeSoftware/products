@@ -40,7 +40,7 @@ public class TestBrowserClient : HttpClient
     }
 
     private CookieHandler _handler;
-        
+
     public CookieContainer CookieContainer => _handler.CookieContainer;
     public Uri CurrentUri => _handler.CurrentUri;
     public HttpResponseMessage LastResponse => _handler.LastResponse;
@@ -60,7 +60,7 @@ public class TestBrowserClient : HttpClient
     {
         return GetCookie(_handler.CurrentUri.ToString(), name);
     }
-        
+
     public Cookie? GetCookie(string uri, string name)
     {
         return _handler.CookieContainer.GetCookies(new Uri(uri)).Where(x => x.Name == name).FirstOrDefault();
@@ -70,7 +70,7 @@ public class TestBrowserClient : HttpClient
     {
         RemoveCookie(CurrentUri.ToString(), name);
     }
-        
+
     public void RemoveCookie(string uri, string name)
     {
         var cookie = CookieContainer.GetCookies(new Uri(uri)).FirstOrDefault(x => x.Name == name);
@@ -82,7 +82,7 @@ public class TestBrowserClient : HttpClient
 
     public async Task FollowRedirectAsync()
     {
-        LastResponse.StatusCode.ShouldBe((HttpStatusCode)302);
+        LastResponse.StatusCode.ShouldBe((HttpStatusCode) 302);
         var location = LastResponse.Headers.Location!.ToString();
         await GetAsync(location);
     }

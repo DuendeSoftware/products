@@ -32,10 +32,10 @@ public abstract class DPoPProofValidatorTestBase
     {
         var optionsMonitor = Substitute.For<IOptionsMonitor<DPoPOptions>>();
         optionsMonitor.Get(Arg.Any<string>()).Returns(Options);
-        
+
         return new TestDPoPProofValidator(
-            optionsMonitor, 
-            ReplayCache 
+            optionsMonitor,
+            ReplayCache
         );
     }
 
@@ -57,7 +57,7 @@ public abstract class DPoPProofValidatorTestBase
     protected const long ClockSkew = 10;
     protected const string AccessToken = "test-access-token";
     protected const string AccessTokenHash = "WXSA1LYsphIZPxnnP-TMOtF_C_nPwWp8v0tQZBMcSAU"; // Pre-computed sha256 hash of "test-access-token"
-    
+
     protected const string PrivateRsaJwk =
     """
     {
@@ -73,7 +73,7 @@ public abstract class DPoPProofValidatorTestBase
     }
     """;
 
-    protected const string PublicRsaJwk = 
+    protected const string PublicRsaJwk =
     """
     {
         "kty":"RSA",
@@ -82,7 +82,7 @@ public abstract class DPoPProofValidatorTestBase
         "n":"yWWAOSV3Z_BW9rJEFvbZyeU-q2mJWC0l8WiHNqwVVf7qXYgm9hJC0j1aPHku_Wpl38DpK3Xu3LjWOFG9OrCqga5Pzce3DDJKI903GNqz5wphJFqweoBFKOjj1wegymvySsLoPqqDNVYTKp4nVnECZS4axZJoNt2l1S1bC8JryaNze2stjW60QT-mIAGq9konKKN3URQ12dr478m0Oh-4WWOiY4HrXoSOklFmzK-aQx1JV_SZ04eIGfSw1pZZyqTaB1BwBotiy-QA03IRxwIXQ7BSx5EaxC5uMCMbzmbvJqjt-q8Y1wyl-UQjRucgp7hkfHSE1QT3zEex2Q3NFux7SQ"
     }
     """;
-    protected static readonly Dictionary<string, string> PublicRsaJwkDeserialized = JsonSerializer.Deserialize<Dictionary<string,string>>(PublicRsaJwk)!;
+    protected static readonly Dictionary<string, string> PublicRsaJwkDeserialized = JsonSerializer.Deserialize<Dictionary<string, string>>(PublicRsaJwk)!;
 
     protected const string PrivateEcdsaJwk =
     """
@@ -109,7 +109,7 @@ public abstract class DPoPProofValidatorTestBase
         "y": "uHzp1K3vnrqoVUwZ_7v3wxAr1reHPdkGoDGzH_pT0ak"
     }
     """;
-    protected static readonly Dictionary<string, object> PublicEcdsaJwkDeserialized = JsonSerializer.Deserialize<Dictionary<string,object>>(PublicEcdsaJwk)!;
+    protected static readonly Dictionary<string, object> PublicEcdsaJwkDeserialized = JsonSerializer.Deserialize<Dictionary<string, object>>(PublicEcdsaJwk)!;
 
     protected static readonly byte[] PrivateHmacKey = CreateHmacKey();
 
@@ -126,7 +126,7 @@ public abstract class DPoPProofValidatorTestBase
     protected const string HttpUrl = "https://example.com";
 
     protected static string CreateDPoPProofToken(
-        string typ = "dpop+jwt", 
+        string typ = "dpop+jwt",
         string alg = SecurityAlgorithms.RsaSha256,
         object? jwk = null,
         string? jti = null,
@@ -137,7 +137,7 @@ public abstract class DPoPProofValidatorTestBase
         var tokenHandler = new JsonWebTokenHandler();
 
         var claims = new List<Claim>();
-        if (jti != null) 
+        if (jti != null)
         {
             claims.Add(new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()));
         }
@@ -168,9 +168,9 @@ public abstract class DPoPProofValidatorTestBase
 
         var jwkPayload = jwk ?? alg switch
         {
-            
+
             string s when s.StartsWith("ES") => PublicEcdsaJwkDeserialized,
-            string s when s.StartsWith("RS")|| s.StartsWith("PS") => PublicRsaJwkDeserialized,
+            string s when s.StartsWith("RS") || s.StartsWith("PS") => PublicRsaJwkDeserialized,
             _ => "null"
         };
 

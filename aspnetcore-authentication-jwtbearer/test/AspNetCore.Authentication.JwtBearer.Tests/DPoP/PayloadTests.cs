@@ -19,7 +19,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Missing payload");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task missing_ath_fails()
@@ -32,7 +32,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'ath' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task mismatched_ath_fails()
@@ -47,7 +47,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'ath' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task missing_jti_fails()
@@ -62,7 +62,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'jti' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task missing_htm_fails()
@@ -78,7 +78,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'htm' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task missing_htu_fails()
@@ -95,7 +95,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'htu' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task missing_iat_fails()
@@ -113,7 +113,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'iat' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task expired_payload_fails()
@@ -135,8 +135,8 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'iat' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
-    
+
+
     [Fact]
     [Trait("Category", "Unit")]
     public async Task valid_payload_succeeds()
