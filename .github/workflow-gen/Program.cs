@@ -5,18 +5,17 @@ using Logicality.GitHub.Actions.Workflow;
 
 var contexts = GitHubContexts.Instance;
 
+var products = new Product[]
 {
-    Product identityServer = new("identity-server", "identity-server.slnf", "is");
-    GenerateCiWorkflow(identityServer);
-    GenerateReleaseWorkflow(identityServer);
-    GenerateCodeQlWorkflow(identityServer, "38 15 * * 0");
-}
-
+    new("aspnetcore-authentication-jwtbearer", "aspnetcore-authentication-jwtbearer.slnf", "aaj"),
+    new("identity-server", "identity-server.slnf", "is"),
+    new("bff", "bff.slnf", "bff", true)
+};
+foreach (var product in products)
 {
-    Product bff = new("bff", "bff.slnf", "bff", true);
-    GenerateCiWorkflow(bff);
-    GenerateReleaseWorkflow(bff);
-    GenerateCodeQlWorkflow(bff, "38 16 * * 0");
+    GenerateCiWorkflow(product);
+    GenerateReleaseWorkflow(product);
+    GenerateCodeQlWorkflow(product, "38 15 * * 0");
 }
 
 GenerateTemplatesReleaseWorkflow(new Product("templates", "../artifacts/templates.csproj", "templates"));
