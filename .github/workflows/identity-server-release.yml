@@ -64,13 +64,7 @@ jobs:
         dotnet-version: |-
           6.0.x
           8.0.x
-          9.0.103
-    - name: Git tag
-      run: |-
-        git config --global user.email "github-bot@duendesoftware.com"
-        git config --global user.name "Duende Software GitHub Bot"
-        git tag -a is-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
-        git push origin is-${{ github.event.inputs.version }}
+          9.0.x
     - name: Pack identity-server.slnf
       run: dotnet pack -c Release identity-server.slnf -o artifacts
     - name: Tool restore
@@ -110,7 +104,7 @@ jobs:
         dotnet-version: |-
           6.0.x
           8.0.x
-          9.0.103
+          9.0.x
     - name: List files
       run: tree
       shell: bash
