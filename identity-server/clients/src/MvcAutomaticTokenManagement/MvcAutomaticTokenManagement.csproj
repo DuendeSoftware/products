@@ -9,7 +9,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
         <PackageReference Include="Serilog.AspNetCore" />
 
-        <PackageReference Include="OpenTelemetry"  />
+        <PackageReference Include="OpenTelemetry" />
         <PackageReference Include="OpenTelemetry.Exporter.Console" />
         <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
         <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
@@ -19,7 +19,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Constants\Constants.csproj"/>
+        <ProjectReference Include="..\..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+        <ProjectReference Include="..\Constants\Constants.csproj" />
     </ItemGroup>
 
 </Project>

@@ -10,4 +10,8 @@
         <PackageReference Include="Serilog.AspNetCore" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+    </ItemGroup>
+
 </Project>
