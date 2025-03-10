@@ -32,7 +32,8 @@ internal class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
         }
 
         var username = await _userManager.GetUserNameAsync(user);
-        var usernameClaim = identity.FindFirst(claim => claim.Type == _userManager.Options.ClaimsIdentity.UserNameClaimType && claim.Value == username);
+        var usernameClaim = identity.FindFirst(claim =>
+            claim.Type == _userManager.Options.ClaimsIdentity.UserNameClaimType && claim.Value == username);
         if (usernameClaim != null)
         {
             identity.RemoveClaim(usernameClaim);
@@ -66,7 +67,8 @@ internal class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
                 {
                     new Claim(JwtClaimTypes.PhoneNumber, phoneNumber),
                     new Claim(JwtClaimTypes.PhoneNumberVerified,
-                        await _userManager.IsPhoneNumberConfirmedAsync(user) ? "true" : "false", ClaimValueTypes.Boolean)
+                        await _userManager.IsPhoneNumberConfirmedAsync(user) ? "true" : "false",
+                        ClaimValueTypes.Boolean)
                 });
             }
         }

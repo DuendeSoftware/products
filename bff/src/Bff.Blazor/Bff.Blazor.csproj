@@ -5,12 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-     <AssemblyName>Duende.BFF.Blazor</AssemblyName>
+    <AssemblyName>Duende.BFF.Blazor</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-      <ProjectReference Include="..\Bff\Bff.csproj" />
-      <ProjectReference Include="..\Bff.Blazor.Client\Bff.Blazor.Client.csproj" />
+    <ProjectReference Include="..\Bff\Bff.csproj" />
+    <ProjectReference Include="..\Bff.Blazor.Client\Bff.Blazor.Client.csproj" />
   </ItemGroup>
 
 </Project>

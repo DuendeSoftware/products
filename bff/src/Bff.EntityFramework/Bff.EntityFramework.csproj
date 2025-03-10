@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
-    
+
     <ProjectReference Include="..\Bff\Bff.csproj" />
   </ItemGroup>
 </Project>

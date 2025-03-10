@@ -8,15 +8,20 @@
   "name": "Duende IdentityServer with In-Memory Stores and Test Users",
   "identity": "Duende.IdentityServer.InMem",
   "groupIdentity": "Duende.IdentityServer.InMem",
-  "shortName": ["duende-is-inmem"],
+  "shortName": [
+    "duende-is-inmem"
+  ],
   "tags": {
     "language": "C#",
     "type": "project"
   },
-
   "sourceName": "IdentityServerInMem",
   "preferNameDirectory": "true",
-  "primaryOutputs": [ { "path": "IdentityServerInMem.csproj" } ],
+  "primaryOutputs": [
+    {
+      "path": "IdentityServerInMem.csproj"
+    }
+  ],
   "symbols": {
     "RenameCommonNamespace": {
       "datatype": "string",
