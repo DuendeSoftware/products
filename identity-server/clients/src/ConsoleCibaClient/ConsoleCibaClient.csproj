@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net8.0</TargetFrameworks>
-        <OutputType>Exe</OutputType>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Constants\Constants.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Constants\Constants.csproj" />
+  </ItemGroup>
 
 </Project>

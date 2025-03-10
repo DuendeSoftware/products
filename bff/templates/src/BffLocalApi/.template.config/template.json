@@ -13,8 +13,11 @@
     "language": "C#",
     "type": "project"
   },
-
   "sourceName": "BffLocalApi",
   "preferNameDirectory": "true",
-  "primaryOutputs": [ { "path": "BffLocalApi.csproj" } ]
+  "primaryOutputs": [
+    {
+      "path": "BffLocalApi.csproj"
+    }
+  ]
 }

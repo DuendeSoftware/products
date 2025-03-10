@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <PackageId>Duende.IdentityServer.EntityFramework</PackageId>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <Description>EntityFramework persistence layer for Duende IdentityServer</Description>
-        <AssemblyName>Duende.IdentityServer.EntityFramework</AssemblyName>
-    </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>Duende.IdentityServer.EntityFramework</PackageId>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Description>EntityFramework persistence layer for Duende IdentityServer</Description>
+    <AssemblyName>Duende.IdentityServer.EntityFramework</AssemblyName>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\EntityFramework.Storage\Duende.IdentityServer.EntityFramework.Storage.csproj" />
-        <ProjectReference Include="..\IdentityServer\Duende.IdentityServer.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference
+      Include="..\EntityFramework.Storage\Duende.IdentityServer.EntityFramework.Storage.csproj" />
+    <ProjectReference Include="..\IdentityServer\Duende.IdentityServer.csproj" />
+  </ItemGroup>
 </Project>
