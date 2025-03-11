@@ -202,6 +202,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<IBackchannelAuthenticationUserValidator, NopBackchannelAuthenticationUserValidator>();
 
         builder.Services.TryAddTransient(typeof(IConcurrencyLock<>), typeof(DefaultConcurrencyLock<>));
+        builder.Services.TryAddSingleton(typeof(IKeyedConcurrencyLock<>), typeof(DefaultKeyedConcurrencyLock<>));
 
         builder.Services.TryAddTransient<IClientStore, EmptyClientStore>();
         builder.Services.TryAddTransient<IResourceStore, EmptyResourceStore>();
