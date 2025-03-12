@@ -1,16 +1,12 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ConsoleCibaClient
 {
@@ -37,7 +33,7 @@ namespace ConsoleCibaClient
             if (disco.IsError) throw new Exception(disco.Error);
 
             var cibaEp = disco.BackchannelAuthenticationEndpoint;
-            
+
             var username = "alice";
             var bindingMessage = Guid.NewGuid().ToString("N").Substring(0, 10);
 
@@ -144,8 +140,8 @@ namespace ConsoleCibaClient
 
         static string CreateRequestObject(IDictionary<string, string> values)
         {
-            var claims = new List<Claim>() 
-            { 
+            var claims = new List<Claim>()
+            {
                 new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString("n"))
             };
             foreach (var item in values)
@@ -171,7 +167,7 @@ namespace ConsoleCibaClient
                     "qi":"pG6J4dcUDrDndMxa-ee1yG4KjZqqyCQcmPAfqklI2LmnpRIjcK78scclvpboI3JQyg6RCEKVMwAhVtQM6cBcIO3JrHgqeYDblp5wXHjto70HVW6Z8kBruNx1AH9E8LzNvSRL-JVTFzBkJuNgzKQfD0G77tQRgJ-Ri7qu3_9o1M4"
                 }
                 """;
-        
+
             var now = DateTime.UtcNow;
 
             var token = new JwtSecurityToken(

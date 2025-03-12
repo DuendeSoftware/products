@@ -6,9 +6,6 @@
 
 using Duende.IdentityServer.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Duende.IdentityServer;
 
@@ -152,7 +149,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
         else
         {
-            if (!_validateIssuerWarned  && _issuers.Count > 1)
+            if (!_validateIssuerWarned && _issuers.Count > 1)
             {
                 _validateIssuerWarned = true;
                 WarningLog?.Invoke(

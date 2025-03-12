@@ -6,7 +6,6 @@
 
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.ResponseHandling;
-using System.Collections.Generic;
 
 namespace Duende.IdentityServer.Configuration;
 

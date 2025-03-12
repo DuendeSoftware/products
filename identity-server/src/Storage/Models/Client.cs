@@ -4,9 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.Linq;
-using System;
 using System.Collections;
 using System.Diagnostics;
 
@@ -108,7 +105,7 @@ public class Client
     /// Specifies whether the client must use a request object on authorize requests (defaults to <c>false</c>.)
     /// </summary>
     public bool RequireRequestObject { get; set; } = false;
-        
+
     /// <summary>
     /// Controls whether access tokens are transmitted via the browser for this client (defaults to <c>false</c>).
     /// This can prevent accidental leakage of access tokens when multiple response types are allowed.
@@ -512,16 +509,16 @@ public enum DPoPTokenExpirationValidationMode
     /// <summary>
     /// No built-in expiration validation.
     /// </summary>
-    Custom  = 0b_0000_0000,  // 0
+    Custom = 0b_0000_0000,  // 0
     /// <summary>
     /// Validate the iat value
     /// </summary>
-    Iat     = 0b_0000_0001,  // 1
+    Iat = 0b_0000_0001,  // 1
     /// <summary>
     /// Validate the nonce value
     /// </summary>
-    Nonce   = 0b_0000_0010,  // 2
-    
+    Nonce = 0b_0000_0010,  // 2
+
     /// <summary>
     /// Validate both the iat and nonce values
     /// </summary>

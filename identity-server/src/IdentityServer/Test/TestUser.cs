@@ -1,10 +1,9 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using System.Collections.Generic;
 using System.Security.Claims;
+using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Test;
 

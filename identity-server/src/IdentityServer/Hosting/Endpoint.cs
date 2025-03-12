@@ -6,7 +6,6 @@
 
 #pragma warning disable 1591
 
-using System;
 using Microsoft.AspNetCore.Http;
 
 namespace Duende.IdentityServer.Hosting;

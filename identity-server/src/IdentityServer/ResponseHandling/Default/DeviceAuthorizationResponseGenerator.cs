@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Validation;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.ResponseHandling;
@@ -80,18 +78,18 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
         Logger.LogTrace("Creating response for device authorization request");
 
         var response = new DeviceAuthorizationResponse();
-            
+
         // generate user_code
         var userCodeGenerator = await UserCodeService.GetGenerator(
             validationResult.ValidatedRequest.Client.UserCodeType ??
             Options.DeviceFlow.DefaultUserCodeType);
-            
+
         var retryCount = 0;
 
         while (retryCount < userCodeGenerator.RetryLimit)
         {
             var userCode = await userCodeGenerator.GenerateAsync();
-                
+
             var deviceCode = await DeviceFlowCodeService.FindByUserCodeAsync(userCode);
             if (deviceCode == null)
             {
@@ -114,7 +112,7 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
             // if url is relative, parse absolute URL
             response.VerificationUri = baseUrl.RemoveTrailingSlash() + Options.UserInteraction.DeviceVerificationUrl;
         }
-            
+
         if (!string.IsNullOrWhiteSpace(Options.UserInteraction.DeviceVerificationUserCodeParameter))
         {
             response.VerificationUriComplete =

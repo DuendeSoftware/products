@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Collections.Generic;
 using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
@@ -33,10 +32,10 @@ public static class Resources
             // resource specific scopes
             new ApiScope("resource1.scope1"),
             new ApiScope("resource1.scope2"),
-                
+
             new ApiScope("resource2.scope1"),
             new ApiScope("resource2.scope2"),
-                
+
             new ApiScope("resource3.scope1"),
             new ApiScope("resource3.scope2"),
                 
@@ -55,7 +54,7 @@ public static class Resources
         };
 
     // API resources are more formal representation of a resource with processing rules and their scopes (if any)
-    public static readonly IEnumerable<ApiResource> ApiResources = 
+    public static readonly IEnumerable<ApiResource> ApiResources =
         new[]
         {
             new ApiResource("urn:resource1", "Resource 1")
@@ -65,7 +64,7 @@ public static class Resources
 
                 Scopes = { "resource1.scope1", "resource1.scope2", "shared.scope" }
             },
-                
+
             new ApiResource("urn:resource2", "Resource 2")
             {
                 Description = "Something very long and descriptive",
@@ -80,11 +79,11 @@ public static class Resources
 
                 Scopes = { "resource2.scope1", "resource2.scope2", "shared.scope" }
             },
-                
+
             new ApiResource("urn:resource3", "Resource 3 (isolated)")
             {
                 ApiSecrets = { new Secret("secret".Sha256()) },
-                    
+
                 RequireResourceIndicator = true,
                 Scopes = { "resource3.scope1", "resource3.scope2", "shared.scope" }
             }

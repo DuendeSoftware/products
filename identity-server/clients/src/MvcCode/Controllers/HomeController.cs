@@ -1,7 +1,7 @@
-using System;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Globalization;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Clients;
 using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
@@ -20,14 +20,14 @@ public class HomeController : Controller
         _httpClientFactory = httpClientFactory;
         _discoveryCache = discoveryCache;
     }
-    
+
     [AllowAnonymous]
     public IActionResult Index() => View();
 
     public IActionResult Secure() => View();
 
     public IActionResult Logout() => SignOut("oidc", "Cookies");
-    
+
     public async Task<IActionResult> CallApi()
     {
         var token = await HttpContext.GetTokenAsync("access_token");

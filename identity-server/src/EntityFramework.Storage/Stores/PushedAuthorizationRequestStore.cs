@@ -2,14 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
-using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Stores;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.EntityFramework.Stores;
 
@@ -25,7 +23,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     /// The CancellationToken service.
     /// </summary>
     protected readonly ICancellationTokenProvider CancellationTokenProvider;
-        
+
     /// <summary>
     /// The logger.
     /// </summary>
@@ -43,7 +41,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
         Logger = logger;
         CancellationTokenProvider = cancellationTokenProvider;
     }
-    
+
     /// <inheritdoc />
     public async Task ConsumeByHashAsync(string referenceValueHash)
     {
@@ -52,7 +50,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
         var numDeleted = await Context.PushedAuthorizationRequests
             .Where(par => par.ReferenceValueHash == referenceValueHash)
             .ExecuteDeleteAsync(CancellationTokenProvider.CancellationToken);
-        if(numDeleted != 1)
+        if (numDeleted != 1)
         {
             Logger.LogWarning("attempted to remove {referenceValueHash} pushed authorization request because it was consumed, but no records were actually deleted.", referenceValueHash);
         }
@@ -62,7 +60,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     public virtual async Task<Models.PushedAuthorizationRequest> GetByHashAsync(string referenceValueHash)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationRequestStore.Get");
-        
+
         var par = (await Context.PushedAuthorizationRequests
                 .AsNoTracking().Where(x => x.ReferenceValueHash == referenceValueHash)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))
@@ -79,7 +77,7 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     public virtual async Task StoreAsync(Models.PushedAuthorizationRequest par)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationStore.Store");
-        
+
         Context.PushedAuthorizationRequests.Add(par.ToEntity());
         try
         {

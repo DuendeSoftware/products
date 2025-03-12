@@ -4,7 +4,6 @@
 
 using Duende.IdentityServer.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
 
 namespace Duende.IdentityServer.Extensions;
 

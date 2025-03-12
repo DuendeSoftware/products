@@ -4,12 +4,10 @@
 
 #nullable enable
 
+using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Hosting.LocalApiAuthentication;
 using Microsoft.AspNetCore.Authentication;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

@@ -4,16 +4,13 @@
 
 #nullable enable
 
+using System.Security.Claims;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer;
 
@@ -131,8 +128,8 @@ public class IdentityServerTools : IIdentityServerTools
     /// <inheritdoc/>
     public virtual async Task<string> IssueJwtAsync(int lifetime, string issuer, string tokenType, IEnumerable<Claim> claims)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(issuer);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(tokenType);
+        ArgumentException.ThrowIfNullOrWhiteSpace(issuer);
+        ArgumentException.ThrowIfNullOrWhiteSpace(tokenType);
         ArgumentNullException.ThrowIfNull(claims);
 
         var token = new Token(tokenType)
@@ -143,7 +140,7 @@ public class IdentityServerTools : IIdentityServerTools
 
             Claims = new HashSet<Claim>(claims, new ClaimComparer())
         };
-        
+
         return await _tokenCreation.CreateTokenAsync(token);
     }
 

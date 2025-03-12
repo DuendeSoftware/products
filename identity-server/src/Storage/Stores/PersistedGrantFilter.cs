@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Stores;
 
 /// <summary>
@@ -19,12 +17,12 @@ public class PersistedGrantFilter
     /// Subject id of the user.
     /// </summary>
     public string? SubjectId { get; set; }
-        
+
     /// <summary>
     /// Session id used for the grant.
     /// </summary>
     public string? SessionId { get; set; }
-        
+
     /// <summary>
     /// Client id the grant was issued to.
     /// </summary>
@@ -39,7 +37,7 @@ public class PersistedGrantFilter
     /// The type of grant.
     /// </summary>
     public string? Type { get; set; }
-    
+
     /// <summary>
     /// The types of grants.
     /// </summary>

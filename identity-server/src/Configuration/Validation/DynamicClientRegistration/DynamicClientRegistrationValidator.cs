@@ -4,10 +4,10 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration.Models;
 using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Duende.IdentityServer.Models;
-using Duende.IdentityModel;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Configuration.Validation.DynamicClientRegistration;
@@ -69,7 +69,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         }
 
         result = await SetLogoutParametersAsync(context);
-        if(result is DynamicClientRegistrationError logoutValidation)
+        if (result is DynamicClientRegistrationError logoutValidation)
         {
             return logoutValidation;
         }
@@ -137,7 +137,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         if (context.Request.GrantTypes.Contains(OidcConstants.GrantTypes.AuthorizationCode))
         {
             context.Client.AllowedGrantTypes.Add(GrantType.AuthorizationCode);
-            if(context.Request.AuthorizationCodeLifetime.HasValue)
+            if (context.Request.AuthorizationCodeLifetime.HasValue)
             {
                 var lifetime = context.Request.AuthorizationCodeLifetime.Value;
                 if (lifetime <= 0)
@@ -188,7 +188,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
                 {
                     return StepResult.Failure("The absolute refresh token lifetime must be greater than 0 if used");
                 }
-                context.Client.AbsoluteRefreshTokenLifetime = lifetime;                
+                context.Client.AbsoluteRefreshTokenLifetime = lifetime;
             }
             if (context.Request.RefreshTokenUsage != null)
             {
@@ -441,7 +441,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     {
         if (context.Request.DefaultMaxAge.HasValue)
         {
-            if(!context.Request.GrantTypes.Contains(GrantType.AuthorizationCode))
+            if (!context.Request.GrantTypes.Contains(GrantType.AuthorizationCode))
             {
                 return StepResult.Failure("default_max_age requires authorization code grant type");
             }
@@ -513,7 +513,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
             }
             context.Client.AccessTokenType = tokenType;
         }
-        if(context.Request.AccessTokenLifetime.HasValue)
+        if (context.Request.AccessTokenLifetime.HasValue)
         {
             var lifetime = context.Request.AccessTokenLifetime.Value;
             if (lifetime <= 0)
@@ -539,7 +539,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// represents that this step succeeded or failed.</returns>
     protected virtual Task<IStepResult> SetIdTokenProperties(DynamicClientRegistrationContext context)
     {
-        if(context.Request.IdentityTokenLifetime.HasValue)
+        if (context.Request.IdentityTokenLifetime.HasValue)
         {
             var lifetime = context.Request.IdentityTokenLifetime.Value;
             if (lifetime <= 0)
@@ -566,7 +566,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// represents that this step succeeded or failed.</returns>
     protected virtual Task<IStepResult> SetServerSideSessionProperties(DynamicClientRegistrationContext context)
     {
-        if(context.Request.CoordinateLifetimeWithUserSession.HasValue)
+        if (context.Request.CoordinateLifetimeWithUserSession.HasValue)
         {
             context.Client.CoordinateLifetimeWithUserSession = context.Request.CoordinateLifetimeWithUserSession.Value;
         }
@@ -591,25 +591,25 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         // Misc Uris
         context.Client.LogoUri = context.Request.LogoUri?.ToString();
         context.Client.InitiateLoginUri = context.Request.InitiateLoginUri?.ToString();
-        
+
         // Login Providers
-        if(context.Request.EnableLocalLogin.HasValue)
+        if (context.Request.EnableLocalLogin.HasValue)
         {
             context.Client.EnableLocalLogin = context.Request.EnableLocalLogin.Value;
         }
         context.Client.IdentityProviderRestrictions = context.Request.IdentityProviderRestrictions ?? new();
-        
+
         // Consent
-        if(context.Request.RequireConsent.HasValue)
+        if (context.Request.RequireConsent.HasValue)
         {
             context.Client.RequireConsent = context.Request.RequireConsent.Value;
         }
         context.Client.ClientUri = context.Request.ClientUri?.AbsoluteUri;
-        if(context.Request.AllowRememberConsent.HasValue)
+        if (context.Request.AllowRememberConsent.HasValue)
         {
             context.Client.AllowRememberConsent = context.Request.AllowRememberConsent.Value;
         }
-        if(context.Request.ConsentLifetime.HasValue)
+        if (context.Request.ConsentLifetime.HasValue)
         {
             var lifetime = context.Request.ConsentLifetime.Value;
             if (lifetime <= 0)

@@ -1,17 +1,12 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Conformance.Basic;
 
@@ -79,8 +74,8 @@ public class RedirectUriTests
             nonce: nonce);
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        _mockPipeline.ErrorWasCalled.Should().BeTrue();
-        _mockPipeline.ErrorMessage.Error.Should().Be("invalid_request");
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+        _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_request");
     }
 
     [Fact]
@@ -102,8 +97,8 @@ public class RedirectUriTests
             nonce: nonce);
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        _mockPipeline.ErrorWasCalled.Should().BeTrue();
-        _mockPipeline.ErrorMessage.Error.Should().Be("invalid_request");
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+        _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_request");
     }
 
     [Fact]
@@ -125,14 +120,14 @@ public class RedirectUriTests
             nonce: nonce);
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().Should().StartWith("https://code_client/callback?");
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://code_client/callback?");
         var authorization = _mockPipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
-        authorization.Code.Should().NotBeNull();
-        authorization.State.Should().Be(state);
+        authorization.Code.ShouldNotBeNull();
+        authorization.State.ShouldBe(state);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(response.Headers.Location.Query);
-        query["foo"].ToString().Should().Be("bar");
-        query["baz"].ToString().Should().Be("quux");
+        query["foo"].ToString().ShouldBe("bar");
+        query["baz"].ToString().ShouldBe("quux");
     }
 
     [Fact]
@@ -153,7 +148,7 @@ public class RedirectUriTests
             nonce: nonce);
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        _mockPipeline.ErrorWasCalled.Should().BeTrue();
-        _mockPipeline.ErrorMessage.Error.Should().Be("invalid_request");
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+        _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_request");
     }
 }

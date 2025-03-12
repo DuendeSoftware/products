@@ -2,19 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Security.Claims;
+using System.Text;
+using System.Text.Encodings.Web;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Stores;
+using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Security.Claims;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Validation;
-using System.Linq;
 using Microsoft.Net.Http.Headers;
-using System.Text;
-using Duende.IdentityServer.Stores;
 using static Duende.IdentityModel.OidcConstants;
 
 namespace Duende.IdentityServer.Hosting.LocalApiAuthentication;
@@ -31,9 +28,9 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
     /// <inheritdoc />
     public LocalApiAuthenticationHandler(
-        IOptionsMonitor<LocalApiAuthenticationOptions> options, 
-        ILoggerFactory logger, 
-        UrlEncoder encoder, 
+        IOptionsMonitor<LocalApiAuthenticationOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder,
         ITokenValidator tokenValidator,
         IDPoPProofValidator dpopValidator,
         IClientStore clientStore)
@@ -133,7 +130,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
                 ExpirationValidationMode = client.DPoPValidationMode,
                 ClientClockSkew = client.DPoPClockSkew,
             };
-            
+
             var dpopResult = await _dpopValidator.ValidateAsync(validationContext);
             if (dpopResult.IsError)
             {
@@ -255,7 +252,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
         if (sb.Length > 0)
         {
-            if(Response.Headers.ContainsKey(HeaderNames.WWWAuthenticate))
+            if (Response.Headers.ContainsKey(HeaderNames.WWWAuthenticate))
             {
 
                 throw new InvalidOperationException("Attempted to set the WWW-Authenticate header when it is already set");
@@ -265,4 +262,4 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
         return Task.CompletedTask;
     }
-} 
+}

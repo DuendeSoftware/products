@@ -1,14 +1,11 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
 using System.Collections.Specialized;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Stores;
-using FluentAssertions;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Stores;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.TokenRequest_Validation;
 
@@ -33,8 +30,8 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 
     [Fact]
@@ -53,8 +50,8 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 
     [Fact]
@@ -73,9 +70,9 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
-        result.ErrorDescription.Should().Be("custom error description");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
+        result.ErrorDescription.ShouldBe("custom error description");
     }
 
     [Fact]
@@ -94,9 +91,9 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
         };
 
         var result = await validator.ValidateRequestAsync(
-            parameters, 
+            parameters,
             client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 }

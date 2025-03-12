@@ -1,19 +1,15 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Validation.EndSessionRequestValidation;
 
@@ -51,13 +47,13 @@ public class EndSessionRequestValidatorTests
 
         var parameters = new NameValueCollection();
         var result = await _subject.ValidateAsync(parameters, null);
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
 
         result = await _subject.ValidateAsync(parameters, new ClaimsPrincipal());
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
 
         result = await _subject.ValidateAsync(parameters, new ClaimsPrincipal(new ClaimsIdentity()));
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -67,7 +63,7 @@ public class EndSessionRequestValidatorTests
         {
             IsError = false,
             Claims = new Claim[] { new Claim("sub", _user.GetSubjectId()) },
-            Client = new Client() { ClientId = "client"}
+            Client = new Client() { ClientId = "client" }
         };
         _stubRedirectUriValidator.IsPostLogoutRedirectUriValid = true;
 
@@ -78,12 +74,12 @@ public class EndSessionRequestValidatorTests
         parameters.Add("state", "foo");
 
         var result = await _subject.ValidateAsync(parameters, _user);
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
 
-        result.ValidatedRequest.Client.ClientId.Should().Be("client");
-        result.ValidatedRequest.PostLogOutUri.Should().Be("http://client/signout-cb");
-        result.ValidatedRequest.State.Should().Be("foo");
-        result.ValidatedRequest.Subject.GetSubjectId().Should().Be(_user.GetSubjectId());
+        result.ValidatedRequest.Client.ClientId.ShouldBe("client");
+        result.ValidatedRequest.PostLogOutUri.ShouldBe("http://client/signout-cb");
+        result.ValidatedRequest.State.ShouldBe("foo");
+        result.ValidatedRequest.Subject.GetSubjectId().ShouldBe(_user.GetSubjectId());
     }
 
     [Fact]
@@ -101,8 +97,8 @@ public class EndSessionRequestValidatorTests
         parameters.Add("id_token_hint", "id_token");
 
         var result = await _subject.ValidateAsync(parameters, _user);
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.PostLogOutUri.Should().BeNull();
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.PostLogOutUri.ShouldBeNull();
     }
 
     [Fact]
@@ -120,8 +116,8 @@ public class EndSessionRequestValidatorTests
         parameters.Add("id_token_hint", "id_token");
 
         var result = await _subject.ValidateAsync(parameters, _user);
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.PostLogOutUri.Should().BeNull();
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.PostLogOutUri.ShouldBeNull();
     }
 
     [Fact]
@@ -142,13 +138,13 @@ public class EndSessionRequestValidatorTests
         parameters.Add("state", "foo");
 
         var result = await _subject.ValidateAsync(parameters, _user);
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
 
-        result.ValidatedRequest.Client.ClientId.Should().Be("client");
-        result.ValidatedRequest.Subject.GetSubjectId().Should().Be(_user.GetSubjectId());
-            
-        result.ValidatedRequest.State.Should().BeNull();
-        result.ValidatedRequest.PostLogOutUri.Should().BeNull();
+        result.ValidatedRequest.Client.ClientId.ShouldBe("client");
+        result.ValidatedRequest.Subject.GetSubjectId().ShouldBe(_user.GetSubjectId());
+
+        result.ValidatedRequest.State.ShouldBeNull();
+        result.ValidatedRequest.PostLogOutUri.ShouldBeNull();
     }
 
     [Fact]
@@ -169,7 +165,7 @@ public class EndSessionRequestValidatorTests
         parameters.Add("state", "foo");
 
         var result = await _subject.ValidateAsync(parameters, _user);
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -178,7 +174,7 @@ public class EndSessionRequestValidatorTests
         var parameters = new NameValueCollection();
 
         var result = await _subject.ValidateAsync(parameters, _user);
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.Raw.Should().BeSameAs(parameters);
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.Raw.ShouldBeSameAs(parameters);
     }
 }

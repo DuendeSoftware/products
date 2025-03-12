@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Duende.IdentityServer.EntityFramework.Mappers;
 
 /// <summary>
@@ -19,7 +16,7 @@ public static class IdentityResourceMappers
     /// <returns></returns>
     public static Models.IdentityResource ToModel(this Entities.IdentityResource entity)
     {
-        return entity == null ? null : 
+        return entity == null ? null :
             new Models.IdentityResource
             {
                 Enabled = entity.Enabled,
@@ -56,7 +53,8 @@ public static class IdentityResourceMappers
                 }).ToList() ?? new List<Entities.IdentityResourceClaim>(),
                 Properties = model.Properties?.Select(p => new Entities.IdentityResourceProperty
                 {
-                    Key = p.Key, Value = p.Value
+                    Key = p.Key,
+                    Value = p.Value
                 }).ToList() ?? new List<Entities.IdentityResourceProperty>(),
 
                 Required = model.Required,

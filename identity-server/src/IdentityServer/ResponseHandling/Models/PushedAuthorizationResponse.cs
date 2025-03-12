@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Text.Json.Serialization;
-
 namespace Duende.IdentityServer.ResponseHandling;
 
 /// <summary>
@@ -21,7 +19,7 @@ public class PushedAuthorizationFailure : PushedAuthorizationResponse
     /// The error code, as specified by RFC 9126, etc.
     /// </summary>
     public required string Error { get; set; }
-    
+
     /// <summary>
     /// The error description: "human-readable ASCII text providing
     /// additional information, used to assist the client developer in
@@ -44,4 +42,3 @@ public class PushedAuthorizationSuccess : PushedAuthorizationResponse
     /// </summary>
     public required int ExpiresIn { get; set; }
 }
-

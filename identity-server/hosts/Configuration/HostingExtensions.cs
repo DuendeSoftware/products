@@ -157,7 +157,7 @@ internal static class HostingExtensions
 
         // health checks
         app.MapHealthChecks("/health");
-        
+
         // local API endpoints
         app.MapControllers()
             .RequireAuthorization(IdentityServerConstants.LocalApi.PolicyName);

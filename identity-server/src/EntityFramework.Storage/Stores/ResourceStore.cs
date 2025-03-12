@@ -2,10 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.EntityFramework.Extensions;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
@@ -61,14 +57,14 @@ public class ResourceStore : IResourceStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByName");
         activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString());
-        
+
         ArgumentNullException.ThrowIfNull(apiResourceNames);
 
         var query =
             from apiResource in Context.ApiResources
             where apiResourceNames.Contains(apiResource.Name)
             select apiResource;
-            
+
         var apis = query
             .Include(x => x.Secrets)
             .Include(x => x.Scopes)
@@ -101,7 +97,7 @@ public class ResourceStore : IResourceStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
-        
+
         var names = scopeNames.ToArray();
 
         var query =
@@ -134,7 +130,7 @@ public class ResourceStore : IResourceStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindIdentityResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
-        
+
         var scopes = scopeNames.ToArray();
 
         var query =
@@ -164,7 +160,7 @@ public class ResourceStore : IResourceStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiScopesByName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
-        
+
         var scopes = scopeNames.ToArray();
 
         var query =
@@ -192,7 +188,7 @@ public class ResourceStore : IResourceStore
     public virtual async Task<Resources> GetAllResourcesAsync()
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.GetAllResources");
-        
+
         var identity = Context.IdentityResources
             .Include(x => x.UserClaims)
             .Include(x => x.Properties)
@@ -204,7 +200,7 @@ public class ResourceStore : IResourceStore
             .Include(x => x.UserClaims)
             .Include(x => x.Properties)
             .AsNoTracking();
-            
+
         var scopes = Context.ApiScopes
             .Include(x => x.UserClaims)
             .Include(x => x.Properties)
@@ -216,9 +212,9 @@ public class ResourceStore : IResourceStore
             (await scopes.ToArrayAsync(CancellationTokenProvider.CancellationToken)).Select(x => x.ToModel())
         );
 
-        Logger.LogDebug("Found {scopes} as all scopes, and {apis} as API resources", 
-            result.IdentityResources.Select(x=>x.Name).Union(result.ApiScopes.Select(x=>x.Name)),
-            result.ApiResources.Select(x=>x.Name));
+        Logger.LogDebug("Found {scopes} as all scopes, and {apis} as API resources",
+            result.IdentityResources.Select(x => x.Name).Union(result.ApiScopes.Select(x => x.Name)),
+            result.ApiResources.Select(x => x.Name));
 
         return result;
     }

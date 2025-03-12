@@ -4,9 +4,8 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Models;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -21,7 +20,7 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     public Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Store");
-        
+
         _repository[pushedAuthorizationRequest.ReferenceValueHash] = pushedAuthorizationRequest;
 
         return Task.CompletedTask;

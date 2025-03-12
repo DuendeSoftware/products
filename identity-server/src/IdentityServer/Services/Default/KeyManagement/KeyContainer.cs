@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Services.KeyManagement;
@@ -43,7 +42,7 @@ public abstract class KeyContainer
     /// Indicates if key is contained in X509 certificate.
     /// </summary>
     public bool HasX509Certificate { get; set; }
-        
+
     /// <summary>
     /// Date key was created.
     /// </summary>

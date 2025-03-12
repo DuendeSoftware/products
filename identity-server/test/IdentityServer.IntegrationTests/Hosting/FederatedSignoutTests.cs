@@ -1,21 +1,15 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel;
 using IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
-using Xunit;
 
 namespace IntegrationTests.Hosting;
 
@@ -81,10 +75,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.MediaType.ShouldBe("text/html");
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Contain("https://server/connect/endsession/callback?endSessionId=");
+        html.ShouldContain("https://server/connect/endsession/callback?endSessionId=");
     }
 
     [Fact]
@@ -102,10 +96,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.PostAsync(IdentityServerPipeline.FederatedSignOutUrl, new FormUrlEncodedContent(new Dictionary<string, string> { { "sid", "123" } }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.MediaType.ShouldBe("text/html");
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Contain("https://server/connect/endsession/callback?endSessionId=");
+        html.ShouldContain("https://server/connect/endsession/callback?endSessionId=");
     }
 
     [Fact]
@@ -115,10 +109,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 
     [Fact]
@@ -126,10 +120,10 @@ public class FederatedSignoutTests
     {
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 
     [Fact]
@@ -152,10 +146,10 @@ public class FederatedSignoutTests
 
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 
     [Fact]
@@ -181,9 +175,9 @@ public class FederatedSignoutTests
         _pipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
-        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Content.Headers.ContentType.Should().BeNull();
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.Should().Be(String.Empty);
+        html.ShouldBe(String.Empty);
     }
 }

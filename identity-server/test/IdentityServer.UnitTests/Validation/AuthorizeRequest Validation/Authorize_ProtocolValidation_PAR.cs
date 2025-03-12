@@ -2,19 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Stores;
-using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using Duende.IdentityModel;
-using UnitTests.Common;
+using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Validation;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.AuthorizeRequest_Validation;
 
@@ -45,11 +37,11 @@ public class Authorize_ProtocolValidation_Valid_PAR
         var validator = Factory.CreateRequestObjectValidator();
         var result = validator.ValidatePushedAuthorizationBindingToClient(par, request);
 
-        result.Should().NotBeNull();
-        result.IsError.Should().Be(true);
-        result.ErrorDescription.Should().Be("invalid client for pushed authorization request");
+        result.ShouldNotBeNull();
+        result.IsError.ShouldBe(true);
+        result.ErrorDescription.ShouldBe("invalid client for pushed authorization request");
     }
-    
+
     [Fact]
     [Trait("Category", Category)]
     public void expired_par_requests_should_fail()
@@ -65,8 +57,8 @@ public class Authorize_ProtocolValidation_Valid_PAR
         var validator = Factory.CreateRequestObjectValidator();
         var result = validator.ValidatePushedAuthorizationExpiration(par, authorizeRequest);
 
-        result.Should().NotBeNull();
-        result.IsError.Should().Be(true);
-        result.ErrorDescription.Should().Be("expired pushed authorization request");
+        result.ShouldNotBeNull();
+        result.IsError.ShouldBe(true);
+        result.ErrorDescription.ShouldBe("expired pushed authorization request");
     }
 }

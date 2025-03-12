@@ -1,16 +1,13 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using UnitTests.Validation.Setup;
 using Microsoft.Extensions.Logging;
-using Xunit;
+using UnitTests.Validation.Setup;
 
 namespace UnitTests.Validation.Secrets;
 
@@ -37,7 +34,7 @@ public class HashedSharedSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 
     [Fact]
@@ -56,7 +53,7 @@ public class HashedSharedSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -74,19 +71,19 @@ public class HashedSharedSecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
 
         secret.Credential = "foobar";
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
 
         secret.Credential = "quux";
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
 
         secret.Credential = "notexpired";
         result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeTrue();
+        result.Success.ShouldBeTrue();
     }
 
     [Fact]
@@ -105,7 +102,7 @@ public class HashedSharedSecretValidation
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -123,7 +120,7 @@ public class HashedSharedSecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -140,7 +137,7 @@ public class HashedSharedSecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -158,6 +155,6 @@ public class HashedSharedSecretValidation
         };
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
-        result.Success.Should().BeFalse();
+        result.Success.ShouldBeFalse();
     }
 }

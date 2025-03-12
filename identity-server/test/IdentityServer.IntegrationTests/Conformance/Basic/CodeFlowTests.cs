@@ -2,24 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Conformance.Basic;
 
-public class CodeFlowTests 
+public class CodeFlowTests
 {
     private const string Category = "Conformance.Basic.CodeFlowTests";
 
@@ -82,7 +75,7 @@ public class CodeFlowTests
         var response = await _pipeline.BrowserClient.GetAsync(url);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
-        authorization.Code.Should().NotBeNull();
+        authorization.Code.ShouldNotBeNull();
 
         var code = authorization.Code;
 
@@ -99,17 +92,17 @@ public class CodeFlowTests
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
         });
 
-        tokenResult.IsError.Should().BeFalse();
-        tokenResult.HttpErrorReason.Should().Be("OK");
-        tokenResult.TokenType.Should().Be("Bearer");
-        tokenResult.AccessToken.Should().NotBeNull();
-        tokenResult.ExpiresIn.Should().BeGreaterThan(0);
-        tokenResult.IdentityToken.Should().NotBeNull();
+        tokenResult.IsError.ShouldBeFalse();
+        tokenResult.HttpErrorReason.ShouldBe("OK");
+        tokenResult.TokenType.ShouldBe("Bearer");
+        tokenResult.AccessToken.ShouldNotBeNull();
+        tokenResult.ExpiresIn.ShouldBeGreaterThan(0);
+        tokenResult.IdentityToken.ShouldNotBeNull();
 
         var token = new JwtSecurityToken(tokenResult.IdentityToken);
-            
+
         var s_hash = token.Claims.FirstOrDefault(c => c.Type == "s_hash");
-        s_hash.Should().BeNull();
+        s_hash.ShouldBeNull();
     }
 
     [Theory]
@@ -119,7 +112,7 @@ public class CodeFlowTests
     public async Task StateHash_should_be_emitted_based_on_options(bool emitStateHash)
     {
         _pipeline.Options.EmitStateHash = emitStateHash;
-            
+
         await _pipeline.LoginAsync("bob");
 
         var nonce = Guid.NewGuid().ToString();
@@ -135,7 +128,7 @@ public class CodeFlowTests
         var response = await _pipeline.BrowserClient.GetAsync(url);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
-        authorization.Code.Should().NotBeNull();
+        authorization.Code.ShouldNotBeNull();
 
         var code = authorization.Code;
 
@@ -152,25 +145,25 @@ public class CodeFlowTests
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
         });
 
-        tokenResult.IsError.Should().BeFalse();
-        tokenResult.HttpErrorReason.Should().Be("OK");
-        tokenResult.TokenType.Should().Be("Bearer");
-        tokenResult.AccessToken.Should().NotBeNull();
-        tokenResult.ExpiresIn.Should().BeGreaterThan(0);
-        tokenResult.IdentityToken.Should().NotBeNull();
+        tokenResult.IsError.ShouldBeFalse();
+        tokenResult.HttpErrorReason.ShouldBe("OK");
+        tokenResult.TokenType.ShouldBe("Bearer");
+        tokenResult.AccessToken.ShouldNotBeNull();
+        tokenResult.ExpiresIn.ShouldBeGreaterThan(0);
+        tokenResult.IdentityToken.ShouldNotBeNull();
 
         var token = new JwtSecurityToken(tokenResult.IdentityToken);
-            
+
         var s_hash = token.Claims.FirstOrDefault(c => c.Type == "s_hash");
 
         if (emitStateHash)
         {
-            s_hash.Should().NotBeNull();
-            s_hash.Value.Should().Be(CryptoHelper.CreateHashClaimValue("state", "RS256"));
+            s_hash.ShouldNotBeNull();
+            s_hash.Value.ShouldBe(CryptoHelper.CreateHashClaimValue("state", "RS256"));
         }
         else
         {
-            s_hash.Should().BeNull();
+            s_hash.ShouldBeNull();
         }
     }
 }

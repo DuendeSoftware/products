@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores.Default;
-using FluentAssertions;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Stores.Default;
 
@@ -25,15 +21,15 @@ public class DistributedCacheAuthorizationParametersMessageStoreTests
     [Fact]
     public async Task DeleteAsync_should_remove_item()
     {
-        _mockCache.Items.Count.Should().Be(0);
+        _mockCache.Items.Count.ShouldBe(0);
 
         var msg = new Message<IDictionary<string, string[]>>(new Dictionary<string, string[]>());
         var id = await _subject.WriteAsync(msg);
 
-        _mockCache.Items.Count.Should().Be(1);
+        _mockCache.Items.Count.ShouldBe(1);
 
         await _subject.DeleteAsync(id);
 
-        _mockCache.Items.Count.Should().Be(0);
+        _mockCache.Items.Count.ShouldBe(0);
     }
 }

@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.Extensions.Logging;
 
@@ -23,10 +22,10 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     /// <param name="handleGenerationService">The handle generation service.</param>
     /// <param name="logger">The logger.</param>
     public DefaultReferenceTokenStore(
-        IPersistedGrantStore store, 
+        IPersistedGrantStore store,
         IPersistentGrantSerializer serializer,
         IHandleGenerationService handleGenerationService,
-        ILogger<DefaultReferenceTokenStore> logger) 
+        ILogger<DefaultReferenceTokenStore> logger)
         : base(IdentityServerConstants.PersistedGrantTypes.ReferenceToken, store, serializer, handleGenerationService, logger)
     {
     }
@@ -35,7 +34,7 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     public Task<string> StoreReferenceTokenAsync(Token token)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.StoreReferenceToken");
-        
+
         return CreateItemAsync(token, token.ClientId, token.SubjectId, token.SessionId, token.Description, token.CreationTime, token.Lifetime);
     }
 
@@ -43,7 +42,7 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     public Task<Token> GetReferenceTokenAsync(string handle)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.GetReferenceToken");
-        
+
         return GetItemAsync(handle);
     }
 
@@ -51,7 +50,7 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     public Task RemoveReferenceTokenAsync(string handle)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.RemoveReferenceToken");
-        
+
         return RemoveItemAsync(handle);
     }
 
@@ -59,7 +58,7 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     public Task RemoveReferenceTokensAsync(string subjectId, string clientId, string sessionId = null)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.RemoveReferenceTokens");
-        
+
         return RemoveAllAsync(subjectId, clientId, sessionId);
     }
 }

@@ -1,0 +1,42 @@
+﻿header {
+    margin-top:40px;
+    margin-bottom:40px;
+    border-bottom:1px solid #808080;
+    padding:10px;
+}
+
+.hide {
+    display:none !important;
+}
+pre:empty {
+    display: none;
+}
+
+.form-inline {
+    margin-bottom: 30px;
+}
+.form-control{
+    margin-right:10px;
+}
+
+#username {
+    font-weight: bold;
+    padding-top: 6px;
+    margin-left:10px;
+}
+.buttons{
+    margin-top:20px;
+}
+.buttons > div {
+    display:inline;
+}
+.form-inline label {
+    font-weight:bold;
+    margin-right:15px;
+}
+.banner{
+    float:left;
+}
+.buttons{
+    float:right;
+}

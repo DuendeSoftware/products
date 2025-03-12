@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Services;
@@ -60,7 +57,7 @@ public class ClientStore : IClientStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
-        
+
         var query = Context.Clients
           .Where(x => x.ClientId == clientId)
           .Include(x => x.AllowedCorsOrigins)

@@ -1,13 +1,9 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using Xunit;
-using FluentAssertions;
 
 namespace UnitTests.Stores;
 
@@ -38,13 +34,13 @@ public class InMemoryResourcesStoreTests
         };
 
         Action act = () => new InMemoryResourcesStore(identityResources, null, null);
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
 
         act = () => new InMemoryResourcesStore(null, apiResources, null);
-        act.Should().Throw<ArgumentException>();
-            
+        act.ShouldThrow<ArgumentException>();
+
         act = () => new InMemoryResourcesStore(null, null, scopes);
-        act.Should().Throw<ArgumentException>();
+        act.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -70,7 +66,7 @@ public class InMemoryResourcesStoreTests
             new ApiScope { Name = "B" },
             new ApiScope { Name = "C" },
         };
-            
+
         new InMemoryResourcesStore(identityResources, null, null);
         new InMemoryResourcesStore(null, apiResources, null);
         new InMemoryResourcesStore(null, null, apiScopes);

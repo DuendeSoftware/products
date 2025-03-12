@@ -1,14 +1,10 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
-using UnitTests.Validation.Setup;
 using Microsoft.AspNetCore.Http;
-using Xunit;
+using UnitTests.Validation.Setup;
 
 namespace UnitTests.Validation.Secrets;
 
@@ -30,8 +26,8 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeFalse();
-        result.Client.ClientId.Should().Be("roclient");
+        result.IsError.ShouldBeFalse();
+        result.Client.ClientId.ShouldBe("roclient");
     }
 
     [Fact]
@@ -48,7 +44,7 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -65,9 +61,9 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeFalse();
-        result.Client.ClientId.Should().Be("roclient.public");
-        result.Client.RequireClientSecret.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
+        result.Client.ClientId.ShouldBe("roclient.public");
+        result.Client.RequireClientSecret.ShouldBeFalse();
     }
 
     [Fact]
@@ -84,8 +80,8 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeFalse();
-        result.Client.ClientId.Should().Be("client.implicit");
+        result.IsError.ShouldBeFalse();
+        result.Client.ClientId.ShouldBe("client.implicit");
     }
 
     [Fact]
@@ -102,6 +98,6 @@ public class ClientSecretValidation
 
         var result = await validator.ValidateAsync(context);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
 }

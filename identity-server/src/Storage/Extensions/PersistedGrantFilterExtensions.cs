@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using Duende.IdentityServer.Stores;
 
 namespace Duende.IdentityServer.Extensions;
@@ -20,11 +19,11 @@ public static class PersistedGrantFilterExtensions
     {
         ArgumentNullException.ThrowIfNull(filter);
 
-        if (String.IsNullOrWhiteSpace(filter.ClientId) && 
+        if (String.IsNullOrWhiteSpace(filter.ClientId) &&
             filter.ClientIds == null &&
             String.IsNullOrWhiteSpace(filter.SessionId) &&
             String.IsNullOrWhiteSpace(filter.SubjectId) &&
-            String.IsNullOrWhiteSpace(filter.Type) && 
+            String.IsNullOrWhiteSpace(filter.Type) &&
             filter.Types == null)
         {
             throw new ArgumentException("No filter values set.", nameof(filter));

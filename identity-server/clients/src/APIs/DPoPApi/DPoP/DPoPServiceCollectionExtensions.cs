@@ -1,7 +1,8 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System;
 
 namespace DPoPApi;
 
@@ -17,7 +18,7 @@ static class DPoPServiceCollectionExtensions
         services.AddTransient<IReplayCache, DefaultReplayCache>();
 
         services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(new ConfigureJwtBearerOptions(scheme));
-        
+
 
         return services;
     }

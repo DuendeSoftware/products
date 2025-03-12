@@ -2,17 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -49,8 +44,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -71,8 +66,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -96,8 +91,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.ExpiredToken);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.ExpiredToken);
     }
 
     [Fact]
@@ -120,8 +115,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.AccessDenied);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.AccessDenied);
     }
 
     [Fact]
@@ -144,8 +139,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.AuthorizationPending);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.AuthorizationPending);
     }
 
     [Fact]
@@ -168,8 +163,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.AuthorizationPending);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.AuthorizationPending);
     }
 
 
@@ -191,8 +186,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Fact]
@@ -213,8 +208,8 @@ public class DeviceCodeValidation
 
         await validator.ValidateAsync(context);
 
-        context.Result.IsError.Should().BeTrue();
-        context.Result.Error.Should().Be(OidcConstants.TokenErrors.SlowDown);
+        context.Result.IsError.ShouldBeTrue();
+        context.Result.Error.ShouldBe(OidcConstants.TokenErrors.SlowDown);
     }
 
     [Fact]
@@ -231,10 +226,10 @@ public class DeviceCodeValidation
         var request = new ValidatedTokenRequest();
         request.SetClient(client);
 
-        var context = new DeviceCodeValidationContext {DeviceCode = handle, Request = request};
+        var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
         await validator.ValidateAsync(context);
-            
-        context.Result.IsError.Should().BeFalse();
+
+        context.Result.IsError.ShouldBeFalse();
     }
 }

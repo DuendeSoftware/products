@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-        
-        <PackageReference Include="IdentityModel.OidcClient" Version="5.2.1" />
-        <PackageReference Include="Serilog.AspNetCore" />
-    </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
 
-    <ItemGroup>
-        <ProjectReference Include="..\Constants\Constants.csproj"/>
-    </ItemGroup>
+    <PackageReference Include="Duende.IdentityModel.OidcClient" />
+    <PackageReference Include="Serilog.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Constants\Constants.csproj" />
+  </ItemGroup>
 </Project>

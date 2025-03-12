@@ -2,13 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -76,7 +73,7 @@ public class DefaultResourceValidator : IResourceValidator
             var invalidRequestedResourceIndicators = request.ResourceIndicators.Except(matchedApiResourceNames);
             if (invalidRequestedResourceIndicators.Any())
             {
-                foreach(var invalid in invalidRequestedResourceIndicators)
+                foreach (var invalid in invalidRequestedResourceIndicators)
                 {
                     _logger.LogError("Invalid resource identifier {resource}. It is either not found, not enabled, or does not support any of the requested scopes.", invalid);
                     result.InvalidResourceIndicators.Add(invalid);

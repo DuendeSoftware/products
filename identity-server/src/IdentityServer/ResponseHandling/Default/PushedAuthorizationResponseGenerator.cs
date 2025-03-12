@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
@@ -42,10 +40,10 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
     public async Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request)
     {
         // Create a reference value
-        var referenceValue = await _handleGeneration.GenerateAsync(); 
-        
+        var referenceValue = await _handleGeneration.GenerateAsync();
+
         var requestUri = $"{IdentityServerConstants.PushedAuthorizationRequestUri}:{referenceValue}";
-        
+
         // Calculate the expiration
         var expiration = request.Client.PushedAuthorizationLifetime ?? _options.PushedAuthorization.Lifetime;
         var expiresAt = DateTime.UtcNow.AddSeconds(expiration);

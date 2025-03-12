@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="../../src.props" />
+
+  <PropertyGroup>
+    <PackageTags>OAuth 2.0;OpenID Connect;Security;ASP.NET Core;DPoP</PackageTags>
+    <Product>Duende AspNetCore Extensions</Product>
+    <MinVerTagPrefix>aaj-</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.2</MinVerMinimumMajorMinor>
+    <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
+  </PropertyGroup>
+
+</Project>

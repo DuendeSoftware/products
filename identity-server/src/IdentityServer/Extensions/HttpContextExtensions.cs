@@ -2,14 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
-using System.Linq;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 #pragma warning disable 1591
@@ -27,6 +24,23 @@ public static class HttpContextExtensions
     internal static bool GetSignOutCalled(this HttpContext context)
     {
         return context.Items.ContainsKey(Constants.EnvironmentKeys.SignOutCalled);
+    }
+
+    internal static void SetExpiredUserSession(this HttpContext context, UserSession userSession)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        context.Items[Constants.EnvironmentKeys.DetectedExpiredUserSession] = userSession;
+    }
+
+    internal static bool TryGetExpiredUserSession(this HttpContext context, out UserSession expiredUserSession)
+    {
+        expiredUserSession = null;
+        if (context.Items.TryGetValue(Constants.EnvironmentKeys.DetectedExpiredUserSession, out var userSession))
+        {
+            expiredUserSession = userSession as UserSession;
+        }
+
+        return expiredUserSession != null;
     }
 
     internal static async Task<string> GetIdentityServerSignoutFrameCallbackUrlAsync(this HttpContext context, LogoutMessage logoutMessage = null)

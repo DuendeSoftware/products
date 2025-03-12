@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores;
@@ -29,7 +27,7 @@ public interface IBackChannelAuthenticationRequestStore
     /// Gets the request.
     /// </summary>
     Task<BackChannelAuthenticationRequest?> GetByAuthenticationRequestIdAsync(string requestId);
-        
+
     /// <summary>
     /// Gets the request.
     /// </summary>

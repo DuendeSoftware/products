@@ -2,21 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using Microsoft.IdentityModel.JsonWebTokens;
-using System;
-using Duende.IdentityServer.Extensions;
-using System.Text.Json;
-using Duende.IdentityModel;
-using System.Linq;
-using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Models;
-using Microsoft.AspNetCore.DataProtection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -203,7 +199,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                     result.IsError = true;
                     result.ErrorDescription = "Missing 'cnf' value.";
                     return Task.CompletedTask;
-                } 
+                }
                 else if (cnfJson.TryGetValue(JwtClaimTypes.ConfirmationMethods.JwkThumbprint, out var jktJson))
                 {
                     var accessTokenJkt = jktJson.ToString();
@@ -407,7 +403,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         // longer than the likelyhood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = Options.DPoP.ProofTokenValidityDuration + skew;
-        
+
         Logger.LogDebug("Adding proof token with jti {jti} to replay cache for duration {cacheDuration}", result.TokenId, cacheDuration);
 
         await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, Clock.UtcNow.Add(cacheDuration));
@@ -514,11 +510,11 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                 return ValueTask.FromResult(iat);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
         }
-        
+
         return ValueTask.FromResult<long>(0);
     }
 
@@ -529,7 +525,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     protected virtual bool IsExpired(DPoPProofValidatonContext context, DPoPProofValidatonResult result, TimeSpan clockSkew, long issuedAtTime)
     {
         var now = Clock.UtcNow.ToUnixTimeSeconds();
-        var start = now + (int) clockSkew.TotalSeconds;
+        var start = now + (int)clockSkew.TotalSeconds;
         if (start < issuedAtTime)
         {
             var diff = issuedAtTime - now;
@@ -537,8 +533,8 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             return true;
         }
 
-        var expiration = issuedAtTime + (int) Options.DPoP.ProofTokenValidityDuration.TotalSeconds;
-        var end = now - (int) clockSkew.TotalSeconds;
+        var expiration = issuedAtTime + (int)Options.DPoP.ProofTokenValidityDuration.TotalSeconds;
+        var end = now - (int)clockSkew.TotalSeconds;
         if (expiration < end)
         {
             var diff = now - expiration;

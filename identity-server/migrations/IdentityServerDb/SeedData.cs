@@ -2,14 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Models;
 using IdentityServerHost.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace SqlServer;
 
@@ -19,11 +16,11 @@ public class SeedData
     {
         using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
         {
-            using (var context = scope.ServiceProvider.GetService<PersistedGrantDbContext>())
+            using (var context = scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>())
             {
                 context.Database.Migrate();
             }
-            using (var context = scope.ServiceProvider.GetService<ConfigurationDbContext>())
+            using (var context = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>())
             {
                 context.Database.Migrate();
                 EnsureSeedData(context);
@@ -108,7 +105,7 @@ public class SeedData
                 Authority = "https://accounts.google.com",
                 ClientId = "998042782978-gkes3j509qj26omrh6orvrnu0klpflh6.apps.googleusercontent.com",
                 Scope = "openid profile email",
-                Properties = 
+                Properties =
                 {
                     { "foo", "bar" }
                 }

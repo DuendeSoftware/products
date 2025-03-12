@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-
 namespace Duende.IdentityServer.Validation;
 
 /// <summary>
@@ -16,4 +14,3 @@ public interface IIntrospectionRequestValidator
     /// </summary>
     Task<IntrospectionRequestValidationResult> ValidateAsync(IntrospectionRequestValidationContext context);
 }
-

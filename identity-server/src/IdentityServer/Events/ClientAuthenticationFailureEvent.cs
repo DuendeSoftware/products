@@ -16,10 +16,10 @@ public class ClientAuthenticationFailureEvent : Event
     /// <param name="clientId">The client identifier.</param>
     /// <param name="message">The message.</param>
     public ClientAuthenticationFailureEvent(string clientId, string message)
-        : base(EventCategories.Authentication, 
+        : base(EventCategories.Authentication,
             "Client Authentication Failure",
-            EventTypes.Failure, 
-            EventIds.ClientAuthenticationFailure, 
+            EventTypes.Failure,
+            EventIds.ClientAuthenticationFailure,
             message)
     {
         ClientId = clientId;

@@ -2,23 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel.Client;
 using IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -205,6 +198,7 @@ public class IdentityServerPipeline
     public string LoginReturnUrl { get; set; }
     public AuthorizationRequest LoginRequest { get; set; }
     public ClaimsPrincipal Subject { get; set; }
+    public AuthenticationProperties AuthenticationProperties { get; set; }
 
     private async Task OnLogin(HttpContext ctx)
     {
@@ -236,7 +230,7 @@ public class IdentityServerPipeline
     {
         if (Subject != null)
         {
-            var props = new AuthenticationProperties();
+            var props = AuthenticationProperties ?? new AuthenticationProperties();
             await ctx.SignInAsync(Subject, props);
             Subject = null;
             var url = ctx.Request.Query[Options.UserInteraction.LoginReturnUrlParameter].FirstOrDefault();
@@ -321,20 +315,21 @@ public class IdentityServerPipeline
     }
 
     /* helpers */
-    public async Task LoginAsync(ClaimsPrincipal subject)
+    public async Task LoginAsync(ClaimsPrincipal subject, AuthenticationProperties authenticationProperties = null)
     {
         var old = BrowserClient.AllowAutoRedirect;
         BrowserClient.AllowAutoRedirect = false;
 
         Subject = subject;
+        AuthenticationProperties = authenticationProperties;
         await BrowserClient.GetAsync(LoginPage);
 
         BrowserClient.AllowAutoRedirect = old;
     }
 
-    public async Task LoginAsync(string subject)
+    public async Task LoginAsync(string subject, AuthenticationProperties authenticationProperties = null)
     {
-        await LoginAsync(new IdentityServerUser(subject).CreatePrincipal());
+        await LoginAsync(new IdentityServerUser(subject).CreatePrincipal(), authenticationProperties);
     }
     public async Task LogoutAsync()
     {
@@ -392,7 +387,7 @@ public class IdentityServerPipeline
     }
     public async Task<(JsonDocument, HttpStatusCode)> PushAuthorizationRequestAsync(
         Dictionary<string, string> parameters)
-    { 
+    {
         var httpResponse = await BackChannelClient.PostAsync(ParEndpoint,
             new FormUrlEncodedContent(parameters));
         var statusCode = httpResponse.StatusCode;
@@ -423,9 +418,9 @@ public class IdentityServerPipeline
                 { "state", state }
             };
 
-        if(extra != null)
+        if (extra != null)
         {
-            foreach(var (key, value) in extra)
+            foreach (var (key, value) in extra)
             {
                 parameters[key] = value;
             }
@@ -459,7 +454,7 @@ public class IdentityServerPipeline
 
         var url = CreateAuthorizeUrl(clientId, responseType, scope, redirectUri, state, nonce, loginHint, acrValues, responseMode, codeChallenge, codeChallengeMethod, requestUri, extra);
         var result = await BrowserClient.GetAsync(url);
-        result.StatusCode.Should().Be(HttpStatusCode.Found);
+        result.StatusCode.ShouldBe(HttpStatusCode.Found);
 
         BrowserClient.AllowAutoRedirect = old;
 
@@ -501,7 +496,7 @@ public class MockMessageHandler : DelegatingHandler
     }
 }
 
-public class MockExternalAuthenticationHandler : 
+public class MockExternalAuthenticationHandler :
     IAuthenticationHandler,
     IAuthenticationSignInHandler,
     IAuthenticationRequestHandler
@@ -509,7 +504,7 @@ public class MockExternalAuthenticationHandler :
     private readonly IHttpContextAccessor _httpContextAccessor;
     private HttpContext HttpContext => _httpContextAccessor.HttpContext;
 
-    public Func<HttpContext, Task<bool>> OnFederatedSignout = 
+    public Func<HttpContext, Task<bool>> OnFederatedSignout =
         async context =>
         {
             await context.SignOutAsync();

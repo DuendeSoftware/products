@@ -6,8 +6,6 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Http;
 

@@ -1,13 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Xunit;
-using Duende.IdentityServer.Validation;
 using System.Collections.Specialized;
-using FluentAssertions;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Validation;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -37,7 +33,7 @@ public class ParRedirectUriValidatorTests
             }
         });
 
-        result.Should().Be(true);
+        result.ShouldBe(true);
     }
 
     [Fact]
@@ -63,7 +59,7 @@ public class ParRedirectUriValidatorTests
             }
         });
 
-        result.Should().Be(true);
+        result.ShouldBe(true);
     }
 
     [Fact]
@@ -87,8 +83,8 @@ public class ParRedirectUriValidatorTests
             RequestedUri = notThePushedRedirectUri,
             Client = new Client()
         });
-        
-        result.Should().Be(false);
+
+        result.ShouldBe(false);
     }
 
     [Fact]
@@ -115,9 +111,9 @@ public class ParRedirectUriValidatorTests
                 RedirectUris = { "https://registered.example.com" }
             }
         });
-        
-        registeredRedirectUri.Should().NotBe(pushedRedirectUri);
-        result.Should().Be(true);
+
+        registeredRedirectUri.ShouldNotBe(pushedRedirectUri);
+        result.ShouldBe(true);
     }
 
     [Fact]
@@ -144,8 +140,8 @@ public class ParRedirectUriValidatorTests
                 RedirectUris = { "https://registered.example.com" }
             }
         });
-        
-        registeredRedirectUri.Should().NotBe(requestedRedirectUri);
-        result.Should().Be(false);
+
+        registeredRedirectUri.ShouldNotBe(requestedRedirectUri);
+        result.ShouldBe(false);
     }
 }

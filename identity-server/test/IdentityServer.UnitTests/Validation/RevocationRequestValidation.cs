@@ -1,17 +1,13 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -56,8 +52,8 @@ public class RevocationRequestValidation
 
         var result = await _validator.ValidateRequestAsync(parameters, _client);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidRequest);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
     }
 
     [Fact]
@@ -71,8 +67,8 @@ public class RevocationRequestValidation
 
         var result = await _validator.ValidateRequestAsync(parameters, _client);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidRequest);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
     }
 
     [Fact]
@@ -87,9 +83,9 @@ public class RevocationRequestValidation
 
         var result = await _validator.ValidateRequestAsync(parameters, _client);
 
-        result.IsError.Should().BeFalse();
-        result.Token.Should().Be("foo");
-        result.TokenTypeHint.Should().Be("access_token");
+        result.IsError.ShouldBeFalse();
+        result.Token.ShouldBe("foo");
+        result.TokenTypeHint.ShouldBe("access_token");
     }
 
     [Fact]
@@ -104,9 +100,9 @@ public class RevocationRequestValidation
 
         var result = await _validator.ValidateRequestAsync(parameters, _client);
 
-        result.IsError.Should().BeFalse();
-        result.Token.Should().Be("foo");
-        result.TokenTypeHint.Should().Be("refresh_token");
+        result.IsError.ShouldBeFalse();
+        result.Token.ShouldBe("foo");
+        result.TokenTypeHint.ShouldBe("refresh_token");
     }
 
     [Fact]
@@ -120,9 +116,9 @@ public class RevocationRequestValidation
 
         var result = await _validator.ValidateRequestAsync(parameters, _client);
 
-        result.IsError.Should().BeFalse();
-        result.Token.Should().Be("foo");
-        result.TokenTypeHint.Should().BeNull();
+        result.IsError.ShouldBeFalse();
+        result.Token.ShouldBe("foo");
+        result.TokenTypeHint.ShouldBeNull();
     }
 
     [Fact]
@@ -137,7 +133,7 @@ public class RevocationRequestValidation
 
         var result = await _validator.ValidateRequestAsync(parameters, _client);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(Constants.RevocationErrors.UnsupportedTokenType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(Constants.RevocationErrors.UnsupportedTokenType);
     }
 }

@@ -2,20 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
 using System.Net;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Authentication;
-using Xunit;
 using Microsoft.AspNetCore.Http;
+using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
 
@@ -36,10 +31,10 @@ public class DefaultUserSessionTests
 
         _user = new IdentityServerUser("123").CreatePrincipal();
         _subject = new DefaultUserSession(
-            _mockHttpContext, 
+            _mockHttpContext,
             _mockAuthenticationHandlerProvider,
             _options,
-            new StubClock(), 
+            new StubClock(),
             new MockServerUrls { Origin = "https://server" },
             TestLogger.Create<DefaultUserSession>());
     }
@@ -49,7 +44,7 @@ public class DefaultUserSessionTests
     {
         await _subject.CreateSessionIdAsync(_user, _props);
 
-        _props.GetSessionId().Should().NotBeNull();
+        _props.GetSessionId().ShouldNotBeNull();
     }
 
     [Fact]
@@ -62,8 +57,8 @@ public class DefaultUserSessionTests
         newProps.SetSessionId("999");
         await _subject.CreateSessionIdAsync(_user, newProps);
 
-        newProps.GetSessionId().Should().NotBeNull();
-        newProps.GetSessionId().Should().Be("999");
+        newProps.GetSessionId().ShouldNotBeNull();
+        newProps.GetSessionId().ShouldBe("999");
     }
 
     [Fact]
@@ -71,12 +66,12 @@ public class DefaultUserSessionTests
     {
         _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
-        _props.GetSessionId().Should().BeNull();
+        _props.GetSessionId().ShouldBeNull();
 
         var newProps = new AuthenticationProperties();
         await _subject.CreateSessionIdAsync(_user, newProps);
 
-        newProps.GetSessionId().Should().NotBeNull();
+        newProps.GetSessionId().ShouldNotBeNull();
     }
 
     [Fact]
@@ -88,10 +83,10 @@ public class DefaultUserSessionTests
         var newProps = new AuthenticationProperties();
         await _subject.CreateSessionIdAsync(new IdentityServerUser("alice").CreatePrincipal(), newProps);
 
-        newProps.GetSessionId().Should().NotBeNull();
-        newProps.GetSessionId().Should().NotBe("999");
+        newProps.GetSessionId().ShouldNotBeNull();
+        newProps.GetSessionId().ShouldNotBe("999");
     }
-        
+
     [Fact]
     public async Task CreateSessionId_when_user_is_authenticated_and_same_sub_should_preserve_sid()
     {
@@ -101,8 +96,8 @@ public class DefaultUserSessionTests
         var newProps = new AuthenticationProperties();
         await _subject.CreateSessionIdAsync(_user, newProps);
 
-        newProps.GetSessionId().Should().NotBeNull();
-        newProps.GetSessionId().Should().Be("999");
+        newProps.GetSessionId().ShouldNotBeNull();
+        newProps.GetSessionId().ShouldBe("999");
     }
 
     [Fact]
@@ -116,7 +111,7 @@ public class DefaultUserSessionTests
         _mockHttpContext.HttpContext.Response.Headers.Clear();
 
         var cookie = cookieContainer.GetCookies(new Uri("http://server")).FirstOrDefault(x => x.Name == _options.Authentication.CheckSessionCookieName);
-        cookie.Value.Should().Be(_props.GetSessionId());
+        cookie.Value.ShouldBe(_props.GetSessionId());
     }
 
     [Fact]
@@ -133,7 +128,7 @@ public class DefaultUserSessionTests
         _mockHttpContext.HttpContext.Response.Headers.Clear();
 
         var cookie = cookieContainer.GetCookies(new Uri("http://server")).FirstOrDefault(x => x.Name == _options.Authentication.CheckSessionCookieName);
-        cookie.Value.Should().Be("999");
+        cookie.Value.ShouldBe("999");
     }
 
     [Fact]
@@ -147,7 +142,7 @@ public class DefaultUserSessionTests
         _mockHttpContext.HttpContext.Response.Headers.Clear();
 
         var cookie = cookieContainer.GetCookies(new Uri("http://server")).FirstOrDefault(x => x.Name == _options.Authentication.CheckSessionCookieName);
-        cookie.Should().BeNull();
+        cookie.ShouldBeNull();
     }
 
     [Fact]
@@ -172,7 +167,7 @@ public class DefaultUserSessionTests
         cookieContainer.SetCookies(new Uri("http://server"), string.Join(',', cookies));
 
         var query = cookieContainer.GetCookies(new Uri("http://server")).Cast<Cookie>().Where(x => x.Name == _options.Authentication.CheckSessionCookieName);
-        query.Count().Should().Be(0);
+        query.Count().ShouldBe(0);
     }
 
     [Fact]
@@ -182,14 +177,14 @@ public class DefaultUserSessionTests
         _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
         var sid = await _subject.GetSessionIdAsync();
-        sid.Should().Be("999");
+        sid.ShouldBe("999");
     }
 
     [Fact]
     public async Task GetCurrentSessionIdAsync_when_user_is_anonymous_should_return_null()
     {
         var sid = await _subject.GetSessionIdAsync();
-        sid.Should().BeNull();
+        sid.ShouldBeNull();
     }
 
     [Fact]
@@ -197,9 +192,9 @@ public class DefaultUserSessionTests
     {
         _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
-        _props.Items.Count.Should().Be(0);
+        _props.Items.Count.ShouldBe(0);
         await _subject.AddClientIdAsync("client");
-        _props.Items.Count.Should().Be(1);
+        _props.Items.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -208,9 +203,9 @@ public class DefaultUserSessionTests
         _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
         var user = await _subject.GetUserAsync();
-        user.GetSubjectId().Should().Be("123");
+        user.GetSubjectId().ShouldBe("123");
     }
-    
+
     [Fact]
     public async Task when_handler_successful_and_identity_is_anonymous_GetIdentityServerUserAsync_should_should_return_null()
     {
@@ -218,14 +213,14 @@ public class DefaultUserSessionTests
         _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(cp, _props, "scheme"));
 
         var user = await _subject.GetUserAsync();
-        user.Should().BeNull();
+        user.ShouldBeNull();
     }
 
     [Fact]
     public async Task when_anonymous_GetIdentityServerUserAsync_should_return_null()
     {
         var user = await _subject.GetUserAsync();
-        user.Should().BeNull();
+        user.ShouldBeNull();
     }
 
     [Fact]
@@ -238,8 +233,8 @@ public class DefaultUserSessionTests
         _props.Items[item.Key] = "junk";
 
         var clients = await _subject.GetClientListAsync();
-        clients.Should().BeEmpty();
-        _props.Items.Count.Should().Be(0);
+        clients.ShouldBeEmpty();
+        _props.Items.Count.ShouldBe(0);
     }
 
     [Fact]
@@ -249,7 +244,7 @@ public class DefaultUserSessionTests
 
         await _subject.AddClientIdAsync("client");
         var clients = await _subject.GetClientListAsync();
-        clients.Should().Contain(new string[] { "client" });
+        clients.ShouldBe(["client"]);
     }
 
     [Fact]
@@ -260,7 +255,7 @@ public class DefaultUserSessionTests
         await _subject.AddClientIdAsync("client1");
         await _subject.AddClientIdAsync("client2");
         var clients = await _subject.GetClientListAsync();
-        clients.Should().Contain(new string[] { "client2", "client1" });
+        clients.ShouldBe(["client2", "client1"], true);
     }
 
     [Fact]
@@ -271,10 +266,10 @@ public class DefaultUserSessionTests
         const string clientId = "client";
         await _subject.AddClientIdAsync(clientId);
         await _subject.AddClientIdAsync(clientId);
-        
+
         var clients = await _subject.GetClientListAsync();
-        
-        _props.Items.Count.Should().Be(1);
-        clients.Should().BeEquivalentTo([clientId]);
+
+        _props.Items.Count.ShouldBe(1);
+        clients.ShouldBe([clientId]);
     }
 }

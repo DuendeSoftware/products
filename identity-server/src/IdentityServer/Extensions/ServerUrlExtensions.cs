@@ -4,8 +4,6 @@
 
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Linq;
 
 namespace Duende.IdentityServer.Extensions;
 
@@ -22,7 +20,7 @@ public static class ServerUrlExtensions
         var split = urls.Origin.Split("://", StringSplitOptions.RemoveEmptyEntries);
         var scheme = split.First();
         var host = HostString.FromUriComponent(split.Last()).Value;
-            
+
         return scheme + "://" + host;
     }
 

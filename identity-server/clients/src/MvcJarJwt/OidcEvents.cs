@@ -1,4 +1,6 @@
-using System.Threading.Tasks;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
@@ -12,7 +14,7 @@ public class OidcEvents : OpenIdConnectEvents
     {
         _assertionService = assertionService;
     }
-    
+
     public override Task AuthorizationCodeReceived(AuthorizationCodeReceivedContext context)
     {
         context.TokenEndpointRequest.ClientAssertionType = OidcConstants.ClientAssertionTypes.JwtBearer;

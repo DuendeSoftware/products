@@ -1,0 +1,25 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "IdentityServer"
+  ],
+  "name": "Duende IdentityServer Empty",
+  "identity": "Duende.IdentityServer.Empty",
+  "groupIdentity": "Duende.IdentityServer.Empty",
+  "shortName": [
+    "duende-is-empty"
+  ],
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "IdentityServerEmpty",
+  "preferNameDirectory": "true",
+  "primaryOutputs": [
+    {
+      "path": "IdentityServerEmpty.csproj"
+    }
+  ]
+}

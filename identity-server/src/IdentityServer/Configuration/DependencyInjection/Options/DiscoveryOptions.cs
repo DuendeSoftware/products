@@ -5,8 +5,6 @@
 #nullable enable
 
 
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Configuration;
 
 /// <summary>

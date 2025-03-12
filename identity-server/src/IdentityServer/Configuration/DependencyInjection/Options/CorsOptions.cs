@@ -6,9 +6,6 @@
 
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using static Duende.IdentityServer.IdentityServerConstants;
 
 namespace Duende.IdentityServer.Configuration;

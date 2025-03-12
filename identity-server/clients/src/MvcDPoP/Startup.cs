@@ -1,14 +1,13 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text.Json;
 using Clients;
 using Duende.AccessTokenManagement;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Reflection.PortableExecutable;
-using System.Security.Cryptography;
-using System.Text.Json;
 
 namespace MvcDPoP;
 

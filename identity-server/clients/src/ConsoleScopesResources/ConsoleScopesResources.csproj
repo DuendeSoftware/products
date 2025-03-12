@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <OutputType>Exe</OutputType>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Constants\Constants.csproj"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Constants\Constants.csproj" />
+  </ItemGroup>
 
 </Project>

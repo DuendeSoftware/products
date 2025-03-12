@@ -3,15 +3,14 @@
 
 
 using System.Net;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -36,7 +35,7 @@ internal class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
     public override async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Authorize + "CallbackEndpoint");
-        
+
         if (!HttpMethods.IsGet(context.Request.Method))
         {
             Logger.LogWarning("Invalid HTTP method for authorize endpoint.");

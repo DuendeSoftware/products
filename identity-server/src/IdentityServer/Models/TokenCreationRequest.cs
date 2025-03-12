@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System;
 using System.Security.Claims;
 using Duende.IdentityServer.Validation;
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -16,10 +16,10 @@ public class ApiAuthenticationFailureEvent : Event
     /// <param name="apiName">Name of the API.</param>
     /// <param name="message">The message.</param>
     public ApiAuthenticationFailureEvent(string apiName, string message)
-        : base(EventCategories.Authentication, 
+        : base(EventCategories.Authentication,
             "API Authentication Failure",
-            EventTypes.Failure, 
-            EventIds.ApiAuthenticationFailure, 
+            EventTypes.Failure,
+            EventIds.ApiAuthenticationFailure,
             message)
     {
         ApiName = apiName;

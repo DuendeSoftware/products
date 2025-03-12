@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net.Http;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 
@@ -43,11 +39,11 @@ public class RefreshTokenClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         response = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -58,11 +54,11 @@ public class RefreshTokenClient
             RefreshToken = response.RefreshToken
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
     }
 
     [Fact]
@@ -79,11 +75,11 @@ public class RefreshTokenClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         response = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -94,11 +90,11 @@ public class RefreshTokenClient
             RefreshToken = response.RefreshToken
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().NotBeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldNotBeNull();
+        response.RefreshToken.ShouldNotBeNull();
     }
 
     [Fact]
@@ -115,11 +111,11 @@ public class RefreshTokenClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var rt1 = response.RefreshToken;
 
@@ -132,17 +128,17 @@ public class RefreshTokenClient
             RefreshToken = response.RefreshToken
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().NotBeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldNotBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var rt2 = response.RefreshToken;
 
-        rt1.Should().BeEquivalentTo(rt2);
+        rt1.ShouldBe(rt2);
     }
-        
+
     [Fact]
     public async Task Refreshing_a_refresh_token_with_one_time_only_should_return_different_refresh_token()
     {
@@ -157,11 +153,11 @@ public class RefreshTokenClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var rt1 = response.RefreshToken;
 
@@ -174,17 +170,17 @@ public class RefreshTokenClient
             RefreshToken = response.RefreshToken
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().NotBeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldNotBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var rt2 = response.RefreshToken;
 
-        rt1.Should().NotBeEquivalentTo(rt2);
+        rt1.ShouldNotBe(rt2);
     }
-        
+
     [Fact]
     public async Task Replaying_a_rotated_token_should_fail()
     {
@@ -200,11 +196,11 @@ public class RefreshTokenClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var rt1 = response.RefreshToken;
 
@@ -218,12 +214,12 @@ public class RefreshTokenClient
             RefreshToken = response.RefreshToken
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().NotBeNull();
-        response.RefreshToken.Should().NotBeNull();
-            
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldNotBeNull();
+        response.RefreshToken.ShouldNotBeNull();
+
         // refresh token (again)
         response = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -234,10 +230,10 @@ public class RefreshTokenClient
             RefreshToken = rt1
         });
 
-        response.IsError.Should().BeTrue();
-        response.Error.Should().Be("invalid_grant");
+        response.IsError.ShouldBeTrue();
+        response.Error.ShouldBe("invalid_grant");
     }
-        
+
     [Fact]
     public async Task Using_a_valid_refresh_token_should_succeed()
     {
@@ -253,11 +249,11 @@ public class RefreshTokenClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var rt1 = response.RefreshToken;
 
@@ -271,9 +267,9 @@ public class RefreshTokenClient
             RefreshToken = rt1
         });
 
-        response.IsError.Should().BeFalse();
+        response.IsError.ShouldBeFalse();
     }
-        
+
     [Fact]
     public async Task Using_a_revoked_refresh_token_should_fail()
     {
@@ -289,11 +285,11 @@ public class RefreshTokenClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
-        response.ExpiresIn.Should().Be(3600);
-        response.TokenType.Should().Be("Bearer");
-        response.IdentityToken.Should().BeNull();
-        response.RefreshToken.Should().NotBeNull();
+        response.IsError.ShouldBeFalse();
+        response.ExpiresIn.ShouldBe(3600);
+        response.TokenType.ShouldBe("Bearer");
+        response.IdentityToken.ShouldBeNull();
+        response.RefreshToken.ShouldNotBeNull();
 
         var rt1 = response.RefreshToken;
 
@@ -309,8 +305,8 @@ public class RefreshTokenClient
             TokenTypeHint = "refresh_token"
         });
 
-        revocationResponse.IsError.Should().Be(false);
-            
+        revocationResponse.IsError.ShouldBe(false);
+
         // refresh token
         response = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -321,7 +317,7 @@ public class RefreshTokenClient
             RefreshToken = rt1
         });
 
-        response.IsError.Should().BeTrue();
-        response.Error.Should().Be("invalid_grant");
+        response.IsError.ShouldBeTrue();
+        response.Error.ShouldBe("invalid_grant");
     }
 }

@@ -5,15 +5,12 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Cors;
 
@@ -48,7 +45,7 @@ public class PolicyProviderTests
 
 
         _subject = new CorsPolicyProvider(
-            TestLogger.Create<CorsPolicyProvider>(),
+            new SanitizedLogger<CorsPolicyProvider>(TestLogger.Create<CorsPolicyProvider>()),
             new Decorator<ICorsPolicyProvider>(_mockInner),
             _options, provider);
     }
@@ -77,8 +74,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeTrue();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeTrue();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 
     [Theory]
@@ -105,8 +102,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeFalse();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeFalse();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 
     [Fact]
@@ -128,8 +125,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, "wrong_name");
 
-        _mockPolicy.WasCalled.Should().BeFalse();
-        _mockInner.WasCalled.Should().BeTrue();
+        _mockPolicy.WasCalled.ShouldBeFalse();
+        _mockInner.WasCalled.ShouldBeTrue();
     }
 
     [Fact]
@@ -149,8 +146,8 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeFalse();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeFalse();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 
     [Theory]
@@ -172,7 +169,7 @@ public class PolicyProviderTests
 
         var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
-        _mockPolicy.WasCalled.Should().BeTrue();
-        _mockInner.WasCalled.Should().BeFalse();
+        _mockPolicy.WasCalled.ShouldBeTrue();
+        _mockInner.WasCalled.ShouldBeFalse();
     }
 }

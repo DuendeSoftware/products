@@ -2,15 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityModel;
-using Duende.IdentityServer.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+using Duende.IdentityModel;
+using Duende.IdentityServer.Extensions;
 
 #pragma warning disable 1591
 
@@ -43,8 +40,8 @@ public static class ValidatedAuthorizeRequestExtensions
         }
 
         request.Raw.Add(Constants.ProcessedPrompt, suppress.ToString());
-        request.PromptModes = request.PromptModes.Except(new[] { 
-            OidcConstants.PromptModes.Login, 
+        request.PromptModes = request.PromptModes.Except(new[] {
+            OidcConstants.PromptModes.Login,
             OidcConstants.PromptModes.SelectAccount,
             OidcConstants.PromptModes.Create
         }).ToArray();
@@ -126,7 +123,7 @@ public static class ValidatedAuthorizeRequestExtensions
 
     public static void AddAcrValue(this ValidatedAuthorizeRequest request, string value)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(value);
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
 
         request.AuthenticationContextReferenceClasses.Add(value);
         var acr_values = request.AuthenticationContextReferenceClasses.ToSpaceSeparatedString();
@@ -171,10 +168,10 @@ public static class ValidatedAuthorizeRequestExtensions
                 // https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests 
                 // requires client id and response type to always be in URL
                 if (key == OidcConstants.AuthorizeRequest.ClientId ||
-                    key == OidcConstants.AuthorizeRequest.ResponseType ||  
+                    key == OidcConstants.AuthorizeRequest.ResponseType ||
                     request.RequestObjectValues.All(x => x.Type != key))
                 {
-                    foreach(var value in request.Raw.GetValues(key))
+                    foreach (var value in request.Raw.GetValues(key))
                     {
                         collection.Add(key, value);
                     }
@@ -186,7 +183,7 @@ public static class ValidatedAuthorizeRequestExtensions
 
         return request.Raw;
     }
-        
+
     public static string ToOptimizedQueryString(this ValidatedAuthorizeRequest request)
     {
         return request.ToOptimizedRawValues().ToQueryString();
@@ -195,6 +192,16 @@ public static class ValidatedAuthorizeRequestExtensions
     [Obsolete("This method is obsolete and will be removed in a future version.")]
     public static IDictionary<string, string[]> ToOptimizedFullDictionary(this ValidatedAuthorizeRequest request)
     {
-        return request.ToOptimizedRawValues().ToFullDictionary();
+        var collection = request.ToOptimizedRawValues();
+
+        // Filter client authentication out of the dictionary that we're building
+        // It's possible for a PAR request to include client auth and we don't want
+        // that to cause these values to get passed into the (obsolete) authorization
+        // parameters message store, where they might get logged or otherwise stored
+        // insecurely.
+        collection.Remove(OidcConstants.TokenRequest.ClientAssertion);
+        collection.Remove(OidcConstants.TokenRequest.ClientSecret);
+
+        return collection.ToFullDictionary();
     }
 }

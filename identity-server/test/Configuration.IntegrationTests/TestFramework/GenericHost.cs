@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
 
 namespace IntegrationTests.TestFramework;
 

@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace IntegrationTests.Hosting;
 
@@ -86,12 +81,12 @@ public class CorsTests
     {
         _pipeline.BackChannelClient.DefaultRequestHeaders.Add("Origin", "https://client");
         _pipeline.BackChannelClient.DefaultRequestHeaders.Add("Access-Control-Request-Method", "GET");
-            
+
         var message = new HttpRequestMessage(HttpMethod.Options, url);
         var response = await _pipeline.BackChannelClient.SendAsync(message);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        response.Headers.Contains("Access-Control-Allow-Origin").Should().BeTrue();
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        response.Headers.Contains("Access-Control-Allow-Origin").ShouldBeTrue();
     }
 
     [Theory]
@@ -110,7 +105,7 @@ public class CorsTests
         var message = new HttpRequestMessage(HttpMethod.Options, url);
         var response = await _pipeline.BackChannelClient.SendAsync(message);
 
-        response.Headers.Contains("Access-Control-Allow-Origin").Should().BeFalse();
+        response.Headers.Contains("Access-Control-Allow-Origin").ShouldBeFalse();
     }
 
     [Fact]
@@ -130,7 +125,7 @@ public class CorsTests
         var message = new HttpRequestMessage(HttpMethod.Options, IdentityServerPipeline.DiscoveryEndpoint);
         var response = await _pipeline.BackChannelClient.SendAsync(message);
 
-        policy.WasCalled.Should().BeTrue();
+        policy.WasCalled.ShouldBeTrue();
     }
 }
 

@@ -2,19 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.TokenRequest_Validation;
 
@@ -39,10 +33,10 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.UserName.Should().Be("bob_no_password");
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.UserName.ShouldBe("bob_no_password");
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task Valid_code_request_should_succeed()
@@ -75,7 +69,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -111,7 +105,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -128,7 +122,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -141,11 +135,11 @@ public class TokenRequestValidation_Valid
 
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.TokenRequest.GrantType, OidcConstants.GrantTypes.ClientCredentials);
-            
+
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -162,7 +156,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -179,7 +173,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -198,7 +192,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -217,7 +211,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -236,7 +230,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -253,7 +247,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -290,7 +284,7 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -322,9 +316,9 @@ public class TokenRequestValidation_Valid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task Valid_device_code_request_should_succeed()
@@ -352,6 +346,6 @@ public class TokenRequestValidation_Valid
         };
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 }

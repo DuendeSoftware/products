@@ -2,16 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using UnitTests.Common;
-using Xunit;
 using static Duende.IdentityModel.OidcConstants;
 
 namespace UnitTests.ResponseHandling.AuthorizeInteractionResponseGenerator;
@@ -57,8 +52,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -84,8 +79,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -107,8 +102,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -131,8 +126,8 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -154,7 +149,7 @@ public class AuthorizeInteractionResponseGeneratorTests
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.IsLogin.Should().BeFalse();
+        result.IsError.ShouldBeTrue();
+        result.IsLogin.ShouldBeFalse();
     }
 }

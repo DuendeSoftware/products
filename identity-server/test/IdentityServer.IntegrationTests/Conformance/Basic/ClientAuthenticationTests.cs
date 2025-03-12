@@ -2,21 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
-using Duende.IdentityModel.Client;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Conformance.Basic;
 
-public class ClientAuthenticationTests 
+public class ClientAuthenticationTests
 {
     private const string Category = "Conformance.Basic.ClientAuthenticationTests";
 
@@ -79,7 +73,7 @@ public class ClientAuthenticationTests
         var response = await _pipeline.BrowserClient.GetAsync(url);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
-        authorization.Code.Should().NotBeNull();
+        authorization.Code.ShouldNotBeNull();
 
         var code = authorization.Code;
 
@@ -96,15 +90,15 @@ public class ClientAuthenticationTests
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
         });
 
-        tokenResult.IsError.Should().BeFalse();
-        tokenResult.HttpErrorReason.Should().Be("OK");
-        tokenResult.TokenType.Should().Be("Bearer");
-        tokenResult.AccessToken.Should().NotBeNull();
-        tokenResult.ExpiresIn.Should().BeGreaterThan(0);
-        tokenResult.IdentityToken.Should().NotBeNull();
+        tokenResult.IsError.ShouldBeFalse();
+        tokenResult.HttpErrorReason.ShouldBe("OK");
+        tokenResult.TokenType.ShouldBe("Bearer");
+        tokenResult.AccessToken.ShouldNotBeNull();
+        tokenResult.ExpiresIn.ShouldBeGreaterThan(0);
+        tokenResult.IdentityToken.ShouldNotBeNull();
 
-        wrapper.Response.Headers.CacheControl.NoCache.Should().BeTrue();
-        wrapper.Response.Headers.CacheControl.NoStore.Should().BeTrue();
+        wrapper.Response.Headers.CacheControl.NoCache.ShouldBeTrue();
+        wrapper.Response.Headers.CacheControl.NoStore.ShouldBeTrue();
     }
 
     [Fact]
@@ -125,7 +119,7 @@ public class ClientAuthenticationTests
         var response = await _pipeline.BrowserClient.GetAsync(url);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
-        authorization.Code.Should().NotBeNull();
+        authorization.Code.ShouldNotBeNull();
 
         var code = authorization.Code;
 
@@ -143,11 +137,11 @@ public class ClientAuthenticationTests
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
         });
 
-        tokenResult.IsError.Should().BeFalse();
-        tokenResult.HttpErrorReason.Should().Be("OK");
-        tokenResult.TokenType.Should().Be("Bearer");
-        tokenResult.AccessToken.Should().NotBeNull();
-        tokenResult.ExpiresIn.Should().BeGreaterThan(0);
-        tokenResult.IdentityToken.Should().NotBeNull();
+        tokenResult.IsError.ShouldBeFalse();
+        tokenResult.HttpErrorReason.ShouldBe("OK");
+        tokenResult.TokenType.ShouldBe("Bearer");
+        tokenResult.AccessToken.ShouldNotBeNull();
+        tokenResult.ExpiresIn.ShouldBeGreaterThan(0);
+        tokenResult.IdentityToken.ShouldNotBeNull();
     }
 }

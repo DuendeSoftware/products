@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.ResponseHandling.AuthorizeInteractionResponseGenerator;
 
@@ -45,7 +40,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -64,7 +59,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -73,12 +68,13 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
         var request = new ValidatedAuthorizeRequest
         {
             ClientId = "foo",
-            Subject = new IdentityServerUser("123") {
+            Subject = new IdentityServerUser("123")
+            {
                 IdentityProvider = IdentityServerConstants.LocalIdentityProvider
             }.CreatePrincipal(),
-            Client = new Client 
+            Client = new Client
             {
-                IdentityProviderRestrictions = new List<string> 
+                IdentityProviderRestrictions = new List<string>
                 {
                     IdentityServerConstants.LocalIdentityProvider
                 }
@@ -87,7 +83,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -103,7 +99,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             Client = new Client
             {
                 EnableLocalLogin = false,
-                IdentityProviderRestrictions = new List<string> 
+                IdentityProviderRestrictions = new List<string>
                 {
                     "some_idp"
                 }
@@ -112,7 +108,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -133,7 +129,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -154,7 +150,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -163,7 +159,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
         var request = new ValidatedAuthorizeRequest
         {
             ClientId = "foo",
-            Client = new Client() {
+            Client = new Client()
+            {
                 UserSsoLifetime = 3600 // 1h
             },
             Subject = new IdentityServerUser("123")
@@ -175,7 +172,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeFalse();
+        result.IsLogin.ShouldBeFalse();
     }
 
     [Fact]
@@ -197,7 +194,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -218,7 +215,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -234,7 +231,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -250,7 +247,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        result.IsLogin.Should().BeTrue();
+        result.IsLogin.ShouldBeTrue();
     }
 
     [Fact]
@@ -269,6 +266,6 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
 
         var result = await _subject.ProcessLoginAsync(request);
 
-        request.Raw.AllKeys.Should().Contain(Constants.ProcessedPrompt);
+        request.Raw.AllKeys.ShouldContain(Constants.ProcessedPrompt);
     }
 }

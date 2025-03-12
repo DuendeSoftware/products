@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -19,7 +16,7 @@ public class NumericUserCodeGeneratorTests
         var userCode = await sut.GenerateAsync();
         var userCodeInt = int.Parse(userCode);
 
-        userCodeInt.Should().BeGreaterOrEqualTo(100000000);
-        userCodeInt.Should().BeLessOrEqualTo(999999999);
+        userCodeInt.ShouldBeGreaterThanOrEqualTo(100000000);
+        userCodeInt.ShouldBeLessThanOrEqualTo(999999999);
     }
 }

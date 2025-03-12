@@ -1,12 +1,9 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
 using System.Net;
-using System.Threading.Tasks;
-using FluentAssertions;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Endpoints.CheckSession;
 
@@ -27,6 +24,6 @@ public class CheckSessionTests
     {
         var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.CheckSessionEndpoint);
 
-        response.StatusCode.Should().NotBe(HttpStatusCode.NotFound);
+        response.StatusCode.ShouldNotBe(HttpStatusCode.NotFound);
     }
 }

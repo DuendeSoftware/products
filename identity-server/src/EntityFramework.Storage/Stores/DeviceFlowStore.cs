@@ -2,18 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityModel;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Services;
 
 namespace Duende.IdentityServer.EntityFramework.Stores;
 
@@ -51,9 +48,9 @@ public class DeviceFlowStore : IDeviceFlowStore
     /// <param name="logger">The logger.</param>
     /// <param name="cancellationTokenProvider"></param>
     public DeviceFlowStore(
-        IPersistedGrantDbContext context, 
+        IPersistedGrantDbContext context,
         IPersistentGrantSerializer serializer,
-        ILogger<DeviceFlowStore> logger, 
+        ILogger<DeviceFlowStore> logger,
         ICancellationTokenProvider cancellationTokenProvider)
     {
         Context = context;
@@ -72,7 +69,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     public virtual async Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.StoreDeviceAuthorization");
-        
+
         Context.DeviceFlowCodes.Add(ToEntity(data, deviceCode, userCode));
 
         await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
@@ -86,7 +83,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     public virtual async Task<DeviceCode> FindByUserCodeAsync(string userCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.FindByUserCode");
-        
+
         var deviceFlowCodes = (await Context.DeviceFlowCodes.AsNoTracking().Where(x => x.UserCode == userCode)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))
             .SingleOrDefault(x => x.UserCode == userCode);
@@ -105,7 +102,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     public virtual async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.FindByDeviceCode");
-        
+
         var deviceFlowCodes = (await Context.DeviceFlowCodes.AsNoTracking().Where(x => x.DeviceCode == deviceCode)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))
             .SingleOrDefault(x => x.DeviceCode == deviceCode);
@@ -125,7 +122,7 @@ public class DeviceFlowStore : IDeviceFlowStore
     public virtual async Task UpdateByUserCodeAsync(string userCode, DeviceCode data)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.UpdateByUserCode");
-        
+
         var existing = (await Context.DeviceFlowCodes.Where(x => x.UserCode == userCode)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))
             .SingleOrDefault(x => x.UserCode == userCode);
@@ -160,12 +157,12 @@ public class DeviceFlowStore : IDeviceFlowStore
     public virtual async Task RemoveByDeviceCodeAsync(string deviceCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.RemoveByDeviceCode");
-        
+
         var deviceFlowCodes = (await Context.DeviceFlowCodes.Where(x => x.DeviceCode == deviceCode)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))
             .SingleOrDefault(x => x.DeviceCode == deviceCode);
 
-        if(deviceFlowCodes != null)
+        if (deviceFlowCodes != null)
         {
             Logger.LogDebug("removing {deviceCode} device code from database", deviceCode);
 

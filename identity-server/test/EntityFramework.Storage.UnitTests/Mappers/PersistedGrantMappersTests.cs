@@ -3,10 +3,8 @@
 
 
 using Duende.IdentityServer.EntityFramework.Mappers;
-using FluentAssertions;
-using Xunit;
-using Models = Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
+using Models = Duende.IdentityServer.Models;
 
 namespace EntityFramework.Storage.UnitTests.Mappers;
 
@@ -19,12 +17,12 @@ public class PersistedGrantMappersTests
         {
             ConsumedTime = new System.DateTime(2020, 02, 03, 4, 5, 6)
         };
-            
+
         var mappedEntity = model.ToEntity();
-        mappedEntity.ConsumedTime.Value.Should().Be(new System.DateTime(2020, 02, 03, 4, 5, 6));
-            
+        mappedEntity.ConsumedTime.Value.ShouldBe(new System.DateTime(2020, 02, 03, 4, 5, 6));
+
         var mappedModel = mappedEntity.ToModel();
-        mappedModel.ConsumedTime.Value.Should().Be(new System.DateTime(2020, 02, 03, 4, 5, 6));
+        mappedModel.ConsumedTime.Value.ShouldBe(new System.DateTime(2020, 02, 03, 4, 5, 6));
 
         Assert.NotNull(mappedModel);
         Assert.NotNull(mappedEntity);
@@ -44,8 +42,7 @@ public class PersistedGrantMappersTests
 
         MapperTestHelpers
             .AllPropertiesAreMapped<Models.PersistedGrant, Entities.PersistedGrant>(source => source.ToEntity(), excludedProperties, out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
     [Fact]
@@ -53,7 +50,6 @@ public class PersistedGrantMappersTests
     {
         MapperTestHelpers
             .AllPropertiesAreMapped<Entities.PersistedGrant, Models.PersistedGrant>(source => source.ToModel(), out var unmappedMembers)
-            .Should()
-            .BeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
+            .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 }

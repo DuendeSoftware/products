@@ -1,0 +1,27 @@
+﻿@page "/callApi"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<PageTitle>Call API</PageTitle>
+
+<p>
+    This page includes several components with different render modes that
+    make API calls that are authorized with an access token. Note that:
+
+    <ul>
+        <li>All components use the same access token</li>
+        <li>The access token is refreshed periodically, and each component then uses the new token.</li>
+    </ul>
+</p>
+
+<div class="row row-cols-1 row-cols-lg-2 row-cols-xxl-3 g-3">
+    <div class="col">
+        <Server />
+    </div>
+    <div class="col">
+        <Wasm />
+    </div>
+    <div class="col">
+        <Auto />
+    </div>
+</div>

@@ -127,7 +127,7 @@ public class InputLengthRestrictions
     /// Max length for the code verifier
     /// </summary>
     public int CodeVerifierMaxLength { get; } = 128;
-        
+
     /// <summary>
     /// Max length for resource indicator parameter
     /// </summary>
@@ -137,7 +137,7 @@ public class InputLengthRestrictions
     /// Max length for binding_message
     /// </summary>
     public int BindingMessage { get; set; } = Default;
-        
+
     /// <summary>
     /// Max length for user_code
     /// </summary>

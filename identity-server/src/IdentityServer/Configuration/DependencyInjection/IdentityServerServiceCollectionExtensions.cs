@@ -8,7 +8,6 @@ using Duende.IdentityServer.Configuration;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using System;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

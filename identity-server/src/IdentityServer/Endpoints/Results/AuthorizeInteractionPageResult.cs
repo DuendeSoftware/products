@@ -2,18 +2,15 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
-using Duende.IdentityServer.Extensions;
-using Duende.IdentityServer.Services;
 using static Duende.IdentityServer.IdentityServerConstants;
-using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -101,7 +98,7 @@ class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<AuthorizeInteract
                 {
                     returnUrl = returnUrl.AddQueryString(Constants.ProcessedMaxAge, processedMaxAge);
                 }
-            } 
+            }
             else
             {
                 returnUrl = returnUrl.AddQueryString(result.Request.ToOptimizedQueryString());

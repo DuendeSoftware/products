@@ -3,18 +3,14 @@
 
 
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Xunit;
+using UnitTests.Common;
 
 namespace UnitTests.Validation.Secrets;
 
@@ -38,7 +34,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -56,10 +52,10 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().NotBeNull();
-        secret.Type.Should().Be(IdentityServerConstants.ParsedSecretTypes.JwtBearer);
-        secret.Id.Should().Be("client");
-        secret.Credential.Should().Be(tokenString);
+        secret.ShouldNotBeNull();
+        secret.Type.ShouldBe(IdentityServerConstants.ParsedSecretTypes.JwtBearer);
+        secret.Id.ShouldBe("client");
+        secret.Credential.ShouldBe(tokenString);
     }
 
     [Fact]
@@ -74,7 +70,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -89,7 +85,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -97,13 +93,13 @@ public class ClientAssertionSecretParsing
     {
         var context = new DefaultHttpContext();
         var body = "malformed";
-            
+
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
         context.Request.ContentType = "application/x-www-form-urlencoded";
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -119,7 +115,7 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 
     [Fact]
@@ -135,6 +131,6 @@ public class ClientAssertionSecretParsing
 
         var secret = await _parser.ParseAsync(context);
 
-        secret.Should().BeNull();
+        secret.ShouldBeNull();
     }
 }

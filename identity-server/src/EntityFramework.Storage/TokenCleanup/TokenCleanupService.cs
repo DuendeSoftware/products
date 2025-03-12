@@ -2,13 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using Duende.IdentityServer.EntityFramework.Entities;
-using Duende.IdentityServer.EntityFramework.Extensions;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.EntityFrameworkCore;
@@ -112,8 +105,8 @@ public class TokenCleanupService : ITokenCleanupService
                     // Run the same query, but now use an interval instead of Take(). This is to
                     // ensure we get all the elements, even if a new element was added in the middle
                     // of the set.
-                    .Where(pg => 
-                        pg.Expiration >= expiredGrants.First().Expiration 
+                    .Where(pg =>
+                        pg.Expiration >= expiredGrants.First().Expiration
                         && pg.Expiration <= expiredGrants.Last().Expiration)
                     // To be on the safe side, filter out any possibly newly added item within the interval
                     .Where(pg => foundIds.Contains(pg.Id))
@@ -126,7 +119,7 @@ public class TokenCleanupService : ITokenCleanupService
                     {
                         _logger.LogWarning("Tried to remove {grantCount} expired grants, but only {deleteCount} " +
                             "was deleted. This indicates that another process has already removed the items. Duplicate " +
-                            "notifications may be sent to the registered IOperationalStoreNotification.", 
+                            "notifications may be sent to the registered IOperationalStoreNotification.",
                             found, deleteCount);
                     }
                     else
@@ -176,8 +169,8 @@ public class TokenCleanupService : ITokenCleanupService
                 var foundIds = consumedGrants.Select(pg => pg.Id).ToArray();
 
                 var deleteCount = await query
-                    .Where(pg => 
-                        pg.ConsumedTime >= consumedGrants.First().ConsumedTime 
+                    .Where(pg =>
+                        pg.ConsumedTime >= consumedGrants.First().ConsumedTime
                         && pg.ConsumedTime <= consumedGrants.Last().ConsumedTime)
                     .Where(pg => foundIds.Contains(pg.Id))
                     .ExecuteDeleteAsync(cancellationToken);

@@ -2,17 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -37,7 +32,7 @@ public class DefaultIdentityServerInteractionServiceTests
     {
         _mockMockHttpContextAccessor = new MockHttpContextAccessor(_options, _mockUserSession, _mockEndSessionStore, _mockServerUrls);
 
-        _subject = new DefaultIdentityServerInteractionService(new StubClock(), 
+        _subject = new DefaultIdentityServerInteractionService(new StubClock(),
             _mockMockHttpContextAccessor,
             _mockLogoutMessageStore,
             _mockErrorMessageStore,
@@ -52,7 +47,7 @@ public class DefaultIdentityServerInteractionServiceTests
         _resourceValidationResult.Resources.IdentityResources.Add(new IdentityResources.OpenId());
         _resourceValidationResult.ParsedScopes.Add(new ParsedScopeValue("openid"));
     }
-        
+
     [Fact]
     public async Task GetLogoutContextAsync_valid_session_and_logout_id_should_not_provide_signout_iframe()
     {
@@ -62,7 +57,7 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.GetLogoutContextAsync("id");
 
-        context.SignOutIFrameUrl.Should().BeNull();
+        context.SignOutIFrameUrl.ShouldBeNull();
     }
 
     [Fact]
@@ -74,7 +69,7 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.GetLogoutContextAsync(null);
 
-        context.SignOutIFrameUrl.Should().NotBeNull();
+        context.SignOutIFrameUrl.ShouldNotBeNull();
     }
 
     [Fact]
@@ -85,7 +80,7 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.GetLogoutContextAsync("id");
 
-        context.SignOutIFrameUrl.Should().BeNull();
+        context.SignOutIFrameUrl.ShouldBeNull();
     }
 
     [Fact]
@@ -93,8 +88,8 @@ public class DefaultIdentityServerInteractionServiceTests
     {
         var context = await _subject.CreateLogoutContextAsync();
 
-        context.Should().BeNull();
-        _mockLogoutMessageStore.Messages.Should().BeEmpty();
+        context.ShouldBeNull();
+        _mockLogoutMessageStore.Messages.ShouldBeEmpty();
     }
 
     [Fact]
@@ -106,20 +101,20 @@ public class DefaultIdentityServerInteractionServiceTests
 
         var context = await _subject.CreateLogoutContextAsync();
 
-        context.Should().NotBeNull();
-        _mockLogoutMessageStore.Messages.Should().NotBeEmpty();
+        context.ShouldNotBeNull();
+        _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();
     }
 
     [Fact]
     public async Task GrantConsentAsync_should_throw_if_granted_and_no_subject()
     {
         Func<Task> act = () => _subject.GrantConsentAsync(
-            new AuthorizationRequest(), 
-            new ConsentResponse() { ScopesValuesConsented = new[] { "openid" } }, 
+            new AuthorizationRequest(),
+            new ConsentResponse() { ScopesValuesConsented = new[] { "openid" } },
             null);
-        
-        await act.Should().ThrowAsync<ArgumentNullException>()
-            .WithMessage("*subject*");
+
+        var exception = await act.ShouldThrowAsync<ArgumentNullException>();
+        exception.ParamName!.ShouldMatch(".*subject.*");
     }
 
     [Fact]
@@ -138,14 +133,15 @@ public class DefaultIdentityServerInteractionServiceTests
     {
         _mockUserSession.User = new IdentityServerUser("bob").CreatePrincipal();
 
-        var req = new AuthorizationRequest() { 
+        var req = new AuthorizationRequest()
+        {
             Client = new Client { ClientId = "client" },
             ValidatedResources = _resourceValidationResult
         };
         await _subject.GrantConsentAsync(req, new ConsentResponse(), null);
 
-        _mockConsentStore.Messages.Should().NotBeEmpty();
+        _mockConsentStore.Messages.ShouldNotBeEmpty();
         var consentRequest = new ConsentRequest(req, "bob");
-        _mockConsentStore.Messages.First().Key.Should().Be(consentRequest.Id);
+        _mockConsentStore.Messages.First().Key.ShouldBe(consentRequest.Id);
     }
 }

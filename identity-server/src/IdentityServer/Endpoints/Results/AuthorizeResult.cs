@@ -2,18 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Duende.IdentityServer.Extensions;
-using Duende.IdentityModel;
-using Microsoft.AspNetCore.Http;
-using System;
 using System.Text.Encodings.Web;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Microsoft.AspNetCore.Http;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -87,7 +85,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
     private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result)
     {
         var referenceValue = result.Response?.Request?.PushedAuthorizationReferenceValue;
-        if(referenceValue.IsPresent())
+        if (referenceValue.IsPresent())
         {
             await _pushedAuthorizationService.ConsumeAsync(referenceValue);
         }
@@ -177,8 +175,8 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
         if (response.IsError && !uri.Contains('#'))
         {
-            // https://tools.ietf.org/html/draft-bradley-oauth-open-redirector-00
-            uri += "#_=_";
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29#section-4.1.3
+            uri += "#_";
         }
 
         return uri;
@@ -192,7 +190,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
     /// response_mode is form_post.
     /// </summary>
     protected virtual string FormPostHeader => DefaultFormPostHeadTags;
-    
+
     /// <summary>
     /// Gets the body tags that will be included in the response when
     /// response_mode is form_post. The string "{body}" (including the curly

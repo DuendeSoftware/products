@@ -2,17 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authentication;
 
 namespace Duende.IdentityServer.Services;
 
@@ -310,8 +306,12 @@ public class DefaultUserSession : IUserSession
         await AuthenticateAsync();
         if (Properties != null)
         {
-            Properties.AddClientId(clientId);
-            await UpdateSessionCookie();
+            var clientIds = Properties.GetClientList();
+            if (!clientIds.Contains(clientId))
+            {
+                Properties.AddClientId(clientId);
+                await UpdateSessionCookie();
+            }
         }
     }
 

@@ -11,7 +11,7 @@ namespace IntegrationTests.Clients.Setup;
 
 public class Startup
 {
-    static public ICustomTokenRequestValidator CustomTokenRequestValidator { get; set; } 
+    static public ICustomTokenRequestValidator CustomTokenRequestValidator { get; set; }
 
     public void ConfigureServices(IServiceCollection services)
     {

@@ -8,8 +8,6 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 

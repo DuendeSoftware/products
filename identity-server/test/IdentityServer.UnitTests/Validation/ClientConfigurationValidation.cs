@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -199,7 +195,25 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
+    }
+
+    [Theory]
+    [MemberData(nameof(GrantTypesWithClientCredentialsTestData))]
+    [Trait("Category", Category)]
+    public async Task not_required_client_secret_for_client_credentials_should_fail(ICollection<string> allowedGrantTypes)
+    {
+        var client = new Client
+        {
+            ClientId = "id",
+            ClientSecrets = { new Secret("secret") },
+            AllowedGrantTypes = allowedGrantTypes,
+            RequireClientSecret = false,
+            RedirectUris = { "https://foo" },
+            AllowedScopes = { "foo" }
+        };
+
+        await ShouldFailAsync(client, "RequireClientSecret is false, but client is using client credentials grant type.");
     }
 
     [Fact]
@@ -215,7 +229,7 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -248,7 +262,7 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -265,7 +279,7 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
     }
     [Fact]
     [Trait("Category", Category)]
@@ -281,7 +295,7 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
     }
     [Fact]
     [Trait("Category", Category)]
@@ -297,7 +311,7 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
     }
     [Fact]
     [Trait("Category", Category)]
@@ -313,7 +327,7 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
     }
     [Fact]
     [Trait("Category", Category)]
@@ -329,7 +343,7 @@ public class ClientConfigurationValidation
         };
 
         var context = await ValidateAsync(client);
-        context.IsValid.Should().BeTrue();
+        context.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -362,7 +376,7 @@ public class ClientConfigurationValidation
         };
 
         var result = await ValidateAsync(client);
-        result.IsValid.Should().BeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -378,7 +392,7 @@ public class ClientConfigurationValidation
         };
 
         var result = await ValidateAsync(client);
-        result.IsValid.Should().BeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -413,7 +427,7 @@ public class ClientConfigurationValidation
         };
 
         var result = await ValidateAsync(client);
-        result.IsValid.Should().BeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Theory]
@@ -444,15 +458,15 @@ public class ClientConfigurationValidation
         };
 
         var result = await ValidateAsync(client);
-        result.IsValid.Should().BeFalse();
-        result.ErrorMessage.Should().Contain("invalid origin");
+        result.IsValid.ShouldBeFalse();
+        result.ErrorMessage.ShouldContain("invalid origin");
         if (!String.IsNullOrWhiteSpace(origin))
         {
-            result.ErrorMessage.Should().Contain(origin);
+            result.ErrorMessage.ShouldContain(origin);
         }
         else
         {
-            result.ErrorMessage.Should().Contain("empty value");
+            result.ErrorMessage.ShouldContain("empty value");
         }
     }
 
@@ -477,7 +491,7 @@ public class ClientConfigurationValidation
         };
 
         var result = await ValidateAsync(client);
-        result.IsValid.Should().BeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
 
@@ -493,7 +507,17 @@ public class ClientConfigurationValidation
     {
         var context = await ValidateAsync(client);
 
-        context.IsValid.Should().BeFalse();
-        context.ErrorMessage.Should().Be(expectedError);
+        context.IsValid.ShouldBeFalse();
+        context.ErrorMessage.ShouldBe(expectedError);
     }
+
+    public static TheoryData<ICollection<string>> GrantTypesWithClientCredentialsTestData =>
+    [
+        GrantTypes.ImplicitAndClientCredentials,
+        GrantTypes.CodeAndClientCredentials,
+        GrantTypes.HybridAndClientCredentials,
+        GrantTypes.ClientCredentials,
+        GrantTypes.ResourceOwnerPasswordAndClientCredentials
+    ];
+
 }

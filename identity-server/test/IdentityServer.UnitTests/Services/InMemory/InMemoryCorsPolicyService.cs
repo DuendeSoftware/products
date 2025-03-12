@@ -2,13 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Services.InMemory;
 
@@ -37,7 +33,7 @@ public class InMemoryCorsPolicyServiceTests
         });
 
         var result = await _subject.IsOriginAllowedAsync("http://foo");
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Theory]
@@ -55,7 +51,7 @@ public class InMemoryCorsPolicyServiceTests
             }
         });
         var result = await _subject.IsOriginAllowedAsync("http://bar");
-        result.Should().Be(false);
+        result.ShouldBe(false);
     }
 
     [Fact]
@@ -72,7 +68,7 @@ public class InMemoryCorsPolicyServiceTests
             }
         });
         var result = await _subject.IsOriginAllowedAsync("http://bar");
-        result.Should().Be(true);
+        result.ShouldBe(true);
     }
 
     [Fact]
@@ -89,7 +85,7 @@ public class InMemoryCorsPolicyServiceTests
             }
         });
         var result = await _subject.IsOriginAllowedAsync("http://quux");
-        result.Should().Be(false);
+        result.ShouldBe(false);
     }
 
     [Fact]
@@ -113,7 +109,7 @@ public class InMemoryCorsPolicyServiceTests
             }
         });
         var result = await _subject.IsOriginAllowedAsync("http://foo");
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -139,6 +135,6 @@ public class InMemoryCorsPolicyServiceTests
             }
         });
         var result = await _subject.IsOriginAllowedAsync("http://bar");
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 }

@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Events;
-using Duende.IdentityServer.Services;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -48,7 +46,7 @@ public class ApiSecretValidator : IApiSecretValidator
     public async Task<ApiSecretValidationResult> ValidateAsync(HttpContext context)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ApiSecretValidator.Validate");
-        
+
         _logger.LogTrace("Start API validation");
 
         var fail = new ApiSecretValidationResult

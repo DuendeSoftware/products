@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -20,7 +20,7 @@ public class UserLoginFailureEvent : Event
     public UserLoginFailureEvent(string username, string error, bool interactive = true, string clientId = null)
         : base(EventCategories.Authentication,
             "User Login Failure",
-            EventTypes.Failure, 
+            EventTypes.Failure,
             EventIds.UserLoginFailure,
             error)
     {

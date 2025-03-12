@@ -2,17 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Collections.Specialized;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.TokenRequest_Validation;
 
@@ -31,7 +27,7 @@ public class TokenRequestValidation_General_Invalid
 
         Func<Task> act = () => validator.ValidateRequestAsync(null, null);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -47,7 +43,7 @@ public class TokenRequestValidation_General_Invalid
 
         Func<Task> act = () => validator.ValidateRequestAsync(parameters, null);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -79,8 +75,8 @@ public class TokenRequestValidation_General_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 
     [Fact]
@@ -91,15 +87,15 @@ public class TokenRequestValidation_General_Invalid
         var codeStore = Factory.CreateAuthorizationCodeStore();
 
         var validator = Factory.CreateTokenRequestValidator(
-            authorizationCodeStore:codeStore);
+            authorizationCodeStore: codeStore);
 
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.TokenRequest.GrantType, "client_credentials");
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
     }
 
     [Fact]
@@ -130,7 +126,7 @@ public class TokenRequestValidation_General_Invalid
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.UnsupportedGrantType);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.UnsupportedGrantType);
     }
 }

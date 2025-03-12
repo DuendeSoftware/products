@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
 

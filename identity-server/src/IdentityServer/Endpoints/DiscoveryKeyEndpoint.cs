@@ -3,7 +3,6 @@
 
 
 using System.Net;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
@@ -34,7 +33,7 @@ internal class DiscoveryKeyEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
-        
+
         _logger.LogTrace("Processing discovery request.");
 
         // validate HTTP

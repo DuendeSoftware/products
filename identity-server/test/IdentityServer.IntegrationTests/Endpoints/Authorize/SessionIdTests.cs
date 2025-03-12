@@ -1,15 +1,11 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using FluentAssertions;
 using IntegrationTests.Common;
-using Xunit;
 
 namespace IntegrationTests.Endpoints.Authorize;
 
@@ -84,13 +80,13 @@ public class SessionIdTests
     {
         await _mockPipeline.LoginAsync("bob");
         var sid1 = _mockPipeline.GetSessionCookie().Value;
-        sid1.Should().NotBeNull();
+        sid1.ShouldNotBeNull();
 
         _mockPipeline.RemoveSessionCookie();
 
         await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint);
 
         var sid2 = _mockPipeline.GetSessionCookie().Value;
-        sid2.Should().Be(sid1);
+        sid2.ShouldBe(sid1);
     }
 }

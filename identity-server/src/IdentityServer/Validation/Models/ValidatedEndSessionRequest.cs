@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Validation;
 
 /// <summary>
@@ -26,7 +24,7 @@ public class ValidatedEndSessionRequest : ValidatedRequest
     /// The post-logout URI.
     /// </value>
     public string PostLogOutUri { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the state.
     /// </summary>

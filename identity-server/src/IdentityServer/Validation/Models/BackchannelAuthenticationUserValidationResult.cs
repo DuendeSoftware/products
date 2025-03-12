@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System;
 using System.Security.Claims;
 
 namespace Duende.IdentityServer.Validation;
@@ -23,7 +22,7 @@ public class BackchannelAuthenticationUserValidationResult
     /// Gets or sets the error.
     /// </summary>
     public string? Error { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the error description.
     /// </summary>

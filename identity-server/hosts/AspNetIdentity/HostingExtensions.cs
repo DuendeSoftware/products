@@ -28,7 +28,7 @@ internal static class HostingExtensions
 
         builder.ConfigureIdentityServer();
         builder.AddExternalIdentityProviders();
-        
+
         // var apiKey = builder.Configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";
         //

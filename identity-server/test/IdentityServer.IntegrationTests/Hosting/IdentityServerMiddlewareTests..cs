@@ -1,14 +1,10 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
 
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Hosting;
-using FluentAssertions;
 using IntegrationTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 
 namespace IntegrationTests.Hosting;
@@ -23,7 +19,7 @@ public class FailRouter : IEndpointRouter
 
     public IEndpointHandler Find(HttpContext context)
     {
-        throw (Exception) _exceptionType.GetConstructor([]).Invoke(null);
+        throw (Exception)_exceptionType.GetConstructor([]).Invoke(null);
     }
 }
 
@@ -61,22 +57,22 @@ public class IdentityServerMiddlewareTests
         var canceledHttpRequest = async () => await _pipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint, token);
 
         // The middleware will always throw
-        var exceptionShould = await canceledHttpRequest.Should().ThrowAsync<Exception>();
+        var exceptionShould = await canceledHttpRequest.ShouldThrowAsync<Exception>();
 
         // The middleware will log most exceptions, but not TaskCanceled or OperationCanceled
         if (filteringExpected)
         {
-            _pipeline.MockLogger.LogMessages.Should().NotContain(m => m.StartsWith("Unhandled exception: "));
+            _pipeline.MockLogger.LogMessages.ShouldNotContain(m => m.StartsWith("Unhandled exception: "));
         }
         else
         {
-            _pipeline.MockLogger.LogMessages.Should().Contain(m => m.StartsWith("Unhandled exception: "));
+            _pipeline.MockLogger.LogMessages.ShouldContain(m => m.StartsWith("Unhandled exception: "));
         }
 
         // Now reset the log messages so that we can verify that we always log for requests that are not canceled
         _pipeline.MockLogger.LogMessages.Clear();
         var notCanceledRequest = async () => await _pipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryKeysEndpoint, CancellationToken.None);
-        await notCanceledRequest.Should().ThrowAsync<Exception>();
-        _pipeline.MockLogger.LogMessages.Should().Contain(m => m.StartsWith("Unhandled exception: "));
+        await notCanceledRequest.ShouldThrowAsync<Exception>();
+        _pipeline.MockLogger.LogMessages.ShouldContain(m => m.StartsWith("Unhandled exception: "));
     }
 }

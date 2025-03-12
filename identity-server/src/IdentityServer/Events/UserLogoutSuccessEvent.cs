@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -16,9 +16,9 @@ public class UserLogoutSuccessEvent : Event
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="name">The name.</param>
     public UserLogoutSuccessEvent(string subjectId, string name)
-        : base(EventCategories.Authentication, 
+        : base(EventCategories.Authentication,
             "User Logout Success",
-            EventTypes.Success, 
+            EventTypes.Success,
             EventIds.UserLogoutSuccess)
     {
         SubjectId = subjectId;

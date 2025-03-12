@@ -3,10 +3,8 @@
 
 #nullable enable
 
-using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Security.Claims;
 
 namespace Duende.IdentityServer.Licensing.V2;
@@ -52,7 +50,7 @@ internal class License
         }
 
         Features = claims.FindAll("feature").Select(f => f.Value).ToArray();
-        
+
         Extras = claims.FindFirst("extras")?.Value ?? string.Empty;
         IsConfigured = true;
     }
@@ -90,7 +88,7 @@ internal class License
     /// The license features
     /// </summary>
     public string[] Features { get; init; } = [];
-    
+
     /// <summary>
     /// Extras
     /// </summary>
@@ -108,7 +106,7 @@ internal class License
         nameof(Extras))
     ]
     public bool IsConfigured { get; init; }
-    
+
     /// <summary>
     /// Checks if a LicenseFeature is enabled in the current license. If there
     /// is no configured license, this always returns true.
@@ -117,10 +115,10 @@ internal class License
     /// <returns></returns>
     public bool IsEnabled(LicenseFeature feature)
     {
-        return !IsConfigured || (AllowedFeatureMask & (ulong) feature) != 0;
+        return !IsConfigured || (AllowedFeatureMask & (ulong)feature) != 0;
     }
 
-    
+
     private ulong? _allowedFeatureMask;
     private ulong AllowedFeatureMask
     {
@@ -132,7 +130,7 @@ internal class License
                 foreach (var featureClaim in Features)
                 {
                     var feature = ToFeatureEnum(featureClaim);
-                    features |= (ulong) feature;
+                    features |= (ulong)feature;
                 }
 
                 _allowedFeatureMask = features;
@@ -140,23 +138,23 @@ internal class License
             return _allowedFeatureMask.Value;
         }
     }
-    
+
     private LicenseFeature ToFeatureEnum(string claimValue)
     {
-        foreach(var field in typeof(LicenseFeature).GetFields())
+        foreach (var field in typeof(LicenseFeature).GetFields())
         {
             if (Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
             {
                 if (string.Equals(attribute.Description, claimValue, StringComparison.OrdinalIgnoreCase))
                 {
-                    return (LicenseFeature) field.GetValue(null)!;
+                    return (LicenseFeature)field.GetValue(null)!;
                 }
             }
         }
         throw new ArgumentException("Unknown license feature {feature}", claimValue);
     }
-    
-    
+
+
     private ulong FeatureMaskForEdition()
     {
         return Edition switch
@@ -165,7 +163,7 @@ internal class License
             LicenseEdition.Bff => FeatureMaskForFeatures(),
             LicenseEdition.Starter => FeatureMaskForFeatures(),
             LicenseEdition.Business => FeatureMaskForFeatures(
-                LicenseFeature.KeyManagement, 
+                LicenseFeature.KeyManagement,
                 LicenseFeature.PAR,
                 LicenseFeature.ServerSideSessions,
                 LicenseFeature.DCR),
@@ -196,9 +194,9 @@ internal class License
     private ulong FeatureMaskForFeatures(params LicenseFeature[] licenseFeatures)
     {
         var result = 0UL;
-        foreach(var feature in licenseFeatures)
+        foreach (var feature in licenseFeatures)
         {
-            result |= (ulong) feature;
+            result |= (ulong)feature;
         }
         return result;
     }

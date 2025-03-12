@@ -1,15 +1,12 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
 using System.Collections.Specialized;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Configuration;
-using FluentAssertions;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.AuthorizeRequest_Validation;
 
@@ -30,8 +27,8 @@ public class Authorize_ClientValidation_IdToken
 
         var validator = Factory.CreateAuthorizeRequestValidator();
         var result = await validator.ValidateAsync(parameters);
-            
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidScope);
+
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
     }
 }

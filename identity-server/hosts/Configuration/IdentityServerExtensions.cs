@@ -1,14 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Security.Cryptography.X509Certificates;
-using Duende.IdentityServer;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.RequestProcessing;
-using Duende.IdentityModel;
 using IdentityServerHost.Configuration;
 using IdentityServerHost.Extensions;
-using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
 

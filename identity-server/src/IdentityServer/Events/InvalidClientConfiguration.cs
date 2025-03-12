@@ -20,7 +20,7 @@ public class InvalidClientConfigurationEvent : Event
     public InvalidClientConfigurationEvent(Client client, string errorMessage)
         : base(EventCategories.Error,
             "Invalid Client Configuration",
-            EventTypes.Error, 
+            EventTypes.Error,
             EventIds.InvalidClientConfiguration,
             errorMessage)
     {

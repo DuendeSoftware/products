@@ -32,7 +32,7 @@ public static class PersistedGrantMappers
                 ConsumedTime = entity.ConsumedTime,
                 Data = entity.Data
             };
-    }   
+    }
 
     /// <summary>
     /// Maps a model to an entity.

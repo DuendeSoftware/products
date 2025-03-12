@@ -1,6 +1,6 @@
-using System.Collections.Generic;
-using FluentAssertions;
-using Xunit;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Duende.IdentityServer.EntityFramework.Extensions;
 
 namespace UnitTests.Validation;
@@ -57,6 +57,6 @@ public class IsLocalUrlTests
     [MemberData(nameof(TestCases))]
     public void IsLocalUrl(string returnUrl, bool expected)
     {
-        returnUrl.IsLocalUrl().Should().Be(expected);
+        returnUrl.IsLocalUrl().ShouldBe(expected);
     }
 }

@@ -4,11 +4,9 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using UnitTests.Common;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -25,7 +23,7 @@ public class OidcReturnUrlParserTests
 
         _subject = new OidcReturnUrlParser(
             _options,
-            null, null, 
+            null, null,
             _urls,
             new LoggerFactory().CreateLogger<OidcReturnUrlParser>());
     }
@@ -40,9 +38,9 @@ public class OidcReturnUrlParserTests
     public void IsValidReturnUrl_accepts_authorize_or_authorizecallback(string url)
     {
         var valid = _subject.IsValidReturnUrl(url);
-        valid.Should().BeTrue();
+        valid.ShouldBeTrue();
     }
-        
+
     [Theory]
     [InlineData(default(string))]
     [InlineData("")]
@@ -61,7 +59,7 @@ public class OidcReturnUrlParserTests
     public void IsValidReturnUrl_rejects_non_authorize_or_authorizecallback(string url)
     {
         var valid = _subject.IsValidReturnUrl(url);
-        valid.Should().BeFalse();
+        valid.ShouldBeFalse();
     }
 
     [Theory]
@@ -73,7 +71,7 @@ public class OidcReturnUrlParserTests
     {
         _options.UserInteraction.AllowOriginInReturnUrl = true;
         var valid = _subject.IsValidReturnUrl(url);
-        valid.Should().BeTrue();
+        valid.ShouldBeTrue();
     }
 
     [Fact]
@@ -81,7 +79,7 @@ public class OidcReturnUrlParserTests
     {
         _options.UserInteraction.AllowOriginInReturnUrl = false;
         var valid = _subject.IsValidReturnUrl("https://server/connect/authorize");
-        valid.Should().BeFalse();
+        valid.ShouldBeFalse();
     }
 
     [Theory]
@@ -97,7 +95,7 @@ public class OidcReturnUrlParserTests
     {
         _options.UserInteraction.AllowOriginInReturnUrl = true;
         var valid = _subject.IsValidReturnUrl(url);
-        valid.Should().BeFalse();
+        valid.ShouldBeFalse();
     }
 
 
@@ -108,7 +106,7 @@ public class OidcReturnUrlParserTests
         _urls.Origin = "https://" + new HostString("грант.рф").ToUriComponent();
 
         var valid = _subject.IsValidReturnUrl("https://xn--80af5akm.xn--p1ai/connect/authorize");
-        valid.Should().BeTrue();
+        valid.ShouldBeTrue();
     }
 
     [Theory]
@@ -121,7 +119,7 @@ public class OidcReturnUrlParserTests
         _urls.Origin = "https://server:443";
 
         var valid = _subject.IsValidReturnUrl(url);
-        valid.Should().BeTrue();
+        valid.ShouldBeTrue();
     }
 
     [Theory]
@@ -140,6 +138,6 @@ public class OidcReturnUrlParserTests
         _urls.Origin = "https://server:443";
 
         var valid = _subject.IsValidReturnUrl(url);
-        valid.Should().BeFalse();
+        valid.ShouldBeFalse();
     }
 }

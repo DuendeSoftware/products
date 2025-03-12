@@ -2,17 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Xunit;
 
 namespace EntityFramework.IntegrationTests;
 
 /// <summary>
-/// Base class for integration tests, responsible for initializing test database providers & an xUnit class fixture
+/// Base class for integration tests, responsible for initializing test database providers and an xUnit class fixture
 /// </summary>
 /// <typeparam name="TClass">The type of the class.</typeparam>
 /// <typeparam name="TDbContext">The type of the database context.</typeparam>
@@ -55,7 +52,6 @@ public class IntegrationTest<TClass, TDbContext, TStoreOption> : IClassFixture<D
 
     protected IntegrationTest(DatabaseProviderFixture<TDbContext> fixture)
     {
-        fixture.Options = TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<TDbContext>) y))
-            .ToList();
+        fixture.Options = TestDatabaseProviders.ToList<DbContextOptions<TDbContext>>();
     }
 }

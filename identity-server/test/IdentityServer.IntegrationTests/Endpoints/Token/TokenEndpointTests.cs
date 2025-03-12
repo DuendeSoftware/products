@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using IntegrationTests.Common;
-using Xunit;
-using System.Text;
 
 namespace IntegrationTests.Endpoints.Token;
 
@@ -91,10 +86,10 @@ public class TokenEndpointTests
         _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer", "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        result.ContainsKey("error").Should().BeFalse();
+        result.ContainsKey("error").ShouldBeFalse();
     }
 
     [Fact]
@@ -114,10 +109,10 @@ public class TokenEndpointTests
         _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("Referer", "http://127.0.0.1:33086/appservice/appservice?t=1564165664142?load");
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        result.ContainsKey("error").Should().BeFalse();
+        result.ContainsKey("error").ShouldBeFalse();
     }
 
     [Fact]
@@ -126,13 +121,13 @@ public class TokenEndpointTests
     {
         var text = $"grant_type=client_credentials&client_id={client_id}&client_secret={client_secret}&scope=%00";
         var content = new StringContent(text, Encoding.UTF8, "application/x-www-form-urlencoded");
-        
+
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, content);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         var error = result["error"].GetString();
-        error.Should().Be("invalid_request");
+        error.ShouldBe("invalid_request");
     }
 }

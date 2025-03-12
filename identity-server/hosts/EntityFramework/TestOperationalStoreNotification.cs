@@ -28,7 +28,7 @@ public class TestOperationalStoreNotification : IOperationalStoreNotification
     public Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(deviceCodes);
-        foreach (var deviceCode in deviceCodes) 
+        foreach (var deviceCode in deviceCodes)
         {
             Console.WriteLine("cleaned device code");
         }

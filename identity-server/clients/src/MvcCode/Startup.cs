@@ -1,18 +1,13 @@
-using System;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using System.IdentityModel.Tokens.Jwt;
 using Clients;
 using Duende.IdentityModel;
+using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using Duende.IdentityModel.Client;
-using Microsoft.Extensions.Configuration;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using System.Threading.Tasks;
 
 namespace MvcCode;
 
@@ -24,13 +19,13 @@ public class Startup
     {
         _configuration = configuration;
     }
-    
+
     public void ConfigureServices(IServiceCollection services)
     {
         JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
         services.AddControllersWithViews();
-        
+
         services.AddHttpClient();
 
         services.AddSingleton<IDiscoveryCache>(r =>
@@ -84,7 +79,7 @@ public class Startup
 
                 options.DisableTelemetry = true;
             });
-        
+
         // var apiKey = _configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";
         //

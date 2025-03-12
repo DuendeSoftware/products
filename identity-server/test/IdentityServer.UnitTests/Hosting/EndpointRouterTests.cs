@@ -2,18 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Licensing.V2;
-using FluentAssertions;
-using UnitTests.Common;
+using Duende.IdentityServer.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
+using UnitTests.Common;
 
 namespace UnitTests.Hosting;
 
@@ -31,14 +27,14 @@ public class EndpointRouterTests
         _options = new IdentityServerOptions();
         var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance);
         var protocolRequestCounter = new ProtocolRequestCounter(licenseAccessor, new NullLoggerFactory());
-        _subject = new EndpointRouter(_endpoints, protocolRequestCounter, _options, TestLogger.Create<EndpointRouter>());
+        _subject = new EndpointRouter(_endpoints, protocolRequestCounter, _options, new SanitizedLogger<EndpointRouter>(TestLogger.Create<EndpointRouter>()));
     }
 
     [Fact]
     public void Endpoint_ctor_requires_path_to_start_with_slash()
     {
         Action a = () => new Duende.IdentityServer.Hosting.Endpoint("ep1", "ep1", typeof(MyEndpointHandler));
-        a.Should().Throw<ArgumentException>();
+        a.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -52,7 +48,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -66,7 +62,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeOfType<MyEndpointHandler>();
+        result.ShouldBeOfType<MyEndpointHandler>();
     }
 
     [Fact]
@@ -80,7 +76,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -94,7 +90,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeOfType<MyEndpointHandler>();
+        result.ShouldBeOfType<MyEndpointHandler>();
     }
 
     [Fact]
@@ -110,7 +106,7 @@ public class EndpointRouterTests
         ctx.RequestServices = new StubServiceProvider();
 
         var result = _subject.Find(ctx);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     private class MyEndpointHandler : IEndpointHandler

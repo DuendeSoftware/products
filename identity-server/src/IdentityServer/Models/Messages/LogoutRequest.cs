@@ -4,11 +4,9 @@
 
 #nullable enable
 
+using System.Collections.Specialized;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Models;
@@ -81,7 +79,7 @@ public class LogoutMessage
     /// Gets or sets the subject identifier for the user at logout time.
     /// </summary>
     public string? SubjectId { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the session identifier for the user at logout time.
     /// </summary>
@@ -96,7 +94,7 @@ public class LogoutMessage
     /// The UI locales.
     /// </summary>
     public string? UiLocales { get; set; }
-        
+
     /// <summary>
     /// Gets the entire parameter collection.
     /// </summary>
@@ -169,7 +167,7 @@ public class LogoutRequest
     /// The UI locales.
     /// </summary>
     public string? UiLocales { get; set; }
-        
+
     /// <summary>
     /// Gets the entire parameter collection.
     /// </summary>

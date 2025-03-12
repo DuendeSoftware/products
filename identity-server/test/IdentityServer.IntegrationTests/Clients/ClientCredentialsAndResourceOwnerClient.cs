@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net.Http;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 
@@ -39,7 +35,7 @@ public class ClientCredentialsandResourceOwnerClient
             Scope = "api1"
         });
 
-        response.IsError.Should().Be(false);
+        response.IsError.ShouldBe(false);
     }
 
     [Fact]
@@ -53,7 +49,7 @@ public class ClientCredentialsandResourceOwnerClient
             Scope = "openid api1"
         });
 
-        response.IsError.Should().Be(true);
+        response.IsError.ShouldBe(true);
     }
 
     [Fact]
@@ -70,7 +66,7 @@ public class ClientCredentialsandResourceOwnerClient
             Password = "bob"
         });
 
-        response.IsError.Should().Be(false);
+        response.IsError.ShouldBe(false);
     }
 
     [Fact]
@@ -87,6 +83,6 @@ public class ClientCredentialsandResourceOwnerClient
             Password = "bob"
         });
 
-        response.IsError.Should().Be(false);
+        response.IsError.ShouldBe(false);
     }
 }

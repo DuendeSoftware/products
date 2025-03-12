@@ -2,16 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 
@@ -46,7 +41,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     [Fact]
@@ -65,7 +60,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     [Fact]
@@ -93,7 +88,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     [Fact]
@@ -115,7 +110,7 @@ public class CustomTokenRequestValidatorClient
         });
 
         var fields = GetFields(response);
-        fields["custom"].GetString().Should().Be("custom");
+        fields["custom"].GetString().ShouldBe("custom");
     }
 
     private Dictionary<string, JsonElement> GetFields(TokenResponse response) => response.Raw.GetFields();

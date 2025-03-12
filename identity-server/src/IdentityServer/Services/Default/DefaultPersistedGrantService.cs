@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-using Duende.IdentityServer.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Services;
 
@@ -42,7 +38,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultPersistedGrantService.GetAllGrants");
 
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(subjectId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(subjectId);
 
         var grants = (await _store.GetAllAsync(new PersistedGrantFilter { SubjectId = subjectId }))
             .Where(x => x.ConsumedTime == null) // filter consumed grants
@@ -179,7 +175,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultPersistedGrantService.RemoveAllGrants");
 
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(subjectId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(subjectId);
 
         return _store.RemoveAllAsync(new PersistedGrantFilter
         {

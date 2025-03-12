@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Duende.AspNetCore.Authentication.JwtBearer</RootNamespace>
+    <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Duende.IdentityModel" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.AspNetCore.Authentication.JwtBearer.Tests" />
+  </ItemGroup>
+
+</Project>

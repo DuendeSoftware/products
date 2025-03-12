@@ -5,10 +5,6 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -82,7 +78,7 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
         // on the PAR endpoint and at the authorize endpoint (if a redirect uri
         // was pushed)
         if (_options?.PushedAuthorization?.AllowUnregisteredPushedRedirectUris == true &&
-            context.Client.RequireClientSecret && 
+            context.Client.RequireClientSecret &&
             (context.AuthorizeRequestType == AuthorizeRequestType.PushedAuthorization ||
              context.AuthorizeRequestType == AuthorizeRequestType.AuthorizeWithPushedParameters))
         {

@@ -2,18 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using UnitTests.Common;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Serialization;
-using FluentAssertions;
+using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Services.Default;
 
@@ -37,7 +33,7 @@ public class DefaultRefreshTokenServiceTests
             TestLogger.Create<DefaultRefreshTokenStore>());
 
         _subject = new DefaultRefreshTokenService(
-            _store, 
+            _store,
             new TestProfileService(),
             _clock,
             _options,
@@ -52,7 +48,7 @@ public class DefaultRefreshTokenServiceTests
 
         var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = accessToken, Client = client });
 
-        (await _store.GetRefreshTokenAsync(handle)).Should().NotBeNull();
+        (await _store.GetRefreshTokenAsync(handle)).ShouldNotBeNull();
     }
 
     [Fact]
@@ -70,8 +66,8 @@ public class DefaultRefreshTokenServiceTests
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
-        refreshToken.Should().NotBeNull();
-        refreshToken.Lifetime.Should().Be(client.AbsoluteRefreshTokenLifetime);
+        refreshToken.ShouldNotBeNull();
+        refreshToken.Lifetime.ShouldBe(client.AbsoluteRefreshTokenLifetime);
     }
 
     [Fact]
@@ -82,7 +78,7 @@ public class DefaultRefreshTokenServiceTests
             ClientId = "client1",
             RefreshTokenUsage = TokenUsage.ReUse,
             RefreshTokenExpiration = TokenExpiration.Sliding,
-            SlidingRefreshTokenLifetime  = 100,
+            SlidingRefreshTokenLifetime = 100,
             AbsoluteRefreshTokenLifetime = 10
         };
 
@@ -90,8 +86,8 @@ public class DefaultRefreshTokenServiceTests
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
-        refreshToken.Should().NotBeNull();
-        refreshToken.Lifetime.Should().Be(client.AbsoluteRefreshTokenLifetime);
+        refreshToken.ShouldNotBeNull();
+        refreshToken.Lifetime.ShouldBe(client.AbsoluteRefreshTokenLifetime);
     }
 
     [Fact]
@@ -109,8 +105,8 @@ public class DefaultRefreshTokenServiceTests
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
-        refreshToken.Should().NotBeNull();
-        refreshToken.Lifetime.Should().Be(client.SlidingRefreshTokenLifetime);
+        refreshToken.ShouldNotBeNull();
+        refreshToken.Lifetime.ShouldBe(client.SlidingRefreshTokenLifetime);
     }
 
 
@@ -132,9 +128,8 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         (await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client }))
-            .Should().NotBeNull()
-            .And
-            .NotBe(handle);
+            .ShouldNotBeNull()
+            .ShouldNotBe(handle);
     }
 
     [Fact]
@@ -160,12 +155,12 @@ public class DefaultRefreshTokenServiceTests
         var refreshToken = await _store.GetRefreshTokenAsync(handle);
         var newHandle = await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client });
 
-        newHandle.Should().NotBeNull().And.Be(handle);
+        newHandle.ShouldBe(handle);
 
         var newRefreshToken = await _store.GetRefreshTokenAsync(newHandle);
 
-        newRefreshToken.Should().NotBeNull();
-        newRefreshToken.Lifetime.Should().Be((int)(now - newRefreshToken.CreationTime).TotalSeconds + client.SlidingRefreshTokenLifetime);
+        newRefreshToken.ShouldNotBeNull();
+        newRefreshToken.Lifetime.ShouldBe((int)(now - newRefreshToken.CreationTime).TotalSeconds + client.SlidingRefreshTokenLifetime);
     }
 
     [Fact]
@@ -191,12 +186,12 @@ public class DefaultRefreshTokenServiceTests
         var refreshToken = await _store.GetRefreshTokenAsync(handle);
         var newHandle = await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client });
 
-        newHandle.Should().NotBeNull().And.Be(handle);
+        newHandle.ShouldBe(handle);
 
         var newRefreshToken = await _store.GetRefreshTokenAsync(newHandle);
 
-        newRefreshToken.Should().NotBeNull();
-        newRefreshToken.Lifetime.Should().Be(client.AbsoluteRefreshTokenLifetime);
+        newRefreshToken.ShouldNotBeNull();
+        newRefreshToken.Lifetime.ShouldBe(client.AbsoluteRefreshTokenLifetime);
     }
 
     [Fact]
@@ -222,12 +217,12 @@ public class DefaultRefreshTokenServiceTests
         var refreshToken = await _store.GetRefreshTokenAsync(handle);
         var newHandle = await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client });
 
-        newHandle.Should().NotBeNull().And.Be(handle);
+        newHandle.ShouldBe(handle);
 
         var newRefreshToken = await _store.GetRefreshTokenAsync(newHandle);
 
-        newRefreshToken.Should().NotBeNull();
-        newRefreshToken.Lifetime.Should().Be((int)(now - newRefreshToken.CreationTime).TotalSeconds + client.SlidingRefreshTokenLifetime);
+        newRefreshToken.ShouldNotBeNull();
+        newRefreshToken.Lifetime.ShouldBe((int)(now - newRefreshToken.CreationTime).TotalSeconds + client.SlidingRefreshTokenLifetime);
     }
 
     [Fact]
@@ -255,12 +250,12 @@ public class DefaultRefreshTokenServiceTests
         var refreshToken = await _store.GetRefreshTokenAsync(handle);
         var newHandle = await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client });
 
-        newHandle.Should().NotBeNull().And.NotBe(handle);
+        newHandle.ShouldNotBeNull().ShouldNotBe(handle);
 
         var newRefreshToken = await _store.GetRefreshTokenAsync(newHandle);
 
-        newRefreshToken.Should().NotBeNull();
-        newRefreshToken.Lifetime.Should().Be((int)(now - newRefreshToken.CreationTime).TotalSeconds + client.SlidingRefreshTokenLifetime);
+        newRefreshToken.ShouldNotBeNull();
+        newRefreshToken.Lifetime.ShouldBe((int)(now - newRefreshToken.CreationTime).TotalSeconds + client.SlidingRefreshTokenLifetime);
     }
 
     [Fact]
@@ -291,14 +286,14 @@ public class DefaultRefreshTokenServiceTests
         var oldToken = await _store.GetRefreshTokenAsync(handle);
         var newToken = await _store.GetRefreshTokenAsync(newHandle);
 
-        oldToken.ConsumedTime.Should().Be(now);
-        newToken.ConsumedTime.Should().BeNull();
+        oldToken.ConsumedTime.ShouldBe(now);
+        newToken.ConsumedTime.ShouldBeNull();
 
-        newToken.CreationTime.Should().Be(oldToken.CreationTime);
-        newToken.Lifetime.Should().Be(oldToken.Lifetime);
+        newToken.CreationTime.ShouldBe(oldToken.CreationTime);
+        newToken.Lifetime.ShouldBe(oldToken.Lifetime);
     }
 
-        [Fact]
+    [Fact]
     public async Task UpdateRefreshToken_one_time_use_with_delete_should_delete_on_use_token_and_create_new_one_with_correct_dates()
     {
         _options.DeleteOneTimeOnlyRefreshTokensOnUse = true;
@@ -326,13 +321,13 @@ public class DefaultRefreshTokenServiceTests
         var oldToken = await _store.GetRefreshTokenAsync(handle);
         var newToken = await _store.GetRefreshTokenAsync(newHandle);
 
-        oldToken.Should().BeNull();
-        newToken.ConsumedTime.Should().BeNull();
+        oldToken.ShouldBeNull();
+        newToken.ConsumedTime.ShouldBeNull();
 
-        newToken.CreationTime.Should().Be(refreshToken.CreationTime);
-        newToken.Lifetime.Should().Be(refreshToken.Lifetime);
+        newToken.CreationTime.ShouldBe(refreshToken.CreationTime);
+        newToken.Lifetime.ShouldBe(refreshToken.Lifetime);
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_invalid_token_should_fail()
     {
@@ -344,9 +339,9 @@ public class DefaultRefreshTokenServiceTests
 
         var result = await _subject.ValidateRefreshTokenAsync("invalid", client);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_client_without_allow_offline_access_should_fail()
     {
@@ -371,9 +366,9 @@ public class DefaultRefreshTokenServiceTests
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_invalid_client_binding_should_fail()
     {
@@ -399,9 +394,9 @@ public class DefaultRefreshTokenServiceTests
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_expired_token_should_fail()
     {
@@ -427,9 +422,9 @@ public class DefaultRefreshTokenServiceTests
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_consumed_token_should_fail()
     {
@@ -456,9 +451,9 @@ public class DefaultRefreshTokenServiceTests
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
-        result.IsError.Should().BeTrue();
+        result.IsError.ShouldBeTrue();
     }
-        
+
     [Fact]
     public async Task ValidateRefreshToken_valid_token_should_succeed()
     {
@@ -484,7 +479,7 @@ public class DefaultRefreshTokenServiceTests
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -513,6 +508,6 @@ public class DefaultRefreshTokenServiceTests
 
         var result = await _subject.ValidateRefreshTokenAsync("key", client);
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 }

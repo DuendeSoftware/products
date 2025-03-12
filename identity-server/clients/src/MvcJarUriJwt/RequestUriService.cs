@@ -1,4 +1,6 @@
-using System;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Collections.Concurrent;
 
 namespace MvcJarUriJwt;
@@ -14,7 +16,7 @@ public class RequestUriService
 
         return id;
     }
-    
+
     public string Get(string id)
     {
         if (_requestObjects.TryGetValue(id, out var value))

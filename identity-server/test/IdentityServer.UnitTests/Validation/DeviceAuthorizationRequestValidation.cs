@@ -2,17 +2,12 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -25,10 +20,10 @@ public class DeviceAuthorizationRequestValidation
     {
         ClientId = "device_flow",
         AllowedGrantTypes = GrantTypes.DeviceFlow,
-        AllowedScopes = {"openid", "profile", "resource"},
+        AllowedScopes = { "openid", "profile", "resource" },
         AllowOfflineAccess = true
     };
-        
+
     [Fact]
     [Trait("Category", Category)]
     public async Task Null_Parameter()
@@ -37,7 +32,7 @@ public class DeviceAuthorizationRequestValidation
 
         Func<Task> act = () => validator.ValidateAsync(null, null);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -47,10 +42,10 @@ public class DeviceAuthorizationRequestValidation
         testClient.ProtocolType = IdentityServerConstants.ProtocolTypes.WsFederation;
 
         var validator = Factory.CreateDeviceAuthorizationRequestValidator();
-        var result = await validator.ValidateAsync(testParameters, new ClientSecretValidationResult {Client = testClient});
+        var result = await validator.ValidateAsync(testParameters, new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
     }
 
     [Fact]
@@ -60,58 +55,58 @@ public class DeviceAuthorizationRequestValidation
         testClient.AllowedGrantTypes = GrantTypes.Implicit;
 
         var validator = Factory.CreateDeviceAuthorizationRequestValidator();
-        var result = await validator.ValidateAsync(testParameters, new ClientSecretValidationResult {Client = testClient});
+        var result = await validator.ValidateAsync(testParameters, new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.UnauthorizedClient);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
     }
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Unauthorized_Scope()
     {
-        var parameters = new NameValueCollection {{"scope", "resource2"}};
+        var parameters = new NameValueCollection { { "scope", "resource2" } };
 
         var validator = Factory.CreateDeviceAuthorizationRequestValidator();
-        var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult {Client = testClient});
+        var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
     }
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Unknown_Scope()
     {
-        var parameters = new NameValueCollection {{"scope", Guid.NewGuid().ToString()}};
+        var parameters = new NameValueCollection { { "scope", Guid.NewGuid().ToString() } };
 
         var validator = Factory.CreateDeviceAuthorizationRequestValidator();
-        var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult {Client = testClient});
+        var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
     }
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Valid_OpenId_Request()
     {
-        var parameters = new NameValueCollection {{"scope", "openid"}};
+        var parameters = new NameValueCollection { { "scope", "openid" } };
 
         var validator = Factory.CreateDeviceAuthorizationRequestValidator();
-        var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult {Client = testClient});
+        var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.IsOpenIdRequest.Should().BeTrue();
-        result.ValidatedRequest.RequestedScopes.Should().Contain("openid");
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.IsOpenIdRequest.ShouldBeTrue();
+        result.ValidatedRequest.RequestedScopes.ShouldContain("openid");
 
-        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Should().Contain(x => x.Name == "openid");
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Should().BeEmpty();
-        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.Should().BeFalse();
+        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.ShouldContain(x => x.Name == "openid");
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.ShouldBeEmpty();
+        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.ShouldBeFalse();
 
-        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Any().Should().BeTrue();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Any().Should().BeFalse();
-        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.Should().BeFalse();
+        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Any().ShouldBeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Any().ShouldBeFalse();
+        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.ShouldBeFalse();
     }
 
     [Fact]
@@ -123,19 +118,19 @@ public class DeviceAuthorizationRequestValidation
         var validator = Factory.CreateDeviceAuthorizationRequestValidator();
         var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.IsOpenIdRequest.Should().BeFalse();
-        result.ValidatedRequest.RequestedScopes.Should().Contain("resource");
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.IsOpenIdRequest.ShouldBeFalse();
+        result.ValidatedRequest.RequestedScopes.ShouldContain("resource");
 
-        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Should().BeEmpty();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Should().Contain(x => x.Name == "api");
-        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Should().Contain(x => x.Name == "resource");
-        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.Should().BeFalse();
+        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.ShouldBeEmpty();
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.ShouldContain(x => x.Name == "api");
+        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.ShouldContain(x => x.Name == "resource");
+        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.ShouldBeFalse();
 
-        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Any().Should().BeFalse();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Any().Should().BeTrue();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Any().Should().BeTrue();
-        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.Should().BeFalse();
+        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Any().ShouldBeFalse();
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Any().ShouldBeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Any().ShouldBeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.ShouldBeFalse();
     }
 
     [Fact]
@@ -147,21 +142,21 @@ public class DeviceAuthorizationRequestValidation
         var validator = Factory.CreateDeviceAuthorizationRequestValidator();
         var result = await validator.ValidateAsync(parameters, new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.IsOpenIdRequest.Should().BeTrue();
-        result.ValidatedRequest.RequestedScopes.Should().Contain("openid");
-        result.ValidatedRequest.RequestedScopes.Should().Contain("resource");
-        result.ValidatedRequest.RequestedScopes.Should().Contain("offline_access");
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.IsOpenIdRequest.ShouldBeTrue();
+        result.ValidatedRequest.RequestedScopes.ShouldContain("openid");
+        result.ValidatedRequest.RequestedScopes.ShouldContain("resource");
+        result.ValidatedRequest.RequestedScopes.ShouldContain("offline_access");
 
-        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Should().Contain(x => x.Name == "openid");
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Should().Contain(x => x.Name == "api");
-        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Should().Contain(x => x.Name == "resource");
-        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.Should().BeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.ShouldContain(x => x.Name == "openid");
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.ShouldContain(x => x.Name == "api");
+        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.ShouldContain(x => x.Name == "resource");
+        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.ShouldBeTrue();
 
-        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Any().Should().BeTrue();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Any().Should().BeTrue();
-        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Any().Should().BeTrue();
-        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.Should().BeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.IdentityResources.Any().ShouldBeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.ApiResources.Any().ShouldBeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.ApiScopes.Any().ShouldBeTrue();
+        result.ValidatedRequest.ValidatedResources.Resources.OfflineAccess.ShouldBeTrue();
     }
 
 
@@ -175,8 +170,8 @@ public class DeviceAuthorizationRequestValidation
             new NameValueCollection(),
             new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeFalse();
-        result.ValidatedRequest.RequestedScopes.Should().Contain(testClient.AllowedScopes);
+        result.IsError.ShouldBeFalse();
+        result.ValidatedRequest.RequestedScopes.ShouldContain(testClient.AllowedScopes);
     }
 
     [Fact]
@@ -190,7 +185,7 @@ public class DeviceAuthorizationRequestValidation
             new NameValueCollection(),
             new ClientSecretValidationResult { Client = testClient });
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.AuthorizeErrors.InvalidScope);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
     }
 }

@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net.Http;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Duende.IdentityModel.Client;
 using IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Xunit;
 
 namespace IntegrationTests.Clients;
 
@@ -45,7 +41,7 @@ public class RevocationClient
             Password = "bob"
         });
 
-        response.IsError.Should().BeFalse();
+        response.IsError.ShouldBeFalse();
 
         // introspect - should be active
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
@@ -57,7 +53,7 @@ public class RevocationClient
             Token = response.AccessToken
         });
 
-        introspectionResponse.IsActive.Should().Be(true);
+        introspectionResponse.IsActive.ShouldBe(true);
 
         // revoke access token
         var revocationResponse = await _client.RevokeTokenAsync(new TokenRevocationRequest
@@ -79,6 +75,6 @@ public class RevocationClient
             Token = response.AccessToken
         });
 
-        introspectionResponse.IsActive.Should().Be(false);
+        introspectionResponse.IsActive.ShouldBe(false);
     }
 }

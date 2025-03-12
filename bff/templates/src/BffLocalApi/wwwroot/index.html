@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="libs/bootstrap.min.css" rel="stylesheet" />
+    <link href="StyleSheet.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+
+        <header>
+            <div class="buttons">
+                <div class="not-logged-in hide">
+                    <a class="btn btn-primary" href="/bff/login?returnUrl=/">Login</a>
+                </div>
+                <div class="logged-in hide">
+                    <a class="btn btn-primary" href="/bff/logout?returnUrl=/" id="logoutLink">Logout</a>
+                    <button class="btn btn-secondary show_session">Show Session Information</button>
+                    <!--<button class="btn btn-secondary remote_api">Call Remote API</button>-->
+                </div>
+                <span id="username"></span>
+            </div>
+            <div class="banner">
+                <h1>TODOs</h1>
+            </div>
+            <div class="clearfix"></div>
+        </header>
+
+
+        <div class="row">
+            <div class="col">
+                <h3>Add New</h3>
+            </div>
+            <div class="form-inline">
+                <label for="date">Todo Date</label>
+                <input class="form-control" id="date" type="datetime" value="2021-03-01" />
+                <label for="name">Todo Name</label>
+                <input class="form-control" id="name" value="Do something" />
+                <button class="form-control btn-success" id="createNewButton">Create</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="alert alert-warning hide"><strong>Error: </strong><span id="errText"></span></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Id</th>
+                        <th>Date</th>
+                        <th>Note</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody id="todos"></tbody>
+            </table>
+        </div>
+
+        <div class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Session Claims</h2>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Claim Type</th>
+                                    <th>Claim Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="claims"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script src="libs/jquery-3.6.0.min.js"></script>
+    <script src="libs/bootstrap.bundle.min.js"></script>
+    <script src="session.js"></script>
+    <script src="todo.js"></script>
+</body>
+</html>

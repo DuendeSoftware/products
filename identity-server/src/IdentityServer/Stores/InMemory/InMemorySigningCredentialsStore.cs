@@ -1,9 +1,8 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
 using Microsoft.IdentityModel.Tokens;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -31,7 +30,7 @@ public class InMemorySigningCredentialsStore : ISigningCredentialStore
     public Task<SigningCredentials> GetSigningCredentialsAsync()
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemorySigningCredentialsStore.GetSigningCredentials");
-        
+
         return Task.FromResult(_credential);
     }
 }

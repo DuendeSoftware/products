@@ -3,7 +3,6 @@
 
 
 using Duende.IdentityServer.Validation;
-using System.Threading.Tasks;
 
 namespace UnitTests.Validation.Setup;
 

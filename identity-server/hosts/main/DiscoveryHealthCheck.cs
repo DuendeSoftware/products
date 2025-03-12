@@ -39,7 +39,7 @@ public class DiscoveryHealthCheck : IHealthCheck
         catch
         {
         }
-        
+
         return new HealthCheckResult(context.Registration.FailureStatus);
     }
 }
@@ -80,4 +80,3 @@ public class DiscoveryKeysHealthCheck : IHealthCheck
         return new HealthCheckResult(context.Registration.FailureStatus);
     }
 }
-

@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.Extensions.Logging;
-using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Stores;
 
@@ -40,7 +39,7 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     public Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.StoreAuthorizationCode");
-        
+
         return CreateItemAsync(code, code.ClientId, code.Subject.GetSubjectId(), code.SessionId, code.Description, code.CreationTime, code.Lifetime);
     }
 
@@ -52,7 +51,7 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.GetAuthorizationCode");
-        
+
         return GetItemAsync(code);
     }
 
@@ -64,7 +63,7 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     public Task RemoveAuthorizationCodeAsync(string code)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.RemoveAuthorizationCode");
-        
+
         return RemoveItemAsync(code);
     }
 }

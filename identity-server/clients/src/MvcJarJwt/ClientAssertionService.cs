@@ -1,7 +1,9 @@
-using System.Threading.Tasks;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Duende.AccessTokenManagement;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
-using Duende.AccessTokenManagement;
 
 namespace MvcJarJwt;
 
@@ -9,7 +11,7 @@ public class ClientAssertionService : IClientAssertionService
 {
     private readonly AssertionService _assertionService;
 
-    public ClientAssertionService(AssertionService assertionService) 
+    public ClientAssertionService(AssertionService assertionService)
     {
         _assertionService = assertionService;
     }

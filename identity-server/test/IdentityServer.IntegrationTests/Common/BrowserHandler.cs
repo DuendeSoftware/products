@@ -2,12 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace IntegrationTests.Common;
 
@@ -33,7 +28,7 @@ public class BrowserHandler : DelegatingHandler
 
         int redirectCount = 0;
 
-        while (AllowAutoRedirect && 
+        while (AllowAutoRedirect &&
                (300 <= (int)response.StatusCode && (int)response.StatusCode < 400) &&
                redirectCount < StopRedirectingAfter)
         {

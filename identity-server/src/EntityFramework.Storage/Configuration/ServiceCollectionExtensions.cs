@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Options;

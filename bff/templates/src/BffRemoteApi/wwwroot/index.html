@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <link href="libs/bootstrap.min.css" rel="stylesheet"/>
+    <link href="StyleSheet.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <h1>Hello BFF</h1>
+    </header>
+
+    <div class="row">
+        <ul class="list-unstyled list-inline">
+            <li><a class="btn btn-primary" href="index.html">Home</a></li>
+            <li>
+                <button class="btn btn-default login">Login</button>
+            </li>
+            <li>
+                <button class="btn btn-primary call_api">Call API</button>
+            </li>
+            <li>
+                <button class="btn btn-info logout">Logout</button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <ul class="list-unstyled list-inline">
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">Message</div>
+            <div class="panel-body">
+                <pre id="response"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Current User</div>
+                <div class="panel-body">
+                    <pre id="user"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">API Result</div>
+                <div class="panel-body">
+                    <pre id="api-result"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+
+<iframe id="bff-silent-login"></iframe>
+</body>
+</html>

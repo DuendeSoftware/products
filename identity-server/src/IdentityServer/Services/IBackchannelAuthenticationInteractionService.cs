@@ -4,11 +4,8 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Models;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Services;
 
@@ -21,7 +18,7 @@ public interface IBackchannelAuthenticationInteractionService
     /// Returns the pending login requests for the current user.
     /// </summary>
     Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync();
-        
+
     /// <summary>
     /// Returns the login request for the id.
     /// </summary>

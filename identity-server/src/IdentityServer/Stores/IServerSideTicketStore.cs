@@ -4,9 +4,6 @@
 
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Stores;
 

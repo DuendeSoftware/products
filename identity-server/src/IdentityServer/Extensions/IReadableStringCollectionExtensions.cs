@@ -2,11 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using Microsoft.Extensions.Primitives;
 
 #pragma warning disable 1591
 

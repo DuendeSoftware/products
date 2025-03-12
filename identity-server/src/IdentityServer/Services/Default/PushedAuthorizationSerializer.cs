@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.DataProtection;
@@ -33,7 +32,7 @@ public class PushedAuthorizationSerializer : IPushedAuthorizationSerializer
             .FromString<Dictionary<string, string[]>>(unprotected)
             .FromFullDictionary();
     }
-    
+
     /// <inheritdoc />
     public string Serialize(NameValueCollection raw)
     {

@@ -36,7 +36,7 @@ public class IndexModel : PageModel
         {
             LoginRequest = result;
         }
-        
+
         return Page();
     }
 }

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Microsoft.IdentityModel.Tokens;

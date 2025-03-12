@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 public static class MapperTestHelpers
@@ -87,18 +84,18 @@ public static class MapperTestHelpers
     {
         // Create the source object
         var source = creator();
-        
+
         // Initialize the source object with non-default values in all of its properties
         var sourceType = typeof(TSource);
         var sourceProperties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance).ToList();
-        foreach(var property in sourceProperties.Where(p => !notAutoInitialized.Contains(p.Name)))
+        foreach (var property in sourceProperties.Where(p => !notAutoInitialized.Contains(p.Name)))
         {
             property.SetValue(source, GetNonDefaultValue(property.PropertyType));
         }
-        
+
         // Customize properties as needed
         customizer(source);
-        
+
         // Map from source to destination.
         var destination = mapper(source);
 
@@ -117,7 +114,7 @@ public static class MapperTestHelpers
                 var propertyValue = property.GetValue(destination);
 
                 if (propertyValue == null ||
-                    propertyValue.Equals(GetDefaultValue(property.PropertyType)) )
+                    propertyValue.Equals(GetDefaultValue(property.PropertyType)))
                 {
                     unmappedMembers.Add(property.Name);
                 }
@@ -129,7 +126,7 @@ public static class MapperTestHelpers
 
     private static object GetDefaultValue(Type type)
     {
-        if(type.IsAbstract ||
+        if (type.IsAbstract ||
            type == typeof(string))
         {
             return null;
@@ -145,7 +142,7 @@ public static class MapperTestHelpers
             return int.MaxValue;
         }
 
-        if(type == typeof(long))
+        if (type == typeof(long))
         {
             return long.MaxValue;
         }
@@ -160,7 +157,7 @@ public static class MapperTestHelpers
             return "Non-empty string";
         }
 
-        if (type == typeof(DateTime)) 
+        if (type == typeof(DateTime))
         {
             return DateTime.MaxValue;
         }
@@ -173,7 +170,7 @@ public static class MapperTestHelpers
         if (type.IsEnum)
         {
             var values = Enum.GetValues(type);
-            return values.GetValue(values.Length - 1); 
+            return values.GetValue(values.Length - 1);
         }
 
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>))

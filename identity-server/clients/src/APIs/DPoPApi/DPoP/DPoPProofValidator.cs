@@ -1,16 +1,14 @@
-using Duende.IdentityModel;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DPoPApi;
 
@@ -334,7 +332,7 @@ public class DPoPProofValidator
         // longer than the likelyhood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dpopOptions.ProofTokenValidityDuration + skew;
-        
+
         Logger.LogDebug("Adding proof token with jti {jti} to replay cache for duration {cacheDuration}", result.TokenId, cacheDuration);
 
         await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, DateTimeOffset.UtcNow.Add(cacheDuration));
@@ -447,11 +445,11 @@ public class DPoPProofValidator
                 return ValueTask.FromResult(iat);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
         }
-        
+
         return ValueTask.FromResult<long>(0);
     }
 
@@ -462,7 +460,7 @@ public class DPoPProofValidator
     protected virtual bool IsExpired(DPoPProofValidatonContext context, DPoPProofValidatonResult result, TimeSpan clockSkew, long issuedAtTime)
     {
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var start = now + (int) clockSkew.TotalSeconds;
+        var start = now + (int)clockSkew.TotalSeconds;
         if (start < issuedAtTime)
         {
             var diff = issuedAtTime - now;
@@ -471,8 +469,8 @@ public class DPoPProofValidator
         }
 
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
-        var expiration = issuedAtTime + (int) dpopOptions.ProofTokenValidityDuration.TotalSeconds;
-        var end = now - (int) clockSkew.TotalSeconds;
+        var expiration = issuedAtTime + (int)dpopOptions.ProofTokenValidityDuration.TotalSeconds;
+        var end = now - (int)clockSkew.TotalSeconds;
         if (expiration < end)
         {
             var diff = now - expiration;

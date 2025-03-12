@@ -1,9 +1,13 @@
-﻿using System;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Reflection;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace WindowsConsoleSystemBrowser
 {
+    [SupportedOSPlatform("Windows")]
     class RegistryConfig
     {
         public RegistryConfig(string uriScheme)

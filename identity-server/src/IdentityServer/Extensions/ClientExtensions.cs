@@ -2,12 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Models;
 
@@ -57,7 +53,7 @@ public static class ClientExtensions
         // TODO - Use X509CertificateLoader in a future release (when we drop NET8 support)
         return secrets
             .Where(s => s.Type == IdentityServerConstants.SecretTypes.X509CertificateBase64)
-            .Select(s => 
+            .Select(s =>
                 new X509Certificate2(Convert.FromBase64String(s.Value)))
             .Where(c => c != null)
             .ToList();

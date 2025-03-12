@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Models;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -23,7 +23,7 @@ class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConnectOptions
 
         context.AuthenticationOptions.Authority = context.IdentityProvider.Authority;
         context.AuthenticationOptions.RequireHttpsMetadata = context.IdentityProvider.Authority.StartsWith("https");
-            
+
         context.AuthenticationOptions.ClientId = context.IdentityProvider.ClientId;
         context.AuthenticationOptions.ClientSecret = context.IdentityProvider.ClientSecret;
 
@@ -51,7 +51,7 @@ class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConnectOptions
 #endif
         context.AuthenticationOptions.TokenValidationParameters.NameClaimType = JwtClaimTypes.Name;
         context.AuthenticationOptions.TokenValidationParameters.RoleClaimType = JwtClaimTypes.Role;
-            
+
         context.AuthenticationOptions.CallbackPath = context.PathPrefix + "/signin";
         context.AuthenticationOptions.SignedOutCallbackPath = context.PathPrefix + "/signout-callback";
         context.AuthenticationOptions.RemoteSignOutPath = context.PathPrefix + "/signout";

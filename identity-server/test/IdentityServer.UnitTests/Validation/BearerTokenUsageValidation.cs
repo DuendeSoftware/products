@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
-using Xunit;
+using UnitTests.Common;
 
 namespace UnitTests.Validation;
 
@@ -24,10 +20,10 @@ public class BearerTokenUsageValidation
         var ctx = new DefaultHttpContext();
         ctx.Request.Method = "GET";
 
-        var validator = new BearerTokenUsageValidator(TestLogger.Create< BearerTokenUsageValidator>());
+        var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 
     [Fact]
@@ -40,7 +36,7 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 
     [Fact]
@@ -54,7 +50,7 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 
     [Fact]
@@ -68,7 +64,7 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 
     [Fact]
@@ -82,7 +78,7 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 
     [Fact]
@@ -96,9 +92,9 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeTrue();
-        result.Token.Should().Be("token");
-        result.UsageType.Should().Be(BearerTokenUsageType.AuthorizationHeader);
+        result.TokenFound.ShouldBeTrue();
+        result.Token.ShouldBe("token");
+        result.UsageType.ShouldBe(BearerTokenUsageType.AuthorizationHeader);
     }
 
     [Fact]
@@ -114,9 +110,9 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeTrue();
-        result.Token.Should().Be("token");
-        result.UsageType.Should().Be(BearerTokenUsageType.PostBody);
+        result.TokenFound.ShouldBeTrue();
+        result.Token.ShouldBe("token");
+        result.UsageType.ShouldBe(BearerTokenUsageType.PostBody);
     }
 
     [Fact]
@@ -132,7 +128,7 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 
     [Fact]
@@ -148,7 +144,7 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 
     [Fact]
@@ -164,6 +160,6 @@ public class BearerTokenUsageValidation
         var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
         var result = await validator.ValidateAsync(ctx);
 
-        result.TokenFound.Should().BeFalse();
+        result.TokenFound.ShouldBeFalse();
     }
 }

@@ -4,7 +4,6 @@
 
 using System.Collections.Specialized;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints;
@@ -13,13 +12,11 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Xunit;
-using Duende.IdentityServer.Stores;
+using UnitTests.Common;
 
 namespace UnitTests.Endpoints.Authorize;
 
@@ -46,7 +43,7 @@ public class AuthorizeEndpointBaseTests
     private StubAuthorizeInteractionResponseGenerator _stubInteractionGenerator = new StubAuthorizeInteractionResponseGenerator();
 
     private MockConsentMessageStore _mockUserConsentResponseMessageStore = new MockConsentMessageStore();
-        
+
     private TestAuthorizeEndpoint _subject;
 
     private ClaimsPrincipal _user = new IdentityServerUser("bob").CreatePrincipal();
@@ -72,9 +69,9 @@ public class AuthorizeEndpointBaseTests
 
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<AuthorizeResult>();
-        ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
-        ((AuthorizeResult)result).Response.SessionState.Should().NotBeNull();
+        result.ShouldBeOfType<AuthorizeResult>();
+        ((AuthorizeResult)result).Response.IsError.ShouldBeTrue();
+        ((AuthorizeResult)result).Response.SessionState.ShouldNotBeNull();
     }
 
     [Fact]
@@ -86,8 +83,8 @@ public class AuthorizeEndpointBaseTests
 
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<AuthorizeResult>();
-        ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
+        result.ShouldBeOfType<AuthorizeResult>();
+        ((AuthorizeResult)result).Response.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -98,7 +95,7 @@ public class AuthorizeEndpointBaseTests
 
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<ConsentPageResult>();
+        result.ShouldBeOfType<ConsentPageResult>();
     }
 
     [Fact]
@@ -109,8 +106,8 @@ public class AuthorizeEndpointBaseTests
 
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<AuthorizeResult>();
-        ((AuthorizeResult)result).Response.IsError.Should().BeTrue();
+        result.ShouldBeOfType<AuthorizeResult>();
+        ((AuthorizeResult)result).Response.IsError.ShouldBeTrue();
     }
 
     [Fact]
@@ -124,10 +121,10 @@ public class AuthorizeEndpointBaseTests
 
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<AuthorizeResult>();
+        result.ShouldBeOfType<AuthorizeResult>();
         var authorizeResult = ((AuthorizeResult)result);
-        authorizeResult.Response.IsError.Should().BeTrue();
-        authorizeResult.Response.ErrorDescription.Should().Be(errorDescription);
+        authorizeResult.Response.IsError.ShouldBeTrue();
+        authorizeResult.Response.ErrorDescription.ShouldBe(errorDescription);
     }
 
     [Fact]
@@ -138,7 +135,7 @@ public class AuthorizeEndpointBaseTests
 
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<LoginPageResult>();
+        result.ShouldBeOfType<LoginPageResult>();
     }
 
     [Fact]
@@ -150,7 +147,7 @@ public class AuthorizeEndpointBaseTests
 
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<CustomRedirectResult>();
+        result.ShouldBeOfType<CustomRedirectResult>();
     }
 
     [Fact]
@@ -159,7 +156,7 @@ public class AuthorizeEndpointBaseTests
     {
         var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
 
-        result.Should().BeOfType<AuthorizeResult>();
+        result.ShouldBeOfType<AuthorizeResult>();
     }
 
     internal void Init()

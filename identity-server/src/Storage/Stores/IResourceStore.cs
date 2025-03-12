@@ -4,8 +4,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores;
@@ -24,7 +22,7 @@ public interface IResourceStore
     /// Gets API scopes by scope name.
     /// </summary>
     Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames);
-        
+
     /// <summary>
     /// Gets API resources by scope name.
     /// </summary>

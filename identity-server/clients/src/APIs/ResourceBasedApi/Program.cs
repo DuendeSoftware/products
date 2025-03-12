@@ -1,7 +1,6 @@
-using System;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;

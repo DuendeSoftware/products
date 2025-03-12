@@ -4,9 +4,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Http;
 
@@ -33,7 +30,7 @@ public class LoggingOptions
     /// Gets or sets the collection of keys that will be used to redact sensitive values from a token request log.
     /// </summary>
     /// <remarks>Please be aware that initializing this property could expose sensitive information in your logs.</remarks>
-    public ICollection<string> TokenRequestSensitiveValuesFilter { get; set; } = 
+    public ICollection<string> TokenRequestSensitiveValuesFilter { get; set; } =
         new HashSet<string>
         {
             OidcConstants.TokenRequest.ClientSecret,
@@ -49,7 +46,7 @@ public class LoggingOptions
     /// Gets or sets the collection of keys that will be used to redact sensitive values from an authorize request log.
     /// </summary>
     /// <remarks>Please be aware that initializing this property could expose sensitive information in your logs.</remarks>
-    public ICollection<string> AuthorizeRequestSensitiveValuesFilter { get; set; } = 
+    public ICollection<string> AuthorizeRequestSensitiveValuesFilter { get; set; } =
         new HashSet<string>
         {
             OidcConstants.AuthorizeRequest.IdTokenHint
@@ -75,5 +72,5 @@ public class LoggingOptions
         var result = !(context.RequestAborted.IsCancellationRequested && exception is OperationCanceledException);
         return result;
     };
-    
+
 }

@@ -1,17 +1,13 @@
-using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.IdentityModel.Tokens.Jwt;
-using Duende.IdentityModel;
 using Clients;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
-using System.Net.Http;
-using Microsoft.Extensions.Configuration;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MvcHybrid
 {
@@ -81,10 +77,10 @@ namespace MvcHybrid
 
                     options.DisableTelemetry = true;
                 });
-            
+
             // var apiKey = _configuration["HoneyCombApiKey"];
             // var dataset = "IdentityServerDev";
-            
+
             // services.AddOpenTelemetryTracing(builder =>
             // {
             //     builder

@@ -3,10 +3,6 @@
 
 
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 
@@ -53,7 +49,7 @@ public class DefaultCorsPolicyService : ICorsPolicyService
     public virtual Task<bool> IsOriginAllowedAsync(string origin)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultCorsPolicyService.IsOriginAllowed");
-        
+
         if (!String.IsNullOrWhiteSpace(origin))
         {
             if (AllowAll)

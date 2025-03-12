@@ -4,10 +4,8 @@
 
 #nullable enable
 
-using Duende.IdentityServer.Extensions;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Models;
 
@@ -18,7 +16,7 @@ namespace Duende.IdentityServer.Models;
 public class ApiResource : Resource
 {
     private string DebuggerDisplay => Name ?? $"{{{typeof(ApiResource)}}}";
-        
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiResource"/> class.
     /// </summary>

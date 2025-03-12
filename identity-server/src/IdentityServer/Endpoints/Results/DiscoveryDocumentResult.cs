@@ -3,11 +3,8 @@
 
 
 using Duende.IdentityServer.Extensions;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Hosting;
+using Microsoft.AspNetCore.Http;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 

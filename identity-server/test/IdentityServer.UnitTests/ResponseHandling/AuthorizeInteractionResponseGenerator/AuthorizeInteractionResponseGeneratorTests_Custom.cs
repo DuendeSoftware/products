@@ -2,17 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
-using UnitTests.Common;
 using Microsoft.Extensions.Logging;
-using Xunit;
+using UnitTests.Common;
 using static Duende.IdentityModel.OidcConstants;
 
 namespace UnitTests.ResponseHandling.AuthorizeInteractionResponseGenerator;
@@ -21,9 +18,9 @@ public class CustomAuthorizeInteractionResponseGenerator : Duende.IdentityServer
 {
     public CustomAuthorizeInteractionResponseGenerator(
         IdentityServerOptions options,
-        IClock clock, 
-        ILogger<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator> logger, 
-        IConsentService consent, 
+        IClock clock,
+        ILogger<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator> logger,
+        IConsentService consent,
         IProfileService profile) : base(options, clock, logger, consent, profile)
     {
     }
@@ -90,8 +87,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsRedirect.Should().BeTrue();
-        result.RedirectUrl.Should().Be("/custom");
+        result.IsRedirect.ShouldBeTrue();
+        result.RedirectUrl.ShouldBe("/custom");
     }
 
     [Fact]
@@ -117,8 +114,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("login_required");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("login_required");
     }
 
     [Fact]
@@ -144,9 +141,9 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("interaction_required");
-        result.RedirectUrl.Should().BeNull();
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("interaction_required");
+        result.RedirectUrl.ShouldBeNull();
     }
 
     [Fact]
@@ -172,7 +169,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
 
         var result = await _subject.ProcessInteractionAsync(request);
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be("consent_required");
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe("consent_required");
     }
 }

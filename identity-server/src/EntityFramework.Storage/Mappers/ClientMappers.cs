@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.Models;
@@ -65,7 +63,7 @@ public static class ClientMappers
             ConsentLifetime = entity.ConsentLifetime,
             AbsoluteRefreshTokenLifetime = entity.AbsoluteRefreshTokenLifetime,
             SlidingRefreshTokenLifetime = entity.SlidingRefreshTokenLifetime,
-            RefreshTokenUsage = (TokenUsage)entity.RefreshTokenUsage, 
+            RefreshTokenUsage = (TokenUsage)entity.RefreshTokenUsage,
             UpdateAccessTokenClaimsOnRefresh = entity.UpdateAccessTokenClaimsOnRefresh,
             RefreshTokenExpiration = (TokenExpiration)entity.RefreshTokenExpiration,
             AccessTokenType = (AccessTokenType)entity.AccessTokenType,
@@ -157,7 +155,7 @@ public static class ClientMappers
             ConsentLifetime = model.ConsentLifetime,
             AbsoluteRefreshTokenLifetime = model.AbsoluteRefreshTokenLifetime,
             SlidingRefreshTokenLifetime = model.SlidingRefreshTokenLifetime,
-            RefreshTokenUsage = (int)model.RefreshTokenUsage, 
+            RefreshTokenUsage = (int)model.RefreshTokenUsage,
             UpdateAccessTokenClaimsOnRefresh = model.UpdateAccessTokenClaimsOnRefresh,
             RefreshTokenExpiration = (int)model.RefreshTokenExpiration,
             AccessTokenType = (int)model.AccessTokenType,

@@ -35,5 +35,5 @@ Duende IdentityServer is source-available, but requires a paid [license](https:/
 - **Free Community Edition**: A free Community Edition license is available for qualifying companies and non-profit organizations. Learn more [here](https://duendesoftware.com/products/communityedition).
 
 ## Reporting Issues and Getting Support
-- For bug reports or feature requests, open an issue on GitHub: [Submit an Issue](https://github.com/DuendeSoftware/Support/issues/new/choose).
+- For bug reports or feature requests, [use our developer community forum](https://github.com/DuendeSoftware/community).
 - For security-related concerns, please contact us privately at: **security@duendesoftware.com**.

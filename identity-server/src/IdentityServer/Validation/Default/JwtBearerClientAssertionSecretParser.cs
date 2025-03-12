@@ -2,16 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using System.Linq;
 using System.IdentityModel.Tokens.Jwt;
-using Duende.IdentityServer.Configuration;
-using Duende.IdentityServer.Models;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -110,7 +107,7 @@ public class JwtBearerClientAssertionSecretParser : ISecretParser
             var jwt = new JwtSecurityToken(token);
             return jwt.Subject;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             _logger.LogWarning(e, "Could not parse client assertion");
             return null;

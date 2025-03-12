@@ -2,27 +2,25 @@
 // See LICENSE in the project root for license information.
 
 
-using Microsoft.AspNetCore.WebUtilities;
-using System;
-using System.Collections.Generic;
+#nullable enable
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityServer.Extensions;
 
 internal static class StringExtensions
 {
     [DebuggerStepThrough]
-    public static string ToSpaceSeparatedString(this IEnumerable<string> list)
+    public static string ToSpaceSeparatedString(this IEnumerable<string>? list)
     {
         if (list == null)
         {
             return string.Empty;
         }
-        
+
         return String.Join(' ', list);
     }
 
@@ -33,7 +31,7 @@ internal static class StringExtensions
         return input.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 
-    public static List<string> ParseScopesString(this string scopes)
+    public static List<string>? ParseScopesString(this string scopes)
     {
         if (scopes.IsMissing())
         {
@@ -53,13 +51,13 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static bool IsMissing([NotNullWhen(false)]this string value)
+    public static bool IsMissing([NotNullWhen(false)] this string? value)
     {
         return string.IsNullOrWhiteSpace(value);
     }
 
     [DebuggerStepThrough]
-    public static bool IsMissingOrTooLong(this string value, int maxLength)
+    public static bool IsMissingOrTooLong(this string? value, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -74,13 +72,14 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static bool IsPresent([NotNullWhen(true)] this string value)
+    public static bool IsPresent([NotNullWhen(true)] this string? value)
     {
         return !string.IsNullOrWhiteSpace(value);
     }
 
     [DebuggerStepThrough]
-    public static string EnsureLeadingSlash(this string url)
+    [return: NotNullIfNotNull("url")]
+    public static string? EnsureLeadingSlash(this string? url)
     {
         if (url != null && !url.StartsWith('/'))
         {
@@ -91,7 +90,8 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static string EnsureTrailingSlash(this string url)
+    [return: NotNullIfNotNull("url")]
+    public static string? EnsureTrailingSlash(this string? url)
     {
         if (url != null && !url.EndsWith('/'))
         {
@@ -102,7 +102,8 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static string RemoveLeadingSlash(this string url)
+    [return: NotNullIfNotNull("url")]
+    public static string? RemoveLeadingSlash(this string? url)
     {
         if (url != null && url.StartsWith('/'))
         {
@@ -113,7 +114,8 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static string RemoveTrailingSlash(this string url)
+    [return: NotNullIfNotNull("url")]
+    public static string? RemoveTrailingSlash(this string? url)
     {
         if (url != null && url.EndsWith('/'))
         {
@@ -124,7 +126,7 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static string CleanUrlPath(this string url)
+    public static string CleanUrlPath(this string? url)
     {
         if (String.IsNullOrWhiteSpace(url)) url = "/";
 
@@ -137,7 +139,7 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static bool IsLocalUrl(this string url)
+    public static bool IsLocalUrl([NotNullWhen(true)] this string? url)
     {
         // This implementation is a copy of a https://github.com/dotnet/aspnetcore/blob/3f1acb59718cadf111a0a796681e3d3509bb3381/src/Mvc/Mvc.Core/src/Routing/UrlHelperBase.cs#L315
         // We originally copied that code to avoid a dependency, but we could potentially remove this entirely by switching to the Microsoft.NET.Sdk.Web sdk.
@@ -207,12 +209,9 @@ internal static class StringExtensions
             return false;
         }
 
-        if (uri.IsFile && !input.StartsWith(Uri.UriSchemeFile + "://", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        return true;
+        return !uri.IsFile ||
+               // no need to check if input starts with {Uri.UriSchemeFile}:// because uri.IsFile ensures it is either '/' or `file://`
+               input.StartsWith(Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase);
     }
 
     [DebuggerStepThrough]
@@ -248,7 +247,7 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static NameValueCollection ReadQueryStringAsNameValueCollection(this string url)
+    public static NameValueCollection ReadQueryStringAsNameValueCollection(this string? url)
     {
         if (url != null)
         {
@@ -264,10 +263,10 @@ internal static class StringExtensions
             }
         }
 
-        return new NameValueCollection();           
+        return new NameValueCollection();
     }
 
-    public static string GetOrigin(this string url)
+    public static string? GetOrigin(this string? url)
     {
         if (url != null)
         {
@@ -286,7 +285,7 @@ internal static class StringExtensions
 
         return null;
     }
-        
+
     public static string Obfuscate(this string value)
     {
         var last4Chars = "****";

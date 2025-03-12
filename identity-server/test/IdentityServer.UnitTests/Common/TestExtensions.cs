@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-
 namespace UnitTests.Common;
 
 internal static class TestExtensions

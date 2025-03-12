@@ -5,7 +5,6 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.DataProtection;
-using System;
 
 namespace Duende.IdentityServer.Services.KeyManagement;
 
@@ -32,12 +31,12 @@ public class DataProtectionKeyProtector : ISigningKeyProtector
     public SerializedKey Protect(KeyContainer key)
     {
         var data = KeySerializer.Serialize(key);
-            
+
         if (_options.DataProtectKeys)
         {
             data = _dataProtectionProvider.Protect(data);
         }
-            
+
         return new SerializedKey
         {
             Version = 1,
@@ -53,8 +52,8 @@ public class DataProtectionKeyProtector : ISigningKeyProtector
     /// <inheritdoc/>
     public KeyContainer Unprotect(SerializedKey key)
     {
-        var data = key.DataProtected ? 
-            _dataProtectionProvider.Unprotect(key.Data) : 
+        var data = key.DataProtected ?
+            _dataProtectionProvider.Unprotect(key.Data) :
             key.Data;
 
         if (key.IsX509Certificate)
@@ -66,7 +65,7 @@ public class DataProtectionKeyProtector : ISigningKeyProtector
         {
             return KeySerializer.Deserialize<RsaKeyContainer>(data);
         }
-            
+
         if (key.Algorithm.StartsWith('E'))
         {
             return KeySerializer.Deserialize<EcKeyContainer>(data);

@@ -2,15 +2,14 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Duende.IdentityModel;
-using Microsoft.AspNetCore.Http;
 using System.Net;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Validation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -33,9 +32,9 @@ internal class UserInfoEndpoint : IEndpointHandler
     /// <param name="responseGenerator">The response generator.</param>
     /// <param name="logger">The logger.</param>
     public UserInfoEndpoint(
-        BearerTokenUsageValidator tokenUsageValidator, 
-        IUserInfoRequestValidator requestValidator, 
-        IUserInfoResponseGenerator responseGenerator, 
+        BearerTokenUsageValidator tokenUsageValidator,
+        IUserInfoRequestValidator requestValidator,
+        IUserInfoResponseGenerator responseGenerator,
         ILogger<UserInfoEndpoint> logger)
     {
         _tokenUsageValidator = tokenUsageValidator;
@@ -52,7 +51,7 @@ internal class UserInfoEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.UserInfo + "Endpoint");
-        
+
         if (!HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsPost(context.Request.Method))
         {
             _logger.LogWarning("Invalid HTTP method for userinfo endpoint.");

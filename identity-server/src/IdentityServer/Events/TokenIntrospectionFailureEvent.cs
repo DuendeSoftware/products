@@ -3,7 +3,6 @@
 
 
 using Duende.IdentityServer.Extensions;
-using System.Collections.Generic;
 
 namespace Duende.IdentityServer.Events;
 

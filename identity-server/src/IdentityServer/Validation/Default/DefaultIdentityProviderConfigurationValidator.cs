@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 
@@ -29,7 +27,7 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
     public virtual async Task ValidateAsync(IdentityProviderConfigurationValidationContext context)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultIdentityProviderConfigurationValidator.Validate");
-        
+
         var type = _options.DynamicProviders.FindProviderType(context.IdentityProvider.Type);
         if (type == null)
         {
@@ -47,7 +45,7 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
         {
             var oidcContext = new IdentityProviderConfigurationValidationContext<OidcProvider>(oidc);
             await ValidateOidcProviderAsync(oidcContext);
-                
+
             if (!oidcContext.IsValid)
             {
                 context.SetError(oidcContext.ErrorMessage);
@@ -67,7 +65,7 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
         {
             context.SetError("Authority is missing.");
         }
-            
+
         if (String.IsNullOrWhiteSpace(context.IdentityProvider.ClientId))
         {
             context.SetError("ClientId is missing.");

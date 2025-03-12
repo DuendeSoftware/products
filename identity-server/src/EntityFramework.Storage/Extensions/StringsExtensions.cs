@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text.Encodings.Web;
 
 namespace Duende.IdentityServer.EntityFramework.Extensions;
@@ -19,7 +16,7 @@ internal static class StringExtensions
         {
             return string.Empty;
         }
-        
+
         return String.Join(' ', list);
     }
 
@@ -27,7 +24,7 @@ internal static class StringExtensions
     public static IEnumerable<string> FromSpaceSeparatedString(this string input)
     {
         input = input.Trim();
-        return input.Split(' ' , StringSplitOptions.RemoveEmptyEntries).ToList();
+        return input.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 
     public static List<string> ParseScopesString(this string scopes)

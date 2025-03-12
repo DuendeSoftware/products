@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.Threading;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.V2;

@@ -2,11 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 #pragma warning disable 1591
 
@@ -15,7 +12,7 @@ namespace Duende.IdentityServer.Extensions;
 public static class IEnumerableExtensions
 {
     [DebuggerStepThrough]
-    public static bool IsNullOrEmpty<T>([NotNullWhen(false)]this IEnumerable<T> list)
+    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IEnumerable<T> list)
     {
         if (list == null)
         {

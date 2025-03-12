@@ -4,9 +4,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -40,7 +37,8 @@ public class IdentityProvider
     /// </summary>
     public IdentityProvider(string type)
     {
-        Type = type ?? throw new ArgumentNullException(nameof(type));
+        ArgumentException.ThrowIfNullOrWhiteSpace(type);
+        Type = type;
     }
 
     /// <summary>

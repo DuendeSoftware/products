@@ -4,15 +4,12 @@
 
 #nullable enable
 
+using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -266,7 +263,7 @@ public static class IdentityServerBuilderExtensionsCrypto
         // add signing algorithm name to key ID to allow using the same key for two different algorithms (e.g. RS256 and PS56);
         var key = new X509SecurityKey(certificate);
         key.KeyId += signingAlgorithm;
-            
+
         var keyInfo = new SecurityKeyInfo
         {
             Key = key,

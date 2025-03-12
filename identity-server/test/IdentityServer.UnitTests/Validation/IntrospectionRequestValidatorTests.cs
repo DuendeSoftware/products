@@ -2,19 +2,13 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation;
 
@@ -38,7 +32,8 @@ public class IntrospectionRequestValidatorTests
     [Trait("Category", Category)]
     public async Task valid_token_should_successfully_validate()
     {
-        var token = new Token {
+        var token = new Token
+        {
             CreationTime = DateTime.UtcNow,
             Issuer = "http://op",
             ClientId = "codeclient",
@@ -50,7 +45,7 @@ public class IntrospectionRequestValidatorTests
             }
         };
         var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token);
-            
+
         var param = new NameValueCollection()
         {
             { "token", handle}
@@ -58,24 +53,24 @@ public class IntrospectionRequestValidatorTests
 
         var result = await _subject.ValidateAsync(
             new IntrospectionRequestValidationContext
-            { 
+            {
                 Parameters = param,
                 Api = new ApiResource("api")
             }
         );
 
-        result.IsError.Should().Be(false);
-        result.IsActive.Should().Be(true);
-        result.Claims.Count().Should().Be(6);
-        result.Token.Should().Be(handle);
+        result.IsError.ShouldBe(false);
+        result.IsActive.ShouldBe(true);
+        result.Claims.Count().ShouldBe(6);
+        result.Token.ShouldBe(handle);
 
         var claimTypes = result.Claims.Select(c => c.Type).ToList();
-        claimTypes.Should().Contain("iss");
-        claimTypes.Should().Contain("scope");
-        claimTypes.Should().Contain("iat");
-        claimTypes.Should().Contain("nbf");
-        claimTypes.Should().Contain("exp");
-            
+        claimTypes.ShouldContain("iss");
+        claimTypes.ShouldContain("scope");
+        claimTypes.ShouldContain("iat");
+        claimTypes.ShouldContain("nbf");
+        claimTypes.ShouldContain("exp");
+
     }
 
     [Fact]
@@ -86,15 +81,15 @@ public class IntrospectionRequestValidatorTests
 
         var result = await _subject.ValidateAsync(new IntrospectionRequestValidationContext
         {
-            Parameters = param, 
+            Parameters = param,
             Api = new ApiResource("api")
         });
 
-        result.IsError.Should().Be(true);
-        result.Error.Should().Be("missing_token");
-        result.IsActive.Should().Be(false);
-        result.Claims.Should().BeNull();
-        result.Token.Should().BeNull();
+        result.IsError.ShouldBe(true);
+        result.Error.ShouldBe("missing_token");
+        result.IsActive.ShouldBe(false);
+        result.Claims.ShouldBeNull();
+        result.Token.ShouldBeNull();
     }
 
     [Fact]
@@ -106,16 +101,16 @@ public class IntrospectionRequestValidatorTests
             { "token", "invalid" }
         };
 
-        var result = await _subject.ValidateAsync(new IntrospectionRequestValidationContext 
-        { 
-            Parameters = param, 
-            Api = new ApiResource("api") 
+        var result = await _subject.ValidateAsync(new IntrospectionRequestValidationContext
+        {
+            Parameters = param,
+            Api = new ApiResource("api")
         });
 
-        result.IsError.Should().Be(false);
-        result.IsActive.Should().Be(false);
-        result.Claims.Should().BeNull();
-        result.Token.Should().Be("invalid");
+        result.IsError.ShouldBe(false);
+        result.IsActive.ShouldBe(false);
+        result.Claims.ShouldBeNull();
+        result.Token.ShouldBe("invalid");
     }
 
     [Theory]
@@ -152,11 +147,9 @@ public class IntrospectionRequestValidatorTests
             }
         );
 
-        result.Claims.Where(c => c.Type == claimType)
-            .Should()
-            .HaveCount(1)
-            .And
-            .Contain(c => c.Value == expectedValueSelector(token));
+        var claims = result.Claims.Where(c => c.Type == claimType).ToArray();
+        claims.Length.ShouldBe(1);
+        claims.ShouldContain(c => c.Value == expectedValueSelector(token));
     }
 
     public static IEnumerable<object[]> DuplicateClaimTestCases()

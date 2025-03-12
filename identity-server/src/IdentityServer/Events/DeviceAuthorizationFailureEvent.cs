@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Validation;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer.Events;
 
@@ -25,7 +25,7 @@ public class DeviceAuthorizationFailureEvent : Event
             ClientId = result.ValidatedRequest.Client?.ClientId;
             ClientName = result.ValidatedRequest.Client?.ClientName;
             Scopes = result.ValidatedRequest.RequestedScopes?.ToSpaceSeparatedString();
-                
+
         }
 
         Endpoint = IdentityServerConstants.EndpointNames.DeviceAuthorization;
@@ -75,7 +75,7 @@ public class DeviceAuthorizationFailureEvent : Event
     /// The scopes.
     /// </value>
     public string Scopes { get; set; }
-        
+
     /// <summary>
     /// Gets or sets the error.
     /// </summary>

@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.Models;
-using Microsoft.AspNetCore.DataProtection;
-using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Duende.IdentityServer.Stores.Serialization;
 
@@ -29,7 +28,7 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
             IgnoreReadOnlyProperties = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
-            
+
         Settings.Converters.Add(new ClaimConverter());
         Settings.Converters.Add(new ClaimsPrincipalConverter());
     }
@@ -61,9 +60,9 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
         {
             payload = _provider.Protect(payload);
         }
-            
+
         var data = new PersistentGrantDataContainer
-        { 
+        {
             PersistentGrantDataContainerVersion = 1,
             DataProtected = ShouldDataProtect,
             Payload = payload,
@@ -81,7 +80,7 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
     public T Deserialize<T>(string json)
     {
         var container = JsonSerializer.Deserialize<PersistentGrantDataContainer>(json, Settings);
-            
+
         if (container.PersistentGrantDataContainerVersion == 0)
         {
             var item = JsonSerializer.Deserialize<T>(json, Settings);
@@ -92,7 +91,7 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
         if (container.PersistentGrantDataContainerVersion == 1)
         {
             var payload = container.Payload;
-                
+
             if (container.DataProtected)
             {
                 if (_provider == null)

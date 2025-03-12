@@ -23,7 +23,7 @@ internal static class HostingExtensions
         builder.AddExternalIdentityProviders();
 
         builder.AddAdminFeatures();
-        
+
         // var apiKey = builder.Configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";
         //
@@ -51,12 +51,12 @@ internal static class HostingExtensions
 
     private static void AddAdminFeatures(this WebApplicationBuilder builder)
     {
-        builder.Services.AddAuthorization(options => 
-            options.AddPolicy("admin", 
+        builder.Services.AddAuthorization(options =>
+            options.AddPolicy("admin",
                 policy => policy.RequireClaim("sub", "1"))
         );
 
-        builder.Services.Configure<RazorPagesOptions>(options => 
+        builder.Services.Configure<RazorPagesOptions>(options =>
             options.Conventions.AuthorizeFolder("/Admin", "admin"));
 
         builder.Services.AddTransient<Pages.Admin.Clients.ClientRepository>();

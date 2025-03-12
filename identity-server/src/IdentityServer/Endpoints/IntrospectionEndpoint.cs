@@ -2,19 +2,17 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
 using System.Net;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using Duende.IdentityServer.Extensions;
-using System.IO;
-using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -64,7 +62,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Introspection + "Endpoint");
-        
+
         _logger.LogTrace("Processing introspection request.");
 
         // validate HTTP
@@ -123,7 +121,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         }
 
         var callerName = api?.Name ?? client.ClientId;
-       
+
         var body = await context.Request.ReadFormAsync();
         if (body == null)
         {

@@ -5,8 +5,6 @@
 #nullable enable
 
 using Microsoft.AspNetCore.Authentication;
-using System;
-using System.Collections.Generic;
 
 namespace Duende.IdentityServer.Models;
 
@@ -60,4 +58,3 @@ public class UserSession
     /// </summary>
     public AuthenticationTicket AuthenticationTicket { get; set; } = default!;
 }
-

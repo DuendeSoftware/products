@@ -6,10 +6,6 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Services;
 
@@ -47,7 +43,12 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     /// The server-side session store (if configured).
     /// </summary>
     protected readonly IServerSideSessionStore ServerSideSessionStore;
-    
+
+    /// <summary>
+    /// The server-side ticket store (if configured).
+    /// </summary>
+    protected readonly IServerSideTicketStore ServerSideTicketStore;
+
     /// <summary>
     /// Ctor.
     /// </summary>
@@ -57,7 +58,8 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         IClientStore clientStore,
         IBackChannelLogoutService backChannelLogoutService,
         ILogger<DefaultSessionCoordinationService> logger,
-        IServerSideSessionStore serverSideSessionStore = null)
+        IServerSideSessionStore serverSideSessionStore = null,
+        IServerSideTicketStore serverSideTicketStore = null)
     {
         Options = options;
         PersistedGrantStore = persistedGrantStore;
@@ -65,6 +67,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         BackChannelLogoutService = backChannelLogoutService;
         Logger = logger;
         ServerSideSessionStore = serverSideSessionStore;
+        ServerSideTicketStore = serverSideTicketStore;
     }
 
     /// <summary>
@@ -102,7 +105,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
             if (clientsToCoordinate.Count > 0)
             {
                 Logger.LogDebug("Due to user logout, removing tokens for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
-                
+
                 await PersistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
                 {
                     SubjectId = session.SubjectId,
@@ -113,7 +116,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
             }
 
             Logger.LogDebug("Due to user logout, invoking backchannel logout for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
-            
+
             // this uses all the clientIds since that's how logout worked before session coordination existed
             // IOW, we know we're not using the clientsToCoordinate list here, also because it's active logout
             await BackChannelLogoutService.SendLogoutNotificationsAsync(new LogoutNotificationContext
@@ -151,7 +154,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         if (clientsToCoordinate.Count > 0)
         {
             Logger.LogDebug("Due to expired session, removing tokens for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
-            
+
             await PersistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
             {
                 SubjectId = session.SubjectId,
@@ -226,7 +229,24 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                         session.Renewed = DateTime.UtcNow;
                         session.Expires = session.Renewed.Add(diff);
 
-                        await ServerSideSessionStore.UpdateSessionAsync(session);
+                        //In rare cases, there are setups where we push forward the expiration of a session
+                        //prior to when .NET's cookie handler would trigger a renewal on a persistent cookie.
+                        //We need to account for that and force that renewal as the pushed forward dates will
+                        //result in the cookie never being renewed and expiring in a surprising way. Renewing
+                        //the ticket also updates the session, so we don't need to do both.
+                        if (Options.Authentication.CookieSlidingExpiration &&
+                            await ServerSideTicketStore.RetrieveAsync(session.Key) is
+                            { Properties: { IsPersistent: true, AllowRefresh: null or true } } ticket)
+                        {
+                            ticket.Properties.SetString(IdentityServerConstants.ForceCookieRenewalFlag, String.Empty);
+                            ticket.Properties.IssuedUtc = session.Renewed;
+                            ticket.Properties.ExpiresUtc = session.Expires;
+                            await ServerSideTicketStore.RenewAsync(session.Key, ticket);
+                        }
+                        else
+                        {
+                            await ServerSideSessionStore.UpdateSessionAsync(session);
+                        }
                     }
                 }
             }

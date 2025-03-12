@@ -3,7 +3,6 @@
 
 
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 
 namespace Duende.IdentityServer.Hosting;
 
@@ -20,4 +19,3 @@ public interface IEndpointResult
     /// <param name="context">The HTTP context.</param>
     Task ExecuteAsync(HttpContext context);
 }
-

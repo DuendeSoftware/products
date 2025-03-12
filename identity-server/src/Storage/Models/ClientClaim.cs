@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System;
 using System.Security.Claims;
 
 namespace Duende.IdentityServer.Models;
@@ -18,7 +17,7 @@ public class ClientClaim
     /// The claim type
     /// </summary>
     public string Type { get; set; } = default!;
-        
+
     /// <summary>
     /// The claim value
     /// </summary>
@@ -63,7 +62,7 @@ public class ClientClaim
     /// <inheritdoc/>
     public override int GetHashCode()
     {
-        unchecked 
+        unchecked
         {
             int hash = 17;
 

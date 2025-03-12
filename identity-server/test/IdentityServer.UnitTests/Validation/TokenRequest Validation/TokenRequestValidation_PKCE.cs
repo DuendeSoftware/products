@@ -1,21 +1,16 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
-using System.Threading.Tasks;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
-using FluentAssertions;
-using Duende.IdentityModel;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
-using Xunit;
 
 namespace UnitTests.Validation.TokenRequest_Validation;
 
@@ -65,7 +60,7 @@ public class TokenRequestValidation_PKCE
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Fact]
@@ -105,7 +100,7 @@ public class TokenRequestValidation_PKCE
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Theory]
@@ -119,7 +114,7 @@ public class TokenRequestValidation_PKCE
 
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
         var challenge = VerifierToSha256CodeChallenge(verifier);
-            
+
         var code = new AuthorizationCode
         {
             CreationTime = DateTime.UtcNow,
@@ -149,7 +144,7 @@ public class TokenRequestValidation_PKCE
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeFalse();
+        result.IsError.ShouldBeFalse();
     }
 
     [Theory]
@@ -185,8 +180,8 @@ public class TokenRequestValidation_PKCE
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Theory]
@@ -225,8 +220,8 @@ public class TokenRequestValidation_PKCE
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Theory]
@@ -268,8 +263,8 @@ public class TokenRequestValidation_PKCE
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     [Theory]
@@ -313,8 +308,8 @@ public class TokenRequestValidation_PKCE
 
         var result = await validator.ValidateRequestAsync(parameters, client.ToValidationResult());
 
-        result.IsError.Should().BeTrue();
-        result.Error.Should().Be(OidcConstants.TokenErrors.InvalidGrant);
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
     }
 
     private static string VerifierToSha256CodeChallenge(string codeVerifier)

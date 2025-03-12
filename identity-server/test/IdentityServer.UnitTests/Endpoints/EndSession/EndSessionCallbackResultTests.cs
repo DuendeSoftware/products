@@ -2,14 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Validation;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using Xunit;
 
 namespace UnitTests.Endpoints.EndSession;
 
@@ -41,7 +37,7 @@ public class EndSessionCallbackResultTests
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_validationResult), ctx);
 
-        ctx.Response.Headers.ContentSecurityPolicy.First().Should().Contain("frame-src http://foo");
+        ctx.Response.Headers.ContentSecurityPolicy.First().ShouldContain("frame-src http://foo");
     }
 
     [Fact]
@@ -55,6 +51,6 @@ public class EndSessionCallbackResultTests
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_validationResult), ctx);
 
-        ctx.Response.Headers.ContentSecurityPolicy.FirstOrDefault().Should().BeNull();
+        ctx.Response.Headers.ContentSecurityPolicy.FirstOrDefault().ShouldBeNull();
     }
 }

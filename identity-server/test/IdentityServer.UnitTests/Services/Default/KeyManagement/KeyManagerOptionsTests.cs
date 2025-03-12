@@ -2,10 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using Duende.IdentityServer.Configuration;
-using FluentAssertions;
-using Xunit;
 
 namespace UnitTests.Services.Default.KeyManagement;
 
@@ -20,7 +17,7 @@ public class KeyManagerOptionsTests
         };
 
         Action a = () => subject.Validate();
-        a.Should().Throw<Exception>();
+        a.ShouldThrow<Exception>();
     }
 
     [Fact]
@@ -32,7 +29,7 @@ public class KeyManagerOptionsTests
         };
 
         Action a = () => subject.Validate();
-        a.Should().Throw<Exception>();
+        a.ShouldThrow<Exception>();
     }
 
     [Fact]
@@ -44,7 +41,7 @@ public class KeyManagerOptionsTests
         };
 
         Action a = () => subject.Validate();
-        a.Should().Throw<Exception>();
+        a.ShouldThrow<Exception>();
     }
 
     [Fact]
@@ -56,7 +53,7 @@ public class KeyManagerOptionsTests
         };
 
         Action a = () => subject.Validate();
-        a.Should().Throw<Exception>();
+        a.ShouldThrow<Exception>();
     }
 
     [Fact]
@@ -71,7 +68,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
         {
             var subject = new KeyManagementOptions
@@ -82,7 +79,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
     }
 
@@ -98,7 +95,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
         {
             var subject = new KeyManagementOptions
@@ -109,7 +106,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
     }
 
@@ -125,7 +122,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
         {
             var subject = new KeyManagementOptions
@@ -136,7 +133,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
     }
 
@@ -152,7 +149,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
 
         {
@@ -164,7 +161,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
 
         {
@@ -176,7 +173,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().NotThrow<Exception>();
+            a.ShouldNotThrow();
         }
     }
 
@@ -192,7 +189,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
 
         {
@@ -204,7 +201,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().Throw<Exception>();
+            a.ShouldThrow<Exception>();
         }
 
         {
@@ -216,7 +213,7 @@ public class KeyManagerOptionsTests
             };
 
             Action a = () => subject.Validate();
-            a.Should().NotThrow<Exception>();
+            a.ShouldNotThrow();
         }
     }
 }

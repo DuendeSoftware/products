@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Services.KeyManagement;
-using FluentAssertions;
-using Xunit;
 
 namespace UnitTests.Services.Default.KeyManagement;
 
@@ -32,19 +28,19 @@ public class InMemoryKeyStoreCacheTests
         await _subject.StoreKeysAsync(keys, TimeSpan.FromMinutes(1));
 
         var result = await _subject.GetKeysAsync();
-        result.Should().BeSameAs(keys);
+        result.ShouldBeSameAs(keys);
 
         _mockClock.UtcNow = now.Subtract(TimeSpan.FromDays(1));
         result = await _subject.GetKeysAsync();
-        result.Should().BeSameAs(keys);
+        result.ShouldBeSameAs(keys);
 
         _mockClock.UtcNow = now.Add(TimeSpan.FromSeconds(59));
         result = await _subject.GetKeysAsync();
-        result.Should().BeSameAs(keys);
+        result.ShouldBeSameAs(keys);
 
         _mockClock.UtcNow = now.Add(TimeSpan.FromMinutes(1));
         result = await _subject.GetKeysAsync();
-        result.Should().BeSameAs(keys);
+        result.ShouldBeSameAs(keys);
     }
 
     [Fact]
@@ -60,6 +56,6 @@ public class InMemoryKeyStoreCacheTests
 
         _mockClock.UtcNow = now.Add(TimeSpan.FromSeconds(61));
         var result = await _subject.GetKeysAsync();
-        result.Should().BeNullOrEmpty();
+        result.ShouldBeNull();
     }
 }

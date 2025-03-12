@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.ComponentModel.DataAnnotations;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 
 namespace IdentityServerHost.Pages.Admin.ApiScopes;
 
@@ -83,9 +83,9 @@ public class ApiScopeRepository
         }
 
 #pragma warning disable CA1849 // Call async methods when in an async method
-// CA1849 Suppressed because AddAsync is only needed for value generators that
-// need async database access (e.g., HiLoValueGenerator), and we don't use those
-// generators
+        // CA1849 Suppressed because AddAsync is only needed for value generators that
+        // need async database access (e.g., HiLoValueGenerator), and we don't use those
+        // generators
         _context.ApiScopes.Add(scope.ToEntity());
 #pragma warning restore CA1849 // Call async methods when in an async method
         await _context.SaveChangesAsync();

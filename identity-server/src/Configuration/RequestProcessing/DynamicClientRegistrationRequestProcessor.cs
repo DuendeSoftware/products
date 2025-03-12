@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration.Configuration;
 using Duende.IdentityServer.Configuration.Models;
 using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Duende.IdentityServer.Models;
-using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Configuration.RequestProcessing;
 
@@ -17,7 +17,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     /// The options.
     /// </summary>
     protected readonly IdentityServerConfigurationOptions Options;
-    
+
     /// <summary>
     /// The client configuration store.
     /// </summary>
@@ -29,7 +29,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     /// <param name="options">The IdentityServer.Configuration options.</param>
     /// <param name="store">The client configuration store.</param>
     public DynamicClientRegistrationRequestProcessor(
-        IdentityServerConfigurationOptions options, 
+        IdentityServerConfigurationOptions options,
         IClientConfigurationStore store)
     {
         Options = options;
@@ -42,7 +42,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
         DynamicClientRegistrationContext context)
     {
         var clientIdResult = await AddClientId(context);
-        if(clientIdResult is DynamicClientRegistrationError clientIdFailure)
+        if (clientIdResult is DynamicClientRegistrationError clientIdFailure)
         {
             return clientIdFailure;
         }
@@ -50,13 +50,13 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
         Secret? secret = null;
         string? plainText = null;
         var clientSecretResult = await AddClientSecret(context);
-        if(clientSecretResult is DynamicClientRegistrationError clientSecretFailure)
+        if (clientSecretResult is DynamicClientRegistrationError clientSecretFailure)
         {
             return clientSecretFailure;
         }
-        else if(clientSecretResult is SuccessfulStep)
+        else if (clientSecretResult is SuccessfulStep)
         {
-            if(context.Items.ContainsKey("secret") && context.Items["secret"] is Secret s &&
+            if (context.Items.ContainsKey("secret") && context.Items["secret"] is Secret s &&
                context.Items.ContainsKey("plainText") && context.Items["plainText"] is string pt)
             {
                 secret = s;
@@ -72,7 +72,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
             ClientSecret = plainText,
             ClientSecretExpiresAt = secret switch
             {
-                null => null, 
+                null => null,
                 { Expiration: null } => 0,
                 { Expiration: DateTime e } => new DateTimeOffset(e).ToUnixTimeSeconds()
             }
@@ -91,7 +91,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     /// the context's Items dictionary.</remark>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    
+
     protected virtual async Task<IStepResult> AddClientSecret(
         DynamicClientRegistrationContext context)
     {
@@ -123,7 +123,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
             TimeSpan t => DateTime.UtcNow.Add(t)
         };
         var secret = new Secret(plainText.ToSha256(), lifetime);
-        return Task.FromResult((secret, plainText));       
+        return Task.FromResult((secret, plainText));
     }
 
     /// <summary>

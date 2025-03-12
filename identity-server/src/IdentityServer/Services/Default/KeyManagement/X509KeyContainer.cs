@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -105,7 +104,7 @@ public class X509KeyContainer : KeyContainer
                 // https://stackoverflow.com/questions/52750160/what-is-the-rationale-for-all-the-different-x509keystorageflags/52840537#52840537
                 catch (CryptographicException ex) when (ex.HResult == unchecked((int)0x80070002)) // File not found
                 {
-                    _cert = new X509Certificate2(Convert.FromBase64String(CertificateRawData), (string) null, X509KeyStorageFlags.MachineKeySet);
+                    _cert = new X509Certificate2(Convert.FromBase64String(CertificateRawData), (string)null, X509KeyStorageFlags.MachineKeySet);
                 }
             }
             else

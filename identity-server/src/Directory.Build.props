@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="../../src.props" />
+
+  <PropertyGroup>
+    <PackageTags>OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;ASP.NET Core</PackageTags>
+    <Product>Duende IdentityServer</Product>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+    <MinVerTagPrefix>is-</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
+  </PropertyGroup>
+
+</Project>

@@ -2,12 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using FluentAssertions;
-using IntegrationTests.TestHosts;
-using Xunit;
-using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using System.Net.Http.Json;
+using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Duende.IdentityServer.Models;
+using IntegrationTests.TestHosts;
 
 namespace IntegrationTests;
 
@@ -30,15 +28,15 @@ public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
         var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
 
         var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         var newClient = await IdentityServerHost.GetClientAsync(response!.ClientId); // Not null already asserted
-        newClient.Should().NotBeNull();
-        newClient.ClientId.Should().Be(response.ClientId);
-        newClient.AllowedGrantTypes.Should().BeEquivalentTo(request.GrantTypes);
-        newClient.ClientName.Should().Be(request.ClientName);
-        newClient.ClientUri.Should().Be(request.ClientUri.ToString());
-        newClient.UserSsoLifetime.Should().Be(request.DefaultMaxAge);
-        newClient.ClientSecrets.Count.Should().Be(1);
-        newClient.ClientSecrets.Single().Value.Should().Be(response.ClientSecret.Sha256());
+        newClient.ShouldNotBeNull();
+        newClient.ClientId.ShouldBe(response.ClientId);
+        newClient.AllowedGrantTypes.ShouldBe(request.GrantTypes);
+        newClient.ClientName.ShouldBe(request.ClientName);
+        newClient.ClientUri.ShouldBe(request.ClientUri.ToString());
+        newClient.UserSsoLifetime.ShouldBe(request.DefaultMaxAge);
+        newClient.ClientSecrets.Count.ShouldBe(1);
+        newClient.ClientSecrets.Single().Value.ShouldBe(response.ClientSecret.Sha256());
     }
 }

@@ -2,9 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Stores;
@@ -27,12 +24,12 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     public Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.StoreDeviceAuthorization");
-        
+
         lock (_repository)
         {
             _repository.Add(new InMemoryDeviceAuthorization(deviceCode, userCode, data));
         }
-            
+
         return Task.CompletedTask;
     }
 
@@ -43,7 +40,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     public Task<DeviceCode> FindByUserCodeAsync(string userCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.FindByUserCode");
-        
+
         DeviceCode foundDeviceCode;
 
         lock (_repository)
@@ -61,7 +58,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.FindByDeviceCode");
-        
+
         DeviceCode foundDeviceCode;
 
         lock (_repository)
@@ -80,7 +77,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     public Task UpdateByUserCodeAsync(string userCode, DeviceCode data)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.UpdateByUserCode");
-        
+
         lock (_repository)
         {
             var foundData = _repository.FirstOrDefault(x => x.UserCode == userCode);
@@ -102,7 +99,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     public Task RemoveByDeviceCodeAsync(string deviceCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.RemoveByDeviceCode");
-        
+
         lock (_repository)
         {
             var foundData = _repository.FirstOrDefault(x => x.DeviceCode == deviceCode);

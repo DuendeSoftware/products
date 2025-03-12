@@ -2,13 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Duende.IdentityServer.Models;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Services;
@@ -27,7 +23,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// The system clock;
     /// </summary>
     protected IClock Clock { get; }
-        
+
     /// <summary>
     /// The IdentityServerTools used to create the JWT.
     /// </summary>
@@ -82,7 +78,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     public virtual async Task SendLogoutNotificationsAsync(LogoutNotificationContext context)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackChannelLogoutService.SendLogoutNotifications");
-        
+
         var backChannelRequests = await LogoutNotificationService.GetBackChannelLogoutNotificationsAsync(context);
         if (backChannelRequests.Any())
         {

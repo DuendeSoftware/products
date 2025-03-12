@@ -1,9 +1,9 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.ResponseHandling;
 
 namespace Duende.IdentityServer.Logging.Models;
 

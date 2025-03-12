@@ -4,9 +4,6 @@
 
 #nullable enable
 
-using System;
-using System.Threading.Tasks;
-
 namespace Duende.IdentityServer.Services;
 
 /// <summary>

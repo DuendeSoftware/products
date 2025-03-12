@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System;
-using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +29,7 @@ public class DefaultIssuerNameService : IIssuerNameService
         _urls = urls;
         _httpContextAccessor = httpContextAccessor;
     }
-        
+
     /// <inheritdoc />
     public Task<string> GetCurrentAsync()
     {

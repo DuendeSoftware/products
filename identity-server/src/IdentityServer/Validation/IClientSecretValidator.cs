@@ -4,7 +4,6 @@
 
 #nullable enable
 
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace Duende.IdentityServer.Validation;
