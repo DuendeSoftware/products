@@ -5,19 +5,25 @@
     "Duende",
     "BFF"
   ],
-  "name": "Duende BFF using a Local API",
-  "identity": "Duende.BFF.BlazorWasm",
-  "groupIdentity": "Duende.BFF.BlazorWasm",
-  "shortName": "duende-bff-blazorwasm",
+  "name": "Duende BFF with Blazor autorender",
+  "identity": "Duende.BFF.Blazor",
+  "groupIdentity": "Duende.BFF.Blazor",
+  "shortName": "duende-bff-blazor",
   "tags": {
     "language": "C#",
     "type": "project"
   },
-
-  "sourceName": "BlazorWasm",
-  "preferNameDirectory": "true",
-  "primaryOutputs": [ 
-    { "path": "BffBlazor/BffBlazor.csproj" },
-    { "path": "BffBlazor.Client/BffBlazor.Client.csproj" } 
+  "sourceName": "BffBlazor",
+  "preferNameDirectory": true,
+  "symbols": {
+    "ProjectName": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "BffBlazor"
+    }
+  },
+  "primaryOutputs": [
+    { "path": "BffBlazor/{{ProjectName}}.csproj" },
+    { "path": "BffBlazor.Client/{{ProjectName}}.Client.csproj" }
   ]
 }
