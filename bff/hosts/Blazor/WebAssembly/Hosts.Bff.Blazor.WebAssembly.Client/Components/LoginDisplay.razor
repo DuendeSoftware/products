@@ -1,7 +1,7 @@
-﻿<AuthorizeView>
+<AuthorizeView>
     <Authorized>
         <strong>Hello, @context!.User!.Identity!.Name</strong>
-        <a href="@context.User.FindFirst("bff:logout_url")?.Value">Log out</a>
+        <a href="@context.User.FindFirst("bff:logout_url")?.Value">Log Out</a>
     </Authorized>
     <NotAuthorized>
         <a href="bff/login">Log in</a>

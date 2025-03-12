@@ -115,7 +115,6 @@ public class BffHost : GenericHost
             => await _identityServerHost.CreateJwtAccessTokenAsync()));
     }
 
-
     private void CustomDefaultBffTransformBuilder(string localpath, TransformBuilderContext context)
     {
         context.AddResponseHeader("added-by-custom-default-transform", "some-value");

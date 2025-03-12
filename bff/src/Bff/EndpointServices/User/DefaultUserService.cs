@@ -99,10 +99,13 @@ public class DefaultUserService : IUserService
     {
         var claims = new List<ClaimRecord>();
 
-        var sessionId = authenticateResult.Principal?.FindFirst(JwtClaimTypes.SessionId)?.Value;
-        claims.Add(new ClaimRecord(
-            Constants.ClaimTypes.LogoutUrl,
-            LogoutUrlBuilder.Build(context.Request.PathBase, Options, sessionId)));
+        if (claims.All(x => x.Type != Constants.ClaimTypes.LogoutUrl))
+        {
+            var sessionId = authenticateResult.Principal?.FindFirst(JwtClaimTypes.SessionId)?.Value;
+            claims.Add(new ClaimRecord(
+                Constants.ClaimTypes.LogoutUrl,
+                LogoutUrlBuilder.Build(context.Request.PathBase, Options, sessionId)));
+        }
 
         if (authenticateResult.Properties != null)
         {

@@ -147,7 +147,7 @@ namespace Duende.Bff.Tests.TestFramework
         }
         ClaimsPrincipal? _userToSignIn;
         AuthenticationProperties? _propsToSignIn;
-        public async Task IssueSessionCookieAsync(params Claim[] claims)
+        public async virtual Task IssueSessionCookieAsync(params Claim[] claims)
         {
             _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
             var response = await BrowserClient.GetAsync(Url("__signin"));

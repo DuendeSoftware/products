@@ -1,16 +1,15 @@
-﻿@using Duende.Bff.Blazor.Client
+@using Duende.Bff.Blazor.Client
 @using Microsoft.Extensions.Options
 
 @rendermode InteractiveAuto
 
-@inject NavigationManager Navigation
 @inject IRenderModeContext RenderModeContext
 @inject IOptions<BffBlazorOptions> Options
 
 <AuthorizeView>
     <Authorized>
         <strong>Hello, @context.User.Identity?.Name</strong>
-        <button class="nav-link btn btn-link" @onclick="e => LogoutUsingBffManagementEndpoint(context)">Log Out</button>
+        <a class="nav-link btn btn-link" href="@BffLogoutUrl(context)">Log in</a>
     </Authorized>
     <Authorizing>
         <a class="nav-link btn btn-link disabled">Log in</a>
@@ -27,10 +26,5 @@
         var logoutUrl = context.User.FindFirst(Constants.ClaimTypes.LogoutUrl);
         if (logoutUrl == null) throw new InvalidOperationException("The logout url is missing");
         return $"{Options.Value.StateProviderBaseAddress}{logoutUrl.Value}";
-    }
-
-    void LogoutUsingBffManagementEndpoint(AuthenticationState context)
-    {
-        Navigation.NavigateTo(BffLogoutUrl(context), forceLoad: true);
     }
 }
