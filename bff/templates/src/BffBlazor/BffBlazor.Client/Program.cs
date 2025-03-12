@@ -7,6 +7,8 @@ builder.Services
     .AddBffBlazorClient() // Provides auth state provider that polls the /bff/user endpoint
     .AddCascadingAuthenticationState();
 
-builder.Services.AddLocalApiHttpClient<WeatherHttpClient>();
+builder.Services.AddSingleton<IWeatherClient>(sp => sp.GetRequiredService<WeatherClient>());
+
+builder.Services.AddLocalApiHttpClient<WeatherClient>();
 
 await builder.Build().RunAsync();

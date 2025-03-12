@@ -14,6 +14,9 @@ public static class AppHostServices
     public const string ApiDpop = "api-dpop";
     public const string BffDpop = "bff-dpop";
     public const string Migrations = "migrations";
+    public const string TemplateBffBlazor = "template-bff-blazor";
+    public const string TemplateBffLocal = "templates-bff-local";
+    public const string TemplateBffRemote = "templates-bff-remote";
 
     public static string[] All => [
         IdentityServer,
@@ -25,7 +28,10 @@ public static class AppHostServices
         BffBlazorPerComponent,
         ApiDpop,
         BffDpop,
-        Migrations
+        Migrations,
+        TemplateBffBlazor,
+        TemplateBffLocal,
+        TemplateBffRemote
     ];
 
 }

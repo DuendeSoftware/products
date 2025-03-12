@@ -1,6 +1,6 @@
-﻿@page "/weather"
+@page "/weather"
 @using Microsoft.AspNetCore.Authorization
-@inject WeatherHttpClient Http
+@inject IWeatherClient WeatherClient
 
 @attribute [Authorize]
 
@@ -44,7 +44,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _forecasts = await Http.GetWeatherForecasts();
+        _forecasts = await WeatherClient.GetWeatherForecasts();
     }
 
 }

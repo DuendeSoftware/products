@@ -37,6 +37,7 @@ public class BlazorModel : PageModel
 
         return header;
     }
+
     public async Task VerifyNotLoggedIn()
     {
         var header = await GetHeader();

@@ -3,15 +3,19 @@ using BffBlazor.Components;
 using Duende.Bff.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
 // BFF setup for blazor
 builder.Services.AddBff()
     .AddServerSideSessions() // Add in-memory implementation of server side sessions
     .AddBlazorServer();
+
+// Register an abstraction for retrieving weather forecasts that can run on the server. 
+// On the client, in WASM, this will be retrieved via an HTTP call to the server.
+builder.Services.AddSingleton<IWeatherClient, ServerWeatherClient>();
 
 // Configure the authentication
 builder.Services.AddAuthentication(options =>
@@ -88,12 +92,10 @@ app.MapBffManagementEndpoints();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
+    .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(typeof(BffBlazor.Client._Imports).Assembly);
-
-
 
 // Example of local api endpoints. 
 app.MapWeatherEndpoints();
-
 
 app.Run();
