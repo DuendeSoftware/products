@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Internal;
 /// </summary>
 public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>
 {
-    static readonly SemaphoreSlim Lock = new SemaphoreSlim(1);
+    readonly SemaphoreSlim Lock = new SemaphoreSlim(1);
 
     /// <inheritdoc/>
     public Task<bool> LockAsync(int millisecondsTimeout)
