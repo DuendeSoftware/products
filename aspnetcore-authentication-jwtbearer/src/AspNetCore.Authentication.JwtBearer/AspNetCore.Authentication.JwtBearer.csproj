@@ -1,43 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
-        <PackageIcon>icon.png</PackageIcon>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <RootNamespace>Duende.AspNetCore.Authentication.JwtBearer</RootNamespace>
-        <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer</AssemblyName>
-        <PackageId>Duende.AspnetCore.Authentication.JwtBearer</PackageId>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-        <!-- Ignore warning about package sources from central package management -->
-        <NoWarn>NU1507</NoWarn>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Duende.AspNetCore.Authentication.JwtBearer</RootNamespace>
+    <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer</AssemblyName>
+  </PropertyGroup>
 
-        <!--Minver-->
-        <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
-        <MinVerTagPrefix>anc-</MinVerTagPrefix>
-    </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Duende.IdentityModel" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath=""/>
-        <None Include="icon.png" Pack="true" PackagePath=""/>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
-    </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.AspNetCore.Authentication.JwtBearer.Tests" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-        <PackageReference Include="Duende.IdentityModel" />
-        <PackageReference Include="MinVer">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <InternalsVisibleTo Include="Duende.AspNetCore.Authentication.JwtBearer.Tests" />
-    </ItemGroup>
-
-    <ItemGroup>
-    </ItemGroup>
 </Project>

@@ -15,7 +15,6 @@ using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
-using Shouldly;
 using Xunit.Abstractions;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer;

@@ -3,7 +3,6 @@
 
 using Duende.IdentityModel;
 using NSubstitute;
-using Shouldly;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 

@@ -3,7 +3,6 @@
 
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
-using Shouldly;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 

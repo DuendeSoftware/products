@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.IdentityModel.Tokens;
-using Shouldly;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 

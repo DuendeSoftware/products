@@ -17,6 +17,6 @@
     <Content Include="src\**\*" Exclude="src\**\bin\**;src\**\obj\**" />
     <Compile Remove="**\*" />
   </ItemGroup>
-  
+
 
 </Project>
