@@ -18,7 +18,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        var cn = Configuration.GetConnectionString("db");
+        var cn = Configuration.GetConnectionString("DefaultConnection");
 
         services.AddOperationalDbContext(options =>
         {

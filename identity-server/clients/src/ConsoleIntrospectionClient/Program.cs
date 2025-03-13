@@ -3,74 +3,68 @@
 
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Hosting;
 
-namespace ConsoleIntrospectionClient
+var builder = Host.CreateApplicationBuilder(args);
+
+// Add ServiceDefaults from Aspire
+builder.AddServiceDefaults();
+
+IDiscoveryCache _cache = new DiscoveryCache(Constants.Authority);
+
+var response = await RequestTokenAsync();
+await IntrospectAsync(response.AccessToken);
+
+async Task<TokenResponse> RequestTokenAsync()
 {
-    public class Program
+    var disco = await _cache.GetAsync();
+    if (disco.IsError) throw new Exception(disco.Error);
+
+    var client = new HttpClient();
+    var response = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
     {
-        static IDiscoveryCache _cache = new DiscoveryCache(Constants.Authority);
+        Address = disco.TokenEndpoint,
 
-        static async Task Main()
+        ClientId = "roclient.reference",
+        ClientSecret = "secret",
+
+        UserName = "bob",
+        Password = "bob",
+        Scope = "resource1.scope1 resource2.scope1"
+    });
+
+    if (response.IsError) throw new Exception(response.Error);
+    return response;
+}
+
+async Task IntrospectAsync(string accessToken)
+{
+    var disco = await _cache.GetAsync();
+    if (disco.IsError) throw new Exception(disco.Error);
+
+    var client = new HttpClient();
+    var result = await client.IntrospectTokenAsync(new TokenIntrospectionRequest
+    {
+        Address = disco.IntrospectionEndpoint,
+
+        ClientId = "urn:resource1",
+        ClientSecret = "secret",
+        Token = accessToken
+    });
+
+    if (result.IsError)
+    {
+        Console.WriteLine(result.Error);
+    }
+    else
+    {
+        if (result.IsActive)
         {
-            Console.Title = "Console Introspection Client";
-
-            var response = await RequestTokenAsync();
-            await IntrospectAsync(response.AccessToken);
+            result.Claims.ToList().ForEach(c => Console.WriteLine($"{c.Type}: {c.Value}"));
         }
-
-        static async Task<TokenResponse> RequestTokenAsync()
+        else
         {
-            var disco = await _cache.GetAsync();
-            if (disco.IsError) throw new Exception(disco.Error);
-
-            var client = new HttpClient();
-            var response = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
-            {
-                Address = disco.TokenEndpoint,
-
-                ClientId = "roclient.reference",
-                ClientSecret = "secret",
-
-                UserName = "bob",
-                Password = "bob",
-                Scope = "resource1.scope1 resource2.scope1"
-            });
-
-            if (response.IsError) throw new Exception(response.Error);
-            return response;
-        }
-
-        private static async Task IntrospectAsync(string accessToken)
-        {
-            var disco = await _cache.GetAsync();
-            if (disco.IsError) throw new Exception(disco.Error);
-
-            var client = new HttpClient();
-            var result = await client.IntrospectTokenAsync(new TokenIntrospectionRequest
-            {
-                Address = disco.IntrospectionEndpoint,
-
-                ClientId = "urn:resource1",
-                ClientSecret = "secret",
-                Token = accessToken
-            });
-
-            if (result.IsError)
-            {
-                Console.WriteLine(result.Error);
-            }
-            else
-            {
-                if (result.IsActive)
-                {
-                    result.Claims.ToList().ForEach(c => Console.WriteLine("{0}: {1}",
-                        c.Type, c.Value));
-                }
-                else
-                {
-                    Console.WriteLine("token is not active");
-                }
-            }
+            Console.WriteLine("Token is not active.");
         }
     }
 }

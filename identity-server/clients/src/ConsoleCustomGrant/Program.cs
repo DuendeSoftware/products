@@ -3,74 +3,65 @@
 
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Hosting;
 
-namespace ConsoleCustomGrant
+var builder = Host.CreateApplicationBuilder(args);
+
+// Add ServiceDefaults from Aspire
+builder.AddServiceDefaults();
+
+IDiscoveryCache _cache = new DiscoveryCache(Constants.Authority);
+
+// custom grant type with subject support
+var response = await RequestTokenAsync("custom");
+response.Show();
+
+await CallServiceAsync(response.AccessToken);
+
+// custom grant type without subject support
+response = await RequestTokenAsync("custom.nosubject");
+response.Show();
+
+await CallServiceAsync(response.AccessToken);
+
+async Task<TokenResponse> RequestTokenAsync(string grantType)
 {
-    class Program
+    var client = new HttpClient();
+
+    var disco = await _cache.GetAsync();
+    if (disco.IsError) throw new Exception(disco.Error);
+
+    var response = await client.RequestTokenAsync(new TokenRequest
     {
-        static IDiscoveryCache _cache = new DiscoveryCache(Constants.Authority);
+        Address = disco.TokenEndpoint,
+        GrantType = grantType,
 
-        static async Task Main()
-        {
-            Console.Title = "Console Custom Grant";
+        ClientId = "client.custom",
+        ClientSecret = "secret",
 
-            // custom grant type with subject support
-            var response = await RequestTokenAsync("custom");
-            response.Show();
-
-            Console.ReadLine();
-            await CallServiceAsync(response.AccessToken);
-
-            Console.ReadLine();
-
-            // custom grant type without subject support
-            response = await RequestTokenAsync("custom.nosubject");
-            response.Show();
-
-            Console.ReadLine();
-            await CallServiceAsync(response.AccessToken);
-        }
-
-        static async Task<TokenResponse> RequestTokenAsync(string grantType)
-        {
-            var client = new HttpClient();
-
-            var disco = await _cache.GetAsync();
-            if (disco.IsError) throw new Exception(disco.Error);
-
-            var response = await client.RequestTokenAsync(new TokenRequest
+        Parameters =
             {
-                Address = disco.TokenEndpoint,
-                GrantType = grantType,
+                { "scope", "resource1.scope1" },
+                { "custom_credential", "custom credential"}
+            }
+    });
 
-                ClientId = "client.custom",
-                ClientSecret = "secret",
+    if (response.IsError) throw new Exception(response.Error);
+    return response;
+}
 
-                Parameters =
-                {
-                    { "scope", "resource1.scope1" },
-                    { "custom_credential", "custom credential"}
-                }
-            });
+static async Task CallServiceAsync(string token)
+{
+    var baseAddress = Constants.SampleApi;
 
-            if (response.IsError) throw new Exception(response.Error);
-            return response;
-        }
+    var client = new HttpClient
+    {
+        BaseAddress = new Uri(baseAddress)
+    };
 
-        static async Task CallServiceAsync(string token)
-        {
-            var baseAddress = Constants.SampleApi;
+    client.SetBearerToken(token);
+    var response = await client.GetStringAsync("identity");
 
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(baseAddress)
-            };
-
-            client.SetBearerToken(token);
-            var response = await client.GetStringAsync("identity");
-
-            "\n\nService claims:".ConsoleGreen();
-            Console.WriteLine(response.PrettyPrintJson());
-        }
-    }
+    "\nService claims:".ConsoleGreen();
+    Console.WriteLine(response.PrettyPrintJson());
 }

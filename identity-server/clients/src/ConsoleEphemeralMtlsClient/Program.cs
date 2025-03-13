@@ -5,88 +5,82 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Hosting;
 
-namespace ConsoleEphemeralMtlsClient
+var builder = Host.CreateApplicationBuilder(args);
+
+// Add ServiceDefaults from Aspire
+builder.AddServiceDefaults();
+
+X509Certificate2 ClientCertificate = CreateClientCertificate("client");
+
+var response = await RequestTokenAsync();
+response.Show();
+
+await CallServiceAsync(response.AccessToken);
+
+async Task<TokenResponse> RequestTokenAsync()
 {
-    class Program
+    var client = new HttpClient(GetHandler(ClientCertificate));
+
+    var disco = await client.GetDiscoveryDocumentAsync(Constants.AuthorityMtls);
+    if (disco.IsError) throw new Exception(disco.Error);
+
+    var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
     {
-        private static X509Certificate2 ClientCertificate;
+        Address = disco.MtlsEndpointAliases.TokenEndpoint,
 
-        static async Task Main(string[] args)
-        {
-            ClientCertificate = CreateClientCertificate("client");
+        ClientId = "client",
+        ClientSecret = "secret",
+        Scope = "resource1.scope1"
+    });
 
-            var response = await RequestTokenAsync();
-            response.Show();
+    if (response.IsError) throw new Exception(response.Error);
+    return response;
+}
 
-            Console.ReadLine();
-            await CallServiceAsync(response.AccessToken);
-        }
+async Task CallServiceAsync(string token)
+{
+    var client = new HttpClient(GetHandler(ClientCertificate))
+    {
+        BaseAddress = new Uri(Constants.SampleApiMtls)
+    };
 
-        static async Task<TokenResponse> RequestTokenAsync()
-        {
-            var client = new HttpClient(GetHandler(ClientCertificate));
+    client.SetBearerToken(token);
+    var response = await client.GetStringAsync("identity");
 
-            var disco = await client.GetDiscoveryDocumentAsync(Constants.AuthorityMtls);
-            if (disco.IsError) throw new Exception(disco.Error);
+    "\nService claims:".ConsoleGreen();
+    Console.WriteLine(response.PrettyPrintJson());
+}
 
-            var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
-            {
-                Address = disco.MtlsEndpointAliases.TokenEndpoint,
+static X509Certificate2 CreateClientCertificate(string name)
+{
+    X500DistinguishedName distinguishedName = new X500DistinguishedName($"CN={name}");
 
-                ClientId = "client",
-                ClientSecret = "secret",
-                Scope = "resource1.scope1"
-            });
+    using (var rsa = RSA.Create(2048))
+    {
+        var request = new CertificateRequest(distinguishedName, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
-            if (response.IsError) throw new Exception(response.Error);
-            return response;
-        }
+        request.CertificateExtensions.Add(
+            new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, false));
 
-        static async Task CallServiceAsync(string token)
-        {
-            var client = new HttpClient(GetHandler(ClientCertificate))
-            {
-                BaseAddress = new Uri(Constants.SampleApiMtls)
-            };
+        request.CertificateExtensions.Add(
+            new X509EnhancedKeyUsageExtension(
+                new OidCollection { new Oid("1.3.6.1.5.5.7.3.2") }, false));
 
-            client.SetBearerToken(token);
-            var response = await client.GetStringAsync("identity");
-
-            "\n\nService claims:".ConsoleGreen();
-            Console.WriteLine(response.PrettyPrintJson());
-        }
-
-        static X509Certificate2 CreateClientCertificate(string name)
-        {
-            X500DistinguishedName distinguishedName = new X500DistinguishedName($"CN={name}");
-
-            using (var rsa = RSA.Create(2048))
-            {
-                var request = new CertificateRequest(distinguishedName, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-
-                request.CertificateExtensions.Add(
-                    new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, false));
-
-                request.CertificateExtensions.Add(
-                    new X509EnhancedKeyUsageExtension(
-                        new OidCollection { new Oid("1.3.6.1.5.5.7.3.2") }, false));
-
-                return request.CreateSelfSigned(new DateTimeOffset(DateTime.UtcNow.AddDays(-1)), new DateTimeOffset(DateTime.UtcNow.AddDays(3650)));
-            }
-        }
-
-        static SocketsHttpHandler GetHandler(X509Certificate2 certificate)
-        {
-            var handler = new SocketsHttpHandler
-            {
-                SslOptions =
-                {
-                    ClientCertificates = new X509CertificateCollection {certificate}
-                }
-            };
-
-            return handler;
-        }
+        return request.CreateSelfSigned(new DateTimeOffset(DateTime.UtcNow.AddDays(-1)), new DateTimeOffset(DateTime.UtcNow.AddDays(3650)));
     }
+}
+
+static SocketsHttpHandler GetHandler(X509Certificate2 certificate)
+{
+    var handler = new SocketsHttpHandler
+    {
+        SslOptions =
+            {
+                ClientCertificates = new X509CertificateCollection {certificate}
+            }
+    };
+
+    return handler;
 }

@@ -4,18 +4,19 @@
 using System.Text.Json;
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Hosting;
 
+var builder = Host.CreateApplicationBuilder(args);
 
+// Add ServiceDefaults from Aspire
+builder.AddServiceDefaults();
 
-Console.Title = "Dynamic Client Registration - Client Credentials Flow";
 await RegisterClient();
-Console.ReadLine();
+
 var response = await RequestTokenAsync();
 response.Show();
 
-Console.ReadLine();
 await CallServiceAsync(response.AccessToken);
-Console.ReadLine();
 
 static async Task RegisterClient()
 {
@@ -47,12 +48,8 @@ static async Task RegisterClient()
     request.Document.Extensions!.Add("client_id", clientJson);
     request.Document.Extensions.Add("client_secret", secretJson);
 
-
     var serialized = JsonSerializer.Serialize(request.Document);
-
     var deserialized = JsonSerializer.Deserialize<DynamicClientRegistrationDocument>(serialized);
-
-
     var response = await client.RegisterClientAsync(request);
 
     if (response.IsError)
@@ -60,6 +57,7 @@ static async Task RegisterClient()
         Console.WriteLine(response.Error);
         return;
     }
+
     Console.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 }
 
@@ -94,6 +92,6 @@ static async Task CallServiceAsync(string token)
     client.SetBearerToken(token);
     var response = await client.GetStringAsync("identity");
 
-    "\n\nService claims:".ConsoleGreen();
+    "\nService claims:".ConsoleGreen();
     Console.WriteLine(response.PrettyPrintJson());
 }

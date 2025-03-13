@@ -233,6 +233,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Authentication.J
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Authentication.JwtBearer.Tests", "aspnetcore-authentication-jwtbearer\test\AspNetCore.Authentication.JwtBearer.Tests\AspNetCore.Authentication.JwtBearer.Tests.csproj", "{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspire", "aspire", "{86784753-7B1E-49B7-B129-607EAA8630A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aspire.orchestrator.AppHost", "identity-server\aspire\aspire.orchestrator\aspire.orchestrator.AppHost\aspire.orchestrator.AppHost.csproj", "{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aspire.orchestrator.ServiceDefaults", "identity-server\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj", "{40E9BF79-6286-B722-AA52-A9EA26990F16}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1287,6 +1293,30 @@ Global
 		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|x64.Build.0 = Release|Any CPU
 		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|x86.ActiveCfg = Release|Any CPU
 		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE}.Release|x86.Build.0 = Release|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Debug|x64.Build.0 = Debug|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Debug|x86.Build.0 = Debug|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Release|x64.ActiveCfg = Release|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Release|x64.Build.0 = Release|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Release|x86.ActiveCfg = Release|Any CPU
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989}.Release|x86.Build.0 = Release|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Debug|x64.Build.0 = Debug|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Debug|x86.Build.0 = Debug|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Release|x64.ActiveCfg = Release|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Release|x64.Build.0 = Release|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Release|x86.ActiveCfg = Release|Any CPU
+		{40E9BF79-6286-B722-AA52-A9EA26990F16}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1401,6 +1431,9 @@ Global
 		{61DDAE59-FFAC-4B79-95F3-EB364406DCDF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{0ACB297D-188B-308B-B469-43E2F84C9DB8} = {4936AE43-E9A4-4995-A87B-BB5609408EEB}
 		{B5D76A1D-B75E-A120-9EBD-BAC10CB405CE} = {61DDAE59-FFAC-4B79-95F3-EB364406DCDF}
+		{86784753-7B1E-49B7-B129-607EAA8630A9} = {AADA824B-A72C-44DB-8852-2B40AFF79BBE}
+		{7B30DB44-4C2A-0C89-FC37-701C9F8D1989} = {86784753-7B1E-49B7-B129-607EAA8630A9}
+		{40E9BF79-6286-B722-AA52-A9EA26990F16} = {86784753-7B1E-49B7-B129-607EAA8630A9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B316ADAE-8ABF-4B22-8A88-EEA4D0FFF97E}

@@ -1,36 +1,58 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Clients;
+using DPoPApi;
 using Serilog;
 using Serilog.Events;
 
-namespace DPoPApi
-{
-    public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog early
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("SampleApi", LogEventLevel.Debug)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// Include the service defaults from Aspire
+builder.AddServiceDefaults();
+
+builder.Services.AddControllers();
+builder.Services.AddCors();
+
+// this API will accept any access token from the authority
+builder.Services.AddAuthentication("token")
+    .AddJwtBearer("token", options =>
     {
-        public static void Main(string[] args)
-        {
-            Console.Title = "DPoP API";
+        options.Authority = Constants.Authority;
+        options.TokenValidationParameters.ValidateAudience = false;
+        options.MapInboundClaims = false;
 
-            BuildWebHost(args).Run();
-        }
+        options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+    });
 
-        public static IHost BuildWebHost(string[] args)
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("DPoPApi", LogEventLevel.Debug)
-                .Enrich.FromLogContext()
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
-                .CreateLogger();
+builder.Services.ConfigureDPoPTokensForScheme("token", options =>
+{
+    options.Mode = DPoPMode.DPoPAndBearer;
+});
 
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                })
-                .UseSerilog()
-                .Build();
-        }
-    }
-}
+var app = builder.Build();
+
+app.UseCors(policy =>
+{
+    policy.WithOrigins("https://localhost:44300");
+    policy.AllowAnyHeader();
+    policy.AllowAnyMethod();
+    policy.WithExposedHeaders("WWW-Authenticate");
+});
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers().RequireAuthorization();
+
+app.Run();
