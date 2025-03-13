@@ -6,9 +6,9 @@ using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
 using Xunit.Abstractions;
 
-namespace Hosts.Tests.Samples
+namespace Hosts.Tests.Templates
 {
-    public class BffBlazorSampleTests(ITestOutputHelper output, AppHostFixture fixture)
+    public class BffBlazorTemplateTests(ITestOutputHelper output, AppHostFixture fixture)
         : PlaywrightTestBase(output, fixture)
     {
         public async Task<WebAssemblyPageModel> GoToHome()

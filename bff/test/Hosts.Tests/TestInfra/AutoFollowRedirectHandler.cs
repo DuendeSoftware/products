@@ -14,7 +14,7 @@ public class AutoFollowRedirectHandler(ILogger<AutoFollowRedirectHandler> logger
         for (var i = 0; i < 20; i++)
         {
             var result = await base.SendAsync(request, cancellationToken);
-            if (result.StatusCode == HttpStatusCode.Found && result.Headers.Location != null)
+            if ((result.StatusCode == HttpStatusCode.Found || result.StatusCode == HttpStatusCode.RedirectKeepVerb) && result.Headers.Location != null)
             {
                 logger.LogInformation("Redirecting from {0} to {1}", previousUri, result.Headers.Location);
 
