@@ -14,7 +14,7 @@ public static class BffBuilderExtensions
         builder.Services
             .AddOpenIdConnectAccessTokenManagement()
             .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()
-            .AddTransient<IClaimsTransformation, AddServerManagementClaimsTransform>();
+            .AddSingleton<IClaimsTransformation, AddServerManagementClaimsTransform>();
 
         return builder;
     }

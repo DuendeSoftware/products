@@ -42,10 +42,6 @@ builder.Services.AddAuthentication(options =>
     {
         options.Cookie.Name = "__Host-blazor";
         options.Cookie.SameSite = SameSiteMode.Strict;
-        options.Events.OnValidatePrincipal += context =>
-        {
-            return Task.CompletedTask;
-        };
     })
     .AddOpenIdConnect("oidc", options =>
     {

@@ -15,7 +15,7 @@ namespace Duende.Bff.Blazor;
 /// </summary>
 /// <param name="httpContextAccessor"></param>
 /// <param name="options"></param>
-public class AddServerManagementClaimsTransform(IHttpContextAccessor httpContextAccessor, IOptions<BffOptions> options) : IClaimsTransformation
+public class AddServerManagementClaimsTransform(IHttpContextAccessor httpContextAccessor, IOptionsMonitor<BffOptions> options) : IClaimsTransformation
 {
     private HttpContext _httpContext => httpContextAccessor.HttpContext ?? throw new InvalidOperationException("not running in http context");
 
@@ -27,7 +27,7 @@ public class AddServerManagementClaimsTransform(IHttpContextAccessor httpContext
             var sessionId = principal.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.SessionId)?.Value;
             claimsIdentity.AddClaim(new Claim(
                 Constants.ClaimTypes.LogoutUrl,
-                LogoutUrlBuilder.Build(_httpContext.Request.PathBase, options.Value, sessionId).ToString()));
+                LogoutUrlBuilder.Build(_httpContext.Request.PathBase, options.CurrentValue, sessionId).ToString()));
         }
 
         principal.AddIdentity(claimsIdentity);
