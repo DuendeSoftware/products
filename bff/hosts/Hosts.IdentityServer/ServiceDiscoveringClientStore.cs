@@ -126,7 +126,12 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                         OidcConstants.GrantTypes.TokenExchange
                     },
 
-                    RedirectUris = { $"{bffBlazorWebAssemblyUrl}signin-oidc", $"{bffBlazorPerComponentUrl}signin-oidc" },
+                    RedirectUris =
+                    {
+                        $"{bffBlazorWebAssemblyUrl}signin-oidc",
+                        $"{bffBlazorPerComponentUrl}signin-oidc",
+                        "https://localhost:7035/signin-oidc"
+                    },
                     PostLogoutRedirectUris =
                     {
                         $"{bffBlazorWebAssemblyUrl}signout-callback-oidc", $"{bffBlazorPerComponentUrl}signout-callback-oidc"

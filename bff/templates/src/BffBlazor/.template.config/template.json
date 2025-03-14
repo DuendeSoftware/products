@@ -1,0 +1,29 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "BFF"
+  ],
+  "name": "Duende BFF with Blazor autorender",
+  "identity": "Duende.BFF.Blazor",
+  "groupIdentity": "Duende.BFF.Blazor",
+  "shortName": "duende-bff-blazor",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "BffBlazor",
+  "preferNameDirectory": true,
+  "symbols": {
+    "ProjectName": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "BffBlazor"
+    }
+  },
+  "primaryOutputs": [
+    { "path": "BffBlazor/{{ProjectName}}.csproj" },
+    { "path": "BffBlazor.Client/{{ProjectName}}.Client.csproj" }
+  ]
+}
