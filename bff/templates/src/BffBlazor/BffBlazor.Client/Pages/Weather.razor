@@ -1,6 +1,7 @@
 @page "/weather"
 @using Microsoft.AspNetCore.Authorization
 @inject IWeatherClient WeatherClient
+@rendermode InteractiveAuto
 
 @attribute [Authorize]
 
@@ -44,7 +45,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _forecasts = await WeatherClient.GetWeatherForecasts();
+         _forecasts = await WeatherClient.GetWeatherForecasts();
     }
 
 }

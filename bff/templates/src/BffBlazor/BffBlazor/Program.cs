@@ -91,8 +91,8 @@ app.MapBffManagementEndpoints();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveWebAssemblyRenderMode()
     .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BffBlazor.Client._Imports).Assembly);
 
 // Example of local api endpoints. 
