@@ -9,8 +9,6 @@ using Duende.Bff.Blazor;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
 using Duende.Bff.Yarp;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;

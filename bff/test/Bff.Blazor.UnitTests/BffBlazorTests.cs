@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using System.Net;
 using Duende.Bff;
 using Duende.Bff.Tests.TestHosts;
@@ -34,7 +37,8 @@ namespace Bff.Blazor.UnitTests
 
 
 
-            IdentityServerHost.OnConfigureServices += services => {
+            IdentityServerHost.OnConfigureServices += services =>
+            {
                 services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
                     new DefaultBackChannelLogoutHttpClient(
                         BffHost!.HttpClient,
