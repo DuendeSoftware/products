@@ -6,25 +6,24 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using BenchmarkDotNet.Attributes;
 
-namespace IdentityServer.PerfTest.Infrastructure
+namespace IdentityServer.PerfTest.Infrastructure;
+
+public class TestBase<T>
+    where T : IdentityServerContainer, new()
 {
-    public class TestBase<T>
-        where T : IdentityServerContainer, new()
+    public static X509Certificate2 Cert { get; }
+
+    static TestBase()
     {
-        public static X509Certificate2 Cert { get; }
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "client.pfx");
+        Cert = new X509Certificate2(path, "password");
+    }
 
-        static TestBase()
-        {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "client.pfx");
-            Cert = new X509Certificate2(path, "password");
-        }
+    protected T Container = new T();
 
-        protected T Container = new T();
-
-        [GlobalCleanup]
-        public void PostTest()
-        {
-            Container.Dispose();
-        }
+    [GlobalCleanup]
+    public void PostTest()
+    {
+        Container.Dispose();
     }
 }

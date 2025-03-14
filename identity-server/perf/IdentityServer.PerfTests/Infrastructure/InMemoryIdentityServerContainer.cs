@@ -9,34 +9,33 @@ using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IdentityServer.PerfTest.Infrastructure
+namespace IdentityServer.PerfTest.Infrastructure;
+
+public class InMemoryIdentityServerContainer : IdentityServerContainer
 {
-    public class InMemoryIdentityServerContainer : IdentityServerContainer
+    public List<Client> Clients = new List<Client>();
+    public List<IdentityResource> IdentityResources = new List<IdentityResource>();
+    public List<ApiResource> ApiResources = new List<ApiResource>();
+    public List<ApiScope> ApiScopes = new List<ApiScope>();
+
+    //options.AddFilter("Duende.IdentityServer", LogLevel.Debug);
+
+    public event Action<IdentityServerOptions> OnConfigureIdentityServerOptions = opts => { };
+
+    public InMemoryIdentityServerContainer()
     {
-        public List<Client> Clients = new List<Client>();
-        public List<IdentityResource> IdentityResources = new List<IdentityResource>();
-        public List<ApiResource> ApiResources = new List<ApiResource>();
-        public List<ApiScope> ApiScopes = new List<ApiScope>();
-
-        //options.AddFilter("Duende.IdentityServer", LogLevel.Debug);
-
-        public event Action<IdentityServerOptions> OnConfigureIdentityServerOptions = opts => { };
-
-        public InMemoryIdentityServerContainer()
+        OnConfigureServices += services =>
         {
-            OnConfigureServices += services =>
-            {
-                services.AddIdentityServer(OnConfigureIdentityServerOptions)
-                    .AddInMemoryClients(Clients)
-                    .AddInMemoryIdentityResources(IdentityResources)
-                    .AddInMemoryApiScopes(ApiScopes)
-                    .AddInMemoryApiResources(ApiResources);
-            };
+            services.AddIdentityServer(OnConfigureIdentityServerOptions)
+                .AddInMemoryClients(Clients)
+                .AddInMemoryIdentityResources(IdentityResources)
+                .AddInMemoryApiScopes(ApiScopes)
+                .AddInMemoryApiResources(ApiResources);
+        };
 
-            OnConfigure += app =>
-            {
-                app.UseIdentityServer();
-            };
-        }
+        OnConfigure += app =>
+        {
+            app.UseIdentityServer();
+        };
     }
 }

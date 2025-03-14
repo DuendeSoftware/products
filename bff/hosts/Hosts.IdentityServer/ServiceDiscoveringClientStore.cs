@@ -20,18 +20,17 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
 {
     private List<Client> _clients = null;
     private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
     private async Task Initialize()
     {
-
         await _semaphore.WaitAsync();
         try
         {
-
-
             if (_clients != null)
             {
                 return;
             }
+
             // Get the BFF URL from the service discovery system. Then use this for building the redirect urls etc..
             var bffUrl = await GetUrlAsync(AppHostServices.Bff);
             var bffDPopUrl = await GetUrlAsync(AppHostServices.BffDpop);
@@ -111,7 +110,6 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                     AccessTokenLifetime = 15,
                     RefreshTokenExpiration = TokenExpiration.Absolute,
                     AbsoluteRefreshTokenLifetime = 60
-
                 },
 
                 new Client
@@ -146,7 +144,6 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
         {
             _semaphore.Release();
         }
-
     }
 
     private async Task<string> GetUrlAsync(string serviceName)

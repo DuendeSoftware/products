@@ -105,7 +105,6 @@ public class TestBrowserClient : HttpClient
             response.StatusCode.ToString().ShouldBe(expectedStatusCode.ToString());
             return new(response, null!);
         }
-
     }
 
     public async Task<BffHostResponse> CallBffHostApi(
@@ -120,6 +119,7 @@ public class TestBrowserClient : HttpClient
         {
             req.Content = content;
         }
+
         req.Headers.Add("x-csrf", "1");
         var response = await SendAsync(req, ct);
         if (expectedStatusCode == null)
@@ -144,6 +144,4 @@ public class TestBrowserClient : HttpClient
         public static implicit operator HttpResponseMessage(BffHostResponse response) => response.HttpResponse;
         public static implicit operator ApiResponse(BffHostResponse response) => response.ApiResponse;
     }
-
-
 }

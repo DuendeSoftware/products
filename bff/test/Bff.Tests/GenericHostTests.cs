@@ -6,24 +6,23 @@ using Duende.Bff.Tests.TestFramework;
 using Microsoft.AspNetCore.Builder;
 using Xunit.Abstractions;
 
-namespace Duende.Bff.Tests
+namespace Duende.Bff.Tests;
+
+public class GenericHostTests(ITestOutputHelper output)
 {
-    public class GenericHostTests(ITestOutputHelper output)
+    [Fact]
+    public async Task Test1()
     {
-        [Fact]
-        public async Task Test1()
+        var host = new GenericHost(output.WriteLine);
+        host.OnConfigure += app => app.Run(ctx =>
         {
-            var host = new GenericHost(output.WriteLine);
-            host.OnConfigure += app => app.Run(ctx =>
-            {
-                ctx.Response.StatusCode = 204;
-                return Task.CompletedTask;
-            });
-            await host.InitializeAsync();
+            ctx.Response.StatusCode = 204;
+            return Task.CompletedTask;
+        });
+        await host.InitializeAsync();
 
-            var response = await host.HttpClient.GetAsync("/test");
+        var response = await host.HttpClient.GetAsync("/test");
 
-            response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-        }
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 }

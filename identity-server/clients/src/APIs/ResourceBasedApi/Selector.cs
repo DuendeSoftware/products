@@ -1,56 +1,55 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace ResourceBasedApi
+namespace ResourceBasedApi;
+
+/// <summary>
+/// Provides helper functions for forwarding logic
+/// </summary>
+public static class Selector
 {
     /// <summary>
-    /// Provides helper functions for forwarding logic
+    /// Provides a forwarding func for JWT vs reference tokens (based on existence of dot in token)
     /// </summary>
-    public static class Selector
+    /// <param name="introspectionScheme">Scheme name of the introspection handler</param>
+    /// <returns></returns>
+    public static Func<HttpContext, string> ForwardReferenceToken(string introspectionScheme = "introspection")
     {
-        /// <summary>
-        /// Provides a forwarding func for JWT vs reference tokens (based on existence of dot in token)
-        /// </summary>
-        /// <param name="introspectionScheme">Scheme name of the introspection handler</param>
-        /// <returns></returns>
-        public static Func<HttpContext, string> ForwardReferenceToken(string introspectionScheme = "introspection")
+        string Select(HttpContext context)
         {
-            string Select(HttpContext context)
+            var (scheme, credential) = GetSchemeAndCredential(context);
+            if (scheme.Equals("Bearer", StringComparison.OrdinalIgnoreCase) &&
+                !credential.Contains("."))
             {
-                var (scheme, credential) = GetSchemeAndCredential(context);
-                if (scheme.Equals("Bearer", StringComparison.OrdinalIgnoreCase) &&
-                    !credential.Contains("."))
-                {
-                    return introspectionScheme;
-                }
-
-                return null;
+                return introspectionScheme;
             }
 
-            return Select;
+            return null;
         }
 
-        /// <summary>
-        /// Extracts scheme and credential from Authorization header (if present)
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public static (string, string) GetSchemeAndCredential(HttpContext context)
+        return Select;
+    }
+
+    /// <summary>
+    /// Extracts scheme and credential from Authorization header (if present)
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static (string, string) GetSchemeAndCredential(HttpContext context)
+    {
+        var header = context.Request.Headers["Authorization"].FirstOrDefault();
+
+        if (string.IsNullOrEmpty(header))
         {
-            var header = context.Request.Headers["Authorization"].FirstOrDefault();
-
-            if (string.IsNullOrEmpty(header))
-            {
-                return ("", "");
-            }
-
-            var parts = header.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length != 2)
-            {
-                return ("", "");
-            }
-
-            return (parts[0], parts[1]);
+            return ("", "");
         }
+
+        var parts = header.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+        {
+            return ("", "");
+        }
+
+        return (parts[0], parts[1]);
     }
 }

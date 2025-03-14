@@ -3,45 +3,44 @@
 
 using System.IO.Pipes;
 
-namespace WindowsConsoleSystemBrowser
+namespace WindowsConsoleSystemBrowser;
+
+class CallbackManager
 {
-    class CallbackManager
+    private readonly string _name;
+
+    public CallbackManager(string name)
     {
-        private readonly string _name;
+        _name = name ?? throw new ArgumentNullException(nameof(name));
+    }
 
-        public CallbackManager(string name)
+    public int ClientConnectTimeoutSeconds { get; set; } = 1;
+
+    public async Task RunClient(string args)
+    {
+        using (var client = new NamedPipeClientStream(".", _name, PipeDirection.Out))
         {
-            _name = name ?? throw new ArgumentNullException(nameof(name));
-        }
+            await client.ConnectAsync(ClientConnectTimeoutSeconds * 1000);
 
-        public int ClientConnectTimeoutSeconds { get; set; } = 1;
-
-        public async Task RunClient(string args)
-        {
-            using (var client = new NamedPipeClientStream(".", _name, PipeDirection.Out))
+            using (var sw = new StreamWriter(client) { AutoFlush = true })
             {
-                await client.ConnectAsync(ClientConnectTimeoutSeconds * 1000);
-
-                using (var sw = new StreamWriter(client) { AutoFlush = true })
-                {
-                    await sw.WriteAsync(args);
-                }
+                await sw.WriteAsync(args);
             }
         }
+    }
 
-        public async Task<string> RunServer(CancellationToken? token = null)
+    public async Task<string> RunServer(CancellationToken? token = null)
+    {
+        token = CancellationToken.None;
+
+        using (var server = new NamedPipeServerStream(_name, PipeDirection.In))
         {
-            token = CancellationToken.None;
+            await server.WaitForConnectionAsync(token.Value);
 
-            using (var server = new NamedPipeServerStream(_name, PipeDirection.In))
+            using (var sr = new StreamReader(server))
             {
-                await server.WaitForConnectionAsync(token.Value);
-
-                using (var sr = new StreamReader(server))
-                {
-                    var msg = await sr.ReadToEndAsync();
-                    return msg;
-                }
+                var msg = await sr.ReadToEndAsync();
+                return msg;
             }
         }
     }

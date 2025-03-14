@@ -23,12 +23,14 @@ public class IdentityServerHost : GenericHost
     }
 
     public List<Client> Clients { get; set; } = new();
+
     public List<IdentityResource> IdentityResources { get; set; } = new()
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
             new IdentityResources.Email(),
         };
+
     public List<ApiScope> ApiScopes { get; set; } = new();
 
     private void ConfigureServices(IServiceCollection services)

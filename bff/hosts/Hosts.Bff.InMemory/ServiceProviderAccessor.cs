@@ -9,5 +9,4 @@ namespace Bff;
 internal class ServiceProviderAccessor
 {
     public IServiceProvider? ServiceProvider { get; set; }
-
 }
