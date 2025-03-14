@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using System.Security.Claims;
-using Duende.Bff.Blazor.Client;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
