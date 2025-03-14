@@ -22,10 +22,10 @@ public static class TestMocks
         return factory;
     }
 
-    public static IOptions<BffBlazorOptions> MockOptions(BffBlazorOptions? opt = null)
+    public static IOptions<BffBlazorClientOptions> MockOptions(BffBlazorClientOptions? opt = null)
     {
-        var result = Substitute.For<IOptions<BffBlazorOptions>>();
-        result.Value.Returns(opt ?? new BffBlazorOptions());
+        var result = Substitute.For<IOptions<BffBlazorClientOptions>>();
+        result.Value.Returns(opt ?? new BffBlazorClientOptions());
         return result;
     }
 }

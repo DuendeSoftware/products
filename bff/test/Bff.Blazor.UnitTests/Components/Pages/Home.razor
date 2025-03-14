@@ -1,0 +1,22 @@
+@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, Blazor BFF!</h1>
+
+
+<AuthorizeView>
+  <Authorized>
+    <h3>Authenticated</h3>
+    <dl>
+      @foreach (var claim in context.User.Claims)
+      {
+        <dt>@claim.Type</dt>
+        <dd>@claim.Value</dd>
+      }
+    </dl>
+  </Authorized>
+  <NotAuthorized>
+    <h3>No session</h3>
+  </NotAuthorized>
+</AuthorizeView>

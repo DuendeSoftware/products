@@ -16,7 +16,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     private readonly FetchUserService _fetchUserService;
     private readonly PersistentUserService _persistentUserService;
     private readonly TimeProvider _timeProvider;
-    private readonly BffBlazorOptions _options;
+    private readonly BffBlazorClientOptions _options;
     private readonly ITimer? _timer;
     private ClaimsPrincipal? _user;
     private readonly ILogger<BffClientAuthenticationStateProvider> _logger;
@@ -30,7 +30,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     public BffClientAuthenticationStateProvider(FetchUserService fetchUserService,
         PersistentUserService persistentUserService,
         TimeProvider timeProvider,
-        IOptions<BffBlazorOptions> options,
+        IOptions<BffBlazorClientOptions> options,
         ILogger<BffClientAuthenticationStateProvider> logger)
     {
         _fetchUserService = fetchUserService;

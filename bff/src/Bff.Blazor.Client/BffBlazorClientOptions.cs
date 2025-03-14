@@ -6,7 +6,7 @@ namespace Duende.Bff.Blazor.Client;
 /// <summary>
 /// Options for Blazor BFF
 /// </summary>
-public class BffBlazorOptions
+public class BffBlazorClientOptions
 {
     /// <summary>
     /// The base path to use for remote APIs.
