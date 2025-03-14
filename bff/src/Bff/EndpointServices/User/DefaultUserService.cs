@@ -99,7 +99,7 @@ public class DefaultUserService : IUserService
     {
         var claims = new List<ClaimRecord>();
 
-        if (claims.All(x => x.Type != Constants.ClaimTypes.LogoutUrl))
+        if (authenticateResult.Principal?.HasClaim(x => x.Type == Constants.ClaimTypes.LogoutUrl) != true)
         {
             var sessionId = authenticateResult.Principal?.FindFirst(JwtClaimTypes.SessionId)?.Value;
             claims.Add(new ClaimRecord(
