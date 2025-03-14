@@ -1,6 +1,12 @@
 namespace BffBlazor;
 
-internal class ServerWeatherClient(HttpClient client) : IWeatherClient
+
+/// <summary>
+/// This is an example of a server-side class that accesses data from a datasource (IE: a database)
+/// and makes it available to the application. On the server, the component can directly access the database,
+/// whereas on the client, the component needs to go via a HTTP Client. See the <see cref="WeatherClient"/>
+/// </summary>
+internal class ServerWeatherClient() : IWeatherClient
 {
     public Task<WeatherForecast[]> GetWeatherForecasts()
     {
