@@ -9,7 +9,7 @@
 <AuthorizeView>
     <Authorized>
         <strong>Hello, @context.User.Identity?.Name</strong>
-        <a class="nav-link btn btn-link" href="@BffLogoutUrl(context)">Log in</a>
+        <a class="nav-link btn btn-link" href="@BffLogoutUrl(context)">Log out</a>
     </Authorized>
     <Authorizing>
         <a class="nav-link btn btn-link disabled">Log in</a>
