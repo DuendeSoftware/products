@@ -30,3 +30,7 @@ dotnet_diagnostic.IDE0011.severity = error # Require braces for all if statement
 dotnet_diagnostic.IDE0055.severity = error # Keep empty braces { } on the same line
 csharp_style_allow_blank_line_after_open_brace = false
 csharp_style_allow_blank_line_between_consecutive_braces = false
+
+csharp_style_var_elsewhere = true:error # Enforce 'var' usage for all local variables
+csharp_style_var_when_type_is_apparent = true:error
+csharp_style_var_for_built_in_types = true:error
