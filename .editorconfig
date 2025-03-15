@@ -31,3 +31,6 @@ dotnet_style_qualification_for_event = false:error
 dotnet_style_qualification_for_field = false:error
 dotnet_style_qualification_for_method = false:error
 dotnet_style_qualification_for_property = false:error
+
+# Use language keywords instead of framework type names for type references
+dotnet_diagnostic.IDE0049.severity = error
