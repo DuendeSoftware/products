@@ -346,7 +346,10 @@ public class DefaultUserSession : IUserSession
     {
         await AuthenticateAsync();
 
-        if (Principal == null || Properties == null) throw new InvalidOperationException("User is not currently authenticated");
+        if (Principal == null || Properties == null)
+        {
+            throw new InvalidOperationException("User is not currently authenticated");
+        }
 
         var scheme = await HttpContext.GetCookieAuthenticationSchemeAsync();
         await HttpContext.SignInAsync(scheme, Principal, Properties);

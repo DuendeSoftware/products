@@ -39,8 +39,12 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
 
     public string Url(string? path = null)
     {
-        path ??= String.Empty;
-        if (!path.StartsWith("/")) path = "/" + path;
+        path ??= string.Empty;
+        if (!path.StartsWith("/"))
+        {
+            path = "/" + path;
+        }
+
         return _baseAddress + path;
     }
 
@@ -73,9 +77,9 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
 
         Server = host.GetTestServer();
         BrowserClient = new TestBrowserClient(Server.CreateHandler());
-        BrowserClient.BaseAddress = new Uri(this._baseAddress);
+        BrowserClient.BaseAddress = new Uri(_baseAddress);
         HttpClient = Server.CreateClient();
-        BrowserClient.BaseAddress = new Uri(this._baseAddress);
+        BrowserClient.BaseAddress = new Uri(_baseAddress);
     }
 
     public event Action<IServiceCollection> OnConfigureServices = _ => { };
@@ -147,9 +151,11 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
             await next();
         });
     }
+
     ClaimsPrincipal? _userToSignIn;
     AuthenticationProperties? _propsToSignIn;
-    public async virtual Task IssueSessionCookieAsync(params Claim[] claims)
+
+    public virtual async Task IssueSessionCookieAsync(params Claim[] claims)
     {
         _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
         var response = await BrowserClient.GetAsync(Url("__signin"));

@@ -23,7 +23,7 @@ public class DefaultCorsPolicyServiceTests
     public async Task IsOriginAllowed_null_param_ReturnsFalse()
     {
         (await subject.IsOriginAllowedAsync(null)).ShouldBe(false);
-        (await subject.IsOriginAllowedAsync(String.Empty)).ShouldBe(false);
+        (await subject.IsOriginAllowedAsync(string.Empty)).ShouldBe(false);
         (await subject.IsOriginAllowedAsync("    ")).ShouldBe(false);
     }
 

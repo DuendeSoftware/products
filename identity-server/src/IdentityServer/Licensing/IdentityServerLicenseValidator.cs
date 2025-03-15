@@ -196,7 +196,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
     bool ValidateResourceIndicatorsWarned = false;
     public void ValidateResourceIndicators(string resourceIndicator)
     {
-        if (!String.IsNullOrWhiteSpace(resourceIndicator))
+        if (!string.IsNullOrWhiteSpace(resourceIndicator))
         {
             if (License != null)
             {

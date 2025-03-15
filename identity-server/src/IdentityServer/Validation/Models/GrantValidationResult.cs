@@ -45,11 +45,30 @@ public class GrantValidationResult : ValidationResult
     {
         IsError = false;
 
-        if (principal.Identities.Count() != 1) throw new InvalidOperationException("only a single identity supported");
-        if (principal.FindFirst(JwtClaimTypes.Subject) == null) throw new InvalidOperationException("sub claim is missing");
-        if (principal.FindFirst(JwtClaimTypes.IdentityProvider) == null) throw new InvalidOperationException("idp claim is missing");
-        if (principal.FindFirst(JwtClaimTypes.AuthenticationMethod) == null) throw new InvalidOperationException("amr claim is missing");
-        if (principal.FindFirst(JwtClaimTypes.AuthenticationTime) == null) throw new InvalidOperationException("auth_time claim is missing");
+        if (principal.Identities.Count() != 1)
+        {
+            throw new InvalidOperationException("only a single identity supported");
+        }
+
+        if (principal.FindFirst(JwtClaimTypes.Subject) == null)
+        {
+            throw new InvalidOperationException("sub claim is missing");
+        }
+
+        if (principal.FindFirst(JwtClaimTypes.IdentityProvider) == null)
+        {
+            throw new InvalidOperationException("idp claim is missing");
+        }
+
+        if (principal.FindFirst(JwtClaimTypes.AuthenticationMethod) == null)
+        {
+            throw new InvalidOperationException("amr claim is missing");
+        }
+
+        if (principal.FindFirst(JwtClaimTypes.AuthenticationTime) == null)
+        {
+            throw new InvalidOperationException("auth_time claim is missing");
+        }
 
         Subject = principal;
         CustomResponse = customResponse;

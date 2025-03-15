@@ -31,7 +31,10 @@ public class TokenCleanupService : ITokenCleanupService
         IOperationalStoreNotification operationalStoreNotification = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        if (_options.TokenCleanupBatchSize < 1) throw new ArgumentException("Token cleanup batch size interval must be at least 1");
+        if (_options.TokenCleanupBatchSize < 1)
+        {
+            throw new ArgumentException("Token cleanup batch size interval must be at least 1");
+        }
 
         _persistedGrantDbContext = persistedGrantDbContext ?? throw new ArgumentNullException(nameof(persistedGrantDbContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -75,7 +78,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// <returns></returns>
     protected virtual async Task RemoveExpiredPersistedGrantsAsync(CancellationToken cancellationToken = default)
     {
-        var found = Int32.MaxValue;
+        var found = int.MaxValue;
 
         while (found >= _options.TokenCleanupBatchSize)
         {
@@ -144,7 +147,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// <returns></returns>
     protected virtual async Task RemoveConsumedPersistedGrantsAsync(CancellationToken cancellationToken = default)
     {
-        var found = Int32.MaxValue;
+        var found = int.MaxValue;
 
         var delay = TimeSpan.FromSeconds(_options.ConsumedTokenCleanupDelay);
         var consumedTimeThreshold = DateTime.UtcNow.Subtract(delay);
@@ -207,7 +210,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// <returns></returns>
     protected virtual async Task RemoveDeviceCodesAsync(CancellationToken cancellationToken = default)
     {
-        var found = Int32.MaxValue;
+        var found = int.MaxValue;
 
         while (found >= _options.TokenCleanupBatchSize)
         {
@@ -263,7 +266,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// </summary>
     protected virtual async Task RemovePushedAuthorizationRequestsAsync(CancellationToken cancellationToken = default)
     {
-        var found = Int32.MaxValue;
+        var found = int.MaxValue;
 
         var query = _persistedGrantDbContext.PushedAuthorizationRequests
             .Where(par => par.ExpiresAtUtc < DateTime.UtcNow)

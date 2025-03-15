@@ -24,7 +24,11 @@
     string BffLogoutUrl(AuthenticationState context)
     {
         var logoutUrl = context.User.FindFirst(Constants.ClaimTypes.LogoutUrl);
-        if (logoutUrl == null) throw new InvalidOperationException("The logout url is missing");
+        if (logoutUrl == null)
+        {
+          throw new InvalidOperationException("The logout url is missing");
+        }
+
         return $"{Options.Value.StateProviderBaseAddress}{logoutUrl.Value}";
     }
 }

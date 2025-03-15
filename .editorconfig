@@ -10,13 +10,35 @@ insert_final_newline = true
 
 indent_size = 4
 
-dotnet_diagnostic.IDE0005.severity = warning  # Remove unnecessary using directives
+# Remove unnecessary using directives
+dotnet_diagnostic.IDE0005.severity = warning
 
-dotnet_diagnostic.IDE0055.severity = warning  # Formatting rule
+ # Formatting rule
+dotnet_diagnostic.IDE0055.severity = warning 
 dotnet_sort_system_directives_first = true
 
-dotnet_diagnostic.IDE0073.severity = warning  # Require file header
+# Require file header
+dotnet_diagnostic.IDE0073.severity = warning  
 file_header_template = Copyright (c) Duende Software. All rights reserved.\nSee LICENSE in the project root for license information.
 
-dotnet_diagnostic.IDE0161.severity = error  # Use file-scoped namespace
+# Use file-scoped namespace
+dotnet_diagnostic.IDE0161.severity = error  
 csharp_style_namespace_declarations = file_scoped
+
+# Remove this or Me qualification
+dotnet_diagnostic.IDE0003.severity = error
+dotnet_style_qualification_for_event = false:error
+dotnet_style_qualification_for_field = false:error
+dotnet_style_qualification_for_method = false:error
+dotnet_style_qualification_for_property = false:error
+
+# Use language keywords instead of framework type names for type references
+dotnet_diagnostic.IDE0049.severity = error
+
+
+# BSD/Allman braces: Place braces on a new line for all constructs, require braces for all if statements and keep empty braces { } on the same line
+csharp_new_line_before_open_brace = all 
+dotnet_diagnostic.IDE0011.severity = error
+dotnet_diagnostic.IDE0055.severity = error
+csharp_style_allow_blank_line_after_open_brace = false
+csharp_style_allow_blank_line_between_consecutive_braces = false

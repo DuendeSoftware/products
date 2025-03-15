@@ -55,7 +55,10 @@ public class Index : PageModel
     {
         // validate return url is still valid
         var request = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
-        if (request == null) return RedirectToPage("/Home/Error/Index");
+        if (request == null)
+        {
+            return RedirectToPage("/Home/Error/Index");
+        }
 
         ConsentResponse? grantedConsent = null;
 
@@ -205,7 +208,7 @@ public class Index : PageModel
     private static ScopeViewModel CreateScopeViewModel(ParsedScopeValue parsedScopeValue, ApiScope apiScope, bool check)
     {
         var displayName = apiScope.DisplayName ?? apiScope.Name;
-        if (!String.IsNullOrWhiteSpace(parsedScopeValue.ParsedParameter))
+        if (!string.IsNullOrWhiteSpace(parsedScopeValue.ParsedParameter))
         {
             displayName += ":" + parsedScopeValue.ParsedParameter;
         }

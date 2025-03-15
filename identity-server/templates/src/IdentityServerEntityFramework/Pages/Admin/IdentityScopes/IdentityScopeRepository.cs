@@ -34,7 +34,7 @@ public class IdentityScopeRepository
             .Include(x => x.UserClaims)
             .AsQueryable();
 
-        if (!String.IsNullOrWhiteSpace(filter))
+        if (!string.IsNullOrWhiteSpace(filter))
         {
             query = query.Where(x => x.Name.Contains(filter) || x.DisplayName.Contains(filter));
         }
@@ -54,7 +54,10 @@ public class IdentityScopeRepository
             .Include(x => x.UserClaims)
             .SingleOrDefaultAsync(x => x.Name == id);
 
-        if (scope == null) return null;
+        if (scope == null)
+        {
+            return null;
+        }
 
         return new IdentityScopeModel
         {
@@ -94,7 +97,10 @@ public class IdentityScopeRepository
             .Include(x => x.UserClaims)
             .SingleOrDefaultAsync(x => x.Name == model.Name);
 
-        if (scope == null) throw new ArgumentException("Invalid Identity Scope");
+        if (scope == null)
+        {
+            throw new ArgumentException("Invalid Identity Scope");
+        }
 
         if (scope.DisplayName != model.DisplayName)
         {
@@ -102,7 +108,7 @@ public class IdentityScopeRepository
         }
 
         var claims = model.UserClaims?.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? Enumerable.Empty<string>();
-        var currentClaims = (scope.UserClaims.Select(x => x.Type) ?? Enumerable.Empty<String>()).ToArray();
+        var currentClaims = (scope.UserClaims.Select(x => x.Type) ?? Enumerable.Empty<string>()).ToArray();
 
         var claimsToAdd = claims.Except(currentClaims).ToArray();
         var claimsToRemove = currentClaims.Except(claims).ToArray();
@@ -126,7 +132,10 @@ public class IdentityScopeRepository
     {
         var scope = await _context.IdentityResources.SingleOrDefaultAsync(x => x.Name == id);
 
-        if (scope == null) throw new ArgumentException("Invalid Identity Scope");
+        if (scope == null)
+        {
+            throw new ArgumentException("Invalid Identity Scope");
+        }
 
         _context.IdentityResources.Remove(scope);
         await _context.SaveChangesAsync();

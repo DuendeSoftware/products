@@ -32,7 +32,11 @@ public class DPoPProofValidatorTests
     {
         get
         {
-            if (_now > DateTime.MinValue) return _now;
+            if (_now > DateTime.MinValue)
+            {
+                return _now;
+            }
+
             return DateTime.UtcNow;
         }
     }
@@ -87,7 +91,7 @@ public class DPoPProofValidatorTests
             if (item.Value.ValueKind == JsonValueKind.String)
             {
                 var val = item.Value.GetString();
-                if (!String.IsNullOrEmpty(val))
+                if (!string.IsNullOrEmpty(val))
                 {
                     jwkValues.Add(item.Name, val);
                 }

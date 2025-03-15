@@ -24,7 +24,7 @@ public class ClientRepository
         var query = _context.Clients
             .Where(c => c.InitiateLoginUri != null);
 
-        if (!String.IsNullOrWhiteSpace(filter))
+        if (!string.IsNullOrWhiteSpace(filter))
         {
             query = query.Where(x => x.ClientId.Contains(filter) || x.ClientName.Contains(filter));
         }

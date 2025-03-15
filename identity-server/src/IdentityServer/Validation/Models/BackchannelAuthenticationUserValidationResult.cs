@@ -16,7 +16,7 @@ public class BackchannelAuthenticationUserValidationResult
     /// <summary>
     /// Indicates if this represents an error.
     /// </summary>
-    public bool IsError => !String.IsNullOrWhiteSpace(Error);
+    public bool IsError => !string.IsNullOrWhiteSpace(Error);
 
     /// <summary>
     /// Gets or sets the error.

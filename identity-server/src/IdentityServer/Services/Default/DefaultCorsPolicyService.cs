@@ -50,7 +50,7 @@ public class DefaultCorsPolicyService : ICorsPolicyService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultCorsPolicyService.IsOriginAllowed");
 
-        if (!String.IsNullOrWhiteSpace(origin))
+        if (!string.IsNullOrWhiteSpace(origin))
         {
             if (AllowAll)
             {
