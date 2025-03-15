@@ -7,16 +7,26 @@ indent_style = space
 insert_final_newline = true
 
 [*.cs]
-
 indent_size = 4
 
-dotnet_diagnostic.IDE0005.severity = warning  # Remove unnecessary using directives
+# Remove this or Me qualification
+dotnet_diagnostic.IDE0003.severity = error
+dotnet_style_qualification_for_event = false:error
+dotnet_style_qualification_for_field = false:error
+dotnet_style_qualification_for_method = false:error
+dotnet_style_qualification_for_property = false:error
 
-dotnet_diagnostic.IDE0055.severity = warning  # Formatting rule
+# Remove unnecessary using directives
+dotnet_diagnostic.IDE0005.severity = warning
+
+ # Formatting rule
+dotnet_diagnostic.IDE0055.severity = warning 
 dotnet_sort_system_directives_first = true
 
-dotnet_diagnostic.IDE0073.severity = warning  # Require file header
+# Require file header
+dotnet_diagnostic.IDE0073.severity = warning  
 file_header_template = Copyright (c) Duende Software. All rights reserved.\nSee LICENSE in the project root for license information.
 
-dotnet_diagnostic.IDE0161.severity = error  # Use file-scoped namespace
+# Use file-scoped namespace
+dotnet_diagnostic.IDE0161.severity = error  
 csharp_style_namespace_declarations = file_scoped

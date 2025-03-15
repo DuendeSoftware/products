@@ -259,7 +259,7 @@ public class AppHostFixture : IAsyncLifetime
         {
 #if !DEBUG_NCRUNCH
             if (_app == null) throw new NullReferenceException("App should not be null");
-            return this._app.GetEndpoint(clientName);
+            return _app.GetEndpoint(clientName);
 #else
             Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
             return null!;
