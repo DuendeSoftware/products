@@ -24,3 +24,9 @@ csharp_style_namespace_declarations = file_scoped:error
 dotnet_diagnostic.IDE0003.severity = error # Enforce that 'this.' should not be used when it's redundant
 
 dotnet_diagnostic.IDE0049.severity = error # Enforce using built-in type keywords (e.g., 'string' instead of 'String')
+
+csharp_new_line_before_open_brace = all # BSD/Allman braces: Place braces on a new line for all constructs
+dotnet_diagnostic.IDE0011.severity = error # Require braces for all if statements
+dotnet_diagnostic.IDE0055.severity = error # Keep empty braces { } on the same line
+csharp_style_allow_blank_line_after_open_brace = false
+csharp_style_allow_blank_line_between_consecutive_braces = false
