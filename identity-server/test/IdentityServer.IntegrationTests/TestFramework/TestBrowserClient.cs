@@ -222,7 +222,7 @@ public class TestBrowserClient : HttpClient
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await AssertExistsAsync(response, ".error-page");
 
-        if (!String.IsNullOrWhiteSpace(error))
+        if (!string.IsNullOrWhiteSpace(error))
         {
             var errorText = await ReadElementTextAsync(response, ".alert.alert-danger");
             errorText.ShouldContain(error);
@@ -238,7 +238,7 @@ public class TestBrowserClient : HttpClient
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await AssertExistsAsync(response, ".validation-summary-errors");
 
-        if (!String.IsNullOrWhiteSpace(error))
+        if (!string.IsNullOrWhiteSpace(error))
         {
             var errorText = await ReadElementTextAsync(response, ".validation-summary-errors");
             errorText.ToLowerInvariant().ShouldContain(error.ToLowerInvariant());

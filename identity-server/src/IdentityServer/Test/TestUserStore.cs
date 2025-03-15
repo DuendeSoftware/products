@@ -167,11 +167,11 @@ public class TestUserStore
         var sub = CryptoRandom.CreateUniqueId(format: CryptoRandom.OutputFormat.Hex);
 
         var claims = new List<Claim>();
-        if (!String.IsNullOrEmpty(name))
+        if (!string.IsNullOrEmpty(name))
         {
             claims.Add(new Claim(ClaimTypes.Name, name));
         }
-        if (!String.IsNullOrEmpty(email))
+        if (!string.IsNullOrEmpty(email))
         {
             claims.Add(new Claim(ClaimTypes.Email, email));
         }

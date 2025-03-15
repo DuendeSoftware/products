@@ -65,7 +65,7 @@ public class ServerSideSessionCookieEventsTests
         };
         if (forceRenew)
         {
-            authProperties.SetString(IdentityServerConstants.ForceCookieRenewalFlag, String.Empty);
+            authProperties.SetString(IdentityServerConstants.ForceCookieRenewalFlag, string.Empty);
         }
 
         var authTicket = new AuthenticationTicket(new ClaimsPrincipal([]), authProperties, "Test")

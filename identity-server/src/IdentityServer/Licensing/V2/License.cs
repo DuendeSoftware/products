@@ -26,7 +26,7 @@ internal class License
     /// </summary>
     internal License(ClaimsPrincipal claims)
     {
-        if (Int32.TryParse(claims.FindFirst("id")?.Value, out var id))
+        if (int.TryParse(claims.FindFirst("id")?.Value, out var id))
         {
             SerialNumber = id;
         }
@@ -34,7 +34,7 @@ internal class License
         CompanyName = claims.FindFirst("company_name")?.Value;
         ContactInfo = claims.FindFirst("contact_info")?.Value;
 
-        if (Int64.TryParse(claims.FindFirst("exp")?.Value, out var exp))
+        if (long.TryParse(claims.FindFirst("exp")?.Value, out var exp))
         {
             Expiration = DateTimeOffset.FromUnixTimeSeconds(exp);
         }

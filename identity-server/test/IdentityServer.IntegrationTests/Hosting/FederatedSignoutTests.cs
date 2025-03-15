@@ -112,7 +112,7 @@ public class FederatedSignoutTests
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.ShouldBe(String.Empty);
+        html.ShouldBe(string.Empty);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class FederatedSignoutTests
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.ShouldBe(String.Empty);
+        html.ShouldBe(string.Empty);
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public class FederatedSignoutTests
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.ShouldBe(String.Empty);
+        html.ShouldBe(string.Empty);
     }
 
     [Fact]
@@ -178,6 +178,6 @@ public class FederatedSignoutTests
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Content.Headers.ContentType.ShouldBeNull();
         var html = await response.Content.ReadAsStringAsync();
-        html.ShouldBe(String.Empty);
+        html.ShouldBe(string.Empty);
     }
 }

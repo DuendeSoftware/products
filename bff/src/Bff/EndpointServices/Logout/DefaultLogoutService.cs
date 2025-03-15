@@ -63,7 +63,7 @@ public class DefaultLogoutService : ILogoutService
         if (result.Succeeded && result.Principal?.Identity?.IsAuthenticated == true)
         {
             var userSessionId = result.Principal.FindFirst(JwtClaimTypes.SessionId)?.Value;
-            if (!String.IsNullOrWhiteSpace(userSessionId))
+            if (!string.IsNullOrWhiteSpace(userSessionId))
             {
                 var passedSessionId = context.Request.Query[JwtClaimTypes.SessionId].FirstOrDefault();
                 // for an authenticated user, if they have a session id claim,
@@ -89,7 +89,7 @@ public class DefaultLogoutService : ILogoutService
         var signInScheme = await AuthenticationSchemeProvider.GetDefaultSignInSchemeAsync();
         await context.SignOutAsync(signInScheme?.Name);
 
-        if (String.IsNullOrWhiteSpace(returnUrl))
+        if (string.IsNullOrWhiteSpace(returnUrl))
         {
             if (context.Request.PathBase.HasValue)
             {

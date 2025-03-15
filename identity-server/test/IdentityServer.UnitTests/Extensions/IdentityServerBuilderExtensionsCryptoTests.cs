@@ -46,7 +46,7 @@ public class IdentityServerBuilderExtensionsCryptoTests
         IServiceCollection services = new ServiceCollection();
         IIdentityServerBuilder identityServerBuilder = new IdentityServerBuilder(services);
 
-        String json =
+        string json =
             """
             {
                 "alg" : "HS256",

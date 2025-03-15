@@ -17,7 +17,7 @@ internal static class StringExtensions
             return string.Empty;
         }
 
-        return String.Join(' ', list);
+        return string.Join(' ', list);
     }
 
     [DebuggerStepThrough]
@@ -120,7 +120,7 @@ internal static class StringExtensions
     [DebuggerStepThrough]
     public static string CleanUrlPath(this string url)
     {
-        if (String.IsNullOrWhiteSpace(url)) url = "/";
+        if (string.IsNullOrWhiteSpace(url)) url = "/";
 
         if (url != "/" && url.EndsWith('/'))
         {

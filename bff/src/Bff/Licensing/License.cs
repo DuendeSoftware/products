@@ -19,7 +19,7 @@ internal class License
 
     public License(ClaimsPrincipal claims)
     {
-        if (Int32.TryParse(claims.FindFirst("id")?.Value, out var id))
+        if (int.TryParse(claims.FindFirst("id")?.Value, out var id))
         {
             Id = id;
         }
@@ -27,7 +27,7 @@ internal class License
         CompanyName = claims.FindFirst("company_name")?.Value;
         ContactInfo = claims.FindFirst("contact_info")?.Value;
 
-        if (Int64.TryParse(claims.FindFirst("exp")?.Value, out var exp))
+        if (long.TryParse(claims.FindFirst("exp")?.Value, out var exp))
         {
             var expDate = DateTimeOffset.FromUnixTimeSeconds(exp);
             Expiration = expDate.UtcDateTime;
@@ -161,7 +161,7 @@ internal class License
                 }
             }
 
-            if (Int32.TryParse(claims.FindFirst("client_limit")?.Value, out var clientLimit))
+            if (int.TryParse(claims.FindFirst("client_limit")?.Value, out var clientLimit))
             {
                 // explicit, so use that value
                 ClientLimit = clientLimit;
@@ -186,7 +186,7 @@ internal class License
             // default 
             IssuerLimit = 1;
 
-            if (Int32.TryParse(claims.FindFirst("issuer_limit")?.Value, out var issuerLimit))
+            if (int.TryParse(claims.FindFirst("issuer_limit")?.Value, out var issuerLimit))
             {
                 IssuerLimit = issuerLimit;
             }

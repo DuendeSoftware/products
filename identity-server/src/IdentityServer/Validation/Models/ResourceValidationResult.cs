@@ -105,14 +105,14 @@ public class ResourceValidationResult
     public ResourceValidationResult FilterByResourceIndicator(string resourceIndicator)
     {
         // filter ApiResources to only the ones allowed by the resource indicator requested
-        var apiResourcesToKeep = (String.IsNullOrWhiteSpace(resourceIndicator) ?
+        var apiResourcesToKeep = (string.IsNullOrWhiteSpace(resourceIndicator) ?
             Resources.ApiResources.Where(x => !x.RequireResourceIndicator) :
             Resources.ApiResources.Where(x => x.Name == resourceIndicator)).ToArray();
 
         var apiScopesToKeep = Resources.ApiScopes.AsEnumerable();
         var parsedScopesToKeep = ParsedScopes;
 
-        if (!String.IsNullOrWhiteSpace(resourceIndicator))
+        if (!string.IsNullOrWhiteSpace(resourceIndicator))
         {
             // filter ApiScopes to only the ones allowed by the ApiResource requested
             var scopeNamesToKeep = apiResourcesToKeep.SelectMany(x => x.Scopes).ToArray();

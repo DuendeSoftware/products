@@ -87,7 +87,7 @@ public class DPoPProofValidatorTests
             if (item.Value.ValueKind == JsonValueKind.String)
             {
                 var val = item.Value.GetString();
-                if (!String.IsNullOrEmpty(val))
+                if (!string.IsNullOrEmpty(val))
                 {
                     jwkValues.Add(item.Name, val);
                 }

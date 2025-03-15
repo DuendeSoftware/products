@@ -22,7 +22,7 @@ public static class IReadableStringCollectionExtensions
             foreach (var val in field.Value)
             {
                 // special check for some Azure product: https://github.com/DuendeSoftware/Support/issues/48
-                if (!String.IsNullOrWhiteSpace(val))
+                if (!string.IsNullOrWhiteSpace(val))
                 {
                     nv.Add(field.Key, val);
                 }
@@ -42,7 +42,7 @@ public static class IReadableStringCollectionExtensions
             foreach (var item in field.Value)
             {
                 // special check for some Azure product: https://github.com/DuendeSoftware/Support/issues/48
-                if (!String.IsNullOrWhiteSpace(item))
+                if (!string.IsNullOrWhiteSpace(item))
                 {
                     nv.Add(field.Key, item);
                 }

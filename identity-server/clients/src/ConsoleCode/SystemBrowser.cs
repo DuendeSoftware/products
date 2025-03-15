@@ -50,7 +50,7 @@ public class SystemBrowser : IBrowser
             try
             {
                 var result = await listener.WaitForCallbackAsync();
-                if (String.IsNullOrWhiteSpace(result))
+                if (string.IsNullOrWhiteSpace(result))
                 {
                     return new BrowserResult { ResultType = BrowserResultType.UnknownError, Error = "Empty response." };
                 }
@@ -110,7 +110,7 @@ public class LoopbackHttpListener : IDisposable
 
     public LoopbackHttpListener(int port, string path = null)
     {
-        path = path ?? String.Empty;
+        path = path ?? string.Empty;
         if (path.StartsWith("/")) path = path.Substring(1);
 
         _url = $"http://127.0.0.1:{port}/{path}";

@@ -87,7 +87,7 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
 
         if (_context.Response.Body.CanWrite)
         {
-            var iframe = String.Format(IframeHtml, iframeUrl);
+            var iframe = string.Format(IframeHtml, iframeUrl);
             _context.Response.ContentType = "text/html";
             await _context.Response.WriteAsync(iframe);
             await _context.Response.Body.FlushAsync();

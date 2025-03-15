@@ -46,7 +46,7 @@ public static class AuthenticationTicketExtensions
     /// </summary>
     public static string GetDisplayName(this AuthenticationTicket ticket, string displayNameClaimType)
     {
-        return String.IsNullOrWhiteSpace(displayNameClaimType) ?
+        return string.IsNullOrWhiteSpace(displayNameClaimType) ?
             null : ticket.Principal.FindFirst(displayNameClaimType)?.Value;
     }
 

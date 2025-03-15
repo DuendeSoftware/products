@@ -15,7 +15,7 @@ internal static class PropertiesConverter
 
     public static Dictionary<string, string> Convert(string sourceMember)
     {
-        if (String.IsNullOrWhiteSpace(sourceMember))
+        if (string.IsNullOrWhiteSpace(sourceMember))
         {
             return new Dictionary<string, string>();
         }

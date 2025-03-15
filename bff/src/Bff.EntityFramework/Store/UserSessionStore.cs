@@ -112,17 +112,17 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
         filter.Validate();
 
         var query = _sessionDbContext.UserSessions.Where(x => x.ApplicationName == _applicationDiscriminator).AsQueryable();
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
 
         var items = await query.Where(x => x.ApplicationName == _applicationDiscriminator).ToArrayAsync(cancellationToken);
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             items = items.Where(x => x.SubjectId == filter.SubjectId).ToArray();
         }
@@ -181,21 +181,21 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
         filter.Validate();
 
         var query = _sessionDbContext.UserSessions.Where(x => x.ApplicationName == _applicationDiscriminator).AsQueryable();
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
 
         var items = await query.Where(x => x.ApplicationName == _applicationDiscriminator).ToArrayAsync(cancellationToken);
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             items = items.Where(x => x.SubjectId == filter.SubjectId).ToArray();
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             items = items.Where(x => x.SessionId == filter.SessionId).ToArray();
         }

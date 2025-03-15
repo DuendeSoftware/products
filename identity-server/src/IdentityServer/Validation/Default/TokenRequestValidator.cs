@@ -788,7 +788,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Resource indicator does not match any resource indicator in the original authorize request.");
             }
         }
-        else if (!String.IsNullOrWhiteSpace(_validatedRequest.RequestedResourceIndicator))
+        else if (!string.IsNullOrWhiteSpace(_validatedRequest.RequestedResourceIndicator))
         {
             resourceIndicators = new[] { _validatedRequest.RequestedResourceIndicator };
         }

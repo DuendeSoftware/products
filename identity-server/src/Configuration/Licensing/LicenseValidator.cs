@@ -142,7 +142,7 @@ internal class LicenseValidator<T>
 
     internal T ValidateKey(string licenseKey)
     {
-        if (!String.IsNullOrWhiteSpace(licenseKey))
+        if (!string.IsNullOrWhiteSpace(licenseKey))
         {
             var handler = new JsonWebTokenHandler();
 

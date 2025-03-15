@@ -19,6 +19,11 @@ dotnet_style_qualification_for_property = false:error
 # Remove unnecessary using directives
 dotnet_diagnostic.IDE0005.severity = warning
 
+# Use language keywords instead of framework type names for type references 
+dotnet_diagnostic.IDE0049.severity = error
+dotnet_style_predefined_type_for_locals_parameters_members = true
+dotnet_style_predefined_type_for_member_access = true
+
  # Formatting rule
 dotnet_diagnostic.IDE0055.severity = warning 
 dotnet_sort_system_directives_first = true

@@ -129,7 +129,7 @@ public class ServerSideSessionCleanupHost : IHostedService
                 var serverSideTicketStore = serviceScope.ServiceProvider.GetRequiredService<IServerSideTicketStore>();
                 var sessionCoordinationService = serviceScope.ServiceProvider.GetRequiredService<ISessionCoordinationService>();
 
-                var found = Int32.MaxValue;
+                var found = int.MaxValue;
 
                 while (found > 0)
                 {
