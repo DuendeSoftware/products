@@ -20,7 +20,10 @@ public static class HashExtensions
     /// <returns>A hash</returns>
     public static string Sha256(this string input)
     {
-        if (input.IsMissing()) return string.Empty;
+        if (input.IsMissing())
+        {
+            return string.Empty;
+        }
 
         var bytes = Encoding.UTF8.GetBytes(input);
         var hash = SHA256.HashData(bytes);
@@ -50,7 +53,10 @@ public static class HashExtensions
     /// <returns>A hash</returns>
     public static string Sha512(this string input)
     {
-        if (input.IsMissing()) return string.Empty;
+        if (input.IsMissing())
+        {
+            return string.Empty;
+        }
 
         var bytes = Encoding.UTF8.GetBytes(input);
         var hash = SHA512.HashData(bytes);

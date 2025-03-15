@@ -128,7 +128,10 @@ internal static class StringExtensions
     [DebuggerStepThrough]
     public static string CleanUrlPath(this string? url)
     {
-        if (string.IsNullOrWhiteSpace(url)) url = "/";
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            url = "/";
+        }
 
         if (url != "/" && url.EndsWith('/'))
         {

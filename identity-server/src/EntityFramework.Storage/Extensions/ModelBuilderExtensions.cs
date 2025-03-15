@@ -29,7 +29,10 @@ public static class ModelBuilderExtensions
     /// <param name="storeOptions">The store options.</param>
     public static void ConfigureClientContext(this ModelBuilder modelBuilder, ConfigurationStoreOptions storeOptions)
     {
-        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema)) modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
+        {
+            modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        }
 
         modelBuilder.Entity<Client>(client =>
         {
@@ -145,7 +148,10 @@ public static class ModelBuilderExtensions
     /// <param name="storeOptions">The store options.</param>
     public static void ConfigurePersistedGrantContext(this ModelBuilder modelBuilder, OperationalStoreOptions storeOptions)
     {
-        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema)) modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
+        {
+            modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        }
 
         modelBuilder.Entity<PersistedGrant>(grant =>
         {
@@ -243,7 +249,10 @@ public static class ModelBuilderExtensions
     /// <param name="storeOptions">The store options.</param>
     public static void ConfigureResourcesContext(this ModelBuilder modelBuilder, ConfigurationStoreOptions storeOptions)
     {
-        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema)) modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
+        {
+            modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        }
 
         modelBuilder.Entity<IdentityResource>(identityResource =>
         {
@@ -369,7 +378,10 @@ public static class ModelBuilderExtensions
     /// <param name="storeOptions">The store options.</param>
     public static void ConfigureIdentityProviderContext(this ModelBuilder modelBuilder, ConfigurationStoreOptions storeOptions)
     {
-        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema)) modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
+        {
+            modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);
+        }
 
         modelBuilder.Entity<IdentityProvider>(entity =>
         {

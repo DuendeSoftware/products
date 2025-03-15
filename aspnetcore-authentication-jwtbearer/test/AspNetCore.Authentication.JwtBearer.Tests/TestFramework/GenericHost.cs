@@ -18,7 +18,11 @@ public class GenericHost
 {
     public GenericHost(ITestOutputHelper testOutputHelper, string baseAddress = "https://server")
     {
-        if (baseAddress.EndsWith("/")) baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        if (baseAddress.EndsWith("/"))
+        {
+            baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        }
+
         _baseAddress = baseAddress;
         _testOutputHelper = testOutputHelper;
     }
@@ -70,7 +74,11 @@ public class GenericHost
     public string Url(string? path = null)
     {
         path = path ?? string.Empty;
-        if (!path.StartsWith("/")) path = "/" + path;
+        if (!path.StartsWith("/"))
+        {
+            path = "/" + path;
+        }
+
         return _baseAddress + path;
     }
 

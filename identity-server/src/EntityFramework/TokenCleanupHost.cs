@@ -42,7 +42,10 @@ public class TokenCleanupHost : IHostedService
     {
         if (_options.EnableTokenCleanup)
         {
-            if (_source != null) throw new InvalidOperationException("Already started. Call Stop first.");
+            if (_source != null)
+            {
+                throw new InvalidOperationException("Already started. Call Stop first.");
+            }
 
             _logger.LogDebug("Starting grant removal");
 
@@ -61,7 +64,10 @@ public class TokenCleanupHost : IHostedService
     {
         if (_options.EnableTokenCleanup)
         {
-            if (_source == null) throw new InvalidOperationException("Not started. Call Start first.");
+            if (_source == null)
+            {
+                throw new InvalidOperationException("Not started. Call Start first.");
+            }
 
             _logger.LogDebug("Stopping grant removal");
 

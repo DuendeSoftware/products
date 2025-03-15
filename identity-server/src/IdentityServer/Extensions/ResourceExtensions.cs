@@ -88,7 +88,10 @@ public static class ResourceExtensions
 
     internal static Resources FilterEnabled(this Resources resources)
     {
-        if (resources == null) return new Resources();
+        if (resources == null)
+        {
+            return new Resources();
+        }
 
         return new Resources(
             resources.IdentityResources.Where(x => x.Enabled),

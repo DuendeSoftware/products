@@ -71,7 +71,10 @@ public class IdentityProviderStore : IIdentityProviderStore
         var idp = (await Context.IdentityProviders.AsNoTracking().Where(x => x.Scheme == scheme)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))
             .SingleOrDefault(x => x.Scheme == scheme);
-        if (idp == null) return null;
+        if (idp == null)
+        {
+            return null;
+        }
 
         var result = MapIdp(idp);
         if (result == null)

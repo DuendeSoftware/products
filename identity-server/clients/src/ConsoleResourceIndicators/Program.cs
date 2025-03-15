@@ -51,7 +51,11 @@ public class Program
             "x) exit".ConsoleGreen();
             var key = Console.ReadKey();
 
-            if (key.Key == ConsoleKey.X) return;
+            if (key.Key == ConsoleKey.X)
+            {
+                return;
+            }
+
             if (ConsoleKey.A <= key.Key && key.Key < ConsoleKey.X)
             {
                 var item = tests[key.Key - ConsoleKey.A];

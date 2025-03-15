@@ -51,7 +51,10 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestValidator.ValidateRequest");
 
-        if (clientValidationResult == null) throw new ArgumentNullException(nameof(clientValidationResult));
+        if (clientValidationResult == null)
+        {
+            throw new ArgumentNullException(nameof(clientValidationResult));
+        }
 
         _logger.LogDebug("Start backchannel authentication request validation");
 
@@ -273,9 +276,20 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         var idTokenHint = _validatedRequest.Raw.Get(OidcConstants.BackchannelAuthenticationRequest.IdTokenHint);
 
         var loginHintCount = 0;
-        if (loginHint.IsPresent()) loginHintCount++;
-        if (loginHintToken.IsPresent()) loginHintCount++;
-        if (idTokenHint.IsPresent()) loginHintCount++;
+        if (loginHint.IsPresent())
+        {
+            loginHintCount++;
+        }
+
+        if (loginHintToken.IsPresent())
+        {
+            loginHintCount++;
+        }
+
+        if (idTokenHint.IsPresent())
+        {
+            loginHintCount++;
+        }
 
         if (loginHintCount == 0)
         {

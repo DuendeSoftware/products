@@ -22,7 +22,10 @@ public class Challenge : PageModel
 
     public IActionResult OnGet(string scheme, string? returnUrl)
     {
-        if (string.IsNullOrEmpty(returnUrl)) returnUrl = "~/";
+        if (string.IsNullOrEmpty(returnUrl))
+        {
+            returnUrl = "~/";
+        }
 
         // Abort on incorrect returnUrl - it is neither a local url nor a valid OIDC url.
         if (Url.IsLocalUrl(returnUrl) == false && _interactionService.IsValidReturnUrl(returnUrl) == false)

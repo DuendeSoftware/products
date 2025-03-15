@@ -111,7 +111,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Options = _options
         };
 
-        if (clientValidationResult == null) throw new ArgumentNullException(nameof(context.ClientValidationResult));
+        if (clientValidationResult == null)
+        {
+            throw new ArgumentNullException(nameof(context.ClientValidationResult));
+        }
 
         _validatedRequest.SetClient(clientValidationResult.Client, clientValidationResult.Secret, clientValidationResult.Confirmation);
 

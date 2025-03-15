@@ -132,13 +132,30 @@ public static class ValidatedAuthorizeRequestExtensions
 
     public static string GenerateSessionStateValue(this ValidatedAuthorizeRequest request)
     {
-        if (request == null) return null;
-        if (!request.IsOpenIdRequest) return null;
+        if (request == null)
+        {
+            return null;
+        }
 
-        if (request.SessionId == null) return null;
+        if (!request.IsOpenIdRequest)
+        {
+            return null;
+        }
 
-        if (request.ClientId.IsMissing()) return null;
-        if (request.RedirectUri.IsMissing()) return null;
+        if (request.SessionId == null)
+        {
+            return null;
+        }
+
+        if (request.ClientId.IsMissing())
+        {
+            return null;
+        }
+
+        if (request.RedirectUri.IsMissing())
+        {
+            return null;
+        }
 
         var clientId = request.ClientId;
         var sessionId = request.SessionId;

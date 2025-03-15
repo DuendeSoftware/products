@@ -41,7 +41,10 @@ public class ServerSideSessionCleanupHost : IHostedService
     {
         if (_options.ServerSideSessions.RemoveExpiredSessions)
         {
-            if (_source != null) throw new InvalidOperationException("Already started. Call Stop first.");
+            if (_source != null)
+            {
+                throw new InvalidOperationException("Already started. Call Stop first.");
+            }
 
             _logger.LogDebug("Starting server-side session removal");
 
@@ -60,7 +63,10 @@ public class ServerSideSessionCleanupHost : IHostedService
     {
         if (_options.ServerSideSessions.RemoveExpiredSessions)
         {
-            if (_source == null) throw new InvalidOperationException("Not started. Call Start first.");
+            if (_source == null)
+            {
+                throw new InvalidOperationException("Not started. Call Start first.");
+            }
 
             _logger.LogDebug("Stopping server-side session removal");
 
@@ -118,7 +124,10 @@ public class ServerSideSessionCleanupHost : IHostedService
     async Task RunAsync(CancellationToken cancellationToken = default)
     {
         // this is here for testing
-        if (!_options.ServerSideSessions.RemoveExpiredSessions) return;
+        if (!_options.ServerSideSessions.RemoveExpiredSessions)
+        {
+            return;
+        }
 
         try
         {
