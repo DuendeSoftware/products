@@ -30,7 +30,7 @@ public class Program
         // create a redirect URI using an available port on the loopback address.
         // requires the OP to allow random ports on 127.0.0.1 - otherwise set a static port
         var browser = new SystemBrowser();
-        string redirectUri = string.Format($"http://127.0.0.1:{browser.Port}");
+        var redirectUri = string.Format($"http://127.0.0.1:{browser.Port}");
 
         var options = new OidcClientOptions
         {
@@ -84,7 +84,10 @@ public class Program
         var currentRefreshToken = result.RefreshToken;
 
         var menu = "  x...exit  c...call api   ";
-        if (currentRefreshToken != null) menu += "r...refresh token   ";
+        if (currentRefreshToken != null)
+        {
+            menu += "r...refresh token   ";
+        }
 
         while (true)
         {
@@ -93,8 +96,16 @@ public class Program
             Console.Write(menu);
             var key = Console.ReadKey();
 
-            if (key.Key == ConsoleKey.X) return;
-            if (key.Key == ConsoleKey.C) await CallApi(currentAccessToken);
+            if (key.Key == ConsoleKey.X)
+            {
+                return;
+            }
+
+            if (key.Key == ConsoleKey.C)
+            {
+                await CallApi(currentAccessToken);
+            }
+
             if (key.Key == ConsoleKey.R)
             {
                 var refreshResult = await _oidcClient.RefreshTokenAsync(currentRefreshToken);

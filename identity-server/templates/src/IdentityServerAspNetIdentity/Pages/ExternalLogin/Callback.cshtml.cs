@@ -159,16 +159,25 @@ public class Callback : PageModel
         }
 
         var identityResult = await _userManager.CreateAsync(user);
-        if (!identityResult.Succeeded) throw new InvalidOperationException(identityResult.Errors.First().Description);
+        if (!identityResult.Succeeded)
+        {
+            throw new InvalidOperationException(identityResult.Errors.First().Description);
+        }
 
         if (filtered.Count != 0)
         {
             identityResult = await _userManager.AddClaimsAsync(user, filtered);
-            if (!identityResult.Succeeded) throw new InvalidOperationException(identityResult.Errors.First().Description);
+            if (!identityResult.Succeeded)
+            {
+                throw new InvalidOperationException(identityResult.Errors.First().Description);
+            }
         }
 
         identityResult = await _userManager.AddLoginAsync(user, new UserLoginInfo(provider, providerUserId, provider));
-        if (!identityResult.Succeeded) throw new InvalidOperationException(identityResult.Errors.First().Description);
+        if (!identityResult.Succeeded)
+        {
+            throw new InvalidOperationException(identityResult.Errors.First().Description);
+        }
 
         return user;
     }

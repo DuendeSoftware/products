@@ -99,8 +99,15 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
     private void AssertRequiredClaims(ClaimsPrincipal principal)
     {
         // for now, we don't allow more than one identity in the principal/cookie
-        if (principal.Identities.Count() != 1) throw new InvalidOperationException("only a single identity supported");
-        if (principal.FindFirst(JwtClaimTypes.Subject) == null) throw new InvalidOperationException("sub claim is missing");
+        if (principal.Identities.Count() != 1)
+        {
+            throw new InvalidOperationException("only a single identity supported");
+        }
+
+        if (principal.FindFirst(JwtClaimTypes.Subject) == null)
+        {
+            throw new InvalidOperationException("sub claim is missing");
+        }
     }
 
     private void AugmentMissingClaims(ClaimsPrincipal principal, DateTime authTime)

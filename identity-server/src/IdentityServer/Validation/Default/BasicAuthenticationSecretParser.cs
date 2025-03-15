@@ -161,7 +161,10 @@ public class BasicAuthenticationSecretParser : ISecretParser
 
     private string UrlDecode(string value)
     {
-        if (value.IsMissing()) return string.Empty;
+        if (value.IsMissing())
+        {
+            return string.Empty;
+        }
 
         return Uri.UnescapeDataString(value.Replace("+", "%20"));
     }

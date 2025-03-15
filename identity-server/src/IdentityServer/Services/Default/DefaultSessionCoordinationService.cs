@@ -238,7 +238,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                             await ServerSideTicketStore.RetrieveAsync(session.Key) is
                             { Properties: { IsPersistent: true, AllowRefresh: null or true } } ticket)
                         {
-                            ticket.Properties.SetString(IdentityServerConstants.ForceCookieRenewalFlag, String.Empty);
+                            ticket.Properties.SetString(IdentityServerConstants.ForceCookieRenewalFlag, string.Empty);
                             ticket.Properties.IssuedUtc = session.Renewed;
                             ticket.Properties.ExpiresUtc = session.Expires;
                             await ServerSideTicketStore.RenewAsync(session.Key, ticket);

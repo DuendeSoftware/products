@@ -19,11 +19,11 @@ public static class PersistedGrantFilterExtensions
     {
         ArgumentNullException.ThrowIfNull(filter);
 
-        if (String.IsNullOrWhiteSpace(filter.ClientId) &&
+        if (string.IsNullOrWhiteSpace(filter.ClientId) &&
             filter.ClientIds == null &&
-            String.IsNullOrWhiteSpace(filter.SessionId) &&
-            String.IsNullOrWhiteSpace(filter.SubjectId) &&
-            String.IsNullOrWhiteSpace(filter.Type) &&
+            string.IsNullOrWhiteSpace(filter.SessionId) &&
+            string.IsNullOrWhiteSpace(filter.SubjectId) &&
+            string.IsNullOrWhiteSpace(filter.Type) &&
             filter.Types == null)
         {
             throw new ArgumentException("No filter values set.", nameof(filter));

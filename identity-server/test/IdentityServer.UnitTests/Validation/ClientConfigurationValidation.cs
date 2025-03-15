@@ -28,7 +28,10 @@ public class ClientConfigurationValidation
         foreach (var client in TestClients.Get())
         {
             // deliberate invalid configuration
-            if (client.ClientId == "implicit_and_client_creds") continue;
+            if (client.ClientId == "implicit_and_client_creds")
+            {
+                continue;
+            }
 
             var context = await ValidateAsync(client);
 
@@ -460,7 +463,7 @@ public class ClientConfigurationValidation
         var result = await ValidateAsync(client);
         result.IsValid.ShouldBeFalse();
         result.ErrorMessage.ShouldContain("invalid origin");
-        if (!String.IsNullOrWhiteSpace(origin))
+        if (!string.IsNullOrWhiteSpace(origin))
         {
             result.ErrorMessage.ShouldContain(origin);
         }

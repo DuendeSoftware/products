@@ -96,20 +96,31 @@ public class Secret
     }
 
     /// <summary>
-    /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+    /// Determines whether the specified <see cref="object" />, is equal to this instance.
     /// </summary>
-    /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+    /// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
     /// <returns>
-    ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+    ///   <c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.
     /// </returns>
     public override bool Equals(object? obj)
     {
-        if (obj == null) return false;
-        var other = obj as Secret;
-        if (other == null) return false;
-        if (ReferenceEquals(other, this)) return true;
+        if (obj == null)
+        {
+            return false;
+        }
 
-        return String.Equals(other.Type, Type, StringComparison.Ordinal) &&
-               String.Equals(other.Value, Value, StringComparison.Ordinal);
+        var other = obj as Secret;
+        if (other == null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(other, this))
+        {
+            return true;
+        }
+
+        return string.Equals(other.Type, Type, StringComparison.Ordinal) &&
+               string.Equals(other.Value, Value, StringComparison.Ordinal);
     }
 }

@@ -37,7 +37,7 @@ public class ApiScopeRepository
             .Include(x => x.UserClaims)
             .AsQueryable();
 
-        if (!String.IsNullOrWhiteSpace(filter))
+        if (!string.IsNullOrWhiteSpace(filter))
         {
             query = query.Where(x => x.Name.Contains(filter) || x.DisplayName.Contains(filter));
         }
@@ -57,7 +57,10 @@ public class ApiScopeRepository
             .Include(x => x.UserClaims)
             .SingleOrDefaultAsync(x => x.Name == id);
 
-        if (scope == null) return null;
+        if (scope == null)
+        {
+            return null;
+        }
 
         return new ApiScopeModel
         {
@@ -98,7 +101,10 @@ public class ApiScopeRepository
             .Include(x => x.UserClaims)
             .SingleOrDefaultAsync(x => x.Name == model.Name);
 
-        if (scope == null) throw new ArgumentException("Invalid Api Scope");
+        if (scope == null)
+        {
+            throw new ArgumentException("Invalid Api Scope");
+        }
 
         if (scope.DisplayName != model.DisplayName)
         {
@@ -106,7 +112,7 @@ public class ApiScopeRepository
         }
 
         var claims = model.UserClaims?.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? Enumerable.Empty<string>();
-        var currentClaims = (scope.UserClaims.Select(x => x.Type) ?? Enumerable.Empty<String>()).ToArray();
+        var currentClaims = (scope.UserClaims.Select(x => x.Type) ?? Enumerable.Empty<string>()).ToArray();
 
         var claimsToAdd = claims.Except(currentClaims).ToArray();
         var claimsToRemove = currentClaims.Except(claims).ToArray();
@@ -130,7 +136,10 @@ public class ApiScopeRepository
     {
         var scope = await _context.ApiScopes.SingleOrDefaultAsync(x => x.Name == id);
 
-        if (scope == null) throw new ArgumentException("Invalid Api Scope");
+        if (scope == null)
+        {
+            throw new ArgumentException("Invalid Api Scope");
+        }
 
         _context.ApiScopes.Remove(scope);
         await _context.SaveChangesAsync();

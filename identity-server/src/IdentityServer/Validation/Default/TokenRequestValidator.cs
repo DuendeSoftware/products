@@ -111,7 +111,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Options = _options
         };
 
-        if (clientValidationResult == null) throw new ArgumentNullException(nameof(context.ClientValidationResult));
+        if (clientValidationResult == null)
+        {
+            throw new ArgumentNullException(nameof(context.ClientValidationResult));
+        }
 
         _validatedRequest.SetClient(clientValidationResult.Client, clientValidationResult.Secret, clientValidationResult.Confirmation);
 
@@ -788,7 +791,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Resource indicator does not match any resource indicator in the original authorize request.");
             }
         }
-        else if (!String.IsNullOrWhiteSpace(_validatedRequest.RequestedResourceIndicator))
+        else if (!string.IsNullOrWhiteSpace(_validatedRequest.RequestedResourceIndicator))
         {
             resourceIndicators = new[] { _validatedRequest.RequestedResourceIndicator };
         }

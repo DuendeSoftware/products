@@ -26,7 +26,7 @@ public static class ConsoleExtensions
     public static void ConsoleBox(this string text, ConsoleColor color)
     {
         var len = text.Length + 4;
-        var line = new String('*', len);
+        var line = new string('*', len);
         line.ColoredWriteLine(ConsoleColor.Green);
         $"* {text} *".ColoredWriteLine(ConsoleColor.Green);
         line.ColoredWriteLine(ConsoleColor.Green);

@@ -154,8 +154,14 @@ public class LocalApiAuthenticationTests
         var result = await _pipeline.BackChannelClient.RequestClientCredentialsTokenAsync(req);
         result.IsError.ShouldBeFalse();
 
-        if (dpop) result.TokenType.ShouldBe("DPoP");
-        else result.TokenType.ShouldBe("Bearer");
+        if (dpop)
+        {
+            result.TokenType.ShouldBe("DPoP");
+        }
+        else
+        {
+            result.TokenType.ShouldBe("Bearer");
+        }
 
         return result.AccessToken;
     }

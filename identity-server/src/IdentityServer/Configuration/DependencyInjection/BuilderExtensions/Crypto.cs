@@ -46,7 +46,9 @@ public static class IdentityServerBuilderExtensionsCrypto
         if (credential.Key is IdentityModel.Tokens.JsonWebKey jsonWebKey)
         {
             if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve && !CryptoHelper.IsValidCrvValueForAlgorithm(jsonWebKey.Crv))
+            {
                 throw new InvalidOperationException("Invalid crv value for signing algorithm");
+            }
         }
 
         builder.Services.AddSingleton<ISigningCredentialStore>(new InMemorySigningCredentialsStore(credential));
@@ -105,7 +107,10 @@ public static class IdentityServerBuilderExtensionsCrypto
         string signingAlgorithm = SecurityAlgorithms.RsaSha256)
     {
         var certificate = CryptoHelper.FindCertificate(name, location, nameType);
-        if (certificate == null) throw new InvalidOperationException($"certificate: '{name}' not found in certificate store");
+        if (certificate == null)
+        {
+            throw new InvalidOperationException($"certificate: '{name}' not found in certificate store");
+        }
 
         return builder.AddSigningCredential(certificate, signingAlgorithm);
     }
@@ -289,7 +294,10 @@ public static class IdentityServerBuilderExtensionsCrypto
         string signingAlgorithm = SecurityAlgorithms.RsaSha256)
     {
         var certificate = CryptoHelper.FindCertificate(name, location, nameType);
-        if (certificate == null) throw new InvalidOperationException($"certificate: '{name}' not found in certificate store");
+        if (certificate == null)
+        {
+            throw new InvalidOperationException($"certificate: '{name}' not found in certificate store");
+        }
 
         return builder.AddValidationKey(certificate, signingAlgorithm);
     }

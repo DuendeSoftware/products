@@ -35,7 +35,7 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
             return;
         }
 
-        if (String.IsNullOrWhiteSpace(context.IdentityProvider.Scheme))
+        if (string.IsNullOrWhiteSpace(context.IdentityProvider.Scheme))
         {
             context.SetError("Scheme is missing.");
             return;
@@ -61,22 +61,22 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
     /// <returns>A string that represents the error. Null if there is no error.</returns>
     protected virtual Task ValidateOidcProviderAsync(IdentityProviderConfigurationValidationContext<OidcProvider> context)
     {
-        if (String.IsNullOrWhiteSpace(context.IdentityProvider.Authority))
+        if (string.IsNullOrWhiteSpace(context.IdentityProvider.Authority))
         {
             context.SetError("Authority is missing.");
         }
 
-        if (String.IsNullOrWhiteSpace(context.IdentityProvider.ClientId))
+        if (string.IsNullOrWhiteSpace(context.IdentityProvider.ClientId))
         {
             context.SetError("ClientId is missing.");
         }
 
-        if (String.IsNullOrWhiteSpace(context.IdentityProvider.ResponseType))
+        if (string.IsNullOrWhiteSpace(context.IdentityProvider.ResponseType))
         {
             context.SetError("ResponseType is missing.");
         }
 
-        if (String.IsNullOrWhiteSpace(context.IdentityProvider.Scope))
+        if (string.IsNullOrWhiteSpace(context.IdentityProvider.Scope))
         {
             context.SetError("Scope is missing.");
         }

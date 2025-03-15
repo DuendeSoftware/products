@@ -124,7 +124,11 @@ public class IdentityServerPipeline
         services.AddTransient<MockExternalAuthenticationHandler>(svcs =>
         {
             var handler = new MockExternalAuthenticationHandler(svcs.GetRequiredService<IHttpContextAccessor>());
-            if (OnFederatedSignout != null) handler.OnFederatedSignout = OnFederatedSignout;
+            if (OnFederatedSignout != null)
+            {
+                handler.OnFederatedSignout = OnFederatedSignout;
+            }
+
             return handler;
         });
 

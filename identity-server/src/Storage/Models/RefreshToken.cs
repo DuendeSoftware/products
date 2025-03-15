@@ -62,7 +62,7 @@ public class RefreshToken
     /// <returns></returns>
     public Token? GetAccessToken(string? resourceIndicator = null)
     {
-        AccessTokens.TryGetValue(resourceIndicator ?? String.Empty, out var token);
+        AccessTokens.TryGetValue(resourceIndicator ?? string.Empty, out var token);
         return token;
     }
 
@@ -74,7 +74,7 @@ public class RefreshToken
     /// <returns></returns>
     public void SetAccessToken(Token token, string? resourceIndicator = null)
     {
-        AccessTokens[resourceIndicator ?? String.Empty] = token;
+        AccessTokens[resourceIndicator ?? string.Empty] = token;
     }
 
     /// <summary>

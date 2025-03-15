@@ -120,7 +120,7 @@ public class CibaTests
 
         foreach (var item in values)
         {
-            if (!String.IsNullOrWhiteSpace(item.Value))
+            if (!string.IsNullOrWhiteSpace(item.Value))
             {
                 claims.Add(new Claim(item.Key, item.Value));
             }
@@ -1016,7 +1016,7 @@ public class CibaTests
             { "scope", "openid profile scope1 offline_access" },
             { "login_hint", "this means bob" },
             { "binding_message", bindingMessage },
-            { "resource", new String('x', 2000) },
+            { "resource", new string('x', 2000) },
         };
 
         SetValidatedUser();

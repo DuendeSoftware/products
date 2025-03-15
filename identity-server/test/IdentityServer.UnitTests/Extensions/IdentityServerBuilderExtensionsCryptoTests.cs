@@ -35,8 +35,8 @@ public class IdentityServerBuilderExtensionsCryptoTests
             }
             """;
 
-        JsonWebKey jsonWebKey = new JsonWebKey(json);
-        SigningCredentials credentials = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
+        var jsonWebKey = new JsonWebKey(json);
+        var credentials = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
         identityServerBuilder.AddSigningCredential(credentials);
     }
 
@@ -46,7 +46,7 @@ public class IdentityServerBuilderExtensionsCryptoTests
         IServiceCollection services = new ServiceCollection();
         IIdentityServerBuilder identityServerBuilder = new IdentityServerBuilder(services);
 
-        String json =
+        var json =
             """
             {
                 "alg" : "HS256",
@@ -56,8 +56,8 @@ public class IdentityServerBuilderExtensionsCryptoTests
             }
             """;
 
-        JsonWebKey jsonWebKey = new JsonWebKey(json);
-        SigningCredentials credentials = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
+        var jsonWebKey = new JsonWebKey(json);
+        var credentials = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
         var act = () => identityServerBuilder.AddSigningCredential(credentials);
 
         act.ShouldThrow<InvalidOperationException>();
@@ -75,7 +75,9 @@ public class IdentityServerBuilderExtensionsCryptoTests
         var filename = Path.Combine(Directory.GetCurrentDirectory(), "tempkey.rsa");
 
         if (File.Exists(filename))
+        {
             File.Delete(filename);
+        }
     }
 
     [Fact]
@@ -97,7 +99,9 @@ public class IdentityServerBuilderExtensionsCryptoTests
             var filename = Path.Combine(Directory.GetCurrentDirectory(), "tempkey.rsa");
 
             if (File.Exists(filename))
+            {
                 File.Delete(filename);
+            }
         }
     }
 
