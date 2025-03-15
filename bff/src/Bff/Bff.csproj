@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <Nullable>enable</Nullable>
-        <AssemblyName>Duende.BFF</AssemblyName>
-        <Description>Backend for frontend (BFF) host for ASP.NET Core</Description>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Duende.BFF</AssemblyName>
+    <Description>Backend for frontend (BFF) host for ASP.NET Core</Description>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-        <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
-    </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
+  </ItemGroup>
 
-    <ItemGroup>
-       <InternalsVisibleTo Include="Duende.Bff.Blazor" />
-    </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.Bff.Blazor" />
+  </ItemGroup>
 </Project>

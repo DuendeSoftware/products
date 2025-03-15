@@ -87,15 +87,14 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name })).SingleOrDefault();
         }
 
-        Assert.NotNull(foundResource);
-        Assert.True(foundResource.Name == resource.Name);
-
-        Assert.NotNull(foundResource.UserClaims);
-        Assert.NotEmpty(foundResource.UserClaims);
-        Assert.NotNull(foundResource.ApiSecrets);
-        Assert.NotEmpty(foundResource.ApiSecrets);
-        Assert.NotNull(foundResource.Scopes);
-        Assert.NotEmpty(foundResource.Scopes);
+        foundResource.ShouldNotBeNull();
+        foundResource.Name.ShouldBe(resource.Name);
+        foundResource.UserClaims.ShouldNotBeNull();
+        foundResource.UserClaims.ShouldNotBeEmpty();
+        foundResource.ApiSecrets.ShouldNotBeNull();
+        foundResource.ApiSecrets.ShouldNotBeEmpty();
+        foundResource.Scopes.ShouldNotBeNull();
+        foundResource.Scopes.ShouldNotBeEmpty();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -117,19 +116,16 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name })).SingleOrDefault();
         }
 
-        Assert.NotNull(foundResource);
-        Assert.True(foundResource.Name == resource.Name);
+        foundResource.ShouldNotBeNull();
+        foundResource.Name.ShouldBe(resource.Name);
 
-        Assert.NotNull(foundResource.UserClaims);
-        Assert.NotEmpty(foundResource.UserClaims);
-        Assert.NotNull(foundResource.ApiSecrets);
-        Assert.NotEmpty(foundResource.ApiSecrets);
-        Assert.NotNull(foundResource.Scopes);
-        Assert.NotEmpty(foundResource.Scopes);
+        foundResource.UserClaims.ShouldNotBeNull();
+        foundResource.UserClaims.ShouldNotBeEmpty();
+        foundResource.ApiSecrets.ShouldNotBeNull();
+        foundResource.ApiSecrets.ShouldNotBeEmpty();
+        foundResource.Scopes.ShouldNotBeNull();
+        foundResource.Scopes.ShouldNotBeEmpty();
     }
-
-
-
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task FindApiResourcesByScopeNameAsync_WhenResourcesExist_ExpectResourcesReturned(DbContextOptions<ConfigurationDbContext> options)
@@ -155,9 +151,9 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             });
         }
 
-        Assert.NotNull(resources);
-        Assert.NotEmpty(resources);
-        Assert.NotNull(resources.Single(x => x.Name == testApiResource.Name));
+        resources.ShouldNotBeNull();
+        resources.ShouldNotBeEmpty();
+        resources.SingleOrDefault(x => x.Name == testApiResource.Name).ShouldNotBeNull();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -186,13 +182,10 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             resources = await store.FindApiResourcesByScopeNameAsync(new[] { testApiScope.Name });
         }
 
-        Assert.NotNull(resources);
-        Assert.NotEmpty(resources);
-        Assert.NotNull(resources.Single(x => x.Name == testApiResource.Name));
+        resources.ShouldNotBeNull();
+        resources.ShouldNotBeEmpty();
+        resources.SingleOrDefault(x => x.Name == testApiResource.Name).ShouldNotBeNull();
     }
-
-
-
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task FindIdentityResourcesByScopeNameAsync_WhenResourceExists_ExpectResourceAndCollectionsReturned(DbContextOptions<ConfigurationDbContext> options)
@@ -215,13 +208,13 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             })).ToList();
         }
 
-        Assert.NotNull(resources);
-        Assert.NotEmpty(resources);
+        resources.ShouldNotBeNull();
+        resources.ShouldNotBeEmpty();
         var foundScope = resources.Single();
 
-        Assert.Equal(resource.Name, foundScope.Name);
-        Assert.NotNull(foundScope.UserClaims);
-        Assert.NotEmpty(foundScope.UserClaims);
+        foundScope.Name.ShouldBe(resource.Name);
+        foundScope.UserClaims.ShouldNotBeNull();
+        foundScope.UserClaims.ShouldNotBeEmpty();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -246,12 +239,10 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             })).ToList();
         }
 
-        Assert.NotNull(resources);
-        Assert.NotEmpty(resources);
-        Assert.NotNull(resources.Single(x => x.Name == resource.Name));
+        resources.ShouldNotBeNull();
+        resources.ShouldNotBeEmpty();
+        resources.SingleOrDefault(x => x.Name == resource.Name).ShouldNotBeNull();
     }
-
-
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task FindApiScopesByNameAsync_WhenResourceExists_ExpectResourceAndCollectionsReturned(DbContextOptions<ConfigurationDbContext> options)
@@ -274,13 +265,13 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             })).ToList();
         }
 
-        Assert.NotNull(resources);
-        Assert.NotEmpty(resources);
+        resources.ShouldNotBeNull();
+        resources.ShouldNotBeEmpty();
         var foundScope = resources.Single();
 
-        Assert.Equal(resource.Name, foundScope.Name);
-        Assert.NotNull(foundScope.UserClaims);
-        Assert.NotEmpty(foundScope.UserClaims);
+        foundScope.Name.ShouldBe(resource.Name);
+        foundScope.UserClaims.ShouldNotBeNull();
+        foundScope.UserClaims.ShouldNotBeEmpty();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -305,13 +296,10 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             })).ToList();
         }
 
-        Assert.NotNull(resources);
-        Assert.NotEmpty(resources);
-        Assert.NotNull(resources.Single(x => x.Name == resource.Name));
+        resources.ShouldNotBeNull();
+        resources.ShouldNotBeEmpty();
+        resources.SingleOrDefault(x => x.Name == resource.Name).ShouldNotBeNull();
     }
-
-
-
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task GetAllResources_WhenAllResourcesRequested_ExpectAllResourcesIncludingHidden(DbContextOptions<ConfigurationDbContext> options)
@@ -352,18 +340,18 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             resources = await store.GetAllResourcesAsync();
         }
 
-        Assert.NotNull(resources);
-        Assert.NotEmpty(resources.IdentityResources);
-        Assert.NotEmpty(resources.ApiResources);
-        Assert.NotEmpty(resources.ApiScopes);
+        resources.ShouldNotBeNull();
+        resources.IdentityResources.ShouldNotBeEmpty();
+        resources.ApiResources.ShouldNotBeEmpty();
+        resources.ApiScopes.ShouldNotBeEmpty();
 
-        Assert.Contains(resources.IdentityResources, x => x.Name == visibleIdentityResource.Name);
-        Assert.Contains(resources.IdentityResources, x => x.Name == hiddenIdentityResource.Name);
+        resources.IdentityResources.ShouldContain(x => x.Name == visibleIdentityResource.Name);
+        resources.IdentityResources.ShouldContain(x => x.Name == hiddenIdentityResource.Name);
 
-        Assert.Contains(resources.ApiResources, x => x.Name == visibleApiResource.Name);
-        Assert.Contains(resources.ApiResources, x => x.Name == hiddenApiResource.Name);
+        resources.ApiResources.ShouldContain(x => x.Name == visibleApiResource.Name);
+        resources.ApiResources.ShouldContain(x => x.Name == hiddenApiResource.Name);
 
-        Assert.Contains(resources.ApiScopes, x => x.Name == visibleApiScope.Name);
-        Assert.Contains(resources.ApiScopes, x => x.Name == hiddenApiScope.Name);
+        resources.ApiScopes.ShouldContain(x => x.Name == visibleApiScope.Name);
+        resources.ApiScopes.ShouldContain(x => x.Name == hiddenApiScope.Name);
     }
 }

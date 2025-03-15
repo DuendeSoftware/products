@@ -126,8 +126,8 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 #pragma warning disable EF1001 // Internal EF Core API usage.
             if (options.Extensions.All(x => x.GetType() != typeof(InMemoryOptionsExtension)))
             {
-                await Assert.ThrowsAsync<DbUpdateException>(() =>
-                    store.StoreDeviceAuthorizationAsync($"device_{Guid.NewGuid().ToString()}", existingUserCode, deviceCodeData));
+                var act = () => store.StoreDeviceAuthorizationAsync($"device_{Guid.NewGuid().ToString()}", existingUserCode, deviceCodeData);
+                await act.ShouldThrowAsync<DbUpdateException>();
             }
 #pragma warning restore EF1001 // Internal EF Core API usage.
         }
@@ -171,8 +171,8 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 #pragma warning disable EF1001 // Internal EF Core API usage.
             if (options.Extensions.All(x => x.GetType() != typeof(InMemoryOptionsExtension)))
             {
-                await Assert.ThrowsAsync<DbUpdateException>(() =>
-                    store.StoreDeviceAuthorizationAsync(existingDeviceCode, $"user_{Guid.NewGuid().ToString()}", deviceCodeData));
+                var act = () => store.StoreDeviceAuthorizationAsync(existingDeviceCode, $"user_{Guid.NewGuid().ToString()}", deviceCodeData);
+                await act.ShouldThrowAsync<DbUpdateException>();
             }
 #pragma warning restore EF1001 // Internal EF Core API usage.
         }

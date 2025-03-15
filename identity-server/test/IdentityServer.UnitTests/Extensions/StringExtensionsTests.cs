@@ -13,7 +13,7 @@ public class StringExtensionsTests
     private void CheckOrigin(string inputUrl, string expectedOrigin)
     {
         var actualOrigin = inputUrl.GetOrigin();
-        Assert.Equal(expectedOrigin, actualOrigin);
+        actualOrigin.ShouldBe(expectedOrigin);
     }
 
     [Fact]

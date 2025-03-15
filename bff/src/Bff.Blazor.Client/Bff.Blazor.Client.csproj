@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-     <AssemblyName>Duende.BFF.Blazor.Client</AssemblyName>
+    <AssemblyName>Duende.BFF.Blazor.Client</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

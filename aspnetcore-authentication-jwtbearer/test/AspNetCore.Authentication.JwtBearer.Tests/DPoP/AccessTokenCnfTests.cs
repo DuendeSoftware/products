@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Microsoft.IdentityModel.Tokens;
-using Shouldly;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 

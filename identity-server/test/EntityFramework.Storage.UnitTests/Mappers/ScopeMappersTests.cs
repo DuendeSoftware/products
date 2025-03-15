@@ -17,8 +17,8 @@ public class ScopesMappersTests
         var mappedEntity = model.ToEntity();
         var mappedModel = mappedEntity.ToModel();
 
-        Assert.NotNull(mappedModel);
-        Assert.NotNull(mappedEntity);
+        mappedModel.ShouldNotBeNull();
+        mappedEntity.ShouldNotBeNull();
     }
 
     [Fact]

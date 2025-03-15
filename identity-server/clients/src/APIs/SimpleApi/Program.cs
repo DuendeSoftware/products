@@ -4,33 +4,50 @@
 using Serilog;
 using Serilog.Events;
 
-namespace SampleApi
-{
-    public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog early
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("SampleApi", LogEventLevel.Debug)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// Include the service defaults from Aspire
+builder.AddServiceDefaults();
+
+builder.Services.AddControllers();
+builder.Services.AddCors();
+builder.Services.AddDistributedMemoryCache();
+
+// this API will accept any access token from the authority
+builder.Services.AddAuthentication("token")
+    .AddJwtBearer("token", options =>
     {
-        public static void Main(string[] args)
-        {
-            Console.Title = "Simple API";
+        options.Authority = Clients.Constants.Authority;
+        options.TokenValidationParameters.ValidateAudience = false;
+        options.MapInboundClaims = false;
 
-            BuildWebHost(args).Run();
-        }
+        options.TokenValidationParameters.ValidTypes = ["at+jwt"];
+    });
 
-        public static IHost BuildWebHost(string[] args)
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("SampleApi", LogEventLevel.Debug)
-                .Enrich.FromLogContext()
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
-                .CreateLogger();
+var app = builder.Build();
 
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                })
-                .UseSerilog()
-                .Build();
-        }
-    }
-}
+app.UseCors(policy =>
+{
+    policy.WithOrigins("https://localhost:44300");
+    policy.AllowAnyHeader();
+    policy.AllowAnyMethod();
+    policy.WithExposedHeaders("WWW-Authenticate");
+});
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers().RequireAuthorization();
+
+app.Run();

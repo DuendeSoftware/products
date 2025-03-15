@@ -3,57 +3,51 @@
 
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Hosting;
 
-namespace ConsoleClientCredentialsFlow
+var builder = Host.CreateApplicationBuilder(args);
+
+// Add ServiceDefaults from Aspire
+builder.AddServiceDefaults();
+
+var response = await RequestTokenAsync();
+response.Show();
+
+await CallServiceAsync(response.AccessToken);
+
+static async Task<TokenResponse> RequestTokenAsync()
 {
-    public class Program
+    var client = new HttpClient();
+
+    var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
+    if (disco.IsError) throw new Exception(disco.Error);
+
+    var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
     {
-        public static async Task Main()
-        {
-            Console.Title = "Console ClientCredentials Flow PostBody";
+        Address = disco.TokenEndpoint,
+        ClientCredentialStyle = ClientCredentialStyle.PostBody,
 
-            var response = await RequestTokenAsync();
-            response.Show();
+        ClientId = "client",
+        ClientSecret = "secret",
+        Scope = "resource1.scope1"
+    });
 
-            Console.ReadLine();
-            await CallServiceAsync(response.AccessToken);
-        }
+    if (response.IsError) throw new Exception(response.Error);
+    return response;
+}
 
-        static async Task<TokenResponse> RequestTokenAsync()
-        {
-            var client = new HttpClient();
+static async Task CallServiceAsync(string token)
+{
+    var baseAddress = Constants.SampleApi;
 
-            var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
-            if (disco.IsError) throw new Exception(disco.Error);
+    var client = new HttpClient
+    {
+        BaseAddress = new Uri(baseAddress)
+    };
 
-            var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
-            {
-                Address = disco.TokenEndpoint,
-                ClientCredentialStyle = ClientCredentialStyle.PostBody,
+    client.SetBearerToken(token);
+    var response = await client.GetStringAsync("identity");
 
-                ClientId = "client",
-                ClientSecret = "secret",
-                Scope = "resource1.scope1"
-            });
-
-            if (response.IsError) throw new Exception(response.Error);
-            return response;
-        }
-
-        static async Task CallServiceAsync(string token)
-        {
-            var baseAddress = Constants.SampleApi;
-
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(baseAddress)
-            };
-
-            client.SetBearerToken(token);
-            var response = await client.GetStringAsync("identity");
-
-            "\n\nService claims:".ConsoleGreen();
-            Console.WriteLine(response.PrettyPrintJson());
-        }
-    }
+    "\n\nService claims:".ConsoleGreen();
+    Console.WriteLine(response.PrettyPrintJson());
 }

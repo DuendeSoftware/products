@@ -10,7 +10,7 @@ public class PerComponentPageModel : BlazorModel
     public async Task<WebAssemblyPageModel> LogOut()
     {
         // Log out again
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Log Out" }).ClickAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Log Out" }).ClickAsync();
 
         var logoutPage = await Build<LogOutPageModel>();
         return await logoutPage.GoHome();

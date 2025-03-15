@@ -3,7 +3,6 @@
 
 using System.Diagnostics;
 using System.Net;
-using Shouldly;
 
 namespace Duende.AspNetCore.TestFramework;
 

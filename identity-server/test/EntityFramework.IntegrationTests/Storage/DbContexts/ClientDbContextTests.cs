@@ -61,7 +61,7 @@ public class ClientDbContextTests : IntegrationTest<ClientDbContextTests, Config
         {
             var client = db.Clients.Include(x => x.AllowedScopes).First();
 
-            Assert.Empty(client.AllowedScopes);
+            client.AllowedScopes.ShouldBeEmpty();
         }
     }
 
@@ -105,7 +105,7 @@ public class ClientDbContextTests : IntegrationTest<ClientDbContextTests, Config
         {
             var client = db.Clients.Include(x => x.RedirectUris).First();
 
-            Assert.Empty(client.RedirectUris);
+            client.RedirectUris.ShouldBeEmpty();
         }
     }
 }

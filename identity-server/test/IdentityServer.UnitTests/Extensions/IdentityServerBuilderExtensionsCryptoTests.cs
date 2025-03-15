@@ -58,7 +58,9 @@ public class IdentityServerBuilderExtensionsCryptoTests
 
         JsonWebKey jsonWebKey = new JsonWebKey(json);
         SigningCredentials credentials = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
-        Assert.Throws<InvalidOperationException>(() => identityServerBuilder.AddSigningCredential(credentials));
+        var act = () => identityServerBuilder.AddSigningCredential(credentials);
+
+        act.ShouldThrow<InvalidOperationException>();
     }
 
     [Fact]
@@ -126,10 +128,9 @@ public class IdentityServerBuilderExtensionsCryptoTests
         var key = new ECDsaSecurityKey(ECDsa.Create(
             ECCurve.CreateFromOid(Oid.FromOidValue(curveOid, OidGroup.All))));
 
-        Assert.Throws<InvalidOperationException>(() => identityServerBuilder.AddSigningCredential(key, alg));
+        var act = () => identityServerBuilder.AddSigningCredential(key, alg);
+        act.ShouldThrow<InvalidOperationException>();
     }
-
-
 
     [Theory]
     [InlineData(Constants.CurveOids.P256, SecurityAlgorithms.EcdsaSha256, JsonWebKeyECTypes.P256)]
@@ -156,6 +157,8 @@ public class IdentityServerBuilderExtensionsCryptoTests
             Crv = crv.Replace("-", string.Empty),
             Alg = SecurityAlgorithms.EcdsaSha256
         };
-        Assert.Throws<InvalidOperationException>(() => identityServerBuilder.AddSigningCredential(jsonWebKeyFromECDsa, alg));
+        var act = () => identityServerBuilder.AddSigningCredential(jsonWebKeyFromECDsa, alg);
+
+        act.ShouldThrow<InvalidOperationException>();
     }
 }

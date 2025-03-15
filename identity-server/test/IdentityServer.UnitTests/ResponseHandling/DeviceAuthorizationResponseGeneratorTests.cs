@@ -92,7 +92,9 @@ public class DeviceAuthorizationResponseGeneratorTests
         testResult.ValidatedRequest.Client.UserCodeType = FakeUserCodeGenerator.UserCodeTypeValue;
         await deviceFlowCodeService.StoreDeviceAuthorizationAsync(FakeUserCodeGenerator.TestCollisionUserCode, new DeviceCode());
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => generator.ProcessAsync(testResult, TestBaseUrl));
+        var act = () => generator.ProcessAsync(testResult, TestBaseUrl);
+
+        act.ShouldThrow<InvalidOperationException>();
     }
 
     [Fact]

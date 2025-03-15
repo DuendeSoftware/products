@@ -43,7 +43,7 @@ public class TokenExtensionsTests
 
         var payloadJson = JsonSerializer.Serialize(payloadDict);
 
-        Assert.Contains(expected, payloadJson);
+        payloadJson.ShouldContain(expected);
     }
 
     [Fact]
@@ -68,6 +68,7 @@ public class TokenExtensionsTests
             }
         };
         var thumbprint = refreshToken.GetProofKeyThumbprints().Single().Thumbprint;
-        Assert.Equal(expected, thumbprint);
+
+        thumbprint.ShouldBe(expected);
     }
 }

@@ -24,8 +24,8 @@ public class PersistedGrantMappersTests
         var mappedModel = mappedEntity.ToModel();
         mappedModel.ConsumedTime.Value.ShouldBe(new System.DateTime(2020, 02, 03, 4, 5, 6));
 
-        Assert.NotNull(mappedModel);
-        Assert.NotNull(mappedEntity);
+        mappedModel.ShouldNotBeNull();
+        mappedEntity.ShouldNotBeNull();
     }
 
     [Fact]

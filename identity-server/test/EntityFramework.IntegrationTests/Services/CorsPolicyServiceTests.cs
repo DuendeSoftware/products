@@ -52,7 +52,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
             result = await service.IsOriginAllowedAsync(testCorsOrigin);
         }
 
-        Assert.True(result);
+        result.ShouldBeTrue();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -76,6 +76,6 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
             result = await service.IsOriginAllowedAsync("InvalidOrigin");
         }
 
-        Assert.False(result);
+        result.ShouldBeFalse();
     }
 }

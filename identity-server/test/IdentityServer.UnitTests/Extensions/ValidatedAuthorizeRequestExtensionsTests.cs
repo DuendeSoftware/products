@@ -43,7 +43,7 @@ public class ValidatedAuthorizeRequestExtensionsTests
 
         var res = request.ToOptimizedFullDictionary();
 
-        Assert.Equal(2, res[OidcConstants.AuthorizeRequest.Resource].Length);
+        res[OidcConstants.AuthorizeRequest.Resource].Length.ShouldBe(2);
     }
 
     [Theory]
@@ -62,6 +62,6 @@ public class ValidatedAuthorizeRequestExtensionsTests
 
         var result = request.ToOptimizedFullDictionary();
 
-        Assert.Empty(result);
+        result.ShouldBeEmpty();
     }
 }

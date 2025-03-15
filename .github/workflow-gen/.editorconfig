@@ -1,4 +1,4 @@
 [*.cs]
 
-# Copyright Header is different for workflow gen - the code is copied between here and the foss repo all the time
+# File header is different for workflow gen - the code is copied between here and the foss repo all the time
 file_header_template=Copyright (c) Duende Software. All rights reserved.\nLicensed under the Apache License, Version 2.0.

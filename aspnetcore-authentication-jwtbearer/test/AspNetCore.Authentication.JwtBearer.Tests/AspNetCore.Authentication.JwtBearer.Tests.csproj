@@ -1,27 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <Nullable>enable</Nullable>
-        <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer.Tests</AssemblyName>
-        <RootNameSpace>Duende.AspNetCore.Authentication.JwtBearer</RootNameSpace>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer.Tests</AssemblyName>
+    <RootNameSpace>Duende.AspNetCore.Authentication.JwtBearer</RootNameSpace>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="AngleSharp" />
-        <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
-        <PackageReference Include="Duende.IdentityModel" />
-        <PackageReference Include="Duende.IdentityServer" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-        <PackageReference Include="Meziantou.Extensions.Logging.Xunit" />
-        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
-        <PackageReference Include="NSubstitute" />
-        <PackageReference Include="RichardSzalay.MockHttp" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
+    <PackageReference Include="Duende.IdentityModel" />
+    <PackageReference Include="Duende.IdentityServer" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Meziantou.Extensions.Logging.Xunit" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="RichardSzalay.MockHttp" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\src\AspNetCore.Authentication.JwtBearer\AspNetCore.Authentication.JwtBearer.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference
+      Include="..\..\src\AspNetCore.Authentication.JwtBearer\AspNetCore.Authentication.JwtBearer.csproj" />
+  </ItemGroup>
 </Project>

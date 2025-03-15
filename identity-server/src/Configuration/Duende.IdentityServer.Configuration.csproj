@@ -1,24 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <Description>Configuration system for Duende IdentityServer</Description>
-        <AssemblyName>Duende.IdentityServer.Configuration</AssemblyName>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Description>Configuration system for Duende IdentityServer</Description>
+    <AssemblyName>Duende.IdentityServer.Configuration</AssemblyName>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Duende.IdentityModel" />
-      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Duende.IdentityModel" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
+  </ItemGroup>
 
 </Project>

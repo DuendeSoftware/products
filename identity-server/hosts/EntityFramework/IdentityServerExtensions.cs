@@ -13,7 +13,7 @@ internal static class IdentityServerExtensions
 {
     internal static WebApplicationBuilder ConfigureIdentityServer(this WebApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("db");
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
         builder.Services.AddIdentityServer(options =>
         {

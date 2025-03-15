@@ -19,11 +19,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForAuthorizeEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableAuthorizeEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.Authorize));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.Authorize)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -32,11 +30,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForCheckSessionEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableCheckSessionEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.CheckSession));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.CheckSession)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -45,11 +41,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForDeviceAuthorizationEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableDeviceAuthorizationEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.DeviceAuthorization));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.DeviceAuthorization)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -58,11 +52,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForDiscoveryEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableDiscoveryEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.Discovery));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.Discovery)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -71,11 +63,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForEndSessionEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableEndSessionEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.EndSession));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.EndSession)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -84,11 +74,8 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForIntrospectionEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableIntrospectionEndpoint = expectedIsEndpointEnabled;
-
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.Introspection)));
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.Introspection));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -97,11 +84,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForTokenEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableTokenEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.Token));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.Token)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -110,11 +95,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForRevocationEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableTokenRevocationEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.Revocation));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.Revocation)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -123,11 +106,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForUserInfoEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableUserInfoEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.UserInfo));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.UserInfo)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -136,11 +117,8 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForPushedAuthorizationEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnablePushedAuthorizationEndpoint = expectedIsEndpointEnabled;
-
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.PushedAuthorization)));
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.PushedAuthorization));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     [Theory]
@@ -149,11 +127,9 @@ public class EndpointOptionsExtensionsTests
     public void IsEndpointEnabledShouldReturnExpectedForBackchannelAuthenticationEndpoint(bool expectedIsEndpointEnabled)
     {
         _options.EnableBackchannelAuthenticationEndpoint = expectedIsEndpointEnabled;
+        var actual = _options.IsEndpointEnabled(CreateTestEndpoint(IdentityServerConstants.EndpointNames.BackchannelAuthentication));
 
-        Assert.Equal(
-            expectedIsEndpointEnabled,
-            _options.IsEndpointEnabled(
-                CreateTestEndpoint(IdentityServerConstants.EndpointNames.BackchannelAuthentication)));
+        actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
     private Endpoint CreateTestEndpoint(string name)

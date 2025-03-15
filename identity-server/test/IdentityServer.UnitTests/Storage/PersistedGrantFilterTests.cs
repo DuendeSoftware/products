@@ -47,8 +47,9 @@ namespace IdentityServer.UnitTests.Storage
         public void Validate_should_throw_if_all_properties_are_null_or_empty()
         {
             var filter = new PersistedGrantFilter();
-            Assert.Throws<ArgumentException>(() => filter.Validate());
-        }
+            var act = () => filter.Validate();
 
+            act.ShouldThrow<ArgumentException>();
+        }
     }
 }

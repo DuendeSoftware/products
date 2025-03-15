@@ -73,7 +73,9 @@ namespace Duende.Bff.Tests.TestFramework
 
             Server = host.GetTestServer();
             BrowserClient = new TestBrowserClient(Server.CreateHandler());
+            BrowserClient.BaseAddress = new Uri(this._baseAddress);
             HttpClient = Server.CreateClient();
+            BrowserClient.BaseAddress = new Uri(this._baseAddress);
         }
 
         public event Action<IServiceCollection> OnConfigureServices = _ => { };
@@ -147,7 +149,7 @@ namespace Duende.Bff.Tests.TestFramework
         }
         ClaimsPrincipal? _userToSignIn;
         AuthenticationProperties? _propsToSignIn;
-        public async Task IssueSessionCookieAsync(params Claim[] claims)
+        public async virtual Task IssueSessionCookieAsync(params Claim[] claims)
         {
             _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
             var response = await BrowserClient.GetAsync(Url("__signin"));

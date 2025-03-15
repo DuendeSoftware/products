@@ -53,7 +53,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var foundGrant = context.PersistedGrants.FirstOrDefault(x => x.Key == persistedGrant.Key);
-            Assert.NotNull(foundGrant);
+            foundGrant.ShouldNotBeNull();
         }
     }
 
@@ -75,7 +75,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             foundPersistedGrant = await store.GetAsync(persistedGrant.Key);
         }
 
-        Assert.NotNull(foundPersistedGrant);
+        foundPersistedGrant.ShouldNotBeNull();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -96,8 +96,8 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             foundPersistedGrants = (await store.GetAllAsync(new PersistedGrantFilter { SubjectId = persistedGrant.SubjectId })).ToList();
         }
 
-        Assert.NotNull(foundPersistedGrants);
-        Assert.NotEmpty(foundPersistedGrants);
+        foundPersistedGrants.ShouldNotBeNull();
+        foundPersistedGrants.ShouldNotBeEmpty();
     }
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
@@ -200,7 +200,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var foundGrant = context.PersistedGrants.FirstOrDefault(x => x.Key == persistedGrant.Key);
-            Assert.Null(foundGrant);
+            foundGrant.ShouldBeNull();
         }
     }
 
@@ -228,7 +228,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var foundGrant = context.PersistedGrants.FirstOrDefault(x => x.Key == persistedGrant.Key);
-            Assert.Null(foundGrant);
+            foundGrant.ShouldBeNull();
         }
     }
 
@@ -257,7 +257,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var foundGrant = context.PersistedGrants.FirstOrDefault(x => x.Key == persistedGrant.Key);
-            Assert.Null(foundGrant);
+            foundGrant.ShouldBeNull();
         }
     }
 
@@ -428,7 +428,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var foundGrant = context.PersistedGrants.FirstOrDefault(x => x.Key == persistedGrant.Key);
-            Assert.Null(foundGrant);
+            foundGrant.ShouldBeNull();
         }
 
         using (var context = new PersistedGrantDbContext(options))
@@ -440,7 +440,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var foundGrant = context.PersistedGrants.FirstOrDefault(x => x.Key == persistedGrant.Key);
-            Assert.NotNull(foundGrant);
+            foundGrant.ShouldNotBeNull();
         }
     }
 
@@ -466,8 +466,8 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         using (var context = new PersistedGrantDbContext(options))
         {
             var foundGrant = context.PersistedGrants.FirstOrDefault(x => x.Key == persistedGrant.Key);
-            Assert.NotNull(foundGrant);
-            Assert.Equal(newDate, persistedGrant.Expiration);
+            foundGrant.ShouldNotBeNull();
+            newDate.ShouldBe(persistedGrant.Expiration.Value);
         }
     }
 }

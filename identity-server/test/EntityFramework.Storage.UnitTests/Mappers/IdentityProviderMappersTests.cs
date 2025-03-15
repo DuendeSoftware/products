@@ -17,8 +17,8 @@ public class IdentityProviderMappersTests
         var mappedEntity = model.ToEntity();
         var mappedModel = mappedEntity.ToModel();
 
-        Assert.NotNull(mappedModel);
-        Assert.NotNull(mappedEntity);
+        mappedModel.ShouldNotBeNull();
+        mappedEntity.ShouldNotBeNull();
     }
 
     [Fact]
@@ -36,13 +36,11 @@ public class IdentityProviderMappersTests
             Scope = "scope",
         };
 
-
         var mappedEntity = model.ToEntity();
         mappedEntity.DisplayName.ShouldBe("name");
         mappedEntity.Scheme.ShouldBe("scheme");
         mappedEntity.Type.ShouldBe("oidc");
         mappedEntity.Properties.ShouldNotBeNullOrEmpty();
-
 
         var mappedModel = new Models.OidcProvider(mappedEntity.ToModel());
 

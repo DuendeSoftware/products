@@ -1,0 +1,88 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <Sdk Name="Aspire.AppHost.Sdk" Version="9.1.0" />
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsAspireHost>true</IsAspireHost>
+        <UserSecretsId>b86a3528-3d86-4514-b57f-9839f472ef31</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="9.1.0" />
+        <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <!-- Database Projects -->
+        <ProjectReference Include="..\..\..\migrations\AspNetIdentityDb\AspNetIdentityDb.csproj" />
+        <ProjectReference Include="..\..\..\migrations\IdentityServerDb\IdentityServerDb.csproj" />
+
+        <!-- IdentityServer Hosts -->
+        <ProjectReference Include="..\..\..\hosts\AspNetIdentity\Host.AspNetIdentity.csproj"
+            PrivateAssets="All" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\..\hosts\Configuration\Host.Configuration.csproj"
+            PrivateAssets="All" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\..\hosts\EntityFramework\Host.EntityFramework.csproj"
+            PrivateAssets="All" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\..\hosts\main\Host.Main.csproj" PrivateAssets="All"
+            ReferenceOutputAssembly="false" />
+
+        <!-- API Projects -->
+        <ProjectReference Include="..\..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\APIs\ResourceBasedApi\ResourceBasedApi.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\APIs\SimpleApi\SimpleApi.csproj" />
+
+        <!-- Clients (Console) -->
+        <ProjectReference Include="..\..\..\clients\src\ConsoleCibaClient\ConsoleCibaClient.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\ConsoleDeviceFlow\ConsoleDeviceFlow.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleClientCredentialsFlow\ConsoleClientCredentialsFlow.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleClientCredentialsFlowCallingIdentityServerApi\ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleClientCredentialsFlowPostBody\ConsoleClientCredentialsFlowPostBody.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleClientCredentialsFlowDPoP\ConsoleClientCredentialsFlowDPoP.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\ConsoleDcrClient\ConsoleDcrClient.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleEphemeralMtlsClient\ConsoleEphemeralMtlsClient.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleCustomGrant\ConsoleExtensionGrant.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleIntrospectionClient\ConsoleIntrospectionClient.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\ConsoleMTLSClient\ConsoleMTLSClient.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsolePrivateKeyJwtClient\ConsolePrivateKeyJwtClient.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleResourceOwnerFlow\ConsoleResourceOwnerFlow.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleResourceOwnerFlowPublic\ConsoleResourceOwnerFlowPublic.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleResourceOwnerFlowReference\ConsoleResourceOwnerFlowReference.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleResourceOwnerFlowRefreshToken\ConsoleResourceOwnerFlowRefreshToken.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\ConsoleResourceOwnerFlowUserInfo\ConsoleResourceOwnerFlowUserInfo.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\WindowsConsoleSystemBrowser\WindowsConsoleSystemBrowser.csproj" />
+
+        <!-- Clients (Web) -->
+        <ProjectReference Include="..\..\..\clients\src\MvcCode\MvcCode.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\MvcDPoP\MvcDPoP.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\JsOidc\JsOidc.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\MvcAutomaticTokenManagement\MvcAutomaticTokenManagement.csproj" />
+        <ProjectReference
+            Include="..\..\..\clients\src\MvcHybridBackChannel\MvcHybridBackChannel.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\MvcJarJwt\MvcJarJwt.csproj" />
+        <ProjectReference Include="..\..\..\clients\src\MvcJarUriJwt\MvcJarUriJwt.csproj" />
+
+    </ItemGroup>
+
+</Project>

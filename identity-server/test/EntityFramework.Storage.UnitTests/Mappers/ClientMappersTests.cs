@@ -18,8 +18,8 @@ public class ClientMappersTests
         var mappedEntity = model.ToEntity();
         var mappedModel = mappedEntity.ToModel();
 
-        Assert.NotNull(mappedModel);
-        Assert.NotNull(mappedEntity);
+        mappedModel.ShouldNotBeNull();
+        mappedEntity.ShouldNotBeNull();
     }
 
     [Fact]
@@ -44,8 +44,6 @@ public class ClientMappersTests
         var foo2 = mappedEntity.Properties.FirstOrDefault(x => x.Key == "foo2");
         foo2.ShouldNotBeNull();
         foo2.Value.ShouldBe("bar2");
-
-
 
         var mappedModel = mappedEntity.ToModel();
 
@@ -94,7 +92,6 @@ public class ClientMappersTests
         model.ProtocolType.ShouldBe(def.ProtocolType);
         model.ClientSecrets.First().Type.ShouldBe(def.ClientSecrets.First().Type);
     }
-
 
     [Fact]
     public void mapping_model_to_entity_maps_all_properties()
