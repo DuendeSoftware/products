@@ -12,6 +12,10 @@ class Program
     {
         var host = BuildWebHost(args);
         SeedData.EnsureSeedData(host.Services);
+
+        // Exit the application
+        Console.WriteLine("Exiting application...");
+        Environment.Exit(0);
     }
 
     public static IWebHost BuildWebHost(string[] args) =>
