@@ -21,8 +21,8 @@ namespace Duende.IdentityServer.Validation;
 /// </summary>
 public class DefaultDPoPProofValidator : IDPoPProofValidator
 {
-    const string ReplayCachePurpose = "DPoPReplay-jti-";
-    const string DataProtectorPurpose = "DPoPProofValidation-nonce";
+    private const string ReplayCachePurpose = "DPoPReplay-jti-";
+    private const string DataProtectorPurpose = "DPoPProofValidation-nonce";
 
     /// <summary>
     /// The options

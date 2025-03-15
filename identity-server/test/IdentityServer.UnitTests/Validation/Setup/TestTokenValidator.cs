@@ -7,7 +7,7 @@ using Duende.IdentityServer.Validation;
 
 namespace UnitTests.Validation.Setup;
 
-class TestTokenValidator : ITokenValidator
+internal class TestTokenValidator : ITokenValidator
 {
     private readonly TokenValidationResult _result;
 

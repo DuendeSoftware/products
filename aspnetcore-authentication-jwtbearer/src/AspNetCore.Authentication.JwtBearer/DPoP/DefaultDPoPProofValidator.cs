@@ -18,7 +18,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// </summary>
 public class DefaultDPoPProofValidator : IDPoPProofValidator
 {
-    const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
+    private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
 
     /// <summary>
     /// The signing algorithms supported for DPoP proofs.

@@ -12,8 +12,8 @@ namespace Duende.Bff.Tests.SessionManagement;
 
 public class CookieSlidingTests : BffIntegrationTestBase
 {
-    readonly InMemoryUserSessionStore _sessionStore = new();
-    readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
+    private readonly InMemoryUserSessionStore _sessionStore = new();
+    private readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
 
     public CookieSlidingTests(ITestOutputHelper output) : base(output)
     {

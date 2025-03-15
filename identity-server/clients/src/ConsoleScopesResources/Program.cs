@@ -6,11 +6,11 @@ using Duende.IdentityModel.Client;
 
 namespace ConsoleScopesResources;
 
-class Program
+internal class Program
 {
     private static DiscoveryCache Cache;
 
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         Console.Title = "Console Resources and Scopes Client";
         Cache = new DiscoveryCache("https://localhost:5001");
@@ -140,7 +140,7 @@ class Program
         }
     }
 
-    static async Task RequestToken(string scope, string resource = null)
+    private static async Task RequestToken(string scope, string resource = null)
     {
         var client = new HttpClient();
         var disco = await Cache.GetAsync();

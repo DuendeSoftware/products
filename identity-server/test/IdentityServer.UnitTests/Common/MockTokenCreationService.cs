@@ -7,7 +7,7 @@ using Duende.IdentityServer.Services;
 
 namespace UnitTests.Common;
 
-class MockTokenCreationService : ITokenCreationService
+internal class MockTokenCreationService : ITokenCreationService
 {
     public string TokenResult { get; set; }
     public Token Token { get; set; }

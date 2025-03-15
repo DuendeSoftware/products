@@ -7,7 +7,7 @@ using Duende.IdentityServer.Stores;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
-class NopIdentityProviderStore : IIdentityProviderStore
+internal class NopIdentityProviderStore : IIdentityProviderStore
 {
     public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync()
     {

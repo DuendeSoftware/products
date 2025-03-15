@@ -10,8 +10,8 @@ namespace ConsoleResourceIndicators;
 
 public class Program
 {
-    static OidcClient _oidcClient;
-    static HttpClient _apiClient = new HttpClient { BaseAddress = new Uri(Constants.SampleApi) };
+    private static OidcClient _oidcClient;
+    private static HttpClient _apiClient = new HttpClient { BaseAddress = new Uri(Constants.SampleApi) };
 
     public static async Task Main()
     {

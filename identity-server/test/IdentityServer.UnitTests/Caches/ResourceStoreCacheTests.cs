@@ -14,13 +14,13 @@ namespace IdentityServer.UnitTests.Caches;
 
 public class ResourceStoreCacheTests
 {
-    List<Client> _clients { get; set; } = new List<Client>();
-    List<IdentityResource> _identityResources { get; set; } = new List<IdentityResource>();
-    List<ApiResource> _resources { get; set; } = new List<ApiResource>();
-    List<ApiScope> _scopes { get; set; } = new List<ApiScope>();
+    private List<Client> _clients { get; set; } = new List<Client>();
+    private List<IdentityResource> _identityResources { get; set; } = new List<IdentityResource>();
+    private List<ApiResource> _resources { get; set; } = new List<ApiResource>();
+    private List<ApiScope> _scopes { get; set; } = new List<ApiScope>();
 
-    MockClock _mockClock = new MockClock() { UtcNow = new DateTimeOffset(2022, 8, 9, 9, 0, 0, TimeSpan.Zero) };
-    ServiceProvider _provider;
+    private MockClock _mockClock = new MockClock() { UtcNow = new DateTimeOffset(2022, 8, 9, 9, 0, 0, TimeSpan.Zero) };
+    private ServiceProvider _provider;
 
     public ResourceStoreCacheTests()
     {

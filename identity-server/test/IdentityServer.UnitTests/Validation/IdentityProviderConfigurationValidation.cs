@@ -13,7 +13,7 @@ public class IdentityProviderConfigurationValidation
 {
     private const string Category = "IdentityProvider Configuration Validation Tests";
     private IIdentityProviderConfigurationValidator _validator;
-    IdentityServerOptions _options;
+    private IdentityServerOptions _options;
 
     public IdentityProviderConfigurationValidation()
     {

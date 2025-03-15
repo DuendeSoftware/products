@@ -6,7 +6,7 @@ using Duende.IdentityServer.Validation;
 
 namespace IntegrationTests.Common;
 
-class MockResourceValidator : IResourceValidator
+internal class MockResourceValidator : IResourceValidator
 {
     public ResourceValidationResult Result { get; set; } = new ResourceValidationResult();
 

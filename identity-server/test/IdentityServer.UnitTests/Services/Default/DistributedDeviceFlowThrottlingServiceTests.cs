@@ -15,7 +15,7 @@ namespace UnitTests.Services.Default;
 public class DistributedDeviceFlowThrottlingServiceTests
 {
     private TestCache cache = new TestCache();
-    InMemoryClientStore _store;
+    private InMemoryClientStore _store;
 
     private readonly IdentityServerOptions options = new IdentityServerOptions { DeviceFlow = new DeviceFlowOptions { Interval = 5 } };
     private readonly DeviceCode deviceCode = new DeviceCode

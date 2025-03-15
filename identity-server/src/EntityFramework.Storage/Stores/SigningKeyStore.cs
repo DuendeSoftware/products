@@ -18,7 +18,7 @@ namespace Duende.IdentityServer.EntityFramework.Stores;
 /// <seealso cref="ISigningKeyStore" />
 public class SigningKeyStore : ISigningKeyStore
 {
-    const string Use = "signing";
+    private const string Use = "signing";
 
     /// <summary>
     /// The DbContext.

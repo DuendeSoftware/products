@@ -17,12 +17,12 @@ public class DefaultTokenServiceTests
 {
     private DefaultTokenService _subject;
 
-    MockClaimsService _mockClaimsService = new MockClaimsService();
-    MockReferenceTokenStore _mockReferenceTokenStore = new MockReferenceTokenStore();
-    MockTokenCreationService _mockTokenCreationService = new MockTokenCreationService();
-    MockSystemClock _mockSystemClock = new MockSystemClock();
-    MockKeyMaterialService _mockKeyMaterialService = new MockKeyMaterialService();
-    IdentityServerOptions _options = new IdentityServerOptions();
+    private MockClaimsService _mockClaimsService = new MockClaimsService();
+    private MockReferenceTokenStore _mockReferenceTokenStore = new MockReferenceTokenStore();
+    private MockTokenCreationService _mockTokenCreationService = new MockTokenCreationService();
+    private MockSystemClock _mockSystemClock = new MockSystemClock();
+    private MockKeyMaterialService _mockKeyMaterialService = new MockKeyMaterialService();
+    private IdentityServerOptions _options = new IdentityServerOptions();
 
     public DefaultTokenServiceTests()
     {

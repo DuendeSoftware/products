@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace IntegrationTests.Clients.Setup;
 
-class CustomProfileService : TestUserProfileService
+internal class CustomProfileService : TestUserProfileService
 {
     public CustomProfileService(TestUserStore users, ILogger<TestUserProfileService> logger) : base(users, logger)
     { }

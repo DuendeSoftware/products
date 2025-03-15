@@ -14,8 +14,8 @@ public class OidcReturnUrlParserTests
 {
     private OidcReturnUrlParser _subject;
 
-    IdentityServerOptions _options = new IdentityServerOptions();
-    MockServerUrls _urls = new MockServerUrls();
+    private IdentityServerOptions _options = new IdentityServerOptions();
+    private MockServerUrls _urls = new MockServerUrls();
 
     public OidcReturnUrlParserTests()
     {

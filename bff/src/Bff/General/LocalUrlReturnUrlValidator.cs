@@ -3,7 +3,7 @@
 
 namespace Duende.Bff;
 
-class LocalUrlReturnUrlValidator : IReturnUrlValidator
+internal class LocalUrlReturnUrlValidator : IReturnUrlValidator
 {
     /// <inheritdoc/>
     public Task<bool> IsValidAsync(string returnUrl)

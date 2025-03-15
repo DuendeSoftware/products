@@ -86,7 +86,7 @@ public class ToDoController : ControllerBase
 
 public class ToDo
 {
-    static int _nextId = 1;
+    private static int _nextId = 1;
     public static int NewId()
     {
         return _nextId++;

@@ -5,7 +5,7 @@ using System.IO.Pipes;
 
 namespace WindowsConsoleSystemBrowser;
 
-class CallbackManager
+internal class CallbackManager
 {
     private readonly string _name;
 

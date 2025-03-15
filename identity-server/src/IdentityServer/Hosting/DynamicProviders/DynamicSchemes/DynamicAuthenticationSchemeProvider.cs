@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
-class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvider
+internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvider
 {
     private readonly IAuthenticationSchemeProvider _inner;
     private readonly DynamicProviderOptions _options;

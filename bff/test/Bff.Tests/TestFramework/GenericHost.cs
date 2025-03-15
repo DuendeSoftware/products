@@ -20,7 +20,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         ? baseAddress.Substring(0, baseAddress.Length - 1)
         : baseAddress;
 
-    IServiceProvider _appServices = null!;
+    private IServiceProvider _appServices = null!;
 
     public bool UseForwardedHeaders { get; set; }
 
@@ -85,7 +85,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
     public event Action<IServiceCollection> OnConfigureServices = _ => { };
     public event Action<IApplicationBuilder> OnConfigure = _ => { };
 
-    void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging(options =>
         {
@@ -96,7 +96,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         OnConfigureServices(services);
     }
 
-    void ConfigureApp(IApplicationBuilder app)
+    private void ConfigureApp(IApplicationBuilder app)
     {
         _appServices = app.ApplicationServices;
 
@@ -106,7 +106,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         ConfigureSignout(app);
     }
 
-    void ConfigureSignout(IApplicationBuilder app)
+    private void ConfigureSignout(IApplicationBuilder app)
     {
         app.Use(async (ctx, next) =>
         {
@@ -127,7 +127,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
-    void ConfigureSignin(IApplicationBuilder app)
+    private void ConfigureSignin(IApplicationBuilder app)
     {
         app.Use(async (ctx, next) =>
         {
@@ -152,8 +152,8 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         });
     }
 
-    ClaimsPrincipal? _userToSignIn;
-    AuthenticationProperties? _propsToSignIn;
+    private ClaimsPrincipal? _userToSignIn;
+    private AuthenticationProperties? _propsToSignIn;
 
     public virtual async Task IssueSessionCookieAsync(params Claim[] claims)
     {

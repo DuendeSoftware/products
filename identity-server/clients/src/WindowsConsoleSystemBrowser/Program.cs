@@ -14,9 +14,9 @@ using Serilog;
 namespace WindowsConsoleSystemBrowser;
 
 [SupportedOSPlatform("Windows")]
-class Program
+internal class Program
 {
-    static async Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         IdentityModelEventSource.ShowPII = true;
 
@@ -45,9 +45,9 @@ class Program
         }
     }
 
-    const string CustomUriScheme = "sample-windows-client";
+    private const string CustomUriScheme = "sample-windows-client";
 
-    static async Task Run()
+    private static async Task Run()
     {
         new RegistryConfig(CustomUriScheme).Configure();
 

@@ -25,7 +25,7 @@ public class MockCache<T> : ICache<T>
 
     private readonly IClock _clock;
 
-    bool TryGetValue(string key, out T item)
+    private bool TryGetValue(string key, out T item)
     {
         if (CacheItems.TryGetValue(key, out var cacheItem))
         {
@@ -39,7 +39,8 @@ public class MockCache<T> : ICache<T>
         item = null;
         return false;
     }
-    void Add(string key, T item, TimeSpan duration)
+
+    private void Add(string key, T item, TimeSpan duration)
     {
         var ci = new CacheItem
         {

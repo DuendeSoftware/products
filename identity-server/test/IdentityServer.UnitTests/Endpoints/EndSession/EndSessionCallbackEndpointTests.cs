@@ -11,8 +11,8 @@ public class EndSessionCallbackEndpointTests
 {
     private const string Category = "End Session Callback Endpoint";
 
-    StubEndSessionRequestValidator _stubEndSessionRequestValidator = new StubEndSessionRequestValidator();
-    EndSessionCallbackEndpoint _subject;
+    private StubEndSessionRequestValidator _stubEndSessionRequestValidator = new StubEndSessionRequestValidator();
+    private EndSessionCallbackEndpoint _subject;
 
     public EndSessionCallbackEndpointTests()
     {

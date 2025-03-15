@@ -111,7 +111,7 @@ public class SessionCleanupHost : IHostedService
         }
     }
 
-    async Task RunAsync(CancellationToken cancellationToken = default)
+    private async Task RunAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -127,7 +127,7 @@ public class SessionCleanupHost : IHostedService
         }
     }
 
-    bool IsIUserSessionStoreCleanupRegistered()
+    private bool IsIUserSessionStoreCleanupRegistered()
     {
         var isService = _serviceProvider.GetRequiredService<IServiceProviderIsService>();
         return isService.IsService(typeof(IUserSessionStoreCleanup));

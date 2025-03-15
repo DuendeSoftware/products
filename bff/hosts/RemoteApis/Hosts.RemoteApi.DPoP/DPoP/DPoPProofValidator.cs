@@ -14,8 +14,8 @@ namespace Api.DPoP;
 
 public class DPoPProofValidator
 {
-    const string ReplayCachePurpose = "DPoPJwtBearerEvents-DPoPReplay-jti-";
-    const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
+    private const string ReplayCachePurpose = "DPoPJwtBearerEvents-DPoPReplay-jti-";
+    private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
 
     public readonly static IEnumerable<string> SupportedDPoPSigningAlgorithms = new[]
     {

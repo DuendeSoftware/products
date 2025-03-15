@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.IntegrationTests.TestFramework;
 
 public class TestBrowserClient : HttpClient
 {
-    class CookieHandler : DelegatingHandler
+    private class CookieHandler : DelegatingHandler
     {
         public CookieContainer CookieContainer { get; } = new CookieContainer();
         public Uri CurrentUri { get; private set; }

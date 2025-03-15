@@ -83,7 +83,7 @@ public class GenericHost
     public event Action<IServiceCollection> OnConfigureServices = services => { };
     public event Action<WebApplication> OnConfigure = app => { };
 
-    void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging(options =>
         {
@@ -94,7 +94,7 @@ public class GenericHost
         OnConfigureServices(services);
     }
 
-    void ConfigureApp(WebApplication app)
+    private void ConfigureApp(WebApplication app)
     {
         _appServices = app.Services;
 

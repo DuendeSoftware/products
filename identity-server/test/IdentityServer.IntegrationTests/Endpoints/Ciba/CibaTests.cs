@@ -22,13 +22,13 @@ public class CibaTests
 {
     private const string Category = "Backchannel Authentication (CIBA) endpoint";
 
-    IdentityServerPipeline _mockPipeline = new();
-    MockCibaUserValidator _mockCibaUserValidator = new();
-    MockCibaUserNotificationService _mockCibaUserNotificationService = new();
-    MockCustomBackchannelAuthenticationValidator _mockCustomBackchannelAuthenticationValidator = new();
+    private IdentityServerPipeline _mockPipeline = new();
+    private MockCibaUserValidator _mockCibaUserValidator = new();
+    private MockCibaUserNotificationService _mockCibaUserNotificationService = new();
+    private MockCustomBackchannelAuthenticationValidator _mockCustomBackchannelAuthenticationValidator = new();
 
-    TestUser _user;
-    Client _cibaClient;
+    private TestUser _user;
+    private Client _cibaClient;
 
     public CibaTests()
     {
@@ -114,7 +114,8 @@ public class CibaTests
         var ci = new ClaimsIdentity(claims, "ciba");
         _mockCibaUserValidator.Result.Subject = new ClaimsPrincipal(ci);
     }
-    string CreateRequestObject(IDictionary<string, string> values)
+
+    private string CreateRequestObject(IDictionary<string, string> values)
     {
         var claims = new List<Claim>();
 

@@ -12,7 +12,7 @@ namespace ConsoleResourceIndicators;
 
 public class Program
 {
-    static OidcClient _oidcClient;
+    private static OidcClient _oidcClient;
 
     public static async Task Main()
     {
