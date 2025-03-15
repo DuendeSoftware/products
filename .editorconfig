@@ -20,3 +20,5 @@ file_header_template = Copyright (c) Duende Software. All rights reserved.\nSee 
 
 dotnet_diagnostic.IDE0161.severity = error  # Use file-scoped namespace
 csharp_style_namespace_declarations = file_scoped:error
+
+dotnet_diagnostic.IDE0003.severity = error # Enforce that 'this.' should not be used when it's redundant
