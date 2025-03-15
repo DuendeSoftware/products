@@ -44,7 +44,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
             .Where(x => x.ConsumedTime == null) // filter consumed grants
             .ToArray();
 
-        List<Exception> errors = new List<Exception>();
+        var errors = new List<Exception>();
 
         T DeserializeAndCaptureErrors<T>(string data)
         {

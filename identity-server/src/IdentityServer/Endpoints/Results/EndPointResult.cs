@@ -23,7 +23,7 @@ public abstract class EndpointResult<T> : IEndpointResult
         var writer = context.RequestServices.GetService<IHttpResponseWriter<T>>();
         if (writer != null)
         {
-            T target = this as T;
+            var target = this as T;
             if (target == null)
             {
                 throw new Exception($"Type parameter {typeof(T)} must be the class derived from 'EndpointResult<T>'.");

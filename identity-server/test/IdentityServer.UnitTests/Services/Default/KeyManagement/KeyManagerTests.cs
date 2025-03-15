@@ -96,7 +96,7 @@ public class KeyManagerTests
     {
         _options.KeyManagement.PropagationTime = TimeSpan.Zero;
 
-        Action a = () =>
+        var a = () =>
         {
             _subject = new KeyManager(
                 _options,

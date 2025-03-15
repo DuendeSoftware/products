@@ -440,7 +440,7 @@ public class DPoPProofValidator
         try
         {
             var value = DataProtector.Unprotect(result.Nonce);
-            if (long.TryParse(value, out long iat))
+            if (long.TryParse(value, out var iat))
             {
                 return ValueTask.FromResult(iat);
             }
