@@ -35,7 +35,6 @@ dotnet_style_qualification_for_property = false:error
 # Use language keywords instead of framework type names for type references
 dotnet_diagnostic.IDE0049.severity = error
 
-
 # BSD/Allman braces: Place braces on a new line for all constructs, require braces for all if statements and keep empty braces { } on the same line
 csharp_new_line_before_open_brace = all 
 dotnet_diagnostic.IDE0011.severity = error
