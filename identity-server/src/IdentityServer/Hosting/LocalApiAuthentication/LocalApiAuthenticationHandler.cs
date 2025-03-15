@@ -219,7 +219,11 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
         if (Options.TokenMode == LocalApiTokenMode.DPoPOnly || Options.TokenMode == LocalApiTokenMode.DPoPAndBearer)
         {
-            if (sb.Length > 0) sb.Append(", ");
+            if (sb.Length > 0)
+            {
+                sb.Append(", ");
+            }
+
             sb.Append("DPoP");
 
             if (Context.Items.ContainsKey("DPoP-Error"))

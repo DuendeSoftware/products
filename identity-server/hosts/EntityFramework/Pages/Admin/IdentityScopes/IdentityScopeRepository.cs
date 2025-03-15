@@ -57,7 +57,10 @@ public class IdentityScopeRepository
             .Include(x => x.UserClaims)
             .SingleOrDefaultAsync(x => x.Name == id);
 
-        if (scope == null) return null;
+        if (scope == null)
+        {
+            return null;
+        }
 
         return new IdentityScopeModel
         {
@@ -97,7 +100,10 @@ public class IdentityScopeRepository
             .Include(x => x.UserClaims)
             .SingleOrDefaultAsync(x => x.Name == model.Name);
 
-        if (scope == null) throw new ArgumentException("Invalid Identity Scope");
+        if (scope == null)
+        {
+            throw new ArgumentException("Invalid Identity Scope");
+        }
 
         if (scope.DisplayName != model.DisplayName)
         {
@@ -129,7 +135,10 @@ public class IdentityScopeRepository
     {
         var scope = await _context.IdentityResources.SingleOrDefaultAsync(x => x.Name == id);
 
-        if (scope == null) throw new ArgumentException("Invalid Identity Scope");
+        if (scope == null)
+        {
+            throw new ArgumentException("Invalid Identity Scope");
+        }
 
         _context.IdentityResources.Remove(scope);
         await _context.SaveChangesAsync();

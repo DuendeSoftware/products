@@ -125,7 +125,10 @@ internal class TokenRevocationEndpoint : IEndpointHandler
             _logger.LogInformation("No matching token found");
         }
 
-        if (response.Error.IsPresent()) return new TokenRevocationErrorResult(response.Error);
+        if (response.Error.IsPresent())
+        {
+            return new TokenRevocationErrorResult(response.Error);
+        }
 
         return new StatusCodeResult(HttpStatusCode.OK);
     }

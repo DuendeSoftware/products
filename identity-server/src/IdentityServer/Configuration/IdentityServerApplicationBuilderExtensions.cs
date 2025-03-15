@@ -47,7 +47,11 @@ public static class IdentityServerApplicationBuilderExtensions
         // handler, which just re-assigns the user on the context. claims transformation
         // will run twice, since that's not cached (whereas the authN handler result is)
         // related: https://github.com/aspnet/Security/issues/1399
-        if (options == null) options = new IdentityServerMiddlewareOptions();
+        if (options == null)
+        {
+            options = new IdentityServerMiddlewareOptions();
+        }
+
         options.AuthenticationMiddleware(app);
 
         app.UseMiddleware<MutualTlsEndpointMiddleware>();
@@ -149,29 +153,66 @@ public static class IdentityServerApplicationBuilderExtensions
 
     private static void ValidateOptions(IdentityServerOptions options, ILogger logger)
     {
-        if (options.IssuerUri.IsPresent()) logger.LogDebug("Custom IssuerUri set to {0}", options.IssuerUri);
+        if (options.IssuerUri.IsPresent())
+        {
+            logger.LogDebug("Custom IssuerUri set to {0}", options.IssuerUri);
+        }
 
         // these three are dynamically populated later from the cookie handler options
         //if (options.UserInteraction.LoginUrl.IsMissing()) throw new InvalidOperationException("LoginUrl is not configured");
         //if (options.UserInteraction.LoginReturnUrlParameter.IsMissing()) throw new InvalidOperationException("LoginReturnUrlParameter is not configured");
         //if (options.UserInteraction.LogoutUrl.IsMissing()) throw new InvalidOperationException("LogoutUrl is not configured");
 
-        if (options.UserInteraction.LogoutIdParameter.IsMissing()) throw new InvalidOperationException("LogoutIdParameter is not configured");
-        if (options.UserInteraction.ErrorUrl.IsMissing()) throw new InvalidOperationException("ErrorUrl is not configured");
-        if (options.UserInteraction.ErrorIdParameter.IsMissing()) throw new InvalidOperationException("ErrorIdParameter is not configured");
-        if (options.UserInteraction.ConsentUrl.IsMissing()) throw new InvalidOperationException("ConsentUrl is not configured");
-        if (options.UserInteraction.ConsentReturnUrlParameter.IsMissing()) throw new InvalidOperationException("ConsentReturnUrlParameter is not configured");
-        if (options.UserInteraction.CustomRedirectReturnUrlParameter.IsMissing()) throw new InvalidOperationException("CustomRedirectReturnUrlParameter is not configured");
+        if (options.UserInteraction.LogoutIdParameter.IsMissing())
+        {
+            throw new InvalidOperationException("LogoutIdParameter is not configured");
+        }
+
+        if (options.UserInteraction.ErrorUrl.IsMissing())
+        {
+            throw new InvalidOperationException("ErrorUrl is not configured");
+        }
+
+        if (options.UserInteraction.ErrorIdParameter.IsMissing())
+        {
+            throw new InvalidOperationException("ErrorIdParameter is not configured");
+        }
+
+        if (options.UserInteraction.ConsentUrl.IsMissing())
+        {
+            throw new InvalidOperationException("ConsentUrl is not configured");
+        }
+
+        if (options.UserInteraction.ConsentReturnUrlParameter.IsMissing())
+        {
+            throw new InvalidOperationException("ConsentReturnUrlParameter is not configured");
+        }
+
+        if (options.UserInteraction.CustomRedirectReturnUrlParameter.IsMissing())
+        {
+            throw new InvalidOperationException("CustomRedirectReturnUrlParameter is not configured");
+        }
+
         if (options.UserInteraction.CreateAccountUrl.IsPresent())
         {
-            if (options.UserInteraction.CreateAccountReturnUrlParameter.IsMissing()) throw new InvalidOperationException("CreateAccountReturnUrlParameter is not configured");
+            if (options.UserInteraction.CreateAccountReturnUrlParameter.IsMissing())
+            {
+                throw new InvalidOperationException("CreateAccountReturnUrlParameter is not configured");
+            }
+
             // if CreateAccountUrl is set, then we internally add to the collection of what we support
             options.UserInteraction.PromptValuesSupported.Add(OidcConstants.PromptModes.Create);
         }
 
-        if (options.Authentication.CheckSessionCookieName.IsMissing()) throw new InvalidOperationException("CheckSessionCookieName is not configured");
+        if (options.Authentication.CheckSessionCookieName.IsMissing())
+        {
+            throw new InvalidOperationException("CheckSessionCookieName is not configured");
+        }
 
-        if (options.Cors.CorsPolicyName.IsMissing()) throw new InvalidOperationException("CorsPolicyName is not configured");
+        if (options.Cors.CorsPolicyName.IsMissing())
+        {
+            throw new InvalidOperationException("CorsPolicyName is not configured");
+        }
     }
 
     internal static object? TestService(IServiceProvider serviceProvider, Type service, ILogger logger, string? message = null, bool doThrow = true)
