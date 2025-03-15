@@ -50,7 +50,7 @@ public abstract class AuthorizeInteractionPageResult : EndpointResult<AuthorizeI
     public string ReturnUrlParameterName { get; }
 }
 
-class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<AuthorizeInteractionPageResult>
+internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<AuthorizeInteractionPageResult>
 {
     private readonly IServerUrls _urls;
     private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;

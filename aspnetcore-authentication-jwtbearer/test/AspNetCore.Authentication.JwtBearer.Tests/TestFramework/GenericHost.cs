@@ -18,13 +18,17 @@ public class GenericHost
 {
     public GenericHost(ITestOutputHelper testOutputHelper, string baseAddress = "https://server")
     {
-        if (baseAddress.EndsWith("/")) baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        if (baseAddress.EndsWith("/"))
+        {
+            baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        }
+
         _baseAddress = baseAddress;
         _testOutputHelper = testOutputHelper;
     }
 
     protected readonly string _baseAddress;
-    IServiceProvider _appServices = default!;
+    private IServiceProvider _appServices = default!;
 
     public Assembly? HostAssembly { get; set; }
     public bool IsDevelopment { get; set; }
@@ -70,7 +74,11 @@ public class GenericHost
     public string Url(string? path = null)
     {
         path = path ?? string.Empty;
-        if (!path.StartsWith("/")) path = "/" + path;
+        if (!path.StartsWith("/"))
+        {
+            path = "/" + path;
+        }
+
         return _baseAddress + path;
     }
 
@@ -98,7 +106,7 @@ public class GenericHost
     public event Action<IServiceCollection> OnConfigureServices = services => { };
     public event Action<WebApplication> OnConfigure = app => { };
 
-    void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services)
     {
         // This adds log messages to the output of our tests when they fail.
         // See https://www.meziantou.net/how-to-view-logs-from-ilogger-in-xunitdotnet.htm
@@ -120,7 +128,7 @@ public class GenericHost
         _appServices = services.BuildServiceProvider();
     }
 
-    void Configure(WebApplication builder)
+    private void Configure(WebApplication builder)
     {
         OnConfigure(builder);
 
@@ -128,7 +136,7 @@ public class GenericHost
         ConfigureSignout(builder);
     }
 
-    void ConfigureSignout(WebApplication app)
+    private void ConfigureSignout(WebApplication app)
     {
         app.Use(async (ctx, next) =>
         {
@@ -149,7 +157,7 @@ public class GenericHost
         response.StatusCode.ShouldBe((HttpStatusCode)204);
     }
 
-    void ConfigureSignin(WebApplication app)
+    private void ConfigureSignin(WebApplication app)
     {
         app.Use(async (ctx, next) =>
         {
@@ -174,8 +182,8 @@ public class GenericHost
         });
     }
 
-    ClaimsPrincipal? _userToSignIn;
-    AuthenticationProperties? _propsToSignIn;
+    private ClaimsPrincipal? _userToSignIn;
+    private AuthenticationProperties? _propsToSignIn;
 
     public async Task IssueSessionCookieAsync(params Claim[] claims)
     {

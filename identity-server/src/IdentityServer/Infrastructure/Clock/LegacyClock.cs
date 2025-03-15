@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace Duende.IdentityServer;
 
-class LegacyClock : IClock
+internal class LegacyClock : IClock
 {
 #pragma warning disable CS0618 // Type or member is obsolete
     private readonly ISystemClock _clock;

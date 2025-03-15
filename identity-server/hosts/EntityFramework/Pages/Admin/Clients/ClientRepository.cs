@@ -76,7 +76,7 @@ public class ClientRepository
             .Include(x => x.AllowedGrantTypes)
             .Where(x => x.AllowedGrantTypes.Count == 1 && x.AllowedGrantTypes.Any(grant => grants.Contains(grant.GrantType)));
 
-        if (!String.IsNullOrWhiteSpace(filter))
+        if (!string.IsNullOrWhiteSpace(filter))
         {
             query = query.Where(x => x.ClientId.Contains(filter) || x.ClientName.Contains(filter));
         }
@@ -101,7 +101,10 @@ public class ClientRepository
             .Where(x => x.ClientId == id)
             .SingleOrDefaultAsync();
 
-        if (client == null) return null;
+        if (client == null)
+        {
+            return null;
+        }
 
         return new EditClientModel
         {
@@ -156,7 +159,10 @@ public class ClientRepository
             .Include(x => x.PostLogoutRedirectUris)
             .SingleOrDefaultAsync(x => x.ClientId == model.ClientId);
 
-        if (client == null) throw new ArgumentException("Invalid Client Id");
+        if (client == null)
+        {
+            throw new ArgumentException("Invalid Client Id");
+        }
 
         if (client.ClientName != model.Name)
         {
@@ -164,7 +170,7 @@ public class ClientRepository
         }
 
         var scopes = model.AllowedScopes.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
-        var currentScopes = (client.AllowedScopes.Select(x => x.Scope) ?? Enumerable.Empty<String>()).ToArray();
+        var currentScopes = (client.AllowedScopes.Select(x => x.Scope) ?? Enumerable.Empty<string>()).ToArray();
 
         var scopesToAdd = scopes.Except(currentScopes).ToArray();
         var scopesToRemove = currentScopes.Except(scopes).ToArray();
@@ -223,7 +229,10 @@ public class ClientRepository
     {
         var client = await _context.Clients.SingleOrDefaultAsync(x => x.ClientId == clientId);
 
-        if (client == null) throw new ArgumentException("Invalid Client Id");
+        if (client == null)
+        {
+            throw new ArgumentException("Invalid Client Id");
+        }
 
         _context.Clients.Remove(client);
         await _context.SaveChangesAsync();

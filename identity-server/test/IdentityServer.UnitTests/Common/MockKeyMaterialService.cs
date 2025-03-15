@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace UnitTests.Common;
 
-class MockKeyMaterialService : IKeyMaterialService
+internal class MockKeyMaterialService : IKeyMaterialService
 {
     public List<SigningCredentials> SigningCredentials = new List<SigningCredentials>();
     public List<SecurityKeyInfo> ValidationKeys = new List<SecurityKeyInfo>();

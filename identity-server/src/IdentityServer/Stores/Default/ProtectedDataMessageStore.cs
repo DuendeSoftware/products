@@ -46,7 +46,7 @@ public class ProtectedDataMessageStore<TModel> : IMessageStore<TModel>
 
         Message<TModel> result = null;
 
-        if (!String.IsNullOrWhiteSpace(value))
+        if (!string.IsNullOrWhiteSpace(value))
         {
             try
             {

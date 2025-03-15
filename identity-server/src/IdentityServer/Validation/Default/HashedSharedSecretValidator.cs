@@ -66,7 +66,7 @@ public class HashedSharedSecretValidator : ISecretValidator
         {
             var secretDescription = string.IsNullOrEmpty(secret.Description) ? "no description" : secret.Description;
 
-            bool isValid = false;
+            var isValid = false;
             byte[] secretBytes;
 
             try

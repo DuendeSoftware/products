@@ -41,7 +41,10 @@ public class ServerSideSessionCleanupHost : IHostedService
     {
         if (_options.ServerSideSessions.RemoveExpiredSessions)
         {
-            if (_source != null) throw new InvalidOperationException("Already started. Call Stop first.");
+            if (_source != null)
+            {
+                throw new InvalidOperationException("Already started. Call Stop first.");
+            }
 
             _logger.LogDebug("Starting server-side session removal");
 
@@ -60,7 +63,10 @@ public class ServerSideSessionCleanupHost : IHostedService
     {
         if (_options.ServerSideSessions.RemoveExpiredSessions)
         {
-            if (_source == null) throw new InvalidOperationException("Not started. Call Start first.");
+            if (_source == null)
+            {
+                throw new InvalidOperationException("Not started. Call Start first.");
+            }
 
             _logger.LogDebug("Stopping server-side session removal");
 
@@ -115,10 +121,13 @@ public class ServerSideSessionCleanupHost : IHostedService
         }
     }
 
-    async Task RunAsync(CancellationToken cancellationToken = default)
+    private async Task RunAsync(CancellationToken cancellationToken = default)
     {
         // this is here for testing
-        if (!_options.ServerSideSessions.RemoveExpiredSessions) return;
+        if (!_options.ServerSideSessions.RemoveExpiredSessions)
+        {
+            return;
+        }
 
         try
         {
@@ -129,7 +138,7 @@ public class ServerSideSessionCleanupHost : IHostedService
                 var serverSideTicketStore = serviceScope.ServiceProvider.GetRequiredService<IServerSideTicketStore>();
                 var sessionCoordinationService = serviceScope.ServiceProvider.GetRequiredService<ISessionCoordinationService>();
 
-                var found = Int32.MaxValue;
+                var found = int.MaxValue;
 
                 while (found > 0)
                 {

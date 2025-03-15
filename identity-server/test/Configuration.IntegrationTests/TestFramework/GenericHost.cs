@@ -14,7 +14,11 @@ public class GenericHost
 {
     public GenericHost(string baseAddress = "https://server")
     {
-        if (baseAddress.EndsWith('/')) baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        if (baseAddress.EndsWith('/'))
+        {
+            baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        }
+
         _baseAddress = baseAddress;
     }
 
@@ -43,7 +47,11 @@ public class GenericHost
 
     public string Url(string path = "")
     {
-        if (!path.StartsWith('/')) path = "/" + path;
+        if (!path.StartsWith('/'))
+        {
+            path = "/" + path;
+        }
+
         return _baseAddress + path;
     }
 
@@ -75,7 +83,7 @@ public class GenericHost
     public event Action<IServiceCollection> OnConfigureServices = services => { };
     public event Action<WebApplication> OnConfigure = app => { };
 
-    void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging(options =>
         {
@@ -86,7 +94,7 @@ public class GenericHost
         OnConfigureServices(services);
     }
 
-    void ConfigureApp(WebApplication app)
+    private void ConfigureApp(WebApplication app)
     {
         _appServices = app.Services;
 

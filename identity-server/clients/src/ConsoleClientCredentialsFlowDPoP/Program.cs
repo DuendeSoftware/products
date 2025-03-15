@@ -17,7 +17,10 @@ builder.AddServiceDefaults();
 var discoClient = new HttpClient();
 
 var disco = await discoClient.GetDiscoveryDocumentAsync(Constants.Authority);
-if (disco.IsError) throw new Exception(disco.Error);
+if (disco.IsError)
+{
+    throw new Exception(disco.Error);
+}
 
 var jwkJson = CreateDPoPKey();
 var client = GetHttpClient(disco.TokenEndpoint, jwkJson);

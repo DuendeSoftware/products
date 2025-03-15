@@ -274,4 +274,4 @@ void WriteWorkflow(Workflow workflow, string fileName)
     Console.WriteLine($"Wrote workflow to {filePath}");
 }
 
-record Product(string Name, string Solution, string TagPrefix, bool EnablePlaywright = false);
+internal record Product(string Name, string Solution, string TagPrefix, bool EnablePlaywright = false);

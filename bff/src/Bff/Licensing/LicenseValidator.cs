@@ -14,21 +14,21 @@ namespace Duende;
 // shared APIs needed for Duende license validation
 internal partial class LicenseValidator
 {
-    static readonly string[] LicenseFileNames = new[]
+    private static readonly string[] LicenseFileNames = new[]
     {
         "Duende_License.key",
         "Duende_IdentityServer_License.key",
     };
 
-    static ILogger Logger;
-    static Action<string, object[]> ErrorLog;
-    static Action<string, object[]> InformationLog;
-    static Action<string, object[]> WarningLog;
-    static Action<string, object[]> DebugLog;
+    private static ILogger Logger;
+    private static Action<string, object[]> ErrorLog;
+    private static Action<string, object[]> InformationLog;
+    private static Action<string, object[]> WarningLog;
+    private static Action<string, object[]> DebugLog;
 
-    static License License;
+    private static License License;
 
-    static void Initalize(ILoggerFactory loggerFactory, string productName, string key, bool isDevelopment = false)
+    private static void Initalize(ILoggerFactory loggerFactory, string productName, string key, bool isDevelopment = false)
     {
         Logger = loggerFactory.CreateLogger($"Duende.{productName}.License");
 
@@ -65,7 +65,10 @@ internal partial class LicenseValidator
 
     public static void ValidateLicense()
     {
-        if (Logger == null) throw new Exception("LicenseValidator.Initalize has not yet been called.");
+        if (Logger == null)
+        {
+            throw new Exception("LicenseValidator.Initalize has not yet been called.");
+        }
 
         var errors = new List<string>();
 
@@ -124,7 +127,7 @@ internal partial class LicenseValidator
 
     internal static License ValidateKey(string licenseKey)
     {
-        if (!String.IsNullOrWhiteSpace(licenseKey))
+        if (!string.IsNullOrWhiteSpace(licenseKey))
         {
             var handler = new JsonWebTokenHandler();
 

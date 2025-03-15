@@ -38,7 +38,10 @@ public class SessionCleanupHost : IHostedService
     {
         if (_options.EnableSessionCleanup)
         {
-            if (_source != null) throw new InvalidOperationException("Already started. Call Stop first.");
+            if (_source != null)
+            {
+                throw new InvalidOperationException("Already started. Call Stop first.");
+            }
 
             if (IsIUserSessionStoreCleanupRegistered())
             {
@@ -108,7 +111,7 @@ public class SessionCleanupHost : IHostedService
         }
     }
 
-    async Task RunAsync(CancellationToken cancellationToken = default)
+    private async Task RunAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -124,7 +127,7 @@ public class SessionCleanupHost : IHostedService
         }
     }
 
-    bool IsIUserSessionStoreCleanupRegistered()
+    private bool IsIUserSessionStoreCleanupRegistered()
     {
         var isService = _serviceProvider.GetRequiredService<IServiceProviderIsService>();
         return isService.IsService(typeof(IUserSessionStoreCleanup));

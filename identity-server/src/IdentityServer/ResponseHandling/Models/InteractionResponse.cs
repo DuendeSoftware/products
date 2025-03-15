@@ -39,8 +39,16 @@ public class InteractionResponse
     {
         get
         {
-            if (IsError) return InteractionResponseType.Error;
-            if (IsLogin || IsConsent || IsCreateAccount || IsRedirect) return InteractionResponseType.UserInteraction;
+            if (IsError)
+            {
+                return InteractionResponseType.Error;
+            }
+
+            if (IsLogin || IsConsent || IsCreateAccount || IsRedirect)
+            {
+                return InteractionResponseType.UserInteraction;
+            }
+
             return InteractionResponseType.None;
         }
     }

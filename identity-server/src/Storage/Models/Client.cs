@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 #nullable enable
 
 using System.Collections;
@@ -406,7 +405,10 @@ public class Client
         }
 
         // single grant type, seems to be fine
-        if (grantTypes.Count() == 1) return;
+        if (grantTypes.Count() == 1)
+        {
+            return;
+        }
 
         // don't allow duplicate grant types
         if (grantTypes.Count() != grantTypes.Distinct().Count())
@@ -452,7 +454,11 @@ public class Client
         private ICollection<string> CloneWith(params string[] values)
         {
             var clone = Clone();
-            foreach (var item in values) clone.Add(item);
+            foreach (var item in values)
+            {
+                clone.Add(item);
+            }
+
             return clone;
         }
 

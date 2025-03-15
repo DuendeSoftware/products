@@ -21,8 +21,8 @@ namespace Duende.IdentityServer.Validation;
 /// </summary>
 public class DefaultDPoPProofValidator : IDPoPProofValidator
 {
-    const string ReplayCachePurpose = "DPoPReplay-jti-";
-    const string DataProtectorPurpose = "DPoPProofValidation-nonce";
+    private const string ReplayCachePurpose = "DPoPReplay-jti-";
+    private const string DataProtectorPurpose = "DPoPProofValidation-nonce";
 
     /// <summary>
     /// The options
@@ -73,7 +73,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         try
         {
-            if (String.IsNullOrEmpty(context?.ProofToken))
+            if (string.IsNullOrEmpty(context?.ProofToken))
             {
                 result.IsError = true;
                 result.ErrorDescription = "Missing DPoP proof value.";
@@ -289,7 +289,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
                 result.AccessTokenHash = ath as string;
             }
 
-            if (String.IsNullOrEmpty(result.AccessTokenHash))
+            if (string.IsNullOrEmpty(result.AccessTokenHash))
             {
                 result.IsError = true;
                 result.ErrorDescription = "Invalid 'ath' value.";
@@ -313,7 +313,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             result.TokenId = jti as string;
         }
 
-        if (String.IsNullOrEmpty(result.TokenId))
+        if (string.IsNullOrEmpty(result.TokenId))
         {
             result.IsError = true;
             result.ErrorDescription = "Invalid 'jti' value.";
@@ -505,7 +505,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         try
         {
             var value = DataProtector.Unprotect(result.Nonce);
-            if (Int64.TryParse(value, out long iat))
+            if (long.TryParse(value, out var iat))
             {
                 return ValueTask.FromResult(iat);
             }

@@ -567,7 +567,7 @@ public class DefaultPersistedGrantServiceTests
         grants.First().Scopes.ShouldBe(["foo1", "foo2"]);
     }
 
-    class CorruptingPersistedGrantStore : IPersistedGrantStore
+    private class CorruptingPersistedGrantStore : IPersistedGrantStore
     {
         public string ClientIdToCorrupt { get; set; }
 

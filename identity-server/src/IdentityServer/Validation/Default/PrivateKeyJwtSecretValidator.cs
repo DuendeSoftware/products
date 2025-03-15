@@ -194,7 +194,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
 
     private bool AudiencesMatchIgnoringTrailingSlash(string tokenAudience, string validAudience)
     {
-        int length = -1;
+        var length = -1;
 
         if (validAudience.Length == tokenAudience.Length + 1 &&
             validAudience.EndsWith("/", StringComparison.InvariantCulture))

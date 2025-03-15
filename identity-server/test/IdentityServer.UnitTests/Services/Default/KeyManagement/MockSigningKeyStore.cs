@@ -7,7 +7,7 @@ using Duende.IdentityServer.Stores;
 
 namespace UnitTests.Services.Default.KeyManagement;
 
-class MockSigningKeyStore : ISigningKeyStore
+internal class MockSigningKeyStore : ISigningKeyStore
 {
     public List<SerializedKey> Keys { get; set; } = new List<SerializedKey>();
     public bool LoadKeysAsyncWasCalled { get; set; }

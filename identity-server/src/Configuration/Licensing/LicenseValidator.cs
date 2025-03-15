@@ -16,7 +16,7 @@ namespace Duende;
 internal class LicenseValidator<T>
     where T : License, new()
 {
-    static readonly string[] LicenseFileNames = new[]
+    private static readonly string[] LicenseFileNames = new[]
     {
         "Duende_License.key",
         "Duende_IdentityServer_License.key",
@@ -31,7 +31,7 @@ internal class LicenseValidator<T>
     protected T License { get; private set; }
 
     // cloned copy meant to be accessible in DI
-    T _copy;
+    private T _copy;
     public T GetLicense()
     {
         if (_copy == null && License != null)
@@ -142,7 +142,7 @@ internal class LicenseValidator<T>
 
     internal T ValidateKey(string licenseKey)
     {
-        if (!String.IsNullOrWhiteSpace(licenseKey))
+        if (!string.IsNullOrWhiteSpace(licenseKey))
         {
             var handler = new JsonWebTokenHandler();
 

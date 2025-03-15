@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
-class DynamicSchemeAuthenticationMiddleware
+internal class DynamicSchemeAuthenticationMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly DynamicProviderOptions _options;

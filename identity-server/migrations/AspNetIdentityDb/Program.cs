@@ -6,7 +6,7 @@ using Microsoft.AspNetCore;
 
 namespace SqlServer;
 
-class Program
+internal class Program
 {
     public static void Main(string[] args)
     {

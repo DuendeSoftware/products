@@ -134,7 +134,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         };
         var requestId = await _mockStore.CreateRequestAsync(req);
 
-        Func<Task> f = async () => await _subject.CompleteLoginRequestAsync(null);
+        var f = async () => await _subject.CompleteLoginRequestAsync(null);
         await f.ShouldThrowAsync<ArgumentNullException>();
     }
 
@@ -150,7 +150,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         };
         var requestId = await _mockStore.CreateRequestAsync(req);
 
-        Func<Task> f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
+        var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
             Description = "desc",
             ScopesValuesConsented = new string[] { "scope1", "invalid" },
@@ -180,7 +180,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         };
         var requestId = await _mockStore.CreateRequestAsync(req);
 
-        Func<Task> f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
+        var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
             Description = "desc",
             ScopesValuesConsented = new string[] { "scope1", "invalid" },
@@ -209,7 +209,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         };
         var requestId = await _mockStore.CreateRequestAsync(req);
 
-        Func<Task> f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
+        var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
             Description = "desc",
             ScopesValuesConsented = new string[] { "scope1", "invalid" },
@@ -238,7 +238,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         };
         var requestId = await _mockStore.CreateRequestAsync(req);
 
-        Func<Task> f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest("invalid")
+        var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest("invalid")
         {
             Description = "desc",
             ScopesValuesConsented = new string[] { "scope1", "invalid" },

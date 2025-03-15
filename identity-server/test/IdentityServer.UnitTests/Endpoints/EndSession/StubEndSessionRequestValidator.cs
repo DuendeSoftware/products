@@ -8,7 +8,7 @@ using Duende.IdentityServer.Validation;
 
 namespace UnitTests.Endpoints.EndSession;
 
-class StubEndSessionRequestValidator : IEndSessionRequestValidator
+internal class StubEndSessionRequestValidator : IEndSessionRequestValidator
 {
     public EndSessionValidationResult EndSessionValidationResult { get; set; } = new EndSessionValidationResult();
     public EndSessionCallbackValidationResult EndSessionCallbackValidationResult { get; set; } = new EndSessionCallbackValidationResult();

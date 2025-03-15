@@ -15,7 +15,7 @@ namespace Duende.IdentityServer.Configuration;
 /// </summary>
 public class DynamicProviderOptions
 {
-    Dictionary<string, DynamicProviderType> _providers = new Dictionary<string, DynamicProviderType>();
+    private Dictionary<string, DynamicProviderType> _providers = new Dictionary<string, DynamicProviderType>();
 
     /// <summary>
     /// Prefix in the pipeline for callbacks from external providers. Defaults to "/federation".
@@ -57,7 +57,10 @@ public class DynamicProviderOptions
         where TOptions : AuthenticationSchemeOptions, new()
         where TIdentityProvider : IdentityProvider
     {
-        if (_providers.ContainsKey(type)) throw new Exception($"Type '{type}' already configured.");
+        if (_providers.ContainsKey(type))
+        {
+            throw new Exception($"Type '{type}' already configured.");
+        }
 
         _providers.Add(type, new DynamicProviderType
         {

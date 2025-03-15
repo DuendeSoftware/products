@@ -71,7 +71,11 @@ public class CachingResourceStore<T> : IResourceStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.GetKey");
 
-        if (names == null || !names.Any()) return string.Empty;
+        if (names == null || !names.Any())
+        {
+            return string.Empty;
+        }
+
         return "sha256-" + names.OrderBy(x => x).Aggregate((x, y) => x + "," + y).Sha256();
     }
 
@@ -194,7 +198,7 @@ public class CachingResourceStore<T> : IResourceStore
     }
 
 
-    async Task<IEnumerable<TItem>> FindItemsAsync<TItem>(
+    private async Task<IEnumerable<TItem>> FindItemsAsync<TItem>(
         IEnumerable<string> names,
         ICache<TItem> cache,
         Func<IEnumerable<string>, Task<Resources>> getResourcesFunc,

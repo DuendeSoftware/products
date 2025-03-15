@@ -21,7 +21,7 @@ public class AddServerManagementClaimsTransform(IHttpContextAccessor httpContext
 
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+        var claimsIdentity = new ClaimsIdentity();
         if (!principal.HasClaim(claim => claim.Type == Constants.ClaimTypes.LogoutUrl))
         {
             var sessionId = principal.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.SessionId)?.Value;

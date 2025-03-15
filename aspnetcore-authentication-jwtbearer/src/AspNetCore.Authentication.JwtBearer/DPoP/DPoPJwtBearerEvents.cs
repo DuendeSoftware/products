@@ -111,7 +111,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
         }
     }
 
-    const string DPoPPrefix = OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP + " ";
+    private const string DPoPPrefix = OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP + " ";
 
     /// <summary>
     /// Checks if the HTTP authorization header's 'scheme' is DPoP.

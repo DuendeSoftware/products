@@ -22,13 +22,13 @@ public class CibaTests
 {
     private const string Category = "Backchannel Authentication (CIBA) endpoint";
 
-    IdentityServerPipeline _mockPipeline = new();
-    MockCibaUserValidator _mockCibaUserValidator = new();
-    MockCibaUserNotificationService _mockCibaUserNotificationService = new();
-    MockCustomBackchannelAuthenticationValidator _mockCustomBackchannelAuthenticationValidator = new();
+    private IdentityServerPipeline _mockPipeline = new();
+    private MockCibaUserValidator _mockCibaUserValidator = new();
+    private MockCibaUserNotificationService _mockCibaUserNotificationService = new();
+    private MockCustomBackchannelAuthenticationValidator _mockCustomBackchannelAuthenticationValidator = new();
 
-    TestUser _user;
-    Client _cibaClient;
+    private TestUser _user;
+    private Client _cibaClient;
 
     public CibaTests()
     {
@@ -114,13 +114,14 @@ public class CibaTests
         var ci = new ClaimsIdentity(claims, "ciba");
         _mockCibaUserValidator.Result.Subject = new ClaimsPrincipal(ci);
     }
-    string CreateRequestObject(IDictionary<string, string> values)
+
+    private string CreateRequestObject(IDictionary<string, string> values)
     {
         var claims = new List<Claim>();
 
         foreach (var item in values)
         {
-            if (!String.IsNullOrWhiteSpace(item.Value))
+            if (!string.IsNullOrWhiteSpace(item.Value))
             {
                 claims.Add(new Claim(item.Key, item.Value));
             }
@@ -1016,7 +1017,7 @@ public class CibaTests
             { "scope", "openid profile scope1 offline_access" },
             { "login_hint", "this means bob" },
             { "binding_message", bindingMessage },
-            { "resource", new String('x', 2000) },
+            { "resource", new string('x', 2000) },
         };
 
         SetValidatedUser();

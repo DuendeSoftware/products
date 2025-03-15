@@ -24,7 +24,8 @@ internal partial class LicenseValidator
             errors.Add($"Your Duende software license does not include the BFF feature.");
         }
     }
-    static void WarnForProductFeaturesWhenMissingLicense()
+
+    private static void WarnForProductFeaturesWhenMissingLicense()
     {
         // none
     }

@@ -34,7 +34,7 @@ public class EndSessionCallbackResult : EndpointResult<EndSessionCallbackResult>
     }
 }
 
-class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCallbackResult>
+internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCallbackResult>
 {
     public EndSessionCallbackHttpWriter(IdentityServerOptions options)
     {
@@ -70,7 +70,10 @@ class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCallbackResul
                 foreach (var origin in origins.Distinct())
                 {
                     sb.Append(origin);
-                    if (sb.Length > 0) sb.Append(' ');
+                    if (sb.Length > 0)
+                    {
+                        sb.Append(' ');
+                    }
                 }
             }
 

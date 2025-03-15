@@ -44,7 +44,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         _logger = logger;
     }
 
-    async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request)
+    private async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request)
     {
         if (request == null)
         {

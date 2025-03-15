@@ -90,7 +90,7 @@ public class DistributedCacheStateDataFormatter : ISecureDataFormat<Authenticati
     /// <returns></returns>
     public AuthenticationProperties Unprotect(string protectedText, string purpose)
     {
-        if (String.IsNullOrWhiteSpace(protectedText))
+        if (string.IsNullOrWhiteSpace(protectedText))
         {
             return null;
         }

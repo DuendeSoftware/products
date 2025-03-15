@@ -136,12 +136,12 @@ public class ClientMappersTests
             .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
-    enum TestEnum
+    private enum TestEnum
     {
         Foo, Bar
     }
 
-    class ExtendedClientEntity : Entities.Client
+    private class ExtendedClientEntity : Entities.Client
     {
         public int Number { get; set; }
         public bool Flag { get; set; }
@@ -167,7 +167,7 @@ public class ClientMappersTests
         }
     }
 
-    class ExtendedClientModel : Models.Client
+    private class ExtendedClientModel : Models.Client
     {
         public ExtendedClientEntity ToExtendedEntity()
         {

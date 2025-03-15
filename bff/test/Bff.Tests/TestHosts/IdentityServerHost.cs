@@ -23,12 +23,14 @@ public class IdentityServerHost : GenericHost
     }
 
     public List<Client> Clients { get; set; } = new();
+
     public List<IdentityResource> IdentityResources { get; set; } = new()
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
             new IdentityResources.Email(),
         };
+
     public List<ApiScope> ApiScopes { get; set; } = new();
 
     private void ConfigureServices(IServiceCollection services)
@@ -104,7 +106,7 @@ public class IdentityServerHost : GenericHost
     {
         var props = new AuthenticationProperties();
 
-        if (!String.IsNullOrWhiteSpace(sid))
+        if (!string.IsNullOrWhiteSpace(sid))
         {
             props.Items.Add("session_id", sid);
         }

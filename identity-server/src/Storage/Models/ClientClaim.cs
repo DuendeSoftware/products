@@ -64,7 +64,7 @@ public class ClientClaim
     {
         unchecked
         {
-            int hash = 17;
+            var hash = 17;
 
             hash = hash * 23 + Value.GetHashCode();
             hash = hash * 23 + Type.GetHashCode();
@@ -76,7 +76,11 @@ public class ClientClaim
     /// <inheritdoc/>
     public override bool Equals(object? obj)
     {
-        if (obj is null) return false;
+        if (obj is null)
+        {
+            return false;
+        }
+
         if (obj is ClientClaim c)
         {
             return (string.Equals(Type, c.Type, StringComparison.Ordinal) &&

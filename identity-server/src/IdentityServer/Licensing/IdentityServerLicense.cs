@@ -120,7 +120,7 @@ public class IdentityServerLicense : License
                 }
             }
 
-            if (Int32.TryParse(claims.FindFirst("client_limit")?.Value, out var clientLimit))
+            if (int.TryParse(claims.FindFirst("client_limit")?.Value, out var clientLimit))
             {
                 // explicit, so use that value
                 ClientLimit = clientLimit;
@@ -145,7 +145,7 @@ public class IdentityServerLicense : License
             // default 
             IssuerLimit = 1;
 
-            if (Int32.TryParse(claims.FindFirst("issuer_limit")?.Value, out var issuerLimit))
+            if (int.TryParse(claims.FindFirst("issuer_limit")?.Value, out var issuerLimit))
             {
                 IssuerLimit = issuerLimit;
             }

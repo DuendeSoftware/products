@@ -8,7 +8,7 @@ namespace Duende.AspNetCore.TestFramework;
 
 public class TestBrowserClient : HttpClient
 {
-    class CookieHandler(HttpMessageHandler next) : DelegatingHandler(next)
+    private class CookieHandler(HttpMessageHandler next) : DelegatingHandler(next)
     {
         public CookieContainer CookieContainer { get; } = new();
         public Uri CurrentUri { get; private set; } = default!;
@@ -18,7 +18,7 @@ public class TestBrowserClient : HttpClient
             CancellationToken cancellationToken)
         {
             CurrentUri = request.RequestUri!;
-            string cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri!);
+            var cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri!);
             if (!string.IsNullOrEmpty(cookieHeader))
             {
                 request.Headers.Add("Cookie", cookieHeader);
@@ -253,7 +253,11 @@ public class HtmlForm(string? action = null)
     {
         get
         {
-            if (Inputs.TryGetValue(key, out var item)) return item;
+            if (Inputs.TryGetValue(key, out var item))
+            {
+                return item;
+            }
+
             return null;
         }
         set

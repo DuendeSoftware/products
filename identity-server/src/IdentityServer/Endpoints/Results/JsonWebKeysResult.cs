@@ -43,7 +43,7 @@ public class JsonWebKeysResult : EndpointResult<JsonWebKeysResult>
     }
 }
 
-class JsonWebKeysHttpWriter : IHttpResponseWriter<JsonWebKeysResult>
+internal class JsonWebKeysHttpWriter : IHttpResponseWriter<JsonWebKeysResult>
 {
     public Task WriteHttpResponse(JsonWebKeysResult result, HttpContext context)
     {

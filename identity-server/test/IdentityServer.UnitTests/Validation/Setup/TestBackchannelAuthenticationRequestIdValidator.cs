@@ -19,8 +19,14 @@ internal class TestBackchannelAuthenticationRequestIdValidator : IBackchannelAut
 
     public Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context)
     {
-        if (shouldError) context.Result = new TokenRequestValidationResult(context.Request, "error");
-        else context.Result = new TokenRequestValidationResult(context.Request);
+        if (shouldError)
+        {
+            context.Result = new TokenRequestValidationResult(context.Request, "error");
+        }
+        else
+        {
+            context.Result = new TokenRequestValidationResult(context.Request);
+        }
 
         //context.Request.DeviceCode = DeviceCodeResult;
 

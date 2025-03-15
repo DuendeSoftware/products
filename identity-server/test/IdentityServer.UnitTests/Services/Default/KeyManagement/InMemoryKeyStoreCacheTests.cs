@@ -8,8 +8,8 @@ namespace UnitTests.Services.Default.KeyManagement;
 
 public class InMemoryKeyStoreCacheTests
 {
-    InMemoryKeyStoreCache _subject;
-    MockClock _mockClock = new MockClock(new DateTime(2018, 3, 1, 9, 0, 0));
+    private InMemoryKeyStoreCache _subject;
+    private MockClock _mockClock = new MockClock(new DateTime(2018, 3, 1, 9, 0, 0));
 
     public InMemoryKeyStoreCacheTests()
     {

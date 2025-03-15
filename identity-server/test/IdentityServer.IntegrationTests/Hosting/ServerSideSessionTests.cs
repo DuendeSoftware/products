@@ -122,7 +122,7 @@ public class ServerSideSessionTests
         _protector = _pipeline.Resolve<IDataProtectionProvider>().CreateProtector("Duende.SessionManagement.ServerSideTicketStore");
     }
 
-    async Task<bool> IsLoggedIn()
+    private async Task<bool> IsLoggedIn()
     {
         var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + "/user");
         return response.StatusCode == System.Net.HttpStatusCode.OK;
