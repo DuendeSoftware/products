@@ -22,3 +22,5 @@ dotnet_diagnostic.IDE0161.severity = error  # Use file-scoped namespace
 csharp_style_namespace_declarations = file_scoped:error
 
 dotnet_diagnostic.IDE0003.severity = error # Enforce that 'this.' should not be used when it's redundant
+
+dotnet_diagnostic.IDE0049.severity = error # Enforce using built-in type keywords (e.g., 'string' instead of 'String')
