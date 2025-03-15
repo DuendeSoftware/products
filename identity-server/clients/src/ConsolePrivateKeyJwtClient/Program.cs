@@ -72,7 +72,10 @@ static async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential
     var client = new HttpClient();
 
     var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var clientToken = CreateClientToken(credential, "client.jwt", disco.TokenEndpoint);
 
@@ -88,7 +91,11 @@ static async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential
             }
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 

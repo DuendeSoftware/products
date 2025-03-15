@@ -40,7 +40,11 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
     public string Url(string? path = null)
     {
         path ??= string.Empty;
-        if (!path.StartsWith("/")) path = "/" + path;
+        if (!path.StartsWith("/"))
+        {
+            path = "/" + path;
+        }
+
         return _baseAddress + path;
     }
 
@@ -147,9 +151,11 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
             await next();
         });
     }
+
     ClaimsPrincipal? _userToSignIn;
     AuthenticationProperties? _propsToSignIn;
-    public async virtual Task IssueSessionCookieAsync(params Claim[] claims)
+
+    public virtual async Task IssueSessionCookieAsync(params Claim[] claims)
     {
         _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
         var response = await BrowserClient.GetAsync(Url("__signin"));

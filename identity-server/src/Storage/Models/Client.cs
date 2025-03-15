@@ -405,7 +405,10 @@ public class Client
         }
 
         // single grant type, seems to be fine
-        if (grantTypes.Count() == 1) return;
+        if (grantTypes.Count() == 1)
+        {
+            return;
+        }
 
         // don't allow duplicate grant types
         if (grantTypes.Count() != grantTypes.Distinct().Count())

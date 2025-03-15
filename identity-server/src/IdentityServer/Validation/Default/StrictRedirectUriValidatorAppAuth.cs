@@ -31,10 +31,16 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
     public override async Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context)
     {
         var isAllowed = await base.IsRedirectUriValidAsync(context);
-        if (isAllowed) return isAllowed;
+        if (isAllowed)
+        {
+            return isAllowed;
+        }
 
         // since this is appauth specific, we can require pkce
-        if (context.Client.RequirePkce && context.Client.RedirectUris.Contains("http://127.0.0.1")) return IsLoopback(context.RequestedUri);
+        if (context.Client.RequirePkce && context.Client.RedirectUris.Contains("http://127.0.0.1"))
+        {
+            return IsLoopback(context.RequestedUri);
+        }
 
         return false;
     }
@@ -50,10 +56,16 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
     public override async Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client)
     {
         var isAllowed = await base.IsPostLogoutRedirectUriValidAsync(requestedUri, client);
-        if (isAllowed) return isAllowed;
+        if (isAllowed)
+        {
+            return isAllowed;
+        }
 
         // since this is appauth specific, we can require pkce
-        if (client.RequirePkce && client.PostLogoutRedirectUris.Contains("http://127.0.0.1")) return IsLoopback(requestedUri);
+        if (client.RequirePkce && client.PostLogoutRedirectUris.Contains("http://127.0.0.1"))
+        {
+            return IsLoopback(requestedUri);
+        }
 
         return false;
     }

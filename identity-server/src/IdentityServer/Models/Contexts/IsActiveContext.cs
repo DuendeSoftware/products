@@ -21,7 +21,10 @@ public class IsActiveContext
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(client);
-        if (caller.IsMissing()) throw new ArgumentNullException(nameof(caller));
+        if (caller.IsMissing())
+        {
+            throw new ArgumentNullException(nameof(caller));
+        }
 
         Subject = subject;
         Client = client;

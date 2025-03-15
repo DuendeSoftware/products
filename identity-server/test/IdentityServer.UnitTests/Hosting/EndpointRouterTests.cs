@@ -129,8 +129,15 @@ public class EndpointRouterTests
     {
         public object GetService(Type serviceType)
         {
-            if (serviceType == typeof(MyEndpointHandler)) return new MyEndpointHandler();
-            if (serviceType == typeof(MyOtherEndpointHandler)) return new MyOtherEndpointHandler();
+            if (serviceType == typeof(MyEndpointHandler))
+            {
+                return new MyEndpointHandler();
+            }
+
+            if (serviceType == typeof(MyOtherEndpointHandler))
+            {
+                return new MyOtherEndpointHandler();
+            }
 
             throw new InvalidOperationException();
         }

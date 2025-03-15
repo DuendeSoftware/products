@@ -7,14 +7,18 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // These hosts don't require additional infrastructure
 if (HostIsEnabled(nameof(Projects.Host_Main)))
+{
     builder
         .AddProject<Projects.Host_Main>("host-main")
         .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
+}
 
 if (HostIsEnabled(nameof(Projects.Host_Configuration)))
+{
     builder
         .AddProject<Projects.Host_Configuration>("host-configuration")
         .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
+}
 
 // These hosts require a database
 if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(Projects.Host_EntityFramework)))
@@ -62,93 +66,149 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
 // ** Console-ScopesResources client ommitted as it currently requires interaction **
 
 if (ClientIsEnabled(nameof(Projects.MvcCode)))
+{
     builder.AddProject<Projects.MvcCode>(name: "mvc-code");
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcDPoP)))
+{
     builder.AddProject<Projects.MvcDPoP>(name: "mvc-dpop");
+}
 
 if (ClientIsEnabled(nameof(Projects.JsOidc)))
+{
     builder.AddProject<Projects.JsOidc>(name: "js-oidc");
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcAutomaticTokenManagement)))
+{
     builder.AddProject<Projects.MvcAutomaticTokenManagement>(name: "mvc-automatic-token-management");
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcHybridBackChannel)))
+{
     builder.AddProject<Projects.MvcHybridBackChannel>(name: "mvc-hybrid-backchannel");
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcJarJwt)))
+{
     builder.AddProject<Projects.MvcJarJwt>(name: "mvc-jar-jwt");
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcJarUriJwt)))
+{
     builder.AddProject<Projects.MvcJarUriJwt>(name: "mvc-jar-uri-jwt");
+}
 
 // These clients require a manual start
 if (ClientIsEnabled(nameof(Projects.ConsoleCibaClient)))
+{
     builder.AddProject<Projects.ConsoleCibaClient>(name: "console-ciba-client").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleDeviceFlow)))
+{
     builder.AddProject<Projects.ConsoleDeviceFlow>(name: "console-device-flow").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlow)))
+{
     builder.AddProject<Projects.ConsoleClientCredentialsFlow>(name: "console-client-credentials-flow").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi)))
+{
     builder.AddProject<Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi>(name: "console-client-credentials-flow-callingidentityserverapi").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlowPostBody)))
+{
     builder.AddProject<Projects.ConsoleClientCredentialsFlowPostBody>("console-client-credentials-flow-postbody").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlowDPoP)))
+{
     builder.AddProject<Projects.ConsoleClientCredentialsFlowDPoP>("console-client-credentials-flow-dpop").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleDcrClient)))
+{
     builder.AddProject<Projects.ConsoleDcrClient>("console-dcr-client").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleEphemeralMtlsClient)))
+{
     builder.AddProject<Projects.ConsoleEphemeralMtlsClient>("console-ephemeral-mtls-client").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleExtensionGrant)))
+{
     builder.AddProject<Projects.ConsoleExtensionGrant>("console-extension-grant").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleIntrospectionClient)))
+{
     builder.AddProject<Projects.ConsoleIntrospectionClient>("console-introspection-client").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleMTLSClient)))
+{
     builder.AddProject<Projects.ConsoleMTLSClient>("console-mtls-client").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsolePrivateKeyJwtClient)))
+{
     builder.AddProject<Projects.ConsolePrivateKeyJwtClient>("console-private-key-jwt-client").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlow)))
+{
     builder.AddProject<Projects.ConsoleResourceOwnerFlow>("console-resource-owner-flow").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowPublic)))
+{
     builder.AddProject<Projects.ConsoleResourceOwnerFlowPublic>("console-resource-owner-flow-public").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowReference)))
+{
     builder.AddProject<Projects.ConsoleResourceOwnerFlowReference>("console-resource-owner-flow-reference").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowRefreshToken)))
+{
     builder.AddProject<Projects.ConsoleResourceOwnerFlowRefreshToken>("console-resource-owner-flow-refresh-token").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowUserInfo)))
+{
     builder.AddProject<Projects.ConsoleResourceOwnerFlowUserInfo>("console-resource-owner-flow-userinfo").WithExplicitStart();
+}
 
 if (ClientIsEnabled(nameof(Projects.WindowsConsoleSystemBrowser)))
+{
     builder.AddProject<Projects.WindowsConsoleSystemBrowser>(name: "console-system-browser").WithExplicitStart();
+}
 
 #endregion
 
 #region API Projects
 
 if (ApiIsEnabled(nameof(Projects.SimpleApi)))
+{
     builder.AddProject<Projects.SimpleApi>(name: "simple-api");
+}
 
 if (ApiIsEnabled(nameof(Projects.ResourceBasedApi)))
+{
     builder.AddProject<Projects.ResourceBasedApi>("resource-based-api");
+}
 
 if (ApiIsEnabled(nameof(Projects.DPoPApi)))
+{
     builder.AddProject<Projects.DPoPApi>(name: "dpop-api");
+}
 
 #endregion
 

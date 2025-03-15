@@ -32,7 +32,11 @@ public class DPoPProofValidatorTests
     {
         get
         {
-            if (_now > DateTime.MinValue) return _now;
+            if (_now > DateTime.MinValue)
+            {
+                return _now;
+            }
+
             return DateTime.UtcNow;
         }
     }

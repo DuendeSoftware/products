@@ -75,7 +75,9 @@ public class IdentityServerBuilderExtensionsCryptoTests
         var filename = Path.Combine(Directory.GetCurrentDirectory(), "tempkey.rsa");
 
         if (File.Exists(filename))
+        {
             File.Delete(filename);
+        }
     }
 
     [Fact]
@@ -97,7 +99,9 @@ public class IdentityServerBuilderExtensionsCryptoTests
             var filename = Path.Combine(Directory.GetCurrentDirectory(), "tempkey.rsa");
 
             if (File.Exists(filename))
+            {
                 File.Delete(filename);
+            }
         }
     }
 

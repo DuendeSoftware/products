@@ -100,7 +100,10 @@ public class DefaultCache<T> : ICache<T>
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.GetOrAdd");
 
         ArgumentNullException.ThrowIfNull(get);
-        if (key == null) return null;
+        if (key == null)
+        {
+            return null;
+        }
 
         var item = await GetAsync(key);
 

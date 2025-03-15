@@ -49,7 +49,10 @@ public class HomeController : Controller
     public async Task<IActionResult> RenewTokens()
     {
         var disco = await _discoveryCache.GetAsync();
-        if (disco.IsError) throw new Exception(disco.Error);
+        if (disco.IsError)
+        {
+            throw new Exception(disco.Error);
+        }
 
         var rt = await HttpContext.GetTokenAsync("refresh_token");
         var tokenClient = _httpClientFactory.CreateClient();

@@ -132,7 +132,10 @@ public class AppHostFixture : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        if (_app != null) await _app.DisposeAsync();
+        if (_app != null)
+        {
+            await _app.DisposeAsync();
+        }
     }
 
     public IDisposable ConnectLogger(WriteTestOutput output)
@@ -149,9 +152,7 @@ public class AppHostFixture : IAsyncLifetime
             client.Timeout = TimeSpan.FromMilliseconds(1000);
             var response = await client.GetAsync("https://localhost:17052");
 
-            if (response.IsSuccessStatusCode) return true;
-
-            return false;
+            return response.IsSuccessStatusCode;
         }
         catch (HttpRequestException)
         {
@@ -200,7 +201,11 @@ public class AppHostFixture : IAsyncLifetime
 #else
             // If we're here, that means that we need to create a http client that's pointing to
             // aspire. 
-            if (_app == null) throw new NotSupportedException("App should not be null");
+            if (_app == null)
+            {
+                throw new NotSupportedException("App should not be null");
+            }
+
             var client = _app.CreateHttpClient(clientName);
             baseAddress = client.BaseAddress;
 
@@ -258,7 +263,11 @@ public class AppHostFixture : IAsyncLifetime
         else
         {
 #if !DEBUG_NCRUNCH
-            if (_app == null) throw new NullReferenceException("App should not be null");
+            if (_app == null)
+            {
+                throw new NullReferenceException("App should not be null");
+            }
+
             return _app.GetEndpoint(clientName);
 #else
             Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");

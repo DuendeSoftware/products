@@ -46,8 +46,15 @@ public class IdentityProvider
     /// </summary>
     public IdentityProvider(string type, IdentityProvider other) : this(type)
     {
-        if (other == null) throw new ArgumentNullException(nameof(other));
-        if (other.Type != type) throw new ArgumentException($"Type '{type}' does not match type of other '{other.Type}'");
+        if (other == null)
+        {
+            throw new ArgumentNullException(nameof(other));
+        }
+
+        if (other.Type != type)
+        {
+            throw new ArgumentException($"Type '{type}' does not match type of other '{other.Type}'");
+        }
 
         Scheme = other.Scheme;
         DisplayName = other.DisplayName;

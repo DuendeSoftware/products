@@ -253,7 +253,11 @@ public class HtmlForm(string? action = null)
     {
         get
         {
-            if (Inputs.TryGetValue(key, out var item)) return item;
+            if (Inputs.TryGetValue(key, out var item))
+            {
+                return item;
+            }
+
             return null;
         }
         set

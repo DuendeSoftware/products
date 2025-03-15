@@ -58,7 +58,10 @@ public class DefaultGrantStore<T>
         IHandleGenerationService handleGenerationService,
         ILogger logger)
     {
-        if (grantType.IsMissing()) throw new ArgumentNullException(nameof(grantType));
+        if (grantType.IsMissing())
+        {
+            throw new ArgumentNullException(nameof(grantType));
+        }
 
         GrantType = grantType;
         Store = store;

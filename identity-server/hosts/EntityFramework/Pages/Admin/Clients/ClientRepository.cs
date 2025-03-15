@@ -101,7 +101,10 @@ public class ClientRepository
             .Where(x => x.ClientId == id)
             .SingleOrDefaultAsync();
 
-        if (client == null) return null;
+        if (client == null)
+        {
+            return null;
+        }
 
         return new EditClientModel
         {
@@ -156,7 +159,10 @@ public class ClientRepository
             .Include(x => x.PostLogoutRedirectUris)
             .SingleOrDefaultAsync(x => x.ClientId == model.ClientId);
 
-        if (client == null) throw new ArgumentException("Invalid Client Id");
+        if (client == null)
+        {
+            throw new ArgumentException("Invalid Client Id");
+        }
 
         if (client.ClientName != model.Name)
         {
@@ -223,7 +229,10 @@ public class ClientRepository
     {
         var client = await _context.Clients.SingleOrDefaultAsync(x => x.ClientId == clientId);
 
-        if (client == null) throw new ArgumentException("Invalid Client Id");
+        if (client == null)
+        {
+            throw new ArgumentException("Invalid Client Id");
+        }
 
         _context.Clients.Remove(client);
         await _context.SaveChangesAsync();

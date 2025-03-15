@@ -29,7 +29,10 @@ public class DefaultScopeParser : IScopeParser
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultScopeParser.ParseScopeValues");
         activity?.SetTag(Tracing.Properties.Scope, scopeValues.ToSpaceSeparatedString());
 
-        if (scopeValues == null) throw new ArgumentNullException(nameof(scopeValues));
+        if (scopeValues == null)
+        {
+            throw new ArgumentNullException(nameof(scopeValues));
+        }
 
         var result = new ParsedScopesResult();
 
