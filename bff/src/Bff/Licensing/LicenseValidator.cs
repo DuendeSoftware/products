@@ -124,7 +124,7 @@ internal partial class LicenseValidator
 
     internal static License ValidateKey(string licenseKey)
     {
-        if (!String.IsNullOrWhiteSpace(licenseKey))
+        if (!string.IsNullOrWhiteSpace(licenseKey))
         {
             var handler = new JsonWebTokenHandler();
 

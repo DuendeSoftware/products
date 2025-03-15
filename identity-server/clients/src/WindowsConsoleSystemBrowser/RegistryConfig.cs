@@ -36,7 +36,7 @@ class RegistryConfig
 
     const string CommandKeyValueName = "";
     const string CommandKeyValueFormat = "\"{0}\" \"%1\"";
-    static string CommandKeyValueValue => String.Format(CommandKeyValueFormat, Assembly.GetExecutingAssembly().Location);
+    static string CommandKeyValueValue => string.Format(CommandKeyValueFormat, Assembly.GetExecutingAssembly().Location);
 
     const string UrlProtocolValueName = "URL Protocol";
     const string UrlProtocolValueValue = "";

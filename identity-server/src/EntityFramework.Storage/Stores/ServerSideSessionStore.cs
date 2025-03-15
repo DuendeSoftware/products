@@ -242,11 +242,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
     private IQueryable<Entities.ServerSideSession> Filter(IQueryable<Entities.ServerSideSession> query, SessionFilter filter)
     {
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
@@ -473,8 +473,8 @@ public class ServerSideSessionStore : IServerSideSessionStore
             var parts = filter.ResultsToken.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (parts != null && parts.Length == 2)
             {
-                Int32.TryParse(parts[0], out first);
-                Int32.TryParse(parts[1], out last);
+                int.TryParse(parts[0], out first);
+                int.TryParse(parts[1], out last);
             }
         }
 
@@ -489,9 +489,9 @@ public class ServerSideSessionStore : IServerSideSessionStore
     /// </summary>
     protected virtual IQueryable<Entities.ServerSideSession> ApplyFilter(IQueryable<Entities.ServerSideSession> query, SessionQuery filter)
     {
-        if (!String.IsNullOrWhiteSpace(filter.DisplayName) ||
-            !String.IsNullOrWhiteSpace(filter.SubjectId) ||
-            !String.IsNullOrWhiteSpace(filter.SessionId))
+        if (!string.IsNullOrWhiteSpace(filter.DisplayName) ||
+            !string.IsNullOrWhiteSpace(filter.SubjectId) ||
+            !string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x =>
                 (filter.SubjectId == null || x.SubjectId.Contains(filter.SubjectId)) &&

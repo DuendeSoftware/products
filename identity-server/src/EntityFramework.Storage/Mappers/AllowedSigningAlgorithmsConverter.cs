@@ -18,7 +18,7 @@ internal static class AllowedSigningAlgorithmsConverter
     public static ICollection<string> Convert(string sourceMember)
     {
         var list = new HashSet<string>();
-        if (!String.IsNullOrWhiteSpace(sourceMember))
+        if (!string.IsNullOrWhiteSpace(sourceMember))
         {
             sourceMember = sourceMember.Trim();
             foreach (var item in sourceMember.Split(',', StringSplitOptions.RemoveEmptyEntries).Distinct())
