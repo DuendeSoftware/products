@@ -73,7 +73,7 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
             {
                 var logoutToken = context.Request.Form[OidcConstants.BackChannelLogoutRequest.LogoutToken].FirstOrDefault();
 
-                if (!String.IsNullOrWhiteSpace(logoutToken))
+                if (!string.IsNullOrWhiteSpace(logoutToken))
                 {
                     var user = await ValidateLogoutTokenAsync(logoutToken);
                     if (user != null)
@@ -133,14 +133,14 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
         }
 
         var nonce = claims.FindFirst("nonce")?.Value;
-        if (!String.IsNullOrWhiteSpace(nonce))
+        if (!string.IsNullOrWhiteSpace(nonce))
         {
             Logger.BackChannelLogoutError("Logout token should not contain nonce claim.");
             return null;
         }
 
         var eventsJson = claims.FindFirst("events")?.Value;
-        if (String.IsNullOrWhiteSpace(eventsJson))
+        if (string.IsNullOrWhiteSpace(eventsJson))
         {
             Logger.BackChannelLogoutError("Logout token missing events claim.");
             return null;

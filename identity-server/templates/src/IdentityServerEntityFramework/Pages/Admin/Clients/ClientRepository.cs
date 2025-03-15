@@ -73,7 +73,7 @@ public class ClientRepository
             .Include(x => x.AllowedGrantTypes)
             .Where(x => x.AllowedGrantTypes.Count == 1 && x.AllowedGrantTypes.Any(grant => grants.Contains(grant.GrantType)));
 
-        if (!String.IsNullOrWhiteSpace(filter))
+        if (!string.IsNullOrWhiteSpace(filter))
         {
             query = query.Where(x => x.ClientId.Contains(filter) || x.ClientName.Contains(filter));
         }
@@ -161,7 +161,7 @@ public class ClientRepository
         }
 
         var scopes = model.AllowedScopes.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
-        var currentScopes = (client.AllowedScopes.Select(x => x.Scope) ?? Enumerable.Empty<String>()).ToArray();
+        var currentScopes = (client.AllowedScopes.Select(x => x.Scope) ?? Enumerable.Empty<string>()).ToArray();
 
         var scopesToAdd = scopes.Except(currentScopes).ToArray();
         var scopesToRemove = currentScopes.Except(scopes).ToArray();

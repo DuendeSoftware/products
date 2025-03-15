@@ -30,7 +30,7 @@ public class BackchannelAuthenticationResponse
     /// <summary>
     /// Indicates if this response represents an error.
     /// </summary>
-    public bool IsError => !String.IsNullOrWhiteSpace(Error);
+    public bool IsError => !string.IsNullOrWhiteSpace(Error);
 
     /// <summary>
     /// Gets or sets the error.

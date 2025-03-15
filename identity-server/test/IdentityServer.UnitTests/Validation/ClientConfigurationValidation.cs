@@ -460,7 +460,7 @@ public class ClientConfigurationValidation
         var result = await ValidateAsync(client);
         result.IsValid.ShouldBeFalse();
         result.ErrorMessage.ShouldContain("invalid origin");
-        if (!String.IsNullOrWhiteSpace(origin))
+        if (!string.IsNullOrWhiteSpace(origin))
         {
             result.ErrorMessage.ShouldContain(origin);
         }

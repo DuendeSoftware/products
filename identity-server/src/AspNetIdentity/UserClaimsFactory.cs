@@ -48,7 +48,7 @@ internal class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
         if (_userManager.SupportsUserEmail)
         {
             var email = await _userManager.GetEmailAsync(user);
-            if (!String.IsNullOrWhiteSpace(email))
+            if (!string.IsNullOrWhiteSpace(email))
             {
                 identity.AddClaims(new[]
                 {
@@ -61,7 +61,7 @@ internal class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
         if (_userManager.SupportsUserPhoneNumber)
         {
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (!String.IsNullOrWhiteSpace(phoneNumber))
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
             {
                 identity.AddClaims(new[]
                 {

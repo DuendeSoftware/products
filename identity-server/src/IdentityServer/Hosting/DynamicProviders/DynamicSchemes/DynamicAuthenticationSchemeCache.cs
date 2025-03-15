@@ -23,7 +23,7 @@ public class DynamicAuthenticationSchemeCache
     /// </summary>
     public void Add(string name, DynamicAuthenticationScheme item)
     {
-        name = name ?? String.Empty;
+        name = name ?? string.Empty;
         _cache.TryAdd(name, item);
     }
 
@@ -32,7 +32,7 @@ public class DynamicAuthenticationSchemeCache
     /// </summary>
     public DynamicAuthenticationScheme Get(string name)
     {
-        name = name ?? String.Empty;
+        name = name ?? string.Empty;
         _cache.TryGetValue(name, out var item);
         return item;
     }

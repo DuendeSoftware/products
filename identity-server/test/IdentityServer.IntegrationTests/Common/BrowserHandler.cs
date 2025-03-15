@@ -15,7 +15,7 @@ public class BrowserHandler : DelegatingHandler
     public bool AllowCookies { get; set; } = true;
     public bool AllowAutoRedirect { get; set; } = true;
     public int ErrorRedirectLimit { get; set; } = 20;
-    public int StopRedirectingAfter { get; set; } = Int32.MaxValue;
+    public int StopRedirectingAfter { get; set; } = int.MaxValue;
 
     public BrowserHandler(HttpMessageHandler next)
         : base(next)
