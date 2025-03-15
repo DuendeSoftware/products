@@ -115,7 +115,7 @@ public abstract class DPoPProofValidatorTestBase
 
     private static byte[] CreateHmacKey()
     {
-        byte[] randomBytes = new byte[64];
+        var randomBytes = new byte[64];
         RandomNumberGenerator.Fill(randomBytes);
         return randomBytes;
     }

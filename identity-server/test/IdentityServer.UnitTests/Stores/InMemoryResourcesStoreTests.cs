@@ -12,21 +12,21 @@ public class InMemoryResourcesStoreTests
     [Fact]
     public void InMemoryResourcesStore_should_throw_if_contains_duplicate_names()
     {
-        List<IdentityResource> identityResources = new List<IdentityResource>
+        var identityResources = new List<IdentityResource>
         {
             new IdentityResource { Name = "A" },
             new IdentityResource { Name = "A" },
             new IdentityResource { Name = "C" }
         };
 
-        List<ApiResource> apiResources = new List<ApiResource>
+        var apiResources = new List<ApiResource>
         {
             new ApiResource { Name = "B" },
             new ApiResource { Name = "B" },
             new ApiResource { Name = "C" }
         };
 
-        List<ApiScope> scopes = new List<ApiScope>
+        var scopes = new List<ApiScope>
         {
             new ApiScope { Name = "B" },
             new ApiScope { Name = "C" },
@@ -46,21 +46,21 @@ public class InMemoryResourcesStoreTests
     [Fact]
     public void InMemoryResourcesStore_should_not_throw_if_does_not_contains_duplicate_names()
     {
-        List<IdentityResource> identityResources = new List<IdentityResource>
+        var identityResources = new List<IdentityResource>
         {
             new IdentityResource { Name = "A" },
             new IdentityResource { Name = "B" },
             new IdentityResource { Name = "C" }
         };
 
-        List<ApiResource> apiResources = new List<ApiResource>
+        var apiResources = new List<ApiResource>
         {
             new ApiResource { Name = "A" },
             new ApiResource { Name = "B" },
             new ApiResource { Name = "C" }
         };
 
-        List<ApiScope> apiScopes = new List<ApiScope>
+        var apiScopes = new List<ApiScope>
         {
             new ApiScope { Name = "A" },
             new ApiScope { Name = "B" },

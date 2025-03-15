@@ -26,7 +26,7 @@ public class BrowserHandler : DelegatingHandler
     {
         var response = await SendCookiesAsync(request, cancellationToken);
 
-        int redirectCount = 0;
+        var redirectCount = 0;
 
         while (AllowAutoRedirect &&
                (300 <= (int)response.StatusCode && (int)response.StatusCode < 400) &&
@@ -71,7 +71,7 @@ public class BrowserHandler : DelegatingHandler
     {
         if (AllowCookies)
         {
-            string cookieHeader = _cookieContainer.GetCookieHeader(request.RequestUri);
+            var cookieHeader = _cookieContainer.GetCookieHeader(request.RequestUri);
             if (!string.IsNullOrEmpty(cookieHeader))
             {
                 request.Headers.Add("Cookie", cookieHeader);

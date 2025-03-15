@@ -398,7 +398,7 @@ public class IdentityServerLicenseValidatorTests
         var license = hasLicense ? new IdentityServerLicense(new Claim("edition", "business")) : null;
         var subject = new MockLicenseValidator();
 
-        for (int i = 0; i < allowedClients; i++)
+        for (var i = 0; i < allowedClients; i++)
         {
             subject.ValidateClient("client" + i, license);
         }

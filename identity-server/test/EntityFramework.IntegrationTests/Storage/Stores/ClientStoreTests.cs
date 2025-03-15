@@ -116,7 +116,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             AllowedGrantTypes = GrantTypes.CodeAndClientCredentials
         };
 
-        for (int i = 0; i < 50; i++)
+        for (var i = 0; i < 50; i++)
         {
             testClient.RedirectUris.Add($"https://localhost/{i}");
             testClient.PostLogoutRedirectUris.Add($"https://localhost/{i}");
@@ -127,7 +127,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         {
             context.Clients.Add(testClient.ToEntity());
 
-            for (int i = 0; i < 50; i++)
+            for (var i = 0; i < 50; i++)
             {
                 context.Clients.Add(new Client
                 {

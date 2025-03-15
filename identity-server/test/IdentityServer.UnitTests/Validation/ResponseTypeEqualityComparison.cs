@@ -26,7 +26,7 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void Both_null()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
+            var comparer = new ResponseTypeEqualityComparer();
             string x = null;
             string y = null;
             var result = comparer.Equals(x, y);
@@ -37,9 +37,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void Left_null_other_not()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
+            var comparer = new ResponseTypeEqualityComparer();
             string x = null;
-            string y = string.Empty;
+            var y = string.Empty;
             var result = comparer.Equals(x, y);
             var expected = (x == y);
             result.ShouldBe(expected);
@@ -48,8 +48,8 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void Right_null_other_not()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = string.Empty;
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = string.Empty;
             string y = null;
             var result = comparer.Equals(x, y);
             var expected = (x == y);
@@ -59,9 +59,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void token_token()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "token";
-            string y = "token";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "token";
+            var y = "token";
             var result = comparer.Equals(x, y);
             var expected = (x == y);
             result.ShouldBe(expected);
@@ -70,9 +70,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void id_token_id_token()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "id_token";
-            string y = "id_token";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "id_token";
+            var y = "id_token";
             var result = comparer.Equals(x, y);
             var expected = (x == y);
             result.ShouldBe(expected);
@@ -81,9 +81,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void id_token_token()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "id_token";
-            string y = "token";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "id_token";
+            var y = "token";
             var result = comparer.Equals(x, y);
             var expected = (x == y);
             result.ShouldBe(expected);
@@ -100,9 +100,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void id_token_token_both_ways()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "id_token token";
-            string y = "token id_token";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "id_token token";
+            var y = "token id_token";
             var result = comparer.Equals(x, y);
             result.ShouldBeTrue();
         }
@@ -110,9 +110,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void code_id_token_both_ways()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "code id_token";
-            string y = "id_token code";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "code id_token";
+            var y = "id_token code";
             var result = comparer.Equals(x, y);
             result.ShouldBeTrue();
         }
@@ -120,9 +120,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void code_token_both_ways()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "code token";
-            string y = "token code";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "code token";
+            var y = "token code";
             var result = comparer.Equals(x, y);
             result.ShouldBeTrue();
         }
@@ -130,9 +130,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void code_id_token_token_combo1()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "code id_token token";
-            string y = "id_token code token";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "code id_token token";
+            var y = "id_token code token";
             var result = comparer.Equals(x, y);
             result.ShouldBeTrue();
         }
@@ -140,9 +140,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void code_id_token_token_combo2()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "code id_token token";
-            string y = "token id_token code";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "code id_token token";
+            var y = "token id_token code";
             var result = comparer.Equals(x, y);
             result.ShouldBeTrue();
         }
@@ -150,9 +150,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void code_id_token_token_missing_code()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "code id_token token";
-            string y = "id_token token";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "code id_token token";
+            var y = "id_token token";
             var result = comparer.Equals(x, y);
             result.ShouldBeFalse();
         }
@@ -160,9 +160,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void code_id_token_token_missing_code_and_token()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "code id_token token";
-            string y = "id_token";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "code id_token token";
+            var y = "id_token";
             var result = comparer.Equals(x, y);
             result.ShouldBeFalse();
         }
@@ -170,9 +170,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void Totally_different_words()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "blerg smoo";
-            string y = "token code";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "blerg smoo";
+            var y = "token code";
             var result = comparer.Equals(x, y);
             result.ShouldBeFalse();
         }
@@ -180,9 +180,9 @@ public class ResponseTypeEqualityComparison
         [Fact]
         public void Same_length_different_count()
         {
-            ResponseTypeEqualityComparer comparer = new ResponseTypeEqualityComparer();
-            string x = "code id_token token";
-            string y = "tokenizer bleegerfi";
+            var comparer = new ResponseTypeEqualityComparer();
+            var x = "code id_token token";
+            var y = "tokenizer bleegerfi";
             var result = comparer.Equals(x, y);
             result.ShouldBeFalse();
         }

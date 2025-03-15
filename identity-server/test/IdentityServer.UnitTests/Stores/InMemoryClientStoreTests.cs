@@ -12,7 +12,7 @@ public class InMemoryClientStoreTests
     [Fact]
     public void InMemoryClient_should_throw_if_contain_duplicate_client_ids()
     {
-        List<Client> clients = new List<Client>
+        var clients = new List<Client>
         {
             new Client { ClientId = "1"},
             new Client { ClientId = "1"},
@@ -26,7 +26,7 @@ public class InMemoryClientStoreTests
     [Fact]
     public void InMemoryClient_should_not_throw_if_does_not_contain_duplicate_client_ids()
     {
-        List<Client> clients = new List<Client>
+        var clients = new List<Client>
         {
             new Client { ClientId = "1"},
             new Client { ClientId = "2"},

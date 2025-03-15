@@ -811,7 +811,7 @@ public class UserSessionStoreTests
     [Fact]
     public async Task DeleteUserSessionsAsync_for_missing_sub_and_sid_should_throw()
     {
-        Func<Task> f = () => _subject.DeleteUserSessionsAsync(new UserSessionsFilter());
+        var f = () => _subject.DeleteUserSessionsAsync(new UserSessionsFilter());
         await f.ShouldThrowAsync<Exception>();
     }
 

@@ -158,7 +158,7 @@ public class DefaultUserSessionTests
         cookieContainer.SetCookies(new Uri("http://server"), string.Join(',', cookies));
         _mockHttpContext.HttpContext.Response.Headers.Clear();
 
-        string cookie = cookieContainer.GetCookieHeader(new Uri("http://server"));
+        var cookie = cookieContainer.GetCookieHeader(new Uri("http://server"));
         _mockHttpContext.HttpContext.Request.Headers.Append("Cookie", cookie);
 
         await _subject.RemoveSessionIdCookieAsync();
