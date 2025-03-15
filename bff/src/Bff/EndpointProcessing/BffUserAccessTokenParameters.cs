@@ -57,10 +57,10 @@ public class BffUserAccessTokenParameters
     {
         return new UserTokenRequestParameters()
         {
-            SignInScheme = this.SignInScheme,
-            ChallengeScheme = this.ChallengeScheme,
-            ForceRenewal = this.ForceRenewal,
-            Resource = this.Resource
+            SignInScheme = SignInScheme,
+            ChallengeScheme = ChallengeScheme,
+            ForceRenewal = ForceRenewal,
+            Resource = Resource
         };
     }
 }

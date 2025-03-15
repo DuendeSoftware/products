@@ -73,9 +73,9 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
 
         Server = host.GetTestServer();
         BrowserClient = new TestBrowserClient(Server.CreateHandler());
-        BrowserClient.BaseAddress = new Uri(this._baseAddress);
+        BrowserClient.BaseAddress = new Uri(_baseAddress);
         HttpClient = Server.CreateClient();
-        BrowserClient.BaseAddress = new Uri(this._baseAddress);
+        BrowserClient.BaseAddress = new Uri(_baseAddress);
     }
 
     public event Action<IServiceCollection> OnConfigureServices = _ => { };
