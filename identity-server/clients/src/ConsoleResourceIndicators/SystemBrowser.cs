@@ -46,7 +46,7 @@ public class SystemBrowser : IBrowser
             try
             {
                 var result = await listener.WaitForCallbackAsync();
-                if (String.IsNullOrWhiteSpace(result))
+                if (string.IsNullOrWhiteSpace(result))
                 {
                     return new BrowserResult { ResultType = BrowserResultType.UnknownError, Error = "Empty response." };
                 }

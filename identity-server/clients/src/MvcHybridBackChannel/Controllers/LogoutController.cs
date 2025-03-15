@@ -53,10 +53,10 @@ public class LogoutController : Controller
         if (claims.FindFirst("sub") == null && claims.FindFirst("sid") == null) throw new Exception("Invalid logout token");
 
         var nonce = claims.FindFirstValue("nonce");
-        if (!String.IsNullOrWhiteSpace(nonce)) throw new Exception("Invalid logout token");
+        if (!string.IsNullOrWhiteSpace(nonce)) throw new Exception("Invalid logout token");
 
         var eventsJson = claims.FindFirst("events")?.Value;
-        if (String.IsNullOrWhiteSpace(eventsJson)) throw new Exception("Invalid logout token");
+        if (string.IsNullOrWhiteSpace(eventsJson)) throw new Exception("Invalid logout token");
 
         var events = JsonDocument.Parse(eventsJson).RootElement;
         var logoutEvent = events.TryGetString("http://schemas.openid.net/event/backchannel-logout");

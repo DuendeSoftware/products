@@ -68,6 +68,6 @@ public class SecretParser : ISecretsListParser
     /// <returns></returns>
     public IEnumerable<string> GetAvailableAuthenticationMethods()
     {
-        return _parsers.Select(p => p.AuthenticationMethod).Where(p => !String.IsNullOrWhiteSpace(p));
+        return _parsers.Select(p => p.AuthenticationMethod).Where(p => !string.IsNullOrWhiteSpace(p));
     }
 }

@@ -200,7 +200,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest, "Invalid requested_expiry");
             }
 
-            if (Int32.TryParse(requestedExpiry, out var expiryValue) &&
+            if (int.TryParse(requestedExpiry, out var expiryValue) &&
                 expiryValue > 0 &&
                 expiryValue <= requestLifetime)
             {

@@ -136,7 +136,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
-        var name = String.IsNullOrWhiteSpace(_options.ServerSideSessions.UserDisplayNameClaimType) ? null : ticket.Principal.FindFirst(_options.ServerSideSessions.UserDisplayNameClaimType)?.Value;
+        var name = string.IsNullOrWhiteSpace(_options.ServerSideSessions.UserDisplayNameClaimType) ? null : ticket.Principal.FindFirst(_options.ServerSideSessions.UserDisplayNameClaimType)?.Value;
 
         var isNew = session.SubjectId != sub || session.SessionId != sid;
         if (isNew)

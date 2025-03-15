@@ -43,7 +43,7 @@ public class Index : PageModel
 
     public async Task<IActionResult> OnGet(string? userCode)
     {
-        if (String.IsNullOrWhiteSpace(userCode))
+        if (string.IsNullOrWhiteSpace(userCode))
         {
             return Page();
         }

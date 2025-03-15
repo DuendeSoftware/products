@@ -26,7 +26,7 @@ public class SessionFilter
     /// </summary>
     public void Validate()
     {
-        if (String.IsNullOrWhiteSpace(SubjectId) && String.IsNullOrWhiteSpace(SessionId))
+        if (string.IsNullOrWhiteSpace(SubjectId) && string.IsNullOrWhiteSpace(SessionId))
         {
             throw new ArgumentNullException("SubjectId or SessionId is required.");
         }

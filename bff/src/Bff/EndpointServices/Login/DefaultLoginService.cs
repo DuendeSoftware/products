@@ -58,7 +58,7 @@ public class DefaultLoginService : ILoginService
             }
         }
 
-        if (String.IsNullOrWhiteSpace(returnUrl))
+        if (string.IsNullOrWhiteSpace(returnUrl))
         {
             if (context.Request.PathBase.HasValue)
             {
