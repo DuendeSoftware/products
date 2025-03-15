@@ -36,3 +36,11 @@ csharp_style_var_when_type_is_apparent = true:error
 csharp_style_var_for_built_in_types = true:error
 
 dotnet_diagnostic.IDE0040.severity = error # Require explicit access modifiers for all types and members
+
+csharp_style_expression_bodied_methods = when_possible:error  # Prefer expression-bodied members for methods, properties, constructors, etc.
+csharp_style_expression_bodied_properties = when_possible:error
+csharp_style_expression_bodied_constructors = when_possible:error
+csharp_style_expression_bodied_operators = when_possible:error
+csharp_style_expression_bodied_accessors = when_possible:error
+csharp_style_expression_bodied_indexers = when_possible:error
+csharp_style_expression_bodied_lambdas = when_possible:error
