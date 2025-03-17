@@ -1,6 +1,15 @@
 # Duende.Templates.BFF
 .NET CLI Templates for Duende BFF
 
+## Building
+
+``` pwsh
+cd templates
+dotnet run -p build
+
+dotnet pack ..\artifacts\ -o d:\packages
+
+```
 
 ### dotnet new duende-bff-remoteapi
 Creates a basic JavaScript-based BFF host that configures and invokes a remote API via the BFF proxy.
