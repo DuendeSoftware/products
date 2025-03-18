@@ -68,6 +68,9 @@ public class Index : PageModel
         {
             if (context != null)
             {
+                // This "can't happen", because if the ReturnUrl was null, then the context would be null
+                ArgumentNullException.ThrowIfNull(Input.ReturnUrl, nameof(Input.ReturnUrl));
+                
                 // if the user cancels, send a result back into IdentityServer as if they 
                 // denied the consent (even if this client does not require consent).
                 // this will send back an access denied OIDC error response to the client.
@@ -118,6 +121,9 @@ public class Index : PageModel
 
                 if (context != null)
                 {
+                    // This "can't happen", because if the ReturnUrl was null, then the context would be null
+                    ArgumentNullException.ThrowIfNull(Input.ReturnUrl, nameof(Input.ReturnUrl));
+                    
                     if (context.IsNativeClient())
                     {
                         // The client is native, so this change in how to
