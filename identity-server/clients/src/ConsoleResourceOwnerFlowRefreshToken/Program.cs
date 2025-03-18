@@ -10,8 +10,11 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = builder.Configuration["is-host"];
+var simpleApi = builder.Configuration["simple-api"];
+
 var _tokenClient = new HttpClient();
-var _cache = new DiscoveryCache(Constants.Authority);
+var _cache = new DiscoveryCache(authority);
 
 var response = await RequestTokenAsync();
 response.Show();
@@ -72,13 +75,11 @@ async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
     return response;
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
-    var baseAddress = Constants.SampleApi;
-
     var client = new HttpClient
     {
-        BaseAddress = new Uri(baseAddress)
+        BaseAddress = new Uri(simpleApi)
     };
 
     client.SetBearerToken(token);

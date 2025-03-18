@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Clients;
 using Duende.IdentityModel.Client;
 using Microsoft.Extensions.Hosting;
 
@@ -10,10 +9,15 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-IDiscoveryCache _cache = new DiscoveryCache(Constants.Authority);
+var authority = builder.Configuration["is-host"];
+
+IDiscoveryCache _cache = new DiscoveryCache(authority);
 
 var response = await RequestTokenAsync();
 await IntrospectAsync(response.AccessToken);
+
+// Graceful shutdown
+Environment.Exit(0);
 
 async Task<TokenResponse> RequestTokenAsync()
 {

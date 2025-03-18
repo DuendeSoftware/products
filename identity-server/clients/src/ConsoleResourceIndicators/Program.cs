@@ -15,6 +15,8 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = builder.Configuration["is-host"];
+
 OidcClient _oidcClient;
 
 "Resource Indicators Demo".ConsoleBox(ConsoleColor.Green);
@@ -66,7 +68,7 @@ async Task FrontChannel(string scope, IEnumerable<string> resource)
 
     var options = new OidcClientOptions
     {
-        Authority = Constants.Authority,
+        Authority = authority,
 
         ClientId = "console.resource.indicators",
 

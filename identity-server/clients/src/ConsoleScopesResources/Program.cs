@@ -10,7 +10,8 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var Cache = new DiscoveryCache("https://localhost:5001");
+var authority = builder.Configuration["is-host"];
+var Cache = new DiscoveryCache(authority);
 
 "Resource setup:\n".ConsoleGreen();
 

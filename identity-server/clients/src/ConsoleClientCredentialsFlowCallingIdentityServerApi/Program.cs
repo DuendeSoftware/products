@@ -10,6 +10,8 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = builder.Configuration["is-host"];
+
 "JWT access token".ConsoleBox(ConsoleColor.Green);
 var response = await RequestTokenAsync("client");
 response.Show();
@@ -23,11 +25,14 @@ await CallServiceAsync(response.AccessToken);
 "No access token (expect failure)".ConsoleBox(ConsoleColor.Green);
 await CallServiceAsync(null);
 
-static async Task<TokenResponse> RequestTokenAsync(string clientId)
+// Graceful shutdown
+Environment.Exit(0);
+
+async Task<TokenResponse> RequestTokenAsync(string clientId)
 {
     var client = new HttpClient();
 
-    var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
+    var disco = await client.GetDiscoveryDocumentAsync(authority);
     if (disco.IsError) throw new Exception(disco.Error);
 
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
@@ -43,13 +48,11 @@ static async Task<TokenResponse> RequestTokenAsync(string clientId)
     return response;
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
-    var baseAddress = Constants.Authority;
-
     var client = new HttpClient
     {
-        BaseAddress = new Uri(baseAddress)
+        BaseAddress = new Uri(authority)
     };
 
     if (token is not null) client.SetBearerToken(token);

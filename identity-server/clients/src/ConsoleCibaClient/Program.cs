@@ -14,7 +14,9 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-IDiscoveryCache _cache = new DiscoveryCache(Constants.Authority);
+var authority = builder.Configuration["is-host"];
+
+IDiscoveryCache _cache = new DiscoveryCache(authority);
 
 var loginResponse = await RequestBackchannelLoginAsync();
 
@@ -23,6 +25,8 @@ tokenResponse.Show();
 
 await CallServiceAsync(tokenResponse.AccessToken);
 
+// Graceful shutdown
+Environment.Exit(0);
 
 async Task<BackchannelAuthenticationResponse> RequestBackchannelLoginAsync()
 {
@@ -133,7 +137,7 @@ static async Task CallServiceAsync(string token)
     Console.WriteLine(response.PrettyPrintJson());
 }
 
-static string CreateRequestObject(IDictionary<string, string> values)
+string CreateRequestObject(IDictionary<string, string> values)
 {
     var claims = new List<Claim>()
         {
@@ -168,7 +172,7 @@ static string CreateRequestObject(IDictionary<string, string> values)
 
     var token = new JwtSecurityToken(
         "ciba",
-        Constants.Authority,
+        authority,
         claims,
         now,
         now.AddMinutes(1),

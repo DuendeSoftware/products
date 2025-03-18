@@ -12,7 +12,10 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-IDiscoveryCache _cache = new DiscoveryCache(Constants.Authority);
+var authority = builder.Configuration["is-host"];
+var simpleApi = builder.Configuration["simple-api"];
+
+IDiscoveryCache _cache = new DiscoveryCache(authority);
 
 var authorizeResponse = await RequestAuthorizationAsync();
 
@@ -20,6 +23,9 @@ var tokenResponse = await RequestTokenAsync(authorizeResponse);
 tokenResponse.Show();
 
 await CallServiceAsync(tokenResponse.AccessToken);
+
+// Graceful shutdown
+Environment.Exit(0);
 
 async Task<DeviceAuthorizationResponse> RequestAuthorizationAsync()
 {
@@ -80,13 +86,11 @@ async Task<TokenResponse> RequestTokenAsync(DeviceAuthorizationResponse authoriz
     }
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
-    var baseAddress = Constants.SampleApi;
-
     var client = new HttpClient
     {
-        BaseAddress = new Uri(baseAddress)
+        BaseAddress = new Uri(simpleApi)
     };
 
     client.SetBearerToken(token);

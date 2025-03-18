@@ -15,6 +15,9 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = builder.Configuration["is-host"];
+var simpleApi = builder.Configuration["simple-api"];
+
 var rsaKey =
     """
         {
@@ -67,11 +70,14 @@ response.Show();
 
 await CallServiceAsync(response.AccessToken);
 
-static async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential)
+// Graceful shutdown
+Environment.Exit(0);
+
+async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential)
 {
     var client = new HttpClient();
 
-    var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
+    var disco = await client.GetDiscoveryDocumentAsync(authority);
     if (disco.IsError) throw new Exception(disco.Error);
 
     var clientToken = CreateClientToken(credential, "client.jwt", disco.TokenEndpoint);
@@ -92,13 +98,11 @@ static async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential
     return response;
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
-    var baseAddress = Constants.SampleApi;
-
     var client = new HttpClient
     {
-        BaseAddress = new Uri(baseAddress)
+        BaseAddress = new Uri(simpleApi)
     };
 
     client.SetBearerToken(token);

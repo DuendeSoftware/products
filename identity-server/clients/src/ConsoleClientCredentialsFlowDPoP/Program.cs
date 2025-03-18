@@ -14,9 +14,12 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = builder.Configuration["is-host"];
+var simpleApi = builder.Configuration["simple-api"];
+
 var discoClient = new HttpClient();
 
-var disco = await discoClient.GetDiscoveryDocumentAsync(Constants.Authority);
+var disco = await discoClient.GetDiscoveryDocumentAsync(authority);
 if (disco.IsError) throw new Exception(disco.Error);
 
 var jwkJson = CreateDPoPKey();
@@ -27,7 +30,10 @@ var response = await client.GetStringAsync("identity");
 "\n\nService Result:".ConsoleGreen();
 Console.WriteLine(response.PrettyPrintJson());
 
-static HttpClient GetHttpClient(string tokenEndpoint, string jwk)
+// Graceful shutdown
+Environment.Exit(0);
+
+HttpClient GetHttpClient(string tokenEndpoint, string jwk)
 {
     var services = new ServiceCollection();
     services.AddDistributedMemoryCache();
@@ -42,7 +48,7 @@ static HttpClient GetHttpClient(string tokenEndpoint, string jwk)
 
     services.AddClientCredentialsHttpClient("test", "client", config =>
     {
-        config.BaseAddress = new Uri(Constants.SampleApi);
+        config.BaseAddress = new Uri(simpleApi);
     });
 
     var provider = services.BuildServiceProvider();

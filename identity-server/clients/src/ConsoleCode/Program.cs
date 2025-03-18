@@ -13,14 +13,20 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = builder.Configuration["is-host"];
+var simpleApi = builder.Configuration["simple-api"];
+
 OidcClient _oidcClient;
-var _apiClient = new HttpClient { BaseAddress = new Uri(Constants.SampleApi) };
+var _apiClient = new HttpClient { BaseAddress = new Uri(simpleApi) };
 
 "Signing in with OIDC".ConsoleBox(ConsoleColor.Green);
 "Login window will open in 5 seconds...".ConsoleGreen();
 Thread.Sleep(millisecondsTimeout: 5000);
 
 await SignIn();
+
+// Graceful shutdown
+Environment.Exit(0);
 
 async Task SignIn()
 {
@@ -31,7 +37,7 @@ async Task SignIn()
 
     var options = new OidcClientOptions
     {
-        Authority = Constants.Authority,
+        Authority = authority,
 
         ClientId = "console.pkce",
 
