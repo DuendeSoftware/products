@@ -6,8 +6,6 @@ using System.Text;
 using Duende.IdentityServer.Licensing;
 using IdentityServerHost;
 using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 
 Console.Title = "IdentityServer (EntityFramework)";
 
