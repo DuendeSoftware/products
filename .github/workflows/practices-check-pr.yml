@@ -1,4 +1,4 @@
-name: practices\check-pr
+name: practices/check-pr
 
 on:
   pull_request:
