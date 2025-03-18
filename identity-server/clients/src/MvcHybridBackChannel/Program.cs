@@ -1,19 +1,37 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Microsoft.AspNetCore;
+using MvcHybridBackChannel;
+using Serilog;
+using Serilog.Events;
 
-namespace MvcHybrid;
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Duende.IdentityModel", LogEventLevel.Debug)
+    .MinimumLevel.Override("MvcHybrid", LogEventLevel.Debug)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+    .CreateLogger();
 
-public class Program
+try
 {
-    public static void Main(string[] args)
-    {
-        BuildWebHost(args).Run();
-    }
+    var builder = WebApplication
+        .CreateBuilder(args);
 
-    public static IWebHost BuildWebHost(string[] args) =>
-        WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>()
-            .Build();
+    builder
+        .AddServiceDefaults();
+
+    builder
+        .ConfigureServices()
+        .ConfigurePipeline()
+        .Run();
+}
+catch (Exception ex) when (ex.GetType().Name is not "HostAbortedException")
+{
+    Log.Fatal(ex, messageTemplate: "Unhandled exception");
+}
+finally
+{
+    Log.Information(messageTemplate: "Shut down complete");
+    Log.CloseAndFlush();
 }

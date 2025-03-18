@@ -1,27 +1,29 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text.Json;
-using Clients;
 using Duende.AccessTokenManagement;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MvcDPoP;
 
-public class Startup
+internal static class HostingExtensions
 {
-    public void ConfigureServices(IServiceCollection services)
+    public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
         JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
+        var authority = builder.Configuration["is-host"];
+        var simpleApi = builder.Configuration["simple-api"];
+
         // add MVC
-        services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews();
 
         // add cookie-based session management with OpenID Connect authentication
-        services.AddAuthentication(options =>
+        builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = "cookie";
             options.DefaultChallengeScheme = "oidc";
@@ -41,7 +43,7 @@ public class Startup
             })
             .AddOpenIdConnect("oidc", options =>
             {
-                options.Authority = Constants.Authority;
+                options.Authority = authority;
                 options.RequireHttpsMetadata = false;
 
                 options.ClientId = "mvc.dpop";
@@ -71,10 +73,10 @@ public class Startup
                 options.DisableTelemetry = true;
             });
 
-        services.AddTransient<IDPoPProofService, CustomProofService>();
+        builder.Services.AddTransient<IDPoPProofService, CustomProofService>();
 
         // add automatic token management
-        services.AddOpenIdConnectAccessTokenManagement(options =>
+        builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
         {
             // add option to opt-in to jkt on authZ ep
             // create and configure a DPoP JWK
@@ -85,15 +87,18 @@ public class Startup
         });
 
         // add HTTP client to call protected API
-        services.AddUserAccessTokenHttpClient("client", configureClient: client =>
+        builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
         {
-            client.BaseAddress = new Uri(Constants.SampleApi);
+            client.BaseAddress = new Uri(simpleApi);
             // somehow allow this HttpClient to override the scheme (because it might be a legacy API still using Bearer)
         }).AddHttpMessageHandler<TestHandler>();
-        services.AddTransient<TestHandler>();
+
+        builder.Services.AddTransient<TestHandler>();
+
+        return builder.Build();
     }
 
-    public void Configure(IApplicationBuilder app)
+    public static WebApplication ConfigurePipeline(this WebApplication app)
     {
         app.UseDeveloperExceptionPage();
         app.UseHttpsRedirection();
@@ -104,10 +109,9 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapDefaultControllerRoute()
-                .RequireAuthorization();
-        });
+        app.MapDefaultControllerRoute()
+            .RequireAuthorization();
+
+        return app;
     }
 }
