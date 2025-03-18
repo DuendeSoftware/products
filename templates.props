@@ -18,6 +18,9 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
 
+    <!--NU5128 doesn't apply to template packages.
+    https://learn.microsoft.com/en-us/dotnet/core/tutorials/cli-templates-create-template-package#description-of-the-project-xml-->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
 
     <!--Minver-->
     <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
