@@ -15,6 +15,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.AddServiceDefaults();
 
 var authority = builder.Configuration["is-host"];
+var simpleApi = builder.Configuration["simple-api"];
 
 IDiscoveryCache _cache = new DiscoveryCache(authority);
 
@@ -121,13 +122,11 @@ async Task<TokenResponse> RequestTokenAsync(BackchannelAuthenticationResponse au
     }
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
-    var baseAddress = Constants.SampleApi;
-
     var client = new HttpClient
     {
-        BaseAddress = new Uri(baseAddress)
+        BaseAddress = new Uri(simpleApi)
     };
 
     client.SetBearerToken(token);

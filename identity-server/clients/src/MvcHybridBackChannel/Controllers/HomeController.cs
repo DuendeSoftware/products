@@ -14,11 +14,13 @@ public class HomeController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IDiscoveryCache _discoveryCache;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(IHttpClientFactory httpClientFactory, IDiscoveryCache discoveryCache)
+    public HomeController(IHttpClientFactory httpClientFactory, IDiscoveryCache discoveryCache, IConfiguration configuration)
     {
         _httpClientFactory = httpClientFactory;
         _discoveryCache = discoveryCache;
+        _configuration = configuration;
     }
 
     public IActionResult Index()
@@ -40,7 +42,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetBearerToken(token);
 
-        var response = await client.GetStringAsync(Constants.SampleApi + "identity");
+        var response = await client.GetStringAsync(_configuration["simple-api"] + "/identity");
         ViewBag.Json = response.PrettyPrintJson();
 
         return View();
