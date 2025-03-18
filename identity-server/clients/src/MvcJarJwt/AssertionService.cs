@@ -3,7 +3,6 @@
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Clients;
 using Duende.IdentityModel;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
