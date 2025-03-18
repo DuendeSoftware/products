@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="src\**\*" Exclude="src\**\bin\**;src\**\obj\**" />
+    <Content Include="src\**\*" Exclude="src\**\bin\**;src\**\obj\**;" PackagePath="src" />
     <Compile Remove="**\*" />
   </ItemGroup>
 

@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <PackageType>Template</PackageType>
-
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <PackageVersion>1.0</PackageVersion>
     <IncludeContentInPack>true</IncludeContentInPack>
