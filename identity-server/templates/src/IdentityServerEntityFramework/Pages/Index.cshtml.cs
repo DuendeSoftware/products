@@ -20,6 +20,6 @@ public class Index : PageModel
             ?.InformationalVersion.Split('+').First()
             ?? "unavailable";
     }
-    
+
     public IdentityServerLicense? License { get; }
 }
