@@ -211,7 +211,7 @@ void GenerateTemplatesReleaseWorkflow(Product product)
 
     workflow.On
         .WorkflowDispatch()
-        .Inputs(new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0"));
+        .InputVersionBranchAndTagOverride();
 
     workflow.EnvDefaults();
 
@@ -232,11 +232,13 @@ void GenerateTemplatesReleaseWorkflow(Product product)
     job.StepGitRemoveExistingTagIfConfigured(product, contexts);
     job.StepGitPushTag(product, contexts);
 
+    job.StepToolRestore();
+
     job.Step()
         .Name("build templates")
         .Run("dotnet run --project build");
 
-    job.StepToolRestore();
+    job.StepPack(product.Solution);
 
     job.StepSign(always: true);
 
