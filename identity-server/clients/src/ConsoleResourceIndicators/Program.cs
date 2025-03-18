@@ -15,6 +15,8 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = builder.Configuration["is-host"];
+
 OidcClient _oidcClient;
 
 "Resource Indicators Demo".ConsoleBox(ConsoleColor.Green);

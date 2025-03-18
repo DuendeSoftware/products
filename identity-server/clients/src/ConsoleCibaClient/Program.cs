@@ -32,6 +32,8 @@ IDiscoveryCache _cache = new DiscoveryCache(authority);
 var host = builder.Build();
 var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
 
+IDiscoveryCache _cache = new DiscoveryCache(authority);
+
 var loginResponse = await RequestBackchannelLoginAsync();
 
 var tokenResponse = await RequestTokenAsync(loginResponse);
