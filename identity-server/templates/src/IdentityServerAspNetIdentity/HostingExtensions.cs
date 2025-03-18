@@ -1,5 +1,5 @@
 using Duende.IdentityServer;
-using IdentityServerAspNetIdentity.Data;
+using IdentityServerHost.Data;
 using IdentityServerHost.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Duende.IdentityModel;
-using IdentityServerAspNetIdentity.Data;
+using IdentityServerHost.Data;
 using IdentityServerHost.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
