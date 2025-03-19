@@ -26,7 +26,7 @@ public static class IdentityServerBuilderExtensionsInMemory
     public static IIdentityServerBuilder AddInMemoryCaching(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IMemoryCache, MemoryCache>();
-        builder.Services.TryAddTransient(typeof(ICache<>), typeof(DefaultCache<>));
+        builder.Services.TryAddSingleton(typeof(ICache<>), typeof(DefaultCache<>));
 
         return builder;
     }

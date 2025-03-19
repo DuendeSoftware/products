@@ -32,7 +32,7 @@ public class DefaultCache<T> : ICache<T>
     /// <summary>
     /// A lock used for concurrency.
     /// </summary>
-    protected IConcurrencyLock<DefaultCache<T>> ConcurrencyLock { get; }
+    protected IKeyedConcurrencyLock<DefaultCache<T>> ConcurrencyLock { get; }
 
     /// <summary>
     /// The logger.
@@ -46,7 +46,7 @@ public class DefaultCache<T> : ICache<T>
     /// <param name="cache">The cache.</param>
     /// <param name="concurrencyLock"></param>
     /// <param name="logger">The logger.</param>
-    public DefaultCache(IdentityServerOptions identityServerOptions, IMemoryCache cache, IConcurrencyLock<DefaultCache<T>> concurrencyLock, ILogger<DefaultCache<T>> logger)
+    public DefaultCache(IdentityServerOptions identityServerOptions, IMemoryCache cache, IKeyedConcurrencyLock<DefaultCache<T>> concurrencyLock, ILogger<DefaultCache<T>> logger)
     {
         IdentityServerOptions = identityServerOptions;
         Cache = cache;
@@ -106,7 +106,7 @@ public class DefaultCache<T> : ICache<T>
 
         if (item == null)
         {
-            if (false == await ConcurrencyLock.LockAsync((int)IdentityServerOptions.Caching.CacheLockTimeout.TotalMilliseconds))
+            if (false == await ConcurrencyLock.LockAsync(GetKey(key), (int)IdentityServerOptions.Caching.CacheLockTimeout.TotalMilliseconds))
             {
                 throw new Exception($"Failed to obtain cache lock for: '{GetType()}'");
             }
@@ -135,7 +135,7 @@ public class DefaultCache<T> : ICache<T>
             }
             finally
             {
-                ConcurrencyLock.Unlock();
+                ConcurrencyLock.Unlock(GetKey(key));
             }
         }
         else
