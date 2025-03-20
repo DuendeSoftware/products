@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,8 +16,17 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var authority = builder.Configuration["is-host"];
-var simpleApi = builder.Configuration["simple-api"];
+// Register a named HttpClient with service discovery support.
+// The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+builder.Services.AddHttpClient("SimpleApi", client =>
+{
+    client.BaseAddress = new Uri("https://simple-api");
+})
+.AddServiceDiscovery();
+
+// Build the host so we can resolve the HttpClientFactory.
+var host = builder.Build();
+var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
 
 var rsaKey =
     """
@@ -75,6 +85,9 @@ Environment.Exit(0);
 
 async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential)
 {
+    // Resolve the authority from the configuration.
+    var authority = builder.Configuration["is-host"];
+
     var client = new HttpClient();
 
     var disco = await client.GetDiscoveryDocumentAsync(authority);
@@ -100,10 +113,8 @@ async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential)
 
 async Task CallServiceAsync(string token)
 {
-    var client = new HttpClient
-    {
-        BaseAddress = new Uri(simpleApi)
-    };
+    // Resolve the HttpClient from DI.
+    var client = httpClientFactory.CreateClient("SimpleApi");
 
     client.SetBearerToken(token);
     var response = await client.GetStringAsync("identity");

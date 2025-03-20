@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Resolve the authority from the configuration.
 var authority = builder.Configuration["is-host"];
 
 // Add ServiceDefaults from Aspire

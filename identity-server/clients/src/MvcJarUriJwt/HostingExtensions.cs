@@ -86,7 +86,7 @@ internal static class HostingExtensions
         builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
         {
             client.BaseAddress = new Uri(simpleApi);
-        });
+        }).AddServiceDiscovery();
 
         // var apiKey = _configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";

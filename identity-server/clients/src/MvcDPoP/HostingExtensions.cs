@@ -89,9 +89,11 @@ internal static class HostingExtensions
         // add HTTP client to call protected API
         builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
         {
-            client.BaseAddress = new Uri(simpleApi);
+            client.BaseAddress = new Uri("https://dpop-api");
             // somehow allow this HttpClient to override the scheme (because it might be a legacy API still using Bearer)
-        }).AddHttpMessageHandler<TestHandler>();
+        })
+            .AddServiceDiscovery()
+            .AddHttpMessageHandler<TestHandler>();
 
         builder.Services.AddTransient<TestHandler>();
 

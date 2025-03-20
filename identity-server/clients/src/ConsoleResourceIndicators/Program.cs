@@ -15,8 +15,6 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var authority = builder.Configuration["is-host"];
-
 OidcClient _oidcClient;
 
 "Resource Indicators Demo".ConsoleBox(ConsoleColor.Green);
@@ -59,6 +57,9 @@ Environment.Exit(0);
 
 async Task FrontChannel(string scope, IEnumerable<string> resource)
 {
+    // Resolve the authority from the configuration.
+    var authority = builder.Configuration["is-host"];
+
     resource ??= [];
 
     // create a redirect URI using an available port on the loopback address.

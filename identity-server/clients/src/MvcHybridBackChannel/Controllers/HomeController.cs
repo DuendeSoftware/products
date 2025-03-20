@@ -37,12 +37,13 @@ public class HomeController : Controller
     [Authorize]
     public async Task<IActionResult> CallApi()
     {
+        // Resolve the HttpClient from DI.
+        var client = _httpClientFactory.CreateClient("SimpleApi");
         var token = await HttpContext.GetTokenAsync("access_token");
 
-        var client = _httpClientFactory.CreateClient();
         client.SetBearerToken(token);
 
-        var response = await client.GetStringAsync(_configuration["simple-api"] + "/identity");
+        var response = await client.GetStringAsync("/identity");
         ViewBag.Json = response.PrettyPrintJson();
 
         return View();

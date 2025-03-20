@@ -75,6 +75,14 @@ internal static class HostingExtensions
                 options.DisableTelemetry = true;
             });
 
+        // Register a named HttpClient with service discovery support.
+        // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+        builder.Services.AddHttpClient("SimpleApi", client =>
+        {
+            client.BaseAddress = new Uri("https://simple-api");
+        })
+        .AddServiceDiscovery();
+
         return builder.Build();
     }
 

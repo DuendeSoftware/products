@@ -16,7 +16,7 @@ var projectRegistry = new Dictionary<string, IResourceBuilder<ProjectResource>>(
 if (HostIsEnabled(nameof(Projects.Host_Main)))
 {
     var hostMain = builder
-        .AddProject<Projects.Host_Main>("host-main")
+        .AddProject<Projects.Host_Main>("is-host")
         .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
 
     projectRegistry.Add("is-host", hostMain);
@@ -25,7 +25,7 @@ if (HostIsEnabled(nameof(Projects.Host_Main)))
 if (HostIsEnabled(nameof(Projects.Host_Configuration)))
 {
     var hostConfiguration = builder
-        .AddProject<Projects.Host_Configuration>("host-configuration")
+        .AddProject<Projects.Host_Configuration>("is-host")
         .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
 
     projectRegistry.Add("is-host", hostConfiguration);
@@ -49,7 +49,7 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitFor(identityServerDb);
 
-        var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity>(name: "host-aspnetidentity")
+        var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity>(name: "is-host")
             .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitForCompletion(aspnetMigration);
@@ -63,12 +63,12 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitFor(identityServerDb);
 
-        var hostEntotyFramework = builder.AddProject<Projects.Host_EntityFramework>(name: "host-entityframework")
+        var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework>(name: "is-host")
             .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitForCompletion(idSrvMigration);
 
-        projectRegistry.Add("is-host", hostEntotyFramework);
+        projectRegistry.Add("is-host", hostEntityFramework);
     }
 }
 

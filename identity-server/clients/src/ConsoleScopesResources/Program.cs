@@ -10,6 +10,7 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+// Resolve the authority from the configuration.
 var authority = builder.Configuration["is-host"];
 var Cache = new DiscoveryCache(authority);
 
