@@ -29,17 +29,17 @@ public class DPoPProofValidatonContext
     /// <summary>
     /// The HTTP URL to validate
     /// </summary>
-    public string Url { get; set; } = default!;
+    public string Url { get; set; } = null!;
 
     /// <summary>
     /// The HTTP method to validate
     /// </summary>
-    public string Method { get; set; } = default!;
+    public string Method { get; set; } = null!;
 
     /// <summary>
     /// The DPoP proof token to validate
     /// </summary>
-    public string ProofToken { get; set; } = default!;
+    public string ProofToken { get; set; } = null!;
 
     /// <summary>
     /// If the access token should also be validated

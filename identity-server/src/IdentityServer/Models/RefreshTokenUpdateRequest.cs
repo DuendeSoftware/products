@@ -14,17 +14,17 @@ public class RefreshTokenUpdateRequest
     /// <summary>
     /// The handle of the refresh token.
     /// </summary>
-    public string Handle { get; set; } = default!;
+    public string Handle { get; set; } = null!;
 
     /// <summary>
     /// The client.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// The refresh token to update.
     /// </summary>
-    public RefreshToken RefreshToken { get; set; } = default!;
+    public RefreshToken RefreshToken { get; set; } = null!;
 
     /// <summary>
     /// Flag to indicate that the refreth token was modified, and requires an update to the database.

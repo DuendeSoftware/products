@@ -27,7 +27,7 @@ public class AppHost : GenericHost
         string clientId,
         ITestOutputHelper testOutputHelper,
         string baseAddress = "https://app",
-        Action<UserTokenManagementOptions>? configureUserTokenManagementOptions = default)
+        Action<UserTokenManagementOptions>? configureUserTokenManagementOptions = null)
         : base(testOutputHelper, baseAddress)
     {
         _identityServerHost = identityServerHost;

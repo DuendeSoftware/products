@@ -17,12 +17,12 @@ public class BackchannelUserLoginRequest
     /// <summary>
     /// Gets or sets the id of the request in the store.
     /// </summary>
-    public string InternalId { get; set; } = default!;
+    public string InternalId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the subject.
     /// </summary>
-    public ClaimsPrincipal Subject { get; set; } = default!;
+    public ClaimsPrincipal Subject { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the binding message.
@@ -52,12 +52,12 @@ public class BackchannelUserLoginRequest
     /// <summary>
     /// Gets or sets the client.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the validated resources.
     /// </summary>
-    public ResourceValidationResult ValidatedResources { get; set; } = default!;
+    public ResourceValidationResult ValidatedResources { get; set; } = null!;
 
     /// <summary> 
     /// Gets or sets a dictionary of custom properties associated with this

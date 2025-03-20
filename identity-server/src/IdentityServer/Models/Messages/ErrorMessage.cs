@@ -33,7 +33,7 @@ public class ErrorMessage
     /// <value>
     /// The error code.
     /// </value>
-    public string Error { get; set; } = default!;
+    public string Error { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the error description.

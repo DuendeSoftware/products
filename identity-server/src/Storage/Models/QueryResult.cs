@@ -15,7 +15,7 @@ public class QueryResult<T>
     /// The token that indicates these results. This is used for more results in subsequent queries.
     /// If null, then there were no more results.
     /// </summary>
-    public string ResultsToken { get; init; } = default!;
+    public string ResultsToken { get; init; } = null!;
 
     /// <summary>
     /// True if there is a previous set of results.
@@ -45,5 +45,5 @@ public class QueryResult<T>
     /// <summary>
     /// The results.
     /// </summary>
-    public IReadOnlyCollection<T> Results { get; init; } = default!;
+    public IReadOnlyCollection<T> Results { get; init; } = null!;
 }

@@ -18,7 +18,7 @@ public class IntrospectionRequestValidationContext
     /// <summary>
     /// The request parameters 
     /// </summary>
-    public NameValueCollection Parameters { get; set; } = default!;
+    public NameValueCollection Parameters { get; set; } = null!;
 
     /// <summary>
     /// The ApiResource that is making the request

@@ -16,12 +16,12 @@ public class RefreshTokenCreationRequest
     /// <summary>
     /// The client.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// The subject.
     /// </summary>
-    public ClaimsPrincipal Subject { get; set; } = default!;
+    public ClaimsPrincipal Subject { get; set; } = null!;
 
     /// <summary>
     /// The description.
@@ -31,7 +31,7 @@ public class RefreshTokenCreationRequest
     /// <summary>
     /// The scopes.
     /// </summary>
-    public IEnumerable<string> AuthorizedScopes { get; set; } = default!;
+    public IEnumerable<string> AuthorizedScopes { get; set; } = null!;
 
     /// <summary>
     /// The resource indicators. Null indicates there was no authorization step, thus no restrictions. 
@@ -47,7 +47,7 @@ public class RefreshTokenCreationRequest
     /// <summary>
     /// The access token.
     /// </summary>
-    public Token AccessToken { get; set; } = default!;
+    public Token AccessToken { get; set; } = null!;
 
     /// <summary>
     /// The proof type used.

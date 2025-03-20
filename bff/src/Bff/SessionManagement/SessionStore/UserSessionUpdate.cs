@@ -11,7 +11,7 @@ public class UserSessionUpdate
     /// <summary>
     /// The subject ID
     /// </summary>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// The session ID
@@ -36,7 +36,7 @@ public class UserSessionUpdate
     /// <summary>
     /// The serialized ticket
     /// </summary>
-    public string Ticket { get; set; } = default!;
+    public string Ticket { get; set; } = null!;
 
     /// <summary>
     /// Copies this instance into another

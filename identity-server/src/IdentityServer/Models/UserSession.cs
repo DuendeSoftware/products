@@ -16,12 +16,12 @@ public class UserSession
     /// <summary>
     /// The subject ID
     /// </summary>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// The session ID
     /// </summary>
-    public string SessionId { get; set; } = default!;
+    public string SessionId { get; set; } = null!;
 
     /// <summary>
     /// The display name for the user
@@ -51,10 +51,10 @@ public class UserSession
     /// <summary>
     /// The client ids for the session
     /// </summary>
-    public IReadOnlyCollection<string> ClientIds { get; set; } = default!;
+    public IReadOnlyCollection<string> ClientIds { get; set; } = null!;
 
     /// <summary>
     /// The underlying AuthenticationTicket
     /// </summary>
-    public AuthenticationTicket AuthenticationTicket { get; set; } = default!;
+    public AuthenticationTicket AuthenticationTicket { get; set; } = null!;
 }

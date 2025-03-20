@@ -18,7 +18,7 @@ public class AuthorizationRequest
     /// <summary>
     /// The client.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// The display mode passed from the authorization request.
@@ -34,7 +34,7 @@ public class AuthorizationRequest
     /// <value>
     /// The redirect URI.
     /// </value>
-    public string RedirectUri { get; set; } = default!;
+    public string RedirectUri { get; set; } = null!;
 
     /// <summary>
     /// The UI locales passed from the authorization request.
@@ -91,7 +91,7 @@ public class AuthorizationRequest
     /// <summary>
     /// The validated resources.
     /// </summary>
-    public ResourceValidationResult ValidatedResources { get; set; } = default!;
+    public ResourceValidationResult ValidatedResources { get; set; } = null!;
 
     /// <summary>
     /// Gets the entire parameter collection.
@@ -107,7 +107,7 @@ public class AuthorizationRequest
     /// <value>
     /// The request object values
     /// </value>
-    public IEnumerable<Claim> RequestObjectValues { get; } = default!;
+    public IEnumerable<Claim> RequestObjectValues { get; } = null!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthorizationRequest"/> class.

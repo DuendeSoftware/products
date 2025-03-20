@@ -17,7 +17,7 @@ public class PersistedGrant
     /// <value>
     /// The key.
     /// </value>
-    public string Key { get; set; } = default!;
+    public string Key { get; set; } = null!;
 
     /// <summary>
     /// Gets the type.
@@ -25,7 +25,7 @@ public class PersistedGrant
     /// <value>
     /// The type.
     /// </value>
-    public string Type { get; set; } = default!;
+    public string Type { get; set; } = null!;
 
     /// <summary>
     /// Gets the subject identifier.
@@ -33,7 +33,7 @@ public class PersistedGrant
     /// <value>
     /// The subject identifier.
     /// </value>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// Gets the session identifier.
@@ -49,7 +49,7 @@ public class PersistedGrant
     /// <value>
     /// The client identifier.
     /// </value>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets the description the user assigned to the device being authorized.
@@ -89,5 +89,5 @@ public class PersistedGrant
     /// <value>
     /// The data.
     /// </value>
-    public string Data { get; set; } = default!;
+    public string Data { get; set; } = null!;
 }

@@ -19,7 +19,7 @@ public class ResourceOwnerPasswordValidationContext
     /// <value>
     /// The name of the user.
     /// </value>
-    public string UserName { get; set; } = default!;
+    public string UserName { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password.
@@ -27,7 +27,7 @@ public class ResourceOwnerPasswordValidationContext
     /// <value>
     /// The password.
     /// </value>
-    public string Password { get; set; } = default!;
+    public string Password { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the request.
@@ -35,7 +35,7 @@ public class ResourceOwnerPasswordValidationContext
     /// <value>
     /// The request.
     /// </value>
-    public ValidatedTokenRequest Request { get; set; } = default!;
+    public ValidatedTokenRequest Request { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the result.

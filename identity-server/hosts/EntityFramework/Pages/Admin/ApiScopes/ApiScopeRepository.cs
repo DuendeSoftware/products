@@ -12,13 +12,13 @@ namespace IdentityServerHost.Pages.Admin.ApiScopes;
 public class ApiScopeSummaryModel
 {
     [Required]
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!;
     public string? DisplayName { get; set; }
 }
 
 public class ApiScopeModel : ApiScopeSummaryModel
 {
-    public string? UserClaims { get; set; } = default!;
+    public string? UserClaims { get; set; } = null!;
 }
 
 

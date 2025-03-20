@@ -1052,7 +1052,7 @@ public class DPoPTokenEndpointTests
     [Trait("Category", Category)]
     public async Task server_issued_nonce_should_be_emitted()
     {
-        string nonce = default;
+        string nonce = null;
 
         _mockPipeline.OnPostConfigureServices += services =>
         {

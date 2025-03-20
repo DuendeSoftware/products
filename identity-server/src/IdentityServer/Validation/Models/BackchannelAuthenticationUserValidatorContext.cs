@@ -17,7 +17,7 @@ public class BackchannelAuthenticationUserValidatorContext
     /// <summary>
     /// Gets or sets the client.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the login hint token.

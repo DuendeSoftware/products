@@ -29,7 +29,7 @@ public class TestBackchannelLoginUserValidator : IBackchannelAuthenticationUserV
     {
         var result = new BackchannelAuthenticationUserValidationResult();
 
-        TestUser user = default;
+        TestUser user = null;
 
         if (userValidatorContext.LoginHint != null)
         {

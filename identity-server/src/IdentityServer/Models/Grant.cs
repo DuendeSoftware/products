@@ -17,7 +17,7 @@ public class Grant
     /// <value>
     /// The subject identifier.
     /// </value>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the client identifier.
@@ -25,7 +25,7 @@ public class Grant
     /// <value>
     /// The client identifier.
     /// </value>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets the description the user assigned to the device being authorized.
@@ -41,7 +41,7 @@ public class Grant
     /// <value>
     /// The scopes.
     /// </value>
-    public IEnumerable<string> Scopes { get; set; } = default!;
+    public IEnumerable<string> Scopes { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the creation time.

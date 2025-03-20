@@ -12,7 +12,7 @@ namespace IdentityServerHost.Pages.Admin.IdentityScopes;
 public class IdentityScopeSummaryModel
 {
     [Required]
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!;
     public string? DisplayName { get; set; }
 }
 

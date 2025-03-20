@@ -68,17 +68,17 @@ public class RedirectUriValidationContext
     /// <summary>
     /// The URI to validate for the client
     /// </summary>
-    public string RequestedUri { get; set; } = default!;
+    public string RequestedUri { get; set; } = null!;
 
     /// <summary>
     /// The client
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// The request parameters
     /// </summary>
-    public NameValueCollection RequestParameters { get; set; } = default!;
+    public NameValueCollection RequestParameters { get; set; } = null!;
 
     /// <summary>
     /// Validated request object values

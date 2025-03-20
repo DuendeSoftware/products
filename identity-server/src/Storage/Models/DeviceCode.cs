@@ -35,7 +35,7 @@ public class DeviceCode
     /// <value>
     /// The client identifier.
     /// </value>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets the description the user assigned to the device being authorized.
@@ -67,7 +67,7 @@ public class DeviceCode
     /// <value>
     /// The authorized scopes.
     /// </value>
-    public IEnumerable<string> RequestedScopes { get; set; } = default!;
+    public IEnumerable<string> RequestedScopes { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the authorized scopes.

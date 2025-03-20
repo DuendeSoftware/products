@@ -14,12 +14,12 @@ public class LogoutNotificationContext
     /// <summary>
     ///  The SubjectId of the user.
     /// </summary>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// The session Id of the user's authentication session.
     /// </summary>
-    public string SessionId { get; set; } = default!;
+    public string SessionId { get; set; } = null!;
 
     /// <summary>
     /// The issuer for the back-channel logout
@@ -29,7 +29,7 @@ public class LogoutNotificationContext
     /// <summary>
     /// The list of client Ids that the user has authenticated to.
     /// </summary>
-    public IEnumerable<string> ClientIds { get; set; } = default!;
+    public IEnumerable<string> ClientIds { get; set; } = null!;
 
     /// <summary>
     /// Indicates why the user's session ended, if known.

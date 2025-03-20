@@ -23,17 +23,17 @@ public class ConfigureAuthenticationContext<TAuthenticationOptions, TIdentityPro
     /// <summary>
     /// The authentication options.
     /// </summary>
-    public TAuthenticationOptions AuthenticationOptions { get; set; } = default!;
+    public TAuthenticationOptions AuthenticationOptions { get; set; } = null!;
 
     /// <summary>
     /// The identity provider.
     /// </summary>
-    public TIdentityProvider IdentityProvider { get; set; } = default!;
+    public TIdentityProvider IdentityProvider { get; set; } = null!;
 
     /// <summary>
     /// The dynamic identity provider options.
     /// </summary>
-    public DynamicProviderOptions DynamicProviderOptions { get; set; } = default!;
+    public DynamicProviderOptions DynamicProviderOptions { get; set; } = null!;
 
     /// <summary>
     /// The path prefix for callback paths the authentication handler is to use.

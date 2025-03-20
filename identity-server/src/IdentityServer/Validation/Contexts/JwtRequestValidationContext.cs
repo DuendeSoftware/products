@@ -16,12 +16,12 @@ public class JwtRequestValidationContext
     /// <summary>
     /// The Client for which the validation is being performed.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// The JWT request object string.
     /// </summary>
-    public string JwtTokenString { get; set; } = default!;
+    public string JwtTokenString { get; set; } = null!;
 
     /// <summary>
     /// Specifies whether the JWT typ and content-type for JWT secured authorization requests is checked according to IETF spec.

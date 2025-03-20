@@ -23,7 +23,7 @@ public class ValidatedRequest
     /// <value>
     /// The raw.
     /// </value>
-    public NameValueCollection Raw { get; set; } = default!;
+    public NameValueCollection Raw { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the client.
@@ -31,12 +31,12 @@ public class ValidatedRequest
     /// <value>
     /// The client.
     /// </value>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// The name of the issuer for the current request
     /// </summary>
-    public string IssuerName { get; set; } = default!;
+    public string IssuerName { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the secret used to authenticate the client.
@@ -86,7 +86,7 @@ public class ValidatedRequest
     /// <value>
     /// The options.
     /// </value>
-    public IdentityServerOptions Options { get; set; } = default!;
+    public IdentityServerOptions Options { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the validated resources for the request.
@@ -115,7 +115,7 @@ public class ValidatedRequest
     /// <value>
     /// The client ID
     /// </value>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Sets the client and the appropriate request specific settings.

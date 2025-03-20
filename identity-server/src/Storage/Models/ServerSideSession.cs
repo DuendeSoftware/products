@@ -14,22 +14,22 @@ public class ServerSideSession
     /// <summary>
     /// The key
     /// </summary>
-    public string Key { get; set; } = default!;
+    public string Key { get; set; } = null!;
 
     /// <summary>
     /// The cookie handler scheme
     /// </summary>
-    public string Scheme { get; set; } = default!;
+    public string Scheme { get; set; } = null!;
 
     /// <summary>
     /// The subject ID
     /// </summary>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// The session ID
     /// </summary>
-    public string SessionId { get; set; } = default!;
+    public string SessionId { get; set; } = null!;
 
     /// <summary>
     /// The display name for the user
@@ -54,5 +54,5 @@ public class ServerSideSession
     /// <summary>
     /// The serialized ticket
     /// </summary>
-    public string Ticket { get; set; } = default!;
+    public string Ticket { get; set; } = null!;
 }

@@ -10,7 +10,7 @@ namespace IdentityServerHost.Pages.Ciba;
 [SecurityHeaders]
 public class IndexModel : PageModel
 {
-    public BackchannelUserLoginRequest LoginRequest { get; set; } = default!;
+    public BackchannelUserLoginRequest LoginRequest { get; set; } = null!;
 
     private readonly IBackchannelAuthenticationInteractionService _backchannelAuthenticationInteraction;
     private readonly ILogger<IndexModel> _logger;

@@ -24,7 +24,7 @@ public class GenericHost
     }
 
     protected readonly string _baseAddress;
-    IServiceProvider _appServices = default!;
+    IServiceProvider _appServices = null!;
 
     public Assembly? HostAssembly { get; set; }
     public bool IsDevelopment { get; set; }

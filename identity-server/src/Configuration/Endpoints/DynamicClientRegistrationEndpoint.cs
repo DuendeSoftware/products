@@ -117,7 +117,7 @@ public class DynamicClientRegistrationEndpoint
         catch (JsonException ex)
         {
             _logger.LogDebug(ex, "Failed to parse dynamic client registration request body");
-            return default;
+            return null;
         }
     }
 }

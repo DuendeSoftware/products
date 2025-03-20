@@ -24,7 +24,7 @@ public abstract class Resource
     /// <summary>
     /// The unique name of the resource.
     /// </summary>
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!;
 
     /// <summary>
     /// Display name of the resource.

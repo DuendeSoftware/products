@@ -13,7 +13,7 @@ public class LoggedOut : PageModel
 {
     private readonly IIdentityServerInteractionService _interactionService;
 
-    public LoggedOutViewModel View { get; set; } = default!;
+    public LoggedOutViewModel View { get; set; } = null!;
 
     public LoggedOut(IIdentityServerInteractionService interactionService)
     {

@@ -19,7 +19,7 @@ public class EditModel : PageModel
     }
 
     [BindProperty]
-    public EditClientModel InputModel { get; set; } = default!;
+    public EditClientModel InputModel { get; set; } = null!;
     [BindProperty]
     public string? Button { get; set; }
 

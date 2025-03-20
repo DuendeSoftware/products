@@ -27,7 +27,7 @@ public class Client
     /// <summary>
     /// Unique ID of the client
     /// </summary>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the protocol type.

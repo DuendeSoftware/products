@@ -20,7 +20,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// <value>
     /// The type of the response.
     /// </value>
-    public string ResponseType { get; set; } = default!;
+    public string ResponseType { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the response mode.
@@ -28,7 +28,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// <value>
     /// The response mode.
     /// </value>
-    public string ResponseMode { get; set; } = default!;
+    public string ResponseMode { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the grant type.
@@ -36,7 +36,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// <value>
     /// The grant type.
     /// </value>
-    public string GrantType { get; set; } = default!;
+    public string GrantType { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the redirect URI.
@@ -44,7 +44,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// <value>
     /// The redirect URI.
     /// </value>
-    public string RedirectUri { get; set; } = default!;
+    public string RedirectUri { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the requested scopes.
@@ -53,7 +53,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// The requested scopes.
     /// </value>
     // todo: consider replacing with extension method to access Raw collection; would need to be done wholesale for all props.
-    public List<string> RequestedScopes { get; set; } = default!;
+    public List<string> RequestedScopes { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the requested resource indicators.

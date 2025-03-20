@@ -16,7 +16,7 @@ public class EditModel : PageModel
     }
 
     [BindProperty]
-    public IdentityScopeModel InputModel { get; set; } = default!;
+    public IdentityScopeModel InputModel { get; set; } = null!;
     [BindProperty]
     public string? Button { get; set; }
 

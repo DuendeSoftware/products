@@ -16,9 +16,9 @@ public class EditModel : PageModel
     }
 
     [BindProperty]
-    public ApiScopeModel InputModel { get; set; } = default!;
+    public ApiScopeModel InputModel { get; set; } = null!;
     [BindProperty]
-    public string Button { get; set; } = default!;
+    public string Button { get; set; } = null!;
 
     public async Task<IActionResult> OnGetAsync(string id)
     {

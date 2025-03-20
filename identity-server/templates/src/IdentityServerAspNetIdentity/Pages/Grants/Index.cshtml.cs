@@ -28,7 +28,7 @@ public class Index : PageModel
         _events = events;
     }
 
-    public ViewModel View { get; set; } = default!;
+    public ViewModel View { get; set; } = null!;
 
     public async Task OnGet()
     {

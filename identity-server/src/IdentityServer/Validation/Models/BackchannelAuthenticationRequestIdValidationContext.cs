@@ -17,7 +17,7 @@ public class BackchannelAuthenticationRequestIdValidationContext
     /// <value>
     /// The device code.
     /// </value>
-    public string AuthenticationRequestId { get; set; } = default!;
+    public string AuthenticationRequestId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the request.
@@ -25,7 +25,7 @@ public class BackchannelAuthenticationRequestIdValidationContext
     /// <value>
     /// The request.
     /// </value>
-    public ValidatedTokenRequest Request { get; set; } = default!;
+    public ValidatedTokenRequest Request { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the result.

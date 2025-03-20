@@ -25,7 +25,7 @@ public class Secret
     /// <value>
     /// The value.
     /// </value>
-    public string Value { get; set; } = default!;
+    public string Value { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the expiration.
@@ -41,7 +41,7 @@ public class Secret
     /// <value>
     /// The type of the client secret.
     /// </value>
-    public string Type { get; set; } = default!;
+    public string Type { get; set; } = null!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Secret"/> class.

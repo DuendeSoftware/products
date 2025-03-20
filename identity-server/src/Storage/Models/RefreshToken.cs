@@ -83,7 +83,7 @@ public class RefreshToken
     /// <value>
     /// The subject.
     /// </value>
-    public ClaimsPrincipal Subject { get; set; } = default!;
+    public ClaimsPrincipal Subject { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the version number.
@@ -99,7 +99,7 @@ public class RefreshToken
     /// <value>
     /// The client identifier.
     /// </value>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets the subject identifier.
@@ -131,7 +131,7 @@ public class RefreshToken
     /// <value>
     /// The scopes.
     /// </value>
-    public IEnumerable<string> AuthorizedScopes { get; set; } = default!;
+    public IEnumerable<string> AuthorizedScopes { get; set; } = null!;
 
     /// <summary>
     /// The resource indicators. Null indicates there was no authorization step, thus no restrictions.

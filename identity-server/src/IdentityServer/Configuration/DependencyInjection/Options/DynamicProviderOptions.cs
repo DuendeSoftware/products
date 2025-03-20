@@ -85,14 +85,14 @@ public class DynamicProviderOptions
         /// <summary>
         /// The type of the handler.
         /// </summary>
-        public Type HandlerType { get; set; } = default!;
+        public Type HandlerType { get; set; } = null!;
         /// <summary>
         /// The type of the options.
         /// </summary>
-        public Type OptionsType { get; set; } = default!;
+        public Type OptionsType { get; set; } = null!;
         /// <summary>
         /// The identity provider protocol type.
         /// </summary>
-        public Type IdentityProviderType { get; set; } = default!;
+        public Type IdentityProviderType { get; set; } = null!;
     }
 }

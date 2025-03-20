@@ -19,7 +19,7 @@ public class ValidatedTokenRequest : ValidatedRequest
     /// <value>
     /// The type of the grant.
     /// </value>
-    public string GrantType { get; set; } = default!;
+    public string GrantType { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the scopes.

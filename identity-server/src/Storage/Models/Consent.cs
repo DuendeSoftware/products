@@ -17,7 +17,7 @@ public class Consent
     /// <value>
     /// The subject identifier.
     /// </value>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the client identifier.
@@ -25,7 +25,7 @@ public class Consent
     /// <value>
     /// The client identifier.
     /// </value>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the scopes.

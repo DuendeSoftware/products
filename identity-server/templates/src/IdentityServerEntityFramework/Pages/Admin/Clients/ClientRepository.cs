@@ -10,7 +10,7 @@ namespace IdentityServerHost.Pages.Admin.Clients;
 public class ClientSummaryModel
 {
     [Required]
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
     public string? Name { get; set; }
     [Required]
     public Flow Flow { get; set; }
@@ -18,13 +18,13 @@ public class ClientSummaryModel
 
 public class CreateClientModel : ClientSummaryModel
 {
-    public string Secret { get; set; } = default!;
+    public string Secret { get; set; } = null!;
 }
 
 public class ClientModel : CreateClientModel, IValidatableObject
 {
     [Required]
-    public string AllowedScopes { get; set; } = default!;
+    public string AllowedScopes { get; set; } = null!;
 
     public string? RedirectUri { get; set; }
     public string? InitiateLoginUri { get; set; }

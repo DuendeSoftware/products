@@ -38,17 +38,17 @@ public class SessionValidationRequest
     /// <summary>
     /// The subject ID
     /// </summary>
-    public string SubjectId { get; set; } = default!;
+    public string SubjectId { get; set; } = null!;
 
     /// <summary>
     /// The session ID
     /// </summary>
-    public string SessionId { get; set; } = default!;
+    public string SessionId { get; set; } = null!;
 
     /// <summary>
     /// The client making the request.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// Indicates the type of request.

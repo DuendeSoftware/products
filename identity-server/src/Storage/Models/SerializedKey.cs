@@ -19,7 +19,7 @@ public class SerializedKey
     /// <summary>
     /// Key identifier.
     /// </summary>
-    public string Id { get; set; } = default!;
+    public string Id { get; set; } = null!;
 
     /// <summary>
     /// Date key was created.
@@ -29,7 +29,7 @@ public class SerializedKey
     /// <summary>
     /// The algorithm.
     /// </summary>
-    public string Algorithm { get; set; } = default!;
+    public string Algorithm { get; set; } = null!;
 
     /// <summary>
     /// Contains X509 certificate.
@@ -39,7 +39,7 @@ public class SerializedKey
     /// <summary>
     /// Serialized data for key.
     /// </summary>
-    public string Data { get; set; } = default!;
+    public string Data { get; set; } = null!;
 
     /// <summary>
     /// Indicates if data is protected.

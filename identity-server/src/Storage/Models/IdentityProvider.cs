@@ -14,7 +14,7 @@ public class IdentityProviderName
     /// <summary>
     /// Scheme name for the provider.
     /// </summary>
-    public string Scheme { get; set; } = default!;
+    public string Scheme { get; set; } = null!;
 
     /// <summary>
     /// Display name for the provider.
@@ -24,7 +24,7 @@ public class IdentityProviderName
     /// <summary>
     /// Flag that indicates if the provider should be used.
     /// </summary>
-    public bool Enabled { get; set; } = default!;
+    public bool Enabled { get; set; } = false!;
 }
 
 /// <summary>
@@ -59,7 +59,7 @@ public class IdentityProvider
     /// <summary>
     /// Scheme name for the provider.
     /// </summary>
-    public string Scheme { get; set; } = default!;
+    public string Scheme { get; set; } = null!;
 
     /// <summary>
     /// Display name for the provider.

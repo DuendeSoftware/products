@@ -34,7 +34,7 @@ public class BackChannelLogoutRequest
     /// <summary>
     /// Gets or sets the client identifier.
     /// </summary>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets the subject identifier.
@@ -49,7 +49,7 @@ public class BackChannelLogoutRequest
     /// <summary>
     /// Gets or sets the back channel logout URI.
     /// </summary>
-    public string LogoutUri { get; set; } = default!;
+    public string LogoutUri { get; set; } = null!;
 
     /// <summary>
     /// Gets a value indicating whether the session identifier is required.

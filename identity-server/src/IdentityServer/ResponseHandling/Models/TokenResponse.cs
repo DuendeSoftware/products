@@ -14,7 +14,7 @@ public class TokenResponse
     /// <summary>
     /// The type of access token, used to populate the token_type response parameter.
     /// </summary>
-    public string AccessTokenType { get; set; } = default!;
+    public string AccessTokenType { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the identity token.
@@ -30,7 +30,7 @@ public class TokenResponse
     /// <value>
     /// The access token.
     /// </value>
-    public string AccessToken { get; set; } = default!;
+    public string AccessToken { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the access token lifetime in seconds.
@@ -54,7 +54,7 @@ public class TokenResponse
     /// <value>
     /// The scope.
     /// </value>
-    public string Scope { get; set; } = default!;
+    public string Scope { get; set; } = null!;
 
     /// <summary>
     /// The DPoP nonce header to emit.

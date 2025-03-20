@@ -42,6 +42,6 @@ public class DefaultReplayCache : IReplayCache
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultReplayCache.Exists");
 
-        return (await _cache.GetAsync(Prefix + purpose + handle, default)) != null;
+        return (await _cache.GetAsync(Prefix + purpose + handle, CancellationToken.None)) != null;
     }
 }

@@ -16,7 +16,7 @@ public class BackChannelAuthenticationRequest
     /// <summary>
     /// The identifier for this request in the store.
     /// </summary>
-    public string InternalId { get; set; } = default!;
+    public string InternalId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the creation time.
@@ -31,17 +31,17 @@ public class BackChannelAuthenticationRequest
     /// <summary>
     /// Gets or sets the ID of the client.
     /// </summary>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the subject.
     /// </summary>
-    public ClaimsPrincipal Subject { get; set; } = default!;
+    public ClaimsPrincipal Subject { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the requested scopes.
     /// </summary>
-    public IEnumerable<string> RequestedScopes { get; set; } = default!;
+    public IEnumerable<string> RequestedScopes { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the requested resource indicators.

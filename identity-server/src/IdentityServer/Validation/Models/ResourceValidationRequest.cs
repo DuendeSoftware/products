@@ -16,12 +16,12 @@ public class ResourceValidationRequest
     /// <summary>
     /// The client.
     /// </summary>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// The requested scope values.
     /// </summary>
-    public IEnumerable<string> Scopes { get; set; } = default!;
+    public IEnumerable<string> Scopes { get; set; } = null!;
 
     /// <summary>
     /// The requested resource indicators.

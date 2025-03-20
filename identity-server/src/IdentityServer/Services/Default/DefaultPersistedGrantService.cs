@@ -63,7 +63,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
         {
             var consents = grants.Where(x => x.Type == IdentityServerConstants.PersistedGrantTypes.UserConsent)
                 .Select(x => DeserializeAndCaptureErrors<Consent>(x.Data))
-                .Where(x => x != default)
+                .Where(x => x != null)
                 .Select(x => new Grant
                 {
                     ClientId = x.ClientId,
@@ -75,7 +75,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
 
             var codes = grants.Where(x => x.Type == IdentityServerConstants.PersistedGrantTypes.AuthorizationCode)
                 .Select(x => DeserializeAndCaptureErrors<AuthorizationCode>(x.Data))
-                .Where(x => x != default)
+                .Where(x => x != null)
                 .Select(x => new Grant
                 {
                     ClientId = x.ClientId,
@@ -88,7 +88,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
 
             var refresh = grants.Where(x => x.Type == IdentityServerConstants.PersistedGrantTypes.RefreshToken)
                 .Select(x => DeserializeAndCaptureErrors<RefreshToken>(x.Data))
-                .Where(x => x != default)
+                .Where(x => x != null)
                 .Select(x => new Grant
                 {
                     ClientId = x.ClientId,
@@ -101,7 +101,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
 
             var access = grants.Where(x => x.Type == IdentityServerConstants.PersistedGrantTypes.ReferenceToken)
                 .Select(x => DeserializeAndCaptureErrors<Token>(x.Data))
-                .Where(x => x != default)
+                .Where(x => x != null)
                 .Select(x => new Grant
                 {
                     ClientId = x.ClientId,

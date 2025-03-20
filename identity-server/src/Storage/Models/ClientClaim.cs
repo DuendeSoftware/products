@@ -16,12 +16,12 @@ public class ClientClaim
     /// <summary>
     /// The claim type
     /// </summary>
-    public string Type { get; set; } = default!;
+    public string Type { get; set; } = null!;
 
     /// <summary>
     /// The claim value
     /// </summary>
-    public string Value { get; set; } = default!;
+    public string Value { get; set; } = null!;
 
     /// <summary>
     /// The claim value type

@@ -11,8 +11,8 @@ public class TestBrowserClient : HttpClient
     class CookieHandler(HttpMessageHandler next) : DelegatingHandler(next)
     {
         public CookieContainer CookieContainer { get; } = new();
-        public Uri CurrentUri { get; private set; } = default!;
-        public HttpResponseMessage LastResponse { get; private set; } = default!;
+        public Uri CurrentUri { get; private set; } = null!;
+        public HttpResponseMessage LastResponse { get; private set; } = null!;
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)

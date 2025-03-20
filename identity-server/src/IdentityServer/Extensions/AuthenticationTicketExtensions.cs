@@ -178,17 +178,17 @@ public static class AuthenticationTicketExtensions
         /// <summary>
         /// The scheme
         /// </summary>
-        public string Scheme { get; init; } = default!;
+        public string Scheme { get; init; } = null!;
 
         /// <summary>
         /// The user
         /// </summary>
-        public ClaimsPrincipalLite User { get; init; } = default!;
+        public ClaimsPrincipalLite User { get; init; } = null!;
 
         /// <summary>
         /// The items
         /// </summary>
-        public IDictionary<string, string> Items { get; init; } = default!;
+        public IDictionary<string, string> Items { get; init; } = null!;
     }
 
     /// <summary>
@@ -204,6 +204,6 @@ public static class AuthenticationTicketExtensions
         /// <summary>
         /// Payload
         /// </summary>
-        public string Payload { get; init; } = default!;
+        public string Payload { get; init; } = null!;
     }
 }

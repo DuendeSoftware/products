@@ -14,7 +14,7 @@ public class IndexModel : PageModel
         _repository = repository;
     }
 
-    public IEnumerable<ApiScopeSummaryModel> Scopes { get; private set; } = default!;
+    public IEnumerable<ApiScopeSummaryModel> Scopes { get; private set; } = null!;
     public string? Filter { get; set; }
 
     public async Task OnGetAsync(string? filter)

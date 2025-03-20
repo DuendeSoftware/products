@@ -42,7 +42,7 @@ public class OidcReturnUrlParserTests
     }
 
     [Theory]
-    [InlineData(default(string))]
+    [InlineData(null)]
     [InlineData("")]
     [InlineData("/")]
     [InlineData("/path")]

@@ -19,7 +19,7 @@ public class NewModel : PageModel
     }
 
     [BindProperty]
-    public IdentityScopeModel InputModel { get; set; } = default!;
+    public IdentityScopeModel InputModel { get; set; } = null!;
 
     public void OnGet()
     {

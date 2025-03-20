@@ -19,7 +19,7 @@ public class ExtensionGrantValidationContext
     /// <value>
     /// The request.
     /// </value>
-    public ValidatedTokenRequest Request { get; set; } = default!;
+    public ValidatedTokenRequest Request { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the result.

@@ -35,7 +35,7 @@ public class AuthorizationCode
     /// <value>
     /// The ID of the client.
     /// </value>
-    public string ClientId { get; set; } = default!;
+    public string ClientId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the subject.
@@ -43,7 +43,7 @@ public class AuthorizationCode
     /// <value>
     /// The subject.
     /// </value>
-    public ClaimsPrincipal Subject { get; set; } = default!;
+    public ClaimsPrincipal Subject { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets a value indicating whether this code is an OpenID Connect code.
@@ -59,7 +59,7 @@ public class AuthorizationCode
     /// <value>
     /// The requested scopes.
     /// </value>
-    public IEnumerable<string> RequestedScopes { get; set; } = default!;
+    public IEnumerable<string> RequestedScopes { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the requested resource indicators.
@@ -72,7 +72,7 @@ public class AuthorizationCode
     /// <value>
     /// The redirect URI.
     /// </value>
-    public string RedirectUri { get; set; } = default!;
+    public string RedirectUri { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the nonce.
@@ -104,7 +104,7 @@ public class AuthorizationCode
     /// <value>
     /// The session identifier.
     /// </value>
-    public string SessionId { get; set; } = default!;
+    public string SessionId { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the code challenge.

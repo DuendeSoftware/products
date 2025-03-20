@@ -28,7 +28,7 @@ public class TokenCreationRequest
     /// <value>
     /// The resources.
     /// </value>
-    public ResourceValidationResult ValidatedResources { get; set; } = default!;
+    public ResourceValidationResult ValidatedResources { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the validated request.
@@ -36,7 +36,7 @@ public class TokenCreationRequest
     /// <value>
     /// The validated request.
     /// </value>
-    public ValidatedRequest ValidatedRequest { get; set; } = default!;
+    public ValidatedRequest ValidatedRequest { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets a value indicating whether [include all identity claims].

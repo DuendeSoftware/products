@@ -19,7 +19,7 @@ public class DeviceFlowAuthorizationRequest
     /// <value>
     /// The client.
     /// </value>
-    public Client Client { get; set; } = default!;
+    public Client Client { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the validated resources.
@@ -27,5 +27,5 @@ public class DeviceFlowAuthorizationRequest
     /// <value>
     /// The scopes requested.
     /// </value>
-    public ResourceValidationResult ValidatedResources { get; set; } = default!;
+    public ResourceValidationResult ValidatedResources { get; set; } = null!;
 }

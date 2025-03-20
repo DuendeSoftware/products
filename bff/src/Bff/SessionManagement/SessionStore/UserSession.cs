@@ -11,7 +11,7 @@ public class UserSession : UserSessionUpdate
     /// <summary>
     /// The key
     /// </summary>
-    public string Key { get; set; } = default!;
+    public string Key { get; set; } = null!;
 
     /// <summary>
     /// Clones the instance

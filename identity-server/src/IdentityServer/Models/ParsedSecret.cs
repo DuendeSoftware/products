@@ -17,7 +17,7 @@ public class ParsedSecret
     /// <value>
     /// The identifier.
     /// </value>
-    public string Id { get; set; } = default!;
+    public string Id { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the credential to verify the secret
@@ -33,7 +33,7 @@ public class ParsedSecret
     /// <value>
     /// The type.
     /// </value>
-    public string Type { get; set; } = default!;
+    public string Type { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets additional properties.

@@ -16,10 +16,10 @@ public class SecurityKeyInfo
     /// <summary>
     /// The key
     /// </summary>
-    public SecurityKey Key { get; set; } = default!;
+    public SecurityKey Key { get; set; } = null!;
 
     /// <summary>
     /// The signing algorithm
     /// </summary>
-    public string SigningAlgorithm { get; set; } = default!;
+    public string SigningAlgorithm { get; set; } = null!;
 }
