@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Globalization;
-using System.Net.Http;
 using Clients;
 using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
