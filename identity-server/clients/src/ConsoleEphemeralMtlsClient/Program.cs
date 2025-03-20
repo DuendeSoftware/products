@@ -12,8 +12,8 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var authority = builder.Configuration["is-host"];
-var simpleApi = builder.Configuration["simple-api"];
+var authority = Constants.AuthorityMtls;
+var simpleApi = Constants.SampleApiMtls;
 
 var ClientCertificate = CreateClientCertificate("client");
 
