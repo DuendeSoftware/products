@@ -333,7 +333,7 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         response.IsSuccessStatusCode.ShouldBeTrue();
         response.Content.Headers.ContentType!.MediaType.ShouldBe("application/json");
         var json = await response.Content.ReadAsStringAsync();
-        ApiResponse apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
+        var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
         apiResult.RequestHeaders["my-header-to-be-copied-by-yarp"].First().ShouldBe("copied-value");
 
         response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform",

@@ -74,7 +74,7 @@ static async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential
     var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
     if (disco.IsError) throw new Exception(disco.Error);
 
-    var clientToken = CreateClientToken(credential, "client.jwt", disco.TokenEndpoint);
+    var clientToken = CreateClientToken(credential, "client.jwt", disco.Issuer);
 
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
     {
@@ -124,6 +124,7 @@ static string CreateClientToken(SigningCredentials credential, string clientId, 
         now.AddMinutes(1),
         credential
     );
+    token.Header["typ"] = "client-credentials+jwt";
 
     var tokenHandler = new JwtSecurityTokenHandler();
     return tokenHandler.WriteToken(token);

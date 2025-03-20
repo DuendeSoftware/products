@@ -16,7 +16,7 @@ public class KeyManagerOptionsTests
             InitializationSynchronizationDelay = -TimeSpan.FromMinutes(1),
         };
 
-        Action a = () => subject.Validate();
+        var a = () => subject.Validate();
         a.ShouldThrow<Exception>();
     }
 
@@ -28,7 +28,7 @@ public class KeyManagerOptionsTests
             InitializationDuration = -TimeSpan.FromMinutes(1),
         };
 
-        Action a = () => subject.Validate();
+        var a = () => subject.Validate();
         a.ShouldThrow<Exception>();
     }
 
@@ -40,7 +40,7 @@ public class KeyManagerOptionsTests
             InitializationKeyCacheDuration = -TimeSpan.FromMinutes(1),
         };
 
-        Action a = () => subject.Validate();
+        var a = () => subject.Validate();
         a.ShouldThrow<Exception>();
     }
 
@@ -52,7 +52,7 @@ public class KeyManagerOptionsTests
             KeyCacheDuration = -TimeSpan.FromMinutes(1),
         };
 
-        Action a = () => subject.Validate();
+        var a = () => subject.Validate();
         a.ShouldThrow<Exception>();
     }
 
@@ -67,7 +67,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(1)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
         {
@@ -78,7 +78,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(1)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
     }
@@ -94,7 +94,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(3)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
         {
@@ -105,7 +105,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(2)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
     }
@@ -121,7 +121,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(0)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
         {
@@ -132,7 +132,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = -TimeSpan.FromMinutes(1)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
     }
@@ -148,7 +148,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(10)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
 
@@ -160,7 +160,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(10)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
 
@@ -172,7 +172,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(10)
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldNotThrow();
         }
     }
@@ -188,7 +188,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(0),
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
 
@@ -200,7 +200,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = -TimeSpan.FromMinutes(1),
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldThrow<Exception>();
         }
 
@@ -212,7 +212,7 @@ public class KeyManagerOptionsTests
                 RetentionDuration = TimeSpan.FromMinutes(20),
             };
 
-            Action a = () => subject.Validate();
+            var a = () => subject.Validate();
             a.ShouldNotThrow();
         }
     }

@@ -1,6 +1,3 @@
-// Copyright (c) Duende Software. All rights reserved.
-// See LICENSE in the project root for license information.
-
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +32,7 @@ public static class Extensions
     internal static IActionResult LoadingPage(this PageModel page, string? redirectUri)
     {
         page.HttpContext.Response.StatusCode = 200;
-        page.HttpContext.Response.Headers["Location"] = "";
+        page.HttpContext.Response.Headers.Location = "";
 
         return page.RedirectToPage("/Redirect/Index", new { RedirectUri = redirectUri });
     }
@@ -55,6 +52,7 @@ public static class Extensions
         {
             return true;
         }
+
         return false;
     }
 }

@@ -40,7 +40,7 @@ foreach (var path in paths.Select(Path.GetFullPath))
 
 Console.WriteLine($"Copied template files to {artifactsDir}");
 Console.WriteLine("");
-Console.WriteLine("dotnet pack -c Release {artifactsDir} -o ");
+Console.WriteLine($"dotnet pack -c Release {artifactsDir}");
 
 return 0;
 

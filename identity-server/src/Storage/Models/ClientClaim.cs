@@ -64,7 +64,7 @@ public class ClientClaim
     {
         unchecked
         {
-            int hash = 17;
+            var hash = 17;
 
             hash = hash * 23 + Value.GetHashCode();
             hash = hash * 23 + Type.GetHashCode();

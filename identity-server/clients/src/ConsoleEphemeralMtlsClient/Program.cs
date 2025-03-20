@@ -12,7 +12,7 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-X509Certificate2 ClientCertificate = CreateClientCertificate("client");
+var ClientCertificate = CreateClientCertificate("client");
 
 var response = await RequestTokenAsync();
 response.Show();
@@ -55,7 +55,7 @@ async Task CallServiceAsync(string token)
 
 static X509Certificate2 CreateClientCertificate(string name)
 {
-    X500DistinguishedName distinguishedName = new X500DistinguishedName($"CN={name}");
+    var distinguishedName = new X500DistinguishedName($"CN={name}");
 
     using (var rsa = RSA.Create(2048))
     {

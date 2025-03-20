@@ -236,8 +236,8 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         Logger.LogDebug("Updating refresh token");
 
         var handle = request.Handle;
-        bool needsCreate = false;
-        bool needsUpdate = request.MustUpdate;
+        var needsCreate = false;
+        var needsUpdate = request.MustUpdate;
 
         if (request.Client.RefreshTokenUsage == TokenUsage.OneTimeOnly)
         {

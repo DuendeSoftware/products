@@ -108,7 +108,7 @@ public class DefaultIdentityServerInteractionServiceTests
     [Fact]
     public async Task GrantConsentAsync_should_throw_if_granted_and_no_subject()
     {
-        Func<Task> act = () => _subject.GrantConsentAsync(
+        var act = () => _subject.GrantConsentAsync(
             new AuthorizationRequest(),
             new ConsentResponse() { ScopesValuesConsented = new[] { "openid" } },
             null);

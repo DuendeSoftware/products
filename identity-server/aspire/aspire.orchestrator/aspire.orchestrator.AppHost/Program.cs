@@ -57,10 +57,6 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
 
 #region Identity Server Clients
 
-// ** Console-Code client ommitted as it currently requires interaction **
-// ** Console-ResourceIndicators client ommitted as it current requires interaction **
-// ** Console-ScopesResources client ommitted as it currently requires interaction **
-
 if (ClientIsEnabled(nameof(Projects.MvcCode)))
     builder.AddProject<Projects.MvcCode>(name: "mvc-code");
 
@@ -136,6 +132,15 @@ if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowUserInfo)))
 
 if (ClientIsEnabled(nameof(Projects.WindowsConsoleSystemBrowser)))
     builder.AddProject<Projects.WindowsConsoleSystemBrowser>(name: "console-system-browser").WithExplicitStart();
+
+if (ClientIsEnabled(nameof(Projects.ConsoleScopesResources)))
+    builder.AddProject<Projects.ConsoleScopesResources>(name: "console-scopes-resources").WithExplicitStart();
+
+if (ClientIsEnabled(nameof(Projects.ConsoleCode)))
+    builder.AddProject<Projects.ConsoleCode>(name: "console-code").WithExplicitStart();
+
+if (ClientIsEnabled(nameof(Projects.ConsoleResourceIndicators)))
+    builder.AddProject<Projects.ConsoleResourceIndicators>(name: "console-resource-indicators").WithExplicitStart();
 
 #endregion
 

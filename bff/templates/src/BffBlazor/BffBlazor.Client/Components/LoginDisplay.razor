@@ -1,0 +1,28 @@
+@using Duende.Bff.Blazor.Client
+@using Microsoft.Extensions.Options
+
+@rendermode InteractiveAuto
+
+@inject IOptions<BffBlazorClientOptions> Options
+
+<AuthorizeView>
+  <Authorized>
+    <strong>Hello, @context.User.Identity?.Name</strong>
+    <a class="nav-link btn btn-link" href="@BffLogoutUrl(context)">Log Out</a>
+  </Authorized>
+  <Authorizing>
+    <a class="nav-link btn btn-link disabled">Log in</a>
+  </Authorizing>
+  <NotAuthorized>
+    <a class="nav-link btn btn-link" href="bff/login">Log in</a>
+  </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+  string BffLogoutUrl(AuthenticationState context)
+  {
+    var logoutUrl = context.User.FindFirst(Constants.ClaimTypes.LogoutUrl);
+    return $"{Options.Value.StateProviderBaseAddress}{logoutUrl?.Value}";
+  }
+}

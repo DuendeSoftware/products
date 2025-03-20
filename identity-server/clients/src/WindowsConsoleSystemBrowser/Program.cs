@@ -58,7 +58,7 @@ class Program
         Console.WriteLine("Press any key to sign in...");
         Console.ReadKey();
 
-        Program p = new Program();
+        var p = new Program();
         await p.SignIn();
 
         Console.ReadKey();
@@ -67,7 +67,7 @@ class Program
     private async Task SignIn()
     {
         // create a redirect URI using the custom redirect uri
-        string redirectUri = string.Format(CustomUriScheme + "://callback");
+        var redirectUri = string.Format(CustomUriScheme + "://callback");
         Console.WriteLine("redirect URI: " + redirectUri);
 
         var options = new OidcClientOptions

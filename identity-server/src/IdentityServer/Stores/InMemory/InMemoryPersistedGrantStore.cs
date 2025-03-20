@@ -30,7 +30,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Get");
 
-        if (key != null && _repository.TryGetValue(key, out PersistedGrant token))
+        if (key != null && _repository.TryGetValue(key, out var token))
         {
             return Task.FromResult(token);
         }

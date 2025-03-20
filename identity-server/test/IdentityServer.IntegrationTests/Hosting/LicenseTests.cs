@@ -66,7 +66,7 @@ public class LicenseTests : IDisposable
         };
         var form = new FormUrlEncodedContent(data);
 
-        for (int i = 0; i < threshold + 1; i++)
+        for (var i = 0; i < threshold + 1; i++)
         {
             await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
         }

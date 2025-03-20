@@ -173,7 +173,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         // and while selecting from multiple accounts would take a significant
         // amount of work to implement, the user interaction would happen on the
         // login page.
-        bool showLoginBecauseOfPrompt = false; // we need this flag because we want to check for (and suppress) either OR BOTH of the prompt and max_age params
+        var showLoginBecauseOfPrompt = false; // we need this flag because we want to check for (and suppress) either OR BOTH of the prompt and max_age params
         if (request.PromptModes.Contains(OidcConstants.PromptModes.Login) ||
             request.PromptModes.Contains(OidcConstants.PromptModes.SelectAccount))
         {
@@ -200,7 +200,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         var isAuthenticated = request.Subject.IsAuthenticated();
 
         // user de-activated
-        bool isActive = false;
+        var isActive = false;
 
         if (isAuthenticated)
         {

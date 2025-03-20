@@ -66,11 +66,11 @@ public class BasicAuthenticationSecretParsing
     [InlineData("client:urn", "secret")]
     public async Task Valid_BasicAuthentication_Request_in_various_Formats_Manual(string userName, string password)
     {
-        Encoding encoding = Encoding.UTF8;
+        var encoding = Encoding.UTF8;
         var context = new DefaultHttpContext();
 
         if (password == null) password = "";
-        string credential = $"{Uri.EscapeDataString(userName)}:{Uri.EscapeDataString(password)}";
+        var credential = $"{Uri.EscapeDataString(userName)}:{Uri.EscapeDataString(password)}";
 
         var headerValue = $"Basic {Convert.ToBase64String(encoding.GetBytes(credential))}";
         context.Request.Headers.Append("Authorization", new StringValues(headerValue));
@@ -93,7 +93,7 @@ public class BasicAuthenticationSecretParsing
     [InlineData("client:urn", "secret")]
     public async Task Valid_BasicAuthentication_Request_in_various_Formats_IdentityModel(string userName, string password)
     {
-        Encoding encoding = Encoding.UTF8;
+        var encoding = Encoding.UTF8;
         var context = new DefaultHttpContext();
 
         var credential = BasicAuthenticationOAuthHeaderValue.EncodeCredential(userName, password);

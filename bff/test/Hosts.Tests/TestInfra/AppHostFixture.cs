@@ -77,9 +77,9 @@ public class AppHostFixture : IAsyncLifetime
         void RemoveConsoleLogger(ILoggingBuilder x)
         {
             var collection = x.Services;
-            for (int i = collection.Count - 1; i >= 0; i--)
+            for (var i = collection.Count - 1; i >= 0; i--)
             {
-                ServiceDescriptor? descriptor = collection[i];
+                var descriptor = collection[i];
                 if (descriptor.ServiceType == typeof(ILoggerProvider) && descriptor.ImplementationType == typeof(ConsoleLoggerProvider))
                 {
                     collection.RemoveAt(i);
@@ -251,6 +251,7 @@ public class AppHostFixture : IAsyncLifetime
                 AppHostServices.Bff => "https://localhost:5002",
                 AppHostServices.BffBlazorPerComponent => "https://localhost:5105",
                 AppHostServices.BffBlazorWebassembly => "https://localhost:5005",
+                AppHostServices.TemplateBffBlazor => "https://localhost:7035",
                 _ => throw new InvalidOperationException("client not configured")
             };
             return new Uri(url);

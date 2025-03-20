@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <PackageType>Template</PackageType>
-
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <PackageVersion>1.0</PackageVersion>
     <IncludeContentInPack>true</IncludeContentInPack>
@@ -18,6 +17,9 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
 
+    <!--NU5128 doesn't apply to template packages.
+    https://learn.microsoft.com/en-us/dotnet/core/tutorials/cli-templates-create-template-package#description-of-the-project-xml-->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
 
     <!--Minver-->
     <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
@@ -36,5 +38,12 @@
     <None Include="../icon.png" Pack="true" Visible="false" PackagePath="" />
     <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
     <None Include="../LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

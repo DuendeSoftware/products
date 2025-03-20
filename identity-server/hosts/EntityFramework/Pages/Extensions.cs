@@ -39,4 +39,23 @@ public static class Extensions
 
         return page.RedirectToPage("/Redirect/Index", new { RedirectUri = redirectUri });
     }
+
+    /// <summary>
+    /// Check for a remote connection (non-localhost)
+    /// </summary>
+    internal static bool IsRemote(this ConnectionInfo connection)
+    {
+        var localAddresses = new List<string?> { "127.0.0.1", "::1" };
+        if (connection.LocalIpAddress != null)
+        {
+            localAddresses.Add(connection.LocalIpAddress.ToString());
+        }
+
+        if (!localAddresses.Contains(connection.RemoteIpAddress?.ToString()))
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

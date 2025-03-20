@@ -1,0 +1,11 @@
+@inject NavigationManager Navigation
+
+@rendermode InteractiveAuto
+
+@code {
+    protected override void OnInitialized()
+    {
+        var returnUrl = Uri.EscapeDataString("/" + Navigation.ToBaseRelativePath(Navigation.Uri));
+        Navigation.NavigateTo($"bff/login?returnUrl={returnUrl}", forceLoad: true);
+    }
+}

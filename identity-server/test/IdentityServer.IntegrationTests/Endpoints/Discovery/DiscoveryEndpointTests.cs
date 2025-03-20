@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +22,7 @@ public class DiscoveryEndpointTests
     [Trait("Category", Category)]
     public async Task Issuer_uri_should_be_lowercase()
     {
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/ROOT");
 
         var result = await pipeline.BackChannelClient.GetAsync("HTTPS://SERVER/ROOT/.WELL-KNOWN/OPENID-CONFIGURATION");
@@ -36,7 +36,7 @@ public class DiscoveryEndpointTests
     [Trait("Category", Category)]
     public async Task when_lower_case_issuer_option_disabled_issuer_uri_should_be_preserved()
     {
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/ROOT");
 
         pipeline.Options.LowerCaseIssuerUri = false;
@@ -60,7 +60,7 @@ public class DiscoveryEndpointTests
         var key = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
         var expectedAlgorithm = SecurityAlgorithms.EcdsaSha256;
 
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += services =>
         {
             // add key to standard RSA key
@@ -88,7 +88,7 @@ public class DiscoveryEndpointTests
         var ecdsaKey = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
         var parameters = ecdsaKey.ECDsa.ExportParameters(true);
 
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
 
         var jsonWebKeyFromECDsa = new JsonWebKey()
         {
@@ -128,7 +128,7 @@ public class DiscoveryEndpointTests
     [Trait("Category", Category)]
     public async Task Jwks_entries_should_contain_alg()
     {
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/ROOT");
 
         var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
@@ -152,7 +152,7 @@ public class DiscoveryEndpointTests
     {
         var key = CryptoHelper.CreateECDsaSecurityKey(crv);
 
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += services =>
         {
             services.AddIdentityServerBuilder()
@@ -177,7 +177,7 @@ public class DiscoveryEndpointTests
         var ecdsaKey = CryptoHelper.CreateECDsaSecurityKey();
         var rsaKey = CryptoHelper.CreateRsaSecurityKey();
 
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += services =>
         {
             services.AddIdentityServerBuilder()
@@ -222,7 +222,7 @@ public class DiscoveryEndpointTests
     [Trait("Category", Category)]
     public async Task prompt_values_supported_should_contain_defaults()
     {
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
 
         var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
@@ -238,7 +238,7 @@ public class DiscoveryEndpointTests
     [Trait("Category", Category)]
     public async Task createaccount_options_should_include_create_in_prompt_values_supported()
     {
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += services =>
         {
             services.PostConfigure<IdentityServerOptions>(opts =>
@@ -262,7 +262,7 @@ public class DiscoveryEndpointTests
     [Trait("Category", Category)]
     public async Task prompt_values_supported_should_be_absent_if_no_authorize_endpoint_enabled()
     {
-        IdentityServerPipeline pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
         pipeline.Options.Endpoints.EnableAuthorizeEndpoint = false;
 
@@ -271,5 +271,54 @@ public class DiscoveryEndpointTests
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data.ContainsKey("prompt_values_supported").ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Can_enable_preview_feature_of_document_discovery_cache()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize("/root");
+
+        pipeline.Options.Preview.EnableDiscoveryDocumentCache = true;
+
+        pipeline.Options.Preview.DiscoveryDocumentCacheDuration = TimeSpan.FromSeconds(1);
+
+        // cache
+        _ = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+
+        // add new entry
+        pipeline.Options.Discovery.CustomEntries = new() {
+            { "after_cache_key", "test_value" }
+        };
+
+        // get cached document
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+
+        // we got a result back
+        data.ContainsKey("after_cache_key").ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void Cannot_set_entries_for_document_discovery_cache_if_enabled()
+    {
+        var result = new DiscoveryDocumentResult("{}", null);
+
+        Should.Throw<InvalidOperationException>(() =>
+            result.Entries = new Dictionary<string, object>());
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void Cannot_get_entries_for_document_discovery_cache_if_enabled()
+    {
+        var result = new DiscoveryDocumentResult("{}", null);
+
+        Should.Throw<InvalidOperationException>(() =>
+            result.Entries.Add("Joe", "Good Stuff"));
     }
 }

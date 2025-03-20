@@ -14,7 +14,7 @@ public class BlazorPerComponentTests(ITestOutputHelper output, AppHostFixture fi
 
     public async Task<PerComponentPageModel> GoToHome()
     {
-        await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorPerComponent).ToString());
+        await Page.GotoAsync(Fixture.GetUrlTo(AppHostServices.BffBlazorPerComponent).ToString(), Defaults.PageGotoOptions);
         return new PerComponentPageModel()
         {
             Page = Page

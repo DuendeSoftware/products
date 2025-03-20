@@ -38,4 +38,15 @@
             and <a href="https://github.com/duendesoftware/samples">ready to use samples</a>.
         </li>
     </ul>
+
+    @if(Model.License != null)
+    {
+        <h2>License</h2>
+        <dl>
+            <dt>Serial Number</dt>
+            <dd>@Model.License.SerialNumber</dd>
+            <dt>Expiration</dt>
+            <dd>@Model.License.Expiration!.Value.ToLongDateString()</dd>
+        </dl>
+    }
 </div>

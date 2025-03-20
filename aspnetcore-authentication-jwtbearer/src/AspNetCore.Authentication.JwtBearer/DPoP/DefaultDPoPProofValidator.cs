@@ -502,7 +502,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         try
         {
             var value = DataProtector.Unprotect(result.Nonce!); // nonce is required by an earlier validation
-            if (long.TryParse(value, out long iat))
+            if (long.TryParse(value, out var iat))
             {
                 return ValueTask.FromResult(iat);
             }

@@ -32,8 +32,14 @@ public class IndexModel : PageModel
     [BindProperty(SupportsGet = true)]
     public string? Prev { get; set; }
 
-    public async Task OnGet()
+    public async Task<ActionResult> OnGet()
     {
+        //Replace with an authorization policy check
+        if (HttpContext.Connection.IsRemote())
+        {
+            return NotFound();
+        }
+
         if (_sessionManagementService != null)
         {
             UserSessions = await _sessionManagementService.QuerySessionsAsync(new SessionQuery
@@ -45,6 +51,8 @@ public class IndexModel : PageModel
                 SubjectId = SubjectIdFilter
             });
         }
+
+        return Page();
     }
 
     [BindProperty]
@@ -52,12 +60,19 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPost()
     {
+        //Replace with an authorization policy check
+        if (HttpContext.Connection.IsRemote())
+        {
+            return NotFound();
+        }
+
         ArgumentNullException.ThrowIfNull(_sessionManagementService);
 
         await _sessionManagementService.RemoveSessionsAsync(new RemoveSessionsContext
         {
             SessionId = SessionId,
         });
+
         return RedirectToPage("/ServerSideSessions/Index", new { Token, DisplayNameFilter, SessionIdFilter, SubjectIdFilter, Prev });
     }
 }

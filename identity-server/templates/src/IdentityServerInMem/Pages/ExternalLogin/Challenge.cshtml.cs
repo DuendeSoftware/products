@@ -21,7 +21,7 @@ public class Challenge : PageModel
     {
         if (string.IsNullOrEmpty(returnUrl)) returnUrl = "~/";
 
-        // validate returnUrl - either it is a valid OIDC URL or back to a local page
+        // Abort on incorrect returnUrl - it is neither a local url nor a valid OIDC url.
         if (Url.IsLocalUrl(returnUrl) == false && _interactionService.IsValidReturnUrl(returnUrl) == false)
         {
             // user might have clicked on a malicious link - should be logged

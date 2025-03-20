@@ -43,7 +43,7 @@ internal static class TokenFactory
             new Claim("sub", subjectId)
         };
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             claims.Add(new Claim("junk", "x".Repeat(100)));
         }
@@ -95,7 +95,7 @@ internal static class TokenFactory
             new Claim("sub", subjectId)
         };
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             claims.Add(new Claim("junk", "x".Repeat(100)));
         }

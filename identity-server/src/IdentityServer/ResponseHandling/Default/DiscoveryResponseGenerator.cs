@@ -393,7 +393,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         // custom entries
         if (!IEnumerableExtensions.IsNullOrEmpty(Options.Discovery.CustomEntries))
         {
-            foreach ((string key, object value) in Options.Discovery.CustomEntries)
+            foreach (var (key, value) in Options.Discovery.CustomEntries)
             {
                 if (entries.ContainsKey(key))
                 {

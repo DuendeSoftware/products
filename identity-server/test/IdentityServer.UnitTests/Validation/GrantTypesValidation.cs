@@ -118,7 +118,7 @@ public class GrantTypesValidation
             AllowedGrantTypes = { "implicit" }
         };
 
-        Action act = () => client.AllowedGrantTypes.Add("authorization_code");
+        var act = () => client.AllowedGrantTypes.Add("authorization_code");
 
         act.ShouldThrow<InvalidOperationException>();
     }

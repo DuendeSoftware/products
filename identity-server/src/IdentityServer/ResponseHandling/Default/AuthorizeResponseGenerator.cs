@@ -161,7 +161,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
         Logger.LogDebug("Creating Implicit Flow response.");
 
         string accessTokenValue = null;
-        int accessTokenLifetime = 0;
+        var accessTokenLifetime = 0;
 
         var responseTypes = request.ResponseType.FromSpaceSeparatedString();
 

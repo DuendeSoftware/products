@@ -26,7 +26,7 @@ public class TestBrowserClient : HttpClient
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             CurrentUri = request.RequestUri;
-            string cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri);
+            var cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri);
             if (!string.IsNullOrEmpty(cookieHeader))
             {
                 request.Headers.Add("Cookie", cookieHeader);

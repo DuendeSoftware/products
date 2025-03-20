@@ -3,176 +3,94 @@
 
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.Hosting;
 
-namespace ConsoleScopesResources;
+var builder = Host.CreateApplicationBuilder(args);
 
-class Program
+// Add ServiceDefaults from Aspire
+builder.AddServiceDefaults();
+
+var Cache = new DiscoveryCache("https://localhost:5001");
+
+"Resource setup:\n".ConsoleGreen();
+
+"resource1: resource1.scope1 resource1.scope2 shared.scope".ConsoleGreen();
+"resource2: resource2.scope1 resource2.scope2 shared.scope".ConsoleGreen();
+"resource3 (isolated): resource3.scope1 resource3.scope2 shared.scope".ConsoleGreen();
+"scopes without resource association: scope3 scope4 transaction\n\n".ConsoleGreen();
+
+// Define a set of automated runs to test the different scenarios
+var plannedRuns = new List<PlannedRun>
 {
-    private static DiscoveryCache Cache;
+    new() { Enabled = true, Id = "A", Name = "Scopes without associated resource", Scope = "scope3 scope4" },
+    new() { Enabled = true, Id = "B", Name = "One scope, single resource", Scope = "resource1.scope1" },
+    new() { Enabled = true, Id = "C", Name = "Two scopes, single resources", Scope = "resource1.scope1 resource1.scope2" },
+    new() { Enabled = true, Id = "D", Name = "Two scopes, one has a resource, one doesn't", Scope = "resource1.scope1 scope3" },
+    new() { Enabled = true, Id = "E", Name = "Two scopes, two resource", Scope = "resource1.scope1 resource2.scope1" },
+    new() { Enabled = true, Id = "F", Name = "Shared scope between two resources", Scope = "shared.scope" },
+    new() { Enabled = true, Id = "G", Name = "Shared scope between two resources and scope that belongs to resource", Scope = "resource1.scope1 shared.scope" },
+    new() { Enabled = true, Id = "H", Name = "Parameterized scope", Scope = "transaction:123" },
+    new() { Enabled = true, Id = "I", Name = "No scope", Scope = "" },
+    new() { Enabled = true, Id = "J", Name = "No scope (resource: resource1)", Scope = "", Resource = "urn:resource1" },
+    new() { Enabled = true, Id = "K", Name = "No scope (resource: resource3)", Scope = "", Resource = "urn:resource3" },
+    new() { Enabled = true, Id = "L", Name = "Isolated scope without resource parameter", Scope = "resource3.scope1" },
+    new() { Enabled = true, Id = "M", Name = "Isolated scope without resource parameter", Scope = "resource3.scope1", Resource = "urn:resource3" },
+    new() { Enabled = true, Id = "N", Name = "Isolated scope without resource parameter", Scope = "resource3.scope1", Resource = "urn:resource2" }
+};
 
-    static async Task Main(string[] args)
+// Execute the planned runs
+foreach (var run in plannedRuns.Where(t => t.Enabled))
+{
+    $"Running: ({run.Id}) - {run.Name}".ConsoleBox(ConsoleColor.Green);
+    await RequestToken(run);
+
+    Thread.Sleep(millisecondsTimeout: 1000);
+}
+
+// Exit the application
+"Exiting application...".ConsoleYellow();
+Environment.Exit(0);
+
+async Task RequestToken(PlannedRun run)
+{
+    var client = new HttpClient();
+    var disco = await Cache.GetAsync();
+
+    var request = new ClientCredentialsTokenRequest
     {
-        Console.Title = "Console Resources and Scopes Client";
-        Cache = new DiscoveryCache("https://localhost:5001");
+        Address = disco.TokenEndpoint,
+        ClientId = "console.resource.scope",
+        ClientSecret = "secret",
 
-        var leave = false;
+        Scope = run.Scope
+    };
 
-        while (leave == false)
-        {
-            Console.Clear();
-
-            "Resource setup:\n".ConsoleGreen();
-
-            "resource1: resource1.scope1 resource1.scope2 shared.scope".ConsoleGreen();
-            "resource2: resource2.scope1 resource2.scope2 shared.scope\n".ConsoleGreen();
-            "resource3 (isolated): resource3.scope1 resource3.scope2 shared.scope\n".ConsoleGreen();
-            "scopes without resource association: scope3 scope4 transaction\n\n".ConsoleGreen();
-
-
-            // scopes without associated resource
-            "a) scope3 scope4".ConsoleYellow();
-
-            // one scope, single resource
-            "b) resource1.scope1".ConsoleYellow();
-
-            // two scopes, single resources
-            "c) resource1.scope1 resource1.scope2".ConsoleYellow();
-
-            // two scopes, one has a resource, one doesn't
-            "d) resource1.scope1 scope3".ConsoleYellow();
-
-            // two scopes, two resource
-            "e) resource1.scope1 resource2.scope1".ConsoleYellow();
-
-            // shared scope between two resources
-            "f) shared.scope".ConsoleYellow();
-
-            // shared scope between two resources and scope that belongs to resource
-            "g) resource1.scope1 shared.scope".ConsoleYellow();
-
-            // parameterized scope
-            "h) transaction:123".ConsoleYellow();
-
-            // no scope
-            "i) no scope".ConsoleYellow();
-
-            // no scope
-            "j) no scope (resource: resource1)".ConsoleYellow();
-
-            // no scope
-            "k) no scope (resource: resource3)".ConsoleYellow();
-
-            // isolated scope without resource parameter
-            "l) resource3.scope1".ConsoleYellow();
-
-            // isolated scope without resource parameter
-            "m) resource3.scope1 (resource: resource3)".ConsoleYellow();
-
-            // isolated scope without resource parameter
-            "n) resource3.scope1 (resource: resource2)".ConsoleYellow();
-
-            "\nx) quit".ConsoleYellow();
-
-            var input = Console.ReadKey();
-
-            switch (input.Key)
-            {
-                case ConsoleKey.A:
-                    await RequestToken("scope3 scope4");
-                    break;
-
-                case ConsoleKey.B:
-                    await RequestToken("resource1.scope1");
-                    break;
-
-                case ConsoleKey.C:
-                    await RequestToken("resource1.scope1 resource1.scope2");
-                    break;
-
-                case ConsoleKey.D:
-                    await RequestToken("resource1.scope1 scope3");
-                    break;
-
-                case ConsoleKey.E:
-                    await RequestToken("resource1.scope1 resource2.scope1");
-                    break;
-
-                case ConsoleKey.F:
-                    await RequestToken("shared.scope");
-                    break;
-
-                case ConsoleKey.G:
-                    await RequestToken("resource1.scope1 shared.scope");
-                    break;
-
-                case ConsoleKey.H:
-                    await RequestToken("transaction:123");
-                    break;
-
-                case ConsoleKey.I:
-                    await RequestToken("");
-                    break;
-
-                case ConsoleKey.J:
-                    await RequestToken("", "urn:resource1");
-                    break;
-
-                case ConsoleKey.K:
-                    await RequestToken("", "urn:resource3");
-                    break;
-
-                case ConsoleKey.L:
-                    await RequestToken("resource3.scope1");
-                    break;
-
-                case ConsoleKey.M:
-                    await RequestToken("resource3.scope1", "urn:resource3");
-                    break;
-
-                case ConsoleKey.N:
-                    await RequestToken("resource3.scope1", "urn:resource2");
-                    break;
-
-                case ConsoleKey.X:
-                    leave = true;
-                    break;
-            }
-        }
+    if (!string.IsNullOrEmpty(run.Resource))
+    {
+        request.Resource.Add(run.Resource);
     }
 
-    static async Task RequestToken(string scope, string resource = null)
+    var response = await client.RequestClientCredentialsTokenAsync(request);
+
+    if (response.IsError)
     {
-        var client = new HttpClient();
-        var disco = await Cache.GetAsync();
-
-        var request = new ClientCredentialsTokenRequest
-        {
-            Address = disco.TokenEndpoint,
-            ClientId = "console.resource.scope",
-            ClientSecret = "secret",
-
-            Scope = scope
-        };
-
-        if (!string.IsNullOrEmpty(resource))
-        {
-            request.Resource.Add(resource);
-        }
-
-        var response = await client.RequestClientCredentialsTokenAsync(request);
-
-        if (response.IsError)
-        {
-            Console.WriteLine();
-            Console.WriteLine(response.Error);
-            Console.ReadLine();
-            return;
-        }
-
-        Console.WriteLine();
         Console.WriteLine();
 
-        response.Show();
-        Console.ReadLine();
+        "An error response was received:".ConsoleRed();
+        Console.WriteLine(response.Error);
     }
+
+    Console.WriteLine();
+    Console.WriteLine();
+
+    response.Show();
+}
+
+class PlannedRun
+{
+    public string Id { get; set; }
+    public bool Enabled { get; set; }
+    public string Name { get; set; }
+    public string Scope { get; set; }
+    public string Resource { get; set; } = null;
 }

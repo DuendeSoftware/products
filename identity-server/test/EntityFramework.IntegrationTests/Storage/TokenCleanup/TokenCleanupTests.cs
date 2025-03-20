@@ -265,7 +265,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
             context.PersistedGrants.ToList().ShouldBeEmpty();
 
-            for (int i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
+            for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
             {
                 var expiredGrant = new PersistedGrant
                 {
@@ -316,7 +316,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         using (var context = new PersistedGrantDbContext(options))
         {
-            for (int i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
+            for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
             {
                 var expiredGrant = new PersistedGrant
                 {
@@ -364,7 +364,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount + 1);
 
         // Each batch had the expected number of grants. Most batches had the batch size grants
-        for (int i = 0; i < expectedPageCount; i++)
+        for (var i = 0; i < expectedPageCount; i++)
         {
             mockNotifications.PersistedGrantNotifications[i].Count().ShouldBe(StoreOptions.TokenCleanupBatchSize);
         }

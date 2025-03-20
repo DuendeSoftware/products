@@ -167,21 +167,25 @@ public class Index : PageModel
         };
 
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-        if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
+        if (context?.IdP != null)
         {
-            var local = context.IdP == Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider;
-
-            // this is meant to short circuit the UI and only trigger the one external IdP
-            View = new ViewModel
+            var scheme = await _schemeProvider.GetSchemeAsync(context.IdP);
+            if (scheme != null)
             {
-                EnableLocalLogin = local,
-            };
+                var local = context.IdP == Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider;
 
-            Input.Username = context.LoginHint;
+                // this is meant to short circuit the UI and only trigger the one external IdP
+                View = new ViewModel
+                {
+                    EnableLocalLogin = local,
+                };
 
-            if (!local)
-            {
-                View.ExternalProviders = new[] { new ViewModel.ExternalProvider(authenticationScheme: context.IdP) };
+                Input.Username = context.LoginHint;
+
+                if (!local)
+                {
+                    View.ExternalProviders = [new ViewModel.ExternalProvider(authenticationScheme: context.IdP, displayName: scheme.DisplayName)];
+                }
             }
 
             return;
