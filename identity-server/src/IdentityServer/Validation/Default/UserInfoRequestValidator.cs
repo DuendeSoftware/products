@@ -67,7 +67,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
         }
 
         // the token must have a one sub claim
-        var subClaim = tokenResult.Claims.SingleOrDefault(c => c.Type == JwtClaimTypes.Subject);
+        var subClaim = tokenResult.Claims?.SingleOrDefault(c => c.Type == JwtClaimTypes.Subject);
         if (subClaim == null)
         {
             _logger.LogError("Token contains no sub claim");
@@ -112,7 +112,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
         }
 
         // make sure user is still active
-        var isActiveContext = new IsActiveContext(subject, tokenResult.Client, IdentityServerConstants.ProfileIsActiveCallers.UserInfoRequestValidation);
+        var isActiveContext = new IsActiveContext(subject, tokenResult.Client!, IdentityServerConstants.ProfileIsActiveCallers.UserInfoRequestValidation);
         await _profile.IsActiveAsync(isActiveContext);
 
         if (isActiveContext.IsActive == false)

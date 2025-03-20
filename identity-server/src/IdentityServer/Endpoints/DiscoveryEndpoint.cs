@@ -9,7 +9,10 @@ using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -38,7 +41,8 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
-        using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
+        using var activity =
+            Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Discovery + "Endpoint");
 
         _logger.LogTrace("Processing discovery request.");
 
@@ -62,8 +66,51 @@ internal class DiscoveryEndpoint : IEndpointHandler
 
         // generate response
         _logger.LogTrace("Calling into discovery response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
 
+        if (_options.Preview.EnableDiscoveryDocumentCache)
+        {
+            var distributedCache = context.RequestServices.GetRequiredService<IDistributedCache>();
+            if (distributedCache is not null)
+            {
+                return await GetCachedDiscoveryDocument(distributedCache, baseUrl, issuerUri);
+            }
+            // fall through to default implementation if there is no cache provider registered
+        }
+
+        var response = await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
         return new DiscoveryDocumentResult(response, _options.Discovery.ResponseCacheInterval);
+    }
+
+    private async Task<IEndpointResult> GetCachedDiscoveryDocument(IDistributedCache cache, string baseUrl,
+        string issuerUri)
+    {
+        var key = $"discoveryDocument/{baseUrl}/{issuerUri}";
+        var json = await cache.GetStringAsync(key);
+
+        if (json is not null)
+        {
+            return new DiscoveryDocumentResult(
+                json: json,
+                maxAge: _options.Discovery.ResponseCacheInterval
+            );
+        }
+
+        var entries =
+            await _responseGenerator.CreateDiscoveryDocumentAsync(baseUrl, issuerUri);
+
+        var expirationFromNow = _options.Preview.DiscoveryDocumentCacheDuration;
+
+        var result =
+            new DiscoveryDocumentResult(
+                entries,
+                isUsingPreviewFeature: true,
+                maxAge: _options.Discovery.ResponseCacheInterval);
+
+        await cache.SetStringAsync(key, result.Json, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = expirationFromNow,
+        });
+
+        return result;
     }
 }

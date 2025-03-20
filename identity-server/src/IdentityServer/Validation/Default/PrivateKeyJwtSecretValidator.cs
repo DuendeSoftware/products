@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -85,7 +84,28 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             return fail;
         }
 
-        var issuer = await _issuerNameService.GetCurrentAsync();
+        // Decide whether to enforce strict audience validation or not.
+        var enforceStrictAud = _options.Preview.StrictClientAssertionAudienceValidation;
+
+        try
+        {
+            // Read the token so we can get the "typ" header value if it exists.
+            var handlerForHeader = new JsonWebTokenHandler();
+            var tokenForHeader = handlerForHeader.ReadJsonWebToken(jwtTokenString);
+            var jwtTyp = tokenForHeader.GetHeaderValue<string>("typ");
+
+            // If strict mode is not enabled by option but the "typ" header value "client-authentication+jwt" is provided,
+            // enforce strict audience validation.
+            if (string.Equals(jwtTyp, "client-authentication+jwt", StringComparison.OrdinalIgnoreCase))
+            {
+                enforceStrictAud = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reading JWT header.");
+            return fail;
+        }
 
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -101,7 +121,9 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             ClockSkew = _options.JwtValidationClockSkew
         };
 
-        if (_options.StrictClientAssertionAudienceValidation)
+        var issuer = await _issuerNameService.GetCurrentAsync();
+
+        if (enforceStrictAud)
         {
             // New strict audience validation requires that the audience be the issuer identifier, disallows multiple
             // audiences in an array, and even disallows wrapping even a single audience in an array 
@@ -115,9 +137,13 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
                 return audValue is string audString &&
                        AudiencesMatch(audString, issuer);
             };
+
+            // Strict audience validation requires that the token type be "client-authentication+jwt"
+            tokenValidationParameters.ValidTypes = ["client-authentication+jwt"];
         }
         else
         {
+            // Legacy behavior with a set of allowed audiences.
             tokenValidationParameters.ValidateAudience = true;
             tokenValidationParameters.ValidAudiences = new[]
             {

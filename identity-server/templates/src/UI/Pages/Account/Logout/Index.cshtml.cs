@@ -1,6 +1,3 @@
-// Copyright (c) Duende Software. All rights reserved.
-// See LICENSE in the project root for license information.
-
 using Duende.IdentityModel;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
@@ -19,7 +16,7 @@ public class Index : PageModel
     private readonly IIdentityServerInteractionService _interaction;
     private readonly IEventService _events;
 
-    [BindProperty] 
+    [BindProperty]
     public string? LogoutId { get; set; }
 
     public Index(IIdentityServerInteractionService interaction, IEventService events)
@@ -48,7 +45,7 @@ public class Index : PageModel
                 showLogoutPrompt = false;
             }
         }
-            
+
         if (showLogoutPrompt == false)
         {
             // if the request for logout was properly authenticated from IdentityServer, then
@@ -67,7 +64,7 @@ public class Index : PageModel
             // this captures necessary info from the current logged in user
             // this can still return null if there is no context needed
             LogoutId ??= await _interaction.CreateLogoutContextAsync();
-                
+
             // delete local authentication cookie
             await HttpContext.SignOutAsync();
 

@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
 using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -271,5 +271,54 @@ public class DiscoveryEndpointTests
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data.ContainsKey("prompt_values_supported").ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Can_enable_preview_feature_of_document_discovery_cache()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize("/root");
+
+        pipeline.Options.Preview.EnableDiscoveryDocumentCache = true;
+
+        pipeline.Options.Preview.DiscoveryDocumentCacheDuration = TimeSpan.FromSeconds(1);
+
+        // cache
+        _ = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+
+        // add new entry
+        pipeline.Options.Discovery.CustomEntries = new() {
+            { "after_cache_key", "test_value" }
+        };
+
+        // get cached document
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+
+        // we got a result back
+        data.ContainsKey("after_cache_key").ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void Cannot_set_entries_for_document_discovery_cache_if_enabled()
+    {
+        var result = new DiscoveryDocumentResult("{}", null);
+
+        Should.Throw<InvalidOperationException>(() =>
+            result.Entries = new Dictionary<string, object>());
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void Cannot_get_entries_for_document_discovery_cache_if_enabled()
+    {
+        var result = new DiscoveryDocumentResult("{}", null);
+
+        Should.Throw<InvalidOperationException>(() =>
+            result.Entries.Add("Joe", "Good Stuff"));
     }
 }

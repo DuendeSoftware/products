@@ -12,6 +12,9 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var clientId = Guid.NewGuid().ToString();
+var clientSecret = Guid.NewGuid().ToString();
+
 // Register named HttpClient with service discovery support.
 // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
 builder.Services.AddHttpClient("SimpleApi", client =>
@@ -53,10 +56,10 @@ async Task RegisterClient()
     };
 
     var json = JsonDocument.Parse(
-        """
+        $$"""
         {
-          "client_id": "client",
-          "client_secret": "secret"
+          "client_id": "{{clientId}}",
+          "client_secret": "{{clientSecret}}"
         }
         """
     );
@@ -67,8 +70,6 @@ async Task RegisterClient()
     request.Document.Extensions!.Add("client_id", clientJson);
     request.Document.Extensions.Add("client_secret", secretJson);
 
-    var serialized = JsonSerializer.Serialize(request.Document);
-    var deserialized = JsonSerializer.Deserialize<DynamicClientRegistrationDocument>(serialized);
     var response = await client.RegisterClientAsync(request);
 
     if (response.IsError)
@@ -94,11 +95,16 @@ async Task<TokenResponse> RequestTokenAsync()
     {
         Address = disco.TokenEndpoint,
 
-        ClientId = "client",
-        ClientSecret = "secret",
+        ClientId = clientId,
+        ClientSecret = clientSecret,
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        Console.WriteLine("\n\nError:\n{0}", response.Error);
+        Environment.Exit(-1);
+        return null;
+    }
     return response;
 }
 
