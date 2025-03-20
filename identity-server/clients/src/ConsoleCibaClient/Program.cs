@@ -25,7 +25,6 @@ builder.Services.AddHttpClient("SimpleApi", client =>
 
 // Resolve the authority from the configuration.
 var authority = builder.Configuration["is-host"];
-var simpleApi = builder.Configuration["simple-api"];
 
 IDiscoveryCache _cache = new DiscoveryCache(authority);
 
