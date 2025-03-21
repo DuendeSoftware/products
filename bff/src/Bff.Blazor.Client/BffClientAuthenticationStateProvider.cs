@@ -4,7 +4,6 @@
 using System.Security.Claims;
 using Duende.Bff.Blazor.Client.Internals;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.Blazor.Client;
@@ -19,7 +18,6 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     private readonly BffBlazorClientOptions _options;
     private readonly ITimer? _timer;
     private ClaimsPrincipal? _user;
-    private readonly ILogger<BffClientAuthenticationStateProvider> _logger;
 
     private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
@@ -27,11 +25,11 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     /// An <see cref="AuthenticationStateProvider"/> intended for use in Blazor
     /// WASM. It polls the /bff/user endpoint to monitor session state.
     /// </summary>
-    public BffClientAuthenticationStateProvider(FetchUserService fetchUserService,
+    public BffClientAuthenticationStateProvider(
+        FetchUserService fetchUserService,
         PersistentUserService persistentUserService,
         TimeProvider timeProvider,
-        IOptions<BffBlazorClientOptions> options,
-        ILogger<BffClientAuthenticationStateProvider> logger)
+        IOptions<BffBlazorClientOptions> options)
     {
         _fetchUserService = fetchUserService;
         _persistentUserService = persistentUserService;
@@ -43,7 +41,6 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
             null,
             TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingDelay),
             TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingInterval));
-        _logger = logger;
     }
 
     private async void TimerCallback(object? _)
