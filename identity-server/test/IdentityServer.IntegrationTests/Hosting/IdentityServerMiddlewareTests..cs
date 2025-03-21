@@ -34,7 +34,6 @@ public class IdentityServerMiddlewareTests
         { typeof(InvalidOperationException), false },
         { typeof(ArgumentException), false },
         { typeof(NullReferenceException), false }
-
     };
 
     [Theory]

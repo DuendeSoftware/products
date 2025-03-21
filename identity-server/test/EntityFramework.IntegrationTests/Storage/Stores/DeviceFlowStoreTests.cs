@@ -41,13 +41,13 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             Lifetime = 300
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             await store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
         }
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var foundDeviceFlowCodes = context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == deviceCode);
 
@@ -69,13 +69,13 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             Lifetime = 300
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             await store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
         }
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var foundDeviceFlowCodes = context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == deviceCode);
 
@@ -103,7 +103,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 new List<Claim> { new Claim(JwtClaimTypes.Subject, $"sub_{Guid.NewGuid().ToString()}") }))
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(new DeviceFlowCodes
             {
@@ -115,10 +115,10 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = deviceCodeData.CreationTime.AddSeconds(deviceCodeData.Lifetime),
                 Data = serializer.Serialize(deviceCodeData)
             });
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
 
@@ -148,7 +148,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 new List<Claim> { new Claim(JwtClaimTypes.Subject, $"sub_{Guid.NewGuid().ToString()}") }))
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(new DeviceFlowCodes
             {
@@ -160,10 +160,10 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = deviceCodeData.CreationTime.AddSeconds(deviceCodeData.Lifetime),
                 Data = serializer.Serialize(deviceCodeData)
             });
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
 
@@ -195,7 +195,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             Subject = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> { new Claim(JwtClaimTypes.Subject, expectedSubject) }))
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(new DeviceFlowCodes
             {
@@ -207,11 +207,11 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = expectedDeviceCodeData.CreationTime.AddSeconds(expectedDeviceCodeData.Lifetime),
                 Data = serializer.Serialize(expectedDeviceCodeData)
             });
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         DeviceCode code;
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             code = await store.FindByUserCodeAsync(testUserCode);
@@ -232,7 +232,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task FindByUserCodeAsync_WhenUserCodeDoesNotExist_ExpectNull(DbContextOptions<PersistedGrantDbContext> options)
     {
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             var code = await store.FindByUserCodeAsync($"user_{Guid.NewGuid().ToString()}");
@@ -257,7 +257,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             Subject = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> { new Claim(JwtClaimTypes.Subject, expectedSubject) }))
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(new DeviceFlowCodes
             {
@@ -269,11 +269,11 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = expectedDeviceCodeData.CreationTime.AddSeconds(expectedDeviceCodeData.Lifetime),
                 Data = serializer.Serialize(expectedDeviceCodeData)
             });
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         DeviceCode code;
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             code = await store.FindByDeviceCodeAsync(testDeviceCode);
@@ -293,7 +293,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task FindByDeviceCodeAsync_WhenDeviceCodeDoesNotExist_ExpectNull(DbContextOptions<PersistedGrantDbContext> options)
     {
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             var code = await store.FindByDeviceCodeAsync($"device_{Guid.NewGuid().ToString()}");
@@ -317,7 +317,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             IsOpenId = true
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(new DeviceFlowCodes
             {
@@ -328,7 +328,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = unauthorizedDeviceCode.CreationTime.AddSeconds(unauthorizedDeviceCode.Lifetime),
                 Data = serializer.Serialize(unauthorizedDeviceCode)
             });
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         var authorizedDeviceCode = new DeviceCode
@@ -343,14 +343,14 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             Lifetime = 300
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             await store.UpdateByUserCodeAsync(testUserCode, authorizedDeviceCode);
         }
 
         DeviceFlowCodes updatedCodes;
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             updatedCodes = context.DeviceFlowCodes.Single(x => x.UserCode == testUserCode);
         }
@@ -392,7 +392,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
             IsOpenId = true
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(new DeviceFlowCodes
             {
@@ -403,16 +403,16 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = existingDeviceCode.CreationTime.AddSeconds(existingDeviceCode.Lifetime),
                 Data = serializer.Serialize(existingDeviceCode)
             });
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             await store.RemoveByDeviceCodeAsync(testDeviceCode);
         }
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.FirstOrDefault(x => x.UserCode == testUserCode).ShouldBeNull();
         }
@@ -420,7 +420,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task RemoveByDeviceCodeAsync_WhenDeviceCodeDoesNotExists_ExpectSuccess(DbContextOptions<PersistedGrantDbContext> options)
     {
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
             await store.RemoveByDeviceCodeAsync($"device_{Guid.NewGuid().ToString()}");

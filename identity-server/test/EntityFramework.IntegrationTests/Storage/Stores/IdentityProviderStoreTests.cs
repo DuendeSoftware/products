@@ -28,7 +28,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task GetBySchemeAsync_should_find_by_scheme(DbContextOptions<ConfigurationDbContext> options)
     {
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var idp = new OidcProvider
             {
@@ -36,10 +36,10 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
                 Type = "oidc"
             };
             context.IdentityProviders.Add(idp.ToEntity());
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var store = new IdentityProviderStore(context, FakeLogger<IdentityProviderStore>.Create(), new NoneCancellationTokenProvider());
             var item = await store.GetBySchemeAsync("scheme1");
@@ -52,7 +52,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task GetBySchemeAsync_should_filter_by_type(DbContextOptions<ConfigurationDbContext> options)
     {
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var idp = new OidcProvider
             {
@@ -60,10 +60,10 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
                 Type = "saml"
             };
             context.IdentityProviders.Add(idp.ToEntity());
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var store = new IdentityProviderStore(context, FakeLogger<IdentityProviderStore>.Create(), new NoneCancellationTokenProvider());
             var item = await store.GetBySchemeAsync("scheme2");
@@ -72,11 +72,10 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
         }
     }
 
-
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task GetBySchemeAsync_should_filter_by_scheme_casing(DbContextOptions<ConfigurationDbContext> options)
     {
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var idp = new OidcProvider
             {
@@ -84,10 +83,10 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
                 Type = "oidc"
             };
             context.IdentityProviders.Add(idp.ToEntity());
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var store = new IdentityProviderStore(context, FakeLogger<IdentityProviderStore>.Create(), new NoneCancellationTokenProvider());
             var item = await store.GetBySchemeAsync("scheme3");
