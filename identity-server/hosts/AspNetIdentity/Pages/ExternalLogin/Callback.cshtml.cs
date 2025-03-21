@@ -149,7 +149,7 @@ public class Callback : PageModel
                        claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname)?.Value;
             if (first != null && last != null)
             {
-                filtered.Add(new Claim(JwtClaimTypes.Name, first + " " + last));
+                filtered.Add(new Claim(JwtClaimTypes.Name, first + ' ' + last));
             }
             else if (first != null)
             {

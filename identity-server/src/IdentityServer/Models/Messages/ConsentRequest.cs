@@ -83,7 +83,7 @@ public class ConsentRequest
     {
         get
         {
-            var normalizedScopes = ScopesRequested?.OrderBy(x => x).Distinct().Aggregate((x, y) => x + "," + y);
+            var normalizedScopes = ScopesRequested?.OrderBy(x => x).Distinct().Aggregate((x, y) => x + ',' + y);
             var value = $"{ClientId}:{Subject}:{Nonce}:{normalizedScopes}";
 
             var bytes = Encoding.UTF8.GetBytes(value);

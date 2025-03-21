@@ -245,7 +245,7 @@ public class YarpBffHost : GenericHost
     {
         if (userQuery != null)
         {
-            userQuery = "?" + userQuery;
+            userQuery = '?' + userQuery;
         }
 
         var req = new HttpRequestMessage(HttpMethod.Get, Url("/bff/user") + userQuery);

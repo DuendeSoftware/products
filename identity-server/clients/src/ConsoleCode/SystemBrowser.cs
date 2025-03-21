@@ -111,7 +111,7 @@ public class LoopbackHttpListener : IDisposable
     public LoopbackHttpListener(int port, string path = null)
     {
         path = path ?? string.Empty;
-        if (path.StartsWith("/")) path = path.Substring(1);
+        if (path.StartsWith('/')) path = path.Substring(1);
 
         _url = $"http://127.0.0.1:{port}/{path}";
 

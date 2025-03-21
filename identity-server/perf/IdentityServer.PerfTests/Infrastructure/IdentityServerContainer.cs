@@ -21,7 +21,7 @@ public class IdentityServerContainer : IDisposable
 
     public string Url(string path = null)
     {
-        if (!path.StartsWith("/")) path = "/" + path;
+        if (!path.StartsWith('/')) path = '/' + path;
         return BaseAddress + path;
     }
 

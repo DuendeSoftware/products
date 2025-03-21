@@ -43,7 +43,7 @@ public class GenericHost
 
     public string Url(string path = "")
     {
-        if (!path.StartsWith('/')) path = "/" + path;
+        if (!path.StartsWith('/')) path = '/' + path;
         return _baseAddress + path;
     }
 

@@ -223,12 +223,12 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
         var length = -1;
 
         if (validAudience.Length == tokenAudience.Length + 1 &&
-            validAudience.EndsWith("/", StringComparison.InvariantCulture))
+            validAudience.EndsWith('/'))
         {
             length = validAudience.Length - 1;
         }
         else if (tokenAudience.Length == validAudience.Length + 1 &&
-                 tokenAudience.EndsWith("/", StringComparison.InvariantCulture))
+                 tokenAudience.EndsWith('/'))
         {
             length = tokenAudience.Length - 1;
         }
