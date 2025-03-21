@@ -73,7 +73,7 @@ public class IdentityScopeRepository
             DisplayName = model.DisplayName?.Trim()
         };
 
-        var claims = model.UserClaims?.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? Enumerable.Empty<string>();
+        var claims = model.UserClaims?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>();
         if (claims.Any())
         {
             scope.UserClaims = claims.ToList();
@@ -101,7 +101,7 @@ public class IdentityScopeRepository
             scope.DisplayName = model.DisplayName?.Trim();
         }
 
-        var claims = model.UserClaims?.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? Enumerable.Empty<string>();
+        var claims = model.UserClaims?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Enumerable.Empty<string>();
         var currentClaims = (scope.UserClaims.Select(x => x.Type) ?? Enumerable.Empty<string>()).ToArray();
 
         var claimsToAdd = claims.Except(currentClaims).ToArray();
