@@ -106,7 +106,7 @@ public class ApiScopeRepository
         }
 
         var claims = model.UserClaims?.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray() ?? Enumerable.Empty<string>();
-        var currentClaims = (scope.UserClaims.Select(x => x.Type) ?? Enumerable.Empty<string>()).ToArray();
+        var currentClaims = scope.UserClaims.Select(x => x.Type).ToArray();
 
         var claimsToAdd = claims.Except(currentClaims).ToArray();
         var claimsToRemove = currentClaims.Except(claims).ToArray();
