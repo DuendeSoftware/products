@@ -20,7 +20,9 @@ jobs:
   verify-formatting:
     name: Verify formatting
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       contents: read
     defaults:
@@ -78,10 +80,82 @@ jobs:
       run: dotnet build identity-server.slnf --no-restore -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
+    - name: Test - test/Configuration.IntegrationTests
+      run: dotnet test test/Configuration.IntegrationTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Configuration.IntegrationTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-Configuration-IntegrationTests
+      name: Test report - test/Configuration.IntegrationTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/Configuration.IntegrationTests
+        path: '**/test/Configuration.IntegrationTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/Configuration.IntegrationTests](${{ steps.test-report-test-Configuration-IntegrationTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Test - test/EntityFramework.IntegrationTests
+      run: dotnet test test/EntityFramework.IntegrationTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/EntityFramework.IntegrationTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-EntityFramework-IntegrationTests
+      name: Test report - test/EntityFramework.IntegrationTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/EntityFramework.IntegrationTests
+        path: '**/test/EntityFramework.IntegrationTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/EntityFramework.IntegrationTests](${{ steps.test-report-test-EntityFramework-IntegrationTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Test - test/EntityFramework.Storage.UnitTests
+      run: dotnet test test/EntityFramework.Storage.UnitTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/EntityFramework.Storage.UnitTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-EntityFramework-Storage-UnitTests
+      name: Test report - test/EntityFramework.Storage.UnitTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/EntityFramework.Storage.UnitTests
+        path: '**/test/EntityFramework.Storage.UnitTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/EntityFramework.Storage.UnitTests](${{ steps.test-report-test-EntityFramework-Storage-UnitTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Test - test/IdentityServer.IntegrationTests
+      run: dotnet test test/IdentityServer.IntegrationTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/IdentityServer.IntegrationTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-IdentityServer-IntegrationTests
+      name: Test report - test/IdentityServer.IntegrationTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/IdentityServer.IntegrationTests
+        path: '**/test/IdentityServer.IntegrationTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/IdentityServer.IntegrationTests](${{ steps.test-report-test-IdentityServer-IntegrationTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Test - test/IdentityServer.UnitTests
+      run: dotnet test test/IdentityServer.UnitTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/IdentityServer.UnitTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-IdentityServer-UnitTests
+      name: Test report - test/IdentityServer.UnitTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/IdentityServer.UnitTests
+        path: '**/test/IdentityServer.UnitTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/IdentityServer.UnitTests](${{ steps.test-report-test-IdentityServer-UnitTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
   playwright:
     name: Playwright tests
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       actions: read
       checks: write
@@ -99,7 +173,9 @@ jobs:
   codeql:
     name: CodeQL analyze
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     defaults:
       run:
         shell: bash
@@ -139,7 +215,9 @@ jobs:
     - build
     - playwright
     - codeql
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       actions: read
       contents: read

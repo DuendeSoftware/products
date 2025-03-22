@@ -20,7 +20,9 @@ jobs:
   verify-formatting:
     name: Verify formatting
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       contents: read
     defaults:
@@ -137,7 +139,9 @@ jobs:
   playwright:
     name: Playwright tests
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       actions: read
       checks: write
@@ -193,7 +197,9 @@ jobs:
   codeql:
     name: CodeQL analyze
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     defaults:
       run:
         shell: bash
@@ -233,7 +239,9 @@ jobs:
     - build
     - playwright
     - codeql
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       actions: read
       contents: read

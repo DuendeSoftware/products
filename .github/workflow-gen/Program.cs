@@ -10,18 +10,18 @@ var products = new Product[]
     new("aspnetcore-authentication-jwtbearer",
         "aspnetcore-authentication-jwtbearer.slnf",
         "aaj",
-        [],
-        []),
-    new("identity-server",
-        "identity-server.slnf",
-        "is",
-        [],
+        ["AspNetCore.Authentication.JwtBearer.Tests"],
         []),
     new("bff",
         "bff.slnf",
         "bff",
         ["Bff.Tests", "Bff.Blazor.Client.UnitTests", "Bff.Blazor.UnitTests", "Bff.EntityFramework.Tests"],
-        ["Hosts.Tests"])
+        ["Hosts.Tests"]),
+    new("identity-server",
+        "identity-server.slnf",
+        "is",
+        ["Configuration.IntegrationTests", "EntityFramework.IntegrationTests", "EntityFramework.Storage.UnitTests", "IdentityServer.IntegrationTests", "IdentityServer.UnitTests"],
+        [])
 };
 foreach (var product in products)
 {
@@ -63,7 +63,7 @@ void GenerateCiWorkflow(Product product)
         .Job(VerifyFormattingJobId)
         .RunEitherOnBranchOrAsPR()
         .Name("Verify formatting")
-        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
         .Defaults().Run("bash", product.Name)
         .Job;
 
@@ -118,7 +118,7 @@ void GenerateCiWorkflow(Product product)
         .Job(PlaywrightJobId)
         .RunEitherOnBranchOrAsPR()
         .Name("Playwright tests")
-        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
         .Defaults().Run("bash", product.Name)
         .Job;
 
@@ -157,7 +157,7 @@ void GenerateCiWorkflow(Product product)
         .Job(CodeQlJobId)
         .RunEitherOnBranchOrAsPR()
         .Name("CodeQL analyze")
-        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
         .Defaults().Run("bash", product.Name)
         .Job;
 
@@ -179,7 +179,7 @@ void GenerateCiWorkflow(Product product)
         .Job("pack")
         .RunEitherOnBranchOrAsPR()
         .Name("Pack, sign and push")
-        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
         .Needs(VerifyFormattingJobId, BuildJobId, PlaywrightJobId, CodeQlJobId)
         .Defaults().Run("bash", product.Name)
         .Job;
