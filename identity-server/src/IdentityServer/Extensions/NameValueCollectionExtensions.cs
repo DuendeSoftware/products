@@ -19,7 +19,7 @@ internal static class NameValueCollectionExtensions
     {
         var nvc = new NameValueCollection();
 
-        foreach ((var key, var strings) in source)
+        foreach (var (key, strings) in source)
         {
             foreach (var value in strings)
             {
