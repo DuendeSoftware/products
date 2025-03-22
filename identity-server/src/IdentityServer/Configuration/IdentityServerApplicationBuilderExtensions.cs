@@ -174,7 +174,7 @@ public static class IdentityServerApplicationBuilderExtensions
         if (options.Cors.CorsPolicyName.IsMissing()) throw new InvalidOperationException("CorsPolicyName is not configured");
     }
 
-    internal static object? TestService(IServiceProvider serviceProvider, Type service, ILogger logger, string? message = null, bool doThrow = true)
+    internal static void TestService(IServiceProvider serviceProvider, Type service, ILogger logger, string? message = null, bool doThrow = true)
     {
         var appService = serviceProvider.GetService(service);
 
@@ -189,7 +189,5 @@ public static class IdentityServerApplicationBuilderExtensions
                 throw new InvalidOperationException(error);
             }
         }
-
-        return appService;
     }
 }

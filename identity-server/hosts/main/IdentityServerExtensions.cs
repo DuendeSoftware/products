@@ -13,9 +13,9 @@ namespace IdentityServerHost;
 
 internal static class IdentityServerExtensions
 {
-    internal static WebApplicationBuilder ConfigureIdentityServer(this WebApplicationBuilder builder)
+    internal static void ConfigureIdentityServer(this WebApplicationBuilder builder)
     {
-        var identityServer = builder.Services.AddIdentityServer(options =>
+        builder.Services.AddIdentityServer(options =>
             {
                 options.Events.RaiseSuccessEvents = true;
                 options.Events.RaiseFailureEvents = true;
@@ -74,8 +74,6 @@ internal static class IdentityServerExtensions
         // {
         //     // opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
         // }).AddInMemoryClientConfigurationStore();
-
-        return builder;
     }
 
     // To use static signing credentials, create keys and add it to the certificate store.
