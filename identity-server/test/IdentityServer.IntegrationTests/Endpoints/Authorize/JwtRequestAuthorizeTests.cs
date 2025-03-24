@@ -179,7 +179,7 @@ public class JwtRequestAuthorizeTests
         _mockPipeline.Initialize();
     }
 
-    string CreateRequestJwt(string issuer, string audience, SigningCredentials credential, Claim[] claims, bool setJwtTyp = false)
+    private string CreateRequestJwt(string issuer, string audience, SigningCredentials credential, Claim[] claims, bool setJwtTyp = false)
     {
         var handler = new JwtSecurityTokenHandler();
         handler.OutboundClaimTypeMap.Clear();

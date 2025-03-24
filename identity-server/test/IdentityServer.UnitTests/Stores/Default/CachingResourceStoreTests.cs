@@ -11,19 +11,19 @@ namespace UnitTests.Stores.Default;
 
 public class CachingResourceStoreTests
 {
-    List<IdentityResource> _identityResources = new List<IdentityResource>();
-    List<ApiResource> _apiResources = new List<ApiResource>();
-    List<ApiScope> _apiScopes = new List<ApiScope>();
-    InMemoryResourcesStore _store;
-    IdentityServerOptions _options = new IdentityServerOptions();
+    private List<IdentityResource> _identityResources = new List<IdentityResource>();
+    private List<ApiResource> _apiResources = new List<ApiResource>();
+    private List<ApiScope> _apiScopes = new List<ApiScope>();
+    private InMemoryResourcesStore _store;
+    private IdentityServerOptions _options = new IdentityServerOptions();
 
-    MockCache<ApiResource> _apiCache = new MockCache<ApiResource>();
-    MockCache<IdentityResource> _identityCache = new MockCache<IdentityResource>();
-    MockCache<ApiScope> _scopeCache = new MockCache<ApiScope>();
-    MockCache<Resources> _resourceCache = new MockCache<Resources>();
-    MockCache<CachingResourceStore<InMemoryResourcesStore>.ApiResourceNames> _apiResourceNamesCache = new MockCache<CachingResourceStore<InMemoryResourcesStore>.ApiResourceNames>();
+    private MockCache<ApiResource> _apiCache = new MockCache<ApiResource>();
+    private MockCache<IdentityResource> _identityCache = new MockCache<IdentityResource>();
+    private MockCache<ApiScope> _scopeCache = new MockCache<ApiScope>();
+    private MockCache<Resources> _resourceCache = new MockCache<Resources>();
+    private MockCache<CachingResourceStore<InMemoryResourcesStore>.ApiResourceNames> _apiResourceNamesCache = new MockCache<CachingResourceStore<InMemoryResourcesStore>.ApiResourceNames>();
 
-    CachingResourceStore<InMemoryResourcesStore> _subject;
+    private CachingResourceStore<InMemoryResourcesStore> _subject;
 
     public CachingResourceStoreTests()
     {

@@ -12,7 +12,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Extensions methods for DPoP
 /// </summary>
-static class DPoPExtensions
+internal static class DPoPExtensions
 {
     public static string? GetAuthorizationScheme(this HttpRequest request)
     {

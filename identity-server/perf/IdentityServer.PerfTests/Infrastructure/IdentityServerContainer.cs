@@ -32,13 +32,13 @@ public class IdentityServerContainer : IDisposable
 
     public DebugLoggerProvider Logger { get; set; } = new DebugLoggerProvider();
 
-    IServiceProvider _appServices;
+    private IServiceProvider _appServices;
     public T ResolveService<T>()
     {
         return _appServices.GetRequiredService<T>();
     }
 
-    List<IServiceScope> _serviceScopes = new List<IServiceScope>();
+    private List<IServiceScope> _serviceScopes = new List<IServiceScope>();
 
     public IServiceScope CreateServiceScope()
     {

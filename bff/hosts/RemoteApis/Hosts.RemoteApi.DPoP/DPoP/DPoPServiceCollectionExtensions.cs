@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Api.DPoP;
 
-static class DPoPServiceCollectionExtensions
+internal static class DPoPServiceCollectionExtensions
 {
     public static IServiceCollection ConfigureDPoPTokensForScheme(this IServiceCollection services, string scheme)
     {

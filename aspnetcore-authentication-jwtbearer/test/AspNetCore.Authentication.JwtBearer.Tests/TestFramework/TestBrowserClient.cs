@@ -8,7 +8,7 @@ namespace Duende.AspNetCore.TestFramework;
 
 public class TestBrowserClient : HttpClient
 {
-    class CookieHandler(HttpMessageHandler next) : DelegatingHandler(next)
+    private class CookieHandler(HttpMessageHandler next) : DelegatingHandler(next)
     {
         public CookieContainer CookieContainer { get; } = new();
         public Uri CurrentUri { get; private set; } = default!;

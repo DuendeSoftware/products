@@ -7,7 +7,7 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 /// <summary>
 /// In-memory implementation of ISigningKeyStoreCache based on static variables. This expects to be used as a singleton.
 /// </summary>
-class InMemoryKeyStoreCache : ISigningKeyStoreCache
+internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
 {
     private readonly IClock _clock;
 

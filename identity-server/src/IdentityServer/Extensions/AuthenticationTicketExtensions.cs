@@ -18,7 +18,7 @@ namespace Duende.IdentityServer.Extensions;
 /// </summary>
 public static class AuthenticationTicketExtensions
 {
-    static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };

@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Services;
 /// <summary>
 /// Decorator on the refresh token service to coordinate refresh token lifetimes and server-side sessions.
 /// </summary>
-class ServerSideSessionRefreshTokenService : IRefreshTokenService
+internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
 {
     /// <summary>
     /// The inner IRefreshTokenService implementation.
@@ -35,7 +35,7 @@ class ServerSideSessionRefreshTokenService : IRefreshTokenService
         SessionCoordinationService = sessionCoordinationService;
     }
 
-    static readonly TokenValidationResult TokenValidationError = new TokenValidationResult
+    private static readonly TokenValidationResult TokenValidationError = new TokenValidationResult
     {
         IsError = true,
         Error = OidcConstants.TokenErrors.InvalidGrant

@@ -17,8 +17,38 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 jobs:
+  verify-formatting:
+    name: Verify formatting
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+        working-directory: aspnetcore-authentication-jwtbearer
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.103
+    - name: Restore
+      run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
+    - name: Verify Formatting
+      run: dotnet format aspnetcore-authentication-jwtbearer.slnf --verify-no-changes --no-restore
   build:
-    name: Build
+    name: Build and test (unit)
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
@@ -36,32 +66,124 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
         dotnet-version: |-
-          6.0.x
           8.0.x
           9.0.103
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
-    - name: Verify Formatting
-      run: dotnet format aspnetcore-authentication-jwtbearer.slnf --verify-no-changes --no-restore
     - name: Build
       run: dotnet build aspnetcore-authentication-jwtbearer.slnf --no-restore -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
-    - name: Test
-      run: dotnet test aspnetcore-authentication-jwtbearer.slnf -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
-    - name: Test report
-      if: github.event == 'push' && (success() || failure())
+    - name: Test - test/AspNetCore.Authentication.JwtBearer.Tests
+      run: dotnet test test/AspNetCore.Authentication.JwtBearer.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/AspNetCore.Authentication.JwtBearer.Tests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-AspNetCore-Authentication-JwtBearer-Tests
+      name: Test report - test/AspNetCore.Authentication.JwtBearer.Tests
+      if: github.event_name == 'push' && (success() || failure())
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
       with:
-        name: Test Report
-        path: '**/Tests.trx'
+        name: Test Report - test/AspNetCore.Authentication.JwtBearer.Tests
+        path: '**/test/AspNetCore.Authentication.JwtBearer.Tests-tests.trx'
         reporter: dotnet-trx
         fail-on-error: true
         fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/AspNetCore.Authentication.JwtBearer.Tests](${{ steps.test-report-test-AspNetCore-Authentication-JwtBearer-Tests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+  playwright:
+    name: Playwright tests
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    permissions:
+      actions: read
+      checks: write
+      contents: read
+    defaults:
+      run:
+        shell: bash
+        working-directory: aspnetcore-authentication-jwtbearer
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+  codeql:
+    name: CodeQL analyze
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    defaults:
+      run:
+        shell: bash
+        working-directory: aspnetcore-authentication-jwtbearer
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0
+      with:
+        languages: csharp
+        build-mode: manual
+        db-location: ~/.codeql/databases
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.103
+    - name: Restore
+      run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
+    - name: Build
+      run: dotnet build aspnetcore-authentication-jwtbearer.slnf --no-restore -c Release
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0
+      with:
+        category: /language:csharp
+  pack:
+    name: Pack, sign and push
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    needs:
+    - verify-formatting
+    - build
+    - playwright
+    - codeql
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: aspnetcore-authentication-jwtbearer
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.103
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack aspnetcore-authentication-jwtbearer.slnf

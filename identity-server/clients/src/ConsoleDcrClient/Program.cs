@@ -12,6 +12,18 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+// Register named HttpClient with service discovery support.
+// The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+builder.Services.AddHttpClient("SimpleApi", client =>
+{
+    client.BaseAddress = new Uri("https://simple-api");
+})
+.AddServiceDiscovery();
+
+// Build the host so we can resolve the HttpClientFactory.
+var host = builder.Build();
+var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
+
 var clientId = Guid.NewGuid().ToString();
 var clientSecret = Guid.NewGuid().ToString();
 

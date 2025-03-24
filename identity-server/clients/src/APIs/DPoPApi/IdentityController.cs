@@ -33,7 +33,6 @@ public class IdentityController : ControllerBase
     [AllowAnonymous]
     public ActionResult TestNonce()
     {
-        var x = Request.GetDPoPProofToken();
         var props = new AuthenticationProperties();
         props.SetDPoPNonce("custom-nonce");
 

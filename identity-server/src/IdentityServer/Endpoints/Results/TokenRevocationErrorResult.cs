@@ -33,7 +33,7 @@ public class TokenRevocationErrorResult : EndpointResult<TokenRevocationErrorRes
     }
 }
 
-class TokenRevocationErrorHttpWriter : IHttpResponseWriter<TokenRevocationErrorResult>
+internal class TokenRevocationErrorHttpWriter : IHttpResponseWriter<TokenRevocationErrorResult>
 {
     public Task WriteHttpResponse(TokenRevocationErrorResult result, HttpContext context)
     {

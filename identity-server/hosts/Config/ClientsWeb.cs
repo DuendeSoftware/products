@@ -8,7 +8,7 @@ namespace IdentityServerHost.Configuration;
 
 public static class ClientsWeb
 {
-    static string[] allowedScopes =
+    private static string[] allowedScopes =
     {
         IdentityServerConstants.StandardScopes.OpenId,
         IdentityServerConstants.StandardScopes.Profile,

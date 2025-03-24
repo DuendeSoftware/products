@@ -59,7 +59,7 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     // when we load these items, we remove the corresponding options from the 
     // options monitor since those instances are cached my the authentication handler plumbing
     // this keeps theirs in sync with ours when we re-load from the DB
-    void RemoveCacheEntry(IdentityProvider idp)
+    private void RemoveCacheEntry(IdentityProvider idp)
     {
         if (idp != null)
         {

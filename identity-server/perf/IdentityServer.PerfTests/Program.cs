@@ -7,9 +7,9 @@ using IdentityServer.PerfTests.Services;
 
 namespace IdentityServer.PerfTests;
 
-class Program
+internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         //var sub = new DefaultTokenServiceTest();
         //while (true)

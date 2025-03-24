@@ -53,7 +53,6 @@ public class IndexModel : PageModel
         }
 
         return Page();
-        return Page();
     }
 
     [BindProperty]

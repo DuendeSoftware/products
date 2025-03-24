@@ -25,19 +25,23 @@ csharp_style_var_when_type_is_apparent = true
 # Remove unnecessary using directives
 dotnet_diagnostic.IDE0005.severity = warning
 
+# Add accessibility modifiers
+dotnet_diagnostic.IDE0040.severity = error
+dotnet_style_require_accessibility_modifiers = always
+
 # Use language keywords instead of framework type names for type references 
 dotnet_diagnostic.IDE0049.severity = error
 dotnet_style_predefined_type_for_locals_parameters_members = true
 dotnet_style_predefined_type_for_member_access = true
 
- # Formatting rule
-dotnet_diagnostic.IDE0055.severity = warning 
+# Formatting rule
+dotnet_diagnostic.IDE0055.severity = warning
 dotnet_sort_system_directives_first = true
 
 # Require file header
-dotnet_diagnostic.IDE0073.severity = warning  
+dotnet_diagnostic.IDE0073.severity = warning
 file_header_template = Copyright (c) Duende Software. All rights reserved.\nSee LICENSE in the project root for license information.
 
 # Use file-scoped namespace
-dotnet_diagnostic.IDE0161.severity = error  
+dotnet_diagnostic.IDE0161.severity = error
 csharp_style_namespace_declarations = file_scoped

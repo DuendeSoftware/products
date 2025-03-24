@@ -34,7 +34,7 @@ public class EndSessionCallbackResult : EndpointResult<EndSessionCallbackResult>
     }
 }
 
-class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCallbackResult>
+internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCallbackResult>
 {
     public EndSessionCallbackHttpWriter(IdentityServerOptions options)
     {

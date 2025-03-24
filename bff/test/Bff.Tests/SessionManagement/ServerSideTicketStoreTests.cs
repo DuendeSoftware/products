@@ -9,7 +9,7 @@ namespace Duende.Bff.Tests.SessionManagement;
 
 public class ServerSideTicketStoreTests : BffIntegrationTestBase
 {
-    readonly InMemoryUserSessionStore _sessionStore = new();
+    private readonly InMemoryUserSessionStore _sessionStore = new();
 
     public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output)
     {

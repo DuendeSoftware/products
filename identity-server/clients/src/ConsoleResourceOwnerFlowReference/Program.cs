@@ -13,9 +13,9 @@ builder.AddServiceDefaults();
 
 // Register a named HttpClient with service discovery support.
 // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
-builder.Services.AddHttpClient("SimpleApi", client =>
+builder.Services.AddHttpClient("ResourceApi", client =>
 {
-    client.BaseAddress = new Uri("https://simple-api");
+    client.BaseAddress = new Uri("https://resource-based-api");
 })
 .AddServiceDiscovery();
 
@@ -61,7 +61,7 @@ async Task<TokenResponse> RequestTokenAsync()
 async Task CallServiceAsync(string token)
 {
     // Resolve the HttpClient from DI.
-    var client = httpClientFactory.CreateClient("SimpleApi");
+    var client = httpClientFactory.CreateClient("ResourceApi");
 
     client.SetBearerToken(token);
 

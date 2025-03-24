@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
-class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConnectOptions, OidcProvider>
+internal class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConnectOptions, OidcProvider>
 {
     public OidcConfigureOptions(IHttpContextAccessor httpContextAccessor, ILogger<OidcConfigureOptions> logger) : base(httpContextAccessor, logger)
     {

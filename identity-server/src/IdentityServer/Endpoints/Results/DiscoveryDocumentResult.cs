@@ -104,7 +104,7 @@ public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
     }
 }
 
-class DiscoveryDocumentHttpWriter : IHttpResponseWriter<DiscoveryDocumentResult>
+internal class DiscoveryDocumentHttpWriter : IHttpResponseWriter<DiscoveryDocumentResult>
 {
     /// <inheritdoc/>
     public Task WriteHttpResponse(DiscoveryDocumentResult result, HttpContext context)

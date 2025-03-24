@@ -81,9 +81,9 @@ async Task FrontChannel(string scope, IEnumerable<string> resource)
         Browser = browser,
 
         Policy =
-            {
-                RequireIdentityTokenSignature = false
-            }
+        {
+            RequireIdentityTokenSignature = false
+        }
     };
 
     var serilog = new LoggerConfiguration()
@@ -159,7 +159,7 @@ async Task Refresh(string refreshToken, string resource)
     Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(payload)).PrettyPrintJson());
 }
 
-class Test
+internal class Test
 {
     public string Id { get; set; }
     public bool Enabled { get; set; }

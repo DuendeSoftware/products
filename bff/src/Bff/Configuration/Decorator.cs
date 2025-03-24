@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Builder;
 /// <summary>
 /// Extension methods for the BFF DI services
 /// </summary>
-static class DecoratorServiceCollectionExtensions
+internal static class DecoratorServiceCollectionExtensions
 {
     internal static void AddTransientDecorator<TService, TImplementation>(this IServiceCollection services)
     where TService : class

@@ -11,9 +11,16 @@ public static class StepExtensions
             ("DOTNET_CLI_TELEMETRY_OPTOUT", "true"));
 
     public static void StepSetupDotNet(this Job job)
-        => job.Step()
+    {
+        job.Step()
+            .Name("List .net sdks")
+            .Run("dotnet --list-sdks");
+
+        job.Step()
             .Name("Setup .NET")
-            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["6.0.x", "8.0.x", "9.0.103"]); // v4.1.0
+            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["8.0.x", "9.0.103"]);
+        // v4.1.0
+    }
 
     /// <summary>
     /// Only run this for a main build
@@ -63,28 +70,33 @@ public static class StepExtensions
             .Name("Build")
             .Run($"dotnet build {solution} --no-restore -c Release");
 
-    public static void StepTest(this Job job, string solution)
+    public static void StepTest(this Job job, string project)
     {
-        var logFileName = "Tests.trx";
+        var logFileName = $"{project}-tests.trx";
         var loggingFlags = $"--logger \"console;verbosity=normal\" " +
                            $"--logger \"trx;LogFileName={logFileName}\" " +
                            $"--collect:\"XPlat Code Coverage\"";
 
         job.Step()
-            .Name("Test")
-            .Run($"dotnet test {solution} -c Release --no-build {loggingFlags}");
+            .Name($"Test - {project}")
+            .Run($"dotnet test {project} -c Release --no-build {loggingFlags}");
 
-        job.Step()
-            .Name("Test report")
+        var id = $"test-report-{project.Replace("/", "-").Replace(".", "-")}";
+        job.Step(id)
+            .Name($"Test report - {project}")
             .WorkingDirectory("test")
             .Uses("dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5") // v1.9.1
-            .If("github.event == 'push' && (success() || failure())")
+            .If("github.event_name == 'push' && (success() || failure())")
             .With(
-                ("name", "Test Report"),
-                ("path", "**/Tests.trx"),
+                ("name", $"Test Report - {project}"),
+                ("path", $"**/{logFileName}"),
                 ("reporter", "dotnet-trx"),
                 ("fail-on-error", "true"),
                 ("fail-on-empty", "true"));
+
+        job.Step()
+            .Name("Publish test report link")
+            .Run($"echo \"[Test Results - {project}](${{{{ steps.{id}.outputs.url_html }}}})\" >> $GITHUB_STEP_SUMMARY");
     }
 
     public static Step StepPushToNuget(this Job job, bool pushAlways = false)
@@ -232,7 +244,8 @@ public static class StepExtensions
             .Uses("github/codeql-action/init@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0") // 3.28.9
             .With(
                 ("languages", "csharp"),
-                ("build-mode", "manual"));
+                ("build-mode", "manual"),
+                ("db-location", "~/.codeql/databases"));
 
     public static void StepPerformCodeQlAnalysis(this Job job) =>
         job.Step()

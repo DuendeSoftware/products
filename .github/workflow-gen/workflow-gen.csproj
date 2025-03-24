@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Logicality.GitHub.Actions.Workflow" Version="0.5.1" />
-    <PackageReference Include="Logicality.GitHub.Actions.Workflow.Extensions" Version="0.5.1" />
+    <PackageReference Include="Logicality.GitHub.Actions.Workflow" Version="0.6.0" />
+    <PackageReference Include="Logicality.GitHub.Actions.Workflow.Extensions" Version="0.6.0" />
   </ItemGroup>
 
 </Project>

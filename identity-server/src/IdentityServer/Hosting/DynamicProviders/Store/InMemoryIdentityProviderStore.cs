@@ -7,7 +7,7 @@ using Duende.IdentityServer.Stores;
 
 namespace Duende.IdentityServer.Hosting.DynamicProviders;
 
-class InMemoryIdentityProviderStore : IIdentityProviderStore
+internal class InMemoryIdentityProviderStore : IIdentityProviderStore
 {
     private readonly IEnumerable<IdentityProvider> _providers;
 

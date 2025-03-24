@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Services.Default;
 /// <summary>
 /// Provides cancellation tokens based on the incoming http request
 /// </summary>
-class DefaultCancellationTokenProvider : ICancellationTokenProvider
+internal class DefaultCancellationTokenProvider : ICancellationTokenProvider
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 

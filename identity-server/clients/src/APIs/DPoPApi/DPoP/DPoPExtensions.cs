@@ -11,9 +11,9 @@ namespace DPoPApi;
 /// <summary>
 /// Extensions methods for DPoP
 /// </summary>
-static class DPoPExtensions
+internal static class DPoPExtensions
 {
-    const string DPoPPrefix = OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP + " ";
+    private const string DPoPPrefix = OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP + " ";
 
     public static bool IsDPoPAuthorizationScheme(this HttpRequest request)
     {

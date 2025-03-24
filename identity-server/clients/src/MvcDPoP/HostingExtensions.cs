@@ -17,7 +17,6 @@ internal static class HostingExtensions
         JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
         var authority = builder.Configuration["is-host"];
-        var simpleApi = builder.Configuration["simple-api"];
 
         // add MVC
         builder.Services.AddControllersWithViews();

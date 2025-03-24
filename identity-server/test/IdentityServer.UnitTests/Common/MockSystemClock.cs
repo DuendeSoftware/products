@@ -6,7 +6,7 @@ using Duende.IdentityServer;
 
 namespace UnitTests.Common;
 
-class MockSystemClock : IClock
+internal class MockSystemClock : IClock
 {
     public DateTimeOffset Now { get; set; }
 

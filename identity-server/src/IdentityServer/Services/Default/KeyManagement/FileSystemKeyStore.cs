@@ -14,8 +14,8 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 /// </summary>
 public class FileSystemKeyStore : ISigningKeyStore
 {
-    const string KeyFilePrefix = "is-signing-key-";
-    const string KeyFileExtension = ".json";
+    private const string KeyFilePrefix = "is-signing-key-";
+    private const string KeyFileExtension = ".json";
 
     private readonly DirectoryInfo _directory;
     private readonly ILogger<FileSystemKeyStore> _logger;

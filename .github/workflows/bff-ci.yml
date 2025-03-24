@@ -17,8 +17,38 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 jobs:
+  verify-formatting:
+    name: Verify formatting
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+        working-directory: bff
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.103
+    - name: Restore
+      run: dotnet restore bff.slnf
+    - name: Verify Formatting
+      run: dotnet format bff.slnf --verify-no-changes --no-restore
   build:
-    name: Build
+    name: Build and test (unit)
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
@@ -36,34 +66,126 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
         dotnet-version: |-
-          6.0.x
           8.0.x
           9.0.103
     - name: Restore
       run: dotnet restore bff.slnf
-    - name: Verify Formatting
-      run: dotnet format bff.slnf --verify-no-changes --no-restore
     - name: Build
       run: dotnet build bff.slnf --no-restore -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
-    - name: Install Playwright
-      run: pwsh test/Hosts.Tests/bin/Release/net9.0/playwright.ps1 install --with-deps
-    - name: Test
-      run: dotnet test bff.slnf -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=Tests.trx" --collect:"XPlat Code Coverage"
-    - name: Test report
-      if: github.event == 'push' && (success() || failure())
+    - name: Test - test/Bff.Tests
+      run: dotnet test test/Bff.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Tests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-Bff-Tests
+      name: Test report - test/Bff.Tests
+      if: github.event_name == 'push' && (success() || failure())
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
       with:
-        name: Test Report
-        path: '**/Tests.trx'
+        name: Test Report - test/Bff.Tests
+        path: '**/test/Bff.Tests-tests.trx'
         reporter: dotnet-trx
         fail-on-error: true
         fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/Bff.Tests](${{ steps.test-report-test-Bff-Tests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Test - test/Bff.Blazor.Client.UnitTests
+      run: dotnet test test/Bff.Blazor.Client.UnitTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Blazor.Client.UnitTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-Bff-Blazor-Client-UnitTests
+      name: Test report - test/Bff.Blazor.Client.UnitTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/Bff.Blazor.Client.UnitTests
+        path: '**/test/Bff.Blazor.Client.UnitTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/Bff.Blazor.Client.UnitTests](${{ steps.test-report-test-Bff-Blazor-Client-UnitTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Test - test/Bff.Blazor.UnitTests
+      run: dotnet test test/Bff.Blazor.UnitTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Blazor.UnitTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-Bff-Blazor-UnitTests
+      name: Test report - test/Bff.Blazor.UnitTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/Bff.Blazor.UnitTests
+        path: '**/test/Bff.Blazor.UnitTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/Bff.Blazor.UnitTests](${{ steps.test-report-test-Bff-Blazor-UnitTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Test - test/Bff.EntityFramework.Tests
+      run: dotnet test test/Bff.EntityFramework.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.EntityFramework.Tests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-Bff-EntityFramework-Tests
+      name: Test report - test/Bff.EntityFramework.Tests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/Bff.EntityFramework.Tests
+        path: '**/test/Bff.EntityFramework.Tests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/Bff.EntityFramework.Tests](${{ steps.test-report-test-Bff-EntityFramework-Tests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+  playwright:
+    name: Playwright tests
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    permissions:
+      actions: read
+      checks: write
+      contents: read
+    defaults:
+      run:
+        shell: bash
+        working-directory: bff
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.103
+    - name: Restore
+      run: dotnet restore bff.slnf
+    - name: Build
+      run: dotnet build bff.slnf --no-restore -c Release
+    - name: Install Playwright
+      run: pwsh test/Hosts.Tests/bin/Release/net9.0/playwright.ps1 install --with-deps
+    - name: Dotnet devcerts
+      run: dotnet dev-certs https --trust
+    - name: Test - test/Hosts.Tests
+      run: dotnet test test/Hosts.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Hosts.Tests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-Hosts-Tests
+      name: Test report - test/Hosts.Tests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/Hosts.Tests
+        path: '**/test/Hosts.Tests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/Hosts.Tests](${{ steps.test-report-test-Hosts-Tests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
     - name: Upload playwright traces
       if: success() || failure()
       uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
@@ -72,6 +194,76 @@ jobs:
         path: bff/test/**/playwright-traces/*.zip
         overwrite: true
         retention-days: 15
+  codeql:
+    name: CodeQL analyze
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    defaults:
+      run:
+        shell: bash
+        working-directory: bff
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0
+      with:
+        languages: csharp
+        build-mode: manual
+        db-location: ~/.codeql/databases
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.103
+    - name: Restore
+      run: dotnet restore bff.slnf
+    - name: Build
+      run: dotnet build bff.slnf --no-restore -c Release
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0
+      with:
+        category: /language:csharp
+  pack:
+    name: Pack, sign and push
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    needs:
+    - verify-formatting
+    - build
+    - playwright
+    - codeql
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: bff
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.103
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack bff.slnf

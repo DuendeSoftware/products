@@ -44,7 +44,7 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
         _provider = dataProtectionProvider?.CreateProtector(nameof(PersistentGrantSerializer));
     }
 
-    bool ShouldDataProtect => _options?.DataProtectData == true && _provider != null;
+    private bool ShouldDataProtect => _options?.DataProtectData == true && _provider != null;
 
     /// <summary>
     /// Serializes the specified value.
@@ -136,7 +136,7 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
     }
 }
 
-class PersistentGrantDataContainer
+internal class PersistentGrantDataContainer
 {
     public int PersistentGrantDataContainerVersion { get; set; }
     public bool DataProtected { get; set; }

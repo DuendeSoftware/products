@@ -194,7 +194,7 @@ public class CachingResourceStore<T> : IResourceStore
     }
 
 
-    async Task<IEnumerable<TItem>> FindItemsAsync<TItem>(
+    private async Task<IEnumerable<TItem>> FindItemsAsync<TItem>(
         IEnumerable<string> names,
         ICache<TItem> cache,
         Func<IEnumerable<string>, Task<Resources>> getResourcesFunc,

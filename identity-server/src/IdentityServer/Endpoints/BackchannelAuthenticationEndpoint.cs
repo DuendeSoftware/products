@@ -109,7 +109,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         _logger.LogTrace("BackchannelAuthenticationResponse: {@response} for subject {subjectId}", response, requestResult.ValidatedRequest.Subject.GetSubjectId());
     }
 
-    BackchannelAuthenticationResult Error(string error, string errorDescription = null)
+    private BackchannelAuthenticationResult Error(string error, string errorDescription = null)
     {
         return new BackchannelAuthenticationResult(new BackchannelAuthenticationResponse(error, errorDescription));
     }
