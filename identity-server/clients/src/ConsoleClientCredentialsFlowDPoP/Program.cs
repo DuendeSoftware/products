@@ -14,9 +14,6 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var authority = builder.Configuration["is-host"];
-var simpleApi = builder.Configuration["simple-api"];
-
 var discoClient = new HttpClient();
 var authority = builder.Configuration["is-host"];
 var disco = await discoClient.GetDiscoveryDocumentAsync(authority);
