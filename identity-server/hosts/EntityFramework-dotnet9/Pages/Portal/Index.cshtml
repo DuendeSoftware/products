@@ -1,0 +1,30 @@
+﻿@page
+@model IdentityServerHost.Pages.Portal.Index
+
+<div class="portal-page">
+
+    <div class="lead">
+        <h1>Client Application Portal</h1>
+        <p>This portal contains links to client applications that are configured
+            with an InitiateLoginUri, which enables
+           <a href="https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin">third-party initiated login</a>.
+        </p>
+    </div>
+
+    @if(!Model.Clients.Any())
+    {
+        <div class="alert">
+            You do not have any clients configured with an InitiateLoginUri.
+        </div>
+    }
+    
+    <ul class="list-group">
+    @foreach (var client in Model.Clients)
+    {
+        <li class="list-group-item">
+            <a href="@client.InitiateLoginUri">@client.LinkText</a>    
+        </li>
+    }
+    </ul>
+
+</div>

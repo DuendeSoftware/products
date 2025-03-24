@@ -1,0 +1,39 @@
+@page
+@model IdentityServerHost.Pages.Admin.IdentityScopes.EditModel
+@{
+}
+
+<div class="identityscopes-page">
+
+    <h2>
+        Edit Identity Scope: @Model.InputModel.Name
+    </h2>
+
+    <partial name="_ValidationSummary" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <input type="hidden" asp-for="@Model.InputModel.Name" />
+
+                <div class="form-group">
+                    <label asp-for="@Model.InputModel.DisplayName"></label>
+                    <input class="form-control" asp-for="@Model.InputModel.DisplayName" autofocus />
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="@Model.InputModel.UserClaims">User Claims (space delimited)</label>
+                    <input class="form-control" asp-for="@Model.InputModel.UserClaims" />
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit" name="Button" value="save">Save Changes</button>
+                    <a class="btn btn-secondary" asp-page="/Admin/IdentityScopes/Index">Cancel</a>
+                    <button class="btn btn-danger" type="submit" name="Button" value="delete">Delete</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
