@@ -115,7 +115,7 @@ public class ServerSideSessionCleanupHost : IHostedService
         }
     }
 
-    async Task RunAsync(CancellationToken cancellationToken = default)
+    private async Task RunAsync(CancellationToken cancellationToken = default)
     {
         // this is here for testing
         if (!_options.ServerSideSessions.RemoveExpiredSessions) return;

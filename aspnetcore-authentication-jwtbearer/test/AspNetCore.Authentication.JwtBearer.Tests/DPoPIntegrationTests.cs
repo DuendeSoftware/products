@@ -21,7 +21,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer;
 
 public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
 {
-    Client DPoPOnlyClient = new()
+    private Client DPoPOnlyClient = new()
     {
         ClientId = "client1",
         ClientSecrets = [new Secret("secret".ToSha256())],

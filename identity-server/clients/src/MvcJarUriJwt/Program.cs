@@ -1,48 +1,37 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using MvcJarUriJwt;
 using Serilog;
 using Serilog.Events;
 
-namespace MvcJarUriJwt;
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Duende.IdentityModel", LogEventLevel.Debug)
+    .MinimumLevel.Override("MvcJarUriJwt", LogEventLevel.Debug)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+    .CreateLogger();
 
-public class Program
+try
 {
-    public static int Main(string[] args)
-    {
-        Console.Title = "MvcJarUriJwt";
+    var builder = WebApplication
+        .CreateBuilder(args);
 
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
-            .MinimumLevel.Override("Duende.IdentityModel", LogEventLevel.Debug)
-            .MinimumLevel.Override("System.Net.Http", LogEventLevel.Information)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
-            .MinimumLevel.Override("MvcJarUriJwt", LogEventLevel.Debug)
-            .Enrich.FromLogContext()
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
-            .CreateLogger();
-        try
-        {
-            Log.Information("Starting host...");
-            CreateHostBuilder(args).Build().Run();
-            return 0;
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Host terminated unexpectedly.");
-            return 1;
-        }
-        finally
-        {
-            Log.CloseAndFlush();
-        }
-    }
+    builder
+        .AddServiceDefaults();
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            })
-            .UseSerilog();
+    builder
+        .ConfigureServices()
+        .ConfigurePipeline()
+        .Run();
+}
+catch (Exception ex) when (ex.GetType().Name is not "HostAbortedException")
+{
+    Log.Fatal(ex, messageTemplate: "Unhandled exception");
+}
+finally
+{
+    Log.Information(messageTemplate: "Shut down complete");
+    Log.CloseAndFlush();
 }

@@ -1,20 +1,35 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using aspire.orchestrator.AppHost;
+
 var builder = DistributedApplication.CreateBuilder(args);
+
+// Create a collection of the project resources to be used by the orchestrator
+// This will allow us to refer back to the projects when setting up references.
+var projectRegistry = new Dictionary<string, IResourceBuilder<ProjectResource>>();
 
 #region Identity Server Hosts
 
 // These hosts don't require additional infrastructure
+
 if (HostIsEnabled(nameof(Projects.Host_Main)))
-    builder
-        .AddProject<Projects.Host_Main>("host-main")
+{
+    var hostMain = builder
+        .AddProject<Projects.Host_Main>("is-host")
         .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
 
+    projectRegistry.Add("is-host", hostMain);
+}
+
 if (HostIsEnabled(nameof(Projects.Host_Configuration)))
-    builder
-        .AddProject<Projects.Host_Configuration>("host-configuration")
+{
+    var hostConfiguration = builder
+        .AddProject<Projects.Host_Configuration>("is-host")
         .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
+
+    projectRegistry.Add("is-host", hostConfiguration);
+}
 
 // These hosts require a database
 if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(Projects.Host_EntityFramework)))
@@ -34,10 +49,12 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitFor(identityServerDb);
 
-        builder.AddProject<Projects.Host_AspNetIdentity>(name: "host-aspnetidentity")
+        var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity>(name: "is-host")
             .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitForCompletion(aspnetMigration);
+
+        projectRegistry.Add("is-host", hostAspNetIdentity);
     }
 
     if (HostIsEnabled(nameof(Projects.Host_EntityFramework)))
@@ -46,11 +63,35 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitFor(identityServerDb);
 
-        builder.AddProject<Projects.Host_EntityFramework>(name: "host-entityframework")
+        var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework>(name: "is-host")
             .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitForCompletion(idSrvMigration);
+
+        projectRegistry.Add("is-host", hostEntityFramework);
     }
+}
+
+#endregion
+
+#region API Projects
+
+if (ApiIsEnabled(nameof(Projects.SimpleApi)))
+{
+    var simpleApi = builder.AddProject<Projects.SimpleApi>(name: "simple-api");
+    projectRegistry.Add("simple-api", simpleApi);
+}
+
+if (ApiIsEnabled(nameof(Projects.ResourceBasedApi)))
+{
+    var resourceBasedApi = builder.AddProject<Projects.ResourceBasedApi>(name: "resource-based-api");
+    projectRegistry.Add("resource-based-api", resourceBasedApi);
+}
+
+if (ApiIsEnabled(nameof(Projects.DPoPApi)))
+{
+    var dpopApi = builder.AddProject<Projects.DPoPApi>(name: "dpop-api");
+    projectRegistry.Add("dpop-api", dpopApi);
 }
 
 #endregion
@@ -58,102 +99,194 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
 #region Identity Server Clients
 
 if (ClientIsEnabled(nameof(Projects.MvcCode)))
-    builder.AddProject<Projects.MvcCode>(name: "mvc-code");
+{
+    builder.AddProject<Projects.MvcCode>(name: "mvc-code")
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcDPoP)))
-    builder.AddProject<Projects.MvcDPoP>(name: "mvc-dpop");
+{
+    builder.AddProject<Projects.MvcDPoP>(name: "mvc-dpop")
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.JsOidc)))
-    builder.AddProject<Projects.JsOidc>(name: "js-oidc");
+{
+    builder.AddProject<Projects.JsOidc>(name: "js-oidc")
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcAutomaticTokenManagement)))
-    builder.AddProject<Projects.MvcAutomaticTokenManagement>(name: "mvc-automatic-token-management");
+{
+    builder.AddProject<Projects.MvcAutomaticTokenManagement>(name: "mvc-automatic-token-management")
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcHybridBackChannel)))
-    builder.AddProject<Projects.MvcHybridBackChannel>(name: "mvc-hybrid-backchannel");
+{
+    builder.AddProject<Projects.MvcHybridBackChannel>(name: "mvc-hybrid-backchannel")
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcJarJwt)))
-    builder.AddProject<Projects.MvcJarJwt>(name: "mvc-jar-jwt");
+{
+    builder.AddProject<Projects.MvcJarJwt>(name: "mvc-jar-jwt")
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.MvcJarUriJwt)))
-    builder.AddProject<Projects.MvcJarUriJwt>(name: "mvc-jar-uri-jwt");
+{
+    builder.AddProject<Projects.MvcJarUriJwt>(name: "mvc-jar-uri-jwt")
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 // These clients require a manual start
 if (ClientIsEnabled(nameof(Projects.ConsoleCibaClient)))
-    builder.AddProject<Projects.ConsoleCibaClient>(name: "console-ciba-client").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleCibaClient>(name: "console-ciba-client")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleDeviceFlow)))
-    builder.AddProject<Projects.ConsoleDeviceFlow>(name: "console-device-flow").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleDeviceFlow>(name: "console-device-flow")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlow)))
-    builder.AddProject<Projects.ConsoleClientCredentialsFlow>(name: "console-client-credentials-flow").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleClientCredentialsFlow>(name: "console-client-credentials-flow")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi)))
-    builder.AddProject<Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi>(name: "console-client-credentials-flow-callingidentityserverapi").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleClientCredentialsFlowCallingIdentityServerApi>(name: "console-client-credentials-flow-callingidentityserverapi")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlowPostBody)))
-    builder.AddProject<Projects.ConsoleClientCredentialsFlowPostBody>("console-client-credentials-flow-postbody").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleClientCredentialsFlowPostBody>(name: "console-client-credentials-flow-postbody")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleClientCredentialsFlowDPoP)))
-    builder.AddProject<Projects.ConsoleClientCredentialsFlowDPoP>("console-client-credentials-flow-dpop").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleClientCredentialsFlowDPoP>(name: "console-client-credentials-flow-dpop")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleDcrClient)))
-    builder.AddProject<Projects.ConsoleDcrClient>("console-dcr-client").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleDcrClient>(name: "console-dcr-client")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleEphemeralMtlsClient)))
-    builder.AddProject<Projects.ConsoleEphemeralMtlsClient>("console-ephemeral-mtls-client").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleEphemeralMtlsClient>(name: "console-ephemeral-mtls-client")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleExtensionGrant)))
-    builder.AddProject<Projects.ConsoleExtensionGrant>("console-extension-grant").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleExtensionGrant>(name: "console-extension-grant")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleIntrospectionClient)))
-    builder.AddProject<Projects.ConsoleIntrospectionClient>("console-introspection-client").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleIntrospectionClient>(name: "console-introspection-client")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleMTLSClient)))
-    builder.AddProject<Projects.ConsoleMTLSClient>("console-mtls-client").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleMTLSClient>(name: "console-mtls-client")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsolePrivateKeyJwtClient)))
-    builder.AddProject<Projects.ConsolePrivateKeyJwtClient>("console-private-key-jwt-client").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsolePrivateKeyJwtClient>(name: "console-private-key-jwt-client")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlow)))
-    builder.AddProject<Projects.ConsoleResourceOwnerFlow>("console-resource-owner-flow").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleResourceOwnerFlow>(name: "console-resource-owner-flow")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowPublic)))
-    builder.AddProject<Projects.ConsoleResourceOwnerFlowPublic>("console-resource-owner-flow-public").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleResourceOwnerFlowPublic>(name: "console-resource-owner-flow-public")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowReference)))
-    builder.AddProject<Projects.ConsoleResourceOwnerFlowReference>("console-resource-owner-flow-reference").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleResourceOwnerFlowReference>(name: "console-resource-owner-flow-reference")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowRefreshToken)))
-    builder.AddProject<Projects.ConsoleResourceOwnerFlowRefreshToken>("console-resource-owner-flow-refresh-token").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleResourceOwnerFlowRefreshToken>(name: "console-resource-owner-flow-refresh-token")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceOwnerFlowUserInfo)))
-    builder.AddProject<Projects.ConsoleResourceOwnerFlowUserInfo>("console-resource-owner-flow-userinfo").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleResourceOwnerFlowUserInfo>(name: "console-resource-owner-flow-userinfo")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.WindowsConsoleSystemBrowser)))
-    builder.AddProject<Projects.WindowsConsoleSystemBrowser>(name: "console-system-browser").WithExplicitStart();
+{
+    builder.AddProject<Projects.WindowsConsoleSystemBrowser>(name: "console-system-browser")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleScopesResources)))
-    builder.AddProject<Projects.ConsoleScopesResources>(name: "console-scopes-resources").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleScopesResources>(name: "console-scopes-resources")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleCode)))
-    builder.AddProject<Projects.ConsoleCode>(name: "console-code").WithExplicitStart();
+{
+    builder.AddProject<Projects.ConsoleCode>(name: "console-code")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 if (ClientIsEnabled(nameof(Projects.ConsoleResourceIndicators)))
-    builder.AddProject<Projects.ConsoleResourceIndicators>(name: "console-resource-indicators").WithExplicitStart();
-
-#endregion
-
-#region API Projects
-
-if (ApiIsEnabled(nameof(Projects.SimpleApi)))
-    builder.AddProject<Projects.SimpleApi>(name: "simple-api");
-
-if (ApiIsEnabled(nameof(Projects.ResourceBasedApi)))
-    builder.AddProject<Projects.ResourceBasedApi>("resource-based-api");
-
-if (ApiIsEnabled(nameof(Projects.DPoPApi)))
-    builder.AddProject<Projects.DPoPApi>(name: "dpop-api");
+{
+    builder.AddProject<Projects.ConsoleResourceIndicators>(name: "console-resource-indicators")
+        .WithExplicitStart()
+        .AddIdentityAndApiReferences(projectRegistry);
+}
 
 #endregion
 

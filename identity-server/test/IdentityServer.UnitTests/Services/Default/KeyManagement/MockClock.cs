@@ -6,7 +6,7 @@ using Duende.IdentityServer;
 
 namespace UnitTests.Services.Default.KeyManagement;
 
-class MockClock : IClock
+internal class MockClock : IClock
 {
     public MockClock()
     {

@@ -115,7 +115,7 @@ public class TokenCleanupHost : IHostedService
         }
     }
 
-    async Task RemoveExpiredGrantsAsync(CancellationToken cancellationToken = default)
+    private async Task RemoveExpiredGrantsAsync(CancellationToken cancellationToken = default)
     {
         try
         {

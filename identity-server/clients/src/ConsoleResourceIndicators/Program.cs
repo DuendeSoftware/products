@@ -57,6 +57,9 @@ Environment.Exit(0);
 
 async Task FrontChannel(string scope, IEnumerable<string> resource)
 {
+    // Resolve the authority from the configuration.
+    var authority = builder.Configuration["is-host"];
+
     resource ??= [];
 
     // create a redirect URI using an available port on the loopback address.
@@ -66,7 +69,7 @@ async Task FrontChannel(string scope, IEnumerable<string> resource)
 
     var options = new OidcClientOptions
     {
-        Authority = Constants.Authority,
+        Authority = authority,
 
         ClientId = "console.resource.indicators",
 
@@ -78,9 +81,9 @@ async Task FrontChannel(string scope, IEnumerable<string> resource)
         Browser = browser,
 
         Policy =
-            {
-                RequireIdentityTokenSignature = false
-            }
+        {
+            RequireIdentityTokenSignature = false
+        }
     };
 
     var serilog = new LoggerConfiguration()
@@ -156,7 +159,7 @@ async Task Refresh(string refreshToken, string resource)
     Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(payload)).PrettyPrintJson());
 }
 
-class Test
+internal class Test
 {
     public string Id { get; set; }
     public bool Enabled { get; set; }

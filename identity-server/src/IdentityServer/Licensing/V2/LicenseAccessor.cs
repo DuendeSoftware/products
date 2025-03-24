@@ -17,7 +17,7 @@ namespace Duende.IdentityServer.Licensing.V2;
 /// </summary>
 internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAccessor> logger)
 {
-    static readonly string[] LicenseFileNames =
+    private static readonly string[] LicenseFileNames =
     [
         "Duende_License.key",
         "Duende_IdentityServer_License.key",

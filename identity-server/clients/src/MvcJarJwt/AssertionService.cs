@@ -3,14 +3,13 @@
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Clients;
 using Duende.IdentityModel;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MvcJarJwt;
 
-public class AssertionService
+public class AssertionService(IConfiguration configuration)
 {
     private static string rsaKey =
         """
@@ -34,7 +33,7 @@ public class AssertionService
 
         var token = new JwtSecurityToken(
             "mvc.jar.jwt",
-            Constants.Authority + "/connect/token",
+            configuration["is-host"] + "/connect/token",
             new List<Claim>()
             {
                 new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()),
@@ -64,7 +63,7 @@ public class AssertionService
 
         var token = new JwtSecurityToken(
             "mvc.jar.jwt",
-            Constants.Authority,
+            configuration["is-host"],
             claims,
             now,
             now.AddMinutes(1),

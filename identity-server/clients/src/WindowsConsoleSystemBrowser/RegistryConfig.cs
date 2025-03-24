@@ -8,7 +8,7 @@ using Microsoft.Win32;
 namespace WindowsConsoleSystemBrowser;
 
 [SupportedOSPlatform("Windows")]
-class RegistryConfig
+internal class RegistryConfig
 {
     public RegistryConfig(string uriScheme)
     {
@@ -22,26 +22,26 @@ class RegistryConfig
 
     private string CustomUriScheme { get; }
 
-    string CustomUriSchemeKeyPath => RootKeyPath + @"\" + CustomUriScheme;
-    string CustomUriSchemeKeyValueValue => "URL:" + CustomUriScheme;
-    string CommandKeyPath => CustomUriSchemeKeyPath + @"\shell\open\command";
+    private string CustomUriSchemeKeyPath => RootKeyPath + @"\" + CustomUriScheme;
+    private string CustomUriSchemeKeyValueValue => "URL:" + CustomUriScheme;
+    private string CommandKeyPath => CustomUriSchemeKeyPath + @"\shell\open\command";
 
-    const string RootKeyPath = @"Software\Classes";
+    private const string RootKeyPath = @"Software\Classes";
 
-    const string CustomUriSchemeKeyValueName = "";
+    private const string CustomUriSchemeKeyValueName = "";
 
-    const string ShellKeyName = "shell";
-    const string OpenKeyName = "open";
-    const string CommandKeyName = "command";
+    private const string ShellKeyName = "shell";
+    private const string OpenKeyName = "open";
+    private const string CommandKeyName = "command";
 
-    const string CommandKeyValueName = "";
-    const string CommandKeyValueFormat = "\"{0}\" \"%1\"";
-    static string CommandKeyValueValue => string.Format(CommandKeyValueFormat, Assembly.GetExecutingAssembly().Location);
+    private const string CommandKeyValueName = "";
+    private const string CommandKeyValueFormat = "\"{0}\" \"%1\"";
+    private static string CommandKeyValueValue => string.Format(CommandKeyValueFormat, Assembly.GetExecutingAssembly().Location);
 
-    const string UrlProtocolValueName = "URL Protocol";
-    const string UrlProtocolValueValue = "";
+    private const string UrlProtocolValueName = "URL Protocol";
+    private const string UrlProtocolValueValue = "";
 
-    bool NeedToAddKeys()
+    private bool NeedToAddKeys()
     {
         var addKeys = false;
 
@@ -63,7 +63,7 @@ class RegistryConfig
         return addKeys;
     }
 
-    void AddRegKeys()
+    private void AddRegKeys()
     {
         using (var classesKey = Registry.CurrentUser.OpenSubKey(RootKeyPath, true))
         {

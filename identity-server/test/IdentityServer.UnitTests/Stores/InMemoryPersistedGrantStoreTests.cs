@@ -9,7 +9,7 @@ namespace UnitTests.Stores;
 
 public class InMemoryPersistedGrantStoreTests
 {
-    InMemoryPersistedGrantStore _subject;
+    private InMemoryPersistedGrantStore _subject;
 
     public InMemoryPersistedGrantStoreTests()
     {

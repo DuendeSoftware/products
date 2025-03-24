@@ -5,8 +5,8 @@
     "IdentityServer"
   ],
   "name": "Duende IdentityServer Quickstart UI (UI assets only)",
-  "identity": "IdentityServer.UI",
-  "groupIdentity": "IdentityServer.UI",
+  "identity": "Duende.IdentityServer.UI",
+  "groupIdentity": "Duende.IdentityServer.UI",
   "shortName": "duende-is-ui",
   "tags": {
     "language": "C#"

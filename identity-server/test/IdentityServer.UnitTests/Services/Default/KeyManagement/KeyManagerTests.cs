@@ -15,16 +15,16 @@ namespace UnitTests.Services.Default.KeyManagement;
 
 public class KeyManagerTests
 {
-    KeyManager _subject;
+    private KeyManager _subject;
 
-    SigningAlgorithmOptions _rsaOptions = new SigningAlgorithmOptions("RS256");
+    private SigningAlgorithmOptions _rsaOptions = new SigningAlgorithmOptions("RS256");
 
-    IdentityServerOptions _options = new IdentityServerOptions();
+    private IdentityServerOptions _options = new IdentityServerOptions();
 
-    MockSigningKeyStore _mockKeyStore = new MockSigningKeyStore();
-    MockSigningKeyStoreCache _mockKeyStoreCache = new MockSigningKeyStoreCache();
-    MockSigningKeyProtector _mockKeyProtector = new MockSigningKeyProtector();
-    MockClock _mockClock = new MockClock(new DateTime(2018, 3, 10, 9, 0, 0));
+    private MockSigningKeyStore _mockKeyStore = new MockSigningKeyStore();
+    private MockSigningKeyStoreCache _mockKeyStoreCache = new MockSigningKeyStoreCache();
+    private MockSigningKeyProtector _mockKeyProtector = new MockSigningKeyProtector();
+    private MockClock _mockClock = new MockClock(new DateTime(2018, 3, 10, 9, 0, 0));
 
     public KeyManagerTests()
     {
@@ -44,13 +44,13 @@ public class KeyManagerTests
             new TestIssuerNameService());
     }
 
-    SerializedKey CreateSerializedKey(TimeSpan? age = null, string alg = "RS256", bool x509 = false)
+    private SerializedKey CreateSerializedKey(TimeSpan? age = null, string alg = "RS256", bool x509 = false)
     {
         var container = CreateKey(age, alg, x509);
         return _mockKeyProtector.Protect(container);
     }
 
-    KeyContainer CreateKey(TimeSpan? age = null, string alg = "RS256", bool x509 = false)
+    private KeyContainer CreateKey(TimeSpan? age = null, string alg = "RS256", bool x509 = false)
     {
         var key = _options.KeyManagement.CreateRsaSecurityKey();
 
@@ -64,21 +64,21 @@ public class KeyManagerTests
         return container;
     }
 
-    string CreateAndStoreKey(TimeSpan? age = null)
+    private string CreateAndStoreKey(TimeSpan? age = null)
     {
         var container = CreateKey(age);
         _mockKeyStore.Keys.Add(_mockKeyProtector.Protect(container));
         return container.Id;
     }
 
-    string CreateAndStoreKeyThatCannotBeUnprotected(TimeSpan? age = null)
+    private string CreateAndStoreKeyThatCannotBeUnprotected(TimeSpan? age = null)
     {
         var container = CreateKey(age);
         _mockKeyStore.Keys.Add(_mockKeyProtector.ProtectAndLoseDataProtectionKey(container));
         return container.Id;
     }
 
-    string CreateCacheAndStoreKey(TimeSpan? age = null)
+    private string CreateCacheAndStoreKey(TimeSpan? age = null)
     {
         var container = CreateKey(age);
         _mockKeyStore.Keys.Add(_mockKeyProtector.Protect(container));

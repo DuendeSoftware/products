@@ -2,44 +2,40 @@
 // See LICENSE in the project root for license information.
 
 using System.IdentityModel.Tokens.Jwt;
-using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
+using MvcHybrid;
 
-namespace MvcHybrid;
+namespace MvcHybridBackChannel;
 
-public class Startup
+internal static class HostingExtensions
 {
-    private readonly IConfiguration _configuration;
-
-    public Startup(IConfiguration configuration)
+    public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        _configuration = configuration;
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-    }
 
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddControllersWithViews();
-        services.AddHttpClient();
+        var authority = builder.Configuration["is-host"];
 
-        services.AddSingleton<IDiscoveryCache>(r =>
+        builder.Services.AddControllersWithViews();
+        builder.Services.AddHttpClient();
+
+        builder.Services.AddSingleton<IDiscoveryCache>(r =>
         {
             var factory = r.GetRequiredService<IHttpClientFactory>();
-            return new DiscoveryCache(Constants.Authority, () => factory.CreateClient());
+            return new DiscoveryCache(authority, () => factory.CreateClient());
         });
 
-        services.AddTransient<CookieEventHandler>();
-        services.AddSingleton<LogoutSessionManager>();
+        builder.Services.AddTransient<CookieEventHandler>();
+        builder.Services.AddSingleton<LogoutSessionManager>();
 
-        services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = "oidc";
-            })
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = "oidc";
+        })
             .AddCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
@@ -49,7 +45,7 @@ public class Startup
             })
             .AddOpenIdConnect("oidc", options =>
             {
-                options.Authority = Constants.Authority;
+                options.Authority = authority;
                 options.RequireHttpsMetadata = false;
 
                 options.ClientSecret = "secret";
@@ -78,6 +74,14 @@ public class Startup
                 options.DisableTelemetry = true;
             });
 
+        // Register a named HttpClient with service discovery support.
+        // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+        builder.Services.AddHttpClient("SimpleApi", client =>
+        {
+            client.BaseAddress = new Uri("https://simple-api");
+        })
+        .AddServiceDiscovery();
+
         // var apiKey = _configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";
 
@@ -98,9 +102,11 @@ public class Startup
         //             option.Headers = $"x-honeycomb-team={apiKey},x-honeycomb-dataset={dataset}";
         //         });
         // });
+
+        return builder.Build();
     }
 
-    public void Configure(IApplicationBuilder app)
+    public static WebApplication ConfigurePipeline(this WebApplication app)
     {
         app.UseDeveloperExceptionPage();
         app.UseStaticFiles();
@@ -108,10 +114,8 @@ public class Startup
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.MapDefaultControllerRoute();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapDefaultControllerRoute();
-        });
+        return app;
     }
 }

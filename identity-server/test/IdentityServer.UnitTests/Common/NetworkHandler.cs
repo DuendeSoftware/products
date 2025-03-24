@@ -8,7 +8,7 @@ namespace UnitTests.Common;
 
 public class NetworkHandler : HttpMessageHandler
 {
-    enum Behavior
+    private enum Behavior
     {
         Throw,
         ReturnError,

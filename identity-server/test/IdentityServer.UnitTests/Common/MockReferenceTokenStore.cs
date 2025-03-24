@@ -7,7 +7,7 @@ using Duende.IdentityServer.Stores;
 
 namespace UnitTests.Common;
 
-class MockReferenceTokenStore : IReferenceTokenStore
+internal class MockReferenceTokenStore : IReferenceTokenStore
 {
     public Task<Token> GetReferenceTokenAsync(string handle)
     {

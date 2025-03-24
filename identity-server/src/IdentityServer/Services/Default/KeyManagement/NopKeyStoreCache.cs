@@ -7,7 +7,7 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 /// <summary>
 /// Nop implementation of ISigningKeyStoreCache that does not cache keys.
 /// </summary>
-class NopKeyStoreCache : ISigningKeyStoreCache
+internal class NopKeyStoreCache : ISigningKeyStoreCache
 {
     /// <summary>
     /// Returns null.

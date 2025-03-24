@@ -40,7 +40,8 @@ internal static class HostingExtensions
             {
                 options.ConfigureDbContext = b =>
                     b.UseSqlite(connectionString, dbOpts => dbOpts.MigrationsAssembly(typeof(Program).Assembly.FullName));
-            });
+            })
+            .AddLicenseSummary();
 
         builder.Services.AddAuthentication()
             .AddGoogle(options =>

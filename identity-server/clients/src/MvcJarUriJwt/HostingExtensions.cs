@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Clients;
 using Duende.AccessTokenManagement;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -9,25 +8,22 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MvcJarUriJwt;
 
-public class Startup
+internal static class HostingExtensions
 {
-    private readonly IConfiguration _configuration;
+    public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
+    {
+        var authority = builder.Configuration["is-host"];
+        var simpleApi = builder.Configuration["simple-api"];
 
-    public Startup(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddSingleton<AssertionService>();
-        services.AddSingleton<RequestUriService>();
-        services.AddTransient<OidcEvents>();
+        builder.Services.AddSingleton<AssertionService>();
+        builder.Services.AddSingleton<RequestUriService>();
+        builder.Services.AddTransient<OidcEvents>();
 
         // add MVC
-        services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews();
 
         // add cookie-based session management with OpenID Connect authentication
-        services.AddAuthentication(options =>
+        builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = "cookie";
             options.DefaultChallengeScheme = "oidc";
@@ -47,7 +43,7 @@ public class Startup
             })
             .AddOpenIdConnect("oidc", options =>
             {
-                options.Authority = Constants.Authority;
+                options.Authority = authority;
                 options.RequireHttpsMetadata = false;
 
                 options.ClientId = "mvc.jar.jwt";
@@ -83,14 +79,14 @@ public class Startup
             });
 
         // add automatic token management
-        services.AddOpenIdConnectAccessTokenManagement();
-        services.AddTransient<IClientAssertionService, ClientAssertionService>();
+        builder.Services.AddOpenIdConnectAccessTokenManagement();
+        builder.Services.AddTransient<IClientAssertionService, ClientAssertionService>();
 
         // add HTTP client to call protected API
-        services.AddUserAccessTokenHttpClient("client", configureClient: client =>
+        builder.Services.AddUserAccessTokenHttpClient("client", configureClient: client =>
         {
-            client.BaseAddress = new Uri(Constants.SampleApi);
-        });
+            client.BaseAddress = new Uri(simpleApi);
+        }).AddServiceDiscovery();
 
         // var apiKey = _configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";
@@ -112,9 +108,11 @@ public class Startup
         //             option.Headers = $"x-honeycomb-team={apiKey},x-honeycomb-dataset={dataset}";
         //         });
         // });
+
+        return builder.Build();
     }
 
-    public void Configure(IApplicationBuilder app)
+    public static WebApplication ConfigurePipeline(this WebApplication app)
     {
         app.UseDeveloperExceptionPage();
         app.UseHttpsRedirection();
@@ -125,10 +123,9 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapDefaultControllerRoute()
-                .RequireAuthorization();
-        });
+        app.MapDefaultControllerRoute()
+            .RequireAuthorization();
+
+        return app;
     }
 }

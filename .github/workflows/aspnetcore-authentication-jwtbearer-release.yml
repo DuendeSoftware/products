@@ -58,11 +58,12 @@ jobs:
       run: |-
         git tag -a aaj-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
         git push origin aaj-${{ github.event.inputs.version }}
+    - name: List .net sdks
+      run: dotnet --list-sdks
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
         dotnet-version: |-
-          6.0.x
           8.0.x
           9.0.103
     - name: Pack aspnetcore-authentication-jwtbearer.slnf
@@ -98,11 +99,12 @@ jobs:
       with:
         name: artifacts
         path: artifacts
+    - name: List .net sdks
+      run: dotnet --list-sdks
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
         dotnet-version: |-
-          6.0.x
           8.0.x
           9.0.103
     - name: List files

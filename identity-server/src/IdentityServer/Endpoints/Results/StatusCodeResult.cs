@@ -41,7 +41,7 @@ public class StatusCodeResult : EndpointResult<StatusCodeResult>
     }
 }
 
-class StatusCodeHttpWriter : IHttpResponseWriter<StatusCodeResult>
+internal class StatusCodeHttpWriter : IHttpResponseWriter<StatusCodeResult>
 {
     public Task WriteHttpResponse(StatusCodeResult result, HttpContext context)
     {

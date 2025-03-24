@@ -4,7 +4,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
-using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Authorization;
@@ -16,10 +15,12 @@ namespace MvcHybrid.Controllers;
 public class LogoutController : Controller
 {
     public LogoutSessionManager LogoutSessions { get; }
+    private readonly IConfiguration _configuration;
 
-    public LogoutController(LogoutSessionManager logoutSessions)
+    public LogoutController(LogoutSessionManager logoutSessions, IConfiguration configuration)
     {
         LogoutSessions = logoutSessions;
+        _configuration = configuration;
     }
 
     [HttpPost]
@@ -65,11 +66,11 @@ public class LogoutController : Controller
         return claims;
     }
 
-    private static async Task<ClaimsPrincipal> ValidateJwt(string jwt)
+    private async Task<ClaimsPrincipal> ValidateJwt(string jwt)
     {
         // read discovery document to find issuer and key material
         var client = new HttpClient();
-        var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
+        var disco = await client.GetDiscoveryDocumentAsync(_configuration["is-host"]);
 
         var keys = new List<SecurityKey>();
         foreach (var webKey in disco.KeySet.Keys)

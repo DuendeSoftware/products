@@ -11,16 +11,22 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
+var authority = Constants.AuthorityMtls;
+var simpleApi = Constants.SampleApiMtls;
+
 var response = await RequestTokenAsync();
 response.Show();
 
 await CallServiceAsync(response.AccessToken);
 
-static async Task<TokenResponse> RequestTokenAsync()
+// Graceful shutdown
+Environment.Exit(0);
+
+async Task<TokenResponse> RequestTokenAsync()
 {
     var client = new HttpClient(GetHandler());
 
-    var disco = await client.GetDiscoveryDocumentAsync("https://identityserver.local");
+    var disco = await client.GetDiscoveryDocumentAsync(authority);
     if (disco.IsError) throw new Exception(disco.Error);
 
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
@@ -35,11 +41,11 @@ static async Task<TokenResponse> RequestTokenAsync()
     return response;
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
     var client = new HttpClient(GetHandler())
     {
-        BaseAddress = new Uri(Constants.SampleApi)
+        BaseAddress = new Uri(simpleApi)
     };
 
     client.SetBearerToken(token);

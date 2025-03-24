@@ -23,7 +23,7 @@ public class DynamicProvidersTests
     private GenericHost _idp1;
     private GenericHost _idp2;
 
-    List<OidcProvider> _oidcProviders = new List<OidcProvider>()
+    private List<OidcProvider> _oidcProviders = new List<OidcProvider>()
     {
         new OidcProvider
         {

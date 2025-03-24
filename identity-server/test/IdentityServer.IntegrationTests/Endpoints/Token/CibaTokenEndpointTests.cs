@@ -19,12 +19,12 @@ public class CibaTokenEndpointTests
 {
     private const string Category = "CIBA Token endpoint";
 
-    IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
-    MockCibaUserValidator _mockCibaUserValidator = new MockCibaUserValidator();
-    MockCibaUserNotificationService _mockCibaUserNotificationService = new MockCibaUserNotificationService();
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+    private MockCibaUserValidator _mockCibaUserValidator = new MockCibaUserValidator();
+    private MockCibaUserNotificationService _mockCibaUserNotificationService = new MockCibaUserNotificationService();
 
-    TestUser _user;
-    Client _cibaClient;
+    private TestUser _user;
+    private Client _cibaClient;
 
     public CibaTokenEndpointTests()
     {

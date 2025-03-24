@@ -13,8 +13,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
-    <ProjectReference
-      Include="..\..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <ProjectReference Include="..\..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Constants\Constants.csproj" />
   </ItemGroup>
 </Project>

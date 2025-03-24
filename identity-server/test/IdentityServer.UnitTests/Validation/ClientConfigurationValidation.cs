@@ -13,7 +13,7 @@ public class ClientConfigurationValidation
 {
     private const string Category = "Client Configuration Validation Tests";
     private IClientConfigurationValidator _validator;
-    IdentityServerOptions _options;
+    private IdentityServerOptions _options;
 
     public ClientConfigurationValidation()
     {

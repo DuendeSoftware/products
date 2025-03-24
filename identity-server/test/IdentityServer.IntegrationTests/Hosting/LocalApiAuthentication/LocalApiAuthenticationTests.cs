@@ -130,13 +130,14 @@ public class LocalApiAuthenticationTests
 
         Init();
     }
-    void Init(LocalApiTokenMode mode = LocalApiTokenMode.DPoPAndBearer)
+
+    private void Init(LocalApiTokenMode mode = LocalApiTokenMode.DPoPAndBearer)
     {
         Mode = mode;
         _pipeline.Initialize();
     }
 
-    async Task<string> GetAccessTokenAsync(bool dpop = false, bool reference = false)
+    private async Task<string> GetAccessTokenAsync(bool dpop = false, bool reference = false)
     {
         var req = new ClientCredentialsTokenRequest
         {
@@ -159,7 +160,8 @@ public class LocalApiAuthenticationTests
 
         return result.AccessToken;
     }
-    string CreateProofToken(string method, string url, string accessToken = null, string nonce = null, string jwkString = null)
+
+    private string CreateProofToken(string method, string url, string accessToken = null, string nonce = null, string jwkString = null)
     {
         var jsonWebKey = new Microsoft.IdentityModel.Tokens.JsonWebKey(jwkString ?? _jwk);
 

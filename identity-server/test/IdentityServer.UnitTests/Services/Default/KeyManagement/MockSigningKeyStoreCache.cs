@@ -6,7 +6,7 @@ using Duende.IdentityServer.Services.KeyManagement;
 
 namespace UnitTests.Services.Default.KeyManagement;
 
-class MockSigningKeyStoreCache : ISigningKeyStoreCache
+internal class MockSigningKeyStoreCache : ISigningKeyStoreCache
 {
     public List<KeyContainer> Cache { get; set; } = new List<KeyContainer>();
 

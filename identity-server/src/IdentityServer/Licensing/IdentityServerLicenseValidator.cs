@@ -14,7 +14,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
 {
     internal readonly static IdentityServerLicenseValidator Instance = new IdentityServerLicenseValidator();
 
-    IdentityServerOptions _options;
+    private IdentityServerOptions _options;
 
     public void Initialize(ILoggerFactory loggerFactory, IdentityServerOptions options, bool isDevelopment = false)
     {
@@ -92,9 +92,10 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
 
     public void ValidateClient(string clientId) => ValidateClient(clientId, License);
 
-    HashSet<string> _clientIds = new();
-    object _clientIdLock = new();
-    bool _validateClientWarned = false;
+    private HashSet<string> _clientIds = new();
+    private object _clientIdLock = new();
+    private bool _validateClientWarned = false;
+
     // Internal method that takes license as parameter to allow testing
     internal void ValidateClient(string clientId, IdentityServerLicense license)
     {
@@ -126,9 +127,9 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    HashSet<string> _issuers = new();
-    object _issuerLock = new();
-    bool _validateIssuerWarned = false;
+    private HashSet<string> _issuers = new();
+    private object _issuerLock = new();
+    private bool _validateIssuerWarned = false;
     public void ValidateIssuer(string iss)
     {
         if (License != null && !License.IssuerLimit.HasValue)
@@ -159,7 +160,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    bool ValidateServerSideSessionsWarned = false;
+    private bool ValidateServerSideSessionsWarned = false;
     public void ValidateServerSideSessions()
     {
         if (License != null)
@@ -176,7 +177,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    bool CanUseDPoPWarned = false;
+    private bool CanUseDPoPWarned = false;
     public void ValidateDPoP()
     {
         if (License != null)
@@ -193,7 +194,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    bool ValidateResourceIndicatorsWarned = false;
+    private bool ValidateResourceIndicatorsWarned = false;
     public void ValidateResourceIndicators(string resourceIndicator)
     {
         if (!string.IsNullOrWhiteSpace(resourceIndicator))
@@ -213,7 +214,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    bool ValidateParWarned = false;
+    private bool ValidateParWarned = false;
     public void ValidatePar()
     {
         if (License != null)
@@ -249,7 +250,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    bool ValidateDynamicProvidersWarned = false;
+    private bool ValidateDynamicProvidersWarned = false;
     public void ValidateDynamicProviders()
     {
         if (License != null)
@@ -266,7 +267,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    bool ValidateCibaWarned = false;
+    private bool ValidateCibaWarned = false;
     public void ValidateCiba()
     {
         if (License != null)

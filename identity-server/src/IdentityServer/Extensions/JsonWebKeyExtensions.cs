@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Extensions;
 /// <summary>
 /// Extensions methods for JsonWebKey
 /// </summary>
-static class JsonWebKeyExtensions
+internal static class JsonWebKeyExtensions
 {
     /// <summary>
     /// Create the value of a thumbprint-based cnf claim

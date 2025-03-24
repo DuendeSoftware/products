@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.DataProtection;
 
 namespace UnitTests.Services.Default.KeyManagement;
 
-class MockSigningKeyProtector : ISigningKeyProtector
+internal class MockSigningKeyProtector : ISigningKeyProtector
 {
     private IDataProtector _dataProtector;
     public bool ProtectWasCalled { get; set; }

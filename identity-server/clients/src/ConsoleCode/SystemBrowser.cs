@@ -100,11 +100,11 @@ public class SystemBrowser : IBrowser
 
 public class LoopbackHttpListener : IDisposable
 {
-    const int DefaultTimeout = 60 * 5; // 5 mins (in seconds)
+    private const int DefaultTimeout = 60 * 5; // 5 mins (in seconds)
 
-    IWebHost _host;
-    TaskCompletionSource<string> _source = new TaskCompletionSource<string>();
-    string _url;
+    private IWebHost _host;
+    private TaskCompletionSource<string> _source = new TaskCompletionSource<string>();
+    private string _url;
 
     public string Url => _url;
 
@@ -132,7 +132,7 @@ public class LoopbackHttpListener : IDisposable
         });
     }
 
-    void Configure(IApplicationBuilder app)
+    private void Configure(IApplicationBuilder app)
     {
         app.Run(async ctx =>
         {

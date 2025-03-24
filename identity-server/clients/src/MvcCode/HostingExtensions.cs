@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.IdentityModel.Tokens.Jwt;
-using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
@@ -11,30 +10,26 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MvcCode;
 
-public class Startup
+internal static class HostingExtensions
 {
-    private readonly IConfiguration _configuration;
-
-    public Startup(IConfiguration configuration)
+    public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        _configuration = configuration;
-    }
+        // Get the authority from the environment variable set by Aspire
+        var authority = builder.Configuration["is-host"];
 
-    public void ConfigureServices(IServiceCollection services)
-    {
         JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
-        services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews();
 
-        services.AddHttpClient();
+        builder.Services.AddHttpClient();
 
-        services.AddSingleton<IDiscoveryCache>(r =>
+        builder.Services.AddSingleton<IDiscoveryCache>(r =>
         {
             var factory = r.GetRequiredService<IHttpClientFactory>();
-            return new DiscoveryCache(Constants.Authority, () => factory.CreateClient());
+            return new DiscoveryCache(authority, () => factory.CreateClient());
         });
 
-        services.AddAuthentication(options =>
+        builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = "oidc";
@@ -45,7 +40,7 @@ public class Startup
             })
             .AddOpenIdConnect("oidc", options =>
             {
-                options.Authority = Constants.Authority;
+                options.Authority = authority;
 
                 options.ClientId = "mvc.code";
                 options.ClientSecret = "secret";
@@ -80,29 +75,18 @@ public class Startup
                 options.DisableTelemetry = true;
             });
 
-        // var apiKey = _configuration["HoneyCombApiKey"];
-        // var dataset = "IdentityServerDev";
-        //
-        // services.AddOpenTelemetryTracing(builder =>
-        // {
-        //     builder
-        //         //.AddConsoleExporter()
-        //         .SetResourceBuilder(
-        //             ResourceBuilder.CreateDefault()
-        //                 .AddService("MVC Code"))
-        //         //.SetSampler(new AlwaysOnSampler())
-        //         .AddHttpClientInstrumentation()
-        //         .AddAspNetCoreInstrumentation()
-        //         .AddSqlClientInstrumentation()
-        //         .AddOtlpExporter(option =>
-        //         {
-        //             option.Endpoint = new Uri("https://api.honeycomb.io");
-        //             option.Headers = $"x-honeycomb-team={apiKey},x-honeycomb-dataset={dataset}";
-        //         });
-        // });
+        // Register a named HttpClient with service discovery support.
+        // The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+        builder.Services.AddHttpClient("SimpleApi", client =>
+        {
+            client.BaseAddress = new Uri("https://simple-api");
+        })
+        .AddServiceDiscovery();
+
+        return builder.Build();
     }
 
-    public void Configure(IApplicationBuilder app)
+    public static WebApplication ConfigurePipeline(this WebApplication app)
     {
         app.UseDeveloperExceptionPage();
         app.UseHttpsRedirection();
@@ -113,10 +97,9 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapDefaultControllerRoute()
-                .RequireAuthorization();
-        });
+        app.MapDefaultControllerRoute()
+            .RequireAuthorization();
+
+        return app;
     }
 }

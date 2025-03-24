@@ -6,7 +6,7 @@ using Duende.IdentityServer;
 
 namespace IntegrationTests.Common;
 
-class MockClock : IClock
+internal class MockClock : IClock
 {
     public DateTimeOffset UtcNow { get; set; } = DateTimeOffset.UtcNow;
 }

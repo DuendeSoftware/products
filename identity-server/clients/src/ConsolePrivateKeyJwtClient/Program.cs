@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using Clients;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,6 +15,18 @@ var builder = Host.CreateApplicationBuilder(args);
 
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
+
+// Register a named HttpClient with service discovery support.
+// The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+builder.Services.AddHttpClient("SimpleApi", client =>
+{
+    client.BaseAddress = new Uri("https://simple-api");
+})
+.AddServiceDiscovery();
+
+// Build the host so we can resolve the HttpClientFactory.
+var host = builder.Build();
+var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
 
 var rsaKey =
     """
@@ -67,11 +80,17 @@ response.Show();
 
 await CallServiceAsync(response.AccessToken);
 
-static async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential)
+// Graceful shutdown
+Environment.Exit(0);
+
+async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential)
 {
+    // Resolve the authority from the configuration.
+    var authority = builder.Configuration["is-host"];
+
     var client = new HttpClient();
 
-    var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
+    var disco = await client.GetDiscoveryDocumentAsync(authority);
     if (disco.IsError) throw new Exception(disco.Error);
 
     var clientToken = CreateClientToken(credential, "client.jwt", disco.Issuer);
@@ -92,14 +111,10 @@ static async Task<TokenResponse> RequestTokenAsync(SigningCredentials credential
     return response;
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
-    var baseAddress = Constants.SampleApi;
-
-    var client = new HttpClient
-    {
-        BaseAddress = new Uri(baseAddress)
-    };
+    // Resolve the HttpClient from DI.
+    var client = httpClientFactory.CreateClient("SimpleApi");
 
     client.SetBearerToken(token);
     var response = await client.GetStringAsync("identity");

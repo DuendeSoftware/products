@@ -3,12 +3,25 @@
 
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
+
+// Register a named HttpClient with service discovery support.
+// The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+builder.Services.AddHttpClient("IdSrv", client =>
+{
+    client.BaseAddress = new Uri("https://is-host");
+})
+.AddServiceDiscovery();
+
+// Build the host so we can resolve the HttpClientFactory.
+var host = builder.Build();
+var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
 
 "JWT access token".ConsoleBox(ConsoleColor.Green);
 var response = await RequestTokenAsync("client");
@@ -23,11 +36,17 @@ await CallServiceAsync(response.AccessToken);
 "No access token (expect failure)".ConsoleBox(ConsoleColor.Green);
 await CallServiceAsync(null);
 
-static async Task<TokenResponse> RequestTokenAsync(string clientId)
+// Graceful shutdown
+Environment.Exit(0);
+
+async Task<TokenResponse> RequestTokenAsync(string clientId)
 {
+    // Resolve the authority from the configuration.
+    var authority = builder.Configuration["is-host"];
+
     var client = new HttpClient();
 
-    var disco = await client.GetDiscoveryDocumentAsync(Constants.Authority);
+    var disco = await client.GetDiscoveryDocumentAsync(authority);
     if (disco.IsError) throw new Exception(disco.Error);
 
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
@@ -43,14 +62,10 @@ static async Task<TokenResponse> RequestTokenAsync(string clientId)
     return response;
 }
 
-static async Task CallServiceAsync(string token)
+async Task CallServiceAsync(string token)
 {
-    var baseAddress = Constants.Authority;
-
-    var client = new HttpClient
-    {
-        BaseAddress = new Uri(baseAddress)
-    };
+    // Resolve the HttpClient from DI.
+    var client = httpClientFactory.CreateClient("IdSrv");
 
     if (token is not null) client.SetBearerToken(token);
     try

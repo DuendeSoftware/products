@@ -4,7 +4,7 @@
 
 namespace Duende.IdentityServer;
 
-class DefaultClock : IClock
+internal class DefaultClock : IClock
 {
     private readonly TimeProvider _timeProvider;
 

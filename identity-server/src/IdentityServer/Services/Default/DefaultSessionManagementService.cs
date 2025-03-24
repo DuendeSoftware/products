@@ -40,7 +40,7 @@ public class DefaultSessionManagementService : ISessionManagementService
         return _serverSideTicketStore.QuerySessionsAsync(filter, cancellationToken);
     }
 
-    static readonly string[] OnlyTokenTypes = new[] {
+    private static readonly string[] OnlyTokenTypes = new[] {
         IdentityServerConstants.PersistedGrantTypes.RefreshToken,
         IdentityServerConstants.PersistedGrantTypes.ReferenceToken,
         IdentityServerConstants.PersistedGrantTypes.AuthorizationCode,

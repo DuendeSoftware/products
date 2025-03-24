@@ -15,40 +15,39 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.AddServiceDefaults();
 
 var discoClient = new HttpClient();
-
-var disco = await discoClient.GetDiscoveryDocumentAsync(Constants.Authority);
+var authority = builder.Configuration["is-host"];
+var disco = await discoClient.GetDiscoveryDocumentAsync(authority);
 if (disco.IsError) throw new Exception(disco.Error);
 
-var jwkJson = CreateDPoPKey();
-var client = GetHttpClient(disco.TokenEndpoint, jwkJson);
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddClientCredentialsTokenManagement()
+    .AddClient("client", client =>
+    {
+        client.TokenEndpoint = disco.TokenEndpoint;
+        client.ClientId = "client";
+        client.ClientSecret = "secret";
+        client.DPoPJsonWebKey = CreateDPoPKey();
+    });
+
+builder.Services.AddClientCredentialsHttpClient("test", "client", config =>
+    {
+        config.BaseAddress = new Uri("https://dpop-api");
+    })
+    .AddServiceDiscovery();
+
+var host = builder.Build();
+
+var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient("test");
+
 
 var response = await client.GetStringAsync("identity");
 
 "\n\nService Result:".ConsoleGreen();
 Console.WriteLine(response.PrettyPrintJson());
 
-static HttpClient GetHttpClient(string tokenEndpoint, string jwk)
-{
-    var services = new ServiceCollection();
-    services.AddDistributedMemoryCache();
-    services.AddClientCredentialsTokenManagement()
-        .AddClient("client", client =>
-        {
-            client.TokenEndpoint = tokenEndpoint;
-            client.ClientId = "client";
-            client.ClientSecret = "secret";
-            client.DPoPJsonWebKey = jwk;
-        });
+// Graceful shutdown
+Environment.Exit(0);
 
-    services.AddClientCredentialsHttpClient("test", "client", config =>
-    {
-        config.BaseAddress = new Uri(Constants.SampleApi);
-    });
-
-    var provider = services.BuildServiceProvider();
-    var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient("test");
-    return client;
-}
 
 static string CreateDPoPKey()
 {

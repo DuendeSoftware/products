@@ -7,16 +7,22 @@ using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Resolve the authority from the configuration.
+var authority = builder.Configuration["is-host"];
+
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
 var _tokenClient = new HttpClient();
-var _cache = new DiscoveryCache(Constants.Authority);
+var _cache = new DiscoveryCache(authority);
 
 var response = await RequestTokenAsync();
 response.Show();
 
 await GetClaimsAsync(response.AccessToken);
+
+// Graceful shutdown
+Environment.Exit(0);
 
 async Task<TokenResponse> RequestTokenAsync()
 {

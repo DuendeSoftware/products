@@ -11,8 +11,8 @@ namespace UnitTests.Stores.Default;
 
 public class DistributedCacheAuthorizationParametersMessageStoreTests
 {
-    MockDistributedCache _mockCache = new MockDistributedCache();
-    DistributedCacheAuthorizationParametersMessageStore _subject;
+    private MockDistributedCache _mockCache = new MockDistributedCache();
+    private DistributedCacheAuthorizationParametersMessageStore _subject;
     public DistributedCacheAuthorizationParametersMessageStoreTests()
     {
         _subject = new DistributedCacheAuthorizationParametersMessageStore(_mockCache, new DefaultHandleGenerationService());

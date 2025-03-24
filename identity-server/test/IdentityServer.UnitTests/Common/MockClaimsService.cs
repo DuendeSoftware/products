@@ -8,7 +8,7 @@ using Duende.IdentityServer.Validation;
 
 namespace UnitTests.Common;
 
-class MockClaimsService : IClaimsService
+internal class MockClaimsService : IClaimsService
 {
     public List<Claim> IdentityTokenClaims { get; set; } = new List<Claim>();
     public List<Claim> AccessTokenClaims { get; set; } = new List<Claim>();

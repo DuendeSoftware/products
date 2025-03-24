@@ -12,7 +12,7 @@ namespace UnitTests.Validation.Setup;
 /// </summary>
 internal class TestPushedAuthorizationService : IPushedAuthorizationService
 {
-    Dictionary<string, DeserializedPushedAuthorizationRequest> pushedRequests = new();
+    private Dictionary<string, DeserializedPushedAuthorizationRequest> pushedRequests = new();
 
 
     public Task ConsumeAsync(string referenceValue)

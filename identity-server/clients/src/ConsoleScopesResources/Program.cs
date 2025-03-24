@@ -10,7 +10,9 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var Cache = new DiscoveryCache("https://localhost:5001");
+// Resolve the authority from the configuration.
+var authority = builder.Configuration["is-host"];
+var Cache = new DiscoveryCache(authority);
 
 "Resource setup:\n".ConsoleGreen();
 
@@ -86,7 +88,7 @@ async Task RequestToken(PlannedRun run)
     response.Show();
 }
 
-class PlannedRun
+internal class PlannedRun
 {
     public string Id { get; set; }
     public bool Enabled { get; set; }

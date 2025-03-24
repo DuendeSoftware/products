@@ -7,18 +7,29 @@ var contexts = GitHubContexts.Instance;
 
 var products = new Product[]
 {
-    new("aspnetcore-authentication-jwtbearer", "aspnetcore-authentication-jwtbearer.slnf", "aaj"),
-    new("identity-server", "identity-server.slnf", "is"),
-    new("bff", "bff.slnf", "bff", true)
+    new("aspnetcore-authentication-jwtbearer",
+        "aspnetcore-authentication-jwtbearer.slnf",
+        "aaj",
+        ["AspNetCore.Authentication.JwtBearer.Tests"],
+        []),
+    new("bff",
+        "bff.slnf",
+        "bff",
+        ["Bff.Tests", "Bff.Blazor.Client.UnitTests", "Bff.Blazor.UnitTests", "Bff.EntityFramework.Tests"],
+        ["Hosts.Tests"]),
+    new("identity-server",
+        "identity-server.slnf",
+        "is",
+        ["Configuration.IntegrationTests", "EntityFramework.IntegrationTests", "EntityFramework.Storage.UnitTests", "IdentityServer.IntegrationTests", "IdentityServer.UnitTests"],
+        [])
 };
 foreach (var product in products)
 {
     GenerateCiWorkflow(product);
     GenerateReleaseWorkflow(product);
-    GenerateCodeQlWorkflow(product, "38 15 * * 0");
 }
 
-GenerateTemplatesReleaseWorkflow(new Product("templates", "../artifacts/templates.csproj", "templates"));
+GenerateTemplatesReleaseWorkflow(new Product("templates", "../artifacts/templates.csproj", "templates", [], []));
 
 
 void GenerateCiWorkflow(Product product)
@@ -42,57 +53,158 @@ void GenerateCiWorkflow(Product product)
 
     workflow.EnvDefaults();
 
-    var job = workflow
-        .Job("build")
+    const string VerifyFormattingJobId = "verify-formatting";
+    const string CodeQlJobId = "codeql";
+    const string PlaywrightJobId = "playwright";
+    const string BuildJobId = "build";
+
+    // Verify formatting
+    var verifyFormattingJob = workflow
+        .Job(VerifyFormattingJobId)
         .RunEitherOnBranchOrAsPR()
-        .Name("Build")
+        .Name("Verify formatting")
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
+        .Defaults().Run("bash", product.Name)
+        .Job;
+
+    verifyFormattingJob.Permissions(contents: Permission.Read);
+
+    verifyFormattingJob.TimeoutMinutes(15);
+
+    verifyFormattingJob.Step()
+        .ActionsCheckout();
+
+    verifyFormattingJob.StepSetupDotNet();
+
+    verifyFormattingJob.StepRestore(product.Solution);
+
+    verifyFormattingJob.StepVerifyFormatting(product.Solution);
+
+    // Build
+    var build = workflow
+        .Job(BuildJobId)
+        .RunEitherOnBranchOrAsPR()
+        .Name("Build and test (unit)")
         .RunsOn(GitHubHostedRunners.UbuntuLatest)
         .Defaults().Run("bash", product.Name)
         .Job;
 
-    job.Permissions(
+    build.Permissions(
         actions: Permission.Read,
         contents: Permission.Read,
         checks: Permission.Write,
         packages: Permission.Write);
 
-    job.TimeoutMinutes(15);
+    build.TimeoutMinutes(15);
 
-    job.Step()
+    build.Step()
         .ActionsCheckout();
 
-    job.StepSetupDotNet();
+    build.StepSetupDotNet();
 
-    job.StepRestore(product.Solution);
+    build.StepRestore(product.Solution);
 
-    job.StepVerifyFormatting(product.Solution);
+    build.StepBuild(product.Solution);
 
-    job.StepBuild(product.Solution);
+    build.StepDotNetDevCerts();
 
-    // Devcerts are needed because some tests run start a http server with https. 
-    job.StepDotNetDevCerts();
-
-    if (product.EnablePlaywright)
+    foreach (var project in product.UnitTestProjects)
     {
-        job.StepInstallPlayWright();
+        build.StepTest($"test/{project}");
     }
 
-    job.StepTest(product.Solution);
+    // Playwright
+    var playwrightJob = workflow
+        .Job(PlaywrightJobId)
+        .RunEitherOnBranchOrAsPR()
+        .Name("Playwright tests")
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
+        .Defaults().Run("bash", product.Name)
+        .Job;
 
-    if (product.EnablePlaywright)
+    playwrightJob.Permissions(
+        actions: Permission.Read,
+        contents: Permission.Read,
+        checks: Permission.Write);
+
+    playwrightJob.TimeoutMinutes(15);
+
+    playwrightJob.Step()
+        .ActionsCheckout();
+
+    if (product.PlaywrightTestProjects.Length > 0)
     {
-        job.StepUploadPlaywrightTestTraces(product.Name);
+        playwrightJob.StepSetupDotNet();
+
+        playwrightJob.StepRestore(product.Solution);
+
+        playwrightJob.StepBuild(product.Solution);
+
+        playwrightJob.StepInstallPlayWright();
+
+        playwrightJob.StepDotNetDevCerts();
+
+        foreach (var project in product.PlaywrightTestProjects)
+        {
+            playwrightJob.StepTest($"test/{project}");
+        }
+
+        playwrightJob.StepUploadPlaywrightTestTraces(product.Name);
     }
 
-    job.StepToolRestore();
+    // CodeQL
+    var codeQlJob = workflow
+        .Job(CodeQlJobId)
+        .RunEitherOnBranchOrAsPR()
+        .Name("CodeQL analyze")
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
+        .Defaults().Run("bash", product.Name)
+        .Job;
 
-    job.StepPack(product.Solution);
+    codeQlJob.Step()
+        .ActionsCheckout();
 
-    job.StepSign();
+    codeQlJob.StepInitializeCodeQl();
 
-    job.StepPushToGithub(contexts);
+    codeQlJob.StepSetupDotNet();
 
-    job.StepUploadArtifacts(product.Name);
+    codeQlJob.StepRestore(product.Solution);
+
+    codeQlJob.StepBuild(product.Solution);
+
+    codeQlJob.StepPerformCodeQlAnalysis();
+
+    // Pack
+    var packJob = workflow
+        .Job("pack")
+        .RunEitherOnBranchOrAsPR()
+        .Name("Pack, sign and push")
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
+        .Needs(VerifyFormattingJobId, BuildJobId, PlaywrightJobId, CodeQlJobId)
+        .Defaults().Run("bash", product.Name)
+        .Job;
+
+    packJob.Permissions(
+        actions: Permission.Read,
+        contents: Permission.Read,
+        packages: Permission.Write);
+
+    packJob.TimeoutMinutes(15);
+
+    packJob.Step()
+        .ActionsCheckout();
+
+    packJob.StepSetupDotNet();
+
+    packJob.StepToolRestore();
+
+    packJob.StepPack(product.Solution);
+
+    packJob.StepSign();
+
+    packJob.StepPushToGithub(contexts);
+
+    packJob.StepUploadArtifacts(product.Name);
 
     var fileName = $"{product.Name}-ci";
     WriteWorkflow(workflow, fileName);
@@ -155,53 +267,6 @@ void GenerateReleaseWorkflow(Product product)
     publishJob.StepPushToNuget(pushAlways: true);
 
     var fileName = $"{product.Name}-release";
-    WriteWorkflow(workflow, fileName);
-}
-
-void GenerateCodeQlWorkflow(Product system, string cronSchedule)
-{
-    var workflow = new Workflow($"{system.Name}/codeql");
-    var branches = new[] { "main" };
-    var paths = new[] { $"{system.Name}/**" };
-
-    workflow.On
-        .WorkflowDispatch();
-    workflow.On
-        .Push()
-        .Branches(branches)
-        .Paths(paths);
-    workflow.On
-        .PullRequest()
-        .Paths(paths);
-    workflow.On
-        .Schedule(cronSchedule);
-
-    var job = workflow
-        .Job("analyze")
-        .Name("Analyze")
-        .RunsOn(GitHubHostedRunners.UbuntuLatest)
-        .Defaults().Run("bash", system.Name)
-        .Job;
-
-    job.Permissions(
-        actions: Permission.Read,
-        contents: Permission.Read,
-        securityEvents: Permission.Write);
-
-    job.Step()
-        .ActionsCheckout();
-
-    job.StepInitializeCodeQl();
-
-    job.StepSetupDotNet();
-
-    job.StepRestore(system.Solution);
-
-    job.StepBuild(system.Solution);
-
-    job.StepPerformCodeQlAnalysis();
-
-    var fileName = $"{system.Name}-codeql-analysis";
     WriteWorkflow(workflow, fileName);
 }
 
@@ -276,4 +341,4 @@ void WriteWorkflow(Workflow workflow, string fileName)
     Console.WriteLine($"Wrote workflow to {filePath}");
 }
 
-record Product(string Name, string Solution, string TagPrefix, bool EnablePlaywright = false);
+internal record Product(string Name, string Solution, string TagPrefix, string[] UnitTestProjects, string[] PlaywrightTestProjects);

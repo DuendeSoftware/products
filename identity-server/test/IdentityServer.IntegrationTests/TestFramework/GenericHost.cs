@@ -24,7 +24,7 @@ public class GenericHost
     }
 
     private readonly string _baseAddress;
-    IServiceProvider _appServices;
+    private IServiceProvider _appServices;
 
     public Assembly HostAssembly { get; set; }
     public bool IsDevelopment { get; set; }
@@ -88,7 +88,7 @@ public class GenericHost
     public event Action<IServiceCollection> OnConfigureServices = services => { };
     public event Action<IApplicationBuilder> OnConfigure = app => { };
 
-    void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services)
     {
         services.AddLogging(options =>
         {
@@ -99,7 +99,7 @@ public class GenericHost
         OnConfigureServices(services);
     }
 
-    void ConfigureApp(IApplicationBuilder app)
+    private void ConfigureApp(IApplicationBuilder app)
     {
         _appServices = app.ApplicationServices;
 
@@ -110,8 +110,7 @@ public class GenericHost
     }
 
 
-
-    void ConfigureSignout(IApplicationBuilder app)
+    private void ConfigureSignout(IApplicationBuilder app)
     {
         app.Use(async (ctx, next) =>
         {
@@ -132,7 +131,7 @@ public class GenericHost
     }
 
 
-    void ConfigureSignin(IApplicationBuilder app)
+    private void ConfigureSignin(IApplicationBuilder app)
     {
         app.Use(async (ctx, next) =>
         {
@@ -156,8 +155,9 @@ public class GenericHost
             await next();
         });
     }
-    ClaimsPrincipal _userToSignIn;
-    AuthenticationProperties _propsToSignIn;
+
+    private ClaimsPrincipal _userToSignIn;
+    private AuthenticationProperties _propsToSignIn;
     public async Task IssueSessionCookieAsync(params Claim[] claims)
     {
         _userToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));

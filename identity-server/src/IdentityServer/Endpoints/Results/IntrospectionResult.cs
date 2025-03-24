@@ -33,8 +33,7 @@ public class IntrospectionResult : EndpointResult<IntrospectionResult>
     }
 }
 
-
-class IntrospectionHttpWriter : IHttpResponseWriter<IntrospectionResult>
+internal class IntrospectionHttpWriter : IHttpResponseWriter<IntrospectionResult>
 {
     public Task WriteHttpResponse(IntrospectionResult result, HttpContext context)
     {
