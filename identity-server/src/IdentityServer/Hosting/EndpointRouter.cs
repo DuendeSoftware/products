@@ -13,6 +13,7 @@ namespace Duende.IdentityServer.Hosting;
 internal class EndpointRouter(
     IEnumerable<Endpoint> endpoints,
     ProtocolRequestCounter requestCounter,
+    LicenseExpirationChecker licenseExpirationChecker,
     IdentityServerOptions options,
     SanitizedLogger<EndpointRouter> sanitizedLogger)
     : IEndpointRouter
@@ -30,6 +31,7 @@ internal class EndpointRouter(
                 sanitizedLogger.LogDebug("Request path {path} matched to endpoint type {endpoint}", context.Request.Path, endpointName);
 
                 requestCounter.Increment();
+                licenseExpirationChecker.CheckExpiration();
 
                 return GetEndpointHandler(endpoint, context);
             }
