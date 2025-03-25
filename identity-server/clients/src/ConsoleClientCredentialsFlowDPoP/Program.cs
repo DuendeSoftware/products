@@ -18,7 +18,6 @@ var authority = builder.Configuration["is-host"];
 var simpleApi = builder.Configuration["simple-api"];
 
 var discoClient = new HttpClient();
-var authority = builder.Configuration["is-host"];
 var disco = await discoClient.GetDiscoveryDocumentAsync(authority);
 if (disco.IsError) throw new Exception(disco.Error);
 
