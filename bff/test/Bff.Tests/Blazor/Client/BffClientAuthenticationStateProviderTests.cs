@@ -3,7 +3,6 @@
 
 using System.Security.Claims;
 using Duende.Bff.Blazor.Client.Internals;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 

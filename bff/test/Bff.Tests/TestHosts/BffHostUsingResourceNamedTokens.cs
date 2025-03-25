@@ -5,9 +5,7 @@ using System.Net;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Yarp.ReverseProxy.Forwarder;
 

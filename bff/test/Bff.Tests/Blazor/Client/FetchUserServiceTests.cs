@@ -4,7 +4,6 @@
 using System.Net;
 using System.Text.Json;
 using Duende.Bff.Blazor.Client.Internals;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;

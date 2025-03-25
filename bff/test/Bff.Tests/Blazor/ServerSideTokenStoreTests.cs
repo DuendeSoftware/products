@@ -3,6 +3,8 @@
 
 using System.Security.Claims;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff;
+using Duende.Bff.Blazor;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -10,7 +12,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 
-namespace Duende.Bff.Blazor.UnitTests;
+namespace Bff.Tests.Blazor;
 
 public class ServerSideTokenStoreTests
 {

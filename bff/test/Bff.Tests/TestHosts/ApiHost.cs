@@ -4,9 +4,6 @@
 using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.IdentityServer.Models;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Bff.Tests.TestHosts;
 
@@ -94,7 +91,7 @@ public class ApiHost : GenericHost
                     Path: context.Request.Path.Value ?? "/",
                     Sub: context.User.FindFirst("sub")?.Value,
                     ClientId: context.User.FindFirst("client_id")?.Value,
-                    Claims: context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                    Claims: context.User.Claims.Select(x => new TestClaimRecord(x.Type, x.Value)).ToArray())
                 {
                     Body = body,
                     RequestHeaders = requestHeaders

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.Tests.TestFramework;
 

@@ -3,7 +3,7 @@
 
 using System.Net;
 using System.Text.Json;
-using Bff.Blazor.UnitTests.Components;
+using Bff.Tests.Blazor.Components;
 using Duende.Bff;
 using Duende.Bff.Blazor;
 using Duende.Bff.Tests.TestFramework;
@@ -13,7 +13,7 @@ using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;
 
-namespace Bff.Blazor.UnitTests;
+namespace Bff.Tests.Blazor;
 
 public class BffBlazorHost : GenericHost
 {
