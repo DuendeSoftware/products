@@ -117,28 +117,6 @@ if (ApiIsEnabled(nameof(Projects.DPoPApi)))
 
 #endregion
 
-#region API Projects
-
-if (ApiIsEnabled(nameof(Projects.SimpleApi)))
-{
-    var simpleApi = builder.AddProject<Projects.SimpleApi>(name: "simple-api");
-    projectRegistry.Add("simple-api", simpleApi);
-}
-
-if (ApiIsEnabled(nameof(Projects.ResourceBasedApi)))
-{
-    var resourceBasedApi = builder.AddProject<Projects.ResourceBasedApi>(name: "resource-based-api");
-    projectRegistry.Add("resource-based-api", resourceBasedApi);
-}
-
-if (ApiIsEnabled(nameof(Projects.DPoPApi)))
-{
-    var dpopApi = builder.AddProject<Projects.DPoPApi>(name: "dpop-api");
-    projectRegistry.Add("dpop-api", dpopApi);
-}
-
-#endregion
-
 #region Identity Server Clients
 
 if (ClientIsEnabled(nameof(Projects.MvcCode)))
