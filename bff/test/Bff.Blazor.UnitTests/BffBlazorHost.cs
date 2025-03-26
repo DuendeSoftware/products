@@ -152,7 +152,7 @@ public class BffBlazorHost : GenericHost
 
     public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
     {
-        if (userQuery != null) userQuery = "?" + userQuery;
+        if (userQuery != null) userQuery = '?' + userQuery;
 
         var req = new HttpRequestMessage(HttpMethod.Get, Url("/bff/user") + userQuery);
         req.Headers.Add("x-csrf", "1");

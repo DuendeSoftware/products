@@ -124,7 +124,7 @@ public class ResourceTests
         var idx = url.IndexOf("code=", StringComparison.Ordinal);
         idx.ShouldBeGreaterThan(-1);
         var code = url.Substring(idx + 5);
-        idx = code.IndexOf("&", StringComparison.Ordinal);
+        idx = code.IndexOf('&', StringComparison.Ordinal);
         if (idx >= 0)
         {
             code = code.Substring(0, idx);

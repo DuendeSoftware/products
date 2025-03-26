@@ -43,10 +43,10 @@ public static class HttpResponseExtensions
 
             if (varyBy?.Any() == true)
             {
-                var vary = varyBy.Aggregate((x, y) => x + "," + y);
+                var vary = varyBy.Aggregate((x, y) => x + ',' + y);
                 if (response.Headers.ContainsKey("Vary"))
                 {
-                    vary = response.Headers.Vary.ToString() + "," + vary;
+                    vary = response.Headers.Vary.ToString() + ',' + vary;
                 }
                 response.Headers.Vary = vary;
             }

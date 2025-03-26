@@ -53,7 +53,7 @@ public abstract class ConfigureAuthenticationOptions<TAuthenticationOptions, TId
         var idp = cache.GetIdentityProvider<TIdentityProvider>(name);
         if (idp != null)
         {
-            var pathPrefix = providerOptions.PathPrefix + "/" + idp.Scheme;
+            var pathPrefix = providerOptions.PathPrefix + '/' + idp.Scheme;
             var ctx = new ConfigureAuthenticationContext<TAuthenticationOptions, TIdentityProvider>
             {
                 IdentityProvider = idp,

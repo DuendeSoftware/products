@@ -28,7 +28,7 @@ public class TestBrowserClient : HttpClient
 
             if (response.Headers.Contains("Set-Cookie"))
             {
-                var responseCookieHeader = string.Join(",", response.Headers.GetValues("Set-Cookie"));
+                var responseCookieHeader = string.Join(',', response.Headers.GetValues("Set-Cookie"));
                 CookieContainer.SetCookies(request.RequestUri, responseCookieHeader);
             }
 

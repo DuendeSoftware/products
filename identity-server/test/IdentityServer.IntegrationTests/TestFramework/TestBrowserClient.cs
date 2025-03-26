@@ -118,7 +118,7 @@ public class TestBrowserClient : HttpClient
         var postUrl = form.Action;
         if (!postUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
         {
-            if (postUrl.StartsWith("/"))
+            if (postUrl.StartsWith('/'))
             {
                 postUrl = CurrentUri.Scheme + "://" + CurrentUri.Authority + postUrl;
             }

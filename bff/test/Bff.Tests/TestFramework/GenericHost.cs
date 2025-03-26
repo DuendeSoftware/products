@@ -16,7 +16,7 @@ namespace Duende.Bff.Tests.TestFramework;
 
 public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "https://server") : IAsyncDisposable
 {
-    private readonly string _baseAddress = baseAddress.EndsWith("/")
+    private readonly string _baseAddress = baseAddress.EndsWith('/')
         ? baseAddress.Substring(0, baseAddress.Length - 1)
         : baseAddress;
 
@@ -40,7 +40,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
     public string Url(string? path = null)
     {
         path ??= string.Empty;
-        if (!path.StartsWith("/")) path = "/" + path;
+        if (!path.StartsWith('/')) path = '/' + path;
         return _baseAddress + path;
     }
 

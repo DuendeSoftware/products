@@ -69,7 +69,7 @@ public class AuthorizeCallbackEndpointTests
 
         _context.Request.Method = "GET";
         _context.Request.Path = new PathString("/connect/authorize/callback");
-        _context.Request.QueryString = new QueryString("?" + parameters.ToQueryString());
+        _context.Request.QueryString = new QueryString('?' + parameters.ToQueryString());
 
         var result = await _subject.ProcessAsync(_context);
 
@@ -106,7 +106,7 @@ public class AuthorizeCallbackEndpointTests
 
         _context.Request.Method = "GET";
         _context.Request.Path = new PathString("/connect/authorize/callback");
-        _context.Request.QueryString = new QueryString("?" + parameters.ToQueryString());
+        _context.Request.QueryString = new QueryString('?' + parameters.ToQueryString());
 
         var result = await _subject.ProcessAsync(_context);
 
@@ -133,7 +133,7 @@ public class AuthorizeCallbackEndpointTests
 
         _context.Request.Method = "GET";
         _context.Request.Path = new PathString("/connect/authorize/callback");
-        _context.Request.QueryString = new QueryString("?" + parameters.ToQueryString());
+        _context.Request.QueryString = new QueryString('?' + parameters.ToQueryString());
 
         var result = await _subject.ProcessAsync(_context);
 
@@ -170,7 +170,7 @@ public class AuthorizeCallbackEndpointTests
 
         _context.Request.Method = "GET";
         _context.Request.Path = new PathString("/connect/authorize/callback");
-        _context.Request.QueryString = new QueryString("?" + parameters.ToQueryString());
+        _context.Request.QueryString = new QueryString('?' + parameters.ToQueryString());
 
         var result = await _subject.ProcessAsync(_context);
 
@@ -194,7 +194,7 @@ public class AuthorizeCallbackEndpointTests
 
         _context.Request.Method = "GET";
         _context.Request.Path = new PathString("/connect/authorize/callback");
-        _context.Request.QueryString = new QueryString("?" + parameters.ToQueryString());
+        _context.Request.QueryString = new QueryString('?' + parameters.ToQueryString());
 
         var result = await _subject.ProcessAsync(_context);
 

@@ -104,9 +104,9 @@ public static class ServiceCollectionExtensions
     private static void SetLocalApiBaseAddress(IServiceProvider sp, HttpClient client)
     {
         var baseAddress = GetLocalBaseAddress(sp);
-        if (!baseAddress.EndsWith("/"))
+        if (!baseAddress.EndsWith('/'))
         {
-            baseAddress += "/";
+            baseAddress += '/';
         }
 
         client.BaseAddress = new Uri(baseAddress);
@@ -135,22 +135,22 @@ public static class ServiceCollectionExtensions
     private static void SetRemoteApiBaseAddress(IServiceProvider sp, HttpClient client)
     {
         var baseAddress = GetRemoteBaseAddress(sp);
-        if (!baseAddress.EndsWith("/"))
+        if (!baseAddress.EndsWith('/'))
         {
-            baseAddress += "/";
+            baseAddress += '/';
         }
 
         var remoteApiPath = GetRemoteApiPath(sp);
         if (!string.IsNullOrEmpty(remoteApiPath))
         {
-            if (remoteApiPath.StartsWith("/"))
+            if (remoteApiPath.StartsWith('/'))
             {
                 remoteApiPath = remoteApiPath.Substring(1);
             }
 
-            if (!remoteApiPath.EndsWith("/"))
+            if (!remoteApiPath.EndsWith('/'))
             {
-                remoteApiPath += "/";
+                remoteApiPath += '/';
             }
         }
 

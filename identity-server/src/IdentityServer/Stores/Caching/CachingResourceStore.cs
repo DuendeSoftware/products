@@ -72,7 +72,7 @@ public class CachingResourceStore<T> : IResourceStore
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.GetKey");
 
         if (names == null || !names.Any()) return string.Empty;
-        return "sha256-" + names.OrderBy(x => x).Aggregate((x, y) => x + "," + y).Sha256();
+        return "sha256-" + names.OrderBy(x => x).Aggregate((x, y) => x + ',' + y).Sha256();
     }
 
     /// <inheritdoc/>

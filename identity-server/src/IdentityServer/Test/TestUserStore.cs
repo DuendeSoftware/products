@@ -118,7 +118,7 @@ public class TestUserStore
             var last = filtered.FirstOrDefault(x => x.Type == JwtClaimTypes.FamilyName)?.Value;
             if (first != null && last != null)
             {
-                filtered.Add(new Claim(JwtClaimTypes.Name, first + " " + last));
+                filtered.Add(new Claim(JwtClaimTypes.Name, first + ' ' + last));
             }
             else if (first != null)
             {
