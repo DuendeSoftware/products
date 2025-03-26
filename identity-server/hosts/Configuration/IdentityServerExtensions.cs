@@ -4,8 +4,8 @@
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.RequestProcessing;
+using Host.Common.Extensions;
 using IdentityServerHost.Configuration;
-using IdentityServerHost.Extensions;
 
 namespace IdentityServerHost;
 
@@ -32,8 +32,8 @@ internal static class IdentityServerExtensions
             .AddInMemoryIdentityResources(Resources.IdentityResources)
             .AddInMemoryApiScopes(Resources.ApiScopes)
             .AddInMemoryApiResources(Resources.ApiResources)
-            .AddExtensionGrantValidator<Extensions.ExtensionGrantValidator>()
-            .AddExtensionGrantValidator<Extensions.NoSubjectExtensionGrantValidator>()
+            .AddExtensionGrantValidator<ExtensionGrantValidator>()
+            .AddExtensionGrantValidator<NoSubjectExtensionGrantValidator>()
             .AddJwtBearerClientAuthentication()
             .AddAppAuthRedirectUriValidator()
             .AddTestUsers(TestUsers.Users)

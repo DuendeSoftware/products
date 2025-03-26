@@ -35,10 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
     <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\Host.Common\Host.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
