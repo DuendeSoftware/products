@@ -36,6 +36,7 @@
 	  "identity-server\\clients\\src\\ConsoleResourceOwnerFlowRefreshToken\\ConsoleResourceOwnerFlowRefreshToken.csproj",
 	  "identity-server\\clients\\src\\ConsoleResourceOwnerFlowUserInfo\\ConsoleResourceOwnerFlowUserInfo.csproj",
 	  "identity-server\\clients\\src\\WindowsConsoleSystemBrowser\\WindowsConsoleSystemBrowser.csproj",
+      "identity-server\\hosts\\Host.Common\\Host.Common.csproj",
       "identity-server\\hosts\\AspNetIdentity\\Host.AspNetIdentity.csproj",
       "identity-server\\hosts\\Configuration\\Host.Configuration.csproj",
       "identity-server\\hosts\\EntityFramework-dotnet9\\Host.EntityFramework.dotnet9.csproj",

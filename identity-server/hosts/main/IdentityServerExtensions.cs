@@ -5,8 +5,8 @@ using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using Host.Common.Extensions;
 using IdentityServerHost.Configuration;
-using IdentityServerHost.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
@@ -44,8 +44,8 @@ internal static class IdentityServerExtensions
             .AddInMemoryApiScopes(Resources.ApiScopes)
             .AddInMemoryApiResources(Resources.ApiResources)
             //.AddStaticSigningCredential()
-            .AddExtensionGrantValidator<Extensions.ExtensionGrantValidator>()
-            .AddExtensionGrantValidator<Extensions.NoSubjectExtensionGrantValidator>()
+            .AddExtensionGrantValidator<ExtensionGrantValidator>()
+            .AddExtensionGrantValidator<NoSubjectExtensionGrantValidator>()
             .AddJwtBearerClientAuthentication()
             .AddAppAuthRedirectUriValidator()
             .AddTestUsers(TestUsers.Users)
