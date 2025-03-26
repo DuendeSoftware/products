@@ -3,7 +3,6 @@
 
 using System.Security.Claims;
 using Duende.Bff.Blazor.Client.Internals;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 
@@ -29,8 +28,7 @@ public class BffClientAuthenticationStateProviderTests
             userService,
             persistentUserService,
             time,
-            TestMocks.MockOptions(),
-            Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());
+            TestMocks.MockOptions());
 
         var authState = await sut.GetAuthenticationStateAsync();
         authState.User.Identity?.IsAuthenticated.ShouldBeFalse();
@@ -71,8 +69,7 @@ public class BffClientAuthenticationStateProviderTests
             {
                 WebAssemblyStateProviderPollingDelay = 2000,
                 WebAssemblyStateProviderPollingInterval = 10000
-            }),
-    Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());
+            }));
 
         var authState = await sut.GetAuthenticationStateAsync();
         authState.User.Identity?.IsAuthenticated.ShouldBeTrue();
@@ -131,8 +128,7 @@ public class BffClientAuthenticationStateProviderTests
             {
                 WebAssemblyStateProviderPollingDelay = 2000,
                 WebAssemblyStateProviderPollingInterval = 10000
-            }),
-    Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());
+            }));
 
         var authState = await sut.GetAuthenticationStateAsync();
         authState.User.Identity?.IsAuthenticated.ShouldBeTrue();
@@ -185,8 +181,7 @@ public class BffClientAuthenticationStateProviderTests
             userService,
             persistentUserService,
             time,
-            TestMocks.MockOptions(),
-            Substitute.For<ILogger<BffClientAuthenticationStateProvider>>());
+            TestMocks.MockOptions());
 
         var _ = await sut.GetAuthenticationStateAsync();
         time.Advance(TimeSpan.FromSeconds(5));

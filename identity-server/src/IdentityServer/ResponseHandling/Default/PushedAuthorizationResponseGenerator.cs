@@ -5,7 +5,6 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.ResponseHandling;
 
@@ -15,7 +14,6 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
     private readonly IHandleGenerationService _handleGeneration;
     private readonly IdentityServerOptions _options;
     private readonly IPushedAuthorizationService _pushedAuthorizationService;
-    private readonly ILogger<PushedAuthorizationResponseGenerator> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PushedAuthorizationResponseGenerator"/> class.
@@ -24,16 +22,14 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
     /// </param>
     /// <param name="options">The IdentityServer options</param>
     /// <param name="pushedAuthorizationService">The pushed authorization service</param>
-    /// <param name="logger">The logger</param>
-    public PushedAuthorizationResponseGenerator(IHandleGenerationService handleGeneration,
+    public PushedAuthorizationResponseGenerator(
+        IHandleGenerationService handleGeneration,
         IdentityServerOptions options,
-        IPushedAuthorizationService pushedAuthorizationService,
-        ILogger<PushedAuthorizationResponseGenerator> logger)
+        IPushedAuthorizationService pushedAuthorizationService)
     {
         _handleGeneration = handleGeneration;
         _options = options;
         _pushedAuthorizationService = pushedAuthorizationService;
-        _logger = logger;
     }
 
     /// <inheritdoc />
