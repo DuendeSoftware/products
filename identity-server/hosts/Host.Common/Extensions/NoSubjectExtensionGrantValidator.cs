@@ -4,9 +4,9 @@
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 
-namespace IdentityServerHost.Extensions;
+namespace Host.Common.Extensions;
 
-public class ExtensionGrantValidator : IExtensionGrantValidator
+public class NoSubjectExtensionGrantValidator : IExtensionGrantValidator
 {
     public Task ValidateAsync(ExtensionGrantValidationContext context)
     {
@@ -15,7 +15,7 @@ public class ExtensionGrantValidator : IExtensionGrantValidator
 
         if (credential != null)
         {
-            context.Result = new GrantValidationResult(subject: "1", authenticationMethod: "custom");
+            context.Result = new GrantValidationResult();
         }
         else
         {
@@ -28,6 +28,6 @@ public class ExtensionGrantValidator : IExtensionGrantValidator
 
     public string GrantType
     {
-        get { return "custom"; }
+        get { return "custom.nosubject"; }
     }
 }

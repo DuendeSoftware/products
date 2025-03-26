@@ -4,15 +4,12 @@
 using System.Security.Claims;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
+using Microsoft.Extensions.Logging;
 
-namespace IdentityServerHost.Extensions;
+namespace Host.Common.Extensions;
 
-public class HostProfileService : TestUserProfileService
+public class HostProfileService(TestUserStore users, ILogger<TestUserProfileService> logger) : TestUserProfileService(users, logger)
 {
-    public HostProfileService(TestUserStore users, ILogger<TestUserProfileService> logger) : base(users, logger)
-    {
-    }
-
     public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
         ArgumentNullException.ThrowIfNull(context);

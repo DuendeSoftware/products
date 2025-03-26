@@ -2,15 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Logging;
 
-namespace IdentityServerHost.Extensions;
+namespace Host.Common.Extensions;
 
-public class ParameterizedScopeParser : DefaultScopeParser
+public class ParameterizedScopeParser(ILogger<DefaultScopeParser> logger) : DefaultScopeParser(logger)
 {
-    public ParameterizedScopeParser(ILogger<DefaultScopeParser> logger) : base(logger)
-    {
-    }
-
     public override void ParseScopeValue(ParseScopeContext scopeContext)
     {
         ArgumentNullException.ThrowIfNull(scopeContext);

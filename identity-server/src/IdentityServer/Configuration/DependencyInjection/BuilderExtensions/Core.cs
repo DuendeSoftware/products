@@ -211,7 +211,6 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<LicenseAccessor>();
         builder.Services.AddSingleton<ProtocolRequestCounter>();
         builder.Services.AddSingleton<LicenseUsageTracker>();
-        builder.Services.AddSingleton<LicenseExpirationChecker>();
 
         return builder;
     }
