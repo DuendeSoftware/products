@@ -20,12 +20,12 @@ builder.Services.AddHttpClient("SimpleApi", client =>
 })
 .AddServiceDiscovery();
 
+var clientId = Guid.NewGuid().ToString();
+var clientSecret = Guid.NewGuid().ToString();
+
 // Build the host so we can resolve the HttpClientFactory.
 var host = builder.Build();
 var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
-
-var clientId = Guid.NewGuid().ToString();
-var clientSecret = Guid.NewGuid().ToString();
 
 await RegisterClient();
 

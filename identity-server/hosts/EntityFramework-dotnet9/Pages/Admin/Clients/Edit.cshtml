@@ -1,0 +1,65 @@
+@page
+@model IdentityServerHost.Pages.Admin.Clients.EditModel
+@{
+}
+
+<div class="clients-page">
+
+    <h2>
+        Edit Client Id: @Model.InputModel.ClientId
+        (<small>@Model.InputModel.Flow</small>)
+    </h2>
+
+    <partial name="_ValidationSummary" />
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <input type="hidden" asp-for="@Model.InputModel.ClientId" />
+                <input type="hidden" asp-for="@Model.InputModel.Flow" />
+
+                <div class="form-group">
+                    <label asp-for="@Model.InputModel.Name"></label>
+                    <input class="form-control" asp-for="@Model.InputModel.Name" autofocus />
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="@Model.InputModel.AllowedScopes">Allowed Scopes (space delimited)</label>
+                    <input class="form-control" asp-for="@Model.InputModel.AllowedScopes" />
+                </div>
+
+                @if (Model.InputModel.Flow == IdentityServerHost.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                {
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.RedirectUri"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.RedirectUri" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.InitiateLoginUri"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.InitiateLoginUri" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.PostLogoutRedirectUri"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.PostLogoutRedirectUri" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.FrontChannelLogoutUri"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.FrontChannelLogoutUri" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.BackChannelLogoutUri"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.BackChannelLogoutUri" />
+                    </div>
+                }
+
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit" name="Button" value="save">Save Changes</button>
+                    <a class="btn btn-secondary" asp-page="/Admin/Clients/Index">Cancel</a>
+                    <button class="btn btn-danger" type="submit" name="Button" value="delete">Delete</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
