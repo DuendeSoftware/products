@@ -5,7 +5,7 @@ using Duende.IdentityServer.Models;
 
 namespace IdentityServerHost.Configuration;
 
-public static class Clients
+public static class TestClients
 {
     public static IEnumerable<Client> Get()
     {

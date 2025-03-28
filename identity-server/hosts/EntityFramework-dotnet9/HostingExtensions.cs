@@ -1,8 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using IdentityServerHost.Extensions;
 using IdentityServerHost.Pages.Admin.ApiScopes;
 using IdentityServerHost.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -19,10 +21,25 @@ internal static class HostingExtensions
         builder.Services.AddRazorPages()
             .AddRazorRuntimeCompilation();
 
+        builder.Services.AddControllers();
+        builder.Services.AddHealthChecks()
+                    .AddCheck<DiscoveryHealthCheck>("DiscoveryHealthCheck")
+                    .AddCheck<DiscoveryKeysHealthCheck>("DiscoveryKeysHealthCheck");
+
+        // cookie policy to deal with temporary browser incompatibilities
+        builder.Services.AddSameSiteCookiePolicy();
+
         builder.ConfigureIdentityServer();
         builder.AddExternalIdentityProviders();
 
         builder.AddAdminFeatures();
+
+        builder.Services.AddLocalApiAuthentication(principal =>
+        {
+            principal.Identities.First().AddClaim(new Claim("additional_claim", "additional_value"));
+
+            return Task.FromResult(principal);
+        });
 
         // var apiKey = builder.Configuration["HoneyCombApiKey"];
         // var dataset = "IdentityServerDev";
@@ -83,7 +100,7 @@ internal static class HostingExtensions
                 options.Scope.Add("email");
                 options.MapInboundClaims = false;
             })
-            .AddOpenIdConnect("demoidsrv", "IdentityServer", options =>
+            .AddOpenIdConnect("demoidsrv", "IdentityServer (Configuration)", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
                 options.SignOutScheme = IdentityServerConstants.SignoutScheme;
@@ -129,6 +146,8 @@ internal static class HostingExtensions
         app.UseSerilogRequestLogging(
             options => options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Debug);
 
+        app.UseCookiePolicy();
+
         app.UseDeveloperExceptionPage();
         app.UseStaticFiles();
 
@@ -136,6 +155,14 @@ internal static class HostingExtensions
         app.UseIdentityServer();
         app.UseAuthorization();
 
+        // health checks
+        app.MapHealthChecks("/health");
+
+        // local API endpoints
+        app.MapControllers()
+            .RequireAuthorization(IdentityServerConstants.LocalApi.PolicyName);
+
+        // UI
         app.MapRazorPages()
             .RequireAuthorization();
 

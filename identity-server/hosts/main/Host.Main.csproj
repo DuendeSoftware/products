@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -42,8 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Config\Clients.cs">
-      <Link>Configuration\Clients.cs</Link>
+    <Compile Include="..\Config\TestClients.cs">
+      <Link>Configuration\TestClients.cs</Link>
     </Compile>
     <Compile Include="..\Config\ClientsConsole.cs">
       <Link>Configuration\ClientsConsole.cs</Link>
@@ -51,8 +51,32 @@
     <Compile Include="..\Config\ClientsWeb.cs">
       <Link>Configuration\ClientsWeb.cs</Link>
     </Compile>
-    <Compile Include="..\Config\Resources.cs">
-      <Link>Configuration\Resources.cs</Link>
+    <Compile Include="..\Config\TestResources.cs">
+      <Link>Configuration\TestResources.cs</Link>
+    </Compile>
+    <Compile Include="..\Config\TestUsers.cs">
+      <Link>Configuration\TestUsers.cs</Link>
+    </Compile>
+    <Compile Include="..\Extensions\ExtensionGrantValidator.cs">
+      <Link>Extensions\ExtensionGrantValidator.cs</Link>
+    </Compile>
+    <Compile Include="..\Extensions\HostProfileService.cs">
+      <Link>Extensions\HostProfileService.cs</Link>
+    </Compile>
+    <Compile Include="..\Extensions\NoSubjectExtensionGrantValidator.cs">
+      <Link>Extensions\NoSubjectExtensionGrantValidator.cs</Link>
+    </Compile>
+    <Compile Include="..\Extensions\ParameterizedScopeParser.cs">
+      <Link>Extensions\ParameterizedScopeParser.cs</Link>
+    </Compile>
+    <Compile Include="..\Extensions\ParameterizedScopeTokenRequestValidator.cs">
+      <Link>Extensions\ParameterizedScopeTokenRequestValidator.cs</Link>
+    </Compile>
+    <Compile Include="..\Extensions\SameSiteHandlingExtensions.cs">
+      <Link>Extensions\SameSiteHandlingExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Extensions\DiscoveryHealthCheck.cs">
+      <Link>Extensions\DiscoveryHealthCheck.cs</Link>
     </Compile>
   </ItemGroup>
 

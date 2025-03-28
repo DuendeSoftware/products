@@ -6,16 +6,11 @@ using IdentityServerHost.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace SqlServer;
+namespace AspNetIdentityDb;
 
-public class Startup
+public class Startup(IConfiguration config)
 {
-    public IConfiguration Configuration { get; }
-
-    public Startup(IConfiguration config)
-    {
-        Configuration = config;
-    }
+    public IConfiguration Configuration { get; } = config;
 
     public void ConfigureServices(IServiceCollection services)
     {

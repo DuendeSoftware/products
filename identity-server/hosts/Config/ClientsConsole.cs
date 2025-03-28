@@ -10,8 +10,8 @@ public static class ClientsConsole
 {
     public static IEnumerable<Client> Get()
     {
-        return new List<Client>
-        {
+        return
+        [
             ///////////////////////////////////////////
             // Console Client Credentials Flow Sample
             //////////////////////////////////////////
@@ -352,6 +352,6 @@ public static class ClientsConsole
                     "resource2.scope1"
                 }
             },
-        };
+        ];
     }
 }

@@ -5,16 +5,11 @@
 using Duende.IdentityServer.EntityFramework.Storage;
 using Microsoft.EntityFrameworkCore;
 
-namespace SqlServer;
+namespace IdentityServerDb;
 
-public class Startup
+public class Startup(IConfiguration config)
 {
-    public IConfiguration Configuration { get; }
-
-    public Startup(IConfiguration config)
-    {
-        Configuration = config;
-    }
+    public IConfiguration Configuration { get; } = config;
 
     public void ConfigureServices(IServiceCollection services)
     {

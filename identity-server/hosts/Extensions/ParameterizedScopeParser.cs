@@ -5,12 +5,8 @@ using Duende.IdentityServer.Validation;
 
 namespace IdentityServerHost.Extensions;
 
-public class ParameterizedScopeParser : DefaultScopeParser
+public class ParameterizedScopeParser(ILogger<DefaultScopeParser> logger) : DefaultScopeParser(logger)
 {
-    public ParameterizedScopeParser(ILogger<DefaultScopeParser> logger) : base(logger)
-    {
-    }
-
     public override void ParseScopeValue(ParseScopeContext scopeContext)
     {
         ArgumentNullException.ThrowIfNull(scopeContext);
