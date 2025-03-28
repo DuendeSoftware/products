@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,7 +55,13 @@ public static class Extensions
             })
             .WithTracing(tracing =>
             {
-                tracing.AddAspNetCoreInstrumentation()
+                tracing
+                    .AddSource(IdentityServerConstants.Tracing.Basic)
+                    .AddSource(IdentityServerConstants.Tracing.Cache)
+                    .AddSource(IdentityServerConstants.Tracing.Services)
+                    .AddSource(IdentityServerConstants.Tracing.Stores)
+                    .AddSource(IdentityServerConstants.Tracing.Validation)
+                    .AddAspNetCoreInstrumentation()
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();

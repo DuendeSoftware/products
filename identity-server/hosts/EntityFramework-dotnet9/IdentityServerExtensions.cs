@@ -16,14 +16,14 @@ internal static class IdentityServerExtensions
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
         builder.Services.AddIdentityServer(options =>
-        {
-            options.Authentication.CoordinateClientLifetimesWithUserSession = true;
-            options.ServerSideSessions.UserDisplayNameClaimType = JwtClaimTypes.Name;
-            options.ServerSideSessions.RemoveExpiredSessions = true;
-            options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromSeconds(10);
-            options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
-            options.Endpoints.EnablePushedAuthorizationEndpoint = true;
-        })
+            {
+                options.Authentication.CoordinateClientLifetimesWithUserSession = true;
+                options.ServerSideSessions.UserDisplayNameClaimType = JwtClaimTypes.Name;
+                options.ServerSideSessions.RemoveExpiredSessions = true;
+                options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromSeconds(10);
+                options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
+                options.Endpoints.EnablePushedAuthorizationEndpoint = true;
+            })
             .AddTestUsers(TestUsers.Users)
             // this adds the config data from DB (clients, resources, CORS)
             .AddConfigurationStore(options =>
@@ -48,10 +48,12 @@ internal static class IdentityServerExtensions
             ;
 
         builder.Services.AddIdentityServerConfiguration(opt =>
-        {
-            // opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
-        })
+            {
+                // opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
+            })
             .AddClientConfigurationStore();
+
+        builder.AddServiceDefaults();
 
         return builder;
     }
