@@ -364,7 +364,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
         };
 
         var createRefreshToken = request.ValidatedResources.Resources.OfflineAccess;
-        var authorizedScopes = Enumerable.Empty<string>();
+        IEnumerable<string> authorizedScopes;
         IEnumerable<string> authorizedResourceIndicators = null;
 
         if (request.AuthorizationCode != null)

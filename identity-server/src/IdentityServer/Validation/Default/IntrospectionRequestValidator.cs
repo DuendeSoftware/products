@@ -94,7 +94,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
         }
 
         // the result we care about
-        IEnumerable<Claim> claims = null;
+        IEnumerable<Claim> claims;
 
         if (api != null)
         {
