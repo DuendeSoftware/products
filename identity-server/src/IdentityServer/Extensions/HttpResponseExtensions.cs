@@ -46,7 +46,7 @@ public static class HttpResponseExtensions
                 var vary = varyBy.Aggregate((x, y) => x + "," + y);
                 if (response.Headers.ContainsKey("Vary"))
                 {
-                    vary = response.Headers.Vary.ToString() + "," + vary;
+                    vary = response.Headers.Vary + "," + vary;
                 }
                 response.Headers.Vary = vary;
             }
