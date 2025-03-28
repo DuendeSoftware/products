@@ -17,7 +17,8 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
     /// <returns></returns>
-    public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames)
+    public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store,
+        IEnumerable<string> scopeNames)
     {
         var identity = await store.FindIdentityResourcesByScopeNameAsync(scopeNames);
         var apiResources = await store.FindApiResourcesByScopeNameAsync(scopeNames);
@@ -33,7 +34,8 @@ public static class IResourceStoreExtensions
         return resources;
     }
 
-    private static void ValidateNameUniqueness(IEnumerable<IdentityResource> identity, IEnumerable<ApiResource> apiResources, IEnumerable<ApiScope> apiScopes)
+    private static void ValidateNameUniqueness(IEnumerable<IdentityResource> identity,
+        IEnumerable<ApiResource> apiResources, IEnumerable<ApiScope> apiScopes)
     {
         // attempt to detect invalid configuration. this is about the only place
         // we can do this, since it's hard to get the values in the store.
@@ -73,14 +75,13 @@ public static class IResourceStoreExtensions
         }
     }
 
-    private static IEnumerable<string> GetDuplicates(IEnumerable<string> names)
+    internal static IEnumerable<string> GetDuplicates(IEnumerable<string> names)
     {
-        var duplicates = names
-            .GroupBy(x => x)
-            .Where(g => g.Count() > 1)
-            .Select(y => y.Key)
-            .ToArray();
-        return duplicates.ToArray();
+        var distinctNames = new HashSet<string>();
+        foreach (var name in names)
+        {
+            if (!distinctNames.Add(name)) yield return name;
+        }
     }
 
     /// <summary>
@@ -89,7 +90,8 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
     /// <returns></returns>
-    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames)
+    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store,
+        IEnumerable<string> scopeNames)
     {
         return (await store.FindResourcesByScopeAsync(scopeNames)).FilterEnabled();
     }
@@ -113,7 +115,8 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
     /// <returns></returns>
-    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames)
+    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(
+        this IResourceStore store, IEnumerable<string> scopeNames)
     {
         return (await store.FindIdentityResourcesByScopeNameAsync(scopeNames)).Where(x => x.Enabled).ToArray();
     }
@@ -121,7 +124,8 @@ public static class IResourceStoreExtensions
     /// <summary>
     /// Finds the enabled API resources by name.
     /// </summary>
-    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames)
+    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store,
+        IEnumerable<string> resourceNames)
     {
         return (await store.FindApiResourcesByNameAsync(resourceNames)).Where(x => x.Enabled).ToArray();
     }
