@@ -94,48 +94,6 @@ jobs:
         fail-on-empty: true
     - name: Publish test report link
       run: echo "[Test Results - test/Bff.Tests](${{ steps.test-report-test-Bff-Tests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
-    - name: Test - test/Bff.Blazor.Client.UnitTests
-      run: dotnet test test/Bff.Blazor.Client.UnitTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Blazor.Client.UnitTests-tests.trx" --collect:"XPlat Code Coverage"
-    - id: test-report-test-Bff-Blazor-Client-UnitTests
-      name: Test report - test/Bff.Blazor.Client.UnitTests
-      if: github.event_name == 'push' && (success() || failure())
-      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
-      with:
-        name: Test Report - test/Bff.Blazor.Client.UnitTests
-        path: '**/test/Bff.Blazor.Client.UnitTests-tests.trx'
-        reporter: dotnet-trx
-        fail-on-error: true
-        fail-on-empty: true
-    - name: Publish test report link
-      run: echo "[Test Results - test/Bff.Blazor.Client.UnitTests](${{ steps.test-report-test-Bff-Blazor-Client-UnitTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
-    - name: Test - test/Bff.Blazor.UnitTests
-      run: dotnet test test/Bff.Blazor.UnitTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Blazor.UnitTests-tests.trx" --collect:"XPlat Code Coverage"
-    - id: test-report-test-Bff-Blazor-UnitTests
-      name: Test report - test/Bff.Blazor.UnitTests
-      if: github.event_name == 'push' && (success() || failure())
-      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
-      with:
-        name: Test Report - test/Bff.Blazor.UnitTests
-        path: '**/test/Bff.Blazor.UnitTests-tests.trx'
-        reporter: dotnet-trx
-        fail-on-error: true
-        fail-on-empty: true
-    - name: Publish test report link
-      run: echo "[Test Results - test/Bff.Blazor.UnitTests](${{ steps.test-report-test-Bff-Blazor-UnitTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
-    - name: Test - test/Bff.EntityFramework.Tests
-      run: dotnet test test/Bff.EntityFramework.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.EntityFramework.Tests-tests.trx" --collect:"XPlat Code Coverage"
-    - id: test-report-test-Bff-EntityFramework-Tests
-      name: Test report - test/Bff.EntityFramework.Tests
-      if: github.event_name == 'push' && (success() || failure())
-      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
-      with:
-        name: Test Report - test/Bff.EntityFramework.Tests
-        path: '**/test/Bff.EntityFramework.Tests-tests.trx'
-        reporter: dotnet-trx
-        fail-on-error: true
-        fail-on-empty: true
-    - name: Publish test report link
-      run: echo "[Test Results - test/Bff.EntityFramework.Tests](${{ steps.test-report-test-Bff-EntityFramework-Tests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
   playwright:
     name: Playwright tests
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')

@@ -15,7 +15,7 @@ var products = new Product[]
     new("bff",
         "bff.slnf",
         "bff",
-        ["Bff.Tests", "Bff.Blazor.Client.UnitTests", "Bff.Blazor.UnitTests", "Bff.EntityFramework.Tests"],
+        ["Bff.Tests"],
         ["Hosts.Tests"]),
     new("identity-server",
         "identity-server.slnf",

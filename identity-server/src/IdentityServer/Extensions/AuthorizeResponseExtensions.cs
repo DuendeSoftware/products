@@ -43,11 +43,11 @@ internal static class AuthorizeResponseExtensions
                 collection.Add("access_token", response.AccessToken);
                 collection.Add("token_type", "Bearer");
                 collection.Add("expires_in", response.AccessTokenLifetime.ToString());
-            }
 
-            if (response.Scope.IsPresent())
-            {
-                collection.Add("scope", response.Scope);
+                if (response.Scope.IsPresent())
+                {
+                    collection.Add("scope", response.Scope);
+                }
             }
         }
 

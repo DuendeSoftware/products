@@ -80,7 +80,7 @@ public class TestBrowserClient : HttpClient
     /// <param name="expectedStatusCode">If specified, the system will verify that this reponse code was given</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>The specified api response</returns>
-    public async Task<BffHostResponse> CallBffHostApi(
+    internal async Task<BffHostResponse> CallBffHostApi(
         string url,
         HttpStatusCode? expectedStatusCode = null,
         CancellationToken ct = default)
@@ -107,7 +107,7 @@ public class TestBrowserClient : HttpClient
         }
     }
 
-    public async Task<BffHostResponse> CallBffHostApi(
+    internal async Task<BffHostResponse> CallBffHostApi(
         string url,
         HttpMethod method,
         HttpContent? content = null,
@@ -139,7 +139,7 @@ public class TestBrowserClient : HttpClient
         }
     }
 
-    public record BffHostResponse(HttpResponseMessage HttpResponse, ApiResponse ApiResponse)
+    internal record BffHostResponse(HttpResponseMessage HttpResponse, ApiResponse ApiResponse)
     {
         public static implicit operator HttpResponseMessage(BffHostResponse response) => response.HttpResponse;
         public static implicit operator ApiResponse(BffHostResponse response) => response.ApiResponse;

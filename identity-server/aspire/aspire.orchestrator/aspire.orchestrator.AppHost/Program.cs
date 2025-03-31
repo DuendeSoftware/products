@@ -32,7 +32,14 @@ if (HostIsEnabled(nameof(Projects.Host_Configuration)))
 }
 
 // These hosts require a database
-if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(Projects.Host_EntityFramework)))
+var dbHosts = new List<string>
+{
+    nameof(Projects.Host_AspNetIdentity),
+    nameof(Projects.Host_EntityFramework),
+    nameof(Projects.Host_EntityFramework_dotnet9)
+};
+
+if (dbHosts.Any(HostIsEnabled))
 {
     // Adds SQL Server to the builder (requires Docker).
     // Feel free to use your preferred docker management service.
@@ -64,6 +71,20 @@ if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)) || HostIsEnabled(nameof(
             .WaitFor(identityServerDb);
 
         var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework>(name: "is-host")
+            .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
+            .WithReference(identityServerDb, connectionName: "DefaultConnection")
+            .WaitForCompletion(idSrvMigration);
+
+        projectRegistry.Add("is-host", hostEntityFramework);
+    }
+
+    if (HostIsEnabled(nameof(Projects.Host_EntityFramework_dotnet9)))
+    {
+        var idSrvMigration = builder.AddProject<Projects.IdentityServerDb>(name: "identityserverdb-migrations")
+            .WithReference(identityServerDb, connectionName: "DefaultConnection")
+            .WaitFor(identityServerDb);
+
+        var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework_dotnet9>(name: "is-host")
             .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
             .WithReference(identityServerDb, connectionName: "DefaultConnection")
             .WaitForCompletion(idSrvMigration);

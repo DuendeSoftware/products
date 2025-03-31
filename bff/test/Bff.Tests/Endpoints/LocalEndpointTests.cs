@@ -2,10 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
-using System.Net.Http.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;

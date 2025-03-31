@@ -6,9 +6,6 @@ using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;
@@ -159,7 +156,7 @@ public class BffHost : GenericHost
                         context.Request.Path.Value ?? "/",
                         context.User.FindFirst("sub")?.Value,
                         context.User.FindFirst("client_id")?.Value,
-                        context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                        context.User.Claims.Select(x => new TestClaimRecord(x.Type, x.Value)).ToArray())
                     {
                         Body = body,
                         RequestHeaders = requestHeaders
@@ -212,7 +209,7 @@ public class BffHost : GenericHost
                         context.Request.Path.Value ?? "/",
                         context.User.FindFirst("sub")?.Value,
                         context.User.FindFirst("client_id")?.Value,
-                        context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                        context.User.Claims.Select(x => new TestClaimRecord(x.Type, x.Value)).ToArray())
                     {
                         Body = body,
                         RequestHeaders = requestHeaders
@@ -266,7 +263,7 @@ public class BffHost : GenericHost
                     context.Request.Path.Value ?? "/",
                     context.User.FindFirst("sub")?.Value,
                     context.User.FindFirst("client_id")?.Value,
-                    context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                    context.User.Claims.Select(x => new TestClaimRecord(x.Type, x.Value)).ToArray())
                 {
                     Body = body,
                     RequestHeaders = requestHeaders
@@ -316,7 +313,7 @@ public class BffHost : GenericHost
                         context.Request.Path.Value ?? "/",
                         sub,
                         context.User.FindFirst("client_id")?.Value,
-                        context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                        context.User.Claims.Select(x => new TestClaimRecord(x.Type, x.Value)).ToArray())
                     {
                         Body = body
                     };
@@ -363,7 +360,7 @@ public class BffHost : GenericHost
                         context.Request.Path.Value ?? "/",
                         sub,
                         context.User.FindFirst("client_id")?.Value,
-                        context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                        context.User.Claims.Select(x => new TestClaimRecord(x.Type, x.Value)).ToArray())
                     {
                         Body = body
                     };

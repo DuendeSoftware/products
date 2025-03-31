@@ -26,9 +26,6 @@
       "bff\\templates\\src\\BffBlazor\\BffBlazor\\BffBlazor.csproj",
       "bff\\templates\\src\\BffLocalApi\\BffLocalApi.csproj",
       "bff\\templates\\src\\BffRemoteApi\\BffRemoteApi.csproj",
-      "bff\\test\\Bff.Blazor.Client.UnitTests\\Bff.Blazor.Client.UnitTests.csproj",
-      "bff\\test\\Bff.Blazor.UnitTests\\Bff.Blazor.UnitTests.csproj",
-      "bff\\test\\Bff.EntityFramework.Tests\\Bff.EntityFramework.Tests.csproj",
       "bff\\test\\Bff.Tests\\Bff.Tests.csproj",
       "bff\\test\\Hosts.Tests\\Hosts.Tests.csproj"
     ]

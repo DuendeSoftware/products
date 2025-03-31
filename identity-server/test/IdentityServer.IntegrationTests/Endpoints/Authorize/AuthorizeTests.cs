@@ -260,11 +260,41 @@ public class AuthorizeTests
         authorization.IsError.ShouldBeFalse();
         authorization.IdentityToken.ShouldBeNull();
         authorization.AccessToken.ShouldBeNull();
+        authorization.Scope.ShouldBeNullOrEmpty();
         authorization.Code.ShouldNotBeNullOrEmpty();
-        authorization.Scope.ShouldBe("openid");
         authorization.State.ShouldBe("123_state");
         authorization.Values["session_state"].ShouldNotBeNullOrEmpty();
         authorization.Values["iss"].ShouldBe("https%3A%2F%2Fserver");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task implicit_success_response_should_have_all_expected_values()
+    {
+        _mockPipeline.Subject = new IdentityServerUser("bob").CreatePrincipal();
+        _mockPipeline.BrowserClient.StopRedirectingAfter = 2;
+
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client1",
+            responseType: "id_token token",
+            scope: "openid profile",
+            redirectUri: "https://client1/callback",
+            state: "123_state",
+            nonce: "123_nonce");
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
+
+        var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
+        authorization.IsError.ShouldBeFalse();
+        authorization.IdentityToken.ShouldNotBeNullOrEmpty();
+        authorization.AccessToken.ShouldNotBeNullOrEmpty();
+        authorization.TokenType.ShouldBe("Bearer");
+        authorization.ExpiresIn.ShouldBePositive();
+        authorization.Scope.ShouldBe("openid profile");
+        authorization.State.ShouldBe("123_state");
+        authorization.Values["session_state"].ShouldNotBeNullOrEmpty();
     }
 
     [Fact]

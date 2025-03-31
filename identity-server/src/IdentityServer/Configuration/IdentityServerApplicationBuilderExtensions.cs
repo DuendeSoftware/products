@@ -76,6 +76,9 @@ public static class IdentityServerApplicationBuilderExtensions
             var env = serviceProvider.GetRequiredService<IHostEnvironment>();
             IdentityServerLicenseValidator.Instance.Initialize(loggerFactory, options, env.IsDevelopment());
 
+            var licenseExpirationChecker = serviceProvider.GetRequiredService<LicenseExpirationChecker>();
+            licenseExpirationChecker.CheckExpiration();
+
             if (options.KeyManagement.Enabled)
             {
                 var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();

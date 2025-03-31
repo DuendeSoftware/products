@@ -19,6 +19,7 @@
   <ItemGroup>
 
     <!-- Database Projects -->
+    <ProjectReference Include="..\..\..\hosts\EntityFramework-dotnet9\Host.EntityFramework.dotnet9.csproj" />
     <ProjectReference Include="..\..\..\migrations\AspNetIdentityDb\AspNetIdentityDb.csproj" />
     <ProjectReference Include="..\..\..\migrations\IdentityServerDb\IdentityServerDb.csproj" />
 
