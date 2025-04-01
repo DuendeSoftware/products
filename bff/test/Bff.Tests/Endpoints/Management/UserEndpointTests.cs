@@ -3,6 +3,7 @@
 
 using System.Net;
 using System.Security.Claims;
+using Bff.Configuration;
 using Duende.Bff.Tests.TestHosts;
 using Xunit.Abstractions;
 

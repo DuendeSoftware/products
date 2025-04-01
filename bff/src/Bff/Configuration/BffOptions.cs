@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Bff.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 
@@ -140,19 +141,20 @@ public class BffOptions
     /// APIs with TokenType.User or TokenType.UserOrClient. Defaults to True. 
     /// </summary>
     public bool RemoveSessionAfterRefreshTokenExpiration { get; set; } = true;
-}
 
-/// <summary>
-/// Enum representing the style of response from the ~/bff/user endpoint when the user is anonymous.
-/// </summary>
-public enum AnonymousSessionResponse
-{
     /// <summary>
-    /// 401 response with empty body
+    /// Implementation that allows you to check if you want to disable the anti-forgery check for a given request.
+    /// Default implementation will disable anti forgery requests for websockets, because websocket requests can't
+    /// include http headers. 
     /// </summary>
-    Response401,
-    /// <summary>
-    /// 200 response with "null" as the body
-    /// </summary>
-    Response200
+    public DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; } = (c) =>
+    {
+        if (c.WebSockets.IsWebSocketRequest)
+        {
+            return true;
+        }
+
+        return false;
+    };
+
 }
