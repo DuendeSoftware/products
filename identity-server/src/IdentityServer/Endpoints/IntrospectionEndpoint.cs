@@ -155,7 +155,8 @@ internal class IntrospectionEndpoint : IEndpointHandler
 
         // render result
         LogSuccess(validationResult.IsActive, callerName);
-        return new IntrospectionResult(response);
+        return new IntrospectionResult(response, callerName,
+            string.Equals(context.Request.Headers.Accept, $"application/{IdentityServerConstants.TokenTypes.IntrospectionResponseToken}", StringComparison.OrdinalIgnoreCase));
     }
 
     private void LogSuccess(bool tokenActive, string callerName)

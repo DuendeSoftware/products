@@ -56,6 +56,7 @@ public static class IdentityServerConstants
         public const string IdentityToken = "id_token";
         public const string AccessToken = "access_token";
         public const string LogoutToken = "logout_token";
+        public const string IntrospectionResponseToken = "token-introspection+jwt";
     }
 
     public static class ClaimValueTypes
