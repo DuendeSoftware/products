@@ -3,6 +3,7 @@
 
 
 using System.Net;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
@@ -155,7 +156,8 @@ internal class IntrospectionEndpoint : IEndpointHandler
 
         // render result
         LogSuccess(validationResult.IsActive, callerName);
-        return new IntrospectionResult(response);
+        return new IntrospectionResult(response, callerName,
+            string.Equals(context.Request.Headers.Accept, $"application/{JwtClaimTypes.JwtTypes.IntrospectionJwtResponse}", StringComparison.OrdinalIgnoreCase));
     }
 
     private void LogSuccess(bool tokenActive, string callerName) => _logger.LogInformation("Success token introspection. Token active: {tokenActive}, for caller: {callerName}", tokenActive, callerName);
