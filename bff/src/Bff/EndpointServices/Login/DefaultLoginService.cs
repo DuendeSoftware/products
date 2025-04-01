@@ -69,7 +69,7 @@ public class DefaultLoginService : ILoginService
 
         var returnUrl = context.Request.Query[Constants.RequestParameters.ReturnUrl].FirstOrDefault();
 
-        var prompt = context.Request.Query["prompt"].FirstOrDefault();
+        var prompt = context.Request.Query[Constants.RequestParameters.Prompt].FirstOrDefault();
 
         var supportedPromptValues = await GetPromptValuesAsync();
         if (prompt != null && !supportedPromptValues.Contains(prompt))

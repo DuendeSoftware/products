@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authentication;
 
 namespace Duende.Bff;
@@ -15,10 +16,10 @@ public static class AuthenticationPropertiesExtensions
     /// </summary>
     public static bool IsSilentLogin(this AuthenticationProperties props)
     {
-        return props.Items.ContainsKey(Constants.BffFlags.SilentLogin);
+        return props.TryGetPrompt(out var prompt) && prompt == "none";
     }
 
-    public static bool TryGetPrompt(this AuthenticationProperties props, out string prompt)
+    public static bool TryGetPrompt(this AuthenticationProperties props, [NotNullWhen(true)] out string? prompt)
     {
         return props.Items.TryGetValue(Constants.BffFlags.Prompt, out prompt);
     }

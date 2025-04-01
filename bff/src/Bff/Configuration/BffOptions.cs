@@ -67,6 +67,7 @@ public class BffOptions
     /// <summary>
     /// Silent login endpoint
     /// </summary>
+    [Obsolete("Use Login?prompt=none")]
     public PathString SilentLoginPath => ManagementBasePath.Add(Constants.ManagementEndpoints.SilentLogin);
 
     /// <summary>

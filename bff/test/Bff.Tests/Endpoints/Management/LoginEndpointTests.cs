@@ -32,9 +32,18 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
     public async Task silent_login_should_challenge_and_redirect_to_root()
     {
         var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/silent-login?redirectUri=/"));
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location!.ToString().ShouldStartWith("/bff/login");
+        response.Headers.Location!.ToString().ShouldContain("redirectUri=/");
+        response.Headers.Location!.ToString().ShouldNotContain("error");
+
+        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
+
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
         response.Headers.Location!.ToString().ShouldNotContain("error");
+
 
         await IdentityServerHost.IssueSessionCookieAsync("alice");
         response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
@@ -63,7 +72,7 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
 
         response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/");
+        response.Headers.Location!.ToString().ShouldBe("/bff/silent-login-callback");
     }
 
     [Fact]

@@ -12,7 +12,9 @@ public class ManagementBasePathTests(ITestOutputHelper output) : BffIntegrationT
     [Theory]
     [InlineData(Constants.ManagementEndpoints.Login)]
     [InlineData(Constants.ManagementEndpoints.Logout)]
+#pragma warning disable CS0618 // Type or member is obsolete
     [InlineData(Constants.ManagementEndpoints.SilentLogin)]
+#pragma warning restore CS0618 // Type or member is obsolete
     [InlineData(Constants.ManagementEndpoints.SilentLoginCallback)]
     [InlineData(Constants.ManagementEndpoints.User)]
     public async Task custom_ManagementBasePath_should_affect_basepath(string path)

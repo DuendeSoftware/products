@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,6 +10,7 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling silent login requests
 /// </summary>
+[Obsolete("This endpoint will be removed in a future version. Use /login?prompt=create")]
 public class DefaultSilentLoginService : ISilentLoginService
 {
     /// <summary>
@@ -35,26 +35,15 @@ public class DefaultSilentLoginService : ISilentLoginService
     }
 
     /// <inheritdoc />
-    public virtual async Task ProcessRequestAsync(HttpContext context)
+    public virtual Task ProcessRequestAsync(HttpContext context)
     {
-        Logger.LogDebug("Processing silent login request");
-
-        context.CheckForBffMiddleware(Options);
-
-        var pathBase = context.Request.PathBase;
-        var redirectPath = pathBase + Options.SilentLoginCallbackPath;
-
-        var props = new AuthenticationProperties
+        var query = context.Request.QueryString;
+        if (!string.IsNullOrEmpty(query.Value))
         {
-            RedirectUri = redirectPath,
-            Items =
-            {
-                { Constants.BffFlags.SilentLogin, "true" }
-            },
-        };
+            query = query.Add(Constants.RequestParameters.Prompt, "none");
+        }
 
-        Logger.LogDebug("Silent login endpoint triggering Challenge with returnUrl {redirectUri}", redirectPath);
-
-        await context.ChallengeAsync(props);
+        context.Response.Redirect($"{Options.LoginPath}?{query}");
+        return Task.CompletedTask;
     }
 }

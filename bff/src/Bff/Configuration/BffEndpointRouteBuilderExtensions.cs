@@ -32,7 +32,9 @@ public static class BffEndpointRouteBuilderExtensions
     public static void MapBffManagementEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapBffManagementLoginEndpoint();
+#pragma warning disable CS0618 // Type or member is obsolete
         endpoints.MapBffManagementSilentLoginEndpoints();
+#pragma warning restore CS0618 // Type or member is obsolete
         endpoints.MapBffManagementLogoutEndpoint();
         endpoints.MapBffManagementUserEndpoint();
         endpoints.MapBffManagementBackchannelEndpoint();
@@ -58,15 +60,19 @@ public static class BffEndpointRouteBuilderExtensions
     /// Adds the silent login BFF management endpoints
     /// </summary>
     /// <param name="endpoints"></param>
+    [Obsolete("Silent login is now handled via login=create")]
     public static void MapBffManagementSilentLoginEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
+#pragma warning disable CS0618 // Type or member is obsolete
         endpoints.MapGet(options.SilentLoginPath.Value!, ProcessWith<ISilentLoginService>)
             .WithMetadata(new BffUIEndpointAttribute())
             .AllowAnonymous();
+#pragma warning restore CS0618 // Type or member is obsolete
+
         endpoints.MapGet(options.SilentLoginCallbackPath.Value!, ProcessWith<ISilentLoginCallbackService>)
             .WithMetadata(new BffUIEndpointAttribute())
             .AllowAnonymous();
