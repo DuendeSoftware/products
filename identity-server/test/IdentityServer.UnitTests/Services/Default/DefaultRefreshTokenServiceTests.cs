@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
@@ -46,7 +45,7 @@ public class DefaultRefreshTokenServiceTests
         var client = new Client();
         var accessToken = new Token();
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = accessToken, Client = client });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = accessToken, Client = client, AuthorizedScopes = [] });
 
         (await _store.GetRefreshTokenAsync(handle)).ShouldNotBeNull();
     }
@@ -62,7 +61,7 @@ public class DefaultRefreshTokenServiceTests
             AbsoluteRefreshTokenLifetime = 10
         };
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client, AuthorizedScopes = [] });
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
@@ -82,7 +81,7 @@ public class DefaultRefreshTokenServiceTests
             AbsoluteRefreshTokenLifetime = 10
         };
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client, AuthorizedScopes = [] });
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
@@ -101,14 +100,13 @@ public class DefaultRefreshTokenServiceTests
             SlidingRefreshTokenLifetime = 10
         };
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client, AuthorizedScopes = [] });
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
         refreshToken.ShouldNotBeNull();
         refreshToken.Lifetime.ShouldBe(client.SlidingRefreshTokenLifetime);
     }
-
 
     [Fact]
     public async Task UpdateRefreshToken_one_time_use_should_create_new_token()

@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Extensions;
 using Microsoft.Extensions.Logging;
 
@@ -10,28 +9,26 @@ namespace Duende.IdentityServer.Validation;
 /// <summary>
 /// Default implementation of IScopeParser.
 /// </summary>
-public class DefaultScopeParser : IScopeParser
+/// <remarks>
+/// Ctor.
+/// </remarks>
+/// <param name="logger"></param>
+public class DefaultScopeParser(ILogger<DefaultScopeParser> logger) : IScopeParser
 {
-    private readonly ILogger<DefaultScopeParser> _logger;
-
-    /// <summary>
-    /// Ctor.
-    /// </summary>
-    /// <param name="logger"></param>
-    public DefaultScopeParser(ILogger<DefaultScopeParser> logger)
-    {
-        _logger = logger;
-    }
-
     /// <inheritdoc/>
     public ParsedScopesResult ParseScopeValues(IEnumerable<string> scopeValues)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultScopeParser.ParseScopeValues");
         activity?.SetTag(Tracing.Properties.Scope, scopeValues.ToSpaceSeparatedString());
 
-        if (scopeValues == null) throw new ArgumentNullException(nameof(scopeValues));
-
         var result = new ParsedScopesResult();
+
+        if (scopeValues is null)
+        {
+            logger.LogError("A collection of scopes cannot be null.");
+            result.Errors.Add(new ParsedScopeValidationError("null", "A collection of scopes cannot be null."));
+            return result;
+        }
 
         foreach (var scopeValue in scopeValues)
         {
@@ -52,7 +49,7 @@ public class DefaultScopeParser : IScopeParser
             }
             else
             {
-                _logger.LogDebug("Scope parsing ignoring scope {scope}", scopeValue.SanitizeLogParameter());
+                logger.LogDebug("Scope parsing ignoring scope {scope}", scopeValue.SanitizeLogParameter());
             }
         }
 
