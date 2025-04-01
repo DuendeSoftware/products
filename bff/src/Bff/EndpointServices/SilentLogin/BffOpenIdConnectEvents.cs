@@ -44,6 +44,11 @@ public class BffOpenIdConnectEvents : OpenIdConnectEvents
             Logger.LogDebug("Setting OIDC ProtocolMessage.Prompt to 'none' for BFF silent login");
             context.ProtocolMessage.Prompt = "none";
         }
+        else if (context.Properties.TryGetPrompt(out var prompt))
+        {
+            Logger.LogDebug("Setting OIDC ProtocolMessage.Prompt to 'none' for BFF silent login");
+            context.ProtocolMessage.Prompt = prompt;
+        }
 
         // we've not "handled" the request, so let other code process
         return Task.FromResult(false);
@@ -76,6 +81,21 @@ public class BffOpenIdConnectEvents : OpenIdConnectEvents
                 context.Response.Redirect(context.Properties.RedirectUri);
                 return Task.FromResult(true);
             }
+        }
+        else if (context.Properties?.TryGetPrompt(out var prompt) == true &&
+                 context.Properties?.RedirectUri != null)
+        {
+            context.HttpContext.Items[Constants.BffFlags.SilentLogin] = context.Properties.RedirectUri;
+
+            if (context.ProtocolMessage.Error != null)
+            {
+                Logger.LogDebug("Handling error response from OIDC provider for BFF silent login.");
+
+                context.HandleResponse();
+                context.Response.Redirect(context.Properties.RedirectUri);
+                return Task.FromResult(true);
+            }
+
         }
 
         return Task.FromResult(false);

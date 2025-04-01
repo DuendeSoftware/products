@@ -1,5 +1,6 @@
 ﻿<ProjectConfiguration>
   <Settings>
+    <EnableRDI>True</EnableRDI>
     <HiddenComponentWarnings>
       <Value>AspNetTestHostCompatibility</Value>
     </HiddenComponentWarnings>

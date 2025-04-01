@@ -107,6 +107,11 @@ public static class Constants
         /// Used to pass a return URL to login/logout
         /// </summary>
         public const string ReturnUrl = "returnUrl";
+
+        /// <summary>
+        /// Used to pass a prompt value to login
+        /// </summary>
+        public const string Prompt = "prompt";
     }
 
 
@@ -119,5 +124,6 @@ public static class Constants
         /// Used to indicate the OIDC request is a silent login
         /// </summary>
         public const string SilentLogin = "bff-silent-login";
+        public const string Prompt = "bff-prompt";
     }
 }

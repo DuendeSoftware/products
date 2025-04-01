@@ -17,4 +17,9 @@ public static class AuthenticationPropertiesExtensions
     {
         return props.Items.ContainsKey(Constants.BffFlags.SilentLogin);
     }
+
+    public static bool TryGetPrompt(this AuthenticationProperties props, out string prompt)
+    {
+        return props.Items.TryGetValue(Constants.BffFlags.Prompt, out prompt);
+    }
 }
