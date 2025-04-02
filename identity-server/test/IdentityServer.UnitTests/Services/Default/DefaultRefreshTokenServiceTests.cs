@@ -45,7 +45,7 @@ public class DefaultRefreshTokenServiceTests
         var client = new Client();
         var accessToken = new Token();
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = accessToken, Client = client, AuthorizedScopes = [] });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = accessToken, Client = client });
 
         (await _store.GetRefreshTokenAsync(handle)).ShouldNotBeNull();
     }
@@ -61,7 +61,7 @@ public class DefaultRefreshTokenServiceTests
             AbsoluteRefreshTokenLifetime = 10
         };
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client, AuthorizedScopes = [] });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client });
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
@@ -81,7 +81,7 @@ public class DefaultRefreshTokenServiceTests
             AbsoluteRefreshTokenLifetime = 10
         };
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client, AuthorizedScopes = [] });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client });
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
@@ -100,7 +100,7 @@ public class DefaultRefreshTokenServiceTests
             SlidingRefreshTokenLifetime = 10
         };
 
-        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client, AuthorizedScopes = [] });
+        var handle = await _subject.CreateRefreshTokenAsync(new RefreshTokenCreationRequest { Subject = _user, AccessToken = new Token(), Client = client });
 
         var refreshToken = (await _store.GetRefreshTokenAsync(handle));
 
