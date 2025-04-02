@@ -34,13 +34,6 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
         var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/silent-login?redirectUri=/"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith("/bff/login");
-        response.Headers.Location!.ToString().ShouldContain("redirectUri=/");
-        response.Headers.Location!.ToString().ShouldNotContain("error");
-
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
         response.Headers.Location!.ToString().ShouldNotContain("error");
 
@@ -57,7 +50,7 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
     }
 
     [Fact]
-    public async Task can_also_issue_silent_login_with_prompt()
+    public async Task can_issue_silent_login_with_prompt_none()
     {
         var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=none"));
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -78,19 +71,21 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
     [Fact]
     public async Task login_with_unsupported_prompt_is_rejected()
     {
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=select")); // select is not supported now. 
+        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=not_supported_prompt")); 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         var problem = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>();
         problem!.Errors.ShouldContainKey("prompt");
-        problem!.Errors["prompt"].ShouldContain("prompt 'select' is not supported");
-
-
+        problem!.Errors["prompt"].ShouldContain("prompt 'not_supported_prompt' is not supported");
     }
 
     [Fact]
-    public async Task can_also_issue_login_with_prompt_select()
+    public async Task can_use_prompt_supported_by_IdentityServer()
     {
+        // Prompt=create is enabled in identity server configuration:
+        //https://docs.duendesoftware.com/identityserver/v7/reference/options/#userinteraction
+        // by setting CreateAccountUrl 
+
         var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=create"));
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
@@ -101,12 +96,7 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/account/create"));
         response.Headers.Location!.ToString().ShouldNotContain("error");
-
-
     }
-
-
-
 
     [Fact]
     public async Task login_endpoint_should_challenge_and_redirect_to_root()

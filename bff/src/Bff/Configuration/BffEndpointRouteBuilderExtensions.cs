@@ -60,7 +60,7 @@ public static class BffEndpointRouteBuilderExtensions
     /// Adds the silent login BFF management endpoints
     /// </summary>
     /// <param name="endpoints"></param>
-    [Obsolete("Silent login is now handled via login=create")]
+    [Obsolete("The silent login endpoint will be removed in a future version. Silent login is now handled by passing the prompt=none parameter to the login endpoint.")]
     public static void MapBffManagementSilentLoginEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.CheckLicense();
