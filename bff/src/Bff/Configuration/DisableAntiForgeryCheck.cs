@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 namespace Bff.Configuration;
 
 /// <summary>
-/// Delegate that defines if the default anti forgery check should be disabled for the current request
+/// Delegate that determines if the anti forgery check should be disabled for a request.
 /// </summary>
 /// <param name="context"></param>
 /// <returns></returns>
