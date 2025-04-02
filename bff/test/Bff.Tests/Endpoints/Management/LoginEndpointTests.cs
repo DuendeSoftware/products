@@ -71,7 +71,7 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
     [Fact]
     public async Task login_with_unsupported_prompt_is_rejected()
     {
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=not_supported_prompt")); 
+        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=not_supported_prompt"));
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         var problem = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>();
