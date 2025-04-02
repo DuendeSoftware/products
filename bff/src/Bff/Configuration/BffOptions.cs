@@ -143,8 +143,8 @@ public class BffOptions
     public bool RemoveSessionAfterRefreshTokenExpiration { get; set; } = true;
 
     /// <summary>
-    /// Implementation that allows you to check if you want to disable the anti-forgery check for a given request.
-    /// Default implementation will disable anti forgery requests for websockets, because websocket requests can't
+    /// A delegate that determines if the anti-forgery check should be disabled for a given request.
+    /// The default is to disable anti forgery checks for websockets, because websocket requests can't
     /// include http headers. 
     /// </summary>
     public DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; } = (c) =>
