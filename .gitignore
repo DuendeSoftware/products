@@ -222,3 +222,6 @@ nCrunchTemp_*
 playwright-traces
 
 artifacts
+
+#exclude for verify.tests
+*.received.txt
