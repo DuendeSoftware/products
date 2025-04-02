@@ -9,9 +9,6 @@ namespace Duende.IdentityServer.Validation;
 /// <summary>
 /// Default implementation of IScopeParser.
 /// </summary>
-/// <remarks>
-/// Ctor.
-/// </remarks>
 /// <param name="logger"></param>
 public class DefaultScopeParser(ILogger<DefaultScopeParser> logger) : IScopeParser
 {
