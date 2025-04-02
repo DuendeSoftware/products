@@ -3,10 +3,10 @@
 
 using System.Text;
 using System.Text.Json;
-using Bff.Configuration;
 using Duende.Bff.Logging;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

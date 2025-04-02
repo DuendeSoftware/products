@@ -3,7 +3,7 @@
 
 using Microsoft.AspNetCore.Http;
 
-namespace Bff.Configuration;
+namespace Duende.Bff.Configuration;
 
 /// <summary>
 /// Delegate that determines if the anti forgery check should be disabled for a request.
