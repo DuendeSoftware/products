@@ -137,6 +137,8 @@ public class UserSessionStoreTests
     {
         await _subject.UpdateUserSessionAsync("key123", new UserSessionUpdate
         {
+            SessionId = "sid2",
+            SubjectId = "sub2",
             Ticket = "ticket2",
             Renewed = new DateTime(2024, 1, 3, 5, 7, 9, DateTimeKind.Utc),
             Expires = new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc)

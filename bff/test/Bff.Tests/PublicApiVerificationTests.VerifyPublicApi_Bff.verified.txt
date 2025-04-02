@@ -372,19 +372,29 @@
     }
     public class UserSession : Duende.Bff.UserSessionUpdate
     {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public UserSession() { }
         public string Key { get; set; }
         public Duende.Bff.UserSession Clone() { }
         public void CopyTo(Duende.Bff.UserSession other) { }
     }
+    [System.Runtime.CompilerServices.RequiredMember]
     public class UserSessionUpdate
     {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public UserSessionUpdate() { }
         public System.DateTime Created { get; set; }
         public System.DateTime? Expires { get; set; }
         public System.DateTime Renewed { get; set; }
-        public string? SessionId { get; set; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public string SessionId { get; set; }
+        [System.Runtime.CompilerServices.RequiredMember]
         public string SubjectId { get; set; }
+        [System.Runtime.CompilerServices.RequiredMember]
         public string Ticket { get; set; }
         public void CopyTo(Duende.Bff.UserSessionUpdate other) { }
     }

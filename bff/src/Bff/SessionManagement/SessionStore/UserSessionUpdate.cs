@@ -11,12 +11,12 @@ public class UserSessionUpdate
     /// <summary>
     /// The subject ID
     /// </summary>
-    public string SubjectId { get; set; } = default!;
+    public required string SubjectId { get; set; }
 
     /// <summary>
     /// The session ID
     /// </summary>
-    public string? SessionId { get; set; }
+    public required string SessionId { get; set; }
 
     /// <summary>
     /// The creation time
@@ -36,7 +36,7 @@ public class UserSessionUpdate
     /// <summary>
     /// The serialized ticket
     /// </summary>
-    public string Ticket { get; set; } = default!;
+    public required string Ticket { get; set; }
 
     /// <summary>
     /// Copies this instance into another

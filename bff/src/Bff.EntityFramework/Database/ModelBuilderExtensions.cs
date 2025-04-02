@@ -42,6 +42,7 @@ public static class ModelBuilderExtensions
             entity.Property(x => x.Key).IsRequired().HasMaxLength(200);
             entity.Property(x => x.SubjectId).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Ticket).IsRequired();
+            entity.Property(x => x.SessionId).IsRequired(false); // Not set to 'required' to prevent database migration 
 
             entity.HasIndex(x => new { x.ApplicationName, x.Key }).IsUnique();
             entity.HasIndex(x => new { x.ApplicationName, x.SubjectId, x.SessionId }).IsUnique();

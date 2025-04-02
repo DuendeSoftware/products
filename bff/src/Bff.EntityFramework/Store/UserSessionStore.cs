@@ -39,7 +39,10 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
 
         var item = new UserSessionEntity()
         {
-            ApplicationName = _applicationDiscriminator
+            ApplicationName = _applicationDiscriminator,
+            SessionId = session.SessionId,
+            SubjectId = session.SubjectId,
+            Ticket = session.Ticket
         };
         session.CopyTo(item);
         _sessionDbContext.UserSessions.Add(item);
@@ -164,7 +167,12 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
         {
             _logger.LogDebug("Getting user session record from store for sub {sub} sid {sid}", item.SubjectId, item.SessionId);
 
-            result = new UserSession();
+            result = new UserSession()
+            {
+                SessionId = item.SessionId,
+                SubjectId = item.SubjectId,
+                Ticket = item.Ticket,
+            };
             item.CopyTo(result);
         }
         else
@@ -202,7 +210,12 @@ public class UserSessionStore : IUserSessionStore, IUserSessionStoreCleanup
 
         var results = items.Select(x =>
         {
-            var item = new UserSession();
+            var item = new UserSession
+            {
+                SessionId = x.SessionId,
+                SubjectId = x.SubjectId,
+                Ticket = x.Ticket,
+            };
             x.CopyTo(item);
             return item;
         }).ToArray();

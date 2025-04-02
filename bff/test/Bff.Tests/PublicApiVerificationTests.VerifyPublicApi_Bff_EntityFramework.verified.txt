@@ -37,6 +37,9 @@
     }
     public class UserSessionEntity : Duende.Bff.UserSession
     {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public UserSessionEntity() { }
         public string ApplicationName { get; set; }
         public long Id { get; set; }

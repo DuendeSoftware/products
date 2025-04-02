@@ -19,7 +19,12 @@ public class UserSession : UserSessionUpdate
     /// <returns></returns>
     public UserSession Clone()
     {
-        var other = new UserSession();
+        var other = new UserSession()
+        {
+            SessionId = SessionId,
+            SubjectId = SubjectId,
+            Ticket = Ticket
+        };
         CopyTo(other);
         return other;
     }
