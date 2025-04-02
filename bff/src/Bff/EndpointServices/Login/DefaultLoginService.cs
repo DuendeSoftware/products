@@ -22,11 +22,11 @@ public class DefaultLoginService : ILoginService
     /// <summary>
     /// The OIDC options monitor
     /// </summary>
-    protected readonly IOptionsMonitor<OpenIdConnectOptions> OptionsMonitor;
+    protected readonly IOptionsMonitor<OpenIdConnectOptions> OpenIdConnectOptionsMonitor;
     /// <summary>
     /// The BFF options
     /// </summary>
-    protected readonly BffOptions Options;
+    protected readonly BffOptions BffOptions;
 
     /// <summary>
     /// The return URL validator
@@ -41,21 +41,21 @@ public class DefaultLoginService : ILoginService
     /// <summary>
     /// ctor
     /// </summary>
-    /// <param name="optionsMonitor"></param>
-    /// <param name="options"></param>
+    /// <param name="openIdConnectOptionsMonitor"></param>
+    /// <param name="bffOptions"></param>
     /// <param name="returnUrlValidator"></param>
     /// <param name="logger"></param>
     /// <param name="authenticationSchemeProvider"></param>
     public DefaultLoginService(
         IAuthenticationSchemeProvider authenticationSchemeProvider,
-        IOptionsMonitor<OpenIdConnectOptions> optionsMonitor,
-        IOptions<BffOptions> options,
+        IOptionsMonitor<OpenIdConnectOptions> openIdConnectOptionsMonitor,
+        IOptions<BffOptions> bffOptions,
         IReturnUrlValidator returnUrlValidator,
         ILogger<DefaultLoginService> logger)
     {
-        Options = options.Value;
+        BffOptions = bffOptions.Value;
         AuthenticationSchemeProvider = authenticationSchemeProvider;
-        OptionsMonitor = optionsMonitor;
+        OpenIdConnectOptionsMonitor = openIdConnectOptionsMonitor;
         ReturnUrlValidator = returnUrlValidator;
         Logger = logger;
     }
@@ -65,7 +65,7 @@ public class DefaultLoginService : ILoginService
     {
         Logger.LogDebug("Processing login request");
 
-        context.CheckForBffMiddleware(Options);
+        context.CheckForBffMiddleware(BffOptions);
 
         var returnUrl = context.Request.Query[Constants.RequestParameters.ReturnUrl].FirstOrDefault();
 
@@ -122,7 +122,7 @@ public class DefaultLoginService : ILoginService
             throw new Exception("Failed to obtain default challenge scheme");
         }
 
-        var options = OptionsMonitor.Get(scheme.Name);
+        var options = OpenIdConnectOptionsMonitor.Get(scheme.Name);
         if (options == null)
         {
             throw new Exception("Failed to obtain OIDC options for default challenge scheme");
