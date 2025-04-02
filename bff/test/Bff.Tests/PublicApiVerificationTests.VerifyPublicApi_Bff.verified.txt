@@ -27,11 +27,6 @@
         public AccessTokenRetrievalError(string error) { }
         public string Error { get; set; }
     }
-    public enum AnonymousSessionResponse
-    {
-        Response401 = 0,
-        Response200 = 1,
-    }
     public static class AuthenticationPropertiesExtensions
     {
         public static bool IsSilentLogin(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props) { }
@@ -86,7 +81,7 @@
     public class BffOptions
     {
         public BffOptions() { }
-        public Duende.Bff.AnonymousSessionResponse AnonymousSessionResponse { get; set; }
+        public Microsoft.AspNetCore.Builder.AnonymousSessionResponse AnonymousSessionResponse { get; set; }
         public string AntiForgeryHeaderName { get; set; }
         public string AntiForgeryHeaderValue { get; set; }
         public Microsoft.AspNetCore.Http.PathString BackChannelLogoutPath { get; }
@@ -94,6 +89,7 @@
         public string? DPoPJsonWebKey { get; set; }
         public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; set; }
         public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
+        public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
         public bool EnableSessionCleanup { get; set; }
         public bool EnforceBffMiddleware { get; set; }
         public string? LicenseKey { get; set; }
@@ -403,6 +399,10 @@
         public string? SubjectId { get; init; }
         public void Validate() { }
     }
+}
+namespace Duende.Bff.Configuration
+{
+    public delegate bool DisableAntiForgeryCheck(Microsoft.AspNetCore.Http.HttpContext context);
 }
 namespace Duende.Bff.Endpoints
 {

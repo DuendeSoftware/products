@@ -145,17 +145,8 @@ public class BffOptions
 
     /// <summary>
     /// A delegate that determines if the anti-forgery check should be disabled for a given request.
-    /// The default is to disable anti forgery checks for websockets, because websocket requests can't
-    /// include http headers. 
+    /// The default is not to disable anti-forgery checks.
     /// </summary>
-    public DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; } = (c) =>
-    {
-        if (c.WebSockets.IsWebSocketRequest)
-        {
-            return true;
-        }
-
-        return false;
-    };
+    public DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; } = (c) => false;
 
 }
