@@ -3,9 +3,9 @@
 
 using System.Net;
 using System.Text.Json;
-using Bff.Tests.Blazor.Components;
 using Duende.Bff;
 using Duende.Bff.Blazor;
+using Duende.Bff.Tests.Blazor.Components;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
 using Duende.Bff.Yarp;
