@@ -11,7 +11,6 @@ namespace Duende.Bff;
 /// <summary>
 /// BFF specific OpenIdConnectEvents class.
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class BffOpenIdConnectEvents(IOptions<BffOptions> options, ILogger<BffOpenIdConnectEvents> logger) : OpenIdConnectEvents
 {
     /// <summary>

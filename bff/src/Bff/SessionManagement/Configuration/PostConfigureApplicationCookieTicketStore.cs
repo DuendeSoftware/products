@@ -12,7 +12,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Cookie configuration for the user session plumbing
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class PostConfigureApplicationCookieTicketStore(
     IHttpContextAccessor httpContextAccessor,
     IOptions<AuthenticationOptions> options)

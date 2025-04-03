@@ -15,7 +15,6 @@ namespace Duende.Bff.Blazor;
 /// </summary>
 /// <param name="httpContextAccessor"></param>
 /// <param name="options"></param>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class AddServerManagementClaimsTransform(IHttpContextAccessor httpContextAccessor, IOptionsMonitor<BffOptions> options) : IClaimsTransformation
 {
     private HttpContext _httpContext => httpContextAccessor.HttpContext ?? throw new InvalidOperationException("not running in http context");

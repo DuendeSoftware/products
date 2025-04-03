@@ -19,7 +19,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Default back-channel logout notification service implementation
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class DefaultBackchannelLogoutService(
     IAuthenticationSchemeProvider authenticationSchemeProvider,
     IOptionsMonitor<OpenIdConnectOptions> optionsMonitor,

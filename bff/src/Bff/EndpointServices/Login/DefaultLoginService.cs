@@ -13,7 +13,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling login requests
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class DefaultLoginService(
     IAuthenticationSchemeProvider authenticationSchemeProvider,
     IOptionsMonitor<OpenIdConnectOptions> openIdConnectOptionsMonitor,

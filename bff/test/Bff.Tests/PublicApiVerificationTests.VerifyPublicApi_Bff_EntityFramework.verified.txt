@@ -41,7 +41,6 @@
         public string? ApplicationName { get; set; }
         public long Id { get; set; }
     }
-    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class UserSessionStore : Duende.Bff.IUserSessionStore, Duende.Bff.IUserSessionStoreCleanup
     {
         public UserSessionStore(Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.DataProtection.DataProtectionOptions> options, Duende.Bff.EntityFramework.ISessionDbContext sessionDbContext, Microsoft.Extensions.Logging.ILogger<Duende.Bff.EntityFramework.UserSessionStore> logger) { }

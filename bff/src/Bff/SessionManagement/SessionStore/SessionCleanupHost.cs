@@ -12,7 +12,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Helper to cleanup expired sessions.
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class SessionCleanupHost(
     IServiceProvider serviceProvider,
     IOptions<BffOptions> options,

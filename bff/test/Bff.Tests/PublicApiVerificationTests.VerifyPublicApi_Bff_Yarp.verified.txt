@@ -1,12 +1,10 @@
 ﻿namespace Duende.Bff.Yarp
 {
-    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class AccessTokenRequestTransform : Yarp.ReverseProxy.Transforms.RequestTransform
     {
         public AccessTokenRequestTransform(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Duende.AccessTokenManagement.IDPoPProofService proofService, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Yarp.AccessTokenRequestTransform> logger) { }
         public override System.Threading.Tasks.ValueTask ApplyAsync(Yarp.ReverseProxy.Transforms.RequestTransformContext context) { }
     }
-    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class AccessTokenTransformProvider : Yarp.ReverseProxy.Transforms.Builder.ITransformProvider
     {
         public AccessTokenTransformProvider(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Yarp.AccessTokenTransformProvider> logger, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory, Duende.AccessTokenManagement.IDPoPProofService dPoPProofService) { }

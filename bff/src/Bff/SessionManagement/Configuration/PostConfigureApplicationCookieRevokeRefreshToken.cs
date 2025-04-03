@@ -13,7 +13,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Cookie configuration to revoke refresh token on logout.
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class PostConfigureApplicationCookieRevokeRefreshToken(
     IOptions<BffOptions> bffOptions,
     IOptions<AuthenticationOptions> authOptions,

@@ -12,7 +12,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Cookie configuration to suppress sliding the cookie on the ~/bff/user endpoint if requested.
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class PostConfigureApplicationValidatePrincipal(
     IOptions<BffOptions> bffOptions,
     IOptions<AuthenticationOptions> authOptions,

@@ -32,14 +32,12 @@ public static class ServiceCollectionExtensions
             .AddSingleton<AuthenticationStateProvider, BffClientAuthenticationStateProvider>()
             .AddSingleton(TimeProvider.System)
             // HttpMessageHandlers must be registered as transient
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddTransient<AntiforgeryHandler>()
             .AddHttpClient(BffClientAuthenticationStateProvider.HttpClientName, (sp, client) =>
             {
                 var baseAddress = GetStateProviderBaseAddress(sp);
                 client.BaseAddress = new Uri(baseAddress);
             }).AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
 
         return services;
     }
@@ -176,9 +174,7 @@ public static class ServiceCollectionExtensions
         Action<HttpClient> configureClient)
     {
         return services.AddHttpClient(clientName, SetLocalApiBaseAddress(configureClient))
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>
@@ -197,9 +193,7 @@ public static class ServiceCollectionExtensions
         Action<IServiceProvider, HttpClient>? configureClient = null)
     {
         return services.AddHttpClient(clientName, SetLocalApiBaseAddress(configureClient))
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>
@@ -215,9 +209,7 @@ public static class ServiceCollectionExtensions
         where T : class
     {
         return services.AddHttpClient<T>(SetLocalApiBaseAddress(configureClient))
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>
@@ -236,9 +228,7 @@ public static class ServiceCollectionExtensions
         Action<HttpClient> configureClient)
     {
         return services.AddHttpClient(clientName, SetRemoteApiBaseAddress(configureClient))
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>
@@ -258,9 +248,7 @@ public static class ServiceCollectionExtensions
         Action<IServiceProvider, HttpClient>? configureClient = null)
     {
         return services.AddHttpClient(clientName, SetRemoteApiBaseAddress(configureClient))
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>
@@ -275,9 +263,7 @@ public static class ServiceCollectionExtensions
         where T : class
     {
         return services.AddHttpClient<T>(SetRemoteApiBaseAddress(configureClient))
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>
@@ -293,8 +279,6 @@ public static class ServiceCollectionExtensions
         where T : class
     {
         return services.AddHttpClient<T>(SetRemoteApiBaseAddress(configureClient))
-#pragma warning disable CS0618 // Type or member is obsolete
             .AddHttpMessageHandler<AntiforgeryHandler>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

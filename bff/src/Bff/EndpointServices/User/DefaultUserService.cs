@@ -17,7 +17,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling user requests
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class DefaultUserService(IOptions<BffOptions> options, ILoggerFactory loggerFactory) : IUserService
 {
     /// <summary>

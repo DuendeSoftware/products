@@ -15,7 +15,6 @@ namespace Duende.Bff;
 /// <summary>
 ///  Extension methods for AuthenticationTicket
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public static class AuthenticationTicketExtensions
 {
     private static readonly JsonSerializerOptions JsonOptions = new()

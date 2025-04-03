@@ -123,10 +123,4 @@ public static class Constants
     {
         public const string Prompt = "bff-prompt";
     }
-
-    internal class ObsoleteMessages
-    {
-        public const string ImplementationWillBeMadeInternal =
-            "The implementation for this class will be made internal in a future release.";
-    }
 }

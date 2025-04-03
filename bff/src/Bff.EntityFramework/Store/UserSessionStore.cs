@@ -12,7 +12,6 @@ namespace Duende.Bff.EntityFramework;
 /// <summary>
 /// Entity framework core implementation of IUserSessionStore
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionDbContext sessionDbContext, ILogger<UserSessionStore> logger) : IUserSessionStore, IUserSessionStoreCleanup
 {
     private readonly string? _applicationDiscriminator = options.Value.ApplicationDiscriminator;

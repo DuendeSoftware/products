@@ -12,7 +12,6 @@ namespace Duende.Bff;
 /// <summary>
 /// IUserSession-backed ticket store
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class ServerSideTicketStore(
     IUserSessionStore store,
     IDataProtectionProvider dataProtectionProvider,

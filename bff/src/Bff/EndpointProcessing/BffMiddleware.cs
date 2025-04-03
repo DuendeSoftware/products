@@ -13,7 +13,6 @@ namespace Duende.Bff.Endpoints;
 /// Middleware to provide anti-forgery protection via a static header and 302 to 401 conversion
 /// Must run *before* the authorization middleware
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class BffMiddleware(
     RequestDelegate next,
     IOptions<BffOptions> options,

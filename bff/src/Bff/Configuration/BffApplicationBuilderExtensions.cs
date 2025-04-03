@@ -17,8 +17,6 @@ public static class BffApplicationBuilderExtensions
     /// <returns></returns>
     public static IApplicationBuilder UseBff(this IApplicationBuilder app)
     {
-#pragma warning disable CS0618 // Type or member is obsolete
         return app.UseMiddleware<BffMiddleware>();
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

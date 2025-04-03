@@ -24,13 +24,11 @@ public static class YarpTransformExtensions
     public static TransformBuilderContext AddBffAccessToken(this TransformBuilderContext context, PathString localPath)
     {
         var proofService = context.Services.GetRequiredService<IDPoPProofService>();
-#pragma warning disable CS0618 // Type or member is obsolete
 
         var logger = context.Services.GetRequiredService<ILogger<AccessTokenRequestTransform>>();
         var options = context.Services.GetRequiredService<IOptions<BffOptions>>();
         context.RequestTransforms.Add(
             new AccessTokenRequestTransform(
-#pragma warning restore CS0618 // Type or member is obsolete
                 options,
                 proofService,
                 logger

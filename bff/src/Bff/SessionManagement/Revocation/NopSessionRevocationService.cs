@@ -9,7 +9,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Nop implementation of the user session store
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class NopSessionRevocationService(ILogger<NopSessionRevocationService> logger) : ISessionRevocationService
 {
     /// <inheritdoc />

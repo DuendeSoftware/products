@@ -20,7 +20,6 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Adds an access token to outgoing requests
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class AccessTokenRequestTransform(
     IOptions<BffOptions> options,
     IDPoPProofService proofService,

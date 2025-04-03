@@ -14,7 +14,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling silent login callback requests
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class DefaultSilentLoginCallbackService(IOptions<BffOptions> options, ILogger<DefaultSilentLoginCallbackService> logger) : ISilentLoginCallbackService
 {
     /// <summary>

@@ -13,7 +13,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling logout requests
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class DefaultLogoutService(IOptions<BffOptions> options,
     IAuthenticationSchemeProvider authenticationAuthenticationSchemeProviderProvider,
     IReturnUrlValidator returnUrlValidator,

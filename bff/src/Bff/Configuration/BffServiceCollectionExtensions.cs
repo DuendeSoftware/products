@@ -38,12 +38,13 @@ public static class BffServiceCollectionExtensions
         services.AddSingleton<IConfigureOptions<UserTokenManagementOptions>, ConfigureUserTokenManagementOptions>();
 
         services.AddTransient<IReturnUrlValidator, LocalUrlReturnUrlValidator>();
-#pragma warning disable CS0618 // Type or member is obsolete
         services.TryAddSingleton<DefaultAccessTokenRetriever>();
 
         // management endpoints
         services.AddTransient<ILoginService, DefaultLoginService>();
+#pragma warning disable CS0618 // Type or member is obsolete
         services.AddTransient<ISilentLoginService, DefaultSilentLoginService>();
+#pragma warning restore CS0618 // Type or member is obsolete
         services.AddTransient<ISilentLoginCallbackService, DefaultSilentLoginCallbackService>();
         services.AddTransient<ILogoutService, DefaultLogoutService>();
         services.AddTransient<IUserService, DefaultUserService>();
@@ -57,13 +58,13 @@ public static class BffServiceCollectionExtensions
         services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
         services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieRevokeRefreshToken>();
 
+#pragma warning disable CS0612 // Type or member is obsolete
         services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
+#pragma warning restore CS0612 // Type or member is obsolete
 
         // wrap ASP.NET Core
         services.AddAuthentication();
         services.AddTransientDecorator<IAuthenticationService, BffAuthenticationService>();
-
-#pragma warning restore CS0618 // Type or member is obsolete
 
         return new BffBuilder(services);
     }

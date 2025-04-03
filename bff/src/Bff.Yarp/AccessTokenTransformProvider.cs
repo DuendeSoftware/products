@@ -14,7 +14,6 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Transform provider to attach an access token to forwarded calls
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class AccessTokenTransformProvider(IOptions<BffOptions> options, ILogger<AccessTokenTransformProvider> logger, ILoggerFactory loggerFactory, IDPoPProofService dPoPProofService) : ITransformProvider
 {
     private readonly BffOptions _options = options.Value;

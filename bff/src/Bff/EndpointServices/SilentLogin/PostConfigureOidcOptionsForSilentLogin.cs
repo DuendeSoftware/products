@@ -12,7 +12,6 @@ namespace Duende.Bff;
 /// <summary>
 /// OIDC configuration to add silent login support
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class PostConfigureOidcOptionsForSilentLogin(
     IOptions<BffOptions> bffOptions,
     IOptions<AuthenticationOptions> options, ILoggerFactory logger) : IPostConfigureOptions<OpenIdConnectOptions>

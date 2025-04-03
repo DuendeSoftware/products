@@ -27,7 +27,6 @@ public class BffBuilder(IServiceCollection services)
     /// <returns></returns>
     public BffBuilder AddServerSideSessions()
     {
-#pragma warning disable CS0618 // Type or member is obsolete
         Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
         Services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
         Services.AddTransient<ISessionRevocationService, SessionRevocationService>();
@@ -35,9 +34,6 @@ public class BffBuilder(IServiceCollection services)
 
         // only add if not already in DI
         Services.TryAddSingleton<IUserSessionStore, InMemoryUserSessionStore>();
-
-#pragma warning restore CS0618 // Type or member is obsolete
-
         return this;
     }
 

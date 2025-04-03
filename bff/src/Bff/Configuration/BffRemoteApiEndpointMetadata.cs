@@ -24,9 +24,7 @@ public class BffRemoteApiEndpointMetadata : IBffApiEndpoint
     /// </summary>
     public BffUserAccessTokenParameters? BffUserAccessTokenParameters { get; set; }
 
-#pragma warning disable CS0618 // Type or member is obsolete
     private Type _accessTokenRetriever = typeof(DefaultAccessTokenRetriever);
-#pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
     /// The type used to retrieve access tokens.

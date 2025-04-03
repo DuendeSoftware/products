@@ -14,7 +14,6 @@ namespace Duende.Bff;
 /// <summary>
 /// Default debug diagnostics service
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class DefaultDiagnosticsService(IWebHostEnvironment environment, IOptions<BffOptions> options)
     : IDiagnosticsService
 {
