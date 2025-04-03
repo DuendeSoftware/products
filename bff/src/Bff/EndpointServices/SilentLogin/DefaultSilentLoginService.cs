@@ -13,22 +13,17 @@ namespace Duende.Bff;
 /// Service for handling silent login requests
 /// </summary>
 [Obsolete("This endpoint will be removed in a future version. Use /login?prompt=create")]
-public class DefaultSilentLoginService : ISilentLoginService
+public class DefaultSilentLoginService(IOptions<BffOptions> options, ILogger<DefaultSilentLoginService> logger) : ISilentLoginService
 {
     /// <summary>
     /// The BFF options
     /// </summary>
     protected readonly BffOptions Options = options.Value;
 
-    /// <summary>
-    /// The logger
-    /// </summary>
-    protected readonly ILogger Logger = logger;
-
     /// <inheritdoc />
     public virtual async Task ProcessRequestAsync(HttpContext context)
     {
-        Logger.LogDebug("Processing silent login request");
+        logger.LogDebug("Processing silent login request");
 
         context.CheckForBffMiddleware(Options);
 
@@ -40,9 +35,8 @@ public class DefaultSilentLoginService : ISilentLoginService
             },
         };
 
-        Logger.LogWarning("Using deprecated silentlogin endpoint. This endpoint will be removed in future versions. Consider calling the BFF Login endpoint with prompt=none.");
+        logger.LogWarning("Using deprecated silentlogin endpoint. This endpoint will be removed in future versions. Consider calling the BFF Login endpoint with prompt=none.");
 
         await context.ChallengeAsync(props);
-
     }
 }

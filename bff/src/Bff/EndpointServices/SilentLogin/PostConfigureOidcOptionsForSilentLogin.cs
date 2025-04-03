@@ -13,10 +13,12 @@ namespace Duende.Bff;
 /// OIDC configuration to add silent login support
 /// </summary>
 [Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
-public class PostConfigureOidcOptionsForSilentLogin(IOptions<AuthenticationOptions> options, ILoggerFactory logger) : IPostConfigureOptions<OpenIdConnectOptions>
+public class PostConfigureOidcOptionsForSilentLogin(
+    IOptions<BffOptions> bffOptions,
+    IOptions<AuthenticationOptions> options, ILoggerFactory logger) : IPostConfigureOptions<OpenIdConnectOptions>
 {
     private readonly string? _scheme = options.Value.DefaultChallengeScheme;
-    private readonly BffOpenIdConnectEvents _events = new BffOpenIdConnectEvents(logger.CreateLogger<BffOpenIdConnectEvents>());
+    private readonly BffOpenIdConnectEvents _events = new BffOpenIdConnectEvents(options, logger.CreateLogger<BffOpenIdConnectEvents>());
 
     /// <inheritdoc />
     public void PostConfigure(string? name, OpenIdConnectOptions options)

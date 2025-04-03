@@ -14,22 +14,20 @@ namespace Duende.Bff;
 /// Service for handling login requests
 /// </summary>
 [Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
-public class DefaultLoginService(IOptions<BffOptions> options, IReturnUrlValidator returnUrlValidator, ILogger<DefaultLoginService> logger)
+public class DefaultLoginService(
+    IAuthenticationSchemeProvider authenticationSchemeProvider,
+    IOptionsMonitor<OpenIdConnectOptions> openIdConnectOptionsMonitor,
+    IOptions<BffOptions> bffOptions,
+    IReturnUrlValidator returnUrlValidator,
+    ILogger<DefaultLoginService> logger)
     : ILoginService
 {
     /// <summary>
-    /// Authentication scheme provider
-    /// </summary>
-    protected readonly IAuthenticationSchemeProvider AuthenticationSchemeProvider;
-
-    /// <summary>
-    /// The OIDC options monitor
-    /// </summary>
-    protected readonly IOptionsMonitor<OpenIdConnectOptions> OpenIdConnectOptionsMonitor;
-    /// <summary>
     /// The BFF options
     /// </summary>
-    protected readonly BffOptions Options = options.Value;
+    protected readonly BffOptions Options = bffOptions.Value;
+
+    private readonly IOptionsMonitor<OpenIdConnectOptions> _openIdConnectOptionsMonitor = openIdConnectOptionsMonitor;
 
     /// <summary>
     /// The return URL validator
@@ -46,7 +44,7 @@ public class DefaultLoginService(IOptions<BffOptions> options, IReturnUrlValidat
     {
         Logger.LogDebug("Processing login request");
 
-        context.CheckForBffMiddleware(BffOptions);
+        context.CheckForBffMiddleware(Options);
 
         var returnUrl = context.Request.Query[Constants.RequestParameters.ReturnUrl].FirstOrDefault();
 
@@ -97,13 +95,13 @@ public class DefaultLoginService(IOptions<BffOptions> options, IReturnUrlValidat
 
     private async Task<ICollection<string>> GetPromptValuesAsync()
     {
-        var scheme = await AuthenticationSchemeProvider.GetDefaultChallengeSchemeAsync();
+        var scheme = await authenticationSchemeProvider.GetDefaultChallengeSchemeAsync();
         if (scheme == null)
         {
             throw new Exception("Failed to obtain default challenge scheme");
         }
 
-        var options = OpenIdConnectOptionsMonitor.Get(scheme.Name);
+        var options = _openIdConnectOptionsMonitor.Get(scheme.Name);
         if (options == null)
         {
             throw new Exception("Failed to obtain OIDC options for default challenge scheme");

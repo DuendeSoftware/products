@@ -43,9 +43,7 @@ public static class BffServiceCollectionExtensions
 
         // management endpoints
         services.AddTransient<ILoginService, DefaultLoginService>();
-#pragma warning disable CS0618 // Type or member is obsolete
         services.AddTransient<ISilentLoginService, DefaultSilentLoginService>();
-#pragma warning restore CS0618 // Type or member is obsolete
         services.AddTransient<ISilentLoginCallbackService, DefaultSilentLoginCallbackService>();
         services.AddTransient<ILogoutService, DefaultLogoutService>();
         services.AddTransient<IUserService, DefaultUserService>();
