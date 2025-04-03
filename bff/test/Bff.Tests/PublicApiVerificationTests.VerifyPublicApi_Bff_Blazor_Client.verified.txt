@@ -1,5 +1,6 @@
 ﻿namespace Duende.Bff.Blazor.Client
 {
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class AntiforgeryHandler : System.Net.Http.DelegatingHandler
     {
         public AntiforgeryHandler() { }

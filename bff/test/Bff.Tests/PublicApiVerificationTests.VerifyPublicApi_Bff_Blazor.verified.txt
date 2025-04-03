@@ -1,5 +1,6 @@
 ﻿namespace Duende.Bff.Blazor
 {
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class AddServerManagementClaimsTransform : Microsoft.AspNetCore.Authentication.IClaimsTransformation
     {
         public AddServerManagementClaimsTransform(Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor, Microsoft.Extensions.Options.IOptionsMonitor<Duende.Bff.BffOptions> options) { }
@@ -14,6 +15,7 @@
     {
         public static Microsoft.AspNetCore.Builder.BffBuilder AddBlazorServer(this Microsoft.AspNetCore.Builder.BffBuilder builder, System.Action<Duende.Bff.Blazor.BffBlazorServerOptions>? configureOptions = null) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public sealed class BffServerAuthenticationStateProvider : Microsoft.AspNetCore.Components.Server.RevalidatingServerAuthenticationStateProvider, System.IDisposable
     {
         public BffServerAuthenticationStateProvider(Duende.Bff.IUserSessionStore sessionStore, Microsoft.AspNetCore.Components.PersistentComponentState persistentComponentState, Microsoft.AspNetCore.Components.NavigationManager navigation, Microsoft.Extensions.Options.IOptions<Duende.Bff.Blazor.BffBlazorServerOptions> blazorOptions, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory) { }
@@ -21,6 +23,7 @@
         public void Dispose() { }
         protected override System.Threading.Tasks.Task<bool> ValidateAuthenticationStateAsync(Microsoft.AspNetCore.Components.Authorization.AuthenticationState authenticationState, System.Threading.CancellationToken cancellationToken) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class ServerSideTokenStore : Duende.AccessTokenManagement.OpenIdConnect.IUserTokenStore
     {
         public ServerSideTokenStore(Duende.AccessTokenManagement.OpenIdConnect.IStoreTokensInAuthenticationProperties tokensInAuthProperties, Duende.Bff.IUserSessionStore sessionStore, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dataProtectionProvider, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Blazor.ServerSideTokenStore> logger, Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider authenticationStateProvider) { }

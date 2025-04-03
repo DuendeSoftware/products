@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Duende.Bff.General;
+namespace Duende.Bff.Internal;
 
 internal static class LogCategories
 {

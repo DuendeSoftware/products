@@ -18,7 +18,7 @@ public class PostConfigureOidcOptionsForSilentLogin(
     IOptions<AuthenticationOptions> options, ILoggerFactory logger) : IPostConfigureOptions<OpenIdConnectOptions>
 {
     private readonly string? _scheme = options.Value.DefaultChallengeScheme;
-    private readonly BffOpenIdConnectEvents _events = new BffOpenIdConnectEvents(options, logger.CreateLogger<BffOpenIdConnectEvents>());
+    private readonly BffOpenIdConnectEvents _events = new BffOpenIdConnectEvents(bffOptions, logger.CreateLogger<BffOpenIdConnectEvents>());
 
     /// <inheritdoc />
     public void PostConfigure(string? name, OpenIdConnectOptions options)

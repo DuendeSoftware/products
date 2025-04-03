@@ -3,7 +3,7 @@
 
 using System.Text;
 using System.Text.Json;
-using Duende.Bff.General;
+using Duende.Bff.Internal;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;

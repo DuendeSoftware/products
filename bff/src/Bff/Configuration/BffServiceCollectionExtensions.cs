@@ -4,7 +4,7 @@
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff;
 using Duende.Bff.EndpointProcessing;
-using Duende.Bff.General;
+using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;

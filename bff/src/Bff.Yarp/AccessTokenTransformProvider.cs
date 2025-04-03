@@ -3,7 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Duende.AccessTokenManagement;
-using Duende.Bff.General;
+using Duende.Bff.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Transforms;

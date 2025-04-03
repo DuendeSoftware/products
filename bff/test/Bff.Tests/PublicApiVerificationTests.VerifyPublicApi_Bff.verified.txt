@@ -25,18 +25,20 @@
     public class AccessTokenRetrievalError : Duende.Bff.AccessTokenResult
     {
         public AccessTokenRetrievalError(string error) { }
-        public string Error { get; set; }
+        public string Error { get; }
     }
     public enum AnonymousSessionResponse
     {
         Response401 = 0,
         Response200 = 1,
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public static class AuthenticationPropertiesExtensions
     {
         public static bool IsSilentLogin(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props) { }
         public static bool TryGetPrompt(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? prompt) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public static class AuthenticationTicketExtensions
     {
         public static Microsoft.AspNetCore.Authentication.AuthenticationTicket? Deserialize(this Duende.Bff.UserSession session, Microsoft.AspNetCore.DataProtection.IDataProtector protector, Microsoft.Extensions.Logging.ILogger logger) { }
@@ -72,10 +74,11 @@
     {
         public BffApiSkipResponseHandlingAttribute() { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class BffOpenIdConnectEvents : Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectEvents
     {
         protected readonly Microsoft.Extensions.Logging.ILogger<Duende.Bff.BffOpenIdConnectEvents> Logger;
-        public BffOpenIdConnectEvents(Microsoft.Extensions.Logging.ILogger<Duende.Bff.BffOpenIdConnectEvents> logger, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options) { }
+        public BffOpenIdConnectEvents(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.BffOpenIdConnectEvents> logger) { }
         public override System.Threading.Tasks.Task AuthenticationFailed(Microsoft.AspNetCore.Authentication.OpenIdConnect.AuthenticationFailedContext context) { }
         public override System.Threading.Tasks.Task MessageReceived(Microsoft.AspNetCore.Authentication.OpenIdConnect.MessageReceivedContext context) { }
         public virtual System.Threading.Tasks.Task<bool> ProcessAuthenticationFailedAsync(Microsoft.AspNetCore.Authentication.OpenIdConnect.AuthenticationFailedContext context) { }
@@ -173,15 +176,15 @@
     public class DPoPTokenResult : Duende.Bff.AccessTokenResult
     {
         public DPoPTokenResult(string accessToken, string dpopJWK) { }
-        public string AccessToken { get; set; }
-        public string DPoPJsonWebKey { get; set; }
+        public string AccessToken { get; }
+        public string DPoPJsonWebKey { get; }
     }
     public class DefaultAccessTokenRetriever : Duende.Bff.IAccessTokenRetriever
     {
-        protected readonly Microsoft.Extensions.Logging.ILogger<Duende.Bff.DefaultAccessTokenRetriever> Logger;
-        public DefaultAccessTokenRetriever(Microsoft.Extensions.Logging.ILogger<Duende.Bff.DefaultAccessTokenRetriever> logger) { }
+        public DefaultAccessTokenRetriever() { }
         public virtual System.Threading.Tasks.Task<Duende.Bff.AccessTokenResult> GetAccessToken(Duende.Bff.AccessTokenRetrievalContext context) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class DefaultBackchannelLogoutService : Duende.Bff.IBackchannelLogoutService, Duende.Bff.IBffEndpointService
     {
         protected readonly Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider AuthenticationSchemeProvider;
@@ -194,6 +197,7 @@
         protected virtual System.Threading.Tasks.Task<System.Security.Claims.ClaimsIdentity?> ValidateJwt(string jwt) { }
         protected virtual System.Threading.Tasks.Task<System.Security.Claims.ClaimsIdentity?> ValidateLogoutTokenAsync(string logoutToken) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class DefaultDiagnosticsService : Duende.Bff.IBffEndpointService, Duende.Bff.IDiagnosticsService
     {
         protected readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment Environment;
@@ -201,16 +205,16 @@
         public DefaultDiagnosticsService(Microsoft.AspNetCore.Hosting.IWebHostEnvironment environment, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options) { }
         public virtual System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class DefaultLoginService : Duende.Bff.IBffEndpointService, Duende.Bff.ILoginService
     {
-        protected readonly Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider AuthenticationSchemeProvider;
-        protected readonly Duende.Bff.BffOptions BffOptions;
         protected readonly Microsoft.Extensions.Logging.ILogger Logger;
-        protected readonly Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> OpenIdConnectOptionsMonitor;
+        protected readonly Duende.Bff.BffOptions Options;
         protected readonly Duende.Bff.IReturnUrlValidator ReturnUrlValidator;
         public DefaultLoginService(Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider authenticationSchemeProvider, Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> openIdConnectOptionsMonitor, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Duende.Bff.IReturnUrlValidator returnUrlValidator, Microsoft.Extensions.Logging.ILogger<Duende.Bff.DefaultLoginService> logger) { }
         public virtual System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class DefaultLogoutService : Duende.Bff.IBffEndpointService, Duende.Bff.ILogoutService
     {
         protected readonly Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider AuthenticationSchemeProvider;
@@ -220,6 +224,7 @@
         public DefaultLogoutService(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider authenticationAuthenticationSchemeProviderProvider, Duende.Bff.IReturnUrlValidator returnUrlValidator, Microsoft.Extensions.Logging.ILogger<Duende.Bff.DefaultLogoutService> logger) { }
         public virtual System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class DefaultSilentLoginCallbackService : Duende.Bff.IBffEndpointService, Duende.Bff.ISilentLoginCallbackService
     {
         protected readonly Microsoft.Extensions.Logging.ILogger Logger;
@@ -230,11 +235,11 @@
     [System.Obsolete("This endpoint will be removed in a future version. Use /login?prompt=create")]
     public class DefaultSilentLoginService : Duende.Bff.IBffEndpointService, Duende.Bff.ISilentLoginService
     {
-        protected readonly Microsoft.Extensions.Logging.ILogger Logger;
         protected readonly Duende.Bff.BffOptions Options;
         public DefaultSilentLoginService(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.DefaultSilentLoginService> logger) { }
         public virtual System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class DefaultUserService : Duende.Bff.IBffEndpointService, Duende.Bff.IUserService
     {
         protected readonly Microsoft.Extensions.Logging.ILogger Logger;
@@ -287,6 +292,7 @@
     {
         System.Threading.Tasks.Task DeleteExpiredSessionsAsync(System.Threading.CancellationToken cancellationToken = default);
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class InMemoryUserSessionStore : Duende.Bff.IUserSessionStore
     {
         public InMemoryUserSessionStore() { }
@@ -309,36 +315,43 @@
     {
         public NoAccessTokenReturnedError(string error) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class NopSessionRevocationService : Duende.Bff.ISessionRevocationService
     {
         public NopSessionRevocationService(Microsoft.Extensions.Logging.ILogger<Duende.Bff.NopSessionRevocationService> logger) { }
         public System.Threading.Tasks.Task RevokeSessionsAsync(Duende.Bff.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken = default) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class PostConfigureApplicationCookieRevokeRefreshToken : Microsoft.Extensions.Options.IPostConfigureOptions<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>
     {
         public PostConfigureApplicationCookieRevokeRefreshToken(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> authOptions, Microsoft.Extensions.Logging.ILogger<Duende.Bff.PostConfigureApplicationCookieRevokeRefreshToken> logger) { }
         public void PostConfigure(string? name, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions options) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class PostConfigureApplicationCookieTicketStore : Microsoft.Extensions.Options.IPostConfigureOptions<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>
     {
         public PostConfigureApplicationCookieTicketStore(Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> options) { }
         public void PostConfigure(string? name, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions options) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class PostConfigureApplicationValidatePrincipal : Microsoft.Extensions.Options.IPostConfigureOptions<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>
     {
         public PostConfigureApplicationValidatePrincipal(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> authOptions, Microsoft.Extensions.Logging.ILogger<Duende.Bff.PostConfigureApplicationValidatePrincipal> logger) { }
         public void PostConfigure(string? name, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions options) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class PostConfigureOidcOptionsForSilentLogin : Microsoft.Extensions.Options.IPostConfigureOptions<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions>
     {
-        public PostConfigureOidcOptionsForSilentLogin(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> authenticationOptions, Microsoft.Extensions.Logging.ILoggerFactory logger) { }
+        public PostConfigureOidcOptionsForSilentLogin(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> options, Microsoft.Extensions.Logging.ILoggerFactory logger) { }
         public void PostConfigure(string? name, Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions options) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class PostConfigureSlidingExpirationCheck : Microsoft.Extensions.Options.IPostConfigureOptions<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>
     {
         public PostConfigureSlidingExpirationCheck(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> authOptions, Microsoft.Extensions.Logging.ILogger<Duende.Bff.PostConfigureSlidingExpirationCheck> logger) { }
         public void PostConfigure(string? name, Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions options) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class ServerSideTicketStore : Duende.Bff.IServerTicketStore, Microsoft.AspNetCore.Authentication.Cookies.ITicketStore
     {
         public static string DataProtectorPurpose;
@@ -346,9 +359,10 @@
         public System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Microsoft.AspNetCore.Authentication.AuthenticationTicket>> GetUserTicketsAsync(Duende.Bff.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task RemoveAsync(string key) { }
         public System.Threading.Tasks.Task RenewAsync(string key, Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Authentication.AuthenticationTicket> RetrieveAsync(string key) { }
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Authentication.AuthenticationTicket?> RetrieveAsync(string key) { }
         public System.Threading.Tasks.Task<string> StoreAsync(Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class SessionCleanupHost : Microsoft.Extensions.Hosting.IHostedService
     {
         public SessionCleanupHost(System.IServiceProvider serviceProvider, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.SessionCleanupHost> logger) { }
@@ -360,12 +374,13 @@
         public SessionRevocationService(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Duende.Bff.IServerTicketStore ticketStore, Duende.Bff.IUserSessionStore sessionStore, Duende.AccessTokenManagement.OpenIdConnect.IUserTokenEndpointService tokenEndpoint, Microsoft.Extensions.Logging.ILogger<Duende.Bff.SessionRevocationService> logger) { }
         public System.Threading.Tasks.Task RevokeSessionsAsync(Duende.Bff.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken = default) { }
     }
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class TicketStoreShim : Microsoft.AspNetCore.Authentication.Cookies.ITicketStore
     {
         public TicketStoreShim(Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) { }
         public System.Threading.Tasks.Task RemoveAsync(string key) { }
         public System.Threading.Tasks.Task RenewAsync(string key, Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Authentication.AuthenticationTicket> RetrieveAsync(string key) { }
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Authentication.AuthenticationTicket?> RetrieveAsync(string key) { }
         public System.Threading.Tasks.Task<string> StoreAsync(Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
     }
     public enum TokenType
@@ -406,6 +421,7 @@
 }
 namespace Duende.Bff.Endpoints
 {
+    [System.Obsolete("The implementation for this class will be made internal in a future release.")]
     public class BffMiddleware
     {
         public BffMiddleware(Microsoft.AspNetCore.Http.RequestDelegate next, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Endpoints.BffMiddleware> logger) { }
