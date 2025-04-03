@@ -24,6 +24,7 @@ namespace Duende.Bff.Blazor;
 // This is a server-side AuthenticationStateProvider that uses
 // PersistentComponentState to flow the authentication state to the client which
 // is then used to initialize the authentication state in the WASM application. 
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAuthenticationStateProvider, IDisposable
 {
     private readonly IUserSessionStore _sessionStore;
@@ -60,7 +61,6 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
 
         CheckLicense(loggerFactory, _bffOptions);
     }
-
 
     internal static bool LicenseChecked;
     internal static void CheckLicense(ILoggerFactory loggerFactory, BffOptions options)

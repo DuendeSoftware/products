@@ -13,6 +13,7 @@ namespace Duende.Bff.Blazor;
 /// <summary>
 /// A token store that retrieves tokens from server side sessions.
 /// </summary>
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class ServerSideTokenStore(
     IStoreTokensInAuthenticationProperties tokensInAuthProperties,
     IUserSessionStore sessionStore,

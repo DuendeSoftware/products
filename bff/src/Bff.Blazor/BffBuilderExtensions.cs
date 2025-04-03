@@ -14,9 +14,12 @@ public static class BffBuilderExtensions
     {
         builder.Services
             .AddOpenIdConnectAccessTokenManagement()
+#pragma warning disable CS0618 // Type or member is obsolete
             .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()
             .AddSingleton<IClaimsTransformation, AddServerManagementClaimsTransform>()
             .AddScoped<AuthenticationStateProvider, BffServerAuthenticationStateProvider>(); ;
+#pragma warning restore CS0618 // Type or member is obsolete
+
 
         if (configureOptions != null)
         {
