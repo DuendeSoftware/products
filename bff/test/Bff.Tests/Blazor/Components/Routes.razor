@@ -1,4 +1,5 @@
-﻿<Router AppAssembly="typeof(BffBlazorHost).Assembly">
+@using global::Bff.Tests.Blazor
+<Router AppAssembly="typeof(BffBlazorHost).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />

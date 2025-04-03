@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
@@ -108,7 +107,6 @@ public class DefaultRefreshTokenServiceTests
         refreshToken.ShouldNotBeNull();
         refreshToken.Lifetime.ShouldBe(client.SlidingRefreshTokenLifetime);
     }
-
 
     [Fact]
     public async Task UpdateRefreshToken_one_time_use_should_create_new_token()
