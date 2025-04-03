@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff;
 
 /// <summary>
@@ -32,7 +33,7 @@ public class BffOpenIdConnectEvents(ILogger<BffOpenIdConnectEvents> logger) : Op
     /// </summary>
     public virtual Task<bool> ProcessRedirectToIdentityProviderAsync(RedirectContext context)
     {
-        if (context.Properties?.IsSilentLogin() == true)
+        if (context.Properties.IsSilentLogin())
         {
             var pathBase = context.Request.PathBase;
             var redirectPath = pathBase + _options.Value.SilentLoginCallbackPath;
@@ -125,6 +126,5 @@ public class BffOpenIdConnectEvents(ILogger<BffOpenIdConnectEvents> logger) : Op
         context.Response.Redirect(context.HttpContext.Items[Constants.BffFlags.SilentLogin]!.ToString()!);
 
         return Task.FromResult(true);
-
     }
 }

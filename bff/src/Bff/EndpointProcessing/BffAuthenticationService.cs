@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace Duende.Bff;
+namespace Duende.Bff.EndpointProcessing;
 
 // this decorates the real authentication service to detect when
 // Challenge of Forbid is being called for a BFF API endpoint
@@ -43,7 +43,7 @@ internal class BffAuthenticationService(
         }
 
         var endpoint = context.GetEndpoint();
-        
+
         var isBffEndpoint = endpoint?.Metadata.GetMetadata<IBffApiEndpoint>() != null;
         if (!isBffEndpoint)
         {

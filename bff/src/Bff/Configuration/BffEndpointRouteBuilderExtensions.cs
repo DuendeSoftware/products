@@ -1,14 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende;
 using Duende.Bff;
+using Duende.Bff.EndpointProcessing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using LicenseValidator = Duende.Bff.Licensing.LicenseValidator;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
 
 /// <summary>
@@ -139,7 +141,6 @@ public static class BffEndpointRouteBuilderExtensions
     internal static void CheckLicense(this IEndpointRouteBuilder endpoints)
     {
         endpoints.ServiceProvider.CheckLicense();
-
     }
 
     internal static void CheckLicense(this IServiceProvider serviceProvider)

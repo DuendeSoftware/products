@@ -5,6 +5,7 @@ using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
 
 /// <summary>

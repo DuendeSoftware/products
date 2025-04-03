@@ -31,7 +31,9 @@ public class PublicApiVerificationTests
         {
             IncludeAssemblyAttributes = false
         };
+#pragma warning disable CS0618 // Type or member is obsolete
         var publicApi = typeof(AccessTokenRequestTransform).Assembly.GeneratePublicApi(apiGeneratorOptions);
+#pragma warning restore CS0618 // Type or member is obsolete
         var settings = new VerifySettings();
         await Verify(publicApi, settings);
     }
@@ -68,7 +70,9 @@ public class PublicApiVerificationTests
         {
             IncludeAssemblyAttributes = false
         };
+#pragma warning disable CS0618 // Type or member is obsolete
         var publicApi = typeof(AntiforgeryHandler).Assembly.GeneratePublicApi(apiGeneratorOptions);
+#pragma warning restore CS0618 // Type or member is obsolete
         var settings = new VerifySettings();
         await Verify(publicApi, settings);
     }

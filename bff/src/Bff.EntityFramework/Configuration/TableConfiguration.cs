@@ -43,5 +43,5 @@ public class TableConfiguration
     /// <value>
     /// The schema.
     /// </value>
-    public string Schema { get; set; }
+    public string? Schema { get; set; }
 }

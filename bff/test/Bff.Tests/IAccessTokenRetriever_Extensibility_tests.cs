@@ -86,7 +86,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
     private class ContextCapturingAccessTokenRetriever : DefaultAccessTokenRetriever
     {
         public AccessTokenRetrievalContext? UsedContext { get; private set; }
-        public ContextCapturingAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger) : base(logger)
+        public ContextCapturingAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger) : base()
         {
         }
 

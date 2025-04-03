@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff;
 
 /// <summary>
@@ -42,10 +43,7 @@ public class PostConfigureOidcOptionsForSilentLogin(IOptions<AuthenticationOptio
         {
             if (!await _events.ProcessRedirectToIdentityProviderAsync(ctx))
             {
-                if (inner != null)
-                {
-                    await inner.Invoke(ctx);
-                }
+                await inner.Invoke(ctx);
             }
         }
 
@@ -58,10 +56,7 @@ public class PostConfigureOidcOptionsForSilentLogin(IOptions<AuthenticationOptio
         {
             if (!await _events.ProcessMessageReceivedAsync(ctx))
             {
-                if (inner != null)
-                {
-                    await inner.Invoke(ctx);
-                }
+                await inner.Invoke(ctx);
             }
         }
 
@@ -74,10 +69,7 @@ public class PostConfigureOidcOptionsForSilentLogin(IOptions<AuthenticationOptio
         {
             if (!await _events.ProcessAuthenticationFailedAsync(ctx))
             {
-                if (inner != null)
-                {
-                    await inner.Invoke(ctx);
-                }
+                await inner.Invoke(ctx);
             }
         }
 

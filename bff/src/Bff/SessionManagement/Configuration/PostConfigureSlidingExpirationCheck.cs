@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff;
 
 /// <summary>
@@ -15,7 +16,7 @@ namespace Duende.Bff;
 public class PostConfigureSlidingExpirationCheck(
     IOptions<BffOptions> bffOptions,
     IOptions<AuthenticationOptions> authOptions,
-    ILogger<PostConfigureSlidingExpirationCheck> logger) 
+    ILogger<PostConfigureSlidingExpirationCheck> logger)
     : IPostConfigureOptions<CookieAuthenticationOptions>
 {
     private readonly BffOptions _options = bffOptions.Value;
@@ -34,7 +35,7 @@ public class PostConfigureSlidingExpirationCheck(
     {
         Task Callback(CookieSlidingExpirationContext ctx)
         {
-            var result = inner?.Invoke(ctx) ?? Task.CompletedTask;
+            var result = inner.Invoke(ctx);
 
             // disable sliding expiration
             if (ctx.HttpContext.Request.Path == _options.UserPath)

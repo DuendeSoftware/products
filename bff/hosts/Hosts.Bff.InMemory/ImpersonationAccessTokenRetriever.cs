@@ -9,10 +9,6 @@ namespace Bff;
 
 public class ImpersonationAccessTokenRetriever : DefaultAccessTokenRetriever
 {
-    public ImpersonationAccessTokenRetriever(ILogger<ImpersonationAccessTokenRetriever> logger) : base(logger)
-    {
-    }
-
     public override async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
     {
         var result = await base.GetAccessToken(context);

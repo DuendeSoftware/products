@@ -31,7 +31,7 @@ public class SessionDbContext<TContext> : DbContext, ISessionDbContext
     /// <summary>
     /// The options for the session store table schema.
     /// </summary>
-    public SessionStoreOptions StoreOptions { get; set; }
+    public SessionStoreOptions? StoreOptions { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SessionDbContext"/> class.
@@ -64,6 +64,11 @@ public class SessionDbContext<TContext> : DbContext, ISessionDbContext
     /// </summary>
     protected virtual void ConfigureSchema(ModelBuilder modelBuilder)
     {
+        if (StoreOptions == null)
+        {
+            throw new InvalidOperationException("StoreOptions should not be null when Configuring Schema");
+        }
+
         modelBuilder.ConfigureSessionContext(StoreOptions);
     }
 }

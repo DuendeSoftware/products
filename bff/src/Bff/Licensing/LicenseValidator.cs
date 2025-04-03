@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+// This class has not been designed to work with 'nullable'
 #nullable disable
 
 using System.Security.Claims;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Duende;
+namespace Duende.Bff.Licensing;
 
 // shared APIs needed for Duende license validation
 internal partial class LicenseValidator
@@ -20,11 +21,11 @@ internal partial class LicenseValidator
         "Duende_IdentityServer_License.key",
     };
 
-    private static ILogger Logger;
-    private static Action<string, object[]> ErrorLog;
-    private static Action<string, object[]> InformationLog;
-    private static Action<string, object[]> WarningLog;
-    private static Action<string, object[]> DebugLog;
+    private static ILogger Logger = null!;
+    private static Action<string, object[]> ErrorLog = null!;
+    private static Action<string, object[]> InformationLog = null!;
+    private static Action<string, object[]> WarningLog = null!;
+    private static Action<string, object[]> DebugLog = null!;
 
     private static License License;
 
@@ -78,7 +79,7 @@ internal partial class LicenseValidator
 
             // we're not using our _warningLog because we always want this emitted regardless of the context
             Logger.LogWarning(message);
-            WarnForProductFeaturesWhenMissingLicense();
+            LicenseValidator.WarnForProductFeaturesWhenMissingLicense();
             return;
         }
 
@@ -93,7 +94,7 @@ internal partial class LicenseValidator
             }
         }
 
-        ValidateProductFeaturesForLicense(errors);
+        LicenseValidator.ValidateProductFeaturesForLicense(errors);
 
         if (errors.Count > 0)
         {
@@ -165,7 +166,7 @@ internal partial class LicenseValidator
     {
         if (Logger.IsEnabled(LogLevel.Trace))
         {
-            LoggerExtensions.LogTrace(Logger, message, args);
+            Logger.LogTrace(message, args);
         }
     }
 
@@ -173,7 +174,7 @@ internal partial class LicenseValidator
     {
         if (Logger.IsEnabled(LogLevel.Debug))
         {
-            LoggerExtensions.LogDebug(Logger, message, args);
+            Logger.LogDebug(message, args);
         }
     }
 
@@ -181,7 +182,7 @@ internal partial class LicenseValidator
     {
         if (Logger.IsEnabled(LogLevel.Information))
         {
-            LoggerExtensions.LogInformation(Logger, message, args);
+            Logger.LogInformation(message, args);
         }
     }
 
@@ -189,7 +190,7 @@ internal partial class LicenseValidator
     {
         if (Logger.IsEnabled(LogLevel.Warning))
         {
-            LoggerExtensions.LogWarning(Logger, message, args);
+            Logger.LogWarning(message, args);
         }
     }
 
@@ -197,7 +198,7 @@ internal partial class LicenseValidator
     {
         if (Logger.IsEnabled(LogLevel.Error))
         {
-            LoggerExtensions.LogError(Logger, message, args);
+            Logger.LogError(message, args);
         }
     }
 }

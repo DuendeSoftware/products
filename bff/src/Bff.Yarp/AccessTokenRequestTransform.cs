@@ -4,7 +4,7 @@
 using System.Net.Http.Headers;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
-using Duende.Bff.Logging;
+using Duende.Bff.General;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;

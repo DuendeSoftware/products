@@ -1,14 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-#nullable disable
-
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
+// ReSharper disable CheckNamespace
 namespace Duende.Bff;
 
 /// <summary>
@@ -19,9 +17,6 @@ namespace Duende.Bff;
 [Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicketStore
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly BffOptions _options = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOptions<BffOptions>>().Value;
-
     private IServerTicketStore Inner => httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IServerTicketStore>();
 
     /// <inheritdoc />
@@ -37,7 +32,7 @@ public class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicket
     }
 
     /// <inheritdoc />
-    public async Task<AuthenticationTicket> RetrieveAsync(string key)
+    public async Task<AuthenticationTicket?> RetrieveAsync(string key)
     {
         var ticket = await Inner.RetrieveAsync(key);
 

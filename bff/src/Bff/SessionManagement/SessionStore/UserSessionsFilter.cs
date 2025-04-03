@@ -25,7 +25,7 @@ public class UserSessionsFilter
     {
         if (string.IsNullOrWhiteSpace(SubjectId) && string.IsNullOrWhiteSpace(SessionId))
         {
-            throw new ArgumentNullException("SubjectId or SessionId is required.");
+            throw new InvalidOperationException("SubjectId or SessionId is required.");
         }
     }
 }

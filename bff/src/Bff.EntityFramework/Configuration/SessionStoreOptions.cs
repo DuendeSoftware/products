@@ -15,7 +15,7 @@ public class SessionStoreOptions
     /// <value>
     /// The default schema.
     /// </value>
-    public string DefaultSchema { get; set; } = null;
+    public string? DefaultSchema { get; set; }
 
     /// <summary>
     /// Gets or sets the persisted grants table configuration.

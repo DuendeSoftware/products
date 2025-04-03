@@ -3,6 +3,7 @@
 
 using Duende.Bff;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
 
 /// <summary>

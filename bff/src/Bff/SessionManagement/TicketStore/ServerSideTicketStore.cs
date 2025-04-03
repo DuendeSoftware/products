@@ -1,13 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-#nullable disable
-
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff;
 
 /// <summary>
@@ -65,7 +64,7 @@ public class ServerSideTicketStore(
     }
 
     /// <inheritdoc />
-    public async Task<AuthenticationTicket> RetrieveAsync(string key)
+    public async Task<AuthenticationTicket?> RetrieveAsync(string key)
     {
         logger.LogDebug("Retrieve AuthenticationTicket for key {key}", key);
 

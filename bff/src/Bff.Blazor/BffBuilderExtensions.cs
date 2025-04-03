@@ -17,7 +17,7 @@ public static class BffBuilderExtensions
 #pragma warning disable CS0618 // Type or member is obsolete
             .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()
             .AddSingleton<IClaimsTransformation, AddServerManagementClaimsTransform>()
-            .AddScoped<AuthenticationStateProvider, BffServerAuthenticationStateProvider>(); ;
+            .AddScoped<AuthenticationStateProvider, BffServerAuthenticationStateProvider>();
 #pragma warning restore CS0618 // Type or member is obsolete
 
 
@@ -25,6 +25,7 @@ public static class BffBuilderExtensions
         {
             builder.Services.Configure(configureOptions);
         }
+
         return builder;
     }
 }

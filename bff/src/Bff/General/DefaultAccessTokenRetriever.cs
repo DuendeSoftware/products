@@ -1,21 +1,14 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Microsoft.Extensions.Logging;
-
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff;
 
 /// <summary>
 /// Default implementation of IAccessTokenRetriever
 /// </summary>
-[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
-public class DefaultAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger) : IAccessTokenRetriever
+public class DefaultAccessTokenRetriever() : IAccessTokenRetriever
 {
-    /// <summary>
-    /// The logger.
-    /// </summary>
-    protected readonly ILogger<DefaultAccessTokenRetriever> Logger;
-
     /// <inheritdoc />
     public virtual async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
     {

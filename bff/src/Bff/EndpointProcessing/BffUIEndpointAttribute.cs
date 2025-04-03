@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.Bff;
+namespace Duende.Bff.EndpointProcessing;
 
 /// <summary>
 /// Marks an endpoint as BFF UI endpoint.

@@ -8,6 +8,7 @@ using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff;
 
 internal static class HttpContextExtensions
@@ -85,6 +86,7 @@ internal static class HttpContextExtensions
             {
                 token = await context.GetClientAccessTokenAsync();
             }
+
             return token;
         }
     }

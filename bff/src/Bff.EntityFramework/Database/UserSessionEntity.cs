@@ -17,5 +17,5 @@ public class UserSessionEntity : UserSession
     /// <summary>
     /// Discriminator to allow multiple applications to share the user session table.
     /// </summary>
-    public string ApplicationName { get; set; }
+    public string? ApplicationName { get; set; }
 }

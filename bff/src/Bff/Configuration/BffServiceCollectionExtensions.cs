@@ -3,6 +3,8 @@
 
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff;
+using Duende.Bff.EndpointProcessing;
+using Duende.Bff.General;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder;
 
 /// <summary>
@@ -35,6 +38,7 @@ public static class BffServiceCollectionExtensions
         services.AddSingleton<IConfigureOptions<UserTokenManagementOptions>, ConfigureUserTokenManagementOptions>();
 
         services.AddTransient<IReturnUrlValidator, LocalUrlReturnUrlValidator>();
+#pragma warning disable CS0618 // Type or member is obsolete
         services.TryAddSingleton<DefaultAccessTokenRetriever>();
 
         // management endpoints
@@ -60,6 +64,8 @@ public static class BffServiceCollectionExtensions
         // wrap ASP.NET Core
         services.AddAuthentication();
         services.AddTransientDecorator<IAuthenticationService, BffAuthenticationService>();
+
+#pragma warning restore CS0618 // Type or member is obsolete
 
         return new BffBuilder(services);
     }

@@ -38,6 +38,7 @@ public class ServerSideTokenStore(
             _authenticationStateProvider.SetAuthenticationState(loggedOutTask);
             return new UserToken();
         }
+
         var ticket = session.Deserialize(_protector, logger) ??
                      throw new InvalidOperationException("Failed to deserialize authentication ticket from session");
 
@@ -65,6 +66,7 @@ public class ServerSideTokenStore(
         {
             return null;
         }
+
         if (sessions.Count > 1) throw new InvalidOperationException("Multiple tickets found");
 
         return sessions.First();
@@ -92,6 +94,7 @@ public class ServerSideTokenStore(
             logger.LogDebug("Failed to find a session to update, bailing out");
             return;
         }
+
         var ticket = session.Deserialize(_protector, logger) ??
                      throw new InvalidOperationException("Failed to deserialize authentication ticket from session");
 

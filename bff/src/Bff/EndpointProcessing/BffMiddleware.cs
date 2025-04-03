@@ -1,11 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Logging;
+using Duende.Bff.General;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff.Endpoints;
 
 /// <summary>
@@ -14,8 +15,8 @@ namespace Duende.Bff.Endpoints;
 /// </summary>
 [Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class BffMiddleware(
-    RequestDelegate next, 
-    IOptions<BffOptions> options, 
+    RequestDelegate next,
+    IOptions<BffOptions> options,
     ILogger<BffMiddleware> logger)
 {
     /// <summary>
@@ -40,7 +41,7 @@ public class BffMiddleware(
         var isBffEndpoint = endpoint.Metadata.GetMetadata<IBffApiEndpoint>() != null;
         var requireAntiForgeryCheck = endpoint.Metadata.GetMetadata<IBffApiSkipAntiforgery>() == null;
         var hasAntiForgeryHeader = context.CheckAntiForgeryHeader(options.Value);
-        if (isBffEndpoint && requireAntiForgeryCheck && !hasAntiForgeryHeader) 
+        if (isBffEndpoint && requireAntiForgeryCheck && !hasAntiForgeryHeader)
         {
             logger.AntiForgeryValidationFailed(context.Request.Path);
 

@@ -1,12 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-#nullable disable
-
-using Duende.Bff;
 using Microsoft.Extensions.Logging;
 
-namespace Duende;
+namespace Duende.Bff.Licensing;
 
 // APIs needed for IdentityServer specific license validation
 internal partial class LicenseValidator

@@ -3,6 +3,7 @@
 
 using Duende.AccessTokenManagement.OpenIdConnect;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff;
 
 /// <summary>
