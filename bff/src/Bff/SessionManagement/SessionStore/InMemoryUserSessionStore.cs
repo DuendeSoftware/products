@@ -8,6 +8,7 @@ namespace Duende.Bff;
 /// <summary>
 /// In-memory user session store
 /// </summary>
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class InMemoryUserSessionStore : IUserSessionStore
 {
     private readonly ConcurrentDictionary<string, UserSession> _store = new();

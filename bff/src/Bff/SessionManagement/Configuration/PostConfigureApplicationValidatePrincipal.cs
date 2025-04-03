@@ -11,24 +11,14 @@ namespace Duende.Bff;
 /// <summary>
 /// Cookie configuration to suppress sliding the cookie on the ~/bff/user endpoint if requested.
 /// </summary>
-public class PostConfigureApplicationValidatePrincipal : IPostConfigureOptions<CookieAuthenticationOptions>
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class PostConfigureApplicationValidatePrincipal(
+    IOptions<BffOptions> bffOptions,
+    IOptions<AuthenticationOptions> authOptions,
+    ILogger<PostConfigureApplicationValidatePrincipal> logger) : IPostConfigureOptions<CookieAuthenticationOptions>
 {
-    private readonly BffOptions _options;
-    private readonly string? _scheme;
-    private readonly ILogger<PostConfigureApplicationValidatePrincipal> _logger;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="bffOptions"></param>
-    /// <param name="authOptions"></param>
-    /// <param name="logger"></param>
-    public PostConfigureApplicationValidatePrincipal(IOptions<BffOptions> bffOptions, IOptions<AuthenticationOptions> authOptions, ILogger<PostConfigureApplicationValidatePrincipal> logger)
-    {
-        _options = bffOptions.Value;
-        _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
-        _logger = logger;
-    }
+    private readonly BffOptions _options = bffOptions.Value;
+    private readonly string? _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
@@ -43,7 +33,7 @@ public class PostConfigureApplicationValidatePrincipal : IPostConfigureOptions<C
     {
         Task Callback(CookieValidatePrincipalContext ctx)
         {
-            var result = inner?.Invoke(ctx) ?? Task.CompletedTask;
+            var result = inner.Invoke(ctx);
 
             // allows the client-side app to request that the cookie does not slide on the user endpoint
             // we must add this logic in the OnValidatePrincipal because it's a code path that can trigger the 
@@ -54,7 +44,7 @@ public class PostConfigureApplicationValidatePrincipal : IPostConfigureOptions<C
                 var slide = ctx.Request.Query[Constants.RequestParameters.SlideCookie];
                 if (slide == "false")
                 {
-                    _logger.LogDebug("Explicitly setting ShouldRenew=false in OnValidatePrincipal due to query param suppressing slide behavior.");
+                    logger.LogDebug("Explicitly setting ShouldRenew=false in OnValidatePrincipal due to query param suppressing slide behavior.");
                     ctx.ShouldRenew = false;
                 }
             }

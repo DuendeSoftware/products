@@ -16,25 +16,13 @@ namespace Duende.Bff;
 /// of the cookie options and coordinated with PostConfigureApplicationCookie. #lame
 /// https://github.com/aspnet/AspNetCore/issues/6946 
 /// </summary>
-public class TicketStoreShim : ITicketStore
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicketStore
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly BffOptions _options;
+    private readonly BffOptions _options = httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOptions<BffOptions>>().Value;
 
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="httpContextAccessor"></param>
-    public TicketStoreShim(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _options = _httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IOptions<BffOptions>>().Value;
-    }
-
-    /// <summary>
-    /// The inner
-    /// </summary>
-    private IServerTicketStore Inner => _httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IServerTicketStore>();
+    private IServerTicketStore Inner => httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IServerTicketStore>();
 
     /// <inheritdoc />
     public Task RemoveAsync(string key)

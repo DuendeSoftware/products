@@ -13,7 +13,11 @@ namespace Duende.Bff;
 /// <summary>
 /// IUserSession-backed ticket store
 /// </summary>
-public class ServerSideTicketStore : IServerTicketStore
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class ServerSideTicketStore(
+    IUserSessionStore store,
+    IDataProtectionProvider dataProtectionProvider,
+    ILogger<ServerSideTicketStore> logger) : IServerTicketStore
 {
     /// <summary>
     /// The "purpose" string to use when protecting and unprotecting server side
@@ -21,25 +25,7 @@ public class ServerSideTicketStore : IServerTicketStore
     /// </summary>
     public static string DataProtectorPurpose = "Duende.Bff.ServerSideTicketStore";
 
-    private readonly IUserSessionStore _store;
-    private readonly IDataProtector _protector;
-    private readonly ILogger<ServerSideTicketStore> _logger;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="store"></param>
-    /// <param name="dataProtectionProvider"></param>
-    /// <param name="logger"></param>
-    public ServerSideTicketStore(
-        IUserSessionStore store,
-        IDataProtectionProvider dataProtectionProvider,
-        ILogger<ServerSideTicketStore> logger)
-    {
-        _store = store;
-        _protector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
-        _logger = logger;
-    }
+    private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
 
     /// <inheritdoc />
     public async Task<string> StoreAsync(AuthenticationTicket ticket)
@@ -47,7 +33,7 @@ public class ServerSideTicketStore : IServerTicketStore
         // it's possible that the user re-triggered OIDC (somehow) prior to
         // the session DB records being cleaned up, so we should preemptively remove
         // conflicting session records for this sub/sid combination
-        await _store.DeleteUserSessionsAsync(new UserSessionsFilter
+        await store.DeleteUserSessionsAsync(new UserSessionsFilter
         {
             SubjectId = ticket.GetSubjectId(),
             SessionId = ticket.GetSessionId()
@@ -62,7 +48,7 @@ public class ServerSideTicketStore : IServerTicketStore
 
     private async Task CreateNewSessionAsync(string key, AuthenticationTicket ticket)
     {
-        _logger.LogDebug("Creating entry in store for AuthenticationTicket, key {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+        logger.LogDebug("Creating entry in store for AuthenticationTicket, key {key}, with expiration: {expiration}", key, ticket.GetExpiration());
 
         var session = new UserSession
         {
@@ -75,30 +61,30 @@ public class ServerSideTicketStore : IServerTicketStore
             Ticket = ticket.Serialize(_protector)
         };
 
-        await _store.CreateUserSessionAsync(session);
+        await store.CreateUserSessionAsync(session);
     }
 
     /// <inheritdoc />
     public async Task<AuthenticationTicket> RetrieveAsync(string key)
     {
-        _logger.LogDebug("Retrieve AuthenticationTicket for key {key}", key);
+        logger.LogDebug("Retrieve AuthenticationTicket for key {key}", key);
 
-        var session = await _store.GetUserSessionAsync(key);
+        var session = await store.GetUserSessionAsync(key);
         if (session == null)
         {
-            _logger.LogDebug("No ticket found in store for {key}", key);
+            logger.LogDebug("No ticket found in store for {key}", key);
             return null;
         }
 
-        var ticket = session.Deserialize(_protector, _logger);
+        var ticket = session.Deserialize(_protector, logger);
         if (ticket != null)
         {
-            _logger.LogDebug("Ticket loaded for key: {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+            logger.LogDebug("Ticket loaded for key: {key}, with expiration: {expiration}", key, ticket.GetExpiration());
             return ticket;
         }
 
         // if we failed to get a ticket, then remove DB record 
-        _logger.LogWarning("Failed to deserialize authentication ticket from store, deleting record for key {key}", key);
+        logger.LogWarning("Failed to deserialize authentication ticket from store, deleting record for key {key}", key);
         await RemoveAsync(key);
 
         return ticket;
@@ -107,7 +93,7 @@ public class ServerSideTicketStore : IServerTicketStore
     /// <inheritdoc />
     public async Task RenewAsync(string key, AuthenticationTicket ticket)
     {
-        var session = await _store.GetUserSessionAsync(key);
+        var session = await store.GetUserSessionAsync(key);
         if (session == null)
         {
             // https://github.com/dotnet/aspnetcore/issues/41516#issuecomment-1178076544
@@ -115,14 +101,14 @@ public class ServerSideTicketStore : IServerTicketStore
             return;
         }
 
-        _logger.LogDebug("Renewing AuthenticationTicket for key {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+        logger.LogDebug("Renewing AuthenticationTicket for key {key}, with expiration: {expiration}", key, ticket.GetExpiration());
 
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
         var isNew = session.SubjectId != sub || session.SessionId != sid;
         var created = isNew ? ticket.GetIssued() : session.Created;
 
-        await _store.UpdateUserSessionAsync(key, new UserSessionUpdate
+        await store.UpdateUserSessionAsync(key, new UserSessionUpdate
         {
             SubjectId = ticket.GetSubjectId(),
             SessionId = ticket.GetSessionId(),
@@ -136,22 +122,22 @@ public class ServerSideTicketStore : IServerTicketStore
     /// <inheritdoc />
     public Task RemoveAsync(string key)
     {
-        _logger.LogDebug("Removing AuthenticationTicket from store for key {key}", key);
+        logger.LogDebug("Removing AuthenticationTicket from store for key {key}", key);
 
-        return _store.DeleteUserSessionAsync(key);
+        return store.DeleteUserSessionAsync(key);
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyCollection<AuthenticationTicket>> GetUserTicketsAsync(UserSessionsFilter filter, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Getting AuthenticationTickets from store for sub {sub} sid {sid}", filter.SubjectId, filter.SessionId);
+        logger.LogDebug("Getting AuthenticationTickets from store for sub {sub} sid {sid}", filter.SubjectId, filter.SessionId);
 
         var list = new List<AuthenticationTicket>();
 
-        var sessions = await _store.GetUserSessionsAsync(filter, cancellationToken);
+        var sessions = await store.GetUserSessionsAsync(filter, cancellationToken);
         foreach (var session in sessions)
         {
-            var ticket = session.Deserialize(_protector, _logger);
+            var ticket = session.Deserialize(_protector, logger);
             if (ticket != null)
             {
                 list.Add(ticket);
@@ -159,7 +145,7 @@ public class ServerSideTicketStore : IServerTicketStore
             else
             {
                 // if we failed to get a ticket, then remove DB record 
-                _logger.LogWarning("Failed to deserialize authentication ticket from store, deleting record for key {key}", session.Key);
+                logger.LogWarning("Failed to deserialize authentication ticket from store, deleting record for key {key}", session.Key);
                 await RemoveAsync(session.Key);
             }
         }

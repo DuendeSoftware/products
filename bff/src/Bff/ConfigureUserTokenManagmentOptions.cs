@@ -11,22 +11,11 @@ namespace Microsoft.AspNetCore.Builder;
 /// Configures the Duende.AccessTokenManagement's UserTokenManagementOptions
 /// based on the BFF's options.
 /// </summary>
-public class ConfigureUserTokenManagementOptions : IConfigureOptions<UserTokenManagementOptions>
+public class ConfigureUserTokenManagementOptions(IOptions<BffOptions> bffOptions) : IConfigureOptions<UserTokenManagementOptions>
 {
-    private readonly BffOptions _bffOptions;
-
-    /// <summary>
-    /// Creates an instance of the <see cref="ConfigureUserTokenManagementOptions"/>
-    /// class.
-    /// </summary>
-    /// <param name="bffOptions"></param>
-    public ConfigureUserTokenManagementOptions(IOptions<BffOptions> bffOptions)
-    {
-        _bffOptions = bffOptions.Value;
-    }
     /// <inheritdoc/>
     public void Configure(UserTokenManagementOptions options)
     {
-        options.DPoPJsonWebKey = _bffOptions.DPoPJsonWebKey;
+        options.DPoPJsonWebKey = bffOptions.Value.DPoPJsonWebKey;
     }
 }

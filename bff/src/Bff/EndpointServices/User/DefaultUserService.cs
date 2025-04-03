@@ -16,28 +16,19 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling user requests
 /// </summary>
-public class DefaultUserService : IUserService
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class DefaultUserService(IOptions<BffOptions> options, ILoggerFactory loggerFactory) : IUserService
 {
     /// <summary>
     /// The options
     /// </summary>
-    protected readonly BffOptions Options;
+    protected readonly BffOptions Options = options.Value;
 
     /// <summary>
     /// The logger
     /// </summary>
-    protected readonly ILogger Logger;
+    protected readonly ILogger Logger = loggerFactory.CreateLogger(LogCategories.ManagementEndpoints);
 
-    /// <summary>
-    /// Ctor
-    /// </summary>
-    /// <param name="options"></param>
-    /// <param name="loggerFactory"></param>
-    public DefaultUserService(IOptions<BffOptions> options, ILoggerFactory loggerFactory)
-    {
-        Options = options.Value;
-        Logger = loggerFactory.CreateLogger(LogCategories.ManagementEndpoints);
-    }
 
     /// <inheritdoc />
     public virtual async Task ProcessRequestAsync(HttpContext context)

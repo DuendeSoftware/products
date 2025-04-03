@@ -14,6 +14,7 @@ namespace Duende.Bff;
 /// <summary>
 ///  Extension methods for AuthenticationTicket
 /// </summary>
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public static class AuthenticationTicketExtensions
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -26,11 +27,13 @@ public static class AuthenticationTicketExtensions
     /// </summary>
     public static string GetSubjectId(this AuthenticationTicket ticket)
     {
-        return ticket.Principal.FindFirst(JwtClaimTypes.Subject)?.Value ??
-               ticket.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-               // for the mfa remember me cookie, ASP.NET Identity uses the 'name' claim for the subject id (for some reason)
-               ticket.Principal.FindFirst(ClaimTypes.Name)?.Value ??
-               throw new InvalidOperationException("Missing 'sub' claim in AuthenticationTicket");
+        var subjectId = ticket.Principal.FindFirst(JwtClaimTypes.Subject)?.Value ??
+                        ticket.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                        // for the mfa remember me cookie, ASP.NET Identity uses the 'name' claim for the subject id (for some reason)
+                        ticket.Principal.FindFirst(ClaimTypes.Name)?.Value ??
+                        throw new InvalidOperationException("Missing 'sub' claim in AuthenticationTicket");
+
+        return subjectId;
     }
 
     /// <summary>

@@ -43,7 +43,9 @@ public class BffBlazorTests : OutputWritingTestBase
                     provider.GetRequiredService<ILoggerFactory>(),
                     provider.GetRequiredService<ICancellationTokenProvider>()));
 
+#pragma warning disable CS0618 // Type or member is obsolete
             services.AddSingleton<DefaultAccessTokenRetriever>();
+#pragma warning restore CS0618 // Type or member is obsolete
         };
     }
 

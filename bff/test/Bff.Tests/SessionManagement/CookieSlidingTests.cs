@@ -11,7 +11,9 @@ namespace Duende.Bff.Tests.SessionManagement;
 
 public class CookieSlidingTests : BffIntegrationTestBase
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     private readonly InMemoryUserSessionStore _sessionStore = new();
+#pragma warning restore CS0618 // Type or member is obsolete
     private readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
 
     public CookieSlidingTests(ITestOutputHelper output) : base(output)

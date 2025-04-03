@@ -9,6 +9,7 @@ namespace Duende.Bff;
 /// <summary>
 ///  Extension methods for AuthenticationProperties
 /// </summary>
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public static class AuthenticationPropertiesExtensions
 {
     /// <summary>

@@ -11,18 +11,12 @@ namespace Duende.Bff;
 
 // this decorates the real authentication service to detect when
 // Challenge of Forbid is being called for a BFF API endpoint
-internal class BffAuthenticationService : IAuthenticationService
+internal class BffAuthenticationService(
+    Decorator<IAuthenticationService> decorator,
+    ILogger<BffAuthenticationService> logger)
+    : IAuthenticationService
 {
-    private readonly IAuthenticationService _inner;
-    private readonly ILogger<BffAuthenticationService> _logger;
-
-    public BffAuthenticationService(
-        Decorator<IAuthenticationService> decorator,
-        ILogger<BffAuthenticationService> logger)
-    {
-        _inner = decorator.Instance;
-        _logger = logger;
-    }
+    private readonly IAuthenticationService _inner = decorator.Instance;
 
     public Task SignInAsync(HttpContext context, string? scheme, ClaimsPrincipal principal, AuthenticationProperties? properties)
     {
@@ -43,25 +37,28 @@ internal class BffAuthenticationService : IAuthenticationService
     {
         await _inner.ChallengeAsync(context, scheme, properties);
 
-        var endpoint = context.GetEndpoint();
-        if (endpoint != null)
+        if (context.Response.StatusCode != 302)
         {
-            if (context.Response.StatusCode == 302)
-            {
-                var isBffEndpoint = endpoint.Metadata.GetMetadata<IBffApiEndpoint>() != null;
-                if (isBffEndpoint)
-                {
-                    var requireResponseHandling = endpoint.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
-                    if (requireResponseHandling)
-                    {
-                        _logger.LogDebug("Challenge was called for a BFF API endpoint, BFF response handling changing status code to 401.");
+            return;
+        }
 
-                        context.Response.StatusCode = 401;
-                        context.Response.Headers.Remove("Location");
-                        context.Response.Headers.Remove("Set-Cookie");
-                    }
-                }
-            }
+        var endpoint = context.GetEndpoint();
+        
+        var isBffEndpoint = endpoint?.Metadata.GetMetadata<IBffApiEndpoint>() != null;
+        if (!isBffEndpoint)
+        {
+            return;
+        }
+
+        var requireResponseHandling = endpoint?.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
+        if (requireResponseHandling)
+        {
+            logger.LogDebug(
+                "Challenge was called for a BFF API endpoint, BFF response handling changing status code to 401.");
+
+            context.Response.StatusCode = 401;
+            context.Response.Headers.Remove("Location");
+            context.Response.Headers.Remove("Set-Cookie");
         }
     }
 
@@ -69,25 +66,29 @@ internal class BffAuthenticationService : IAuthenticationService
     {
         await _inner.ForbidAsync(context, scheme, properties);
 
-        var endpoint = context.GetEndpoint();
-        if (endpoint != null)
-        {
-            if (context.Response.StatusCode == 302)
-            {
-                var isBffEndpoint = endpoint.Metadata.GetMetadata<IBffApiEndpoint>() != null;
-                if (isBffEndpoint)
-                {
-                    var requireResponseHandling = endpoint.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
-                    if (requireResponseHandling)
-                    {
-                        _logger.LogDebug("Forbid was called for a BFF API endpoint, BFF response handling changing status code to 403.");
 
-                        context.Response.StatusCode = 403;
-                        context.Response.Headers.Remove("Location");
-                        context.Response.Headers.Remove("Set-Cookie");
-                    }
-                }
-            }
+        if (context.Response.StatusCode != 302)
+        {
+            return;
+        }
+
+        var endpoint = context.GetEndpoint();
+
+        var isBffEndpoint = endpoint?.Metadata.GetMetadata<IBffApiEndpoint>() != null;
+        if (!isBffEndpoint)
+        {
+            return;
+        }
+
+        var requireResponseHandling = endpoint?.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
+        if (requireResponseHandling)
+        {
+            logger.LogDebug(
+                "Forbid was called for a BFF API endpoint, BFF response handling changing status code to 403.");
+
+            context.Response.StatusCode = 403;
+            context.Response.Headers.Remove("Location");
+            context.Response.Headers.Remove("Set-Cookie");
         }
     }
 }

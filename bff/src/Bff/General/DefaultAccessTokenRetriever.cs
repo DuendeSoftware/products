@@ -8,21 +8,13 @@ namespace Duende.Bff;
 /// <summary>
 /// Default implementation of IAccessTokenRetriever
 /// </summary>
-public class DefaultAccessTokenRetriever : IAccessTokenRetriever
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class DefaultAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger) : IAccessTokenRetriever
 {
     /// <summary>
     /// The logger.
     /// </summary>
     protected readonly ILogger<DefaultAccessTokenRetriever> Logger;
-
-    /// <summary>
-    /// Creates new instances of DefaultAccessTokenRetriever. 
-    /// </summary>
-    /// <param name="logger"></param>
-    public DefaultAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger)
-    {
-        Logger = logger;
-    }
 
     /// <inheritdoc />
     public virtual async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)

@@ -12,24 +12,15 @@ namespace Duende.Bff;
 /// <summary>
 /// Cookie configuration to revoke refresh token on logout.
 /// </summary>
-public class PostConfigureApplicationCookieRevokeRefreshToken : IPostConfigureOptions<CookieAuthenticationOptions>
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class PostConfigureApplicationCookieRevokeRefreshToken(
+    IOptions<BffOptions> bffOptions,
+    IOptions<AuthenticationOptions> authOptions,
+    ILogger<PostConfigureApplicationCookieRevokeRefreshToken> logger)
+    : IPostConfigureOptions<CookieAuthenticationOptions>
 {
-    private readonly BffOptions _options;
-    private readonly string? _scheme;
-    private readonly ILogger<PostConfigureApplicationCookieRevokeRefreshToken> _logger;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="bffOptions"></param>
-    /// <param name="authOptions"></param>
-    /// <param name="logger"></param>
-    public PostConfigureApplicationCookieRevokeRefreshToken(IOptions<BffOptions> bffOptions, IOptions<AuthenticationOptions> authOptions, ILogger<PostConfigureApplicationCookieRevokeRefreshToken> logger)
-    {
-        _options = bffOptions.Value;
-        _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
-        _logger = logger;
-    }
+    private readonly BffOptions _options = bffOptions.Value;
+    private readonly string? _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
@@ -44,12 +35,10 @@ public class PostConfigureApplicationCookieRevokeRefreshToken : IPostConfigureOp
     {
         async Task Callback(CookieSigningOutContext ctx)
         {
-            _logger.LogDebug("Revoking user's refresh tokens in OnSigningOut for subject id: {subjectId}", ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
+            logger.LogDebug("Revoking user's refresh tokens in OnSigningOut for subject id: {subjectId}", ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
             await ctx.HttpContext.RevokeRefreshTokenAsync();
-            if (inner != null)
-            {
-                await inner.Invoke(ctx);
-            }
+
+            await inner.Invoke(ctx);
         }
 
         return Callback;

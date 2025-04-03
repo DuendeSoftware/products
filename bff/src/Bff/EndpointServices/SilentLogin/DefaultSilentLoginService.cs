@@ -17,23 +17,12 @@ public class DefaultSilentLoginService : ISilentLoginService
     /// <summary>
     /// The BFF options
     /// </summary>
-    protected readonly BffOptions Options;
+    protected readonly BffOptions Options = options.Value;
 
     /// <summary>
     /// The logger
     /// </summary>
-    protected readonly ILogger Logger;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="options"></param>
-    /// <param name="logger"></param>
-    public DefaultSilentLoginService(IOptions<BffOptions> options, ILogger<DefaultSilentLoginService> logger)
-    {
-        Options = options.Value;
-        Logger = logger;
-    }
+    protected readonly ILogger Logger = logger;
 
     /// <inheritdoc />
     public virtual async Task ProcessRequestAsync(HttpContext context)

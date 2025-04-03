@@ -11,28 +11,21 @@ namespace Duende.Bff;
 /// <summary>
 /// Cookie configuration for the user session plumbing
 /// </summary>
-public class PostConfigureApplicationCookieTicketStore : IPostConfigureOptions<CookieAuthenticationOptions>
-{
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly string? _scheme;
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class PostConfigureApplicationCookieTicketStore(
+    IHttpContextAccessor httpContextAccessor,
+    IOptions<AuthenticationOptions> options)
+    : IPostConfigureOptions<CookieAuthenticationOptions>
 
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="httpContextAccessor"></param>
-    /// <param name="options"></param>
-    public PostConfigureApplicationCookieTicketStore(IHttpContextAccessor httpContextAccessor, IOptions<AuthenticationOptions> options)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _scheme = options.Value.DefaultAuthenticateScheme ?? options.Value.DefaultScheme;
-    }
+{
+    private readonly string? _scheme = options.Value.DefaultAuthenticateScheme ?? options.Value.DefaultScheme;
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
     {
         if (name == _scheme)
         {
-            options.SessionStore = new TicketStoreShim(_httpContextAccessor);
+            options.SessionStore = new TicketStoreShim(httpContextAccessor);
         }
     }
 }

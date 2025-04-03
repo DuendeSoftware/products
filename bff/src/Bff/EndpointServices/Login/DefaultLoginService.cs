@@ -12,7 +12,9 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling login requests
 /// </summary>
-public class DefaultLoginService : ILoginService
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class DefaultLoginService(IOptions<BffOptions> options, IReturnUrlValidator returnUrlValidator, ILogger<DefaultLoginService> logger) 
+    : ILoginService
 {
     /// <summary>
     /// Authentication scheme provider
@@ -26,39 +28,17 @@ public class DefaultLoginService : ILoginService
     /// <summary>
     /// The BFF options
     /// </summary>
-    protected readonly BffOptions BffOptions;
+    protected readonly BffOptions Options = options.Value;
 
     /// <summary>
     /// The return URL validator
     /// </summary>
-    protected readonly IReturnUrlValidator ReturnUrlValidator;
+    protected readonly IReturnUrlValidator ReturnUrlValidator = returnUrlValidator;
 
     /// <summary>
     /// The logger
     /// </summary>
-    protected readonly ILogger Logger;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="openIdConnectOptionsMonitor"></param>
-    /// <param name="bffOptions"></param>
-    /// <param name="returnUrlValidator"></param>
-    /// <param name="logger"></param>
-    /// <param name="authenticationSchemeProvider"></param>
-    public DefaultLoginService(
-        IAuthenticationSchemeProvider authenticationSchemeProvider,
-        IOptionsMonitor<OpenIdConnectOptions> openIdConnectOptionsMonitor,
-        IOptions<BffOptions> bffOptions,
-        IReturnUrlValidator returnUrlValidator,
-        ILogger<DefaultLoginService> logger)
-    {
-        BffOptions = bffOptions.Value;
-        AuthenticationSchemeProvider = authenticationSchemeProvider;
-        OpenIdConnectOptionsMonitor = openIdConnectOptionsMonitor;
-        ReturnUrlValidator = returnUrlValidator;
-        Logger = logger;
-    }
+    protected readonly ILogger Logger = logger;
 
     /// <inheritdoc />
     public virtual async Task ProcessRequestAsync(HttpContext context)

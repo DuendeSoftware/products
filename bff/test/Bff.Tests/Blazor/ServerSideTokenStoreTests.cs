@@ -35,12 +35,16 @@ public class ServerSideTokenStoreTests
         };
 
         // Create shared dependencies
+#pragma warning disable CS0618 // Type or member is obsolete
         var sessionStore = new InMemoryUserSessionStore();
+#pragma warning restore CS0618 // Type or member is obsolete
         var dataProtection = new EphemeralDataProtectionProvider();
 
         // Use the ticket store to save the user's initial session
         // Note that we don't yet have tokens in the session
+#pragma warning disable CS0618 // Type or member is obsolete
         var sessionService = new ServerSideTicketStore(sessionStore, dataProtection, Substitute.For<ILogger<ServerSideTicketStore>>());
+#pragma warning restore CS0618 // Type or member is obsolete
         await sessionService.StoreAsync(new AuthenticationTicket(
             user,
             props,

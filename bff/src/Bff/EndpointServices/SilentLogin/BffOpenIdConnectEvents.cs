@@ -10,25 +10,13 @@ namespace Duende.Bff;
 /// <summary>
 /// BFF specific OpenIdConnectEvents class.
 /// </summary>
-public class BffOpenIdConnectEvents : OpenIdConnectEvents
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class BffOpenIdConnectEvents(ILogger<BffOpenIdConnectEvents> logger) : OpenIdConnectEvents
 {
     /// <summary>
     /// The logger.
     /// </summary>
-    protected readonly ILogger<BffOpenIdConnectEvents> Logger;
-
-    private readonly IOptions<BffOptions> _options;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="logger"></param>
-    /// <param name="options"></param>
-    public BffOpenIdConnectEvents(ILogger<BffOpenIdConnectEvents> logger, IOptions<BffOptions> options)
-    {
-        Logger = logger;
-        _options = options;
-    }
+    protected readonly ILogger<BffOpenIdConnectEvents> Logger = logger;
 
     /// <inheritdoc/>
     public override async Task RedirectToIdentityProvider(RedirectContext context)
@@ -77,19 +65,21 @@ public class BffOpenIdConnectEvents : OpenIdConnectEvents
     /// </summary>
     public virtual Task<bool> ProcessMessageReceivedAsync(MessageReceivedContext context)
     {
-        if (context.Properties?.IsSilentLogin() == true &&
-            context.Properties?.RedirectUri != null)
+        if (context.Properties?.IsSilentLogin() != true ||
+            context.Properties?.RedirectUri == null)
         {
-            context.HttpContext.Items["silent"] = context.Properties.RedirectUri;
+            return Task.FromResult(false);
+        }
 
-            if (context.ProtocolMessage.Error != null)
-            {
-                Logger.LogDebug("Handling error response from OIDC provider for BFF silent login.");
+        context.HttpContext.Items["silent"] = context.Properties.RedirectUri;
 
-                context.HandleResponse();
-                context.Response.Redirect(context.Properties.RedirectUri);
-                return Task.FromResult(true);
-            }
+        if (context.ProtocolMessage.Error != null)
+        {
+            Logger.LogDebug("Handling error response from OIDC provider for BFF silent login.");
+
+            context.HandleResponse();
+            context.Response.Redirect(context.Properties.RedirectUri);
+            return Task.FromResult(true);
         }
         else if (context.Properties?.TryGetPrompt(out var prompt) == true &&
                  context.Properties?.RedirectUri != null)
@@ -124,16 +114,17 @@ public class BffOpenIdConnectEvents : OpenIdConnectEvents
     /// </summary>
     public virtual Task<bool> ProcessAuthenticationFailedAsync(AuthenticationFailedContext context)
     {
-        if (context.HttpContext.Items.ContainsKey("silent"))
+        if (!context.HttpContext.Items.ContainsKey("silent"))
         {
-            Logger.LogDebug("Handling failed response from OIDC provider for BFF silent login.");
-
-            context.HandleResponse();
-            context.Response.Redirect(context.HttpContext.Items["silent"]!.ToString()!);
-
-            return Task.FromResult(true);
+            return Task.FromResult(false);
         }
 
-        return Task.FromResult(false);
+        Logger.LogDebug("Handling failed response from OIDC provider for BFF silent login.");
+
+        context.HandleResponse();
+        context.Response.Redirect(context.HttpContext.Items[Constants.BffFlags.SilentLogin]!.ToString()!);
+
+        return Task.FromResult(true);
+
     }
 }

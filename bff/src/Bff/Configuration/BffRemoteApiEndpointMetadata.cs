@@ -30,10 +30,7 @@ public class BffRemoteApiEndpointMetadata : IBffApiEndpoint
     /// </summary>
     public Type AccessTokenRetriever
     {
-        get
-        {
-            return _accessTokenRetriever;
-        }
+        get => _accessTokenRetriever;
         set
         {
             if (value.IsAssignableTo(typeof(IAccessTokenRetriever)))

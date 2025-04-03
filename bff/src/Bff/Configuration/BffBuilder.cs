@@ -13,21 +13,12 @@ namespace Microsoft.AspNetCore.Builder;
 /// <summary>
 /// Encapsulates DI options for Duende.BFF
 /// </summary>
-public class BffBuilder
+public class BffBuilder(IServiceCollection services)
 {
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="services"></param>
-    public BffBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
-
     /// <summary>
     /// The service collection
     /// </summary>
-    public IServiceCollection Services { get; }
+    public IServiceCollection Services { get; } = services;
 
     /// <summary>
     /// Adds a server-side session store using the in-memory store

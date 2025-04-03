@@ -12,45 +12,32 @@ namespace Duende.Bff;
 /// <summary>
 /// Service for handling logout requests
 /// </summary>
-public class DefaultLogoutService : ILogoutService
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class DefaultLogoutService(IOptions<BffOptions> options,
+    IAuthenticationSchemeProvider authenticationAuthenticationSchemeProviderProvider,
+    IReturnUrlValidator returnUrlValidator,
+    ILogger<DefaultLogoutService> logger)
+    : ILogoutService
 {
     /// <summary>
     /// The BFF options
     /// </summary>
-    protected readonly BffOptions Options;
+    protected readonly BffOptions Options = options.Value;
 
     /// <summary>
     /// The scheme provider
     /// </summary>
-    protected readonly IAuthenticationSchemeProvider AuthenticationSchemeProvider;
+    protected readonly IAuthenticationSchemeProvider AuthenticationSchemeProvider = authenticationAuthenticationSchemeProviderProvider;
 
     /// <summary>
     /// The return URL validator
     /// </summary>
-    protected readonly IReturnUrlValidator ReturnUrlValidator;
+    protected readonly IReturnUrlValidator ReturnUrlValidator = returnUrlValidator;
 
     /// <summary>
     /// The logger
     /// </summary>
-    protected readonly ILogger Logger;
-
-    /// <summary>
-    /// Ctor
-    /// </summary>
-    /// <param name="options"></param>
-    /// <param name="authenticationAuthenticationSchemeProviderProvider"></param>
-    /// <param name="returnUrlValidator"></param>
-    /// <param name="logger"></param>
-    public DefaultLogoutService(IOptions<BffOptions> options,
-        IAuthenticationSchemeProvider authenticationAuthenticationSchemeProviderProvider,
-        IReturnUrlValidator returnUrlValidator,
-        ILogger<DefaultLogoutService> logger)
-    {
-        Options = options.Value;
-        AuthenticationSchemeProvider = authenticationAuthenticationSchemeProviderProvider;
-        ReturnUrlValidator = returnUrlValidator;
-        Logger = logger;
-    }
+    protected readonly ILogger Logger = logger;
 
     /// <inheritdoc />
     public virtual async Task ProcessRequestAsync(HttpContext context)
