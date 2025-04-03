@@ -52,6 +52,4 @@ public static class BffYarpEndpointRouteBuilderExtensions
                 })
             .WithMetadata(new BffRemoteApiEndpointMetadata());
     }
-
-
 }

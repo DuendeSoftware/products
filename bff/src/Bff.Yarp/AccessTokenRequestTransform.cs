@@ -20,12 +20,12 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Adds an access token to outgoing requests
 /// </summary>
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class AccessTokenRequestTransform(
     IOptions<BffOptions> options,
     IDPoPProofService proofService,
     ILogger<AccessTokenRequestTransform> logger) : RequestTransform
 {
-
     /// <inheritdoc />
     public override async ValueTask ApplyAsync(RequestTransformContext context)
     {
@@ -34,6 +34,7 @@ public class AccessTokenRequestTransform(
         {
             throw new InvalidOperationException("endpoint not found");
         }
+
         UserTokenRequestParameters? userAccessTokenParameters = null;
 
         context.HttpContext.RequestServices.CheckLicense();
@@ -88,9 +89,7 @@ public class AccessTokenRequestTransform(
 
                 ApplyError(context, tokenError, metadata.RequiredTokenType);
                 break;
-            case NoAccessTokenResult noToken:
-                break;
-            default:
+            case NoAccessTokenResult:
                 break;
         }
     }
@@ -108,7 +107,6 @@ public class AccessTokenRequestTransform(
 
             logger.UserSessionRevoked(tokenError.Error);
             return true;
-
         }
 
         return false;
@@ -121,14 +119,14 @@ public class AccessTokenRequestTransform(
             return null;
 
         TokenType? requiredTokenType = null;
-        if (Enum.TryParse<TokenType>(yarp.Config?.Metadata?.GetValueOrDefault(Constants.Yarp.TokenTypeMetadata), true, out var type))
+        if (Enum.TryParse<TokenType>(yarp.Config.Metadata?.GetValueOrDefault(Constants.Yarp.TokenTypeMetadata), true, out var type))
         {
             requiredTokenType = type;
         }
 
         return new BffRemoteApiEndpointMetadata()
         {
-            OptionalUserToken = yarp.Config?.Metadata?.GetValueOrDefault(Constants.Yarp.OptionalUserTokenMetadata) == "true",
+            OptionalUserToken = yarp.Config.Metadata?.GetValueOrDefault(Constants.Yarp.OptionalUserTokenMetadata) == "true",
             RequiredTokenType = requiredTokenType
         };
     }

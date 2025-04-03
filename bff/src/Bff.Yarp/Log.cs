@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Duende.Bff.Yarp.Logging;
+namespace Duende.Bff.Yarp;
 
 internal static class EventIds
 {
@@ -12,7 +12,6 @@ internal static class EventIds
 
 internal static class Log
 {
-
     private static readonly Action<ILogger, string, string, Exception?> ProxyResponseErrorMessage = LoggerMessage.Define<string, string>(
         LogLevel.Information,
         EventIds.ProxyError,

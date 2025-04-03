@@ -3,6 +3,7 @@
 
 namespace Duende.Bff.Blazor.Client;
 
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
 public class AntiforgeryHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,

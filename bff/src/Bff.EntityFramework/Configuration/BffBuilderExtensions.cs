@@ -6,6 +6,7 @@ using Duende.Bff.EntityFramework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -71,9 +72,11 @@ public static class BffBuilderExtensions
     public static BffBuilder AddEntityFrameworkServerSideSessionsServices<TContext>(this BffBuilder bffBuilder)
         where TContext : ISessionDbContext
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         bffBuilder.Services.AddTransient<IUserSessionStoreCleanup, UserSessionStore>();
         bffBuilder.Services.AddTransient<ISessionDbContext>(svcs => svcs.GetRequiredService<TContext>());
         return bffBuilder.AddServerSideSessions<UserSessionStore>();
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     /// <summary>

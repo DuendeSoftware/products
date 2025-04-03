@@ -3,6 +3,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff.EntityFramework;
 
 /// <summary>

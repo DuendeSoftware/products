@@ -18,4 +18,10 @@ public static class Constants
         /// </summary>
         public const string LogoutUrl = "bff:logout_url";
     }
+
+    internal class ObsoleteMessages
+    {
+        public const string ImplementationWillBeMadeInternal =
+            "The implementation for this class will be made internal in a future release.";
+    }
 }

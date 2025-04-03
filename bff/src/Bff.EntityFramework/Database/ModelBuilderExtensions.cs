@@ -4,6 +4,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+// ReSharper disable CheckNamespace
 namespace Duende.Bff.EntityFramework;
 
 /// <summary>

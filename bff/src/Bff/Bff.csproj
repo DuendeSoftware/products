@@ -14,5 +14,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Duende.Bff.Blazor" />
+    <InternalsVisibleTo Include="Duende.Bff.EntityFramework" />
   </ItemGroup>
 </Project>

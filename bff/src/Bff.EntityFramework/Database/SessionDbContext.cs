@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace Duende.Bff.EntityFramework;
 
 /// <summary>
@@ -50,7 +51,7 @@ public class SessionDbContext<TContext> : DbContext, ISessionDbContext
     {
         if (StoreOptions is null)
         {
-            StoreOptions = this.GetService<IOptions<SessionStoreOptions>>()?.Value ?? new SessionStoreOptions();
+            StoreOptions = this.GetService<IOptions<SessionStoreOptions>>().Value;
         }
 
         ConfigureSchema(modelBuilder);

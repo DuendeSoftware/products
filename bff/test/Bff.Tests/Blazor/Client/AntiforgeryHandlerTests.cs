@@ -23,7 +23,9 @@ public class AntiforgeryHandlerTests
     }
 }
 
+#pragma warning disable CS0618 // Type or member is obsolete
 public class TestAntiforgeryHandler : AntiforgeryHandler
+#pragma warning restore CS0618 // Type or member is obsolete
 {
     public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {

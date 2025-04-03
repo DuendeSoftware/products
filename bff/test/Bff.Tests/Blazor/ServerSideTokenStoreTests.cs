@@ -52,12 +52,16 @@ public class ServerSideTokenStoreTests
         ));
 
         var tokensInProps = MockStoreTokensInAuthProps();
+#pragma warning disable CS0618 // Type or member is obsolete
+
         var sut = new ServerSideTokenStore(
             tokensInProps,
             sessionStore,
             dataProtection,
             Substitute.For<ILogger<ServerSideTokenStore>>(),
             Substitute.For<AuthenticationStateProvider, IHostEnvironmentAuthenticationStateProvider>());
+#pragma warning restore CS0618 // Type or member is obsolete
+
 
         await sut.StoreTokenAsync(user, expectedToken);
         var actualToken = await sut.GetTokenAsync(user);

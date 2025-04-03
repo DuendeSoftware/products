@@ -14,27 +14,10 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Transform provider to attach an access token to forwarded calls
 /// </summary>
-public class AccessTokenTransformProvider : ITransformProvider
+[Obsolete(Constants.ObsoleteMessages.ImplementationWillBeMadeInternal)]
+public class AccessTokenTransformProvider(IOptions<BffOptions> options, ILogger<AccessTokenTransformProvider> logger, ILoggerFactory loggerFactory, IDPoPProofService dPoPProofService) : ITransformProvider
 {
-    private readonly BffOptions _options;
-    private readonly ILogger<AccessTokenTransformProvider> _logger;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly IDPoPProofService _dPoPProofService;
-
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="options"></param>
-    /// <param name="logger"></param>
-    /// <param name="loggerFactory"></param>
-    /// <param name="dPoPProofService"></param>
-    public AccessTokenTransformProvider(IOptions<BffOptions> options, ILogger<AccessTokenTransformProvider> logger, ILoggerFactory loggerFactory, IDPoPProofService dPoPProofService)
-    {
-        _options = options.Value;
-        _logger = logger;
-        _loggerFactory = loggerFactory;
-        _dPoPProofService = dPoPProofService;
-    }
+    private readonly BffOptions _options = options.Value;
 
     /// <inheritdoc />
     public void ValidateRoute(TransformRouteValidationContext context)
@@ -68,6 +51,7 @@ public class AccessTokenTransformProvider : ITransformProvider
             throw new ArgumentException(
                 $"Mismatching {metadataName} route and cluster metadata values found");
         }
+
         metadata = values.First();
         return true;
     }
@@ -75,14 +59,14 @@ public class AccessTokenTransformProvider : ITransformProvider
     /// <inheritdoc />
     public void Apply(TransformBuilderContext transformBuildContext)
     {
-        if (GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out var optionalTokenMetadata))
+        if (GetMetadataValue(transformBuildContext, Constants.Yarp.OptionalUserTokenMetadata, out _))
         {
-            if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out var tokenTypeMetadata))
+            if (GetMetadataValue(transformBuildContext, Constants.Yarp.TokenTypeMetadata, out _))
             {
                 transformBuildContext.AddRequestTransform(ctx =>
                 {
                     ctx.HttpContext.Response.StatusCode = 500;
-                    _logger.InvalidRouteConfiguration(transformBuildContext.Route.ClusterId, transformBuildContext.Route.RouteId);
+                    logger.InvalidRouteConfiguration(transformBuildContext.Route.ClusterId, transformBuildContext.Route.RouteId);
 
                     return ValueTask.CompletedTask;
                 });
@@ -107,8 +91,8 @@ public class AccessTokenTransformProvider : ITransformProvider
 
             var accessTokenTransform = new AccessTokenRequestTransform(
                 Options.Create(_options),
-                _dPoPProofService,
-                _loggerFactory.CreateLogger<AccessTokenRequestTransform>());
+                dPoPProofService,
+                loggerFactory.CreateLogger<AccessTokenRequestTransform>());
 
             await accessTokenTransform.ApplyAsync(transformContext);
         });

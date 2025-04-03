@@ -47,5 +47,4 @@ public static class ReverseProxyEndpointConventionBuilderExtensions
     {
         return builder.WithMetadata(new BffApiAttribute());
     }
-
 }

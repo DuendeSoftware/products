@@ -17,7 +17,9 @@ public static class ReverseProxyBuilderExtensions
     /// <returns></returns>
     public static IReverseProxyBuilder AddBffExtensions(this IReverseProxyBuilder builder)
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         builder.AddTransforms<AccessTokenTransformProvider>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
         return builder;
     }

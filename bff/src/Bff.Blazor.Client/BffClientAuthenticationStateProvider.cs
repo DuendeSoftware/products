@@ -14,10 +14,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     public const string HttpClientName = "Duende.Bff.Blazor.Client:StateProvider";
 
     private readonly FetchUserService _fetchUserService;
-    private readonly PersistentUserService _persistentUserService;
-    private readonly TimeProvider _timeProvider;
-    private readonly BffBlazorClientOptions _options;
-    private readonly ITimer? _timer;
+    private ITimer? _timer;
     private ClaimsPrincipal? _user;
     private readonly ILogger<BffClientAuthenticationStateProvider> _logger;
 
@@ -34,15 +31,12 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         ILogger<BffClientAuthenticationStateProvider> logger)
     {
         _fetchUserService = fetchUserService;
-        _persistentUserService = persistentUserService;
-        _timeProvider = timeProvider;
-        _options = options.Value;
-        _persistentUserService.GetPersistedUser(out var user);
+        persistentUserService.GetPersistedUser(out var user);
         _user = user;
-        _timer = _timeProvider.CreateTimer(TimerCallback,
+        _timer = timeProvider.CreateTimer(TimerCallback,
             null,
-            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingDelay),
-            TimeSpan.FromMilliseconds(_options.WebAssemblyStateProviderPollingInterval));
+            TimeSpan.FromMilliseconds(options.Value.WebAssemblyStateProviderPollingDelay),
+            TimeSpan.FromMilliseconds(options.Value.WebAssemblyStateProviderPollingInterval));
         _logger = logger;
     }
 
@@ -80,12 +74,13 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
             if (_timer != null)
             {
                 await _timer.DisposeAsync();
+                _timer = null;
             }
         }
 
         return user;
-
     }
+
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         // There is a (theoretical) possibility that the timer and the GetAuthenticationStateAsync are fired
