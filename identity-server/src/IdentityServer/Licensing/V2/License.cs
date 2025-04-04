@@ -148,12 +148,12 @@ internal class License
     /// <summary>
     /// The client limit
     /// </summary>
-    public int? ClientLimit { get; set; }
+    public int? ClientLimit { get; init; }
 
     /// <summary>
     /// The issuer limit
     /// </summary>
-    public int? IssuerLimit { get; set; }
+    public int? IssuerLimit { get; init; }
 
     /// <summary>
     /// The license features
