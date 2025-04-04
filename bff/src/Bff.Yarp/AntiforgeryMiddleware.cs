@@ -38,6 +38,14 @@ public class AntiforgeryMiddleware
     {
         var route = context.GetRouteModel();
 
+        // Check if the request is a WebSocket request
+        if (_options.DisableAntiForgeryCheck(context))
+        {
+            await _next(context);
+            return;
+        }
+
+
         if (route.Config.Metadata != null)
         {
             if (route.Config.Metadata.TryGetValue(Constants.Yarp.AntiforgeryCheckMetadata, out var value))

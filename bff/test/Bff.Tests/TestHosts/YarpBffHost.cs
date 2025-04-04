@@ -51,7 +51,10 @@ public class YarpBffHost : GenericHost
         services.AddRouting();
         services.AddAuthorization();
 
-        var bff = services.AddBff(options => { BffOptions = options; });
+        var bff = services.AddBff(options =>
+        {
+            BffOptions = options;
+        });
 
         services.AddSingleton<IForwarderHttpClientFactory>(
             new CallbackForwarderHttpClientFactory(

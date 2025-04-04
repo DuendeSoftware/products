@@ -27,7 +27,16 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
+    [Fact]
+    public async Task can_disable_anti_forgery_check()
+    {
+        YarpBasedBffHost.BffOptions.DisableAntiForgeryCheck = (c) => true;
 
+        var req = new HttpRequestMessage(HttpMethod.Get, YarpBasedBffHost.Url("/api_anon/test"));
+        var response = await YarpBasedBffHost.BrowserClient.SendAsync(req);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
 
     [Fact]
     public async Task anonymous_call_to_no_token_requirement_route_should_succeed()

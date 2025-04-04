@@ -338,4 +338,14 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform",
             "a custom transform doesn't run the defaults");
     }
+    [Fact]
+    public async Task can_disable_anti_forgery_check()
+    {
+        BffHost.BffOptions.DisableAntiForgeryCheck = (c) => true;
+
+        var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user_or_anon/test"));
+        var response = await BffHost.BrowserClient.SendAsync(req);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
 }
