@@ -277,7 +277,7 @@
     }
     public interface IUserSessionStoreCleanup
     {
-        System.Threading.Tasks.Task DeleteExpiredSessionsAsync(System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<int> DeleteExpiredSessionsAsync(System.Threading.CancellationToken cancellationToken = default);
     }
     public class InMemoryUserSessionStore : Duende.Bff.IUserSessionStore
     {
@@ -334,7 +334,7 @@
     public class ServerSideTicketStore : Duende.Bff.IServerTicketStore, Microsoft.AspNetCore.Authentication.Cookies.ITicketStore
     {
         public static string DataProtectorPurpose;
-        public ServerSideTicketStore(Duende.Bff.IUserSessionStore store, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dataProtectionProvider, Microsoft.Extensions.Logging.ILogger<Duende.Bff.ServerSideTicketStore> logger) { }
+        public ServerSideTicketStore(Duende.Bff.Internal.BffMetrics metrics, Duende.Bff.IUserSessionStore store, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dataProtectionProvider, Microsoft.Extensions.Logging.ILogger<Duende.Bff.ServerSideTicketStore> logger) { }
         public System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Microsoft.AspNetCore.Authentication.AuthenticationTicket>> GetUserTicketsAsync(Duende.Bff.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task RemoveAsync(string key) { }
         public System.Threading.Tasks.Task RenewAsync(string key, Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
@@ -343,7 +343,7 @@
     }
     public class SessionCleanupHost : Microsoft.Extensions.Hosting.IHostedService
     {
-        public SessionCleanupHost(System.IServiceProvider serviceProvider, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.SessionCleanupHost> logger) { }
+        public SessionCleanupHost(Duende.Bff.Internal.BffMetrics metrics, System.IServiceProvider serviceProvider, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.SessionCleanupHost> logger) { }
         public System.Threading.Tasks.Task StartAsync(System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task StopAsync(System.Threading.CancellationToken cancellationToken) { }
     }
@@ -406,5 +406,16 @@ namespace Duende.Bff.Endpoints
     {
         public BffMiddleware(Microsoft.AspNetCore.Http.RequestDelegate next, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Endpoints.BffMiddleware> logger) { }
         public System.Threading.Tasks.Task Invoke(Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
+}
+namespace Duende.Bff.Internal
+{
+    public sealed class BffMetrics
+    {
+        public const string MeterName = "Duende.Bff";
+        public BffMetrics(System.Diagnostics.Metrics.IMeterFactory meterFactory) { }
+        public void SessionEnded() { }
+        public void SessionStarted() { }
+        public void SessionsEnded(int count) { }
     }
 }

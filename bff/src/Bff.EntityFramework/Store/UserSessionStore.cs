@@ -221,8 +221,10 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
     }
 
     /// <inheritdoc/>
-    public async Task DeleteExpiredSessionsAsync(CancellationToken cancellationToken = default)
+    public async Task<int> DeleteExpiredSessionsAsync(CancellationToken cancellationToken = default)
     {
+        var removed = 0;
+
         var found = int.MaxValue;
         var batchSize = 100;
 
@@ -244,7 +246,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
             logger.LogDebug("Removing {serverSideSessionCount} server side sessions", found);
 
             sessionDbContext.UserSessions.RemoveRange(expired);
-
+            removed += found;
             try
             {
                 await sessionDbContext.SaveChangesAsync(cancellationToken);
@@ -261,5 +263,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
                 }
             }
         }
+
+        return removed;
     }
 }

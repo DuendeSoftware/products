@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Internal;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -13,6 +14,7 @@ namespace Duende.Bff;
 /// IUserSession-backed ticket store
 /// </summary>
 public class ServerSideTicketStore(
+    BffMetrics metrics,
     IUserSessionStore store,
     IDataProtectionProvider dataProtectionProvider,
     ILogger<ServerSideTicketStore> logger) : IServerTicketStore
@@ -60,6 +62,7 @@ public class ServerSideTicketStore(
         };
 
         await store.CreateUserSessionAsync(session);
+        metrics.SessionStarted();
     }
 
     /// <inheritdoc />
@@ -84,7 +87,6 @@ public class ServerSideTicketStore(
         // if we failed to get a ticket, then remove DB record 
         logger.LogWarning("Failed to deserialize authentication ticket from store, deleting record for key {key}", key);
         await RemoveAsync(key);
-
         return ticket;
     }
 
@@ -121,6 +123,7 @@ public class ServerSideTicketStore(
     public Task RemoveAsync(string key)
     {
         logger.LogDebug("Removing AuthenticationTicket from store for key {key}", key);
+        metrics.SessionEnded();
 
         return store.DeleteUserSessionAsync(key);
     }
