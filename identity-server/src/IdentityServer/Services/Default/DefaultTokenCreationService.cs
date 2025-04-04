@@ -106,6 +106,10 @@ public class DefaultTokenCreationService : ITokenCreationService
                 additionalHeaderElements.Add("typ", Options.LogoutTokenJwtType);
             }
         }
+        else if (token.Type == IdentityServerConstants.TokenTypes.IntrospectionResponseToken)
+        {
+            additionalHeaderElements.Add("typ", "token-introspection+jwt");
+        }
 
         return Task.FromResult(additionalHeaderElements);
     }
