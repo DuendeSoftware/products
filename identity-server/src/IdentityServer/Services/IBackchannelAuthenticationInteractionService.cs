@@ -38,10 +38,7 @@ public class CompleteBackchannelLoginRequest
     /// <summary>
     /// Ctor
     /// </summary>
-    public CompleteBackchannelLoginRequest(string internalId)
-    {
-        InternalId = internalId ?? throw new ArgumentNullException(nameof(internalId));
-    }
+    public CompleteBackchannelLoginRequest(string internalId) => InternalId = internalId ?? throw new ArgumentNullException(nameof(internalId));
 
     /// <summary>
     /// The internal store id for the request.

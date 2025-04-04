@@ -47,10 +47,7 @@ public class YarpBffIntegrationTestBase : OutputWritingTestBase
         _bffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(WriteLine, _identityServerHost, ApiHost, "spa");
     }
 
-    public async Task Login(string sub)
-    {
-        await _identityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
-    }
+    public async Task Login(string sub) => await _identityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
 
     public override async Task InitializeAsync()
     {

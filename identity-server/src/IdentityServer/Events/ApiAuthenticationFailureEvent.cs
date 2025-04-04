@@ -20,10 +20,7 @@ public class ApiAuthenticationFailureEvent : Event
             "API Authentication Failure",
             EventTypes.Failure,
             EventIds.ApiAuthenticationFailure,
-            message)
-    {
-        ApiName = apiName;
-    }
+            message) => ApiName = apiName;
 
     /// <summary>
     /// Gets or sets the name of the API.

@@ -9,22 +9,19 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class EndpointOptionsExtensions
 {
-    public static bool IsEndpointEnabled(this EndpointsOptions options, Endpoint endpoint)
+    public static bool IsEndpointEnabled(this EndpointsOptions options, Endpoint endpoint) => endpoint?.Name switch
     {
-        return endpoint?.Name switch
-        {
-            IdentityServerConstants.EndpointNames.Authorize => options.EnableAuthorizeEndpoint,
-            IdentityServerConstants.EndpointNames.CheckSession => options.EnableCheckSessionEndpoint,
-            IdentityServerConstants.EndpointNames.DeviceAuthorization => options.EnableDeviceAuthorizationEndpoint,
-            IdentityServerConstants.EndpointNames.Discovery => options.EnableDiscoveryEndpoint,
-            IdentityServerConstants.EndpointNames.EndSession => options.EnableEndSessionEndpoint,
-            IdentityServerConstants.EndpointNames.Introspection => options.EnableIntrospectionEndpoint,
-            IdentityServerConstants.EndpointNames.Revocation => options.EnableTokenRevocationEndpoint,
-            IdentityServerConstants.EndpointNames.Token => options.EnableTokenEndpoint,
-            IdentityServerConstants.EndpointNames.UserInfo => options.EnableUserInfoEndpoint,
-            IdentityServerConstants.EndpointNames.PushedAuthorization => options.EnablePushedAuthorizationEndpoint,
-            IdentityServerConstants.EndpointNames.BackchannelAuthentication => options.EnableBackchannelAuthenticationEndpoint,
-            _ => true
-        };
-    }
+        IdentityServerConstants.EndpointNames.Authorize => options.EnableAuthorizeEndpoint,
+        IdentityServerConstants.EndpointNames.CheckSession => options.EnableCheckSessionEndpoint,
+        IdentityServerConstants.EndpointNames.DeviceAuthorization => options.EnableDeviceAuthorizationEndpoint,
+        IdentityServerConstants.EndpointNames.Discovery => options.EnableDiscoveryEndpoint,
+        IdentityServerConstants.EndpointNames.EndSession => options.EnableEndSessionEndpoint,
+        IdentityServerConstants.EndpointNames.Introspection => options.EnableIntrospectionEndpoint,
+        IdentityServerConstants.EndpointNames.Revocation => options.EnableTokenRevocationEndpoint,
+        IdentityServerConstants.EndpointNames.Token => options.EnableTokenEndpoint,
+        IdentityServerConstants.EndpointNames.UserInfo => options.EnableUserInfoEndpoint,
+        IdentityServerConstants.EndpointNames.PushedAuthorization => options.EnablePushedAuthorizationEndpoint,
+        IdentityServerConstants.EndpointNames.BackchannelAuthentication => options.EnableBackchannelAuthenticationEndpoint,
+        _ => true
+    };
 }

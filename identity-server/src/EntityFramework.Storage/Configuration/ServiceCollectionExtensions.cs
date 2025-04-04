@@ -24,10 +24,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
     /// <param name="storeOptionsAction">The store options action.</param>
     /// <returns></returns>
     public static IServiceCollection AddConfigurationDbContext(this IServiceCollection services,
-        Action<ConfigurationStoreOptions>? storeOptionsAction = null)
-    {
-        return services.AddConfigurationDbContext<ConfigurationDbContext>(storeOptionsAction);
-    }
+        Action<ConfigurationStoreOptions>? storeOptionsAction = null) => services.AddConfigurationDbContext<ConfigurationDbContext>(storeOptionsAction);
 
     /// <summary>
     /// Add Configuration DbContext to the DI system.
@@ -98,10 +95,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
     /// <param name="storeOptionsAction">The store options action.</param>
     /// <returns></returns>
     public static IServiceCollection AddOperationalDbContext(this IServiceCollection services,
-        Action<OperationalStoreOptions>? storeOptionsAction = null)
-    {
-        return services.AddOperationalDbContext<PersistedGrantDbContext>(storeOptionsAction);
-    }
+        Action<OperationalStoreOptions>? storeOptionsAction = null) => services.AddOperationalDbContext<PersistedGrantDbContext>(storeOptionsAction);
 
     /// <summary>
     /// Adds operational DbContext to the DI system.

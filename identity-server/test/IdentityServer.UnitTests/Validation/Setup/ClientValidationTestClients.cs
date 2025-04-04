@@ -11,9 +11,7 @@ namespace UnitTests.Validation.Setup;
 
 internal static class ClientValidationTestClients
 {
-    public static List<Client> Get()
-    {
-        return new List<Client>
+    public static List<Client> Get() => new List<Client>
         {
             new Client
             {
@@ -206,5 +204,4 @@ internal static class ClientValidationTestClients
                 }
             }
         };
-    }
 }

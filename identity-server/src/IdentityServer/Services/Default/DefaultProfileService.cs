@@ -23,10 +23,7 @@ public class DefaultProfileService : IProfileService
     /// Initializes a new instance of the <see cref="DefaultProfileService"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public DefaultProfileService(ILogger<DefaultProfileService> logger)
-    {
-        Logger = logger;
-    }
+    public DefaultProfileService(ILogger<DefaultProfileService> logger) => Logger = logger;
 
     /// <summary>
     /// This method is called whenever claims about the user are requested (e.g. during token creation or via the userinfo endpoint)

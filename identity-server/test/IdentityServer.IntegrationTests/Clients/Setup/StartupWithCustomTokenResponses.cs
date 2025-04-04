@@ -40,8 +40,5 @@ public class StartupWithCustomTokenResponses
         builder.AddExtensionGrantValidator<CustomResponseExtensionGrantValidator>();
     }
 
-    public void Configure(IApplicationBuilder app)
-    {
-        app.UseIdentityServer();
-    }
+    public void Configure(IApplicationBuilder app) => app.UseIdentityServer();
 }

@@ -10,10 +10,7 @@ public class NewModel : PageModel
 {
     private readonly IdentityScopeRepository _repository;
 
-    public NewModel(IdentityScopeRepository repository)
-    {
-        _repository = repository;
-    }
+    public NewModel(IdentityScopeRepository repository) => _repository = repository;
 
     [BindProperty]
     public IdentityScopeModel InputModel { get; set; } = default!;

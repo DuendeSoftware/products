@@ -49,8 +49,5 @@ public class IntegrationTestBase : IDisposable
         _loggingScope.Dispose();
     }
 
-    public HttpClient CreateHttpClient(string clientName)
-    {
-        return Fixture.CreateHttpClient(clientName);
-    }
+    public HttpClient CreateHttpClient(string clientName) => Fixture.CreateHttpClient(clientName);
 }

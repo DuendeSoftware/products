@@ -11,10 +11,7 @@ public class ClientAssertionService : IClientAssertionService
 {
     private readonly AssertionService _assertionService;
 
-    public ClientAssertionService(AssertionService assertionService)
-    {
-        _assertionService = assertionService;
-    }
+    public ClientAssertionService(AssertionService assertionService) => _assertionService = assertionService;
 
     public Task<ClientAssertion> GetClientAssertionAsync(string clientName = null, TokenRequestParameters parameters = null)
     {

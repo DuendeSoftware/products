@@ -13,10 +13,7 @@ public class DistributedCacheAuthorizationParametersMessageStoreTests
 {
     private MockDistributedCache _mockCache = new MockDistributedCache();
     private DistributedCacheAuthorizationParametersMessageStore _subject;
-    public DistributedCacheAuthorizationParametersMessageStoreTests()
-    {
-        _subject = new DistributedCacheAuthorizationParametersMessageStore(_mockCache, new DefaultHandleGenerationService());
-    }
+    public DistributedCacheAuthorizationParametersMessageStoreTests() => _subject = new DistributedCacheAuthorizationParametersMessageStore(_mockCache, new DefaultHandleGenerationService());
 
     [Fact]
     public async Task DeleteAsync_should_remove_item()

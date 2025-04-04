@@ -19,10 +19,7 @@ public class DefaultReplayCache : IReplayCache
     /// ctor
     /// </summary>
     /// <param name="cache"></param>
-    public DefaultReplayCache(IDistributedCache cache)
-    {
-        _cache = cache;
-    }
+    public DefaultReplayCache(IDistributedCache cache) => _cache = cache;
 
     /// <inheritdoc />
     public async Task AddAsync(string purpose, string handle, DateTimeOffset expiration)

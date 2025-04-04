@@ -112,18 +112,12 @@ public class EndpointRouterTests
 
     private class MyEndpointHandler : IEndpointHandler
     {
-        public Task<IEndpointResult> ProcessAsync(HttpContext context)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<IEndpointResult> ProcessAsync(HttpContext context) => throw new NotImplementedException();
     }
 
     private class MyOtherEndpointHandler : IEndpointHandler
     {
-        public Task<IEndpointResult> ProcessAsync(HttpContext context)
-        {
-            throw new NotImplementedException();
-        }
+        public Task<IEndpointResult> ProcessAsync(HttpContext context) => throw new NotImplementedException();
     }
 
     private class StubServiceProvider : IServiceProvider

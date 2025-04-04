@@ -10,10 +10,7 @@ namespace IdentityServer.UnitTests.Caches;
 public class MockCache<T> : ICache<T>
     where T : class
 {
-    public MockCache(IClock clock)
-    {
-        _clock = clock;
-    }
+    public MockCache(IClock clock) => _clock = clock;
 
     public class CacheItem
     {

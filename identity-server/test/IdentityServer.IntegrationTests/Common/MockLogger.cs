@@ -8,10 +8,7 @@ namespace IdentityServer.IntegrationTests.Common;
 public class MockLogger : ILogger
 {
     public static MockLogger Create() => new MockLogger(new LoggerExternalScopeProvider());
-    public MockLogger(LoggerExternalScopeProvider scopeProvider)
-    {
-        _scopeProvider = scopeProvider;
-    }
+    public MockLogger(LoggerExternalScopeProvider scopeProvider) => _scopeProvider = scopeProvider;
 
     public readonly List<string> LogMessages = new();
 
@@ -23,10 +20,7 @@ public class MockLogger : ILogger
 
     public bool IsEnabled(LogLevel logLevel) => true;
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-    {
-        LogMessages.Add(formatter(state, exception));
-    }
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) => LogMessages.Add(formatter(state, exception));
 }
 
 public class MockLogger<T> : MockLogger, ILogger<T>
@@ -42,8 +36,5 @@ public class MockLoggerProvider(MockLogger logger) : ILoggerProvider
     {
     }
 
-    public ILogger CreateLogger(string categoryName)
-    {
-        return logger;
-    }
+    public ILogger CreateLogger(string categoryName) => logger;
 }

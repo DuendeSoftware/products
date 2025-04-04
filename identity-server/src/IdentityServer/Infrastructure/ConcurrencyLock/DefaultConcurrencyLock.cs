@@ -23,8 +23,5 @@ public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>
     }
 
     /// <inheritdoc/>
-    public void Unlock()
-    {
-        Lock.Release();
-    }
+    public void Unlock() => Lock.Release();
 }

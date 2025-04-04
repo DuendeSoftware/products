@@ -19,10 +19,7 @@ public class UseAspNetIdentityCookieScheme : IPostConfigureOptions<IdentityServe
     /// ctor
     /// </summary>
     /// <param name="authOptions"></param>
-    public UseAspNetIdentityCookieScheme(IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> authOptions)
-    {
-        _authOptions = authOptions;
-    }
+    public UseAspNetIdentityCookieScheme(IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> authOptions) => _authOptions = authOptions;
 
     /// <inheritdoc/>
     public void PostConfigure(string name, IdentityServerOptions options)

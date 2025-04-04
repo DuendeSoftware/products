@@ -10,11 +10,8 @@ namespace IdentityServerHost.Pages.Home;
 [AllowAnonymous]
 public class Index : PageModel
 {
-    public string Version
-    {
-        get => typeof(Duende.IdentityServer.Hosting.IdentityServerMiddleware).Assembly
+    public string Version => typeof(Duende.IdentityServer.Hosting.IdentityServerMiddleware).Assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             ?.InformationalVersion.Split('+').First()
             ?? "unavailable";
-    }
 }

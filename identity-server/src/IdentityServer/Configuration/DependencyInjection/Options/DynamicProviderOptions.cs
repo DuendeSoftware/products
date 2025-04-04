@@ -32,14 +32,8 @@ public class DynamicProviderOptions
     /// </summary>
     public string SignOutScheme
     {
-        get
-        {
-            return _signOutScheme ?? IdentityServerConstants.DefaultCookieAuthenticationScheme;
-        }
-        set
-        {
-            _signOutScheme = value;
-        }
+        get => _signOutScheme ?? IdentityServerConstants.DefaultCookieAuthenticationScheme;
+        set => _signOutScheme = value;
     }
 
     private string? _signOutScheme;
@@ -47,7 +41,7 @@ public class DynamicProviderOptions
     /// <summary>
     /// Gets a value indicating if the SignOutScheme was set explicitly, either by application logic or by options binding.
     /// </summary>
-    public bool SignOutSchemeSetExplicitly { get => _signOutScheme != null; }
+    public bool SignOutSchemeSetExplicitly => _signOutScheme != null;
 
     /// <summary>
     /// Registers a provider configuration model and authentication handler for the protocol type being used.
@@ -72,10 +66,7 @@ public class DynamicProviderOptions
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    public DynamicProviderType? FindProviderType(string type)
-    {
-        return _providers.GetValueOrDefault(type);
-    }
+    public DynamicProviderType? FindProviderType(string type) => _providers.GetValueOrDefault(type);
 
     /// <summary>
     /// Models a provider type registered with the dynamic providers feature.

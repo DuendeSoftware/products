@@ -26,10 +26,7 @@ public class PerComponentPageModel : BlazorModel
 
 public class CallApiPageModel : PerComponentPageModel
 {
-    protected override async Task Verify()
-    {
-        await Expect(Page.GetByText("InteractiveServer")).ToBeVisibleAsync();
-    }
+    protected override async Task Verify() => await Expect(Page.GetByText("InteractiveServer")).ToBeVisibleAsync();
 
     public async Task InvokeCallApi(string headingName)
     {

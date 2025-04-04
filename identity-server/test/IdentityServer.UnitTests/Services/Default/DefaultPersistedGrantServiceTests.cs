@@ -573,10 +573,7 @@ public class DefaultPersistedGrantServiceTests
 
         private IPersistedGrantStore _inner;
 
-        public CorruptingPersistedGrantStore(IPersistedGrantStore inner)
-        {
-            _inner = inner;
-        }
+        public CorruptingPersistedGrantStore(IPersistedGrantStore inner) => _inner = inner;
 
         public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
         {
@@ -592,24 +589,12 @@ public class DefaultPersistedGrantServiceTests
             return items;
         }
 
-        public Task<PersistedGrant> GetAsync(string key)
-        {
-            return _inner.GetAsync(key);
-        }
+        public Task<PersistedGrant> GetAsync(string key) => _inner.GetAsync(key);
 
-        public Task RemoveAllAsync(PersistedGrantFilter filter)
-        {
-            return _inner.RemoveAllAsync(filter);
-        }
+        public Task RemoveAllAsync(PersistedGrantFilter filter) => _inner.RemoveAllAsync(filter);
 
-        public Task RemoveAsync(string key)
-        {
-            return _inner.RemoveAsync(key);
-        }
+        public Task RemoveAsync(string key) => _inner.RemoveAsync(key);
 
-        public Task StoreAsync(PersistedGrant grant)
-        {
-            return _inner.StoreAsync(grant);
-        }
+        public Task StoreAsync(PersistedGrant grant) => _inner.StoreAsync(grant);
     }
 }

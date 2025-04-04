@@ -14,13 +14,7 @@ internal static class ObjectSerializer
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public static string ToString(object o)
-    {
-        return JsonSerializer.Serialize(o, Options);
-    }
+    public static string ToString(object o) => JsonSerializer.Serialize(o, Options);
 
-    public static T FromString<T>(string value)
-    {
-        return JsonSerializer.Deserialize<T>(value, Options);
-    }
+    public static T FromString<T>(string value) => JsonSerializer.Deserialize<T>(value, Options);
 }

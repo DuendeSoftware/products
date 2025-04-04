@@ -161,13 +161,11 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     /// </summary>
     /// <param name="refreshToken"></param>
     /// <returns></returns>
-    protected virtual Task<bool> AcceptConsumedTokenAsync(RefreshToken refreshToken)
-    {
+    protected virtual Task<bool> AcceptConsumedTokenAsync(RefreshToken refreshToken) =>
         // by default we will not accept consumed tokens
         // change the behavior here to implement a time window
         // you can also implement additional revocation logic here
-        return Task.FromResult(false);
-    }
+        Task.FromResult(false);
 
     /// <summary>
     /// Creates the refresh token.

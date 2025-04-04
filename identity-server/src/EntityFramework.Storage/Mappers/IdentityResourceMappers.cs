@@ -14,9 +14,7 @@ public static class IdentityResourceMappers
     /// </summary>
     /// <param name="entity">The entity.</param>
     /// <returns></returns>
-    public static Models.IdentityResource ToModel(this Entities.IdentityResource entity)
-    {
-        return entity == null ? null :
+    public static Models.IdentityResource ToModel(this Entities.IdentityResource entity) => entity == null ? null :
             new Models.IdentityResource
             {
                 Enabled = entity.Enabled,
@@ -30,16 +28,13 @@ public static class IdentityResourceMappers
                 Required = entity.Required,
                 Emphasize = entity.Emphasize
             };
-    }
 
     /// <summary>
     /// Maps a model to an entity.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns></returns>
-    public static Entities.IdentityResource ToEntity(this Models.IdentityResource model)
-    {
-        return model == null ? null :
+    public static Entities.IdentityResource ToEntity(this Models.IdentityResource model) => model == null ? null :
             new Entities.IdentityResource
             {
                 Enabled = model.Enabled,
@@ -60,5 +55,4 @@ public static class IdentityResourceMappers
                 Required = model.Required,
                 Emphasize = model.Emphasize
             };
-    }
 }

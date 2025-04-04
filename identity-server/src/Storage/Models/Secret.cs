@@ -46,10 +46,7 @@ public class Secret
     /// <summary>
     /// Initializes a new instance of the <see cref="Secret"/> class.
     /// </summary>
-    public Secret()
-    {
-        Type = IdentityServerConstants.SecretTypes.SharedSecret;
-    }
+    public Secret() => Type = IdentityServerConstants.SecretTypes.SharedSecret;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Secret"/> class.

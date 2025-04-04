@@ -17,28 +17,19 @@ public static class EndpointConventionBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IEndpointConventionBuilder AsBffApiEndpoint(this IEndpointConventionBuilder builder)
-    {
-        return builder.WithMetadata(new BffApiAttribute());
-    }
+    public static IEndpointConventionBuilder AsBffApiEndpoint(this IEndpointConventionBuilder builder) => builder.WithMetadata(new BffApiAttribute());
 
     /// <summary>
     /// Adds marker that will cause the BFF framework to skip all antiforgery for this endpoint.
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IEndpointConventionBuilder SkipAntiforgery(this IEndpointConventionBuilder builder)
-    {
-        return builder.WithMetadata(new BffApiSkipAntiforgeryAttribute());
-    }
+    public static IEndpointConventionBuilder SkipAntiforgery(this IEndpointConventionBuilder builder) => builder.WithMetadata(new BffApiSkipAntiforgeryAttribute());
 
     /// <summary>
     /// Adds marker that will cause the BFF framework will not override the HTTP response status code.
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static IEndpointConventionBuilder SkipResponseHandling(this IEndpointConventionBuilder builder)
-    {
-        return builder.WithMetadata(new BffApiSkipResponseHandlingAttribute());
-    }
+    public static IEndpointConventionBuilder SkipResponseHandling(this IEndpointConventionBuilder builder) => builder.WithMetadata(new BffApiSkipResponseHandlingAttribute());
 }

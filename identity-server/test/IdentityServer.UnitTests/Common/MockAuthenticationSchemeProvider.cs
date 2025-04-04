@@ -14,15 +14,9 @@ internal class MockAuthenticationSchemeProvider : IAuthenticationSchemeProvider
         new AuthenticationScheme("scheme", null, typeof(MockAuthenticationHandler))
     };
 
-    public void AddScheme(AuthenticationScheme scheme)
-    {
-        Schemes.Add(scheme);
-    }
+    public void AddScheme(AuthenticationScheme scheme) => Schemes.Add(scheme);
 
-    public Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync()
-    {
-        return Task.FromResult(Schemes.AsEnumerable());
-    }
+    public Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync() => Task.FromResult(Schemes.AsEnumerable());
 
     public Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync()
     {
@@ -30,35 +24,17 @@ internal class MockAuthenticationSchemeProvider : IAuthenticationSchemeProvider
         return Task.FromResult(scheme);
     }
 
-    public Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync()
-    {
-        return GetDefaultAuthenticateSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync() => GetDefaultAuthenticateSchemeAsync();
 
-    public Task<AuthenticationScheme> GetDefaultForbidSchemeAsync()
-    {
-        return GetDefaultAuthenticateSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultForbidSchemeAsync() => GetDefaultAuthenticateSchemeAsync();
 
-    public Task<AuthenticationScheme> GetDefaultSignInSchemeAsync()
-    {
-        return GetDefaultAuthenticateSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultSignInSchemeAsync() => GetDefaultAuthenticateSchemeAsync();
 
-    public Task<AuthenticationScheme> GetDefaultSignOutSchemeAsync()
-    {
-        return GetDefaultAuthenticateSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultSignOutSchemeAsync() => GetDefaultAuthenticateSchemeAsync();
 
-    public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemesAsync()
-    {
-        return Task.FromResult(Schemes.AsEnumerable());
-    }
+    public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemesAsync() => Task.FromResult(Schemes.AsEnumerable());
 
-    public Task<AuthenticationScheme> GetSchemeAsync(string name)
-    {
-        return Task.FromResult(Schemes.FirstOrDefault(x => x.Name == name));
-    }
+    public Task<AuthenticationScheme> GetSchemeAsync(string name) => Task.FromResult(Schemes.FirstOrDefault(x => x.Name == name));
 
     public void RemoveScheme(string name)
     {

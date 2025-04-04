@@ -54,8 +54,5 @@ internal class TokenRequestValidationLog
         }
     }
 
-    public override string ToString()
-    {
-        return LogSerializer.Serialize(this);
-    }
+    public override string ToString() => LogSerializer.Serialize(this);
 }

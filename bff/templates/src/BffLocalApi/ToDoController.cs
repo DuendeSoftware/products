@@ -13,10 +13,7 @@ public class ToDoController : ControllerBase
         new ToDo { Id = ToDo.NewId(), Date = DateTimeOffset.UtcNow.AddHours(4), Name = "Have Dinner", User = "alice" },
     };
 
-    public ToDoController(ILogger<ToDoController> logger)
-    {
-        _logger = logger;
-    }
+    public ToDoController(ILogger<ToDoController> logger) => _logger = logger;
 
     [HttpGet("todos")]
     public IActionResult GetAll()
@@ -79,10 +76,7 @@ public class ToDo
 {
     private static int _nextId = 1;
 
-    public static int NewId()
-    {
-        return _nextId++;
-    }
+    public static int NewId() => _nextId++;
 
     public int Id { get; set; }
     public DateTimeOffset Date { get; set; }

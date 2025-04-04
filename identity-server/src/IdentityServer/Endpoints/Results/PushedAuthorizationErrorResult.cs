@@ -25,10 +25,7 @@ public class PushedAuthorizationErrorResult : EndpointResult<PushedAuthorization
     /// Initializes a new instance of the <see cref="PushedAuthorizationErrorResult"/> class.
     /// </summary>
     /// <param name="response">The error response model.</param>
-    public PushedAuthorizationErrorResult(PushedAuthorizationFailure response)
-    {
-        Response = response ?? throw new ArgumentNullException(nameof(response));
-    }
+    public PushedAuthorizationErrorResult(PushedAuthorizationFailure response) => Response = response ?? throw new ArgumentNullException(nameof(response));
 }
 
 internal class PushedAuthorizationErrorHttpWriter : IHttpResponseWriter<PushedAuthorizationErrorResult>

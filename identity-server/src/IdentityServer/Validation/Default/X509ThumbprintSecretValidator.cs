@@ -20,10 +20,7 @@ public class X509ThumbprintSecretValidator : ISecretValidator
     /// ctor
     /// </summary>
     /// <param name="logger"></param>
-    public X509ThumbprintSecretValidator(ILogger<X509ThumbprintSecretValidator> logger)
-    {
-        _logger = logger;
-    }
+    public X509ThumbprintSecretValidator(ILogger<X509ThumbprintSecretValidator> logger) => _logger = logger;
 
     /// <inheritdoc/>
     public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)

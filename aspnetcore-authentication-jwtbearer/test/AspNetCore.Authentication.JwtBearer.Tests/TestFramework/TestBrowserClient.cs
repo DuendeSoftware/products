@@ -50,25 +50,13 @@ public class TestBrowserClient : HttpClient
     }
 
     private TestBrowserClient(CookieHandler handler)
-        : base(handler)
-    {
-        _handler = handler;
-    }
+        : base(handler) => _handler = handler;
 
-    public Cookie? GetCookie(string name)
-    {
-        return GetCookie(_handler.CurrentUri.ToString(), name);
-    }
+    public Cookie? GetCookie(string name) => GetCookie(_handler.CurrentUri.ToString(), name);
 
-    public Cookie? GetCookie(string uri, string name)
-    {
-        return _handler.CookieContainer.GetCookies(new Uri(uri)).Where(x => x.Name == name).FirstOrDefault();
-    }
+    public Cookie? GetCookie(string uri, string name) => _handler.CookieContainer.GetCookies(new Uri(uri)).Where(x => x.Name == name).FirstOrDefault();
 
-    public void RemoveCookie(string name)
-    {
-        RemoveCookie(CurrentUri.ToString(), name);
-    }
+    public void RemoveCookie(string name) => RemoveCookie(CurrentUri.ToString(), name);
 
     public void RemoveCookie(string uri, string name)
     {
@@ -256,9 +244,6 @@ public class HtmlForm(string? action = null)
             if (Inputs.TryGetValue(key, out var item)) return item;
             return null;
         }
-        set
-        {
-            Inputs[key] = value;
-        }
+        set => Inputs[key] = value;
     }
 }

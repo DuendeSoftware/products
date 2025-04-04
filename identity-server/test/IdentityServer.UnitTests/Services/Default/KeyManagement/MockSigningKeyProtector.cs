@@ -51,8 +51,5 @@ internal class MockSigningKeyProtector : ISigningKeyProtector
         };
     }
 
-    public KeyContainer Unprotect(SerializedKey key)
-    {
-        return KeySerializer.Deserialize<RsaKeyContainer>(_dataProtector.Unprotect(key.Data));
-    }
+    public KeyContainer Unprotect(SerializedKey key) => KeySerializer.Deserialize<RsaKeyContainer>(_dataProtector.Unprotect(key.Data));
 }

@@ -164,10 +164,7 @@ public class UserSessionStoreTests
     }
 
     [Fact]
-    public async Task DeleteUserSessionAsync_for_invalid_key_should_succeed()
-    {
-        await _subject.DeleteUserSessionAsync("invalid");
-    }
+    public async Task DeleteUserSessionAsync_for_invalid_key_should_succeed() => await _subject.DeleteUserSessionAsync("invalid");
 
     [Fact]
     public async Task GetUserSessionsAsync_for_valid_sub_should_succeed()

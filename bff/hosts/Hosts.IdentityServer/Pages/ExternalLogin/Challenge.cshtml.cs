@@ -15,10 +15,7 @@ public class Challenge : PageModel
 {
     private readonly IIdentityServerInteractionService _interactionService;
 
-    public Challenge(IIdentityServerInteractionService interactionService)
-    {
-        _interactionService = interactionService;
-    }
+    public Challenge(IIdentityServerInteractionService interactionService) => _interactionService = interactionService;
 
     public IActionResult OnGet(string scheme, string returnUrl)
     {

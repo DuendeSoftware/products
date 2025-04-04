@@ -50,10 +50,7 @@ public class TestBrowserClient : HttpClient
     }
 
     private TestBrowserClient(CookieHandler handler)
-        : base(handler)
-    {
-        _handler = handler;
-    }
+        : base(handler) => _handler = handler;
 
     public void RemoveCookie(string name)
     {

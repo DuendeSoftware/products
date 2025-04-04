@@ -50,10 +50,7 @@ public class AuthorizeEndpointBaseTests
 
     private ValidatedAuthorizeRequest _validatedAuthorizeRequest;
 
-    public AuthorizeEndpointBaseTests()
-    {
-        Init();
-    }
+    public AuthorizeEndpointBaseTests() => Init();
 
     [Fact]
     [Trait("Category", Category)]
@@ -211,9 +208,6 @@ public class AuthorizeEndpointBaseTests
         {
         }
 
-        public override Task<IEndpointResult> ProcessAsync(HttpContext context)
-        {
-            throw new System.NotImplementedException();
-        }
+        public override Task<IEndpointResult> ProcessAsync(HttpContext context) => throw new System.NotImplementedException();
     }
 }

@@ -8,9 +8,7 @@ namespace IntegrationTests.Endpoints.Introspection.Setup;
 
 public static class Users
 {
-    public static List<TestUser> Get()
-    {
-        return new List<TestUser>
+    public static List<TestUser> Get() => new List<TestUser>
         {
             new TestUser
             {
@@ -19,5 +17,4 @@ public static class Users
                 Password = "bob"
             }
         };
-    }
 }

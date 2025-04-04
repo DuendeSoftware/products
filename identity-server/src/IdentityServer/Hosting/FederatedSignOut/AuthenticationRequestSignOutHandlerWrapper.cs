@@ -12,13 +12,7 @@ internal class AuthenticationRequestSignOutHandlerWrapper : AuthenticationReques
     private readonly IAuthenticationSignOutHandler _inner;
 
     public AuthenticationRequestSignOutHandlerWrapper(IAuthenticationSignOutHandler inner, IHttpContextAccessor httpContextAccessor)
-        : base((IAuthenticationRequestHandler)inner, httpContextAccessor)
-    {
-        _inner = inner;
-    }
+        : base((IAuthenticationRequestHandler)inner, httpContextAccessor) => _inner = inner;
 
-    public Task SignOutAsync(AuthenticationProperties properties)
-    {
-        return _inner.SignOutAsync(properties);
-    }
+    public Task SignOutAsync(AuthenticationProperties properties) => _inner.SignOutAsync(properties);
 }

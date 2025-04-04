@@ -31,11 +31,8 @@ public class GenericHost
     private TestServer? _server;
     public TestServer Server
     {
-        get
-        {
-            return _server ?? throw new InvalidOperationException(
+        get => _server ?? throw new InvalidOperationException(
                 $"Attempt to use {nameof(Server)} before it was initialized. Did you forget to call ${Initialize}?");
-        }
         private set => _server = value;
     }
 
@@ -60,12 +57,10 @@ public class GenericHost
     private readonly ITestOutputHelper _testOutputHelper;
 
     public T Resolve<T>()
-        where T : notnull
-    {
+        where T : notnull =>
         // not calling dispose on scope on purpose
-        return _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider
+        _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider
             .GetRequiredService<T>();
-    }
 
     public string Url(string? path = null)
     {
@@ -128,20 +123,17 @@ public class GenericHost
         ConfigureSignout(builder);
     }
 
-    private void ConfigureSignout(WebApplication app)
-    {
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signout")
-            {
-                await ctx.SignOutAsync();
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+    private void ConfigureSignout(WebApplication app) => app.Use(async (ctx, next) =>
+                                                              {
+                                                                  if (ctx.Request.Path == "/__signout")
+                                                                  {
+                                                                      await ctx.SignOutAsync();
+                                                                      ctx.Response.StatusCode = 204;
+                                                                      return;
+                                                                  }
 
-            await next();
-        });
-    }
+                                                                  await next();
+                                                              });
 
     public async Task RevokeSessionCookieAsync()
     {
@@ -149,30 +141,27 @@ public class GenericHost
         response.StatusCode.ShouldBe((HttpStatusCode)204);
     }
 
-    private void ConfigureSignin(WebApplication app)
-    {
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signin")
-            {
-                if (_userToSignIn is not object)
-                {
-                    throw new Exception("No User Configured for SignIn");
-                }
+    private void ConfigureSignin(WebApplication app) => app.Use(async (ctx, next) =>
+                                                             {
+                                                                 if (ctx.Request.Path == "/__signin")
+                                                                 {
+                                                                     if (_userToSignIn is not object)
+                                                                     {
+                                                                         throw new Exception("No User Configured for SignIn");
+                                                                     }
 
-                var props = _propsToSignIn ?? new AuthenticationProperties();
-                await ctx.SignInAsync(_userToSignIn, props);
+                                                                     var props = _propsToSignIn ?? new AuthenticationProperties();
+                                                                     await ctx.SignInAsync(_userToSignIn, props);
 
-                _userToSignIn = null;
-                _propsToSignIn = null;
+                                                                     _userToSignIn = null;
+                                                                     _propsToSignIn = null;
 
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+                                                                     ctx.Response.StatusCode = 204;
+                                                                     return;
+                                                                 }
 
-            await next();
-        });
-    }
+                                                                 await next();
+                                                             });
 
     private ClaimsPrincipal? _userToSignIn;
     private AuthenticationProperties? _propsToSignIn;
@@ -188,8 +177,5 @@ public class GenericHost
         _propsToSignIn = props;
         return IssueSessionCookieAsync(claims);
     }
-    public Task IssueSessionCookieAsync(string sub, params Claim[] claims)
-    {
-        return IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
-    }
+    public Task IssueSessionCookieAsync(string sub, params Claim[] claims) => IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
 }

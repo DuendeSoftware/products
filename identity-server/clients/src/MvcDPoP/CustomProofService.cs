@@ -22,8 +22,5 @@ public class CustomProofService : DefaultDPoPProofService, IDPoPProofService
         return base.CreateProofTokenAsync(request);
     }
 
-    public new string GetProofKeyThumbprint(DPoPProofRequest request)
-    {
-        return base.GetProofKeyThumbprint(request);
-    }
+    public new string GetProofKeyThumbprint(DPoPProofRequest request) => base.GetProofKeyThumbprint(request);
 }

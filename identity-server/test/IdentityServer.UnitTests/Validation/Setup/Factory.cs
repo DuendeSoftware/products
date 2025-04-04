@@ -21,10 +21,7 @@ namespace UnitTests.Validation.Setup;
 
 internal static class Factory
 {
-    public static IClientStore CreateClientStore()
-    {
-        return new InMemoryClientStore(TestClients.Get());
-    }
+    public static IClientStore CreateClientStore() => new InMemoryClientStore(TestClients.Get());
 
     public static TokenRequestValidator CreateTokenRequestValidator(
         IdentityServerOptions options = null,
@@ -143,12 +140,9 @@ internal static class Factory
             TestLogger.Create<TokenRequestValidator>());
     }
 
-    public static IRefreshTokenService CreateRefreshTokenService(IRefreshTokenStore store = null, IProfileService profile = null)
-    {
-        return CreateRefreshTokenService(store ?? CreateRefreshTokenStore(),
+    public static IRefreshTokenService CreateRefreshTokenService(IRefreshTokenStore store = null, IProfileService profile = null) => CreateRefreshTokenService(store ?? CreateRefreshTokenStore(),
             profile ?? new TestProfileService(),
             new PersistentGrantOptions());
-    }
 
     private static IRefreshTokenService CreateRefreshTokenService(
         IRefreshTokenStore store,
@@ -172,9 +166,7 @@ internal static class Factory
     }
 
     internal static ITokenCreationService CreateDefaultTokenCreator(IdentityServerOptions options = null,
-        IClock clock = null)
-    {
-        return new DefaultTokenCreationService(
+        IClock clock = null) => new DefaultTokenCreationService(
             clock ?? new StubClock(),
             new DefaultKeyMaterialService(
                 new IValidationKeysStore[] { },
@@ -183,7 +175,6 @@ internal static class Factory
             ),
             options ?? TestIdentityServerOptions.Create(),
             TestLogger.Create<DefaultTokenCreationService>());
-    }
 
     public static DeviceAuthorizationRequestValidator CreateDeviceAuthorizationRequestValidator(
         IdentityServerOptions options = null,
@@ -389,40 +380,25 @@ internal static class Factory
         return new ClientSecretValidator(clients, parser, validator, new TestEventService(), TestLogger.Create<ClientSecretValidator>());
     }
 
-    public static IAuthorizationCodeStore CreateAuthorizationCodeStore()
-    {
-        return new DefaultAuthorizationCodeStore(new InMemoryPersistedGrantStore(),
+    public static IAuthorizationCodeStore CreateAuthorizationCodeStore() => new DefaultAuthorizationCodeStore(new InMemoryPersistedGrantStore(),
             new PersistentGrantSerializer(),
             new DefaultHandleGenerationService(),
             TestLogger.Create<DefaultAuthorizationCodeStore>());
-    }
 
-    public static IRefreshTokenStore CreateRefreshTokenStore()
-    {
-        return new DefaultRefreshTokenStore(new InMemoryPersistedGrantStore(),
+    public static IRefreshTokenStore CreateRefreshTokenStore() => new DefaultRefreshTokenStore(new InMemoryPersistedGrantStore(),
             new PersistentGrantSerializer(),
             new DefaultHandleGenerationService(),
             TestLogger.Create<DefaultRefreshTokenStore>());
-    }
 
-    public static IReferenceTokenStore CreateReferenceTokenStore()
-    {
-        return new DefaultReferenceTokenStore(new InMemoryPersistedGrantStore(),
+    public static IReferenceTokenStore CreateReferenceTokenStore() => new DefaultReferenceTokenStore(new InMemoryPersistedGrantStore(),
             new PersistentGrantSerializer(),
             new DefaultHandleGenerationService(),
             TestLogger.Create<DefaultReferenceTokenStore>());
-    }
 
-    public static IDeviceFlowCodeService CreateDeviceCodeService()
-    {
-        return new DefaultDeviceFlowCodeService(new InMemoryDeviceFlowStore(), new DefaultHandleGenerationService());
-    }
+    public static IDeviceFlowCodeService CreateDeviceCodeService() => new DefaultDeviceFlowCodeService(new InMemoryDeviceFlowStore(), new DefaultHandleGenerationService());
 
-    public static IUserConsentStore CreateUserConsentStore()
-    {
-        return new DefaultUserConsentStore(new InMemoryPersistedGrantStore(),
+    public static IUserConsentStore CreateUserConsentStore() => new DefaultUserConsentStore(new InMemoryPersistedGrantStore(),
             new PersistentGrantSerializer(),
             new DefaultHandleGenerationService(),
             TestLogger.Create<DefaultUserConsentStore>());
-    }
 }

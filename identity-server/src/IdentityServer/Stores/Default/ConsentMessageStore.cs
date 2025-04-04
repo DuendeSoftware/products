@@ -10,10 +10,7 @@ internal class ConsentMessageStore : IConsentMessageStore
 {
     protected readonly MessageCookie<ConsentResponse> Cookie;
 
-    public ConsentMessageStore(MessageCookie<ConsentResponse> cookie)
-    {
-        Cookie = cookie;
-    }
+    public ConsentMessageStore(MessageCookie<ConsentResponse> cookie) => Cookie = cookie;
 
     public virtual Task DeleteAsync(string id)
     {

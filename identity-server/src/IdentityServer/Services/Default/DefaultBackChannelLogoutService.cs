@@ -114,10 +114,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// <param name="client"></param>
     /// <param name="data"></param>
     /// <returns></returns>
-    protected virtual Task PostLogoutJwt(BackChannelLogoutRequest client, Dictionary<string, string> data)
-    {
-        return HttpClient.PostAsync(client.LogoutUri, data);
-    }
+    protected virtual Task PostLogoutJwt(BackChannelLogoutRequest client, Dictionary<string, string> data) => HttpClient.PostAsync(client.LogoutUri, data);
 
     /// <summary>
     /// Creates the form-url-encoded payload (as a dictionary) to send to the client.

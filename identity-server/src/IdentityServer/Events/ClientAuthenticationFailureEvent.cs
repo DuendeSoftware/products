@@ -20,10 +20,7 @@ public class ClientAuthenticationFailureEvent : Event
             "Client Authentication Failure",
             EventTypes.Failure,
             EventIds.ClientAuthenticationFailure,
-            message)
-    {
-        ClientId = clientId;
-    }
+            message) => ClientId = clientId;
 
     /// <summary>
     /// Gets or sets the client identifier.

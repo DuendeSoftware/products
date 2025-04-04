@@ -37,10 +37,7 @@ public abstract class Event
     /// Allows implementing custom initialization logic.
     /// </summary>
     /// <returns></returns>
-    protected internal virtual Task PrepareAsync()
-    {
-        return Task.CompletedTask;
-    }
+    protected internal virtual Task PrepareAsync() => Task.CompletedTask;
 
     /// <summary>
     /// Gets or sets the category.
@@ -140,8 +137,5 @@ public abstract class Event
     }
 
     /// <inheritdoc/>
-    public override string ToString()
-    {
-        return LogSerializer.Serialize(this);
-    }
+    public override string ToString() => LogSerializer.Serialize(this);
 }

@@ -158,13 +158,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         return new IntrospectionResult(response);
     }
 
-    private void LogSuccess(bool tokenActive, string callerName)
-    {
-        _logger.LogInformation("Success token introspection. Token active: {tokenActive}, for caller: {callerName}", tokenActive, callerName);
-    }
+    private void LogSuccess(bool tokenActive, string callerName) => _logger.LogInformation("Success token introspection. Token active: {tokenActive}, for caller: {callerName}", tokenActive, callerName);
 
-    private void LogFailure(string error, string callerName)
-    {
-        _logger.LogError("Failed token introspection: {error}, for caller: {callerName}", error, callerName);
-    }
+    private void LogFailure(string error, string callerName) => _logger.LogError("Failed token introspection: {error}, for caller: {callerName}", error, callerName);
 }

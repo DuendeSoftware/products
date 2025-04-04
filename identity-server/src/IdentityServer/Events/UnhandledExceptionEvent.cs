@@ -19,10 +19,7 @@ public class UnhandledExceptionEvent : Event
             "Unhandled Exception",
             EventTypes.Error,
             EventIds.UnhandledException,
-            ex.Message)
-    {
-        Details = ex.ToString();
-    }
+            ex.Message) => Details = ex.ToString();
 
     /// <summary>
     /// Gets or sets the details.

@@ -113,10 +113,7 @@ internal class License
     /// </summary>
     /// <param name="feature"></param>
     /// <returns></returns>
-    public bool IsEnabled(LicenseFeature feature)
-    {
-        return !IsConfigured || (AllowedFeatureMask & (ulong)feature) != 0;
-    }
+    public bool IsEnabled(LicenseFeature feature) => !IsConfigured || (AllowedFeatureMask & (ulong)feature) != 0;
 
 
     private ulong? _allowedFeatureMask;
@@ -155,41 +152,38 @@ internal class License
     }
 
 
-    private ulong FeatureMaskForEdition()
+    private ulong FeatureMaskForEdition() => Edition switch
     {
-        return Edition switch
-        {
-            null => FeatureMaskForFeatures(),
-            LicenseEdition.Bff => FeatureMaskForFeatures(),
-            LicenseEdition.Starter => FeatureMaskForFeatures(),
-            LicenseEdition.Business => FeatureMaskForFeatures(
-                LicenseFeature.KeyManagement,
-                LicenseFeature.PAR,
-                LicenseFeature.ServerSideSessions,
-                LicenseFeature.DCR),
-            LicenseEdition.Enterprise => FeatureMaskForFeatures(
-                LicenseFeature.KeyManagement,
-                LicenseFeature.PAR,
-                LicenseFeature.ResourceIsolation,
-                LicenseFeature.DynamicProviders,
-                LicenseFeature.CIBA,
-                LicenseFeature.ServerSideSessions,
-                LicenseFeature.DPoP,
-                LicenseFeature.DCR
-            ),
-            LicenseEdition.Community => FeatureMaskForFeatures(
-                LicenseFeature.KeyManagement,
-                LicenseFeature.PAR,
-                LicenseFeature.ResourceIsolation,
-                LicenseFeature.DynamicProviders,
-                LicenseFeature.CIBA,
-                LicenseFeature.ServerSideSessions,
-                LicenseFeature.DPoP,
-                LicenseFeature.DCR
-            ),
-            _ => throw new ArgumentException(),
-        };
-    }
+        null => FeatureMaskForFeatures(),
+        LicenseEdition.Bff => FeatureMaskForFeatures(),
+        LicenseEdition.Starter => FeatureMaskForFeatures(),
+        LicenseEdition.Business => FeatureMaskForFeatures(
+            LicenseFeature.KeyManagement,
+            LicenseFeature.PAR,
+            LicenseFeature.ServerSideSessions,
+            LicenseFeature.DCR),
+        LicenseEdition.Enterprise => FeatureMaskForFeatures(
+            LicenseFeature.KeyManagement,
+            LicenseFeature.PAR,
+            LicenseFeature.ResourceIsolation,
+            LicenseFeature.DynamicProviders,
+            LicenseFeature.CIBA,
+            LicenseFeature.ServerSideSessions,
+            LicenseFeature.DPoP,
+            LicenseFeature.DCR
+        ),
+        LicenseEdition.Community => FeatureMaskForFeatures(
+            LicenseFeature.KeyManagement,
+            LicenseFeature.PAR,
+            LicenseFeature.ResourceIsolation,
+            LicenseFeature.DynamicProviders,
+            LicenseFeature.CIBA,
+            LicenseFeature.ServerSideSessions,
+            LicenseFeature.DPoP,
+            LicenseFeature.DCR
+        ),
+        _ => throw new ArgumentException(),
+    };
 
     private ulong FeatureMaskForFeatures(params LicenseFeature[] licenseFeatures)
     {

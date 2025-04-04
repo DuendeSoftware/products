@@ -13,10 +13,7 @@ public class EditModel : PageModel
 {
     private readonly IdentityScopeRepository _repository;
 
-    public EditModel(IdentityScopeRepository repository)
-    {
-        _repository = repository;
-    }
+    public EditModel(IdentityScopeRepository repository) => _repository = repository;
 
     [BindProperty]
     public IdentityScopeModel InputModel { get; set; } = default!;

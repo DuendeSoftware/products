@@ -9,10 +9,7 @@ public class IndexModel : PageModel
 {
     private readonly ApiScopeRepository _repository;
 
-    public IndexModel(ApiScopeRepository repository)
-    {
-        _repository = repository;
-    }
+    public IndexModel(ApiScopeRepository repository) => _repository = repository;
 
     public IEnumerable<ApiScopeSummaryModel> Scopes { get; private set; } = default!;
     public string? Filter { get; set; }

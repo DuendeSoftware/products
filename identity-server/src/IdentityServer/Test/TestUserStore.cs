@@ -19,10 +19,7 @@ public class TestUserStore
     /// Initializes a new instance of the <see cref="TestUserStore"/> class.
     /// </summary>
     /// <param name="users">The users.</param>
-    public TestUserStore(List<TestUser> users)
-    {
-        _users = users;
-    }
+    public TestUserStore(List<TestUser> users) => _users = users;
 
     /// <summary>
     /// Validates the credentials.
@@ -52,20 +49,14 @@ public class TestUserStore
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <returns></returns>
-    public TestUser FindBySubjectId(string subjectId)
-    {
-        return _users.FirstOrDefault(x => x.SubjectId == subjectId);
-    }
+    public TestUser FindBySubjectId(string subjectId) => _users.FirstOrDefault(x => x.SubjectId == subjectId);
 
     /// <summary>
     /// Finds the user by username.
     /// </summary>
     /// <param name="username">The username.</param>
     /// <returns></returns>
-    public TestUser FindByUsername(string username)
-    {
-        return _users.FirstOrDefault(x => x.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
-    }
+    public TestUser FindByUsername(string username) => _users.FirstOrDefault(x => x.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// Finds the user by external provider.
@@ -73,12 +64,9 @@ public class TestUserStore
     /// <param name="provider">The provider.</param>
     /// <param name="userId">The user identifier.</param>
     /// <returns></returns>
-    public TestUser FindByExternalProvider(string provider, string userId)
-    {
-        return _users.FirstOrDefault(x =>
-            x.ProviderName == provider &&
-            x.ProviderSubjectId == userId);
-    }
+    public TestUser FindByExternalProvider(string provider, string userId) => _users.FirstOrDefault(x =>
+                                                                                       x.ProviderName == provider &&
+                                                                                       x.ProviderSubjectId == userId);
 
     /// <summary>
     /// Automatically provisions a user.

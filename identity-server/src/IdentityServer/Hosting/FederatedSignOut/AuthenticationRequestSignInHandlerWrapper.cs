@@ -13,13 +13,7 @@ internal class AuthenticationRequestSignInHandlerWrapper : AuthenticationRequest
     private readonly IAuthenticationSignInHandler _inner;
 
     public AuthenticationRequestSignInHandlerWrapper(IAuthenticationSignInHandler inner, IHttpContextAccessor httpContextAccessor)
-        : base(inner, httpContextAccessor)
-    {
-        _inner = inner;
-    }
+        : base(inner, httpContextAccessor) => _inner = inner;
 
-    public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-    {
-        return _inner.SignInAsync(user, properties);
-    }
+    public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties) => _inner.SignInAsync(user, properties);
 }

@@ -17,8 +17,5 @@ internal static class Log
         EventIds.ProxyError,
         "Proxy response error. local path: '{localPath}', error: '{error}'");
 
-    public static void ProxyResponseError(this ILogger logger, string localPath, string error)
-    {
-        ProxyResponseErrorMessage(logger, localPath, error, null);
-    }
+    public static void ProxyResponseError(this ILogger logger, string localPath, string error) => ProxyResponseErrorMessage(logger, localPath, error, null);
 }

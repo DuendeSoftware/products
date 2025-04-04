@@ -66,12 +66,9 @@ public static class IdentityServerBuilderExtensionsCore
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <returns></returns>
-    public static IIdentityServerBuilder AddCookieAuthentication(this IIdentityServerBuilder builder)
-    {
-        return builder
+    public static IIdentityServerBuilder AddCookieAuthentication(this IIdentityServerBuilder builder) => builder
             .AddDefaultCookieHandlers()
             .AddCookieAuthenticationExtensions();
-    }
 
     /// <summary>
     /// Adds the default cookie handlers and corresponding configuration

@@ -18,10 +18,7 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
         }
     }
 
-    public virtual Task InitializeAsync()
-    {
-        return Task.CompletedTask;
-    }
+    public virtual Task InitializeAsync() => Task.CompletedTask;
 
     public virtual Task DisposeAsync()
     {

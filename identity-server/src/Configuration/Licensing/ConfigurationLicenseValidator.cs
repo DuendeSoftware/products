@@ -34,8 +34,5 @@ internal class ConfigurationLicenseValidator : LicenseValidator<ConfigurationLic
         }
     }
 
-    protected override void WarnForProductFeaturesWhenMissingLicense()
-    {
-        WarningLog?.Invoke("You are using the IdentityServer Configuration API feature, but you do not have a license. This feature requires the Business or Enterprise Edition tier of license.", null);
-    }
+    protected override void WarnForProductFeaturesWhenMissingLicense() => WarningLog?.Invoke("You are using the IdentityServer Configuration API feature, but you do not have a license. This feature requires the Business or Enterprise Edition tier of license.", null);
 }

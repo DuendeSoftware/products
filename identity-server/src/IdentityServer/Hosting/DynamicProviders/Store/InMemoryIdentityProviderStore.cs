@@ -11,10 +11,7 @@ internal class InMemoryIdentityProviderStore : IIdentityProviderStore
 {
     private readonly IEnumerable<IdentityProvider> _providers;
 
-    public InMemoryIdentityProviderStore(IEnumerable<IdentityProvider> providers)
-    {
-        _providers = providers;
-    }
+    public InMemoryIdentityProviderStore(IEnumerable<IdentityProvider> providers) => _providers = providers;
 
     public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync()
     {

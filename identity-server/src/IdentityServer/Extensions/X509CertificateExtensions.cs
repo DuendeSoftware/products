@@ -35,8 +35,5 @@ public static class X509CertificateExtensions
     /// Returns the SHA256 thumbprint of the certificate as a base64url encoded string
     /// </summary>
     /// <returns></returns>
-    public static string GetSha256Thumbprint(this X509Certificate2 certificate)
-    {
-        return Base64Url.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
-    }
+    public static string GetSha256Thumbprint(this X509Certificate2 certificate) => Base64Url.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
 }

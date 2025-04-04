@@ -327,10 +327,7 @@ public class IdentityServerPipeline
         BrowserClient.AllowAutoRedirect = old;
     }
 
-    public async Task LoginAsync(string subject, AuthenticationProperties authenticationProperties = null)
-    {
-        await LoginAsync(new IdentityServerUser(subject).CreatePrincipal(), authenticationProperties);
-    }
+    public async Task LoginAsync(string subject, AuthenticationProperties authenticationProperties = null) => await LoginAsync(new IdentityServerUser(subject).CreatePrincipal(), authenticationProperties);
     public async Task LogoutAsync()
     {
         var old = BrowserClient.AllowAutoRedirect;
@@ -341,18 +338,9 @@ public class IdentityServerPipeline
         BrowserClient.AllowAutoRedirect = old;
     }
 
-    public void RemoveLoginCookie()
-    {
-        BrowserClient.RemoveCookie(BaseUrl, IdentityServerConstants.DefaultCookieAuthenticationScheme);
-    }
-    public void RemoveSessionCookie()
-    {
-        BrowserClient.RemoveCookie(BaseUrl, IdentityServerConstants.DefaultCheckSessionCookieName);
-    }
-    public Cookie GetSessionCookie()
-    {
-        return BrowserClient.GetCookie(BaseUrl, IdentityServerConstants.DefaultCheckSessionCookieName);
-    }
+    public void RemoveLoginCookie() => BrowserClient.RemoveCookie(BaseUrl, IdentityServerConstants.DefaultCookieAuthenticationScheme);
+    public void RemoveSessionCookie() => BrowserClient.RemoveCookie(BaseUrl, IdentityServerConstants.DefaultCheckSessionCookieName);
+    public Cookie GetSessionCookie() => BrowserClient.GetCookie(BaseUrl, IdentityServerConstants.DefaultCheckSessionCookieName);
 
     public string CreateAuthorizeUrl(
         string clientId = null,
@@ -429,10 +417,7 @@ public class IdentityServerPipeline
         return await PushAuthorizationRequestAsync(parameters);
     }
 
-    public Duende.IdentityModel.Client.AuthorizeResponse ParseAuthorizationResponseUrl(string url)
-    {
-        return new Duende.IdentityModel.Client.AuthorizeResponse(url);
-    }
+    public Duende.IdentityModel.Client.AuthorizeResponse ParseAuthorizationResponseUrl(string url) => new Duende.IdentityModel.Client.AuthorizeResponse(url);
 
     public async Task<Duende.IdentityModel.Client.AuthorizeResponse> RequestAuthorizationEndpointAsync(
         string clientId,
@@ -471,11 +456,9 @@ public class IdentityServerPipeline
         return new Duende.IdentityModel.Client.AuthorizeResponse(redirect);
     }
 
-    public T Resolve<T>()
-    {
+    public T Resolve<T>() =>
         // create throw-away scope
-        return ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<T>();
-    }
+        ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<T>();
 }
 
 public class MockMessageHandler : DelegatingHandler
@@ -511,10 +494,7 @@ public class MockExternalAuthenticationHandler :
             return true;
         };
 
-    public MockExternalAuthenticationHandler(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    public MockExternalAuthenticationHandler(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
     public async Task<bool> HandleRequestAsync()
     {
@@ -526,33 +506,15 @@ public class MockExternalAuthenticationHandler :
         return false;
     }
 
-    public Task<AuthenticateResult> AuthenticateAsync()
-    {
-        return Task.FromResult(AuthenticateResult.NoResult());
-    }
+    public Task<AuthenticateResult> AuthenticateAsync() => Task.FromResult(AuthenticateResult.NoResult());
 
-    public Task ChallengeAsync(AuthenticationProperties properties)
-    {
-        return Task.CompletedTask;
-    }
+    public Task ChallengeAsync(AuthenticationProperties properties) => Task.CompletedTask;
 
-    public Task ForbidAsync(AuthenticationProperties properties)
-    {
-        return Task.CompletedTask;
-    }
+    public Task ForbidAsync(AuthenticationProperties properties) => Task.CompletedTask;
 
-    public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-    {
-        return Task.CompletedTask;
-    }
+    public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context) => Task.CompletedTask;
 
-    public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties) => Task.CompletedTask;
 
-    public Task SignOutAsync(AuthenticationProperties properties)
-    {
-        return Task.CompletedTask;
-    }
+    public Task SignOutAsync(AuthenticationProperties properties) => Task.CompletedTask;
 }

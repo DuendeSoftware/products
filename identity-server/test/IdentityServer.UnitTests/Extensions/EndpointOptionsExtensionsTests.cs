@@ -132,8 +132,5 @@ public class EndpointOptionsExtensionsTests
         actual.ShouldBe(expectedIsEndpointEnabled);
     }
 
-    private Endpoint CreateTestEndpoint(string name)
-    {
-        return new Endpoint(name, "", null);
-    }
+    private Endpoint CreateTestEndpoint(string name) => new Endpoint(name, "", null);
 }

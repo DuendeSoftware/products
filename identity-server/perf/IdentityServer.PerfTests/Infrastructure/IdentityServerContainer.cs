@@ -33,17 +33,11 @@ public class IdentityServerContainer : IDisposable
     public DebugLoggerProvider Logger { get; set; } = new DebugLoggerProvider();
 
     private IServiceProvider _appServices;
-    public T ResolveService<T>()
-    {
-        return _appServices.GetRequiredService<T>();
-    }
+    public T ResolveService<T>() => _appServices.GetRequiredService<T>();
 
     private List<IServiceScope> _serviceScopes = new List<IServiceScope>();
 
-    public IServiceScope CreateServiceScope()
-    {
-        return ResolveService<IServiceScopeFactory>().CreateScope();
-    }
+    public IServiceScope CreateServiceScope() => ResolveService<IServiceScopeFactory>().CreateScope();
     public T ResolveScopedService<T>()
     {
         // caching to call dispose later
@@ -69,10 +63,7 @@ public class IdentityServerContainer : IDisposable
     }
 
 
-    public void Reset()
-    {
-        ResetAsync().GetAwaiter().GetResult();
-    }
+    public void Reset() => ResetAsync().GetAwaiter().GetResult();
 
     public async Task ResetAsync()
     {
@@ -142,8 +133,5 @@ public class IdentityServerContainer : IDisposable
         OnConfigure(app);
     }
 
-    public HttpClient CreateClient()
-    {
-        return new HttpClient(Handler);
-    }
+    public HttpClient CreateClient() => new HttpClient(Handler);
 }

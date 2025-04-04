@@ -89,10 +89,7 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
     /// <returns></returns>
-    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames)
-    {
-        return (await store.FindResourcesByScopeAsync(scopeNames)).FilterEnabled();
-    }
+    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames) => (await store.FindResourcesByScopeAsync(scopeNames)).FilterEnabled();
 
     /// <summary>
     /// Gets all enabled resources.
@@ -113,16 +110,10 @@ public static class IResourceStoreExtensions
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
     /// <returns></returns>
-    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames)
-    {
-        return (await store.FindIdentityResourcesByScopeNameAsync(scopeNames)).Where(x => x.Enabled).ToArray();
-    }
+    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames)).Where(x => x.Enabled).ToArray();
 
     /// <summary>
     /// Finds the enabled API resources by name.
     /// </summary>
-    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames)
-    {
-        return (await store.FindApiResourcesByNameAsync(resourceNames)).Where(x => x.Enabled).ToArray();
-    }
+    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames) => (await store.FindApiResourcesByNameAsync(resourceNames)).Where(x => x.Enabled).ToArray();
 }

@@ -54,10 +54,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <returns></returns>
-    public static IIdentityServerBuilder AddAppAuthRedirectUriValidator(this IIdentityServerBuilder builder)
-    {
-        return builder.AddRedirectUriValidator<StrictRedirectUriValidatorAppAuth>();
-    }
+    public static IIdentityServerBuilder AddAppAuthRedirectUriValidator(this IIdentityServerBuilder builder) => builder.AddRedirectUriValidator<StrictRedirectUriValidatorAppAuth>();
 
     /// <summary>
     /// Adds the resource owner validator.

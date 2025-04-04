@@ -45,10 +45,7 @@ public class IdentityProviderConfigurationValidationContext<T>
     /// <summary>
     /// Initializes a new instance of the IdentityProviderConfigurationValidationContext class.
     /// </summary>
-    public IdentityProviderConfigurationValidationContext(T idp)
-    {
-        IdentityProvider = idp;
-    }
+    public IdentityProviderConfigurationValidationContext(T idp) => IdentityProvider = idp;
 
     /// <summary>
     /// Sets a validation error.

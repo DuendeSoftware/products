@@ -40,12 +40,9 @@ public class IdentityResourcesMappersTests
     }
 
     [Fact]
-    public void mapping_entity_to_model_maps_all_properties()
-    {
-        MapperTestHelpers
+    public void mapping_entity_to_model_maps_all_properties() => MapperTestHelpers
             .AllPropertiesAreMapped<Entities.IdentityResource, Models.IdentityResource>(
                 source => source.ToModel(),
                 out var unmappedMembers)
             .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
-    }
 }

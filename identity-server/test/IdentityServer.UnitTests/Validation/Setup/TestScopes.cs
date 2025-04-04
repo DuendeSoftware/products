@@ -8,18 +8,13 @@ namespace UnitTests.Validation.Setup;
 
 internal class TestScopes
 {
-    public static IEnumerable<IdentityResource> GetIdentity()
-    {
-        return new IdentityResource[]
+    public static IEnumerable<IdentityResource> GetIdentity() => new IdentityResource[]
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile()
         };
-    }
 
-    public static IEnumerable<ApiResource> GetApis()
-    {
-        return new ApiResource[]
+    public static IEnumerable<ApiResource> GetApis() => new ApiResource[]
         {
             new ApiResource
             {
@@ -42,11 +37,8 @@ internal class TestScopes
                 Scopes =  { "scope1" }
             },
         };
-    }
 
-    public static IEnumerable<ApiScope> GetScopes()
-    {
-        return new ApiScope[]
+    public static IEnumerable<ApiScope> GetScopes() => new ApiScope[]
         {
             new ApiScope
             {
@@ -60,5 +52,4 @@ internal class TestScopes
             },
             new ApiScope("scope1")
         };
-    }
 }

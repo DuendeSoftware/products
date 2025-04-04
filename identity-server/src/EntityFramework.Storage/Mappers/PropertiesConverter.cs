@@ -8,10 +8,7 @@ namespace Duende.IdentityServer.EntityFramework.Mappers;
 
 internal static class PropertiesConverter
 {
-    public static string Convert(Dictionary<string, string> sourceMember)
-    {
-        return JsonSerializer.Serialize(sourceMember);
-    }
+    public static string Convert(Dictionary<string, string> sourceMember) => JsonSerializer.Serialize(sourceMember);
 
     public static Dictionary<string, string> Convert(string sourceMember)
     {

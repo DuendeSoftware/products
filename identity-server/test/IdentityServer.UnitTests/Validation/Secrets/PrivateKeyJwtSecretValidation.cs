@@ -40,15 +40,9 @@ public class PrivateKeyJwtSecretValidation
         _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
     }
 
-    private JwtSecurityToken CreateToken(string clientId, string aud = "https://idsrv.com/", DateTime? nowOverride = null, bool setTyp = false)
-    {
-        return CreateTokenHelper(clientId, new Claim(JwtClaimTypes.Audience, aud), nowOverride, setTyp);
-    }
+    private JwtSecurityToken CreateToken(string clientId, string aud = "https://idsrv.com/", DateTime? nowOverride = null, bool setTyp = false) => CreateTokenHelper(clientId, new Claim(JwtClaimTypes.Audience, aud), nowOverride, setTyp);
 
-    private JwtSecurityToken CreateToken(string clientId, string[] audiences, DateTime? nowOverride = null, bool setTyp = false)
-    {
-        return CreateTokenHelper(clientId, new Claim(JwtClaimTypes.Audience, JsonSerializer.Serialize(audiences), JsonClaimValueTypes.JsonArray), nowOverride, setTyp);
-    }
+    private JwtSecurityToken CreateToken(string clientId, string[] audiences, DateTime? nowOverride = null, bool setTyp = false) => CreateTokenHelper(clientId, new Claim(JwtClaimTypes.Audience, JsonSerializer.Serialize(audiences), JsonClaimValueTypes.JsonArray), nowOverride, setTyp);
 
     private JwtSecurityToken CreateTokenHelper(string clientId, Claim aud = null, DateTime? nowOverride = null, bool setJwtTyp = false)
     {

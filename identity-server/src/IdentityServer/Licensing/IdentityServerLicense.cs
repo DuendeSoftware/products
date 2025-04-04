@@ -21,10 +21,7 @@ public class IdentityServerLicense : License
     }
 
     // for testing
-    internal IdentityServerLicense(params Claim[] claims)
-    {
-        Initialize(new ClaimsPrincipal(new ClaimsIdentity(claims)));
-    }
+    internal IdentityServerLicense(params Claim[] claims) => Initialize(new ClaimsPrincipal(new ClaimsIdentity(claims)));
 
     internal override void Initialize(ClaimsPrincipal claims)
     {

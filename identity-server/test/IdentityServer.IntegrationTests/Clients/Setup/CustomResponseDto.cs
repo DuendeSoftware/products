@@ -11,20 +11,14 @@ public class CustomResponseDto
 
     public CustomResponseDto nested { get; set; }
 
-    public static CustomResponseDto Create
+    public static CustomResponseDto Create => new CustomResponseDto
     {
-        get
+        string_value = "dto_string",
+        int_value = 43,
+        nested = new CustomResponseDto
         {
-            return new CustomResponseDto
-            {
-                string_value = "dto_string",
-                int_value = 43,
-                nested = new CustomResponseDto
-                {
-                    string_value = "dto_nested_string",
-                    int_value = 44
-                }
-            };
+            string_value = "dto_nested_string",
+            int_value = 44
         }
-    }
+    };
 }

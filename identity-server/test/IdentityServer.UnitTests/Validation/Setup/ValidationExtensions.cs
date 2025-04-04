@@ -9,12 +9,9 @@ namespace UnitTests.Validation.Setup;
 
 public static class ValidationExtensions
 {
-    public static ClientSecretValidationResult ToValidationResult(this Client client, ParsedSecret secret = null)
+    public static ClientSecretValidationResult ToValidationResult(this Client client, ParsedSecret secret = null) => new ClientSecretValidationResult
     {
-        return new ClientSecretValidationResult
-        {
-            Client = client,
-            Secret = secret
-        };
-    }
+        Client = client,
+        Secret = secret
+    };
 }

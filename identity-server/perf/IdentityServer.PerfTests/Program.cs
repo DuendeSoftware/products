@@ -9,8 +9,7 @@ namespace IdentityServer.PerfTests;
 
 internal class Program
 {
-    private static void Main(string[] args)
-    {
+    private static void Main(string[] args) =>
         //var sub = new DefaultTokenServiceTest();
         //while (true)
         //{
@@ -18,5 +17,4 @@ internal class Program
         //}
 
         BenchmarkRunner.Run<DefaultTokenServiceTest>();
-    }
 }

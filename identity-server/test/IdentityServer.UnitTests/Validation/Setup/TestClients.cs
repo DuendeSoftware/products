@@ -9,9 +9,7 @@ namespace UnitTests.Validation.Setup;
 
 internal class TestClients
 {
-    public static IEnumerable<Client> Get()
-    {
-        return new List<Client>
+    public static IEnumerable<Client> Get() => new List<Client>
         {
             new Client
             {
@@ -511,5 +509,4 @@ internal class TestClients
                 },
             }
         };
-    }
 }

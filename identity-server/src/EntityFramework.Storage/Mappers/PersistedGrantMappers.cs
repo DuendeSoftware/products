@@ -16,9 +16,7 @@ public static class PersistedGrantMappers
     /// </summary>
     /// <param name="entity">The entity.</param>
     /// <returns></returns>
-    public static PersistedGrant ToModel(this Entities.PersistedGrant entity)
-    {
-        return entity == null ? null :
+    public static PersistedGrant ToModel(this Entities.PersistedGrant entity) => entity == null ? null :
             new PersistedGrant
             {
                 Key = entity.Key,
@@ -32,16 +30,13 @@ public static class PersistedGrantMappers
                 ConsumedTime = entity.ConsumedTime,
                 Data = entity.Data
             };
-    }
 
     /// <summary>
     /// Maps a model to an entity.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns></returns>
-    public static Entities.PersistedGrant ToEntity(this Models.PersistedGrant model)
-    {
-        return model == null ? null :
+    public static Entities.PersistedGrant ToEntity(this Models.PersistedGrant model) => model == null ? null :
             new Entities.PersistedGrant
             {
                 Key = model.Key,
@@ -55,7 +50,6 @@ public static class PersistedGrantMappers
                 ConsumedTime = model.ConsumedTime,
                 Data = model.Data
             };
-    }
 
     /// <summary>
     /// Updates an entity from a model.

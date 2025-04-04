@@ -17,10 +17,7 @@ public class ReturnUrlParser
     /// Initializes a new instance of the <see cref="ReturnUrlParser"/> class.
     /// </summary>
     /// <param name="parsers">The parsers.</param>
-    public ReturnUrlParser(IEnumerable<IReturnUrlParser> parsers)
-    {
-        _parsers = parsers;
-    }
+    public ReturnUrlParser(IEnumerable<IReturnUrlParser> parsers) => _parsers = parsers;
 
     /// <summary>
     /// Parses the return URL.

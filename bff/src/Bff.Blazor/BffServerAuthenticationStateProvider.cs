@@ -75,10 +75,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         LicenseChecked = true;
     }
 
-    private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
-    {
-        _authenticationStateTask = task;
-    }
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> task) => _authenticationStateTask = task;
 
     private async Task OnPersistingAsync()
     {

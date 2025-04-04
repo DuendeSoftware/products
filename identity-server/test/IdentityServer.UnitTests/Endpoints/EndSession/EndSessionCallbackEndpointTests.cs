@@ -14,10 +14,7 @@ public class EndSessionCallbackEndpointTests
     private StubEndSessionRequestValidator _stubEndSessionRequestValidator = new StubEndSessionRequestValidator();
     private EndSessionCallbackEndpoint _subject;
 
-    public EndSessionCallbackEndpointTests()
-    {
-        _subject = new EndSessionCallbackEndpoint(
+    public EndSessionCallbackEndpointTests() => _subject = new EndSessionCallbackEndpoint(
             _stubEndSessionRequestValidator,
             new LoggerFactory().CreateLogger<EndSessionCallbackEndpoint>());
-    }
 }

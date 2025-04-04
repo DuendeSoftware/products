@@ -16,30 +16,24 @@ public static class PushedAuthorizationRequestMappers
     /// </summary>
     /// <param name="entity">The entity.</param>
     /// <returns></returns>
-    public static Models.PushedAuthorizationRequest ToModel(this PushedAuthorizationRequest entity)
-    {
-        return entity == null ? null :
+    public static Models.PushedAuthorizationRequest ToModel(this PushedAuthorizationRequest entity) => entity == null ? null :
             new Models.PushedAuthorizationRequest
             {
                 ReferenceValueHash = entity.ReferenceValueHash,
                 ExpiresAtUtc = entity.ExpiresAtUtc,
                 Parameters = entity.Parameters,
             };
-    }
 
     /// <summary>
     /// Maps a model to an entity.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns></returns>
-    public static Entities.PushedAuthorizationRequest ToEntity(this Models.PushedAuthorizationRequest model)
-    {
-        return model == null ? null :
+    public static Entities.PushedAuthorizationRequest ToEntity(this Models.PushedAuthorizationRequest model) => model == null ? null :
             new Entities.PushedAuthorizationRequest
             {
                 ReferenceValueHash = model.ReferenceValueHash,
                 ExpiresAtUtc = model.ExpiresAtUtc,
                 Parameters = model.Parameters,
             };
-    }
 }

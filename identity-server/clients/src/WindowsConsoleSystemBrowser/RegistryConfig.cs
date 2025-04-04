@@ -10,10 +10,7 @@ namespace WindowsConsoleSystemBrowser;
 [SupportedOSPlatform("Windows")]
 internal class RegistryConfig
 {
-    public RegistryConfig(string uriScheme)
-    {
-        CustomUriScheme = uriScheme;
-    }
+    public RegistryConfig(string uriScheme) => CustomUriScheme = uriScheme;
 
     public void Configure()
     {

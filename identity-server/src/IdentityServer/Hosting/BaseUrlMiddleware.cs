@@ -14,10 +14,7 @@ public class BaseUrlMiddleware
 {
     private readonly RequestDelegate _next;
 
-    public BaseUrlMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
+    public BaseUrlMiddleware(RequestDelegate next) => _next = next;
 
     public async Task Invoke(HttpContext context)
     {

@@ -24,20 +24,17 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         }
     }
 
-    private static PersistedGrant CreateTestObject(string sub = null, string clientId = null, string sid = null, string type = null)
+    private static PersistedGrant CreateTestObject(string sub = null, string clientId = null, string sid = null, string type = null) => new PersistedGrant
     {
-        return new PersistedGrant
-        {
-            Key = Guid.NewGuid().ToString(),
-            Type = type ?? "authorization_code",
-            ClientId = clientId ?? Guid.NewGuid().ToString(),
-            SubjectId = sub ?? Guid.NewGuid().ToString(),
-            SessionId = sid ?? Guid.NewGuid().ToString(),
-            CreationTime = new DateTime(2016, 08, 01),
-            Expiration = new DateTime(2016, 08, 31),
-            Data = Guid.NewGuid().ToString()
-        };
-    }
+        Key = Guid.NewGuid().ToString(),
+        Type = type ?? "authorization_code",
+        ClientId = clientId ?? Guid.NewGuid().ToString(),
+        SubjectId = sub ?? Guid.NewGuid().ToString(),
+        SessionId = sid ?? Guid.NewGuid().ToString(),
+        CreationTime = new DateTime(2016, 08, 01),
+        Expiration = new DateTime(2016, 08, 31),
+        Data = Guid.NewGuid().ToString()
+    };
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task StoreAsync_WhenPersistedGrantStored_ExpectSuccess(DbContextOptions<PersistedGrantDbContext> options)

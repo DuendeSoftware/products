@@ -6,10 +6,7 @@ namespace Duende.Bff.Internal;
 internal class LocalUrlReturnUrlValidator : IReturnUrlValidator
 {
     /// <inheritdoc/>
-    public Task<bool> IsValidAsync(string returnUrl)
-    {
-        return Task.FromResult(IsLocalUrl(returnUrl));
-    }
+    public Task<bool> IsValidAsync(string returnUrl) => Task.FromResult(IsLocalUrl(returnUrl));
 
     internal static bool IsLocalUrl(string url)
     {

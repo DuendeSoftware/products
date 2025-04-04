@@ -32,10 +32,7 @@ public class TokenEndpointTests
 
     private TokenEndpoint _subject;
 
-    public TokenEndpointTests()
-    {
-        Init();
-    }
+    public TokenEndpointTests() => Init();
 
     [Fact]
     public async Task ProcessAsync_should_not_raise_event_on_use_dpop_nonce_token_validation_failure()

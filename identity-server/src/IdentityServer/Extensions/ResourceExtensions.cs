@@ -132,10 +132,7 @@ public static class ResourceExtensions
         return new List<string>();
     }
 
-    private static IEnumerable<T> IntersectLists<T>(IEnumerable<IEnumerable<T>> lists)
-    {
-        return lists.Aggregate((l1, l2) => l1.Intersect(l2));
-    }
+    private static IEnumerable<T> IntersectLists<T>(IEnumerable<IEnumerable<T>> lists) => lists.Aggregate((l1, l2) => l1.Intersect(l2));
 
     internal static bool AreValidResourceIndicatorFormat(this IEnumerable<string> list, ILogger logger)
     {

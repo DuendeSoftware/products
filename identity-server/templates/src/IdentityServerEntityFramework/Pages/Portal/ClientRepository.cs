@@ -14,10 +14,7 @@ public class ClientRepository
 {
     private readonly ConfigurationDbContext _context;
 
-    public ClientRepository(ConfigurationDbContext context)
-    {
-        _context = context;
-    }
+    public ClientRepository(ConfigurationDbContext context) => _context = context;
 
     public async Task<IEnumerable<ThirdPartyInitiatedLoginLink>> GetClientsWithLoginUris(string? filter = null)
     {

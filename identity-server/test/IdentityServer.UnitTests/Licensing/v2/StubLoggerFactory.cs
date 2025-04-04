@@ -7,10 +7,7 @@ namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class StubLoggerFactory(ILogger logger) : ILoggerFactory
 {
-    public ILogger CreateLogger(string categoryName)
-    {
-        return logger;
-    }
+    public ILogger CreateLogger(string categoryName) => logger;
 
     public void Dispose()
     {

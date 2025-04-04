@@ -72,10 +72,7 @@ public class RefreshToken
     /// <param name="resourceIndicator"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    public void SetAccessToken(Token token, string? resourceIndicator = null)
-    {
-        AccessTokens[resourceIndicator ?? string.Empty] = token;
-    }
+    public void SetAccessToken(Token token, string? resourceIndicator = null) => AccessTokens[resourceIndicator ?? string.Empty] = token;
 
     /// <summary>
     /// Gets or sets the original subject that requested the token.

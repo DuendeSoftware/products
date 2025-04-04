@@ -26,10 +26,7 @@ public class TokenResult : EndpointResult<TokenResult>
     /// </summary>
     /// <param name="response"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public TokenResult(TokenResponse response)
-    {
-        Response = response ?? throw new ArgumentNullException(nameof(response));
-    }
+    public TokenResult(TokenResponse response) => Response = response ?? throw new ArgumentNullException(nameof(response));
 }
 
 internal class TokenHttpWriter : IHttpResponseWriter<TokenResult>

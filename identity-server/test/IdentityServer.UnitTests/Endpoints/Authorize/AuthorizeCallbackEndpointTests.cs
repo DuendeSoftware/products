@@ -47,10 +47,7 @@ public class AuthorizeCallbackEndpointTests
 
     private ValidatedAuthorizeRequest _validatedAuthorizeRequest;
 
-    public AuthorizeCallbackEndpointTests()
-    {
-        Init();
-    }
+    public AuthorizeCallbackEndpointTests() => Init();
 
     [Fact]
     [Trait("Category", Category)]

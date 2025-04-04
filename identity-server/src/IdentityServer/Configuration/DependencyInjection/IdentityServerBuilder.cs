@@ -18,10 +18,7 @@ public class IdentityServerBuilder : IIdentityServerBuilder
     /// </summary>
     /// <param name="services">The services.</param>
     /// <exception cref="System.ArgumentNullException">services</exception>
-    public IdentityServerBuilder(IServiceCollection services)
-    {
-        Services = services ?? throw new ArgumentNullException(nameof(services));
-    }
+    public IdentityServerBuilder(IServiceCollection services) => Services = services ?? throw new ArgumentNullException(nameof(services));
 
     /// <summary>
     /// Gets the services.

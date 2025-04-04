@@ -23,10 +23,7 @@ public class IdentityScopeRepository
 {
     private readonly ConfigurationDbContext _context;
 
-    public IdentityScopeRepository(ConfigurationDbContext context)
-    {
-        _context = context;
-    }
+    public IdentityScopeRepository(ConfigurationDbContext context) => _context = context;
 
     public async Task<IEnumerable<IdentityScopeSummaryModel>> GetAllAsync(string? filter = null)
     {

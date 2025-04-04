@@ -13,10 +13,7 @@ public class EditModel : PageModel
 {
     private readonly ClientRepository _repository;
 
-    public EditModel(ClientRepository repository)
-    {
-        _repository = repository;
-    }
+    public EditModel(ClientRepository repository) => _repository = repository;
 
     [BindProperty]
     public EditClientModel InputModel { get; set; } = default!;

@@ -163,10 +163,7 @@ public class AppHostFixture : IAsyncLifetime
         }
     }
 
-    private void WriteLogs(string logMessage)
-    {
-        _activeWriter?.Invoke(logMessage);
-    }
+    private void WriteLogs(string logMessage) => _activeWriter?.Invoke(logMessage);
 
     /// <summary>
     ///     This method builds a http client.

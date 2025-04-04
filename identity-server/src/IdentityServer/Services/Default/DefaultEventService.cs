@@ -97,10 +97,7 @@ public class DefaultEventService : IEventService
     /// <returns>
     ///   <c>true</c> if this event would be persisted; otherwise, <c>false</c>.
     /// </returns>
-    protected virtual bool CanRaiseEvent(Event evt)
-    {
-        return CanRaiseEventType(evt.EventType);
-    }
+    protected virtual bool CanRaiseEvent(Event evt) => CanRaiseEventType(evt.EventType);
 
     /// <summary>
     /// Prepares the event.

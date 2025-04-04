@@ -104,13 +104,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         return new BackchannelAuthenticationResult(response);
     }
 
-    private void LogResponse(BackchannelAuthenticationResponse response, BackchannelAuthenticationRequestValidationResult requestResult)
-    {
-        _logger.LogTrace("BackchannelAuthenticationResponse: {@response} for subject {subjectId}", response, requestResult.ValidatedRequest.Subject.GetSubjectId());
-    }
+    private void LogResponse(BackchannelAuthenticationResponse response, BackchannelAuthenticationRequestValidationResult requestResult) => _logger.LogTrace("BackchannelAuthenticationResponse: {@response} for subject {subjectId}", response, requestResult.ValidatedRequest.Subject.GetSubjectId());
 
-    private BackchannelAuthenticationResult Error(string error, string errorDescription = null)
-    {
-        return new BackchannelAuthenticationResult(new BackchannelAuthenticationResponse(error, errorDescription));
-    }
+    private BackchannelAuthenticationResult Error(string error, string errorDescription = null) => new BackchannelAuthenticationResult(new BackchannelAuthenticationResponse(error, errorDescription));
 }

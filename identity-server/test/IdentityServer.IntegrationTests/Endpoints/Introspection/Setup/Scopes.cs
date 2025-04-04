@@ -8,9 +8,7 @@ namespace IntegrationTests.Endpoints.Introspection.Setup;
 
 internal class Scopes
 {
-    public static IEnumerable<ApiResource> GetApis()
-    {
-        return new ApiResource[]
+    public static IEnumerable<ApiResource> GetApis() => new ApiResource[]
         {
             new ApiResource
             {
@@ -40,10 +38,7 @@ internal class Scopes
                 Scopes = { "api3-a", "api3-b" }
             }
         };
-    }
-    public static IEnumerable<ApiScope> GetScopes()
-    {
-        return new ApiScope[]
+    public static IEnumerable<ApiScope> GetScopes() => new ApiScope[]
         {
             new ApiScope
             {
@@ -62,5 +57,4 @@ internal class Scopes
                 Name = "api3-b"
             }
         };
-    }
 }

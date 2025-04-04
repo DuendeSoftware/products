@@ -14,13 +14,7 @@ internal static class KeySerializer
             IncludeFields = true
         };
 
-    public static string Serialize<T>(T item)
-    {
-        return JsonSerializer.Serialize(item, item.GetType(), _settings);
-    }
+    public static string Serialize<T>(T item) => JsonSerializer.Serialize(item, item.GetType(), _settings);
 
-    public static T Deserialize<T>(string json)
-    {
-        return JsonSerializer.Deserialize<T>(json, _settings);
-    }
+    public static T Deserialize<T>(string json) => JsonSerializer.Deserialize<T>(json, _settings);
 }

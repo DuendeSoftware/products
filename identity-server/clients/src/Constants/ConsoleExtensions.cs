@@ -12,10 +12,7 @@ public static class ConsoleExtensions
     /// </summary>
     /// <param name="text">The text.</param>
     [DebuggerStepThrough]
-    public static void ConsoleGreen(this string text)
-    {
-        text.ColoredWriteLine(ConsoleColor.Green);
-    }
+    public static void ConsoleGreen(this string text) => text.ColoredWriteLine(ConsoleColor.Green);
 
     /// <summary>
     /// Writes text to the console in a box.
@@ -37,20 +34,14 @@ public static class ConsoleExtensions
     /// </summary>
     /// <param name="text">The text.</param>
     [DebuggerStepThrough]
-    public static void ConsoleRed(this string text)
-    {
-        text.ColoredWriteLine(ConsoleColor.Red);
-    }
+    public static void ConsoleRed(this string text) => text.ColoredWriteLine(ConsoleColor.Red);
 
     /// <summary>
     /// Writes yellow text to the console.
     /// </summary>
     /// <param name="text">The text.</param>
     [DebuggerStepThrough]
-    public static void ConsoleYellow(this string text)
-    {
-        text.ColoredWriteLine(ConsoleColor.Yellow);
-    }
+    public static void ConsoleYellow(this string text) => text.ColoredWriteLine(ConsoleColor.Yellow);
 
     /// <summary>
     /// Writes out text with the specified ConsoleColor.

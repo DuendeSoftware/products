@@ -47,10 +47,7 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static bool IsMissing(this string value)
-    {
-        return string.IsNullOrWhiteSpace(value);
-    }
+    public static bool IsMissing(this string value) => string.IsNullOrWhiteSpace(value);
 
     [DebuggerStepThrough]
     public static bool IsMissingOrTooLong(this string value, int maxLength)
@@ -68,10 +65,7 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static bool IsPresent(this string value)
-    {
-        return !string.IsNullOrWhiteSpace(value);
-    }
+    public static bool IsPresent(this string value) => !string.IsNullOrWhiteSpace(value);
 
     [DebuggerStepThrough]
     public static string EnsureLeadingSlash(this string url)
@@ -209,10 +203,7 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static string AddQueryString(this string url, string name, string value)
-    {
-        return url.AddQueryString(name + "=" + UrlEncoder.Default.Encode(value));
-    }
+    public static string AddQueryString(this string url, string name, string value) => url.AddQueryString(name + "=" + UrlEncoder.Default.Encode(value));
 
     [DebuggerStepThrough]
     public static string AddHashFragment(this string url, string query)

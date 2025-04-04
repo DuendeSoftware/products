@@ -11,9 +11,7 @@ namespace IntegrationTests.Clients.Setup;
 
 internal class Clients
 {
-    public static IEnumerable<Client> Get()
-    {
-        return new List<Client>
+    public static IEnumerable<Client> Get() => new List<Client>
         {
             ///////////////////////////////////////////
             // Console Client Credentials Flow Sample
@@ -250,5 +248,4 @@ internal class Clients
                 RedirectUris = { "http://implicit_and_client_creds" }
             }
         };
-    }
 }

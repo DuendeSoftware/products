@@ -14,9 +14,7 @@ public static class ApiResourceMappers
     /// </summary>
     /// <param name="entity">The entity.</param>
     /// <returns></returns>
-    public static Models.ApiResource ToModel(this Entities.ApiResource entity)
-    {
-        return entity == null ? null :
+    public static Models.ApiResource ToModel(this Entities.ApiResource entity) => entity == null ? null :
             new Models.ApiResource
             {
                 Enabled = entity.Enabled,
@@ -38,16 +36,13 @@ public static class ApiResourceMappers
                 Scopes = entity.Scopes?.Select(s => s.Scope).ToList() ?? new List<string>(),
                 AllowedAccessTokenSigningAlgorithms = AllowedSigningAlgorithmsConverter.Convert(entity.AllowedAccessTokenSigningAlgorithms),
             };
-    }
 
     /// <summary>
     /// Maps a model to an entity.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns></returns>
-    public static Entities.ApiResource ToEntity(this Models.ApiResource model)
-    {
-        return model == null ? null :
+    public static Entities.ApiResource ToEntity(this Models.ApiResource model) => model == null ? null :
             new Entities.ApiResource
             {
                 Enabled = model.Enabled,
@@ -79,5 +74,4 @@ public static class ApiResourceMappers
                 }).ToList() ?? new List<Entities.ApiResourceScope>(),
                 AllowedAccessTokenSigningAlgorithms = AllowedSigningAlgorithmsConverter.Convert(model.AllowedAccessTokenSigningAlgorithms),
             };
-    }
 }

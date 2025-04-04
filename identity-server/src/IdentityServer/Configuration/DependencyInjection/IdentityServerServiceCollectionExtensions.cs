@@ -21,10 +21,7 @@ public static class IdentityServerServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The services.</param>
     /// <returns></returns>
-    public static IIdentityServerBuilder AddIdentityServerBuilder(this IServiceCollection services)
-    {
-        return new IdentityServerBuilder(services);
-    }
+    public static IIdentityServerBuilder AddIdentityServerBuilder(this IServiceCollection services) => new IdentityServerBuilder(services);
 
     /// <summary>
     /// Adds IdentityServer.

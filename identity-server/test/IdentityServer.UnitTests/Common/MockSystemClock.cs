@@ -10,11 +10,5 @@ internal class MockSystemClock : IClock
 {
     public DateTimeOffset Now { get; set; }
 
-    public DateTimeOffset UtcNow
-    {
-        get
-        {
-            return Now;
-        }
-    }
+    public DateTimeOffset UtcNow => Now;
 }

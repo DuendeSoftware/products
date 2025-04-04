@@ -170,10 +170,7 @@ public class SigningAlgorithmOptions
     /// Constructor.
     /// </summary>
     [SetsRequiredMembers]
-    public SigningAlgorithmOptions(string name)
-    {
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-    }
+    public SigningAlgorithmOptions(string name) => Name = name ?? throw new ArgumentNullException(nameof(name));
 
     /// <summary>
     /// The algorithm name.

@@ -88,8 +88,5 @@ internal static class ILoggerDevExtensions
         }
     }
 
-    public static object SanitizeLogParameter(this object value)
-    {
-        return value?.GetType() == typeof(string) ? value.ToString()?.ReplaceLineEndings(string.Empty) : value;
-    }
+    public static object SanitizeLogParameter(this object value) => value?.GetType() == typeof(string) ? value.ToString()?.ReplaceLineEndings(string.Empty) : value;
 }

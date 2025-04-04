@@ -27,16 +27,10 @@ public class AntiforgeryHandlerTests
 public class TestAntiforgeryHandler : AntiforgeryHandler
 #pragma warning restore CS0618 // Type or member is obsolete
 {
-    public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        return base.SendAsync(request, cancellationToken);
-    }
+    public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => base.SendAsync(request, cancellationToken);
 }
 
 public class NoOpHttpMessageHandler : HttpMessageHandler
 {
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
-    }
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
 }

@@ -44,9 +44,7 @@ public class Authorize_ProtocolValidation_Resources
         },
     };
 
-    public Authorize_ProtocolValidation_Resources()
-    {
-        _subject = new AuthorizeRequestValidator(
+    public Authorize_ProtocolValidation_Resources() => _subject = new AuthorizeRequestValidator(
             _options,
             new TestIssuerNameService("https://sts"),
             new InMemoryClientStore(_clients),
@@ -57,7 +55,6 @@ public class Authorize_ProtocolValidation_Resources
             Factory.CreateRequestObjectValidator(),
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance)),
             new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
-    }
 
     [Fact]
     [Trait("Category", Category)]

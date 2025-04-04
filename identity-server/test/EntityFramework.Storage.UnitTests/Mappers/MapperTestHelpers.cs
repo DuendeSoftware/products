@@ -8,71 +8,47 @@ public static class MapperTestHelpers
 {
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Func<TSource, TDestination> mapper,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, EmptyCustomization<TSource>(), mapper, Array.Empty<string>(), out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, EmptyCustomization<TSource>(), mapper, Array.Empty<string>(), out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Func<TSource> creator,
         Func<TSource, TDestination> mapper,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(creator, NoExclusions, EmptyCustomization<TSource>(), mapper, NoExclusions, out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(creator, NoExclusions, EmptyCustomization<TSource>(), mapper, NoExclusions, out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Action<TSource> customizer,
         Func<TSource, TDestination> mapper,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, customizer, mapper, Array.Empty<string>(), out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, customizer, mapper, Array.Empty<string>(), out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Func<TSource, TDestination> mapper,
         IEnumerable<string> notMapped,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, EmptyCustomization<TSource>(), mapper, notMapped, out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, EmptyCustomization<TSource>(), mapper, notMapped, out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Action<TSource> customizer,
         Func<TSource, TDestination> mapper,
         IEnumerable<string> notMapped,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, customizer, mapper, notMapped, out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(DefaultConstructor<TSource>(), NoExclusions, customizer, mapper, notMapped, out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         IEnumerable<string> excludeFromAutoInitialization,
         Action<TSource> customizer,
         Func<TSource, TDestination> mapper,
         IEnumerable<string> notMapped,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(DefaultConstructor<TSource>(), excludeFromAutoInitialization, customizer, mapper, notMapped, out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(DefaultConstructor<TSource>(), excludeFromAutoInitialization, customizer, mapper, notMapped, out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Func<TSource> creator,
         Action<TSource> customizer,
         Func<TSource, TDestination> mapper,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(creator, NoExclusions, customizer, mapper, NoExclusions, out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(creator, NoExclusions, customizer, mapper, NoExclusions, out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Func<TSource> creator,
         Func<TSource, TDestination> mapper,
         IEnumerable<string> notMapped,
-        out List<string> unmappedMembers)
-    {
-        return AllPropertiesAreMapped(creator, NoExclusions, EmptyCustomization<TSource>(), mapper, notMapped, out unmappedMembers);
-    }
+        out List<string> unmappedMembers) => AllPropertiesAreMapped(creator, NoExclusions, EmptyCustomization<TSource>(), mapper, notMapped, out unmappedMembers);
 
     public static bool AllPropertiesAreMapped<TSource, TDestination>(
         Func<TSource> creator,
@@ -216,15 +192,9 @@ public static class MapperTestHelpers
     }
 
 
-    private static Action<TSource> EmptyCustomization<TSource>()
-    {
-        return src => { };
-    }
+    private static Action<TSource> EmptyCustomization<TSource>() => src => { };
 
-    private static Func<TSource> DefaultConstructor<TSource>()
-    {
-        return Activator.CreateInstance<TSource>;
-    }
+    private static Func<TSource> DefaultConstructor<TSource>() => Activator.CreateInstance<TSource>;
 
     private static string[] NoExclusions = Array.Empty<string>();
 }

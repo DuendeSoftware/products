@@ -26,10 +26,7 @@ public class Resources
     /// </summary>
     /// <param name="other">The other.</param>
     public Resources(Resources other)
-        : this(other.IdentityResources, other.ApiResources, other.ApiScopes)
-    {
-        OfflineAccess = other.OfflineAccess;
-    }
+        : this(other.IdentityResources, other.ApiResources, other.ApiScopes) => OfflineAccess = other.OfflineAccess;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Resources"/> class.

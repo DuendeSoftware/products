@@ -11,10 +11,7 @@ public class InMemoryPersistedGrantStoreTests
 {
     private InMemoryPersistedGrantStore _subject;
 
-    public InMemoryPersistedGrantStoreTests()
-    {
-        _subject = new InMemoryPersistedGrantStore();
-    }
+    public InMemoryPersistedGrantStoreTests() => _subject = new InMemoryPersistedGrantStore();
 
     [Fact]
     public async Task Store_should_persist_value()

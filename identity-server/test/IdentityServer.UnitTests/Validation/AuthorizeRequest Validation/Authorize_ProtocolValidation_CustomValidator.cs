@@ -16,10 +16,7 @@ public class Authorize_ProtocolValidation_CustomValidator
     private StubAuthorizeRequestValidator _stubAuthorizeRequestValidator = new StubAuthorizeRequestValidator();
     private AuthorizeRequestValidator _subject;
 
-    public Authorize_ProtocolValidation_CustomValidator()
-    {
-        _subject = Factory.CreateAuthorizeRequestValidator(customValidator: _stubAuthorizeRequestValidator);
-    }
+    public Authorize_ProtocolValidation_CustomValidator() => _subject = Factory.CreateAuthorizeRequestValidator(customValidator: _stubAuthorizeRequestValidator);
 
     [Fact]
     [Trait("Category", Category)]

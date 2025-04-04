@@ -29,15 +29,9 @@ public class MockUserSession : IUserSession
         return Task.FromResult(SessionId);
     }
 
-    public Task<ClaimsPrincipal> GetUserAsync()
-    {
-        return Task.FromResult(User);
-    }
+    public Task<ClaimsPrincipal> GetUserAsync() => Task.FromResult(User);
 
-    Task<string> IUserSession.GetSessionIdAsync()
-    {
-        return Task.FromResult(SessionId);
-    }
+    Task<string> IUserSession.GetSessionIdAsync() => Task.FromResult(SessionId);
 
     public Task EnsureSessionIdCookieAsync()
     {
@@ -51,10 +45,7 @@ public class MockUserSession : IUserSession
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<string>> GetClientListAsync()
-    {
-        return Task.FromResult<IEnumerable<string>>(Clients);
-    }
+    public Task<IEnumerable<string>> GetClientListAsync() => Task.FromResult<IEnumerable<string>>(Clients);
 
     public Task AddClientIdAsync(string clientId)
     {

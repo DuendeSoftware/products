@@ -10,10 +10,7 @@ public class NewModel : PageModel
 {
     private readonly ApiScopeRepository _repository;
 
-    public NewModel(ApiScopeRepository repository)
-    {
-        _repository = repository;
-    }
+    public NewModel(ApiScopeRepository repository) => _repository = repository;
 
     [BindProperty]
     public ApiScopeModel InputModel { get; set; } = default!;

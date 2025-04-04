@@ -32,8 +32,5 @@ public class CustomResponseExtensionGrantValidator : IExtensionGrantValidator
         return Task.CompletedTask;
     }
 
-    public string GrantType
-    {
-        get { return "custom"; }
-    }
+    public string GrantType => "custom";
 }

@@ -10,10 +10,7 @@ namespace IdentityServerHost;
 
 public class TestOperationalStoreNotification : IOperationalStoreNotification
 {
-    public TestOperationalStoreNotification()
-    {
-        Console.WriteLine("ctor");
-    }
+    public TestOperationalStoreNotification() => Console.WriteLine("ctor");
 
     public Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CancellationToken cancellationToken = default)
     {

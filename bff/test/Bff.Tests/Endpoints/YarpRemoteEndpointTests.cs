@@ -11,13 +11,10 @@ namespace Duende.Bff.Tests.Endpoints;
 public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrationTestBase(output)
 {
     [Fact]
-    public async Task anonymous_call_with_no_csrf_header_to_no_token_requirement_no_csrf_route_should_succeed()
-    {
-        await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+    public async Task anonymous_call_with_no_csrf_header_to_no_token_requirement_no_csrf_route_should_succeed() => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_anon_no_csrf/test"),
             expectedStatusCode: HttpStatusCode.OK
         );
-    }
 
     [Fact]
     public async Task anonymous_call_with_no_csrf_header_to_csrf_route_should_fail()
@@ -39,22 +36,16 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
     }
 
     [Fact]
-    public async Task anonymous_call_to_no_token_requirement_route_should_succeed()
-    {
-        await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+    public async Task anonymous_call_to_no_token_requirement_route_should_succeed() => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_anon/test"),
             expectedStatusCode: HttpStatusCode.OK
         );
-    }
 
     [Fact]
-    public async Task anonymous_call_to_user_token_requirement_route_should_fail()
-    {
-        await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+    public async Task anonymous_call_to_user_token_requirement_route_should_fail() => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_user/test"),
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
-    }
 
     [Fact]
     public async Task anonymous_call_to_optional_user_token_route_should_succeed()

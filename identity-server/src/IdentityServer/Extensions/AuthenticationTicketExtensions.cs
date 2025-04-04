@@ -26,29 +26,20 @@ public static class AuthenticationTicketExtensions
     /// <summary>
     /// Extracts a subject identifier
     /// </summary>
-    public static string GetSubjectId(this AuthenticationTicket ticket)
-    {
-        return ticket.Principal.FindFirst(JwtClaimTypes.Subject)?.Value ??
+    public static string GetSubjectId(this AuthenticationTicket ticket) => ticket.Principal.FindFirst(JwtClaimTypes.Subject)?.Value ??
                throw new InvalidOperationException("Missing subject id for principal in authentication ticket.");
-    }
 
     /// <summary>
     /// Extracts the session ID
     /// </summary>
-    public static string GetSessionId(this AuthenticationTicket ticket)
-    {
-        return ticket.Properties.GetSessionId() ??
+    public static string GetSessionId(this AuthenticationTicket ticket) => ticket.Properties.GetSessionId() ??
             throw new InvalidOperationException("Missing session id for principal in authentication ticket.");
-    }
 
     /// <summary>
     /// Extracts the display name
     /// </summary>
-    public static string GetDisplayName(this AuthenticationTicket ticket, string displayNameClaimType)
-    {
-        return string.IsNullOrWhiteSpace(displayNameClaimType) ?
+    public static string GetDisplayName(this AuthenticationTicket ticket, string displayNameClaimType) => string.IsNullOrWhiteSpace(displayNameClaimType) ?
             null : ticket.Principal.FindFirst(displayNameClaimType)?.Value;
-    }
 
     /// <summary>
     /// Gets the issuer
@@ -62,27 +53,18 @@ public static class AuthenticationTicketExtensions
     /// <summary>
     /// Sets a issuer
     /// </summary>
-    public static void SetIssuer(this AuthenticationTicket ticket, string issuer)
-    {
-        ticket.Properties.Items[JwtClaimTypes.Issuer] = issuer;
-    }
+    public static void SetIssuer(this AuthenticationTicket ticket, string issuer) => ticket.Properties.Items[JwtClaimTypes.Issuer] = issuer;
 
 
     /// <summary>
     /// Extracts the issuance time
     /// </summary>
-    public static DateTime GetIssued(this AuthenticationTicket ticket)
-    {
-        return ticket.Properties.IssuedUtc?.UtcDateTime ?? DateTime.UtcNow;
-    }
+    public static DateTime GetIssued(this AuthenticationTicket ticket) => ticket.Properties.IssuedUtc?.UtcDateTime ?? DateTime.UtcNow;
 
     /// <summary>
     /// Extracts the expiration time
     /// </summary>
-    public static DateTime? GetExpiration(this AuthenticationTicket ticket)
-    {
-        return ticket.Properties.ExpiresUtc?.UtcDateTime;
-    }
+    public static DateTime? GetExpiration(this AuthenticationTicket ticket) => ticket.Properties.ExpiresUtc?.UtcDateTime;
 
 
     /// <summary>

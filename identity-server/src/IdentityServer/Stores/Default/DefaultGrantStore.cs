@@ -77,10 +77,7 @@ public class DefaultGrantStore<T>
     /// <summary>
     /// Creates a handle.
     /// </summary>
-    protected async Task<string> CreateHandleAsync()
-    {
-        return await HandleGenerationService.GenerateAsync() + HexEncodingFormatSuffix;
-    }
+    protected async Task<string> CreateHandleAsync() => await HandleGenerationService.GenerateAsync() + HexEncodingFormatSuffix;
 
     /// <summary>
     /// Gets the hashed key.
@@ -240,10 +237,7 @@ public class DefaultGrantStore<T>
     /// </summary>
     /// <param name="key">The key.</param>
     /// <returns></returns>
-    protected virtual async Task RemoveItemByHashedKeyAsync(string key)
-    {
-        await Store.RemoveAsync(key);
-    }
+    protected virtual async Task RemoveItemByHashedKeyAsync(string key) => await Store.RemoveAsync(key);
 
     /// <summary>
     /// Removes all items for a subject id / client id combination.
@@ -252,14 +246,11 @@ public class DefaultGrantStore<T>
     /// <param name="clientId">The client identifier.</param>
     /// <param name="sessionId">The optional session identifier.</param>
     /// <returns></returns>
-    protected virtual async Task RemoveAllAsync(string subjectId, string clientId, string sessionId = null)
+    protected virtual async Task RemoveAllAsync(string subjectId, string clientId, string sessionId = null) => await Store.RemoveAllAsync(new PersistedGrantFilter
     {
-        await Store.RemoveAllAsync(new PersistedGrantFilter
-        {
-            SubjectId = subjectId,
-            ClientId = clientId,
-            SessionId = sessionId,
-            Type = GrantType
-        });
-    }
+        SubjectId = subjectId,
+        ClientId = clientId,
+        SessionId = sessionId,
+        Type = GrantType
+    });
 }

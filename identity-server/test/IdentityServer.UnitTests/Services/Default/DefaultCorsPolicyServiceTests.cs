@@ -13,10 +13,7 @@ public class DefaultCorsPolicyServiceTests
 
     private DefaultCorsPolicyService subject;
 
-    public DefaultCorsPolicyServiceTests()
-    {
-        subject = new DefaultCorsPolicyService(TestLogger.Create<DefaultCorsPolicyService>());
-    }
+    public DefaultCorsPolicyServiceTests() => subject = new DefaultCorsPolicyService(TestLogger.Create<DefaultCorsPolicyService>());
 
     [Fact]
     [Trait("Category", Category)]

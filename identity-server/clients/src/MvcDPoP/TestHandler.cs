@@ -7,10 +7,7 @@ public class TestHandler : DelegatingHandler
 {
     private readonly ILogger<TestHandler> _logger;
 
-    public TestHandler(ILogger<TestHandler> logger)
-    {
-        _logger = logger;
-    }
+    public TestHandler(ILogger<TestHandler> logger) => _logger = logger;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var response = await base.SendAsync(request, cancellationToken);

@@ -20,10 +20,7 @@ public static class PrincipalExtensions
     /// <param name="principal">The principal.</param>
     /// <returns></returns>
     [DebuggerStepThrough]
-    public static DateTime GetAuthenticationTime(this IPrincipal principal)
-    {
-        return DateTimeOffset.FromUnixTimeSeconds(principal.GetAuthenticationTimeEpoch()).UtcDateTime;
-    }
+    public static DateTime GetAuthenticationTime(this IPrincipal principal) => DateTimeOffset.FromUnixTimeSeconds(principal.GetAuthenticationTimeEpoch()).UtcDateTime;
 
     /// <summary>
     /// Gets the authentication epoch time.
@@ -31,10 +28,7 @@ public static class PrincipalExtensions
     /// <param name="principal">The principal.</param>
     /// <returns></returns>
     [DebuggerStepThrough]
-    public static long GetAuthenticationTimeEpoch(this IPrincipal principal)
-    {
-        return principal.Identity.GetAuthenticationTimeEpoch();
-    }
+    public static long GetAuthenticationTimeEpoch(this IPrincipal principal) => principal.Identity.GetAuthenticationTimeEpoch();
 
     /// <summary>
     /// Gets the authentication epoch time.
@@ -58,10 +52,7 @@ public static class PrincipalExtensions
     /// <param name="principal">The principal.</param>
     /// <returns></returns>
     [DebuggerStepThrough]
-    public static string GetSubjectId(this IPrincipal principal)
-    {
-        return principal.Identity.GetSubjectId();
-    }
+    public static string GetSubjectId(this IPrincipal principal) => principal.Identity.GetSubjectId();
 
     /// <summary>
     /// Gets the subject identifier.
@@ -102,10 +93,7 @@ public static class PrincipalExtensions
     /// <param name="principal">The principal.</param>
     /// <returns></returns>
     [DebuggerStepThrough]
-    public static string GetAuthenticationMethod(this IPrincipal principal)
-    {
-        return principal.Identity.GetAuthenticationMethod();
-    }
+    public static string GetAuthenticationMethod(this IPrincipal principal) => principal.Identity.GetAuthenticationMethod();
 
     /// <summary>
     /// Gets the authentication method claims.
@@ -113,10 +101,7 @@ public static class PrincipalExtensions
     /// <param name="principal">The principal.</param>
     /// <returns></returns>
     [DebuggerStepThrough]
-    public static IEnumerable<Claim> GetAuthenticationMethods(this IPrincipal principal)
-    {
-        return principal.Identity.GetAuthenticationMethods();
-    }
+    public static IEnumerable<Claim> GetAuthenticationMethods(this IPrincipal principal) => principal.Identity.GetAuthenticationMethods();
 
     /// <summary>
     /// Gets the authentication method.
@@ -152,10 +137,7 @@ public static class PrincipalExtensions
     /// <param name="principal">The principal.</param>
     /// <returns></returns>
     [DebuggerStepThrough]
-    public static string GetIdentityProvider(this IPrincipal principal)
-    {
-        return principal.Identity.GetIdentityProvider();
-    }
+    public static string GetIdentityProvider(this IPrincipal principal) => principal.Identity.GetIdentityProvider();
 
     /// <summary>
     /// Gets the identity provider.
@@ -179,10 +161,7 @@ public static class PrincipalExtensions
     /// <param name="principal">The principal.</param>
     /// <returns></returns>
     [DebuggerStepThrough]
-    public static string GetTenant(this ClaimsPrincipal principal)
-    {
-        return principal.FindFirst(IdentityServerConstants.ClaimTypes.Tenant)?.Value;
-    }
+    public static string GetTenant(this ClaimsPrincipal principal) => principal.FindFirst(IdentityServerConstants.ClaimTypes.Tenant)?.Value;
 
     /// <summary>
     /// Determines whether this instance is authenticated.
@@ -192,8 +171,5 @@ public static class PrincipalExtensions
     ///   <c>true</c> if the specified principal is authenticated; otherwise, <c>false</c>.
     /// </returns>
     [DebuggerStepThrough]
-    public static bool IsAuthenticated(this IPrincipal principal)
-    {
-        return principal != null && principal.Identity != null && principal.Identity.IsAuthenticated;
-    }
+    public static bool IsAuthenticated(this IPrincipal principal) => principal != null && principal.Identity != null && principal.Identity.IsAuthenticated;
 }

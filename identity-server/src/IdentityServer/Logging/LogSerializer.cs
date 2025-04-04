@@ -18,18 +18,12 @@ internal static class LogSerializer
         WriteIndented = true
     };
 
-    static LogSerializer()
-    {
-        Options.Converters.Add(new JsonStringEnumConverter());
-    }
+    static LogSerializer() => Options.Converters.Add(new JsonStringEnumConverter());
 
     /// <summary>
     /// Serializes the specified object.
     /// </summary>
     /// <param name="logObject">The object.</param>
     /// <returns></returns>
-    public static string Serialize(object logObject)
-    {
-        return JsonSerializer.Serialize(logObject, Options);
-    }
+    public static string Serialize(object logObject) => JsonSerializer.Serialize(logObject, Options);
 }

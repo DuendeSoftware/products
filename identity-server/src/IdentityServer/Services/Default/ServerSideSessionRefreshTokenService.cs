@@ -69,14 +69,8 @@ internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
     }
 
     /// <inheritdoc/>
-    public Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request)
-    {
-        return Inner.CreateRefreshTokenAsync(request);
-    }
+    public Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request) => Inner.CreateRefreshTokenAsync(request);
 
     /// <inheritdoc/>
-    public Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request)
-    {
-        return Inner.UpdateRefreshTokenAsync(request);
-    }
+    public Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request) => Inner.UpdateRefreshTokenAsync(request);
 }

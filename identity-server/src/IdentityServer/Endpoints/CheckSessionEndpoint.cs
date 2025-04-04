@@ -14,10 +14,7 @@ internal class CheckSessionEndpoint : IEndpointHandler
 {
     private readonly ILogger _logger;
 
-    public CheckSessionEndpoint(ILogger<CheckSessionEndpoint> logger)
-    {
-        _logger = logger;
-    }
+    public CheckSessionEndpoint(ILogger<CheckSessionEndpoint> logger) => _logger = logger;
 
     public Task<IEndpointResult> ProcessAsync(HttpContext context)
     {

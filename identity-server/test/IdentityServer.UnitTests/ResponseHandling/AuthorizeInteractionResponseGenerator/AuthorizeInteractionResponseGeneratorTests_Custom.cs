@@ -54,15 +54,12 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
     private MockConsentService _mockConsentService = new MockConsentService();
     private StubClock _clock = new StubClock();
 
-    public AuthorizeInteractionResponseGeneratorTests_Custom()
-    {
-        _subject = new CustomAuthorizeInteractionResponseGenerator(
+    public AuthorizeInteractionResponseGeneratorTests_Custom() => _subject = new CustomAuthorizeInteractionResponseGenerator(
             _options,
             _clock,
             TestLogger.Create<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator>(),
             _mockConsentService,
             new MockProfileService());
-    }
 
 
     [Fact]

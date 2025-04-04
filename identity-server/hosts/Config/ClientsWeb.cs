@@ -19,9 +19,7 @@ public static class ClientsWeb
         "custom.profile"
     };
 
-    public static IEnumerable<Client> Get()
-    {
-        return new List<Client>
+    public static IEnumerable<Client> Get() => new List<Client>
         {
             ///////////////////////////////////////////
             // JS OIDC Sample
@@ -259,5 +257,4 @@ public static class ClientsWeb
                 AllowedScopes = allowedScopes
             },
         };
-    }
 }

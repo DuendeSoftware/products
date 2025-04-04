@@ -23,8 +23,5 @@ internal class QueryStringAuthorizationParametersMessageStore : IAuthorizationPa
         return Task.FromResult(msg);
     }
 
-    public Task DeleteAsync(string id)
-    {
-        return Task.CompletedTask;
-    }
+    public Task DeleteAsync(string id) => Task.CompletedTask;
 }

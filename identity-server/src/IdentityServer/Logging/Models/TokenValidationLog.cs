@@ -20,8 +20,5 @@ internal class TokenValidationLog
     // both
     public Dictionary<string, object> Claims { get; set; }
 
-    public override string ToString()
-    {
-        return LogSerializer.Serialize(this);
-    }
+    public override string ToString() => LogSerializer.Serialize(this);
 }

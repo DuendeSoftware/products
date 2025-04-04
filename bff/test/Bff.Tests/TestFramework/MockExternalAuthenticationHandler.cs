@@ -47,8 +47,5 @@ public class MockExternalAuthenticationHandler : RemoteAuthenticationHandler<Moc
 
 public class MockExternalAuthenticationOptions : RemoteAuthenticationOptions
 {
-    public MockExternalAuthenticationOptions()
-    {
-        CallbackPath = "/external-callback";
-    }
+    public MockExternalAuthenticationOptions() => CallbackPath = "/external-callback";
 }

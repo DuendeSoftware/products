@@ -77,19 +77,16 @@ public class PlaywrightTestBase : PageTest, IDisposable
         await base.DisposeAsync();
     }
 
-    public override BrowserNewContextOptions ContextOptions()
+    public override BrowserNewContextOptions ContextOptions() => new()
     {
-        return new()
-        {
-            Locale = "en-US",
-            ColorScheme = ColorScheme.Light,
+        Locale = "en-US",
+        ColorScheme = ColorScheme.Light,
 
-            // We need to ignore https errors to make this work on the build server. 
-            // Even though we use dotnet dev-certs https --trust on the build agent,
-            // it still claims the certs are invalid. 
-            IgnoreHTTPSErrors = true,
-        };
-    }
+        // We need to ignore https errors to make this work on the build server. 
+        // Even though we use dotnet dev-certs https --trust on the build agent,
+        // it still claims the certs are invalid. 
+        IgnoreHTTPSErrors = true,
+    };
 
 
     public AppHostFixture Fixture { get; }
@@ -112,10 +109,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
         _loggingScope.Dispose();
     }
 
-    public HttpClient CreateHttpClient(string clientName)
-    {
-        return Fixture.CreateHttpClient(clientName);
-    }
+    public HttpClient CreateHttpClient(string clientName) => Fixture.CreateHttpClient(clientName);
 }
 
 public class WithTestNameAttribute : BeforeAfterTestAttribute

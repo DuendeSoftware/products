@@ -57,38 +57,17 @@ internal static class Log
         EventIds.InvalidRouteConfiguration,
         "Failed to request new User Access Token due to: {message}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.");
 
-    public static void AntiForgeryValidationFailed(this ILogger logger, string localPath)
-    {
-        AntiForgeryValidationFailedMessage(logger, localPath, null);
-    }
+    public static void AntiForgeryValidationFailed(this ILogger logger, string localPath) => AntiForgeryValidationFailedMessage(logger, localPath, null);
 
-    public static void BackChannelLogout(this ILogger logger, string sub, string sid)
-    {
-        BackChannelLogoutMessage(logger, sub, sid, null);
-    }
+    public static void BackChannelLogout(this ILogger logger, string sub, string sid) => BackChannelLogoutMessage(logger, sub, sid, null);
 
-    public static void BackChannelLogoutError(this ILogger logger, string error)
-    {
-        BackChannelLogoutErrorMessage(logger, error, null);
-    }
+    public static void BackChannelLogoutError(this ILogger logger, string error) => BackChannelLogoutErrorMessage(logger, error, null);
 
-    public static void AccessTokenMissing(this ILogger logger, string tokenType, string localPath, string detail)
-    {
-        AccessTokenMissingMessage(logger, tokenType, localPath, detail, null);
-    }
+    public static void AccessTokenMissing(this ILogger logger, string tokenType, string localPath, string detail) => AccessTokenMissingMessage(logger, tokenType, localPath, detail, null);
 
-    public static void InvalidRouteConfiguration(this ILogger logger, string? clusterId, string routeId)
-    {
-        InvalidRouteConfigurationMessage(logger, clusterId ?? "no cluster id", routeId, null);
-    }
+    public static void InvalidRouteConfiguration(this ILogger logger, string? clusterId, string routeId) => InvalidRouteConfigurationMessage(logger, clusterId ?? "no cluster id", routeId, null);
 
-    public static void FailedToRequestNewUserAccessToken(this ILogger logger, string message)
-    {
-        FailedToRequestNewTokenMessage(logger, message, null);
-    }
+    public static void FailedToRequestNewUserAccessToken(this ILogger logger, string message) => FailedToRequestNewTokenMessage(logger, message, null);
 
-    public static void UserSessionRevoked(this ILogger logger, string message)
-    {
-        UserSessionRevokedMessage(logger, message, null);
-    }
+    public static void UserSessionRevoked(this ILogger logger, string message) => UserSessionRevokedMessage(logger, message, null);
 }

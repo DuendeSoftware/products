@@ -22,13 +22,10 @@ public class SecretValidation
     private SecretValidator _validator;
     private IdentityServerOptions _options = new IdentityServerOptions();
 
-    public SecretValidation()
-    {
-        _validator = new SecretValidator(
+    public SecretValidation() => _validator = new SecretValidator(
             new StubClock(),
             new[] { _hashedSecretValidator },
             new Logger<SecretValidator>(new LoggerFactory()));
-    }
 
     [Fact]
     [Trait("Category", Category)]

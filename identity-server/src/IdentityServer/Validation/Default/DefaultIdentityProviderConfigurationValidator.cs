@@ -18,10 +18,7 @@ public class DefaultIdentityProviderConfigurationValidator : IIdentityProviderCo
     /// <summary>
     /// Constructor for DefaultIdentityProviderConfigurationValidator
     /// </summary>
-    public DefaultIdentityProviderConfigurationValidator(IdentityServerOptions options)
-    {
-        _options = options;
-    }
+    public DefaultIdentityProviderConfigurationValidator(IdentityServerOptions options) => _options = options;
 
     /// <inheritdoc/>
     public virtual async Task ValidateAsync(IdentityProviderConfigurationValidationContext context)

@@ -14,10 +14,7 @@ public class IdentityTokenValidation
 {
     private const string Category = "Identity token validation";
 
-    static IdentityTokenValidation()
-    {
-        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-    }
+    static IdentityTokenValidation() => JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
     [Fact]
     [Trait("Category", Category)]

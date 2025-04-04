@@ -55,8 +55,5 @@ public class IsLocalUrlTests
 
     [Theory]
     [MemberData(nameof(TestCases))]
-    public void IsLocalUrl(string returnUrl, bool expected)
-    {
-        returnUrl.IsLocalUrl().ShouldBe(expected);
-    }
+    public void IsLocalUrl(string returnUrl, bool expected) => returnUrl.IsLocalUrl().ShouldBe(expected);
 }

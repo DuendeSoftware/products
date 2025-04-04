@@ -23,10 +23,7 @@ public class ApiScopeRepository
 {
     private readonly ConfigurationDbContext _context;
 
-    public ApiScopeRepository(ConfigurationDbContext context)
-    {
-        _context = context;
-    }
+    public ApiScopeRepository(ConfigurationDbContext context) => _context = context;
 
     public async Task<IEnumerable<ApiScopeSummaryModel>> GetAllAsync(string? filter = null)
     {

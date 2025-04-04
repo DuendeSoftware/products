@@ -32,10 +32,7 @@ public class DefaultBackChannelLogoutServiceTests
 
 
         // CreateTokenAsync is protected, so we use this wrapper to exercise it in our tests
-        public async Task<string> ExerciseCreateTokenAsync(BackChannelLogoutRequest request)
-        {
-            return await CreateTokenAsync(request);
-        }
+        public async Task<string> ExerciseCreateTokenAsync(BackChannelLogoutRequest request) => await CreateTokenAsync(request);
     }
 
     [Fact]

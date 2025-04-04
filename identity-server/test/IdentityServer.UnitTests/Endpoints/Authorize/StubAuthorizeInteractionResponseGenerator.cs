@@ -12,8 +12,5 @@ internal class StubAuthorizeInteractionResponseGenerator : IAuthorizeInteraction
 {
     internal InteractionResponse Response { get; set; } = new InteractionResponse();
 
-    public Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)
-    {
-        return Task.FromResult(Response);
-    }
+    public Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null) => Task.FromResult(Response);
 }

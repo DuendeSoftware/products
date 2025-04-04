@@ -12,10 +12,7 @@ public class LoggedOut : PageModel
 
     public LoggedOutViewModel View { get; set; } = default!;
 
-    public LoggedOut(IIdentityServerInteractionService interactionService)
-    {
-        _interactionService = interactionService;
-    }
+    public LoggedOut(IIdentityServerInteractionService interactionService) => _interactionService = interactionService;
 
     public async Task OnGet(string? logoutId)
     {

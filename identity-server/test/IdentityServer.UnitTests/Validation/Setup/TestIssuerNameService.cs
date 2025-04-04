@@ -10,13 +10,7 @@ internal class TestIssuerNameService : IIssuerNameService
 {
     private readonly string _value;
 
-    public TestIssuerNameService(string value = null)
-    {
-        _value = value ?? "https://identityserver";
-    }
+    public TestIssuerNameService(string value = null) => _value = value ?? "https://identityserver";
 
-    public Task<string> GetCurrentAsync()
-    {
-        return Task.FromResult(_value);
-    }
+    public Task<string> GetCurrentAsync() => Task.FromResult(_value);
 }

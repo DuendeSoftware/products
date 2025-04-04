@@ -18,10 +18,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
     private MockConsentService _mockConsent = new MockConsentService();
     private MockProfileService _fakeUserService = new MockProfileService();
 
-    private void RequiresConsent(bool value)
-    {
-        _mockConsent.RequiresConsentResult = value;
-    }
+    private void RequiresConsent(bool value) => _mockConsent.RequiresConsentResult = value;
 
     private void AssertUpdateConsentNotCalled()
     {
@@ -37,19 +34,14 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
         _mockConsent.ConsentScopes.ShouldBe(scopes);
     }
 
-    private static IEnumerable<IdentityResource> GetIdentityScopes()
-    {
-        return new IdentityResource[]
+    private static IEnumerable<IdentityResource> GetIdentityScopes() => new IdentityResource[]
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
             new IdentityResources.Email()
         };
-    }
 
-    private static IEnumerable<ApiResource> GetApiResources()
-    {
-        return new ApiResource[]
+    private static IEnumerable<ApiResource> GetApiResources() => new ApiResource[]
         {
             new ApiResource
             {
@@ -57,11 +49,8 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
                 Scopes = { "read", "write", "forbidden" }
             }
         };
-    }
 
-    private static IEnumerable<ApiScope> GetScopes()
-    {
-        return new ApiScope[]
+    private static IEnumerable<ApiScope> GetScopes() => new ApiScope[]
         {
             new ApiScope
             {
@@ -82,17 +71,13 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
                 Emphasize = true
             }
         };
-    }
 
-    public AuthorizeInteractionResponseGeneratorTests_Consent()
-    {
-        _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
+    public AuthorizeInteractionResponseGeneratorTests_Consent() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,
             new StubClock(),
             TestLogger.Create<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator>(),
             _mockConsent,
             _fakeUserService);
-    }
 
     private static ResourceValidationResult GetValidatedResources(params string[] scopes)
     {

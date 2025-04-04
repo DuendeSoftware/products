@@ -49,10 +49,7 @@ public class BffIntegrationTestBase : OutputWritingTestBase
         };
     }
 
-    public async Task Login(string sub)
-    {
-        await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
-    }
+    public async Task Login(string sub) => await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
 
     public override async Task InitializeAsync()
     {

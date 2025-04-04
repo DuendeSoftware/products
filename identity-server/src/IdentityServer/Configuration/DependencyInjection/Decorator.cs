@@ -8,10 +8,7 @@ internal class Decorator<TService>
 {
     public TService Instance { get; set; }
 
-    public Decorator(TService instance)
-    {
-        Instance = instance;
-    }
+    public Decorator(TService instance) => Instance = instance;
 }
 
 internal class Decorator<TService, TImpl> : Decorator<TService>
@@ -28,8 +25,5 @@ internal class DisposableDecorator<TService> : Decorator<TService>, IDisposable
     {
     }
 
-    public void Dispose()
-    {
-        (Instance as IDisposable)?.Dispose();
-    }
+    public void Dispose() => (Instance as IDisposable)?.Dispose();
 }

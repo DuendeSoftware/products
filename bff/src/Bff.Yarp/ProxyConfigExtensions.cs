@@ -16,10 +16,7 @@ public static class ProxyConfigExtensions
     /// <param name="config"></param>
     /// <param name="tokenType"></param>
     /// <returns></returns>
-    public static RouteConfig WithAccessToken(this RouteConfig config, TokenType tokenType)
-    {
-        return config.WithMetadata(Constants.Yarp.TokenTypeMetadata, tokenType.ToString());
-    }
+    public static RouteConfig WithAccessToken(this RouteConfig config, TokenType tokenType) => config.WithMetadata(Constants.Yarp.TokenTypeMetadata, tokenType.ToString());
 
     /// <summary>
     /// Adds BFF access token metadata to a route configuration, indicating that 
@@ -28,20 +25,14 @@ public static class ProxyConfigExtensions
     /// </summary>
     /// <param name="config"></param>
     /// <returns></returns>
-    public static RouteConfig WithOptionalUserAccessToken(this RouteConfig config)
-    {
-        return config.WithMetadata(Constants.Yarp.OptionalUserTokenMetadata, "true");
-    }
+    public static RouteConfig WithOptionalUserAccessToken(this RouteConfig config) => config.WithMetadata(Constants.Yarp.OptionalUserTokenMetadata, "true");
 
     /// <summary>
     /// Adds anti-forgery metadata to a route configuration
     /// </summary>
     /// <param name="config"></param>
     /// <returns></returns>
-    public static RouteConfig WithAntiforgeryCheck(this RouteConfig config)
-    {
-        return config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
-    }
+    public static RouteConfig WithAntiforgeryCheck(this RouteConfig config) => config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
 
     private static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
     {

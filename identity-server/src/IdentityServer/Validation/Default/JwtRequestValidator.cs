@@ -144,10 +144,7 @@ public class JwtRequestValidator : IJwtRequestValidator
     /// </summary>
     /// <param name="client">The client</param>
     /// <returns></returns>
-    protected virtual Task<List<SecurityKey>> GetKeysAsync(Client client)
-    {
-        return client.ClientSecrets.GetKeysAsync();
-    }
+    protected virtual Task<List<SecurityKey>> GetKeysAsync(Client client) => client.ClientSecrets.GetKeysAsync();
 
     /// <summary>
     /// Validates the JWT token

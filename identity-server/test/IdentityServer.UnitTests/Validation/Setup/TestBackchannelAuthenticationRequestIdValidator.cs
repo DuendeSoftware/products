@@ -10,10 +10,7 @@ internal class TestBackchannelAuthenticationRequestIdValidator : IBackchannelAut
 {
     private readonly bool shouldError;
 
-    public TestBackchannelAuthenticationRequestIdValidator(bool shouldError = false)
-    {
-        this.shouldError = shouldError;
-    }
+    public TestBackchannelAuthenticationRequestIdValidator(bool shouldError = false) => this.shouldError = shouldError;
 
     //public DeviceCode DeviceCodeResult { get; set; } = new DeviceCode();
 

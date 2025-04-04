@@ -19,10 +19,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <summary>
     /// Constructor for DefaultClientConfigurationValidator
     /// </summary>
-    public DefaultClientConfigurationValidator(IdentityServerOptions options)
-    {
-        _options = options;
-    }
+    public DefaultClientConfigurationValidator(IdentityServerOptions options) => _options = options;
 
     /// <summary>
     /// Determines whether the configuration of a client is valid.
@@ -256,8 +253,5 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns></returns>
-    protected virtual Task ValidatePropertiesAsync(ClientConfigurationValidationContext context)
-    {
-        return Task.CompletedTask;
-    }
+    protected virtual Task ValidatePropertiesAsync(ClientConfigurationValidationContext context) => Task.CompletedTask;
 }

@@ -8,10 +8,7 @@ namespace MvcHybrid;
 
 public class CookieEventHandler : CookieAuthenticationEvents
 {
-    public CookieEventHandler(LogoutSessionManager logoutSessions)
-    {
-        LogoutSessions = logoutSessions;
-    }
+    public CookieEventHandler(LogoutSessionManager logoutSessions) => LogoutSessions = logoutSessions;
 
     public LogoutSessionManager LogoutSessions { get; }
 

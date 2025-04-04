@@ -8,8 +8,5 @@ namespace UnitTests.Common;
 
 public static class TestLogger
 {
-    public static ILogger<T> Create<T>()
-    {
-        return new LoggerFactory().CreateLogger<T>();
-    }
+    public static ILogger<T> Create<T>() => new LoggerFactory().CreateLogger<T>();
 }

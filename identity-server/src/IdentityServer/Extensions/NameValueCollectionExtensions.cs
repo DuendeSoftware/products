@@ -10,10 +10,7 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class NameValueCollectionExtensions
 {
-    public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source)
-    {
-        return source.AllKeys.ToDictionary(k => k, k => source.GetValues(k));
-    }
+    public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source) => source.AllKeys.ToDictionary(k => k, k => source.GetValues(k));
 
     public static NameValueCollection FromFullDictionary(this IDictionary<string, string[]> source)
     {
@@ -95,10 +92,7 @@ internal static class NameValueCollectionExtensions
         return result;
     }
 
-    public static Dictionary<string, string> ToDictionary(this NameValueCollection collection)
-    {
-        return collection.ToScrubbedDictionary();
-    }
+    public static Dictionary<string, string> ToDictionary(this NameValueCollection collection) => collection.ToScrubbedDictionary();
 
     public static Dictionary<string, string> ToScrubbedDictionary(this NameValueCollection collection, params string[] nameFilter)
     {

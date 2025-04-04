@@ -256,24 +256,19 @@ public class PushedAuthorizationTests
         });
     }
 
-    private void ConfigureUsers()
+    private void ConfigureUsers() => _mockPipeline.Users.Add(new TestUser
     {
-        _mockPipeline.Users.Add(new TestUser
-        {
-            SubjectId = "bob",
-            Username = "bob",
-            Claims = new Claim[]
+        SubjectId = "bob",
+        Username = "bob",
+        Claims = new Claim[]
                     {
                 new Claim("name", "Bob Loblaw"),
                 new Claim("email", "bob@loblaw.com"),
                 new Claim("role", "Attorney")
                     }
-        });
-    }
+    });
 
-    private void ConfigureClients()
-    {
-        _mockPipeline.Clients.AddRange(new Client[]
+    private void ConfigureClients() => _mockPipeline.Clients.AddRange(new Client[]
         {
             _client = new Client
             {
@@ -289,7 +284,6 @@ public class PushedAuthorizationTests
                 RedirectUris = new List<string> { "https://client1/callback" },
             },
         });
-    }
 
 
 }

@@ -457,22 +457,13 @@ internal class TokenValidator : ITokenValidator
         }
     }
 
-    private TokenValidationResult Invalid(string error)
+    private TokenValidationResult Invalid(string error) => new TokenValidationResult
     {
-        return new TokenValidationResult
-        {
-            IsError = true,
-            Error = error
-        };
-    }
+        IsError = true,
+        Error = error
+    };
 
-    private void LogError(string message)
-    {
-        _logger.LogError(message + "\n{@logMessage}", _log);
-    }
+    private void LogError(string message) => _logger.LogError(message + "\n{@logMessage}", _log);
 
-    private void LogSuccess()
-    {
-        _logger.LogDebug("Token validation success\n{@logMessage}", _log);
-    }
+    private void LogSuccess() => _logger.LogDebug("Token validation success\n{@logMessage}", _log);
 }

@@ -28,18 +28,12 @@ public class EndSessionCallbackResult : EndpointResult<EndSessionCallbackResult>
     /// </summary>
     /// <param name="result"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public EndSessionCallbackResult(EndSessionCallbackValidationResult result)
-    {
-        Result = result ?? throw new ArgumentNullException(nameof(result));
-    }
+    public EndSessionCallbackResult(EndSessionCallbackValidationResult result) => Result = result ?? throw new ArgumentNullException(nameof(result));
 }
 
 internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCallbackResult>
 {
-    public EndSessionCallbackHttpWriter(IdentityServerOptions options)
-    {
-        _options = options;
-    }
+    public EndSessionCallbackHttpWriter(IdentityServerOptions options) => _options = options;
 
     private IdentityServerOptions _options;
 

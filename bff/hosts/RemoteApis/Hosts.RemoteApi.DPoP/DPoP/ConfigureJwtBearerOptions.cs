@@ -10,10 +10,7 @@ public class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
 {
     private readonly string _configScheme;
 
-    public ConfigureJwtBearerOptions(string configScheme)
-    {
-        _configScheme = configScheme;
-    }
+    public ConfigureJwtBearerOptions(string configScheme) => _configScheme = configScheme;
 
     public void PostConfigure(string name, JwtBearerOptions options)
     {

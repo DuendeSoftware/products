@@ -28,10 +28,7 @@ public class DynamicClientRegistrationResponseGenerator : IDynamicClientRegistra
     protected readonly ILogger<DynamicClientRegistrationResponseGenerator> Logger;
 
     /// <inheritdoc/>
-    public DynamicClientRegistrationResponseGenerator(ILogger<DynamicClientRegistrationResponseGenerator> logger)
-    {
-        Logger = logger;
-    }
+    public DynamicClientRegistrationResponseGenerator(ILogger<DynamicClientRegistrationResponseGenerator> logger) => Logger = logger;
 
     /// <inheritdoc/>
     public virtual async Task WriteResponse<T>(HttpContext context, int statusCode, T response)

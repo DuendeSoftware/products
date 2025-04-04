@@ -22,10 +22,7 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
     /// Initializes a new instance of the <see cref="TokenRevocationRequestValidator"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public TokenRevocationRequestValidator(ILogger<TokenRevocationRequestValidator> logger)
-    {
-        _logger = logger;
-    }
+    public TokenRevocationRequestValidator(ILogger<TokenRevocationRequestValidator> logger) => _logger = logger;
 
     /// <summary>
     /// Validates the request.

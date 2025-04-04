@@ -8,20 +8,15 @@ namespace IntegrationTests.Clients.Setup;
 
 internal class Scopes
 {
-    public static IEnumerable<IdentityResource> GetIdentityScopes()
-    {
-        return new IdentityResource[]
+    public static IEnumerable<IdentityResource> GetIdentityScopes() => new IdentityResource[]
         {
             new IdentityResources.OpenId(),
             new IdentityResources.Email(),
             new IdentityResources.Address(),
             new IdentityResource("roles", new[] { "role" })
         };
-    }
 
-    public static IEnumerable<ApiResource> GetApiResources()
-    {
-        return new List<ApiResource>
+    public static IEnumerable<ApiResource> GetApiResources() => new List<ApiResource>
         {
             new ApiResource
             {
@@ -37,11 +32,8 @@ internal class Scopes
                 Scopes = { "other_api" }
             }
         };
-    }
 
-    public static IEnumerable<ApiScope> GetApiScopes()
-    {
-        return new ApiScope[]
+    public static IEnumerable<ApiScope> GetApiScopes() => new ApiScope[]
         {
             new ApiScope
             {
@@ -65,5 +57,4 @@ internal class Scopes
                 Name = "other_api",
             },
         };
-    }
 }

@@ -46,10 +46,7 @@ public class AuthorizeEndpointTests
 
     private ValidatedAuthorizeRequest _validatedAuthorizeRequest;
 
-    public AuthorizeEndpointTests()
-    {
-        Init();
-    }
+    public AuthorizeEndpointTests() => Init();
 
     [Fact]
     [Trait("Category", Category)]

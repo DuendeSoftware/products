@@ -112,11 +112,9 @@ public class AuthorizationRequest
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthorizationRequest"/> class.
     /// </summary>
-    public AuthorizationRequest()
-    {
+    public AuthorizationRequest() =>
         // public for testing
         Parameters = new NameValueCollection();
-    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthorizationRequest"/> class.

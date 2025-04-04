@@ -13,10 +13,7 @@ public class TestDeviceCodeValidator : IDeviceCodeValidator
 
     public DeviceCode DeviceCodeResult { get; set; } = new DeviceCode();
 
-    public TestDeviceCodeValidator(bool shouldError = false)
-    {
-        this.shouldError = shouldError;
-    }
+    public TestDeviceCodeValidator(bool shouldError = false) => this.shouldError = shouldError;
 
     public Task ValidateAsync(DeviceCodeValidationContext context)
     {

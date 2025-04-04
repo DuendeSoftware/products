@@ -54,10 +54,7 @@ public class NetworkHandler : HttpMessageHandler
         _behavior = Behavior.ReturnDocument;
     }
 
-    public NetworkHandler(Func<HttpRequestMessage, HttpResponseMessage> action)
-    {
-        _action = action;
-    }
+    public NetworkHandler(Func<HttpRequestMessage, HttpResponseMessage> action) => _action = action;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {

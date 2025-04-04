@@ -35,45 +35,21 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
         _licenseUsageTracker = licenseUsageTracker;
     }
 
-    public void AddScheme(AuthenticationScheme scheme)
-    {
-        _inner.AddScheme(scheme);
-    }
+    public void AddScheme(AuthenticationScheme scheme) => _inner.AddScheme(scheme);
 
-    public Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync()
-    {
-        return _inner.GetDefaultAuthenticateSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultAuthenticateSchemeAsync() => _inner.GetDefaultAuthenticateSchemeAsync();
 
-    public Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync()
-    {
-        return _inner.GetDefaultChallengeSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultChallengeSchemeAsync() => _inner.GetDefaultChallengeSchemeAsync();
 
-    public Task<AuthenticationScheme> GetDefaultForbidSchemeAsync()
-    {
-        return _inner.GetDefaultForbidSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultForbidSchemeAsync() => _inner.GetDefaultForbidSchemeAsync();
 
-    public Task<AuthenticationScheme> GetDefaultSignInSchemeAsync()
-    {
-        return _inner.GetDefaultSignInSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultSignInSchemeAsync() => _inner.GetDefaultSignInSchemeAsync();
 
-    public Task<AuthenticationScheme> GetDefaultSignOutSchemeAsync()
-    {
-        return _inner.GetDefaultSignOutSchemeAsync();
-    }
+    public Task<AuthenticationScheme> GetDefaultSignOutSchemeAsync() => _inner.GetDefaultSignOutSchemeAsync();
 
-    public Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync()
-    {
-        return _inner.GetAllSchemesAsync();
-    }
+    public Task<IEnumerable<AuthenticationScheme>> GetAllSchemesAsync() => _inner.GetAllSchemesAsync();
 
-    public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemesAsync()
-    {
-        return _inner.GetRequestHandlerSchemesAsync();
-    }
+    public Task<IEnumerable<AuthenticationScheme>> GetRequestHandlerSchemesAsync() => _inner.GetRequestHandlerSchemesAsync();
 
     public async Task<AuthenticationScheme> GetSchemeAsync(string name)
     {
@@ -87,10 +63,7 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
         return scheme;
     }
 
-    public void RemoveScheme(string name)
-    {
-        _inner.RemoveScheme(name);
-    }
+    public void RemoveScheme(string name) => _inner.RemoveScheme(name);
 
 
     private async Task<AuthenticationScheme> GetDynamicSchemeAsync(string name)

@@ -13,38 +13,20 @@ public class IdentityServerBuilderExtensionsCacheStoreTests
 {
     private class CustomClientStore : IClientStore
     {
-        public Task<Client> FindClientByIdAsync(string clientId)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<Client> FindClientByIdAsync(string clientId) => throw new System.NotImplementedException();
     }
 
     private class CustomResourceStore : IResourceStore
     {
-        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames) => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> names) => throw new System.NotImplementedException();
 
-        public Task<Resources> GetAllResourcesAsync()
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<Resources> GetAllResourcesAsync() => throw new System.NotImplementedException();
 
-        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames) => throw new System.NotImplementedException();
     }
 
     [Fact]

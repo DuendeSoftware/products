@@ -16,8 +16,5 @@ internal class DefaultCustomTokenRequestValidator : ICustomTokenRequestValidator
     /// <returns>
     /// The validation result
     /// </returns>
-    public Task ValidateAsync(CustomTokenRequestValidationContext context)
-    {
-        return Task.CompletedTask;
-    }
+    public Task ValidateAsync(CustomTokenRequestValidationContext context) => Task.CompletedTask;
 }

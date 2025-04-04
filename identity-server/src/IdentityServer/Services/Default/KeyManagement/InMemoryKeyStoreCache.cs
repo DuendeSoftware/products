@@ -20,10 +20,7 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// Constructor for InMemoryKeyStoreCache.
     /// </summary>
     /// <param name="clock"></param>
-    public InMemoryKeyStoreCache(IClock clock)
-    {
-        _clock = clock;
-    }
+    public InMemoryKeyStoreCache(IClock clock) => _clock = clock;
 
     /// <summary>
     /// Returns cached keys.

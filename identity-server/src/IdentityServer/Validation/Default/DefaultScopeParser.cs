@@ -102,10 +102,7 @@ public class DefaultScopeParser(ILogger<DefaultScopeParser> logger) : IScopePars
         /// <summary>
         /// Ctor. Indicates success, but the scope should not be included in result.
         /// </summary>
-        internal ParseScopeContext(string rawScopeValue)
-        {
-            RawValue = rawScopeValue;
-        }
+        internal ParseScopeContext(string rawScopeValue) => RawValue = rawScopeValue;
 
         /// <summary>
         /// Sets the parsed name and parsed parameter value for the scope.
