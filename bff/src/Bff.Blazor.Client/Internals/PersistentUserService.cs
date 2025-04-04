@@ -48,12 +48,12 @@ internal class PersistentUserService
     {
         if (!_state.TryTakeFromJson<ClaimsPrincipalRecord>(nameof(ClaimsPrincipalRecord), out var lite) || lite is null)
         {
-            _logger.LogDebug("Failed to load persisted user.");
+            _logger.FailedToLoadPersistedUser();
             user = null;
             return false;
         }
 
-        _logger.LogDebug("Persisted user loaded.");
+        _logger.PersistedUserLoaded();
 
         user = lite.ToClaimsPrincipal();
         return true;

@@ -57,7 +57,7 @@ public class BffMiddleware(
         var isUiEndpoint = endpoint.Metadata.GetMetadata<IBffUIApiEndpoint>() != null;
         if (isUiEndpoint && context.IsAjaxRequest())
         {
-            logger.LogDebug("BFF management endpoint {endpoint} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.", context.Request.Path);
+            logger.ManagementEndpointAccessedViaAjax(context.Request.Path);
         }
 
         await next(context);

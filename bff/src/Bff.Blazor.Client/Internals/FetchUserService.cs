@@ -40,7 +40,7 @@ internal class FetchUserService
     {
         try
         {
-            _logger.LogInformation("Fetching user information.");
+            _logger.FetchingUserInformation();
             var claims = await _client.GetFromJsonAsync<List<ClaimRecord>>("bff/user?slide=false");
 
             var identity = new ClaimsIdentity(
@@ -60,7 +60,7 @@ internal class FetchUserService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Fetching user failed.");
+            _logger.FetchingUserFailed(ex);
             return new ClaimsPrincipal(new ClaimsIdentity());
         }
     }

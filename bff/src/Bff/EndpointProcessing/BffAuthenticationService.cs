@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -53,9 +54,7 @@ internal class BffAuthenticationService(
         var requireResponseHandling = endpoint?.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
         if (requireResponseHandling)
         {
-            logger.LogDebug(
-                "Challenge was called for a BFF API endpoint, BFF response handling changing status code to 401.");
-
+            logger.ChallengeForBffApiEndpoint();
             context.Response.StatusCode = 401;
             context.Response.Headers.Remove("Location");
             context.Response.Headers.Remove("Set-Cookie");
@@ -65,7 +64,6 @@ internal class BffAuthenticationService(
     public async Task ForbidAsync(HttpContext context, string? scheme, AuthenticationProperties? properties)
     {
         await _inner.ForbidAsync(context, scheme, properties);
-
 
         if (context.Response.StatusCode != 302)
         {
@@ -83,9 +81,7 @@ internal class BffAuthenticationService(
         var requireResponseHandling = endpoint?.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
         if (requireResponseHandling)
         {
-            logger.LogDebug(
-                "Forbid was called for a BFF API endpoint, BFF response handling changing status code to 403.");
-
+            logger.ForbidForBffApiEndpoint();
             context.Response.StatusCode = 403;
             context.Response.Headers.Remove("Location");
             context.Response.Headers.Remove("Set-Cookie");
