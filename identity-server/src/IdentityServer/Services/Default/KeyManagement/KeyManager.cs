@@ -269,7 +269,7 @@ public class KeyManager : IKeyManager
         var now = _clock.UtcNow.UtcDateTime;
         var iss = await _issuerNameService.GetCurrentAsync();
 
-        KeyContainer container = null;
+        KeyContainer container;
 
         if (alg.IsRsaKey)
         {
