@@ -54,6 +54,9 @@ internal class License
 
         Extras = claims.FindFirst("extras")?.Value ?? string.Empty;
 
+        // IsConfigured needs to be set prior to checking for clients and issuers claims or the Redistribution check will not return an appropriate value
+        IsConfigured = true;
+
         if (!claims.HasClaim("feature", "unlimited_clients"))
         {
             // default values
@@ -111,8 +114,6 @@ internal class License
                 _ => IssuerLimit
             };
         }
-
-        IsConfigured = true;
     }
 
     /// <summary>
@@ -143,7 +144,7 @@ internal class License
     /// <summary>
     /// True if redistribution is enabled for this license, and false otherwise.
     /// </summary>
-    public bool Redistribution => IsEnabled(LicenseFeature.Redistribution) || IsEnabled(LicenseFeature.ISV);
+    public bool Redistribution => IsConfigured && (IsEnabled(LicenseFeature.Redistribution) || IsEnabled(LicenseFeature.ISV));
 
     /// <summary>
     /// The client limit
