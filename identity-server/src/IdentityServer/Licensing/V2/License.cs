@@ -46,12 +46,72 @@ internal class License
             {
                 throw new Exception($"Invalid edition in license: '{edition}'");
             }
+
             Edition = editionValue;
         }
 
         Features = claims.FindAll("feature").Select(f => f.Value).ToArray();
 
         Extras = claims.FindFirst("extras")?.Value ?? string.Empty;
+
+        if (!claims.HasClaim("feature", "unlimited_clients"))
+        {
+            // default values
+            if (Redistribution)
+            {
+                // default for all ISV editions
+                ClientLimit = 5;
+            }
+            else
+            {
+                // defaults limits for non-ISV editions
+                ClientLimit = Edition switch
+                {
+                    LicenseEdition.Business => 15,
+                    LicenseEdition.Starter => 5,
+                    _ => ClientLimit
+                };
+            }
+
+            if (int.TryParse(claims.FindFirst("client_limit")?.Value, out var clientLimit))
+            {
+                // explicit, so use that value
+                ClientLimit = clientLimit;
+            }
+
+            if (!Redistribution)
+            {
+                // these for the non-ISV editions that always have unlimited, regardless of explicit value
+                ClientLimit = Edition switch
+                {
+                    LicenseEdition.Enterprise or LicenseEdition.Community =>
+                        // unlimited
+                        null,
+                    _ => ClientLimit
+                };
+            }
+        }
+
+        if (!claims.HasClaim("feature", "unlimited_issuers"))
+        {
+            // default 
+            IssuerLimit = 1;
+
+            if (int.TryParse(claims.FindFirst("issuer_limit")?.Value, out var issuerLimit))
+            {
+                IssuerLimit = issuerLimit;
+            }
+
+            // these for the editions that always have unlimited, regardless of explicit value
+            IssuerLimit = Edition switch
+            {
+                LicenseEdition.Enterprise or LicenseEdition.Community =>
+                    // unlimited
+                    null,
+                _ => IssuerLimit
+            };
+        }
+
         IsConfigured = true;
     }
 
@@ -64,6 +124,7 @@ internal class License
     /// The company name
     /// </summary>
     public string? CompanyName { get; init; }
+
     /// <summary>
     /// The company contact info
     /// </summary>
@@ -83,6 +144,16 @@ internal class License
     /// True if redistribution is enabled for this license, and false otherwise.
     /// </summary>
     public bool Redistribution => IsEnabled(LicenseFeature.Redistribution) || IsEnabled(LicenseFeature.ISV);
+
+    /// <summary>
+    /// The client limit
+    /// </summary>
+    public int? ClientLimit { get; set; }
+
+    /// <summary>
+    /// The issuer limit
+    /// </summary>
+    public int? IssuerLimit { get; set; }
 
     /// <summary>
     /// The license features
