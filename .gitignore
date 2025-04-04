@@ -43,6 +43,9 @@ TestResult.xml
 [Rr]eleasePS/
 dlldata.c
 
+# Benchmarks
+identity-server/perf/IdentityServer.PerfTests/BenchmarkDotNet.Artifacts
+
 *_i.c
 *_p.c
 *_i.h
