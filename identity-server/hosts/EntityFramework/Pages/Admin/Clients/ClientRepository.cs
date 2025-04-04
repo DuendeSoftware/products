@@ -164,7 +164,7 @@ public class ClientRepository
         }
 
         var scopes = model.AllowedScopes.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
-        var currentScopes = (client.AllowedScopes.Select(x => x.Scope) ?? Enumerable.Empty<string>()).ToArray();
+        var currentScopes = client.AllowedScopes.Select(x => x.Scope).ToArray();
 
         var scopesToAdd = scopes.Except(currentScopes).ToArray();
         var scopesToRemove = currentScopes.Except(scopes).ToArray();
