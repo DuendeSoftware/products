@@ -28,7 +28,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
     {
         const string testCorsOrigin = "https://identityserver.io/";
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(new Client
             {
@@ -42,11 +42,11 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
                 ClientName = "2",
                 AllowedCorsOrigins = new List<string> { "https://www.identityserver.com", testCorsOrigin }
             }.ToEntity());
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         bool result;
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var service = new CorsPolicyService(context, FakeLogger<CorsPolicyService>.Create(), new NoneCancellationTokenProvider());
             result = await service.IsOriginAllowedAsync(testCorsOrigin);
@@ -58,7 +58,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task IsOriginAllowedAsync_WhenOriginIsNotAllowed_ExpectFalse(DbContextOptions<ConfigurationDbContext> options)
     {
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(new Client
             {
@@ -66,11 +66,11 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
                 ClientName = Guid.NewGuid().ToString(),
                 AllowedCorsOrigins = new List<string> { "https://www.identityserver.com" }
             }.ToEntity());
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         bool result;
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var service = new CorsPolicyService(context, FakeLogger<CorsPolicyService>.Create(), new NoneCancellationTokenProvider());
             result = await service.IsOriginAllowedAsync("InvalidOrigin");

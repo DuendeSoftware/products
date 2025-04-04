@@ -52,15 +52,15 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             Data = "{!}"
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(expiredGrant);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.FirstOrDefault(x => x.Key == expiredGrant.Key).ShouldBeNull();
         }
@@ -79,15 +79,15 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             Data = "{!}"
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(validGrant);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.FirstOrDefault(x => x.Key == validGrant.Key).ShouldNotBeNull();
         }
@@ -122,16 +122,16 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                     Data = "{!}"
                 });
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.AddRange(expiredGrants);
             context.PersistedGrants.AddRange(validGrants);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             var remaining = context.PersistedGrants.ToList();
 
@@ -154,15 +154,15 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             Data = "{!}"
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(expiredGrant);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == expiredGrant.DeviceCode).ShouldBeNull();
         }
@@ -182,15 +182,15 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             Data = "{!}"
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(validGrant);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.FirstOrDefault(x => x.DeviceCode == validGrant.DeviceCode).ShouldNotBeNull();
         }
@@ -211,15 +211,15 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             Data = "{!}"
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(consumedGrant);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options, removeConsumedTokens: true).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.FirstOrDefault(x => x.Id == consumedGrant.Id).ShouldBeNull();
         }
@@ -239,15 +239,15 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             Data = "{!}"
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(consumedGrant);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options, removeConsumedTokens: false).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.FirstOrDefault(x => x.Id == consumedGrant.Id).ShouldNotBeNull();
         }
@@ -260,9 +260,8 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         var expectedPageCount = 5;
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
-
             context.PersistedGrants.ToList().ShouldBeEmpty();
 
             for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
@@ -278,10 +277,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                 };
                 context.PersistedGrants.Add(expiredGrant);
             }
-            context.SaveChanges();
+
+            await context.SaveChangesAsync();
 
             context.PersistedGrants.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize * expectedPageCount);
-
         }
 
         var mockNotifications = new MockOperationalStoreNotification();
@@ -301,7 +300,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         }
 
         // All grants are removed because they were all expired
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.ToList().ShouldBeEmpty();
         }
@@ -314,7 +313,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
 
         var expectedPageCount = 5;
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             for (var i = 0; i < StoreOptions.TokenCleanupBatchSize * expectedPageCount; i++)
             {
@@ -329,7 +328,8 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                 };
                 context.PersistedGrants.Add(expiredGrant);
             }
-            context.SaveChanges();
+
+            await context.SaveChangesAsync();
         }
 
         // Whenever we cleanup a batch of grants, a new (expired) grant is inserted
@@ -376,7 +376,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         // One final grant will be left behind, created by the last notification to fire
         // We can treat this as the first grant created after the job ran, 
         // we just are able to observe it because it was created in the final batch's notification
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Count().ShouldBe(1);
         }
@@ -411,23 +411,21 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
             Data = "{!}"
         };
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(newConsumedGrant);
             context.PersistedGrants.Add(oldConsumedGrant);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         await CreateSut(options, removeConsumedTokens: true, delay).CleanupGrantsAsync();
 
-        using (var context = new PersistedGrantDbContext(options))
+        await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.FirstOrDefault(x => x.Id == newConsumedGrant.Id).ShouldNotBeNull();
             context.PersistedGrants.FirstOrDefault(x => x.Id == oldConsumedGrant.Id).ShouldBeNull();
         }
-
     }
-
 
     private TokenCleanupService CreateSut(
         DbContextOptions<PersistedGrantDbContext> dbContextOpts,
