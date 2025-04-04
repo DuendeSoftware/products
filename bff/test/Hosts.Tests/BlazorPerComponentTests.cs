@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Hosts.Tests.TestInfra.Retries;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
@@ -21,7 +22,7 @@ public class BlazorPerComponentTests(ITestOutputHelper output, AppHostFixture fi
         };
     }
 
-    [SkippableFact]
+    [RetriableFact]
     public async Task Can_load_blazor_webassembly_app()
     {
         await Warmup();
