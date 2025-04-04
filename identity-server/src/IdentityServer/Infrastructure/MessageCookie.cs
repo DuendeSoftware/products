@@ -64,7 +64,7 @@ internal class MessageCookie<TModel>
     private IEnumerable<string> GetCookieNames()
     {
         var key = CookiePrefix;
-        foreach ((var name, var _) in _context.HttpContext.Request.Cookies)
+        foreach (var (name, _) in _context.HttpContext.Request.Cookies)
         {
             if (name.StartsWith(key))
             {

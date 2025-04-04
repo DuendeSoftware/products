@@ -329,7 +329,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// </summary>
     protected virtual async Task<TokenResponse> ProcessTokenRequestAsync(TokenRequestValidationResult validationResult)
     {
-        (var accessToken, var refreshToken) = await CreateAccessTokenAsync(validationResult.ValidatedRequest);
+        var (accessToken, refreshToken) = await CreateAccessTokenAsync(validationResult.ValidatedRequest);
         var response = new TokenResponse
         {
             AccessToken = accessToken,
