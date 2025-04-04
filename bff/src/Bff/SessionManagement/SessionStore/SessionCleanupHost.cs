@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ namespace Duende.Bff;
 /// Helper to cleanup expired sessions.
 /// </summary>
 public class SessionCleanupHost(
+    BffMetrics metrics,
     IServiceProvider serviceProvider,
     IOptions<BffOptions> options,
     ILogger<SessionCleanupHost> logger) : IHostedService
@@ -104,11 +106,10 @@ public class SessionCleanupHost(
     {
         try
         {
-            using (var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<IUserSessionStoreCleanup>();
-                await tokenCleanupService.DeleteExpiredSessionsAsync(cancellationToken);
-            }
+            using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<IUserSessionStoreCleanup>();
+            var removed = await tokenCleanupService.DeleteExpiredSessionsAsync(cancellationToken);
+            metrics.SessionsEnded(removed);
         }
         catch (Exception ex)
         {
