@@ -23,9 +23,9 @@ internal static class DPoPServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection ConfigureDPoPTokensForScheme(this IServiceCollection services, string scheme, Action<DPoPOptions> configure)
+    public static void ConfigureDPoPTokensForScheme(this IServiceCollection services, string scheme, Action<DPoPOptions> configure)
     {
         services.Configure(scheme, configure);
-        return services.ConfigureDPoPTokensForScheme(scheme);
+        services.ConfigureDPoPTokensForScheme(scheme);
     }
 }
