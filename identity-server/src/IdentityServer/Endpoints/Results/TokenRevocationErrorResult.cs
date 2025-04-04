@@ -27,10 +27,7 @@ public class TokenRevocationErrorResult : EndpointResult<TokenRevocationErrorRes
     /// Initializes a new instance of the <see cref="TokenRevocationErrorResult"/> class.
     /// </summary>
     /// <param name="error">The error.</param>
-    public TokenRevocationErrorResult(string error)
-    {
-        Error = error ?? throw new ArgumentNullException(nameof(error));
-    }
+    public TokenRevocationErrorResult(string error) => Error = error ?? throw new ArgumentNullException(nameof(error));
 }
 
 internal class TokenRevocationErrorHttpWriter : IHttpResponseWriter<TokenRevocationErrorResult>

@@ -10,10 +10,7 @@ public class EditModel : PageModel
 {
     private readonly ApiScopeRepository _repository;
 
-    public EditModel(ApiScopeRepository repository)
-    {
-        _repository = repository;
-    }
+    public EditModel(ApiScopeRepository repository) => _repository = repository;
 
     [BindProperty]
     public ApiScopeModel InputModel { get; set; } = default!;

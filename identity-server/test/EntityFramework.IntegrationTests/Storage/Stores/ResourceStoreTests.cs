@@ -24,49 +24,40 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         }
     }
 
-    private static IdentityResource CreateIdentityTestResource()
+    private static IdentityResource CreateIdentityTestResource() => new IdentityResource()
     {
-        return new IdentityResource()
-        {
-            Name = Guid.NewGuid().ToString(),
-            DisplayName = Guid.NewGuid().ToString(),
-            Description = Guid.NewGuid().ToString(),
-            ShowInDiscoveryDocument = true,
-            UserClaims =
+        Name = Guid.NewGuid().ToString(),
+        DisplayName = Guid.NewGuid().ToString(),
+        Description = Guid.NewGuid().ToString(),
+        ShowInDiscoveryDocument = true,
+        UserClaims =
             {
                 JwtClaimTypes.Subject,
                 JwtClaimTypes.Name,
             }
-        };
-    }
+    };
 
-    private static ApiResource CreateApiResourceTestResource()
+    private static ApiResource CreateApiResourceTestResource() => new ApiResource()
     {
-        return new ApiResource()
-        {
-            Name = Guid.NewGuid().ToString(),
-            ApiSecrets = new List<Secret> { new Secret("secret".ToSha256()) },
-            Scopes = { Guid.NewGuid().ToString() },
-            UserClaims =
+        Name = Guid.NewGuid().ToString(),
+        ApiSecrets = new List<Secret> { new Secret("secret".ToSha256()) },
+        Scopes = { Guid.NewGuid().ToString() },
+        UserClaims =
             {
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
             }
-        };
-    }
+    };
 
-    private static ApiScope CreateApiScopeTestResource()
+    private static ApiScope CreateApiScopeTestResource() => new ApiScope()
     {
-        return new ApiScope()
-        {
-            Name = Guid.NewGuid().ToString(),
-            UserClaims =
+        Name = Guid.NewGuid().ToString(),
+        UserClaims =
             {
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
             }
-        };
-    }
+    };
 
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]

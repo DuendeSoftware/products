@@ -27,10 +27,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
     private const string CacheKey = "devicecode_";
     private readonly DateTime testDate = new DateTime(2018, 09, 01, 8, 0, 0, DateTimeKind.Utc);
 
-    public DistributedDeviceFlowThrottlingServiceTests()
-    {
-        _store = new InMemoryClientStore(new List<Client>());
-    }
+    public DistributedDeviceFlowThrottlingServiceTests() => _store = new InMemoryClientStore(new List<Client>());
 
     [Fact]
     public async Task First_Poll()
@@ -118,10 +115,7 @@ internal class TestCache : IDistributedCache
         return null;
     }
 
-    public Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken())
-    {
-        return Task.FromResult(Get(key));
-    }
+    public Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken()) => Task.FromResult(Get(key));
 
     public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
     {
@@ -136,23 +130,11 @@ internal class TestCache : IDistributedCache
         return Task.CompletedTask;
     }
 
-    public void Refresh(string key)
-    {
-        throw new NotImplementedException();
-    }
+    public void Refresh(string key) => throw new NotImplementedException();
 
-    public Task RefreshAsync(string key, CancellationToken token = new CancellationToken())
-    {
-        throw new NotImplementedException();
-    }
+    public Task RefreshAsync(string key, CancellationToken token = new CancellationToken()) => throw new NotImplementedException();
 
-    public void Remove(string key)
-    {
-        throw new NotImplementedException();
-    }
+    public void Remove(string key) => throw new NotImplementedException();
 
-    public Task RemoveAsync(string key, CancellationToken token = new CancellationToken())
-    {
-        throw new NotImplementedException();
-    }
+    public Task RemoveAsync(string key, CancellationToken token = new CancellationToken()) => throw new NotImplementedException();
 }

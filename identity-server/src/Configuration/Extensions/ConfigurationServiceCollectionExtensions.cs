@@ -22,10 +22,7 @@ public class IdentityServerConfigurationBuilder
     /// Initializes a new instance of the <see
     /// cref="IdentityServerConfigurationBuilder"/> class.
     /// </summary>
-    public IdentityServerConfigurationBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
+    public IdentityServerConfigurationBuilder(IServiceCollection services) => Services = services;
 
     /// <summary>
     /// Gets the service collection.

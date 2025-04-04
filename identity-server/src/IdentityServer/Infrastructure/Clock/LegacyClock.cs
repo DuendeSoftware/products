@@ -13,14 +13,7 @@ internal class LegacyClock : IClock
 #pragma warning restore CS0618 // Type or member is obsolete
 
 #pragma warning disable CS0618 // Type or member is obsolete
-    public LegacyClock(ISystemClock clock)
-#pragma warning restore CS0618 // Type or member is obsolete
-    {
-        _clock = clock;
-    }
+    public LegacyClock(ISystemClock clock) => _clock = clock;
 
-    public DateTimeOffset UtcNow
-    {
-        get => _clock.UtcNow;
-    }
+    public DateTimeOffset UtcNow => _clock.UtcNow;
 }

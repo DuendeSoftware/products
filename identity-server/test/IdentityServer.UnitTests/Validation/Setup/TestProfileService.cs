@@ -11,15 +11,9 @@ internal class TestProfileService : IProfileService
 {
     private bool _shouldBeActive;
 
-    public TestProfileService(bool shouldBeActive = true)
-    {
-        _shouldBeActive = shouldBeActive;
-    }
+    public TestProfileService(bool shouldBeActive = true) => _shouldBeActive = shouldBeActive;
 
-    public Task GetProfileDataAsync(ProfileDataRequestContext context)
-    {
-        return Task.CompletedTask;
-    }
+    public Task GetProfileDataAsync(ProfileDataRequestContext context) => Task.CompletedTask;
 
     public Task IsActiveAsync(IsActiveContext context)
     {

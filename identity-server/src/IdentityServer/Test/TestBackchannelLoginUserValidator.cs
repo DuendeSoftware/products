@@ -19,10 +19,7 @@ public class TestBackchannelLoginUserValidator : IBackchannelAuthenticationUserV
     /// <summary>
     /// Ctor
     /// </summary>
-    public TestBackchannelLoginUserValidator(TestUserStore testUserStore)
-    {
-        _testUserStore = testUserStore;
-    }
+    public TestBackchannelLoginUserValidator(TestUserStore testUserStore) => _testUserStore = testUserStore;
 
     /// <inheritdoc/>
     public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext)

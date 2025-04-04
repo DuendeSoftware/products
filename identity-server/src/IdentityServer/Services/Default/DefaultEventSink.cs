@@ -21,10 +21,7 @@ public class DefaultEventSink : IEventSink
     /// Initializes a new instance of the <see cref="DefaultEventSink"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public DefaultEventSink(ILogger<DefaultEventService> logger)
-    {
-        _logger = logger;
-    }
+    public DefaultEventSink(ILogger<DefaultEventService> logger) => _logger = logger;
 
     /// <summary>
     /// Raises the specified event.

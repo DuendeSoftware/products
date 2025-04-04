@@ -112,15 +112,9 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return Valid(request);
     }
 
-    private static bool IsParRequestUri(string requestUri)
-    {
-        return requestUri.StartsWith(IdentityServerConstants.PushedAuthorizationRequestUri);
-    }
+    private static bool IsParRequestUri(string requestUri) => requestUri.StartsWith(IdentityServerConstants.PushedAuthorizationRequestUri);
 
-    private string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request)
-    {
-        return request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
-    }
+    private string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request) => request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
 
     public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request)
     {
@@ -324,15 +318,9 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return Valid(request);
     }
 
-    private AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null)
-    {
-        return new AuthorizeRequestValidationResult(request, error, description);
-    }
+    private AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null) => new AuthorizeRequestValidationResult(request, error, description);
 
-    private AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request)
-    {
-        return new AuthorizeRequestValidationResult(request);
-    }
+    private AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
 
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {

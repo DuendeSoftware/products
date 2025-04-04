@@ -19,14 +19,11 @@ public class BffUserAccessTokenParameters(
     /// Retrieve a UserAccessTokenParameters
     /// </summary>
     /// <returns></returns>
-    public UserTokenRequestParameters ToUserAccessTokenRequestParameters()
+    public UserTokenRequestParameters ToUserAccessTokenRequestParameters() => new UserTokenRequestParameters()
     {
-        return new UserTokenRequestParameters()
-        {
-            SignInScheme = signInScheme,
-            ChallengeScheme = challengeScheme,
-            ForceRenewal = forceRenewal,
-            Resource = resource
-        };
-    }
+        SignInScheme = signInScheme,
+        ChallengeScheme = challengeScheme,
+        ForceRenewal = forceRenewal,
+        Resource = resource
+    };
 }

@@ -94,10 +94,7 @@ internal class TicketStoreShim : ITicketStore
     /// ctor
     /// </summary>
     /// <param name="httpContextAccessor"></param>
-    public TicketStoreShim(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    public TicketStoreShim(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
     /// <summary>
     /// The inner
@@ -105,26 +102,14 @@ internal class TicketStoreShim : ITicketStore
     private IServerSideTicketStore Inner => _httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IServerSideTicketStore>();
 
     /// <inheritdoc />
-    public Task RemoveAsync(string key)
-    {
-        return Inner.RemoveAsync(key);
-    }
+    public Task RemoveAsync(string key) => Inner.RemoveAsync(key);
 
     /// <inheritdoc />
-    public Task RenewAsync(string key, AuthenticationTicket ticket)
-    {
-        return Inner.RenewAsync(key, ticket);
-    }
+    public Task RenewAsync(string key, AuthenticationTicket ticket) => Inner.RenewAsync(key, ticket);
 
     /// <inheritdoc />
-    public Task<AuthenticationTicket> RetrieveAsync(string key)
-    {
-        return Inner.RetrieveAsync(key);
-    }
+    public Task<AuthenticationTicket> RetrieveAsync(string key) => Inner.RetrieveAsync(key);
 
     /// <inheritdoc />
-    public Task<string> StoreAsync(AuthenticationTicket ticket)
-    {
-        return Inner.StoreAsync(ticket);
-    }
+    public Task<string> StoreAsync(AuthenticationTicket ticket) => Inner.StoreAsync(ticket);
 }

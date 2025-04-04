@@ -20,10 +20,7 @@ public class X509NameSecretValidator : ISecretValidator
     /// ctor
     /// </summary>
     /// <param name="logger"></param>
-    public X509NameSecretValidator(ILogger<X509NameSecretValidator> logger)
-    {
-        _logger = logger;
-    }
+    public X509NameSecretValidator(ILogger<X509NameSecretValidator> logger) => _logger = logger;
 
     /// <inheritdoc/>
     public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)

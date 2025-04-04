@@ -15,8 +15,5 @@ public static class ProxyAppBuilderExtensions
     /// </summary>
     /// <param name="yarpApp"></param>
     /// <returns></returns>
-    public static IApplicationBuilder UseAntiforgeryCheck(this IApplicationBuilder yarpApp)
-    {
-        return yarpApp.UseMiddleware<AntiforgeryMiddleware>();
-    }
+    public static IApplicationBuilder UseAntiforgeryCheck(this IApplicationBuilder yarpApp) => yarpApp.UseMiddleware<AntiforgeryMiddleware>();
 }

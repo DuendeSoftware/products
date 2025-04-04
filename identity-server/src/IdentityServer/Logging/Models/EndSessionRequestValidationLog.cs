@@ -41,8 +41,5 @@ internal class EndSessionRequestValidationLog
         State = request.State;
     }
 
-    public override string ToString()
-    {
-        return LogSerializer.Serialize(this);
-    }
+    public override string ToString() => LogSerializer.Serialize(this);
 }

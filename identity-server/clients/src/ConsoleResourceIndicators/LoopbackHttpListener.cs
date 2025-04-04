@@ -32,28 +32,22 @@ public class LoopbackHttpListener : IDisposable
         _host.Start();
     }
 
-    public void Dispose()
-    {
-        Task.Run(async () =>
-        {
-            await Task.Delay(500);
-            _host.Dispose();
-        });
-    }
+    public void Dispose() => Task.Run(async () =>
+                                  {
+                                      await Task.Delay(500);
+                                      _host.Dispose();
+                                  });
 
-    private void Configure(IApplicationBuilder app)
-    {
-        app.Run(async ctx =>
-        {
-            if (ctx.Request.Method == "GET")
-            {
-                await SetResultAsync(ctx.Request.QueryString.Value, ctx);
-                return;
-            }
+    private void Configure(IApplicationBuilder app) => app.Run(async ctx =>
+                                                            {
+                                                                if (ctx.Request.Method == "GET")
+                                                                {
+                                                                    await SetResultAsync(ctx.Request.QueryString.Value, ctx);
+                                                                    return;
+                                                                }
 
-            ctx.Response.StatusCode = 405;
-        });
-    }
+                                                                ctx.Response.StatusCode = 405;
+                                                            });
 
     private async Task SetResultAsync(string value, HttpContext ctx)
     {

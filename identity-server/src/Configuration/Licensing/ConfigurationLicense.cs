@@ -21,10 +21,7 @@ public class ConfigurationLicense : License
     }
 
     // for testing
-    internal ConfigurationLicense(params Claim[] claims)
-    {
-        Initialize(new ClaimsPrincipal(new ClaimsIdentity(claims)));
-    }
+    internal ConfigurationLicense(params Claim[] claims) => Initialize(new ClaimsPrincipal(new ClaimsIdentity(claims)));
 
     internal override void Initialize(ClaimsPrincipal claims)
     {

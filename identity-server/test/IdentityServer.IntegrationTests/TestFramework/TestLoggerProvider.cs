@@ -23,15 +23,9 @@ public class TestLoggerProvider : ILoggerProvider
         {
         }
 
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return this;
-        }
+        public IDisposable BeginScope<TState>(TState state) => this;
 
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
+        public bool IsEnabled(LogLevel logLevel) => true;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
@@ -42,15 +36,9 @@ public class TestLoggerProvider : ILoggerProvider
 
     public List<string> LogEntries = new List<string>();
 
-    private void Log(string msg)
-    {
-        LogEntries.Add(msg);
-    }
+    private void Log(string msg) => LogEntries.Add(msg);
 
-    public ILogger CreateLogger(string categoryName)
-    {
-        return new DebugLogger(this, categoryName);
-    }
+    public ILogger CreateLogger(string categoryName) => new DebugLogger(this, categoryName);
 
     public void Dispose()
     {

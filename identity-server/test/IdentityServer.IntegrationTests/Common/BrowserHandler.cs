@@ -53,10 +53,7 @@ public class BrowserHandler : DelegatingHandler
         return response;
     }
 
-    internal Cookie GetCookie(string uri, string name)
-    {
-        return _cookieContainer.GetCookies(new Uri(uri)).FirstOrDefault(x => x.Name == name);
-    }
+    internal Cookie GetCookie(string uri, string name) => _cookieContainer.GetCookies(new Uri(uri)).FirstOrDefault(x => x.Name == name);
 
     internal void RemoveCookie(string uri, string name)
     {

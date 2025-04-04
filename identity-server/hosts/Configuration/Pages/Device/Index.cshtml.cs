@@ -180,42 +180,33 @@ public class Index : PageModel
         return vm;
     }
 
-    private static ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+    private static ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check) => new ScopeViewModel
     {
-        return new ScopeViewModel
-        {
-            Value = identity.Name,
-            DisplayName = identity.DisplayName ?? identity.Name,
-            Description = identity.Description,
-            Emphasize = identity.Emphasize,
-            Required = identity.Required,
-            Checked = check || identity.Required
-        };
-    }
+        Value = identity.Name,
+        DisplayName = identity.DisplayName ?? identity.Name,
+        Description = identity.Description,
+        Emphasize = identity.Emphasize,
+        Required = identity.Required,
+        Checked = check || identity.Required
+    };
 
-    private static ScopeViewModel CreateScopeViewModel(ParsedScopeValue parsedScopeValue, ApiScope apiScope, bool check)
+    private static ScopeViewModel CreateScopeViewModel(ParsedScopeValue parsedScopeValue, ApiScope apiScope, bool check) => new ScopeViewModel
     {
-        return new ScopeViewModel
-        {
-            Value = parsedScopeValue.RawValue,
-            // todo: use the parsed scope value in the display?
-            DisplayName = apiScope.DisplayName ?? apiScope.Name,
-            Description = apiScope.Description,
-            Emphasize = apiScope.Emphasize,
-            Required = apiScope.Required,
-            Checked = check || apiScope.Required
-        };
-    }
+        Value = parsedScopeValue.RawValue,
+        // todo: use the parsed scope value in the display?
+        DisplayName = apiScope.DisplayName ?? apiScope.Name,
+        Description = apiScope.Description,
+        Emphasize = apiScope.Emphasize,
+        Required = apiScope.Required,
+        Checked = check || apiScope.Required
+    };
 
-    private static ScopeViewModel GetOfflineAccessScope(bool check)
+    private static ScopeViewModel GetOfflineAccessScope(bool check) => new ScopeViewModel
     {
-        return new ScopeViewModel
-        {
-            Value = Duende.IdentityServer.IdentityServerConstants.StandardScopes.OfflineAccess,
-            DisplayName = DeviceOptions.OfflineAccessDisplayName,
-            Description = DeviceOptions.OfflineAccessDescription,
-            Emphasize = true,
-            Checked = check
-        };
-    }
+        Value = Duende.IdentityServer.IdentityServerConstants.StandardScopes.OfflineAccess,
+        DisplayName = DeviceOptions.OfflineAccessDisplayName,
+        Description = DeviceOptions.OfflineAccessDescription,
+        Emphasize = true,
+        Checked = check
+    };
 }

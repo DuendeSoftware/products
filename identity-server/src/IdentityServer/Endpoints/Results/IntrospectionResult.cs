@@ -27,10 +27,7 @@ public class IntrospectionResult : EndpointResult<IntrospectionResult>
     /// </summary>
     /// <param name="entries">The result.</param>
     /// <exception cref="System.ArgumentNullException">result</exception>
-    public IntrospectionResult(Dictionary<string, object> entries)
-    {
-        Entries = entries ?? throw new ArgumentNullException(nameof(entries));
-    }
+    public IntrospectionResult(Dictionary<string, object> entries) => Entries = entries ?? throw new ArgumentNullException(nameof(entries));
 }
 
 internal class IntrospectionHttpWriter : IHttpResponseWriter<IntrospectionResult>

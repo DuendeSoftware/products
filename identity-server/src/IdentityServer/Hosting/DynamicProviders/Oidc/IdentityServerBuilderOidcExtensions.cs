@@ -49,8 +49,5 @@ public static class IdentityServerBuilderOidcExtensions
     /// <param name="builder">The builder.</param>
     /// <param name="providers"></param>
     /// <returns></returns>
-    public static IIdentityServerBuilder AddInMemoryOidcProviders(this IIdentityServerBuilder builder, IEnumerable<OidcProvider> providers)
-    {
-        return builder.AddInMemoryIdentityProviders(providers);
-    }
+    public static IIdentityServerBuilder AddInMemoryOidcProviders(this IIdentityServerBuilder builder, IEnumerable<OidcProvider> providers) => builder.AddInMemoryIdentityProviders(providers);
 }

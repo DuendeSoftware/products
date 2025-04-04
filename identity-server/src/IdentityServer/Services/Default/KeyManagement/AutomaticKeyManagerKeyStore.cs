@@ -27,22 +27,13 @@ public interface IAutomaticKeyManagerKeyStore : IValidationKeysStore, ISigningCr
 internal class NopAutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
 {
     /// <inheritdoc/>
-    public Task<SigningCredentials> GetSigningCredentialsAsync()
-    {
-        return Task.FromResult<SigningCredentials>(null);
-    }
+    public Task<SigningCredentials> GetSigningCredentialsAsync() => Task.FromResult<SigningCredentials>(null);
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync()
-    {
-        return Task.FromResult(Enumerable.Empty<SigningCredentials>());
-    }
+    public Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync() => Task.FromResult(Enumerable.Empty<SigningCredentials>());
 
     /// <inheritdoc/>
-    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
-    {
-        return Task.FromResult(Enumerable.Empty<SecurityKeyInfo>());
-    }
+    public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync() => Task.FromResult(Enumerable.Empty<SecurityKeyInfo>());
 }
 
 /// <summary>

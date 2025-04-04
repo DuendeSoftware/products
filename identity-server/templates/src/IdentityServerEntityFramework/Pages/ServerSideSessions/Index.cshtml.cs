@@ -10,10 +10,7 @@ public class IndexModel : PageModel
 {
     private readonly ISessionManagementService? _sessionManagementService;
 
-    public IndexModel(ISessionManagementService? sessionManagementService = null)
-    {
-        _sessionManagementService = sessionManagementService;
-    }
+    public IndexModel(ISessionManagementService? sessionManagementService = null) => _sessionManagementService = sessionManagementService;
 
     public QueryResult<UserSession>? UserSessions { get; set; }
 

@@ -21,10 +21,7 @@ public static class HttpContextExtensions
         context.Items[Constants.EnvironmentKeys.SignOutCalled] = "true";
     }
 
-    internal static bool GetSignOutCalled(this HttpContext context)
-    {
-        return context.Items.ContainsKey(Constants.EnvironmentKeys.SignOutCalled);
-    }
+    internal static bool GetSignOutCalled(this HttpContext context) => context.Items.ContainsKey(Constants.EnvironmentKeys.SignOutCalled);
 
     internal static void SetExpiredUserSession(this HttpContext context, UserSession userSession)
     {

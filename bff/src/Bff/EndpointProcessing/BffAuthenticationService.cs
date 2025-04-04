@@ -18,20 +18,11 @@ internal class BffAuthenticationService(
 {
     private readonly IAuthenticationService _inner = decorator.Instance;
 
-    public Task SignInAsync(HttpContext context, string? scheme, ClaimsPrincipal principal, AuthenticationProperties? properties)
-    {
-        return _inner.SignInAsync(context, scheme, principal, properties);
-    }
+    public Task SignInAsync(HttpContext context, string? scheme, ClaimsPrincipal principal, AuthenticationProperties? properties) => _inner.SignInAsync(context, scheme, principal, properties);
 
-    public Task SignOutAsync(HttpContext context, string? scheme, AuthenticationProperties? properties)
-    {
-        return _inner.SignOutAsync(context, scheme, properties);
-    }
+    public Task SignOutAsync(HttpContext context, string? scheme, AuthenticationProperties? properties) => _inner.SignOutAsync(context, scheme, properties);
 
-    public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string? scheme)
-    {
-        return _inner.AuthenticateAsync(context, scheme);
-    }
+    public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string? scheme) => _inner.AuthenticateAsync(context, scheme);
 
     public async Task ChallengeAsync(HttpContext context, string? scheme, AuthenticationProperties? properties)
     {

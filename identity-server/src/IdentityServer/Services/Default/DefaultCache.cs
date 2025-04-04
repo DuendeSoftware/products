@@ -59,10 +59,7 @@ public class DefaultCache<T> : ICache<T>
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    protected string GetKey(string key)
-    {
-        return typeof(T).FullName + KeySeparator + key;
-    }
+    protected string GetKey(string key) => typeof(T).FullName + KeySeparator + key;
 
     /// <inheritdoc/>
     public Task<T> GetAsync(string key)

@@ -22,10 +22,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
     /// <param name="logger">The logger.</param>
     /// <param name="options">The options.</param>
     public StrictRedirectUriValidatorAppAuth(ILogger<StrictRedirectUriValidatorAppAuth> logger, IdentityServerOptions options = null)
-        : base(options)
-    {
-        _logger = logger;
-    }
+        : base(options) => _logger = logger;
 
     /// <inheritdoc/>
     public override async Task<bool> IsRedirectUriValidAsync(RedirectUriValidationContext context)

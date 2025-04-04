@@ -17,10 +17,7 @@ internal sealed class CustomClientRegistrationProcessor : DynamicClientRegistrat
     public CustomClientRegistrationProcessor(
         IdentityServerConfigurationOptions options,
         IClientConfigurationStore store,
-        ICollection<Client> clients) : base(options, store)
-    {
-        _clients = clients;
-    }
+        ICollection<Client> clients) : base(options, store) => _clients = clients;
 
     protected override async Task<IStepResult> AddClientId(DynamicClientRegistrationContext context)
     {

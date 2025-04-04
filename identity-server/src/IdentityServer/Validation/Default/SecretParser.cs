@@ -66,8 +66,5 @@ public class SecretParser : ISecretsListParser
     /// Gets all available authentication methods.
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<string> GetAvailableAuthenticationMethods()
-    {
-        return _parsers.Select(p => p.AuthenticationMethod).Where(p => !string.IsNullOrWhiteSpace(p));
-    }
+    public IEnumerable<string> GetAvailableAuthenticationMethods() => _parsers.Select(p => p.AuthenticationMethod).Where(p => !string.IsNullOrWhiteSpace(p));
 }

@@ -24,10 +24,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// Initializes a new instance of the <see cref="DynamicClientRegistrationValidator"/> class.
     /// </summary>
     public DynamicClientRegistrationValidator(
-        ILogger<DynamicClientRegistrationValidator> logger)
-    {
-        Logger = logger;
-    }
+        ILogger<DynamicClientRegistrationValidator> logger) => Logger = logger;
 
     /// <inheritdoc/>
     public async Task<IDynamicClientRegistrationValidationResult> ValidateAsync(DynamicClientRegistrationContext context)
@@ -464,10 +461,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// other contextual information.</param>
     /// <returns>A task that returns an <see cref="IStepResult"/>, which either
     /// represents that this step succeeded or failed.</returns>
-    protected virtual Task<IStepResult> ValidateSoftwareStatementAsync(DynamicClientRegistrationContext context)
-    {
-        return StepResult.Success();
-    }
+    protected virtual Task<IStepResult> ValidateSoftwareStatementAsync(DynamicClientRegistrationContext context) => StepResult.Success();
 
     /// <summary>
     /// Validates the requested client parameters related to public clients and

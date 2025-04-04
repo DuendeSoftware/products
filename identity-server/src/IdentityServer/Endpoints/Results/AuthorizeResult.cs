@@ -30,10 +30,7 @@ public class AuthorizeResult : EndpointResult<AuthorizeResult>
     /// </summary>
     /// <param name="response"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public AuthorizeResult(AuthorizeResponse response)
-    {
-        Response = response ?? throw new ArgumentNullException(nameof(response));
-    }
+    public AuthorizeResult(AuthorizeResponse response) => Response = response ?? throw new ArgumentNullException(nameof(response));
 }
 
 /// <summary>

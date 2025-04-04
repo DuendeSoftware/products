@@ -36,11 +36,9 @@ public class GenericHost
     public TestLoggerProvider Logger { get; set; } = new TestLoggerProvider();
 
 
-    public T Resolve<T>()
-    {
+    public T Resolve<T>() =>
         // not calling dispose on scope on purpose
-        return _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
-    }
+        _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
 
     public string Url(string path = null)
     {
@@ -110,20 +108,17 @@ public class GenericHost
     }
 
 
-    private void ConfigureSignout(IApplicationBuilder app)
-    {
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signout")
-            {
-                await ctx.SignOutAsync();
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+    private void ConfigureSignout(IApplicationBuilder app) => app.Use(async (ctx, next) =>
+                                                                   {
+                                                                       if (ctx.Request.Path == "/__signout")
+                                                                       {
+                                                                           await ctx.SignOutAsync();
+                                                                           ctx.Response.StatusCode = 204;
+                                                                           return;
+                                                                       }
 
-            await next();
-        });
-    }
+                                                                       await next();
+                                                                   });
     public async Task RevokeSessionCookieAsync()
     {
         var response = await BrowserClient.GetAsync(Url("__signout"));
@@ -131,30 +126,27 @@ public class GenericHost
     }
 
 
-    private void ConfigureSignin(IApplicationBuilder app)
-    {
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signin")
-            {
-                if (_userToSignIn != null)
-                {
-                    throw new Exception("No User Configured for SignIn");
-                }
+    private void ConfigureSignin(IApplicationBuilder app) => app.Use(async (ctx, next) =>
+                                                                  {
+                                                                      if (ctx.Request.Path == "/__signin")
+                                                                      {
+                                                                          if (_userToSignIn != null)
+                                                                          {
+                                                                              throw new Exception("No User Configured for SignIn");
+                                                                          }
 
-                var props = _propsToSignIn ?? new AuthenticationProperties();
-                await ctx.SignInAsync(_userToSignIn, props);
+                                                                          var props = _propsToSignIn ?? new AuthenticationProperties();
+                                                                          await ctx.SignInAsync(_userToSignIn, props);
 
-                _userToSignIn = null;
-                _propsToSignIn = null;
+                                                                          _userToSignIn = null;
+                                                                          _propsToSignIn = null;
 
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+                                                                          ctx.Response.StatusCode = 204;
+                                                                          return;
+                                                                      }
 
-            await next();
-        });
-    }
+                                                                      await next();
+                                                                  });
 
     private ClaimsPrincipal _userToSignIn;
     private AuthenticationProperties _propsToSignIn;
@@ -169,8 +161,5 @@ public class GenericHost
         _propsToSignIn = props;
         return IssueSessionCookieAsync(claims);
     }
-    public Task IssueSessionCookieAsync(string sub, params Claim[] claims)
-    {
-        return IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
-    }
+    public Task IssueSessionCookieAsync(string sub, params Claim[] claims) => IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
 }

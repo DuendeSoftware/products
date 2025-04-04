@@ -19,10 +19,7 @@ public class InMemoryValidationKeysStore : IValidationKeysStore
     /// </summary>
     /// <param name="keys">The keys.</param>
     /// <exception cref="System.ArgumentNullException">keys</exception>
-    public InMemoryValidationKeysStore(IEnumerable<SecurityKeyInfo> keys)
-    {
-        _keys = keys ?? throw new ArgumentNullException(nameof(keys));
-    }
+    public InMemoryValidationKeysStore(IEnumerable<SecurityKeyInfo> keys) => _keys = keys ?? throw new ArgumentNullException(nameof(keys));
 
     /// <summary>
     /// Gets all validation keys.

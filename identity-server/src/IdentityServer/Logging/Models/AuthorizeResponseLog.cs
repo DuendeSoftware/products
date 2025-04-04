@@ -30,8 +30,5 @@ internal class AuthorizeResponseLog
         ErrorDescription = response.ErrorDescription;
     }
 
-    public override string ToString()
-    {
-        return LogSerializer.Serialize(this);
-    }
+    public override string ToString() => LogSerializer.Serialize(this);
 }

@@ -26,8 +26,5 @@ public class Startup
         builder.AddDeveloperSigningCredential(persistKey: false);
     }
 
-    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
-    {
-        app.UseIdentityServer();
-    }
+    public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory) => app.UseIdentityServer();
 }

@@ -15,10 +15,7 @@ public class TableConfiguration
     /// Initializes a new instance of the <see cref="TableConfiguration"/> class.
     /// </summary>
     /// <param name="name">The name.</param>
-    public TableConfiguration(string name)
-    {
-        Name = name;
-    }
+    public TableConfiguration(string name) => Name = name;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TableConfiguration"/> class.

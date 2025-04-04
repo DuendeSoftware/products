@@ -8,8 +8,5 @@ namespace Duende.IdentityServer.Stores.Empty;
 
 internal class EmptyClientStore : IClientStore
 {
-    public Task<Client> FindClientByIdAsync(string clientId)
-    {
-        return Task.FromResult<Client>(null);
-    }
+    public Task<Client> FindClientByIdAsync(string clientId) => Task.FromResult<Client>(null);
 }

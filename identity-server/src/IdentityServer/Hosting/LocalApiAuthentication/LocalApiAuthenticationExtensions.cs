@@ -88,8 +88,5 @@ public static class LocalApiAuthenticationExtensions
     /// <param name="displayName">The display name of this scheme.</param>
     /// <param name="configureOptions">The configure options.</param>
     /// <returns></returns>
-    public static AuthenticationBuilder AddLocalApi(this AuthenticationBuilder builder, string authenticationScheme, string? displayName, Action<LocalApiAuthenticationOptions> configureOptions)
-    {
-        return builder.AddScheme<LocalApiAuthenticationOptions, LocalApiAuthenticationHandler>(authenticationScheme, displayName, configureOptions);
-    }
+    public static AuthenticationBuilder AddLocalApi(this AuthenticationBuilder builder, string authenticationScheme, string? displayName, Action<LocalApiAuthenticationOptions> configureOptions) => builder.AddScheme<LocalApiAuthenticationOptions, LocalApiAuthenticationHandler>(authenticationScheme, displayName, configureOptions);
 }

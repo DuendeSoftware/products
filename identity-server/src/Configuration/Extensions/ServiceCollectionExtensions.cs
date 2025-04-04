@@ -19,8 +19,5 @@ public static class ServiceCollectionExtensions
     /// <remark>
     /// This is for testing and demos only.
     /// </remark>
-    public static IServiceCollection AddInMemoryClientConfigurationStore(this IdentityServerConfigurationBuilder builder)
-    {
-        return builder.Services.AddTransient<IClientConfigurationStore, InMemoryClientConfigurationStore>();
-    }
+    public static IServiceCollection AddInMemoryClientConfigurationStore(this IdentityServerConfigurationBuilder builder) => builder.Services.AddTransient<IClientConfigurationStore, InMemoryClientConfigurationStore>();
 }

@@ -9,10 +9,7 @@ public class IndexModel : PageModel
 {
     private readonly ClientRepository _repository;
 
-    public IndexModel(ClientRepository repository)
-    {
-        _repository = repository;
-    }
+    public IndexModel(ClientRepository repository) => _repository = repository;
 
     public IEnumerable<ClientSummaryModel> Clients { get; private set; } = default!;
     public string? Filter { get; set; }

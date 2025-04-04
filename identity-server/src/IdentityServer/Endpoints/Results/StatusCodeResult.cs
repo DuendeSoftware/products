@@ -26,19 +26,13 @@ public class StatusCodeResult : EndpointResult<StatusCodeResult>
     /// Initializes a new instance of the <see cref="StatusCodeResult"/> class.
     /// </summary>
     /// <param name="statusCode">The status code.</param>
-    public StatusCodeResult(HttpStatusCode statusCode)
-    {
-        StatusCode = (int)statusCode;
-    }
+    public StatusCodeResult(HttpStatusCode statusCode) => StatusCode = (int)statusCode;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StatusCodeResult"/> class.
     /// </summary>
     /// <param name="statusCode">The status code.</param>
-    public StatusCodeResult(int statusCode)
-    {
-        StatusCode = statusCode;
-    }
+    public StatusCodeResult(int statusCode) => StatusCode = statusCode;
 }
 
 internal class StatusCodeHttpWriter : IHttpResponseWriter<StatusCodeResult>

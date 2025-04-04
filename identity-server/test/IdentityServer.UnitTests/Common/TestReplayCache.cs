@@ -12,10 +12,7 @@ public class TestReplayCache : IReplayCache
     private readonly IClock _clock;
     private Dictionary<string, DateTimeOffset> _values = new Dictionary<string, DateTimeOffset>();
 
-    public TestReplayCache(IClock clock)
-    {
-        _clock = clock;
-    }
+    public TestReplayCache(IClock clock) => _clock = clock;
 
     public Task AddAsync(string purpose, string handle, DateTimeOffset expiration)
     {

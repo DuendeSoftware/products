@@ -20,10 +20,7 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
         return Task.FromResult(key);
     }
 
-    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId)
-    {
-        return Task.FromResult(Items[requestId]);
-    }
+    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId) => Task.FromResult(Items[requestId]);
 
     public Task<BackChannelAuthenticationRequest> GetByInternalIdAsync(string id)
     {

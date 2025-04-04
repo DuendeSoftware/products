@@ -13,10 +13,7 @@ public class HomeController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public HomeController(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
+    public HomeController(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
     [AllowAnonymous]
     public IActionResult Index() => View();

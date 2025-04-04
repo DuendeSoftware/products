@@ -19,10 +19,7 @@ public class CheckSessionResult : EndpointResult<CheckSessionResult>
 
 internal class CheckSessionHttpWriter : IHttpResponseWriter<CheckSessionResult>
 {
-    public CheckSessionHttpWriter(IdentityServerOptions options)
-    {
-        _options = options;
-    }
+    public CheckSessionHttpWriter(IdentityServerOptions options) => _options = options;
 
     private IdentityServerOptions _options;
     private static volatile string FormattedHtml;
@@ -37,10 +34,7 @@ internal class CheckSessionHttpWriter : IHttpResponseWriter<CheckSessionResult>
         await context.Response.WriteHtmlAsync(html);
     }
 
-    private void AddCspHeaders(HttpContext context)
-    {
-        context.Response.AddScriptCspHeaders(_options.Csp, IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript);
-    }
+    private void AddCspHeaders(HttpContext context) => context.Response.AddScriptCspHeaders(_options.Csp, IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript);
     private string GetHtml(string cookieName)
     {
         if (cookieName != LastCheckSessionCookieName)

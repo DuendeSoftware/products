@@ -16,13 +16,10 @@ namespace Bff.Tests.Blazor;
 
 public class ServerSideTokenStoreTests
 {
-    private ClaimsPrincipal CreatePrincipal(string sub, string sid)
-    {
-        return new ClaimsPrincipal(new ClaimsIdentity([
+    private ClaimsPrincipal CreatePrincipal(string sub, string sid) => new ClaimsPrincipal(new ClaimsIdentity([
             new Claim("sub", sub),
             new Claim("sid", sid)
         ], "pwd", "name", "role"));
-    }
 
     [Fact]
     public async Task Can_add_retrieve_and_remove_tokens()

@@ -10,8 +10,5 @@ internal class StubTokenRequestValidator : ITokenRequestValidator
 {
     public TokenRequestValidationResult Result { get; set; }
 
-    public Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context)
-    {
-        return Task.FromResult(Result);
-    }
+    public Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context) => Task.FromResult(Result);
 }

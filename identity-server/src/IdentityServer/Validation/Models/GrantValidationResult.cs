@@ -127,18 +127,15 @@ public class GrantValidationResult : ValidationResult
         CustomResponse = customResponse;
     }
 
-    private string ConvertTokenErrorEnumToString(TokenRequestErrors error)
+    private string ConvertTokenErrorEnumToString(TokenRequestErrors error) => error switch
     {
-        return error switch
-        {
-            TokenRequestErrors.InvalidClient => OidcConstants.TokenErrors.InvalidClient,
-            TokenRequestErrors.InvalidGrant => OidcConstants.TokenErrors.InvalidGrant,
-            TokenRequestErrors.InvalidRequest => OidcConstants.TokenErrors.InvalidRequest,
-            TokenRequestErrors.InvalidScope => OidcConstants.TokenErrors.InvalidScope,
-            TokenRequestErrors.UnauthorizedClient => OidcConstants.TokenErrors.UnauthorizedClient,
-            TokenRequestErrors.UnsupportedGrantType => OidcConstants.TokenErrors.UnsupportedGrantType,
-            TokenRequestErrors.InvalidTarget => OidcConstants.TokenErrors.InvalidTarget,
-            _ => throw new InvalidOperationException("invalid token error")
-        };
-    }
+        TokenRequestErrors.InvalidClient => OidcConstants.TokenErrors.InvalidClient,
+        TokenRequestErrors.InvalidGrant => OidcConstants.TokenErrors.InvalidGrant,
+        TokenRequestErrors.InvalidRequest => OidcConstants.TokenErrors.InvalidRequest,
+        TokenRequestErrors.InvalidScope => OidcConstants.TokenErrors.InvalidScope,
+        TokenRequestErrors.UnauthorizedClient => OidcConstants.TokenErrors.UnauthorizedClient,
+        TokenRequestErrors.UnsupportedGrantType => OidcConstants.TokenErrors.UnsupportedGrantType,
+        TokenRequestErrors.InvalidTarget => OidcConstants.TokenErrors.InvalidTarget,
+        _ => throw new InvalidOperationException("invalid token error")
+    };
 }

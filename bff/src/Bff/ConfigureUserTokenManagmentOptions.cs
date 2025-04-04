@@ -15,8 +15,5 @@ namespace Microsoft.AspNetCore.Builder;
 public class ConfigureUserTokenManagementOptions(IOptions<BffOptions> bffOptions) : IConfigureOptions<UserTokenManagementOptions>
 {
     /// <inheritdoc/>
-    public void Configure(UserTokenManagementOptions options)
-    {
-        options.DPoPJsonWebKey = bffOptions.Value.DPoPJsonWebKey;
-    }
+    public void Configure(UserTokenManagementOptions options) => options.DPoPJsonWebKey = bffOptions.Value.DPoPJsonWebKey;
 }

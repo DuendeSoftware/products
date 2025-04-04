@@ -148,10 +148,7 @@ internal class Program
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-    public void BringConsoleToFront()
-    {
-        SetForegroundWindow(GetConsoleWindow());
-    }
+    public void BringConsoleToFront() => SetForegroundWindow(GetConsoleWindow());
 
     public static string GetRequestPostData(HttpListenerRequest request)
     {

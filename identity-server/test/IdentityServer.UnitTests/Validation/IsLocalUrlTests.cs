@@ -78,10 +78,7 @@ public class IsLocalUrlTests
 
     [Theory]
     [MemberData(nameof(TestCases))]
-    public void IsLocalUrl(string returnUrl, bool expected)
-    {
-        returnUrl.IsLocalUrl().ShouldBe(expected);
-    }
+    public void IsLocalUrl(string returnUrl, bool expected) => returnUrl.IsLocalUrl().ShouldBe(expected);
 
     [Theory]
     [MemberData(nameof(TestCases))]
@@ -159,9 +156,7 @@ public class IsLocalUrlTests
         return parser;
     }
 
-    private static OidcReturnUrlParser GetOidcReturnUrlParser()
-    {
-        return new OidcReturnUrlParser(
+    private static OidcReturnUrlParser GetOidcReturnUrlParser() => new OidcReturnUrlParser(
             new IdentityServerOptions(),
             new StubAuthorizeRequestValidator
             {
@@ -173,7 +168,6 @@ public class IsLocalUrlTests
             new MockUserSession(),
             new MockServerUrls(),
             new LoggerFactory().CreateLogger<OidcReturnUrlParser>());
-    }
 
 
 }

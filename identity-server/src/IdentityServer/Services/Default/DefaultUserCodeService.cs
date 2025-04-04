@@ -17,10 +17,7 @@ public class DefaultUserCodeService : IUserCodeService
     /// </summary>
     /// <param name="generators">The generators.</param>
     /// <exception cref="ArgumentNullException">generators</exception>
-    public DefaultUserCodeService(IEnumerable<IUserCodeGenerator> generators)
-    {
-        _generators = generators ?? throw new ArgumentNullException(nameof(generators));
-    }
+    public DefaultUserCodeService(IEnumerable<IUserCodeGenerator> generators) => _generators = generators ?? throw new ArgumentNullException(nameof(generators));
 
     /// <summary>
     /// Gets the user code generator.

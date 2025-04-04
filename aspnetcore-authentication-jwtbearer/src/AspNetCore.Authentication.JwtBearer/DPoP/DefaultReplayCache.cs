@@ -17,10 +17,7 @@ public class DefaultReplayCache : IReplayCache
     /// <summary>
     /// Constructs new instances of <see cref="DefaultReplayCache"/>.
     /// </summary>
-    public DefaultReplayCache(IDistributedCache cache)
-    {
-        _cache = cache;
-    }
+    public DefaultReplayCache(IDistributedCache cache) => _cache = cache;
 
     /// <inheritdoc />
     public async Task Add(string handle, DateTimeOffset expiration, CancellationToken cancellationToken)
@@ -34,8 +31,5 @@ public class DefaultReplayCache : IReplayCache
     }
 
     /// <inheritdoc />
-    public async Task<bool> Exists(string handle, CancellationToken cancellationToken)
-    {
-        return await _cache.GetAsync(Prefix + handle, cancellationToken) != null;
-    }
+    public async Task<bool> Exists(string handle, CancellationToken cancellationToken) => await _cache.GetAsync(Prefix + handle, cancellationToken) != null;
 }

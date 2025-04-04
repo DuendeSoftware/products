@@ -798,15 +798,9 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return Valid(request);
     }
 
-    private AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null)
-    {
-        return new AuthorizeRequestValidationResult(request, error, description);
-    }
+    private AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new AuthorizeRequestValidationResult(request, error, description);
 
-    private AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request)
-    {
-        return new AuthorizeRequestValidationResult(request);
-    }
+    private AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
 
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {

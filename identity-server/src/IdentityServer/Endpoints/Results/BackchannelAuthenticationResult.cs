@@ -26,10 +26,7 @@ public class BackchannelAuthenticationResult : EndpointResult<BackchannelAuthent
     /// </summary>
     /// <param name="response"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public BackchannelAuthenticationResult(BackchannelAuthenticationResponse response)
-    {
-        Response = response ?? throw new ArgumentNullException(nameof(response));
-    }
+    public BackchannelAuthenticationResult(BackchannelAuthenticationResponse response) => Response = response ?? throw new ArgumentNullException(nameof(response));
 }
 
 internal class BackchannelAuthenticationHttpWriter : IHttpResponseWriter<BackchannelAuthenticationResult>

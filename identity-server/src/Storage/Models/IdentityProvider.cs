@@ -93,9 +93,6 @@ public class IdentityProvider
             Properties.TryGetValue(name, out var result);
             return result;
         }
-        set
-        {
-            Properties[name] = value!;
-        }
+        set => Properties[name] = value!;
     }
 }

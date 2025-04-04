@@ -156,10 +156,7 @@ public class RevocationTests
         return authorizationResponse.AccessToken;
     }
 
-    private Task<bool> IsAccessTokenValidAsync(Tokens tokens)
-    {
-        return IsAccessTokenValidAsync(tokens.AccessToken);
-    }
+    private Task<bool> IsAccessTokenValidAsync(Tokens tokens) => IsAccessTokenValidAsync(tokens.AccessToken);
 
     private async Task<bool> IsAccessTokenValidAsync(string token)
     {

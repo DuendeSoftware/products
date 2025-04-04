@@ -81,20 +81,11 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         await _inner.SignOutAsync(context, scheme, properties);
     }
 
-    public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme)
-    {
-        return _inner.AuthenticateAsync(context, scheme);
-    }
+    public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string scheme) => _inner.AuthenticateAsync(context, scheme);
 
-    public Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties properties)
-    {
-        return _inner.ChallengeAsync(context, scheme, properties);
-    }
+    public Task ChallengeAsync(HttpContext context, string scheme, AuthenticationProperties properties) => _inner.ChallengeAsync(context, scheme, properties);
 
-    public Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties properties)
-    {
-        return _inner.ForbidAsync(context, scheme, properties);
-    }
+    public Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties properties) => _inner.ForbidAsync(context, scheme, properties);
 
     private void AssertRequiredClaims(ClaimsPrincipal principal)
     {

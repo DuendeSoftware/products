@@ -16,8 +16,5 @@ public static class AssertionExtensions
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
     }
 
-    public static void ReplayCacheShouldNotBeCalled(this TestDPoPProofValidator validator)
-    {
-        validator.TestReplayCache.DidNotReceive().Add(Arg.Any<string>(), Arg.Any<DateTimeOffset>());
-    }
+    public static void ReplayCacheShouldNotBeCalled(this TestDPoPProofValidator validator) => validator.TestReplayCache.DidNotReceive().Add(Arg.Any<string>(), Arg.Any<DateTimeOffset>());
 }

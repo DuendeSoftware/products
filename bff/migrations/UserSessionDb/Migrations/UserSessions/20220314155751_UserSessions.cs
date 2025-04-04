@@ -53,9 +53,6 @@ public partial class UserSessions : Migration
             column: "Expires");
     }
 
-    protected override void Down(MigrationBuilder migrationBuilder)
-    {
-        migrationBuilder.DropTable(
+    protected override void Down(MigrationBuilder migrationBuilder) => migrationBuilder.DropTable(
             name: "UserSessions");
-    }
 }

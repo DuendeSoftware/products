@@ -27,10 +27,7 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
         _logger = factory?.CreateLogger(GetType());
     }
 
-    public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
-    {
-        return _inner.InitializeAsync(scheme, context);
-    }
+    public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context) => _inner.InitializeAsync(scheme, context);
 
     public async Task<bool> HandleRequestAsync()
     {
@@ -50,20 +47,11 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
         return result;
     }
 
-    public Task<AuthenticateResult> AuthenticateAsync()
-    {
-        return _inner.AuthenticateAsync();
-    }
+    public Task<AuthenticateResult> AuthenticateAsync() => _inner.AuthenticateAsync();
 
-    public Task ChallengeAsync(AuthenticationProperties properties)
-    {
-        return _inner.ChallengeAsync(properties);
-    }
+    public Task ChallengeAsync(AuthenticationProperties properties) => _inner.ChallengeAsync(properties);
 
-    public Task ForbidAsync(AuthenticationProperties properties)
-    {
-        return _inner.ForbidAsync(properties);
-    }
+    public Task ForbidAsync(AuthenticationProperties properties) => _inner.ForbidAsync(properties);
 
     private async Task ProcessFederatedSignOutRequestAsync()
     {

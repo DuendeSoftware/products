@@ -35,10 +35,7 @@ public class LocalApiAuthenticationTests
     public bool ApiWasCalled { get; set; }
     public ClaimsPrincipal ApiPrincipal { get; set; }
 
-    static LocalApiAuthenticationTests()
-    {
-        _jwk = GenerateJwk();
-    }
+    static LocalApiAuthenticationTests() => _jwk = GenerateJwk();
 
     private static string GenerateJwk()
     {

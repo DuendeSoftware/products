@@ -44,8 +44,5 @@ public class DynamicAuthenticationSchemeCache
     /// <param name="name"></param>
     /// <returns></returns>
     public T GetIdentityProvider<T>(string name)
-        where T : IdentityProvider
-    {
-        return Get(name)?.IdentityProvider as T;
-    }
+        where T : IdentityProvider => Get(name)?.IdentityProvider as T;
 }

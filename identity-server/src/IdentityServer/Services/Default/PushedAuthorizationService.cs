@@ -29,10 +29,7 @@ public class PushedAuthorizationService : IPushedAuthorizationService
     }
 
     /// <inheritdoc />
-    public Task ConsumeAsync(string referenceValue)
-    {
-        return _store.ConsumeByHashAsync(referenceValue.ToSha256());
-    }
+    public Task ConsumeAsync(string referenceValue) => _store.ConsumeByHashAsync(referenceValue.ToSha256());
 
     /// <inheritdoc />
     public async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(string referenceValue)

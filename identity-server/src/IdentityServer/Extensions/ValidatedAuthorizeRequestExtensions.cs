@@ -83,29 +83,17 @@ public static class ValidatedAuthorizeRequestExtensions
         }
     }
 
-    public static string GetIdP(this ValidatedAuthorizeRequest request)
-    {
-        return request.GetPrefixedAcrValue(Constants.KnownAcrValues.HomeRealm);
-    }
+    public static string GetIdP(this ValidatedAuthorizeRequest request) => request.GetPrefixedAcrValue(Constants.KnownAcrValues.HomeRealm);
 
-    public static void RemoveIdP(this ValidatedAuthorizeRequest request)
-    {
-        request.RemovePrefixedAcrValue(Constants.KnownAcrValues.HomeRealm);
-    }
+    public static void RemoveIdP(this ValidatedAuthorizeRequest request) => request.RemovePrefixedAcrValue(Constants.KnownAcrValues.HomeRealm);
 
-    public static string GetTenant(this ValidatedAuthorizeRequest request)
-    {
-        return request.GetPrefixedAcrValue(Constants.KnownAcrValues.Tenant);
-    }
+    public static string GetTenant(this ValidatedAuthorizeRequest request) => request.GetPrefixedAcrValue(Constants.KnownAcrValues.Tenant);
 
-    public static IEnumerable<string> GetAcrValues(this ValidatedAuthorizeRequest request)
-    {
-        return request
+    public static IEnumerable<string> GetAcrValues(this ValidatedAuthorizeRequest request) => request
             .AuthenticationContextReferenceClasses
             .Where(acr => !Constants.KnownAcrValues.All.Any(well_known => acr.StartsWith(well_known)))
             .Distinct()
             .ToArray();
-    }
 
     public static void RemoveAcrValue(this ValidatedAuthorizeRequest request, string value)
     {
@@ -184,10 +172,7 @@ public static class ValidatedAuthorizeRequestExtensions
         return request.Raw;
     }
 
-    public static string ToOptimizedQueryString(this ValidatedAuthorizeRequest request)
-    {
-        return request.ToOptimizedRawValues().ToQueryString();
-    }
+    public static string ToOptimizedQueryString(this ValidatedAuthorizeRequest request) => request.ToOptimizedRawValues().ToQueryString();
 
     [Obsolete("This method is obsolete and will be removed in a future version.")]
     public static IDictionary<string, string[]> ToOptimizedFullDictionary(this ValidatedAuthorizeRequest request)

@@ -47,10 +47,7 @@ namespace Duende.IdentityServer.IntegrationTests.TestFramework
 
     public class MockExternalAuthenticationOptions : RemoteAuthenticationOptions
     {
-        public MockExternalAuthenticationOptions()
-        {
-            CallbackPath = "/external-callback";
-        }
+        public MockExternalAuthenticationOptions() => CallbackPath = "/external-callback";
     }
 }
 
@@ -61,9 +58,6 @@ namespace Microsoft.Extensions.DependencyInjection
         public static AuthenticationBuilder AddMockExternalAuthentication(this AuthenticationBuilder builder,
             string authenticationScheme = "external",
             string displayName = "external",
-            Action<MockExternalAuthenticationOptions> configureOptions = null)
-        {
-            return builder.AddRemoteScheme<MockExternalAuthenticationOptions, MockExternalAuthenticationHandler>(authenticationScheme, displayName, configureOptions);
-        }
+            Action<MockExternalAuthenticationOptions> configureOptions = null) => builder.AddRemoteScheme<MockExternalAuthenticationOptions, MockExternalAuthenticationHandler>(authenticationScheme, displayName, configureOptions);
     }
 }

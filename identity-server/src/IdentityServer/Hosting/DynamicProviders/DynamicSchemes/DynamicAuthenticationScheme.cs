@@ -18,10 +18,7 @@ public class DynamicAuthenticationScheme : AuthenticationScheme
     /// <param name="idp"></param>
     /// <param name="handlerType"></param>
     public DynamicAuthenticationScheme(IdentityProvider idp, Type handlerType)
-        : base(idp.Scheme, idp.DisplayName, handlerType)
-    {
-        IdentityProvider = idp;
-    }
+        : base(idp.Scheme, idp.DisplayName, handlerType) => IdentityProvider = idp;
 
     /// <summary>
     /// The corresponding IdentityProvider configuration data.

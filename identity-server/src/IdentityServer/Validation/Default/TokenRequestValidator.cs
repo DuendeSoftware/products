@@ -83,14 +83,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
     // only here for legacy unit tests
     // maybe at some point we clean up the unit tests?
-    internal Task<TokenRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult)
+    internal Task<TokenRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult) => ValidateRequestAsync(new TokenRequestValidationContext
     {
-        return ValidateRequestAsync(new TokenRequestValidationContext
-        {
-            RequestParameters = parameters,
-            ClientValidationResult = clientValidationResult
-        });
-    }
+        RequestParameters = parameters,
+        ClientValidationResult = clientValidationResult
+    });
 
     /// <inheritdoc/>
     public async Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context)
@@ -1227,30 +1224,15 @@ internal class TokenRequestValidator : ITokenRequestValidator
         return TimeConstantComparer.IsEqual(transformedCodeVerifier.Sha256(), codeChallenge);
     }
 
-    private TokenRequestValidationResult Valid(Dictionary<string, object> customResponse = null)
-    {
-        return new TokenRequestValidationResult(_validatedRequest, customResponse);
-    }
+    private TokenRequestValidationResult Valid(Dictionary<string, object> customResponse = null) => new TokenRequestValidationResult(_validatedRequest, customResponse);
 
-    private TokenRequestValidationResult Invalid(string error, string errorDescription = null, Dictionary<string, object> customResponse = null)
-    {
-        return new TokenRequestValidationResult(_validatedRequest, error, errorDescription, customResponse);
-    }
+    private TokenRequestValidationResult Invalid(string error, string errorDescription = null, Dictionary<string, object> customResponse = null) => new TokenRequestValidationResult(_validatedRequest, error, errorDescription, customResponse);
 
-    private void LogError(string message = null, object values = null)
-    {
-        LogWithRequestDetails(LogLevel.Error, message, values);
-    }
+    private void LogError(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Error, message, values);
 
-    private void LogWarning(string message = null, object values = null)
-    {
-        LogWithRequestDetails(LogLevel.Warning, message, values);
-    }
+    private void LogWarning(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Warning, message, values);
 
-    private void LogInformation(string message = null, object values = null)
-    {
-        LogWithRequestDetails(LogLevel.Information, message, values);
-    }
+    private void LogInformation(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Information, message, values);
 
     private void LogWithRequestDetails(LogLevel logLevel, string message = null, object values = null)
     {
@@ -1281,10 +1263,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
     }
 
-    private void LogSuccess()
-    {
-        LogWithRequestDetails(LogLevel.Information, "Token request validation success");
-    }
+    private void LogSuccess() => LogWithRequestDetails(LogLevel.Information, "Token request validation success");
 
     private Task RaiseSuccessfulResourceOwnerAuthenticationEventAsync(string userName, string subjectId, string clientId)
     {
