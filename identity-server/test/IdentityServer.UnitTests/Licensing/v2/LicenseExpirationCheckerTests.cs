@@ -3,6 +3,7 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
 using UnitTests.Common;
@@ -11,11 +12,10 @@ namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class LicenseExpirationCheckerTests
 {
-    private readonly IdentityServerOptions _options;
-    private readonly LicenseAccessor _licenseAccessor;
-    private readonly MockSystemClock _mockSystemClock;
-    private readonly FakeLogger<LicenseExpirationChecker> _logger;
-    private readonly LicenseExpirationChecker _expirationCheck;
+    private IdentityServerOptions _options;
+    private LicenseAccessor _licenseAccessor;
+    private MockSystemClock _mockSystemClock;
+    private FakeLogger<LicenseExpirationChecker> _logger;
 
     //Expiration of all the test licenses we use
     private readonly DateTimeOffset _licenseExpiration = new(
@@ -23,26 +23,30 @@ public class LicenseExpirationCheckerTests
         new TimeOnly(12, 00),
         TimeSpan.Zero);
 
-    public LicenseExpirationCheckerTests()
+    private LicenseExpirationChecker CreateLicenseExpirationChecker(string licenseKey)
     {
-        _options = new IdentityServerOptions();
+        _options = new IdentityServerOptions
+        {
+            LicenseKey = licenseKey
+        };
         _licenseAccessor = new LicenseAccessor(_options, new NullLogger<LicenseAccessor>());
         _mockSystemClock = new MockSystemClock();
         _logger = new FakeLogger<LicenseExpirationChecker>();
-        _expirationCheck = new LicenseExpirationChecker(_licenseAccessor, _mockSystemClock, new StubLoggerFactory(_logger));
+        return new LicenseExpirationChecker(_licenseAccessor, _mockSystemClock, new StubLoggerFactory(_logger));
     }
 
     [Theory]
     [MemberData(nameof(NonRedistributionLicenseKeys))]
-    public void warning_is_logged_for_expired_license(string licenseKey)
+    public void warning_is_logged_at_error_level_for_expired_license(string licenseKey)
     {
-        _options.LicenseKey = licenseKey;
+        var expirationChecker = CreateLicenseExpirationChecker(licenseKey);
         _mockSystemClock.Now = _licenseExpiration.AddDays(1);
 
-        _expirationCheck.CheckExpiration();
+        expirationChecker.CheckExpiration();
 
-        // REMINDER - If this test needs to change because the log message was updated, so should no_warning_is_logged_for_unexpired_license
+        // REMINDER - If this test needs to change because the log message was updated, so should the other test methods
         _logger.Collector.GetSnapshot().ShouldContain(r =>
+                r.Level == LogLevel.Error &&
                 r.Message ==
                 "The IdentityServer license is expired. In a future version of IdentityServer, license expiration will be enforced after a grace period.",
             1);
@@ -52,10 +56,10 @@ public class LicenseExpirationCheckerTests
     [MemberData(nameof(NonRedistributionLicenseKeys))]
     public void no_warning_is_logged_for_unexpired_license(string licenseKey)
     {
-        _options.LicenseKey = licenseKey;
+        var expirationChecker = CreateLicenseExpirationChecker(licenseKey);
         _mockSystemClock.Now = _licenseExpiration.AddDays(-1);
 
-        _expirationCheck.CheckExpiration();
+        expirationChecker.CheckExpiration();
 
         _logger.Collector.GetSnapshot().ShouldNotContain(r =>
                 r.Message == "The IdentityServer license is expired. In a future version of IdentityServer, license expiration will be enforced after a grace period.");
@@ -63,17 +67,20 @@ public class LicenseExpirationCheckerTests
 
     [Theory]
     [MemberData(nameof(RedistributionLicenseKeys))]
-    public void no_expired_license_warning_for_redistribution_license(string licenseKey)
+    public void warning_is_logged_at_trace_level_for_redistribution_license(string licenseKey)
     {
-        _options.LicenseKey =
-            "eyJhbGciOiJQUzI1NiIsImtpZCI6IklkZW50aXR5U2VydmVyTGljZW5zZWtleS83Y2VhZGJiNzgxMzA0NjllODgwNjg5MTAyNTQxNGYxNiIsInR5cCI6ImxpY2Vuc2Urand0In0.eyJpc3MiOiJodHRwczovL2R1ZW5kZXNvZnR3YXJlLmNvbSIsImF1ZCI6IklkZW50aXR5U2VydmVyIiwiaWF0IjoxNzMwNDE5MjAwLCJleHAiOjE3MzE2Mjg4MDAsImNvbXBhbnlfbmFtZSI6Il90ZXN0IiwiY29udGFjdF9pbmZvIjoiY29udGFjdEBkdWVuZGVzb2Z0d2FyZS5jb20iLCJlZGl0aW9uIjoiRW50ZXJwcmlzZSIsImlkIjoiNjY4NCIsImZlYXR1cmUiOiJpc3YiLCJwcm9kdWN0IjoiVEJEIn0.Y-bbdSsdHHzrJs40CpEIsgi7ugc8ScTa2ArCuL-wM__O6znygAUTGOLrzhFaeRibud5lNXSYaA0vkkF1UFQS4HJF_wTMe5pYH4DT1vVYaVXd9Xyqn-klQvBLcoo4JAoFNau0Az-czbo6UBkejKn-7QDnJunFcHaYenDpzgsXHiaK4mkIMRI_OnBYKegNa_xvYRRzorKkT3x8q1n7vUnx80-b6Jf2Y0u6fPsLwE2Or-VBXRpTGL20MBtcPS56wQDDdl4eKkW716lHS-Iyh5KW3K5HVKRxd86ot18MY6Bd3PPUQocFYXd5KhTH_YKvwVqAUkc0MhHYJLFV_5Q8qSRECA";
+        var expirationChecker = CreateLicenseExpirationChecker(licenseKey);
         _mockSystemClock.Now = _licenseExpiration.AddDays(1);
 
         _licenseAccessor.Current.Redistribution.ShouldBeTrue();
 
-        _expirationCheck.CheckExpiration();
+        expirationChecker.CheckExpiration();
 
-        _logger.Collector.GetSnapshot().ShouldBeEmpty();
+        _logger.Collector.GetSnapshot().ShouldContain(r =>
+                r.Level == LogLevel.Trace &&
+                r.Message ==
+                "The IdentityServer license is expired. In a future version of IdentityServer, license expiration will be enforced after a grace period.",
+            1);
     }
 
     public static TheoryData<string> NonRedistributionLicenseKeys =>

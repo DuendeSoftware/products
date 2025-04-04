@@ -12,13 +12,13 @@ internal class LicenseExpirationChecker(
     IClock clock,
     ILoggerFactory loggerFactory)
 {
-    private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
+    private readonly LicenseLoggingAdapter _logger = new(license.Current.Redistribution, loggerFactory.CreateLogger("Duende.IdentityServer.License"));
 
     private bool _expiredLicenseWarned;
 
     public void CheckExpiration()
     {
-        if (!_expiredLicenseWarned && !license.Current.Redistribution && IsExpired)
+        if (!_expiredLicenseWarned && IsExpired)
         {
             _expiredLicenseWarned = true;
             _logger.LogError("The IdentityServer license is expired. In a future version of IdentityServer, license expiration will be enforced after a grace period.");
