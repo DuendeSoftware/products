@@ -11,84 +11,65 @@ internal static class LogCategories
     public const string RemoteApiEndpoints = "Duende.Bff.RemoteApiEndpoints";
 }
 
-internal static class EventIds
+internal class OTelParameters
 {
-    public static readonly EventId AntiForgeryValidationFailed = new(1, "AntiForgeryValidationFailed");
-    public static readonly EventId BackChannelLogout = new(2, "BackChannelLogout");
-    public static readonly EventId BackChannelLogoutError = new(3, "BackChannelLogoutError");
-    public static readonly EventId AccessTokenMissing = new(4, "AccessTokenMissing");
-    public static readonly EventId InvalidRouteConfiguration = new(5, "InvalidRouteConfiguration");
+    public const string CacheKey = "CacheKey";
+    public const string ClientId = "ClientId";
+    public const string ClientName = "ClientName";
+    public const string ClusterId = "ClusterId";
+    public const string Detail = "Detail";
+    public const string Error = "Error";
+    public const string ErrorDescription = "ErrorDescription";
+    public const string Expiration = "Expiration";
+    public const string ForceRenewal = "ForceRenewal";
+    public const string LocalPath = "LocalPath";
+    public const string Method = "Method";
+    public const string RequestUrl = "RequestUrl";
+    public const string Resource = "Resource";
+    public const string RouteId = "RouteId";
+    public const string Scheme = "Scheme";
+    public const string Sid = "Sid";
+    public const string StatusCode = "StatusCode";
+    public const string Sub = "Sub";
+    public const string TokenHash = "TokenHash";
+    public const string TokenType = "TokenType";
+    public const string Url = "Url";
+    public const string User = "User";
 }
-
-internal static class Log
+internal static partial class Log
 {
-    private static readonly Action<ILogger, string, Exception?> AntiForgeryValidationFailedMessage = LoggerMessage.Define<string>(
+    [LoggerMessage(
         LogLevel.Error,
-        EventIds.AntiForgeryValidationFailed,
-        "Anti-forgery validation failed. local path: '{localPath}'");
+        $"Anti-forgery validation failed. local path: '{{{OTelParameters.LocalPath}}}'")]
+    public static partial void AntiForgeryValidationFailed(this ILogger logger, string localPath);
 
-    private static readonly Action<ILogger, string, string, Exception?> BackChannelLogoutMessage = LoggerMessage.Define<string, string>(
-        LogLevel.Information,
-        EventIds.BackChannelLogout,
-        "Back-channel logout. sub: '{sub}', sid: '{sid}'");
+    [LoggerMessage(
+        level: LogLevel.Debug,
+        message: $"Back-channel logout. sub: '{{{OTelParameters.Sub}}}', sid: '{{{OTelParameters.Sid}}}'")]
+    public static partial void BackChannelLogout(this ILogger logger, string sub, string sid);
 
-    private static readonly Action<ILogger, string, Exception?> BackChannelLogoutErrorMessage = LoggerMessage.Define<string>(
-        LogLevel.Information,
-        EventIds.BackChannelLogoutError,
-        "Back-channel logout error. error: '{error}'");
+    [LoggerMessage(
+        level: LogLevel.Warning,
+        message: $"Back-channel logout error. error: '{{{OTelParameters.Error}}}'")]
+    public static partial void BackChannelLogoutError(this ILogger logger, string error);
 
-    private static readonly Action<ILogger, string, string, string, Exception?> AccessTokenMissingMessage = LoggerMessage.Define<string, string, string>(
-        LogLevel.Warning,
-        EventIds.AccessTokenMissing,
-        "Access token is missing. token type: '{tokenType}', local path: '{localpath}', detail: '{detail}'");
+    [LoggerMessage(
+        level: LogLevel.Warning,
+        message: $"Access token is missing. token type: '{{{OTelParameters.TokenType}}}', local path: '{{{OTelParameters.LocalPath}}}', detail: '{{{OTelParameters.Detail}}}'")]
+    public static partial void AccessTokenMissing(this ILogger logger, string tokenType, string localPath, string detail);
 
-    private static readonly Action<ILogger, string, string, Exception?> InvalidRouteConfigurationMessage = LoggerMessage.Define<string, string>(
-        LogLevel.Warning,
-        EventIds.InvalidRouteConfiguration,
-        "Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{clusterId}', routeId: '{routeId}'");
+    [LoggerMessage(
+        level: LogLevel.Warning,
+        message: $"Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{{{OTelParameters.ClusterId}}}', routeId: '{{{OTelParameters.RouteId}}}'")]
+    public static partial void InvalidRouteConfiguration(this ILogger logger, string? clusterId, string routeId);
 
-    private static readonly Action<ILogger, string, Exception?> FailedToRequestNewTokenMessage = LoggerMessage.Define<string>(
-        LogLevel.Warning,
-        EventIds.InvalidRouteConfiguration,
-        "Failed to request new User Access Token due to: {message}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.");
+    [LoggerMessage(
+        level: LogLevel.Warning,
+        message: $"Failed to request new User Access Token due to: {{{OTelParameters.Error}}}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.")]
+    public static partial void FailedToRequestNewUserAccessToken(this ILogger logger, string error);
 
-    private static readonly Action<ILogger, string, Exception?> UserSessionRevokedMessage = LoggerMessage.Define<string>(
-        LogLevel.Warning,
-        EventIds.InvalidRouteConfiguration,
-        "Failed to request new User Access Token due to: {message}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.");
-
-    public static void AntiForgeryValidationFailed(this ILogger logger, string localPath)
-    {
-        AntiForgeryValidationFailedMessage(logger, localPath, null);
-    }
-
-    public static void BackChannelLogout(this ILogger logger, string sub, string sid)
-    {
-        BackChannelLogoutMessage(logger, sub, sid, null);
-    }
-
-    public static void BackChannelLogoutError(this ILogger logger, string error)
-    {
-        BackChannelLogoutErrorMessage(logger, error, null);
-    }
-
-    public static void AccessTokenMissing(this ILogger logger, string tokenType, string localPath, string detail)
-    {
-        AccessTokenMissingMessage(logger, tokenType, localPath, detail, null);
-    }
-
-    public static void InvalidRouteConfiguration(this ILogger logger, string? clusterId, string routeId)
-    {
-        InvalidRouteConfigurationMessage(logger, clusterId ?? "no cluster id", routeId, null);
-    }
-
-    public static void FailedToRequestNewUserAccessToken(this ILogger logger, string message)
-    {
-        FailedToRequestNewTokenMessage(logger, message, null);
-    }
-
-    public static void UserSessionRevoked(this ILogger logger, string message)
-    {
-        UserSessionRevokedMessage(logger, message, null);
-    }
+    [LoggerMessage(
+        level: LogLevel.Warning,
+        message: $"Failed to request new User Access Token due to: {{{OTelParameters.Error}}}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.")]
+    public static partial void UserSessionRevoked(this ILogger logger, string error);
 }
