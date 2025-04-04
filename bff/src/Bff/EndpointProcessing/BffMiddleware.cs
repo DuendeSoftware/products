@@ -28,10 +28,9 @@ public class BffMiddleware(
         // add marker so we can determine if middleware has run later in the pipeline
         context.Items[Constants.BffMiddlewareMarker] = true;
 
-        // Check if the request is a WebSocket request
-        if (_options.DisableAntiForgeryCheck(context))
+        if (options.Value.DisableAntiForgeryCheck(context))
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
