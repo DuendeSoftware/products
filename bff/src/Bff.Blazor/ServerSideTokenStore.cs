@@ -3,6 +3,7 @@
 
 using System.Security.Claims;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -28,7 +29,7 @@ public class ServerSideTokenStore(
 
     public async Task<UserToken> GetTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null)
     {
-        logger.LogDebug("Retrieving token for user {user}", user.Identity?.Name);
+        logger.RetrievingTokenForUser(user.Identity?.Name);
         var session = await GetSession(user);
         if (session == null)
         {
@@ -53,7 +54,7 @@ public class ServerSideTokenStore(
         var sub = user.FindFirst("sub")?.Value ?? throw new InvalidOperationException("no sub claim");
         var sid = user.FindFirst("sid")?.Value ?? throw new InvalidOperationException("no sid claim");
 
-        logger.LogDebug("Retrieving session {sid} for sub {sub}", sid, sub);
+        logger.RetrievingSession(sid, sub);
 
         var sessions = await sessionStore.GetUserSessionsAsync(new UserSessionsFilter
         {
@@ -74,14 +75,14 @@ public class ServerSideTokenStore(
     public async Task StoreTokenAsync(ClaimsPrincipal user, UserToken token,
         UserTokenRequestParameters? parameters = null)
     {
-        logger.LogDebug("Storing token for user {user}", user.Identity?.Name);
+        logger.StoringTokenForUser(user.Identity?.Name);
         await UpdateTicket(user,
             ticket => { tokensInAuthProperties.SetUserToken(token, ticket.Properties, parameters); });
     }
 
     public async Task ClearTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null)
     {
-        logger.LogDebug("Removing token for user {user}", user.Identity?.Name);
+        logger.RemovingTokenForUser(user.Identity?.Name);
         await UpdateTicket(user, ticket => { tokensInAuthProperties.RemoveUserToken(ticket.Properties, parameters); });
     }
 
@@ -90,7 +91,7 @@ public class ServerSideTokenStore(
         var session = await GetSession(user);
         if (session == null)
         {
-            logger.LogDebug("Failed to find a session to update, bailing out");
+            logger.FailedToFindSessionToUpdate();
             return;
         }
 

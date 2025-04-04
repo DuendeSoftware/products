@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Internal;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,7 +20,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
     /// <inheritdoc/>
     public async Task CreateUserSessionAsync(UserSession session, CancellationToken cancellationToken)
     {
-        logger.LogDebug("Creating user session record in store for sub {sub} sid {sid}", session.SubjectId, session.SessionId);
+        logger.CreatingUserSession(session.SubjectId, session.SessionId);
 
         var item = new UserSessionEntity()
         {
@@ -47,11 +48,11 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
             // MySQL would send:    ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Duplicate entry '<AppName>-<SessionIdValue>' for key 'IX_UserSessions_ApplicationName_SessionId'
             if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) || exception.Contains("IX_UserSessions_ApplicationName_SessionId"))
             {
-                logger.LogDebug(ex, "Detected a duplicate insert of the same session. This can happen when multiple browser tabs are open and can safely be ignored.");
+                logger.DuplicateSessionInsertDetected(ex);
             }
             else
             {
-                logger.LogWarning(ex, "Exception creating new server-side session in database: {error}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.", ex.Message);
+                logger.ExceptionCreatingSession(ex, ex.Message);
             }
         }
     }
@@ -64,13 +65,11 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
 
         if (item == null)
         {
-            logger.LogDebug("No record found in user session store when trying to delete user session for key {key}",
-                key);
+            logger.NoRecordFoundForKey(key);
             return;
         }
 
-        logger.LogDebug("Deleting user session record in store for sub {sub} sid {sid}", item.SubjectId,
-            item.SessionId);
+        logger.DeletingUserSession(item.SubjectId, item.SessionId);
 
         sessionDbContext.UserSessions.Remove(item);
         try
@@ -81,7 +80,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
         {
             // suppressing exception for concurrent deletes
             // https://github.com/DuendeSoftware/BFF/issues/63
-            logger.LogDebug("DbUpdateConcurrencyException: {error}", ex.Message);
+            logger.DbUpdateConcurrencyException(ex.Message);
 
             foreach (var entry in ex.Entries)
             {
@@ -118,7 +117,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
             items = items.Where(x => x.SessionId == filter.SessionId).ToArray();
         }
 
-        logger.LogDebug("Deleting {count} user session(s) from store for sub {sub} sid {sid}", items.Length, filter.SubjectId, filter.SessionId);
+        logger.DeletingUserSessions(items.Length, filter.SubjectId, filter.SessionId);
 
         sessionDbContext.UserSessions.RemoveRange(items);
 
@@ -130,7 +129,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
         {
             // suppressing exception for concurrent deletes
             // https://github.com/DuendeSoftware/BFF/issues/63
-            logger.LogDebug("DbUpdateConcurrencyException: {error}", ex.Message);
+            logger.DbUpdateConcurrencyException(ex.Message);
 
             foreach (var entry in ex.Entries)
             {
@@ -149,12 +148,11 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
         UserSession? result = null;
         if (item == null)
         {
-            logger.LogDebug("No record found in user session store when trying to get user session for key {key}", key);
+            logger.NoRecordFoundForKey(key);
             return null;
         }
 
-        logger.LogDebug("Getting user session record from store for sub {sub} sid {sid}", item.SubjectId,
-            item.SessionId);
+        logger.GettingUserSession(item.SubjectId, item.SessionId);
 
         result = new UserSession();
         item.CopyTo(result);
@@ -196,7 +194,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
             return item;
         }).ToArray();
 
-        logger.LogDebug("Getting {count} user session(s) from store for sub {sub} sid {sid}", results.Length, filter.SubjectId, filter.SessionId);
+        logger.GettingUserSessions(results.Length, filter.SubjectId, filter.SessionId);
 
         return results;
     }
@@ -208,13 +206,11 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
         var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == _applicationDiscriminator);
         if (item == null)
         {
-            logger.LogDebug("No record found in user session store when trying to update user session for key {key}",
-                key);
+            logger.NoRecordFoundForKey(key);
             return;
         }
 
-        logger.LogDebug("Updating user session record in store for sub {sub} sid {sid}", item.SubjectId,
-            item.SessionId);
+        logger.UpdatingUserSession(item.SubjectId, item.SessionId);
 
         session.CopyTo(item);
         await sessionDbContext.SaveChangesAsync(cancellationToken);
@@ -241,7 +237,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
                 continue;
             }
 
-            logger.LogDebug("Removing {serverSideSessionCount} server side sessions", found);
+            logger.RemovingServerSideSessions(found);
 
             sessionDbContext.UserSessions.RemoveRange(expired);
 
@@ -252,7 +248,7 @@ public class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionD
             catch (DbUpdateConcurrencyException ex)
             {
                 // suppressing exception for concurrent deletes
-                logger.LogDebug("DbUpdateConcurrencyException: {error}", ex.Message);
+                logger.DbUpdateConcurrencyException(ex.Message);
 
                 foreach (var entry in ex.Entries)
                 {
