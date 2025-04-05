@@ -147,7 +147,7 @@ internal class License
     public bool Redistribution => IsConfigured && (IsEnabled(LicenseFeature.Redistribution) || IsEnabled(LicenseFeature.ISV));
 
     /// <summary>
-    /// The client limit
+    /// The number of clients this license allows, or <c>null</c> if the license allows unlimited clients.
     /// </summary>
     public int? ClientLimit { get; init; }
 
