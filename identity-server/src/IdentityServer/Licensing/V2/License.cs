@@ -152,7 +152,7 @@ internal class License
     public int? ClientLimit { get; init; }
 
     /// <summary>
-    /// The issuer limit
+    /// The number of issuers this license allows, or <c>null</c> if the license allows unlimited issuers.
     /// </summary>
     public int? IssuerLimit { get; init; }
 
