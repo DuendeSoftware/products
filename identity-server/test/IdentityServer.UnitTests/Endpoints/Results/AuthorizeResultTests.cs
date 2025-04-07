@@ -214,13 +214,11 @@ public class AuthorizeResultTests
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("default-src 'none';");
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.AuthorizeScript}'");
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
-        using (var rdr = new StreamReader(_context.Response.Body))
-        {
-            var html = rdr.ReadToEnd();
-            html.ShouldContain("<base target='_self'/>");
-            html.ShouldContain("<form method='post' action='http://client/callback'>");
-            html.ShouldContain("<input type='hidden' name='state' value='state' />");
-        }
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+        html.ShouldContain("<base target='_self'/>");
+        html.ShouldContain("<form method='post' action='http://client/callback'>");
+        html.ShouldContain("<input type='hidden' name='state' value='state' />");
     }
 
     [Fact]

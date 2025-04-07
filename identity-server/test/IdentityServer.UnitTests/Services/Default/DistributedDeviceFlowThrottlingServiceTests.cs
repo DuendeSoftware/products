@@ -51,7 +51,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
         var handle = Guid.NewGuid().ToString();
         var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
 
-        cache.Set(CacheKey + handle, Encoding.UTF8.GetBytes(testDate.AddSeconds(-1).ToString("O")));
+        await cache.SetAsync(CacheKey + handle, Encoding.UTF8.GetBytes(testDate.AddSeconds(-1).ToString("O")));
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 
@@ -67,7 +67,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
 
-        cache.Set($"devicecode_{handle}", Encoding.UTF8.GetBytes(testDate.AddSeconds(-deviceCode.Lifetime - 1).ToString("O")));
+        await cache.SetAsync($"devicecode_{handle}", Encoding.UTF8.GetBytes(testDate.AddSeconds(-deviceCode.Lifetime - 1).ToString("O")));
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 

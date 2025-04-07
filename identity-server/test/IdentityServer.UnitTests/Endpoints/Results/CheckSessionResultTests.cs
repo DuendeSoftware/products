@@ -41,11 +41,9 @@ public class CheckSessionResultTests
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("default-src 'none';");
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
-        using (var rdr = new StreamReader(_context.Response.Body))
-        {
-            var html = rdr.ReadToEnd();
-            html.ShouldContain("<script id='cookie-name' type='application/json'>foobar</script>");
-        }
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+        html.ShouldContain("<script id='cookie-name' type='application/json'>foobar</script>");
     }
 
     [Fact]
@@ -73,16 +71,13 @@ public class CheckSessionResultTests
     [Theory]
     [InlineData("foobar")]
     [InlineData("morefoobar")]
-
     public async Task can_change_cached_cookiename(string cookieName)
     {
         _options.Authentication.CheckSessionCookieName = cookieName;
         await _subject.WriteHttpResponse(new CheckSessionResult(), _context);
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
-        using (var rdr = new StreamReader(_context.Response.Body))
-        {
-            var html = rdr.ReadToEnd();
-            html.ShouldContain($"<script id='cookie-name' type='application/json'>{cookieName}</script>");
-        }
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+        html.ShouldContain($"<script id='cookie-name' type='application/json'>{cookieName}</script>");
     }
 }

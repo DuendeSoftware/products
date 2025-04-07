@@ -1,0 +1,12 @@
+# Set C# as the primary language
+*.cs linguist-language=C#
+*.cs linguist-detectable=true
+
+# Mark other files as documentation, vendored, or generated as needed
+# This helps reduce their impact on language statistics
+
+# Common files to exclude from language statistics
+*.js linguist-vendored=true
+*.css linguist-vendored=true
+*.html linguist-vendored=true
+*.json linguist-vendored=true

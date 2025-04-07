@@ -58,12 +58,10 @@ public class EndSessionCallbackResultTests
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("style-src 'sha256-e6FQZewefmod2S/5T11pTXjzE2vn3/8GRwWOs917YE4=';");
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("frame-src http://foo.com http://bar.com");
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
-        using (var rdr = new StreamReader(_context.Response.Body))
-        {
-            var html = rdr.ReadToEnd();
-            html.ShouldContain("<iframe loading='eager' allow='' src='http://foo.com'></iframe>");
-            html.ShouldContain("<iframe loading='eager' allow='' src='http://bar.com'></iframe>");
-        }
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+        html.ShouldContain("<iframe loading='eager' allow='' src='http://foo.com'></iframe>");
+        html.ShouldContain("<iframe loading='eager' allow='' src='http://bar.com'></iframe>");
     }
 
     [Fact]

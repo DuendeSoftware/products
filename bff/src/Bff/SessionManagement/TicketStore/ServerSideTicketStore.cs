@@ -14,6 +14,7 @@ namespace Duende.Bff;
 /// IUserSession-backed ticket store
 /// </summary>
 public class ServerSideTicketStore(
+    BffMetrics metrics,
     IUserSessionStore store,
     IDataProtectionProvider dataProtectionProvider,
     ILogger<ServerSideTicketStore> logger) : IServerTicketStore
@@ -61,6 +62,7 @@ public class ServerSideTicketStore(
         };
 
         await store.CreateUserSessionAsync(session);
+        metrics.SessionStarted();
     }
 
     /// <inheritdoc />
@@ -85,7 +87,6 @@ public class ServerSideTicketStore(
         // if we failed to get a ticket, then remove DB record 
         logger.FailedToDeserializeAuthenticationTicket(key);
         await RemoveAsync(key);
-
         return ticket;
     }
 
@@ -122,6 +123,7 @@ public class ServerSideTicketStore(
     public Task RemoveAsync(string key)
     {
         logger.RemovingAuthenticationTicket(key);
+        metrics.SessionEnded();
 
         return store.DeleteUserSessionAsync(key);
     }

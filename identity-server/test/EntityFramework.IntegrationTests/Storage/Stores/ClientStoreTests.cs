@@ -27,7 +27,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task FindClientByIdAsync_WhenClientDoesNotExist_ExpectNull(DbContextOptions<ConfigurationDbContext> options)
     {
-        using var context = new ConfigurationDbContext(options);
+        await using var context = new ConfigurationDbContext(options);
         var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
         var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString());
         client.ShouldBeNull();
@@ -42,14 +42,14 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             ClientName = "Test Client"
         };
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(testClient.ToEntity());
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         Client client;
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
             client = await store.FindClientByIdAsync(testClient.ClientId);
@@ -76,14 +76,14 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             RedirectUris = { "https://locahost/signin" }
         };
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(testClient.ToEntity());
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         Client client;
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
             client = await store.FindClientByIdAsync(testClient.ClientId);
@@ -123,7 +123,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             testClient.AllowedCorsOrigins.Add($"https://localhost:{i}");
         }
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(testClient.ToEntity());
 
@@ -144,7 +144,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             context.SaveChanges();
         }
 
-        using (var context = new ConfigurationDbContext(options))
+        await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
 

@@ -62,6 +62,8 @@ public static class BffServiceCollectionExtensions
         services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
 #pragma warning restore CS0612 // Type or member is obsolete
 
+        services.AddSingleton<BffMetrics>();
+
         // wrap ASP.NET Core
         services.AddAuthentication();
         services.AddTransientDecorator<IAuthenticationService, BffAuthenticationService>();
