@@ -85,23 +85,16 @@ public class TokenResponseGenerator : ITokenResponseGenerator
         activity?.SetTag(Tracing.Properties.GrantType, request.ValidatedRequest.GrantType);
         activity?.SetTag(Tracing.Properties.ClientId, request.ValidatedRequest.Client.ClientId);
 
-        switch (request.ValidatedRequest.GrantType)
+        return request.ValidatedRequest.GrantType switch
         {
-            case OidcConstants.GrantTypes.ClientCredentials:
-                return await ProcessClientCredentialsRequestAsync(request);
-            case OidcConstants.GrantTypes.Password:
-                return await ProcessPasswordRequestAsync(request);
-            case OidcConstants.GrantTypes.AuthorizationCode:
-                return await ProcessAuthorizationCodeRequestAsync(request);
-            case OidcConstants.GrantTypes.RefreshToken:
-                return await ProcessRefreshTokenRequestAsync(request);
-            case OidcConstants.GrantTypes.DeviceCode:
-                return await ProcessDeviceCodeRequestAsync(request);
-            case OidcConstants.GrantTypes.Ciba:
-                return await ProcessCibaRequestAsync(request);
-            default:
-                return await ProcessExtensionGrantRequestAsync(request);
-        }
+            OidcConstants.GrantTypes.ClientCredentials => await ProcessClientCredentialsRequestAsync(request),
+            OidcConstants.GrantTypes.Password => await ProcessPasswordRequestAsync(request),
+            OidcConstants.GrantTypes.AuthorizationCode => await ProcessAuthorizationCodeRequestAsync(request),
+            OidcConstants.GrantTypes.RefreshToken => await ProcessRefreshTokenRequestAsync(request),
+            OidcConstants.GrantTypes.DeviceCode => await ProcessDeviceCodeRequestAsync(request),
+            OidcConstants.GrantTypes.Ciba => await ProcessCibaRequestAsync(request),
+            _ => await ProcessExtensionGrantRequestAsync(request),
+        };
     }
 
     /// <summary>

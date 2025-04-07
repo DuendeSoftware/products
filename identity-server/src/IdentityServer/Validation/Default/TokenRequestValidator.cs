@@ -188,23 +188,16 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // run specific logic for grants
         //////////////////////////////////////////////////////////
 
-        switch (grantType)
+        return grantType switch
         {
-            case OidcConstants.GrantTypes.AuthorizationCode:
-                return await RunValidationAsync(ValidateAuthorizationCodeRequestAsync, parameters);
-            case OidcConstants.GrantTypes.ClientCredentials:
-                return await RunValidationAsync(ValidateClientCredentialsRequestAsync, parameters);
-            case OidcConstants.GrantTypes.Password:
-                return await RunValidationAsync(ValidateResourceOwnerCredentialRequestAsync, parameters);
-            case OidcConstants.GrantTypes.RefreshToken:
-                return await RunValidationAsync(ValidateRefreshTokenRequestAsync, parameters);
-            case OidcConstants.GrantTypes.DeviceCode:
-                return await RunValidationAsync(ValidateDeviceCodeRequestAsync, parameters);
-            case OidcConstants.GrantTypes.Ciba:
-                return await RunValidationAsync(ValidateCibaRequestRequestAsync, parameters);
-            default:
-                return await RunValidationAsync(ValidateExtensionGrantRequestAsync, parameters);
-        }
+            OidcConstants.GrantTypes.AuthorizationCode => await RunValidationAsync(ValidateAuthorizationCodeRequestAsync, parameters),
+            OidcConstants.GrantTypes.ClientCredentials => await RunValidationAsync(ValidateClientCredentialsRequestAsync, parameters),
+            OidcConstants.GrantTypes.Password => await RunValidationAsync(ValidateResourceOwnerCredentialRequestAsync, parameters),
+            OidcConstants.GrantTypes.RefreshToken => await RunValidationAsync(ValidateRefreshTokenRequestAsync, parameters),
+            OidcConstants.GrantTypes.DeviceCode => await RunValidationAsync(ValidateDeviceCodeRequestAsync, parameters),
+            OidcConstants.GrantTypes.Ciba => await RunValidationAsync(ValidateCibaRequestRequestAsync, parameters),
+            _ => await RunValidationAsync(ValidateExtensionGrantRequestAsync, parameters),
+        };
     }
 
     private async Task<TokenRequestValidationResult> ValidateProofToken(TokenRequestValidationContext context)

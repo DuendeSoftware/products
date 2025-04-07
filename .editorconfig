@@ -53,6 +53,9 @@ csharp_style_expression_bodied_indexers = true
 dotnet_diagnostic.IDE0027.severity = error
 csharp_style_expression_bodied_accessors = true
 
+# Use switch expression when possible
+csharp_style_prefer_switch_expression = true:suggestion
+
 # Use language keywords instead of framework type names for type references 
 dotnet_diagnostic.IDE0049.severity = error
 dotnet_style_predefined_type_for_locals_parameters_members = true

@@ -73,22 +73,14 @@ public class DefaultEventService : IEventService
     /// <param name="evtType"></param>
     /// <returns></returns>
     /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-    public bool CanRaiseEventType(EventTypes evtType)
+    public bool CanRaiseEventType(EventTypes evtType) => evtType switch
     {
-        switch (evtType)
-        {
-            case EventTypes.Failure:
-                return Options.Events.RaiseFailureEvents;
-            case EventTypes.Information:
-                return Options.Events.RaiseInformationEvents;
-            case EventTypes.Success:
-                return Options.Events.RaiseSuccessEvents;
-            case EventTypes.Error:
-                return Options.Events.RaiseErrorEvents;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(evtType));
-        }
-    }
+        EventTypes.Failure => Options.Events.RaiseFailureEvents,
+        EventTypes.Information => Options.Events.RaiseInformationEvents,
+        EventTypes.Success => Options.Events.RaiseSuccessEvents,
+        EventTypes.Error => Options.Events.RaiseErrorEvents,
+        _ => throw new ArgumentOutOfRangeException(nameof(evtType)),
+    };
 
     /// <summary>
     /// Determines whether this event would be persisted.

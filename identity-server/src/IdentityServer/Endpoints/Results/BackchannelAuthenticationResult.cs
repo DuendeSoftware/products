@@ -37,19 +37,12 @@ internal class BackchannelAuthenticationHttpWriter : IHttpResponseWriter<Backcha
 
         if (result.Response.IsError)
         {
-            switch (result.Response.Error)
+            context.Response.StatusCode = result.Response.Error switch
             {
-                case OidcConstants.BackchannelAuthenticationRequestErrors.InvalidClient:
-                    context.Response.StatusCode = 401;
-                    break;
-                case OidcConstants.BackchannelAuthenticationRequestErrors.AccessDenied:
-                    context.Response.StatusCode = 403;
-                    break;
-                default:
-                    context.Response.StatusCode = 400;
-                    break;
-            }
-
+                OidcConstants.BackchannelAuthenticationRequestErrors.InvalidClient => 401,
+                OidcConstants.BackchannelAuthenticationRequestErrors.AccessDenied => 403,
+                _ => 400,
+            };
             await context.Response.WriteJsonAsync(new ErrorResultDto
             {
                 error = result.Response.Error,
