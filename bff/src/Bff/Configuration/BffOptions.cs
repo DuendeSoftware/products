@@ -1,13 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Configuration;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.Configuration;
 
 /// <summary>
 /// Options for BFF

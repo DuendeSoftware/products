@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.SessionStore;
+using Duende.Bff.SessionManagement.TicketStore;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Time.Testing;
@@ -11,9 +13,7 @@ namespace Duende.Bff.Tests.SessionManagement;
 
 public class CookieSlidingTests : BffIntegrationTestBase
 {
-#pragma warning disable CS0618 // Type or member is obsolete
     private readonly InMemoryUserSessionStore _sessionStore = new();
-#pragma warning restore CS0618 // Type or member is obsolete
     private readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
 
     public CookieSlidingTests(ITestOutputHelper output) : base(output) => BffHost.OnConfigureServices += services =>

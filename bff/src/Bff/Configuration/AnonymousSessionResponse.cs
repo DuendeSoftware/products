@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Microsoft.AspNetCore.Builder;
+namespace Duende.Bff.Configuration;
 
 /// <summary>
 /// Enum representing the style of response from the ~/bff/user endpoint when the user is anonymous.

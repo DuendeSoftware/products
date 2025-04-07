@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff;
+using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Configuration;
 using Duende.Bff.Yarp;
 using Hosts.ServiceDefaults;
 using Microsoft.Extensions.ServiceDiscovery;
@@ -76,7 +78,7 @@ internal static class Extensions
 
                 options.Resource = "urn:isolated-api";
             });
-        services.AddSingleton<ImpersonationAccessTokenRetriever>();
+        services.AddTransient<ImpersonationAccessTokenRetriever>();
 
         services.AddUserAccessTokenHttpClient("api",
             configureClient: client => { client.BaseAddress = new Uri("https://localhost:5010/api"); });

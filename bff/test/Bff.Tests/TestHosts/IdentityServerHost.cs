@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Tests.TestFramework;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;

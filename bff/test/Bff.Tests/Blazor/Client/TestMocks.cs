@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.Blazor.Client.Internals;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 

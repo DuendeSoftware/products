@@ -1,7 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Internal;
 using Duende.Bff.Tests.TestHosts;
+using Duende.Bff.Yarp;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit.Abstractions;
 
@@ -12,10 +15,7 @@ namespace Duende.Bff.Tests;
 /// </summary>
 public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
 {
-
-#pragma warning disable CS0618 // Type or member is obsolete
     private ContextCapturingAccessTokenRetriever _customAccessTokenReceiver { get; } = new(NullLogger<DefaultAccessTokenRetriever>.Instance);
-#pragma warning restore CS0618 // Type or member is obsolete
 
     public IAccessTokenRetriever_Extensibility_tests(ITestOutputHelper output) : base(output)
     {
@@ -82,7 +82,6 @@ public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
     /// <summary>
     /// Captures the context in which the access token retriever is called, so we can assert on it
     /// </summary>
-#pragma warning disable CS0618 // Type or member is obsolete
     private class ContextCapturingAccessTokenRetriever : DefaultAccessTokenRetriever
     {
         public AccessTokenRetrievalContext? UsedContext { get; private set; }
@@ -96,6 +95,5 @@ public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
             return base.GetAccessToken(context);
         }
     }
-#pragma warning restore CS0618 // Type or member is obsolete
 
 }

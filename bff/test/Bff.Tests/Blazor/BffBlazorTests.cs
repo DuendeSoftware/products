@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
-using Duende.Bff;
+using Duende.Bff.Internal;
 using Duende.Bff.Tests.TestHosts;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -43,9 +43,7 @@ public class BffBlazorTests : OutputWritingTestBase
                     provider.GetRequiredService<ILoggerFactory>(),
                     provider.GetRequiredService<ICancellationTokenProvider>()));
 
-#pragma warning disable CS0618 // Type or member is obsolete
             services.AddSingleton<DefaultAccessTokenRetriever>();
-#pragma warning restore CS0618 // Type or member is obsolete
         };
     }
 

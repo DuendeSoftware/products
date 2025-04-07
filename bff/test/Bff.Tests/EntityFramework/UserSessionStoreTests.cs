@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Duende.Bff.EntityFramework.Tests;

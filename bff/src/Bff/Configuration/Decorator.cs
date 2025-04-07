@@ -3,8 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-// ReSharper disable once CheckNamespace
-namespace Microsoft.AspNetCore.Builder;
+namespace Duende.Bff.Configuration;
 
 /// <summary>
 /// Extension methods for the BFF DI services

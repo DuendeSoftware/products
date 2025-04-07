@@ -3,6 +3,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Duende.AccessTokenManagement;
+using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,7 +16,7 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Transform provider to attach an access token to forwarded calls
 /// </summary>
-public class AccessTokenTransformProvider(IOptions<BffOptions> options, ILogger<AccessTokenTransformProvider> logger, ILoggerFactory loggerFactory, IDPoPProofService dPoPProofService) : ITransformProvider
+internal class AccessTokenTransformProvider(IOptions<BffOptions> options, ILogger<AccessTokenTransformProvider> logger, ILoggerFactory loggerFactory, IDPoPProofService dPoPProofService) : ITransformProvider
 {
     private readonly BffOptions _options = options.Value;
 

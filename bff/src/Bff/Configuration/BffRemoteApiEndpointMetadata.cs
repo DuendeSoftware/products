@@ -1,13 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Endpoints;
+
+namespace Duende.Bff.Configuration;
 
 /// <summary>
 /// Endpoint metadata for a remote BFF API endpoint
 /// </summary>
-public class BffRemoteApiEndpointMetadata : IBffApiEndpoint
+public class BffRemoteApiEndpointMetadata : IBffApiMetadata
 {
     /// <summary>
     /// Required token type (if any)
@@ -24,7 +26,7 @@ public class BffRemoteApiEndpointMetadata : IBffApiEndpoint
     /// </summary>
     public BffUserAccessTokenParameters? BffUserAccessTokenParameters { get; set; }
 
-    private Type _accessTokenRetriever = typeof(DefaultAccessTokenRetriever);
+    private Type _accessTokenRetriever = typeof(IAccessTokenRetriever);
 
     /// <summary>
     /// The type used to retrieve access tokens.

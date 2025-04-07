@@ -1,10 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.Extensions.Logging;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.Revocation;
 
 /// <summary>
 /// Nop implementation of the user session store

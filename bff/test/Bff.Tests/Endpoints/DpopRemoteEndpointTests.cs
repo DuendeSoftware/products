@@ -3,6 +3,7 @@
 
 using System.Security.Cryptography;
 using System.Text.Json;
+using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.IdentityModel.Tokens;

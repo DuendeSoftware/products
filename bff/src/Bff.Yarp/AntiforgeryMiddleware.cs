@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,7 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Middleware for YARP to check the antiforgery header
 /// </summary>
-public class AntiforgeryMiddleware
+internal class AntiforgeryMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly BffOptions _options;

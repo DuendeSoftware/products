@@ -4,6 +4,8 @@
 using System.Security.Claims;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Internal;
+using Duende.Bff.SessionManagement.SessionStore;
+using Duende.Bff.SessionManagement.TicketStore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -14,7 +16,7 @@ namespace Duende.Bff.Blazor;
 /// <summary>
 /// A token store that retrieves tokens from server side sessions.
 /// </summary>
-public class ServerSideTokenStore(
+internal class ServerSideTokenStore(
     IStoreTokensInAuthenticationProperties tokensInAuthProperties,
     IUserSessionStore sessionStore,
     IDataProtectionProvider dataProtectionProvider,

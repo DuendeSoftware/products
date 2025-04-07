@@ -1,19 +1,19 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.SessionStore;
 
 /// <summary>
 /// Helper to cleanup expired sessions.
 /// </summary>
-public class SessionCleanupHost(
+internal class SessionCleanupHost(
     BffMetrics metrics,
     IServiceProvider serviceProvider,
     IOptions<BffOptions> options,

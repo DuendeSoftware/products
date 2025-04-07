@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using Duende.Bff.Internal;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Xunit.Abstractions;
@@ -43,9 +44,7 @@ public class BffIntegrationTestBase : OutputWritingTestBase
                     provider.GetRequiredService<ILoggerFactory>(),
                     provider.GetRequiredService<ICancellationTokenProvider>()));
 
-#pragma warning disable CS0618 // Type or member is obsolete
             services.AddSingleton<DefaultAccessTokenRetriever>();
-#pragma warning restore CS0618 // Type or member is obsolete
         };
     }
 

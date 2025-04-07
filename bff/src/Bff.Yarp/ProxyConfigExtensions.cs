@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
 using Yarp.ReverseProxy.Configuration;
 
 namespace Duende.Bff.Yarp;

@@ -1,10 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.TicketStore;
 
 /// <summary>
 /// Extends ITicketStore with additional query APIs.

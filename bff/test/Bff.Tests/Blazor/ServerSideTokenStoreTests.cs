@@ -4,13 +4,15 @@
 using System.Diagnostics.Metrics;
 using System.Security.Claims;
 using Duende.AccessTokenManagement.OpenIdConnect;
-using Duende.Bff;
 using Duende.Bff.Blazor;
 using Duende.Bff.Internal;
+using Duende.Bff.SessionManagement.SessionStore;
+using Duende.Bff.SessionManagement.TicketStore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 
@@ -34,16 +36,12 @@ public class ServerSideTokenStoreTests
         };
 
         // Create shared dependencies
-#pragma warning disable CS0618 // Type or member is obsolete
         var sessionStore = new InMemoryUserSessionStore();
-#pragma warning restore CS0618 // Type or member is obsolete
         var dataProtection = new EphemeralDataProtectionProvider();
 
         // Use the ticket store to save the user's initial session
         // Note that we don't yet have tokens in the session
-#pragma warning disable CS0618 // Type or member is obsolete
-        var sessionService = new ServerSideTicketStore(new BffMetrics(new DummyMeterFactory()), sessionStore, dataProtection, Substitute.For<ILogger<ServerSideTicketStore>>());
-#pragma warning restore CS0618 // Type or member is obsolete
+        var sessionService = new ServerSideTicketStore(new BffMetrics(new DummyMeterFactory()), sessionStore, dataProtection, new NullLogger<ServerSideTicketStore>());
         await sessionService.StoreAsync(new AuthenticationTicket(
             user,
             props,
@@ -51,15 +49,13 @@ public class ServerSideTokenStoreTests
         ));
 
         var tokensInProps = MockStoreTokensInAuthProps();
-#pragma warning disable CS0618 // Type or member is obsolete
 
         var sut = new ServerSideTokenStore(
             tokensInProps,
             sessionStore,
             dataProtection,
-            Substitute.For<ILogger<ServerSideTokenStore>>(),
+            new NullLogger<ServerSideTokenStore>(),
             Substitute.For<AuthenticationStateProvider, IHostEnvironmentAuthenticationStateProvider>());
-#pragma warning restore CS0618 // Type or member is obsolete
 
 
         await sut.StoreTokenAsync(user, expectedToken);

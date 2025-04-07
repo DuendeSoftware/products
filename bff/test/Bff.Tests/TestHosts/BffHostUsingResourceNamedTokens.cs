@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Authentication;

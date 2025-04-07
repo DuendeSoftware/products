@@ -1,17 +1,17 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff;
+using Duende.Bff.AccessTokenManagement;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 
 namespace Bff;
 
-public class ImpersonationAccessTokenRetriever : DefaultAccessTokenRetriever
+public class ImpersonationAccessTokenRetriever(IAccessTokenRetriever inner) : IAccessTokenRetriever
 {
-    public override async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
+    public async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
     {
-        var result = await base.GetAccessToken(context);
+        var result = await inner.GetAccessToken(context);
 
         if (result is BearerTokenResult bearerToken)
         {
@@ -31,10 +31,12 @@ public class ImpersonationAccessTokenRetriever : DefaultAccessTokenRetriever
             {
                 return new NoAccessTokenReturnedError("Token exchanged failed. Access token is null");
             }
+
             if (exchangeResponse.IsError)
             {
                 return new AccessTokenRetrievalError($"Token exchanged failed: {exchangeResponse.ErrorDescription}");
             }
+
             return new BearerTokenResult(exchangeResponse.AccessToken);
         }
 

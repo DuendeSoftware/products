@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Bff\Shared\ClaimRecordExtensions.cs" Link="Shared\ClaimRecordExtensions.cs" />
-    <Compile Include="..\Bff\Shared\ClaimsPrincipalRecord.cs" Link="Shared\ClaimsPrincipalRecord.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
     <PackageReference Include="Microsoft.Extensions.Http" />

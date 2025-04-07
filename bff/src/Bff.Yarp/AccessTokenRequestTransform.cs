@@ -4,10 +4,11 @@
 using System.Net.Http.Headers;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,7 +21,7 @@ namespace Duende.Bff.Yarp;
 /// <summary>
 /// Adds an access token to outgoing requests
 /// </summary>
-public class AccessTokenRequestTransform(
+internal class AccessTokenRequestTransform(
     IOptions<BffOptions> options,
     IDPoPProofService proofService,
     ILogger<AccessTokenRequestTransform> logger) : RequestTransform

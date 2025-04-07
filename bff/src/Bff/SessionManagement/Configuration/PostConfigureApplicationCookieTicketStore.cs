@@ -6,13 +6,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.Configuration;
 
 /// <summary>
 /// Cookie configuration for the user session plumbing
 /// </summary>
-public class PostConfigureApplicationCookieTicketStore(
+internal class PostConfigureApplicationCookieTicketStore(
     IHttpContextAccessor httpContextAccessor,
     IOptions<AuthenticationOptions> options)
     : IPostConfigureOptions<CookieAuthenticationOptions>

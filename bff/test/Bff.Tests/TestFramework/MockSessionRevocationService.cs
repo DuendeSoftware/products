@@ -1,6 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.Revocation;
+using Duende.Bff.SessionManagement.SessionStore;
+
 namespace Duende.Bff.Tests.TestFramework;
 
 public class MockSessionRevocationService : ISessionRevocationService

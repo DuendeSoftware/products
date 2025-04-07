@@ -3,6 +3,9 @@
 
 using System.Diagnostics;
 using System.Security.Claims;
+using Duende.Bff.Configuration;
+using Duende.Bff.Internal;
+using Duende.Bff.SessionManagement.SessionStore;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -25,7 +28,7 @@ namespace Duende.Bff.Blazor;
 /// PersistentComponentState to flow the authentication state to the client which
 /// is then used to initialize the authentication state in the WASM application. 
 /// </summary>
-public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAuthenticationStateProvider, IDisposable
+internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerAuthenticationStateProvider, IDisposable
 {
     private readonly IUserSessionStore _sessionStore;
     private readonly PersistentComponentState _state;

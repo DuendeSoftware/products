@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.TicketStore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +15,7 @@ namespace Duende.Bff;
 /// of the cookie options and coordinated with PostConfigureApplicationCookie. #lame
 /// https://github.com/aspnet/AspNetCore/issues/6946 
 /// </summary>
-public class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicketStore
+internal class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicketStore
 {
     private IServerTicketStore Inner => httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IServerTicketStore>();
 

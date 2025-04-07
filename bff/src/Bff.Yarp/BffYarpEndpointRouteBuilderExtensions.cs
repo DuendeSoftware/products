@@ -1,14 +1,14 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff;
-using Duende.Bff.Yarp;
+using Duende.Bff.Configuration;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Transforms.Builder;
 
-namespace Microsoft.AspNetCore.Builder;
+namespace Duende.Bff.Yarp;
 
 /// <summary>
 /// Extension methods for the BFF endpoints

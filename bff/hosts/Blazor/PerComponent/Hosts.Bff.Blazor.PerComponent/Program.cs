@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Blazor;
 using Duende.Bff.Yarp;
 using Hosts.Bff.Blazor.PerComponent;

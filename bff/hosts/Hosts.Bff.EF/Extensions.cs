@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff;
+using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.EntityFramework;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;

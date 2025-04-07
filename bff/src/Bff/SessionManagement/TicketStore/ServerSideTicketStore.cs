@@ -2,18 +2,18 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Internal;
+using Duende.Bff.SessionManagement.SessionStore;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.TicketStore;
 
 /// <summary>
 /// IUserSession-backed ticket store
 /// </summary>
-public class ServerSideTicketStore(
+internal class ServerSideTicketStore(
     BffMetrics metrics,
     IUserSessionStore store,
     IDataProtectionProvider dataProtectionProvider,

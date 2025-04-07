@@ -4,6 +4,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using Duende.Bff;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Yarp;
 using Microsoft.IdentityModel.Tokens;
 using Yarp.ReverseProxy.Configuration;
@@ -77,15 +78,15 @@ internal static class Extensions
 
         // Add BFF services to DI - also add server-side session management
         services.AddBff(options =>
-        {
-            var rsaKey = new RsaSecurityKey(RSA.Create(2048));
-            var jwkKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
-            jwkKey.Alg = "PS256";
-            var jwk = JsonSerializer.Serialize(jwkKey);
-            options.DPoPJsonWebKey = jwk;
-        })
-        .AddRemoteApis()
-        .AddServerSideSessions();
+            {
+                var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+                var jwkKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
+                jwkKey.Alg = "PS256";
+                var jwk = JsonSerializer.Serialize(jwkKey);
+                options.DPoPJsonWebKey = jwk;
+            })
+            .AddRemoteApis()
+            .AddServerSideSessions();
 
         // local APIs
         services.AddControllers();

@@ -3,6 +3,8 @@
 
 using System.Net;
 using System.Text.Json;
+using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Authentication;

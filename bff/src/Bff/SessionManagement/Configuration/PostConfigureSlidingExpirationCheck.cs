@@ -1,18 +1,18 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.Configuration;
 
 /// <summary>
 /// Cookie configuration to suppress sliding the cookie on the ~/bff/user endpoint if requested.
 /// </summary>
-public class PostConfigureSlidingExpirationCheck(
+internal class PostConfigureSlidingExpirationCheck(
     IOptions<BffOptions> bffOptions,
     IOptions<AuthenticationOptions> authOptions,
     ILogger<PostConfigureSlidingExpirationCheck> logger)

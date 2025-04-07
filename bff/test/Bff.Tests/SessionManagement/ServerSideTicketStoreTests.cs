@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestHosts;
 using Xunit.Abstractions;
 
@@ -8,9 +9,7 @@ namespace Duende.Bff.Tests.SessionManagement;
 
 public class ServerSideTicketStoreTests : BffIntegrationTestBase
 {
-#pragma warning disable CS0618 // Type or member is obsolete
     private readonly InMemoryUserSessionStore _sessionStore = new();
-#pragma warning restore CS0618 // Type or member is obsolete
 
     public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output) => BffHost.OnConfigureServices += services =>
                                                                                        {

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestHosts;
 using Xunit.Abstractions;
 

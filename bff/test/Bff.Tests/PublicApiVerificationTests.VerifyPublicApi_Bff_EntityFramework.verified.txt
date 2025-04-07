@@ -1,5 +1,17 @@
 ﻿namespace Duende.Bff.EntityFramework
 {
+    public static class BffBuilderExtensions
+    {
+        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions(this Duende.Bff.BffBuilder bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action) { }
+        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions(this Duende.Bff.BffBuilder bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action) { }
+        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this Duende.Bff.BffBuilder bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext { }
+        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this Duende.Bff.BffBuilder bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext { }
+        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessionsServices<TContext>(this Duende.Bff.BffBuilder bffBuilder)
+            where TContext : Duende.Bff.EntityFramework.ISessionDbContext { }
+        public static Duende.Bff.BffBuilder ConfigureEntityFrameworkSessionStoreOptions(this Duende.Bff.BffBuilder bffBuilder, System.Action<Duende.Bff.EntityFramework.SessionStoreOptions> action) { }
+    }
     public interface ISessionDbContext
     {
         Microsoft.EntityFrameworkCore.DbSet<Duende.Bff.EntityFramework.UserSessionEntity> UserSessions { get; set; }
@@ -35,21 +47,10 @@
         public string Name { get; set; }
         public string? Schema { get; set; }
     }
-    public class UserSessionEntity : Duende.Bff.UserSession
+    public class UserSessionEntity : Duende.Bff.SessionManagement.SessionStore.UserSession
     {
         public UserSessionEntity() { }
         public string? ApplicationName { get; set; }
         public long Id { get; set; }
-    }
-    public class UserSessionStore : Duende.Bff.IUserSessionStore, Duende.Bff.IUserSessionStoreCleanup
-    {
-        public UserSessionStore(Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.DataProtection.DataProtectionOptions> options, Duende.Bff.EntityFramework.ISessionDbContext sessionDbContext, Microsoft.Extensions.Logging.ILogger<Duende.Bff.EntityFramework.UserSessionStore> logger) { }
-        public System.Threading.Tasks.Task CreateUserSessionAsync(Duende.Bff.UserSession session, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task<int> DeleteExpiredSessionsAsync(System.Threading.CancellationToken cancellationToken = default) { }
-        public System.Threading.Tasks.Task DeleteUserSessionAsync(string key, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task DeleteUserSessionsAsync(Duende.Bff.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task<Duende.Bff.UserSession?> GetUserSessionAsync(string key, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Duende.Bff.UserSession>> GetUserSessionsAsync(Duende.Bff.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task UpdateUserSessionAsync(string key, Duende.Bff.UserSessionUpdate session, System.Threading.CancellationToken cancellationToken) { }
     }
 }

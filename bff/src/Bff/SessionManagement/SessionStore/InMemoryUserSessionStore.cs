@@ -3,13 +3,12 @@
 
 using System.Collections.Concurrent;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.SessionStore;
 
 /// <summary>
 /// In-memory user session store
 /// </summary>
-public class InMemoryUserSessionStore : IUserSessionStore
+internal class InMemoryUserSessionStore : IUserSessionStore
 {
     private readonly ConcurrentDictionary<string, UserSession> _store = new();
 

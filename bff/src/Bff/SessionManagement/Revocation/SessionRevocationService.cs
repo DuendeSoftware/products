@@ -2,17 +2,19 @@
 // See LICENSE in the project root for license information.
 
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff.Configuration;
+using Duende.Bff.SessionManagement.SessionStore;
+using Duende.Bff.SessionManagement.TicketStore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.Revocation;
 
 /// <summary>
 /// Default implementation of the ISessionRevocationService.
 /// </summary>
-public class SessionRevocationService(
+internal class SessionRevocationService(
     IOptions<BffOptions> options,
     IServerTicketStore ticketStore,
     IUserSessionStore sessionStore,

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.Blazor.Client.Internals;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
 
@@ -23,9 +24,7 @@ public class AntiforgeryHandlerTests
     }
 }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-public class TestAntiforgeryHandler : AntiforgeryHandler
-#pragma warning restore CS0618 // Type or member is obsolete
+internal class TestAntiforgeryHandler : AntiforgeryHandler
 {
     public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => base.SendAsync(request, cancellationToken);
 }

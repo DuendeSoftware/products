@@ -1,25 +1,12 @@
 ﻿namespace Duende.Bff.Yarp
 {
-    public class AccessTokenRequestTransform : Yarp.ReverseProxy.Transforms.RequestTransform
-    {
-        public AccessTokenRequestTransform(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Duende.AccessTokenManagement.IDPoPProofService proofService, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Yarp.AccessTokenRequestTransform> logger) { }
-        public override System.Threading.Tasks.ValueTask ApplyAsync(Yarp.ReverseProxy.Transforms.RequestTransformContext context) { }
-    }
-    public class AccessTokenTransformProvider : Yarp.ReverseProxy.Transforms.Builder.ITransformProvider
-    {
-        public AccessTokenTransformProvider(Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Yarp.AccessTokenTransformProvider> logger, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory, Duende.AccessTokenManagement.IDPoPProofService dPoPProofService) { }
-        public void Apply(Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext transformBuildContext) { }
-        public void ValidateCluster(Yarp.ReverseProxy.Transforms.Builder.TransformClusterValidationContext context) { }
-        public void ValidateRoute(Yarp.ReverseProxy.Transforms.Builder.TransformRouteValidationContext context) { }
-    }
-    public class AntiforgeryMiddleware
-    {
-        public AntiforgeryMiddleware(Microsoft.AspNetCore.Http.RequestDelegate next, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Yarp.AntiforgeryMiddleware> logger) { }
-        public System.Threading.Tasks.Task Invoke(Microsoft.AspNetCore.Http.HttpContext context) { }
-    }
     public static class BffBuilderExtensions
     {
-        public static Microsoft.AspNetCore.Builder.BffBuilder AddRemoteApis(this Microsoft.AspNetCore.Builder.BffBuilder builder) { }
+        public static Duende.Bff.BffBuilder AddRemoteApis(this Duende.Bff.BffBuilder builder) { }
+    }
+    public static class BffYarpEndpointRouteBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapRemoteBffApiEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, Microsoft.AspNetCore.Http.PathString localPath, string apiAddress, System.Action<Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext>? yarpTransformBuilder = null) { }
     }
     public delegate void BffYarpTransformBuilder(string localPath, Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context);
     public static class DefaultBffYarpTransformerBuilders
@@ -32,8 +19,8 @@
     }
     public static class ProxyConfigExtensions
     {
-        public static Yarp.ReverseProxy.Configuration.ClusterConfig WithAccessToken(this Yarp.ReverseProxy.Configuration.ClusterConfig config, Duende.Bff.TokenType tokenType) { }
-        public static Yarp.ReverseProxy.Configuration.RouteConfig WithAccessToken(this Yarp.ReverseProxy.Configuration.RouteConfig config, Duende.Bff.TokenType tokenType) { }
+        public static Yarp.ReverseProxy.Configuration.ClusterConfig WithAccessToken(this Yarp.ReverseProxy.Configuration.ClusterConfig config, Duende.Bff.AccessTokenManagement.TokenType tokenType) { }
+        public static Yarp.ReverseProxy.Configuration.RouteConfig WithAccessToken(this Yarp.ReverseProxy.Configuration.RouteConfig config, Duende.Bff.AccessTokenManagement.TokenType tokenType) { }
         public static Yarp.ReverseProxy.Configuration.RouteConfig WithAntiforgeryCheck(this Yarp.ReverseProxy.Configuration.RouteConfig config) { }
         public static Yarp.ReverseProxy.Configuration.RouteConfig WithOptionalUserAccessToken(this Yarp.ReverseProxy.Configuration.RouteConfig config) { }
     }
@@ -46,5 +33,9 @@
         public static Microsoft.AspNetCore.Builder.ReverseProxyConventionBuilder AsBffApiEndpoint(this Microsoft.AspNetCore.Builder.ReverseProxyConventionBuilder builder) { }
         public static Microsoft.AspNetCore.Builder.ReverseProxyConventionBuilder MapBffReverseProxy(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         public static Microsoft.AspNetCore.Builder.ReverseProxyConventionBuilder MapBffReverseProxy(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, System.Action<Microsoft.AspNetCore.Builder.IReverseProxyApplicationBuilder> configureAction) { }
+    }
+    public static class YarpTransformExtensions
+    {
+        public static Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext AddBffAccessToken(this Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context, Microsoft.AspNetCore.Http.PathString localPath) { }
     }
 }

@@ -2,16 +2,14 @@
 // See LICENSE in the project root for license information.
 
 using Duende.AccessTokenManagement;
-using Duende.Bff;
-using Duende.Bff.Yarp;
+using Duende.Bff.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Transforms.Builder;
 
-// ReSharper disable once CheckNamespace
-namespace Microsoft.AspNetCore.Builder;
+namespace Duende.Bff.Yarp;
 
 /// <summary>
 /// Extensions for YARP transforms

@@ -1,19 +1,19 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-// ReSharper disable once CheckNamespace
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.Configuration;
 
 /// <summary>
 /// Cookie configuration to revoke refresh token on logout.
 /// </summary>
-public class PostConfigureApplicationCookieRevokeRefreshToken(
+internal class PostConfigureApplicationCookieRevokeRefreshToken(
     IOptions<BffOptions> bffOptions,
     IOptions<AuthenticationOptions> authOptions,
     ILogger<PostConfigureApplicationCookieRevokeRefreshToken> logger)

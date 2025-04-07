@@ -13,4 +13,7 @@
     <ProjectReference Include="..\Bff\Bff.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.Bff.Tests" />
+  </ItemGroup>
 </Project>

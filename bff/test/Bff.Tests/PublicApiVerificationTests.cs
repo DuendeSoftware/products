@@ -1,8 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff;
 using Duende.Bff.Blazor;
-using Duende.Bff.Blazor.Client;
+using Duende.Bff.Blazor.Client.Internals;
 using Duende.Bff.EntityFramework;
 using Duende.Bff.Yarp;
 using PublicApiGenerator;
@@ -31,9 +32,7 @@ public class PublicApiVerificationTests
         {
             IncludeAssemblyAttributes = false
         };
-#pragma warning disable CS0618 // Type or member is obsolete
         var publicApi = typeof(AccessTokenRequestTransform).Assembly.GeneratePublicApi(apiGeneratorOptions);
-#pragma warning restore CS0618 // Type or member is obsolete
         var settings = new VerifySettings();
         await Verify(publicApi, settings);
     }
@@ -70,9 +69,7 @@ public class PublicApiVerificationTests
         {
             IncludeAssemblyAttributes = false
         };
-#pragma warning disable CS0618 // Type or member is obsolete
         var publicApi = typeof(AntiforgeryHandler).Assembly.GeneratePublicApi(apiGeneratorOptions);
-#pragma warning restore CS0618 // Type or member is obsolete
         var settings = new VerifySettings();
         await Verify(publicApi, settings);
     }
