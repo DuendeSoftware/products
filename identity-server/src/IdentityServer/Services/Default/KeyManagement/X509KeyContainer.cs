@@ -19,10 +19,7 @@ public class X509KeyContainer : KeyContainer
     /// <summary>
     /// Constructor for X509KeyContainer.
     /// </summary>
-    public X509KeyContainer()
-    {
-        HasX509Certificate = true;
-    }
+    public X509KeyContainer() => HasX509Certificate = true;
 
     /// <summary>
     /// Constructor for X509KeyContainer.

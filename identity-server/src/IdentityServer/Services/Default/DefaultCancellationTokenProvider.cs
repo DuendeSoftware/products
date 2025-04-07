@@ -17,10 +17,7 @@ internal class DefaultCancellationTokenProvider : ICancellationTokenProvider
     /// Constructor
     /// </summary>
     /// <param name="httpContextAccessor"></param>
-    public DefaultCancellationTokenProvider(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    public DefaultCancellationTokenProvider(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
     /// <summary>
     /// Provides access to the cancellation token from the http context

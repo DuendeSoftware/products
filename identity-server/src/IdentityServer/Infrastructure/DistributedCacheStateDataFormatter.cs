@@ -38,10 +38,7 @@ public class DistributedCacheStateDataFormatter : ISecureDataFormat<Authenticati
     /// </summary>
     /// <param name="data">The data.</param>
     /// <returns></returns>
-    public string Protect(AuthenticationProperties data)
-    {
-        return Protect(data, null);
-    }
+    public string Protect(AuthenticationProperties data) => Protect(data, null);
 
     /// <summary>
     /// Protects the specified data.
@@ -77,10 +74,7 @@ public class DistributedCacheStateDataFormatter : ISecureDataFormat<Authenticati
     /// </summary>
     /// <param name="protectedText">The protected text.</param>
     /// <returns></returns>
-    public AuthenticationProperties Unprotect(string protectedText)
-    {
-        return Unprotect(protectedText, null);
-    }
+    public AuthenticationProperties Unprotect(string protectedText) => Unprotect(protectedText, null);
 
     /// <summary>
     /// Unprotects the specified protected text.

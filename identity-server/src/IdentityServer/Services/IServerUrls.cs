@@ -24,5 +24,5 @@ public interface IServerUrls
     /// <summary>
     /// Gets the base URL for IdentityServer.
     /// </summary>
-    string BaseUrl { get => Origin + BasePath; }
+    string BaseUrl => Origin + BasePath;
 }

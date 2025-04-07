@@ -10,10 +10,7 @@ public class CookieHandler : DelegatingHandler
     private readonly CookieContainer _cookieContainer;
 
     public CookieHandler(HttpMessageHandler innerHandler, CookieContainer cookieContainer)
-        : base(innerHandler)
-    {
-        _cookieContainer = cookieContainer;
-    }
+        : base(innerHandler) => _cookieContainer = cookieContainer;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {

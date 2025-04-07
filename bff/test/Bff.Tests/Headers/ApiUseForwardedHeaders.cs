@@ -10,10 +10,7 @@ namespace Duende.Bff.Tests.Headers;
 
 public class ApiUseForwardedHeaders : BffIntegrationTestBase
 {
-    public ApiUseForwardedHeaders(ITestOutputHelper output) : base(output)
-    {
-        ApiHost.UseForwardedHeaders = true;
-    }
+    public ApiUseForwardedHeaders(ITestOutputHelper output) : base(output) => ApiHost.UseForwardedHeaders = true;
 
     [Fact]
     public async Task bff_host_name_should_propagate_to_api()

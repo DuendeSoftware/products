@@ -24,10 +24,7 @@ public class DeviceAuthorizationResult : EndpointResult<DeviceAuthorizationResul
     /// </summary>
     /// <param name="response"></param>
     /// <exception cref="ArgumentNullException"></exception>
-    public DeviceAuthorizationResult(DeviceAuthorizationResponse response)
-    {
-        Response = response ?? throw new ArgumentNullException(nameof(response));
-    }
+    public DeviceAuthorizationResult(DeviceAuthorizationResponse response) => Response = response ?? throw new ArgumentNullException(nameof(response));
 }
 
 internal class DeviceAuthorizationHttpWriter : IHttpResponseWriter<DeviceAuthorizationResult>

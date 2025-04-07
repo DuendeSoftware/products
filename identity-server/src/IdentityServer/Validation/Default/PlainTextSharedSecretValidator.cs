@@ -20,10 +20,7 @@ public class PlainTextSharedSecretValidator : ISecretValidator
     /// Initializes a new instance of the <see cref="PlainTextSharedSecretValidator"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public PlainTextSharedSecretValidator(ILogger<PlainTextSharedSecretValidator> logger)
-    {
-        _logger = logger;
-    }
+    public PlainTextSharedSecretValidator(ILogger<PlainTextSharedSecretValidator> logger) => _logger = logger;
 
     /// <summary>
     /// Validates a secret

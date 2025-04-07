@@ -25,9 +25,33 @@ csharp_style_var_when_type_is_apparent = true
 # Remove unnecessary using directives
 dotnet_diagnostic.IDE0005.severity = warning
 
-# Add accessibility modifiers
-dotnet_diagnostic.IDE0040.severity = error
-dotnet_style_require_accessibility_modifiers = always
+# Use expression body for constructors
+dotnet_diagnostic.IDE0021.severity = error
+csharp_style_expression_bodied_constructors = true
+
+# Use expression body for methods
+dotnet_diagnostic.IDE0022.severity = error
+csharp_style_expression_bodied_methods = true
+
+# Use expression body for conversion operators
+dotnet_diagnostic.IDE0023.severity = error
+csharp_style_expression_bodied_operators = true
+
+# Use expression body for operators
+dotnet_diagnostic.IDE0024.severity = error
+csharp_style_expression_bodied_operators = true
+
+# Use expression body for properties
+dotnet_diagnostic.IDE0025.severity = error
+csharp_style_expression_bodied_properties = true
+
+# Use expression body for indexers
+dotnet_diagnostic.IDE0026.severity = error
+csharp_style_expression_bodied_indexers = true
+
+# Use expression body for accessors
+dotnet_diagnostic.IDE0027.severity = error
+csharp_style_expression_bodied_accessors = true
 
 # Use language keywords instead of framework type names for type references 
 dotnet_diagnostic.IDE0049.severity = error

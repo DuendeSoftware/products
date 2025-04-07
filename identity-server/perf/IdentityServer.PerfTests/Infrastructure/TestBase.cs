@@ -22,8 +22,5 @@ public class TestBase<T>
     protected T Container = new T();
 
     [GlobalCleanup]
-    public void PostTest()
-    {
-        Container.Dispose();
-    }
+    public void PostTest() => Container.Dispose();
 }

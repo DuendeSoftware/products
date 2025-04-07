@@ -56,8 +56,5 @@ public class Startup
         }
     }
 
-    public void Configure(IApplicationBuilder app)
-    {
-        app.UseIdentityServer();
-    }
+    public void Configure(IApplicationBuilder app) => app.UseIdentityServer();
 }

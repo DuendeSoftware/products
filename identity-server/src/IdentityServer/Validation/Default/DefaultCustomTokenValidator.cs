@@ -35,10 +35,7 @@ public class DefaultCustomTokenValidator : ICustomTokenValidator
     /// <returns>
     /// The validation result
     /// </returns>
-    public virtual Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result)
-    {
-        return Task.FromResult(result);
-    }
+    public virtual Task<TokenValidationResult> ValidateAccessTokenAsync(TokenValidationResult result) => Task.FromResult(result);
 
     /// <summary>
     /// Custom validation logic for identity tokens.
@@ -47,8 +44,5 @@ public class DefaultCustomTokenValidator : ICustomTokenValidator
     /// <returns>
     /// The validation result
     /// </returns>
-    public virtual Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result)
-    {
-        return Task.FromResult(result);
-    }
+    public virtual Task<TokenValidationResult> ValidateIdentityTokenAsync(TokenValidationResult result) => Task.FromResult(result);
 }

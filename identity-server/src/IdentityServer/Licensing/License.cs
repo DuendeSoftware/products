@@ -118,10 +118,7 @@ public abstract class License
     }
 
     /// <inheritdoc/>
-    public override string ToString()
-    {
-        return ObjectSerializer.ToString(this);
-    }
+    public override string ToString() => ObjectSerializer.ToString(this);
 
     internal static class ObjectSerializer
     {
@@ -130,9 +127,6 @@ public abstract class License
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        public static string ToString(object o)
-        {
-            return JsonSerializer.Serialize(o, Options);
-        }
+        public static string ToString(object o) => JsonSerializer.Serialize(o, Options);
     }
 }

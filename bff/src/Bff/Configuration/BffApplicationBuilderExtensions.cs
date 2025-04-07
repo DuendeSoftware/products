@@ -15,8 +15,5 @@ public static class BffApplicationBuilderExtensions
     /// </summary>
     /// <param name="app"></param>
     /// <returns></returns>
-    public static IApplicationBuilder UseBff(this IApplicationBuilder app)
-    {
-        return app.UseMiddleware<BffMiddleware>();
-    }
+    public static IApplicationBuilder UseBff(this IApplicationBuilder app) => app.UseMiddleware<BffMiddleware>();
 }

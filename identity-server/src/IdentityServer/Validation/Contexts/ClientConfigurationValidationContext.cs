@@ -41,10 +41,7 @@ public class ClientConfigurationValidationContext
     /// Initializes a new instance of the <see cref="ClientConfigurationValidationContext"/> class.
     /// </summary>
     /// <param name="client">The client.</param>
-    public ClientConfigurationValidationContext(Client client)
-    {
-        Client = client;
-    }
+    public ClientConfigurationValidationContext(Client client) => Client = client;
 
     /// <summary>
     /// Sets a validation error.

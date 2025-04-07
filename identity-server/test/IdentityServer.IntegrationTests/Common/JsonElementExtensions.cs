@@ -20,13 +20,7 @@ public static class JsonElementExtensions
         return JsonSerializer.Deserialize<T>(json);
     }
 
-    public static List<string> ToStringList(this JsonElement element)
-    {
-        return element.EnumerateArray().Select(item => item.GetString()).ToList();
-    }
+    public static List<string> ToStringList(this JsonElement element) => element.EnumerateArray().Select(item => item.GetString()).ToList();
 
-    public static Dictionary<string, JsonElement> GetFields(this string raw)
-    {
-        return JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(raw);
-    }
+    public static Dictionary<string, JsonElement> GetFields(this string raw) => JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(raw);
 }

@@ -20,10 +20,7 @@ public class HashedSharedSecretValidator : ISecretValidator
     /// Initializes a new instance of the <see cref="HashedSharedSecretValidator"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public HashedSharedSecretValidator(ILogger<HashedSharedSecretValidator> logger)
-    {
-        _logger = logger;
-    }
+    public HashedSharedSecretValidator(ILogger<HashedSharedSecretValidator> logger) => _logger = logger;
 
     /// <summary>
     /// Validates a secret

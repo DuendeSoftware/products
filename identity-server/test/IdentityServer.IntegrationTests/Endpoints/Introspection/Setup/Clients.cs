@@ -8,9 +8,7 @@ namespace IntegrationTests.Endpoints.Introspection.Setup;
 
 internal class Clients
 {
-    public static IEnumerable<Client> Get()
-    {
-        return new List<Client>
+    public static IEnumerable<Client> Get() => new List<Client>
         {
             new Client
             {
@@ -75,5 +73,4 @@ internal class Clients
                 AccessTokenType = AccessTokenType.Reference
             },
         };
-    }
 }

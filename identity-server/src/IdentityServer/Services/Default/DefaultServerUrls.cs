@@ -17,10 +17,7 @@ public class DefaultServerUrls : IServerUrls
     /// <summary>
     /// ctor
     /// </summary>
-    public DefaultServerUrls(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+    public DefaultServerUrls(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
     /// <inheritdoc/>
     public string Origin
@@ -43,13 +40,7 @@ public class DefaultServerUrls : IServerUrls
     /// <inheritdoc/>
     public string BasePath
     {
-        get
-        {
-            return _httpContextAccessor.HttpContext.Items[Constants.EnvironmentKeys.IdentityServerBasePath] as string;
-        }
-        set
-        {
-            _httpContextAccessor.HttpContext.Items[Constants.EnvironmentKeys.IdentityServerBasePath] = value.RemoveTrailingSlash();
-        }
+        get => _httpContextAccessor.HttpContext.Items[Constants.EnvironmentKeys.IdentityServerBasePath] as string;
+        set => _httpContextAccessor.HttpContext.Items[Constants.EnvironmentKeys.IdentityServerBasePath] = value.RemoveTrailingSlash();
     }
 }

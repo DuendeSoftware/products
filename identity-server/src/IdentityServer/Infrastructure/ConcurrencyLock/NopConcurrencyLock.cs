@@ -10,10 +10,7 @@ namespace Duende.IdentityServer.Internal;
 public class NopConcurrencyLock<T> : IConcurrencyLock<T>
 {
     /// <inheritdoc/>
-    public Task<bool> LockAsync(int millisecondsTimeout)
-    {
-        return Task.FromResult(true);
-    }
+    public Task<bool> LockAsync(int millisecondsTimeout) => Task.FromResult(true);
 
     /// <inheritdoc/>
     public void Unlock()

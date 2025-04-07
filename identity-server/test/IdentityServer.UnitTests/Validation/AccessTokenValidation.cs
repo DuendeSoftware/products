@@ -20,10 +20,7 @@ public class AccessTokenValidation
     private IdentityServerOptions _options = new IdentityServerOptions();
     private StubClock _clock = new StubClock();
 
-    static AccessTokenValidation()
-    {
-        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-    }
+    static AccessTokenValidation() => JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
     private DateTime now;
     public DateTime UtcNow
@@ -35,10 +32,7 @@ public class AccessTokenValidation
         }
     }
 
-    public AccessTokenValidation()
-    {
-        _clock.UtcNowFunc = () => UtcNow;
-    }
+    public AccessTokenValidation() => _clock.UtcNowFunc = () => UtcNow;
 
     [Fact]
     [Trait("Category", Category)]

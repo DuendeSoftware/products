@@ -19,10 +19,7 @@ public class NotSupportedResourceOwnerPasswordValidator : IResourceOwnerPassword
     /// Initializes a new instance of the <see cref="NotSupportedResourceOwnerPasswordValidator"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public NotSupportedResourceOwnerPasswordValidator(ILogger<NotSupportedResourceOwnerPasswordValidator> logger)
-    {
-        _logger = logger;
-    }
+    public NotSupportedResourceOwnerPasswordValidator(ILogger<NotSupportedResourceOwnerPasswordValidator> logger) => _logger = logger;
 
     /// <summary>
     /// Validates the resource owner password credential

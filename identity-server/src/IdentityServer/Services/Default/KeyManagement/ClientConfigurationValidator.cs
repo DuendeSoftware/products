@@ -20,10 +20,7 @@ public class ClientConfigurationValidator : DefaultClientConfigurationValidator
     /// <param name="isOptions"></param>
     /// <param name="keyManagerOptions"></param>
     public ClientConfigurationValidator(IdentityServerOptions isOptions, KeyManagementOptions keyManagerOptions = null)
-        : base(isOptions)
-    {
-        _keyManagerOptions = keyManagerOptions;
-    }
+        : base(isOptions) => _keyManagerOptions = keyManagerOptions;
 
     /// <inheritdoc/>
     protected override async Task ValidateLifetimesAsync(ClientConfigurationValidationContext context)

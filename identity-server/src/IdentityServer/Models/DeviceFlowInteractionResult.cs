@@ -40,12 +40,9 @@ public class DeviceFlowInteractionResult
     /// </summary>
     /// <param name="errorDescription">The error description.</param>
     /// <returns></returns>
-    public static DeviceFlowInteractionResult Failure(string? errorDescription = null)
+    public static DeviceFlowInteractionResult Failure(string? errorDescription = null) => new DeviceFlowInteractionResult
     {
-        return new DeviceFlowInteractionResult
-        {
-            IsError = true,
-            ErrorDescription = errorDescription
-        };
-    }
+        IsError = true,
+        ErrorDescription = errorDescription
+    };
 }

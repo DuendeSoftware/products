@@ -18,10 +18,7 @@ public class InMemorySigningCredentialsStore : ISigningCredentialStore
     /// Initializes a new instance of the <see cref="InMemorySigningCredentialsStore"/> class.
     /// </summary>
     /// <param name="credential">The credential.</param>
-    public InMemorySigningCredentialsStore(SigningCredentials credential)
-    {
-        _credential = credential;
-    }
+    public InMemorySigningCredentialsStore(SigningCredentials credential) => _credential = credential;
 
     /// <summary>
     /// Gets the signing credentials.

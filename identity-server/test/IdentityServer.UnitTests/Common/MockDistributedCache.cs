@@ -19,24 +19,15 @@ public class MockDistributedCache : IDistributedCache
         return null;
     }
 
-    public Task<byte[]> GetAsync(string key, CancellationToken token = default)
-    {
-        return Task.FromResult(Get(key));
-    }
+    public Task<byte[]> GetAsync(string key, CancellationToken token = default) => Task.FromResult(Get(key));
 
     public void Refresh(string key)
     {
     }
 
-    public Task RefreshAsync(string key, CancellationToken token = default)
-    {
-        return Task.CompletedTask;
-    }
+    public Task RefreshAsync(string key, CancellationToken token = default) => Task.CompletedTask;
 
-    public void Remove(string key)
-    {
-        Items.Remove(key);
-    }
+    public void Remove(string key) => Items.Remove(key);
 
     public Task RemoveAsync(string key, CancellationToken token = default)
     {
@@ -44,10 +35,7 @@ public class MockDistributedCache : IDistributedCache
         return Task.CompletedTask;
     }
 
-    public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
-    {
-        Items[key] = (value, options);
-    }
+    public void Set(string key, byte[] value, DistributedCacheEntryOptions options) => Items[key] = (value, options);
 
     public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
     {

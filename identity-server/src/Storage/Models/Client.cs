@@ -82,7 +82,7 @@ public class Client
     /// </summary>
     public ICollection<string> AllowedGrantTypes
     {
-        get { return _allowedGrantTypes; }
+        get => _allowedGrantTypes;
         set
         {
             ValidateGrantTypes(value);
@@ -433,20 +433,11 @@ public class Client
     {
         private readonly ICollection<string> _inner;
 
-        public GrantTypeValidatingHashSet()
-        {
-            _inner = new HashSet<string>();
-        }
+        public GrantTypeValidatingHashSet() => _inner = new HashSet<string>();
 
-        public GrantTypeValidatingHashSet(IEnumerable<string> values)
-        {
-            _inner = new HashSet<string>(values);
-        }
+        public GrantTypeValidatingHashSet(IEnumerable<string> values) => _inner = new HashSet<string>(values);
 
-        private ICollection<string> Clone()
-        {
-            return new HashSet<string>(this);
-        }
+        private ICollection<string> Clone() => new HashSet<string>(this);
 
         private ICollection<string> CloneWith(params string[] values)
         {
@@ -465,35 +456,17 @@ public class Client
             _inner.Add(item);
         }
 
-        public void Clear()
-        {
-            _inner.Clear();
-        }
+        public void Clear() => _inner.Clear();
 
-        public bool Contains(string item)
-        {
-            return _inner.Contains(item);
-        }
+        public bool Contains(string item) => _inner.Contains(item);
 
-        public void CopyTo(string[] array, int arrayIndex)
-        {
-            _inner.CopyTo(array, arrayIndex);
-        }
+        public void CopyTo(string[] array, int arrayIndex) => _inner.CopyTo(array, arrayIndex);
 
-        public IEnumerator<string> GetEnumerator()
-        {
-            return _inner.GetEnumerator();
-        }
+        public IEnumerator<string> GetEnumerator() => _inner.GetEnumerator();
 
-        public bool Remove(string item)
-        {
-            return _inner.Remove(item);
-        }
+        public bool Remove(string item) => _inner.Remove(item);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _inner.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _inner.GetEnumerator();
     }
 }
 

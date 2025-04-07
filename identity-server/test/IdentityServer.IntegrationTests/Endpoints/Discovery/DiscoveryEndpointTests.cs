@@ -48,10 +48,7 @@ public class DiscoveryEndpointTests
         data["issuer"].GetString().ShouldBe("https://server/ROOT");
     }
 
-    private void Pipeline_OnPostConfigureServices(IServiceCollection obj)
-    {
-        throw new System.NotImplementedException();
-    }
+    private void Pipeline_OnPostConfigureServices(IServiceCollection obj) => throw new System.NotImplementedException();
 
     [Fact]
     [Trait("Category", Category)]

@@ -20,10 +20,7 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// Initializes a new instance of the <see cref="StrictRedirectUriValidator" />.
     /// </summary>
     /// <param name="options"></param>
-    public StrictRedirectUriValidator(IdentityServerOptions options = null)
-    {
-        _options = options;
-    }
+    public StrictRedirectUriValidator(IdentityServerOptions options = null) => _options = options;
 
     /// <summary>
     /// Checks if a given URI string is in a collection of strings (using ordinal ignore case comparison)
@@ -46,10 +43,7 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// <returns>
     ///   <c>true</c> is the URI is valid; <c>false</c> otherwise.
     /// </returns>
-    public virtual Task<bool> IsRedirectUriValidAsync(string requestedUri, Client client)
-    {
-        return Task.FromResult(StringCollectionContainsString(client.RedirectUris, requestedUri));
-    }
+    public virtual Task<bool> IsRedirectUriValidAsync(string requestedUri, Client client) => Task.FromResult(StringCollectionContainsString(client.RedirectUris, requestedUri));
 
     /// <summary>
     /// Determines whether a post logout URI is valid for a client.
@@ -59,10 +53,7 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// <returns>
     ///   <c>true</c> is the URI is valid; <c>false</c> otherwise.
     /// </returns>
-    public virtual Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client)
-    {
-        return Task.FromResult(StringCollectionContainsString(client.PostLogoutRedirectUris, requestedUri));
-    }
+    public virtual Task<bool> IsPostLogoutRedirectUriValidAsync(string requestedUri, Client client) => Task.FromResult(StringCollectionContainsString(client.PostLogoutRedirectUris, requestedUri));
 
     /// <summary>
     /// Determines whether a redirect uri is valid for a context.

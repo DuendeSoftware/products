@@ -8,18 +8,9 @@ namespace UnitTests.Common;
 
 internal class StubDataProtectionProvider : IDataProtectionProvider, IDataProtector
 {
-    public IDataProtector CreateProtector(string purpose)
-    {
-        return this;
-    }
+    public IDataProtector CreateProtector(string purpose) => this;
 
-    public byte[] Protect(byte[] plaintext)
-    {
-        return plaintext;
-    }
+    public byte[] Protect(byte[] plaintext) => plaintext;
 
-    public byte[] Unprotect(byte[] protectedData)
-    {
-        return protectedData;
-    }
+    public byte[] Unprotect(byte[] protectedData) => protectedData;
 }

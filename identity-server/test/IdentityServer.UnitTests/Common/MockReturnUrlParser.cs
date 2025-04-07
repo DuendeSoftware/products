@@ -16,13 +16,7 @@ public class MockReturnUrlParser : ReturnUrlParser
     {
     }
 
-    public override Task<AuthorizationRequest> ParseAsync(string returnUrl)
-    {
-        return Task.FromResult(AuthorizationRequestResult);
-    }
+    public override Task<AuthorizationRequest> ParseAsync(string returnUrl) => Task.FromResult(AuthorizationRequestResult);
 
-    public override bool IsValidReturnUrl(string returnUrl)
-    {
-        return IsValidReturnUrlResult;
-    }
+    public override bool IsValidReturnUrl(string returnUrl) => IsValidReturnUrlResult;
 }

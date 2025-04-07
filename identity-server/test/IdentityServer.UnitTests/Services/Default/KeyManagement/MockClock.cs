@@ -12,10 +12,7 @@ internal class MockClock : IClock
     {
     }
 
-    public MockClock(DateTime now)
-    {
-        UtcNow = now;
-    }
+    public MockClock(DateTime now) => UtcNow = now;
 
     public DateTimeOffset UtcNow { get; set; }
 }

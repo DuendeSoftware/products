@@ -15,13 +15,7 @@ public static class AuthenticationPropertiesExtensions
     /// <summary>
     /// Determines if this AuthenticationProperties represents a BFF silent login.
     /// </summary>
-    public static bool IsSilentLogin(this AuthenticationProperties props)
-    {
-        return props.TryGetPrompt(out var prompt) && prompt == "none";
-    }
+    public static bool IsSilentLogin(this AuthenticationProperties props) => props.TryGetPrompt(out var prompt) && prompt == "none";
 
-    public static bool TryGetPrompt(this AuthenticationProperties props, [NotNullWhen(true)] out string? prompt)
-    {
-        return props.Items.TryGetValue(Constants.BffFlags.Prompt, out prompt);
-    }
+    public static bool TryGetPrompt(this AuthenticationProperties props, [NotNullWhen(true)] out string? prompt) => props.Items.TryGetValue(Constants.BffFlags.Prompt, out prompt);
 }

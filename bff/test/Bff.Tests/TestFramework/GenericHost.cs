@@ -26,11 +26,9 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
     private TestLoggerProvider Logger { get; } = new(writeOutput, baseAddress + " - ");
 
 
-    public T Resolve<T>() where T : notnull
-    {
+    public T Resolve<T>() where T : notnull =>
         // not calling dispose on scope on purpose
-        return _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
-    }
+        _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
 
     public string Url(string? path = null)
     {
@@ -97,20 +95,17 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         ConfigureSignout(app);
     }
 
-    private void ConfigureSignout(IApplicationBuilder app)
-    {
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signout")
-            {
-                await ctx.SignOutAsync();
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+    private void ConfigureSignout(IApplicationBuilder app) => app.Use(async (ctx, next) =>
+                                                                   {
+                                                                       if (ctx.Request.Path == "/__signout")
+                                                                       {
+                                                                           await ctx.SignOutAsync();
+                                                                           ctx.Response.StatusCode = 204;
+                                                                           return;
+                                                                       }
 
-            await next();
-        });
-    }
+                                                                       await next();
+                                                                   });
 
     public async Task RevokeSessionCookieAsync()
     {
@@ -118,30 +113,27 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
-    private void ConfigureSignin(IApplicationBuilder app)
-    {
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signin")
-            {
-                if (_userToSignIn is null)
-                {
-                    throw new Exception("No User Configured for SignIn");
-                }
+    private void ConfigureSignin(IApplicationBuilder app) => app.Use(async (ctx, next) =>
+                                                                  {
+                                                                      if (ctx.Request.Path == "/__signin")
+                                                                      {
+                                                                          if (_userToSignIn is null)
+                                                                          {
+                                                                              throw new Exception("No User Configured for SignIn");
+                                                                          }
 
-                var props = _propsToSignIn ?? new AuthenticationProperties();
-                await ctx.SignInAsync(_userToSignIn, props);
+                                                                          var props = _propsToSignIn ?? new AuthenticationProperties();
+                                                                          await ctx.SignInAsync(_userToSignIn, props);
 
-                _userToSignIn = null;
-                _propsToSignIn = null;
+                                                                          _userToSignIn = null;
+                                                                          _propsToSignIn = null;
 
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+                                                                          ctx.Response.StatusCode = 204;
+                                                                          return;
+                                                                      }
 
-            await next();
-        });
-    }
+                                                                      await next();
+                                                                  });
 
     private ClaimsPrincipal? _userToSignIn;
     private AuthenticationProperties? _propsToSignIn;
@@ -157,10 +149,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         _propsToSignIn = props;
         return IssueSessionCookieAsync(claims);
     }
-    public Task IssueSessionCookieAsync(string sub, params Claim[] claims)
-    {
-        return IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
-    }
+    public Task IssueSessionCookieAsync(string sub, params Claim[] claims) => IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
 
     public async ValueTask DisposeAsync()
     {

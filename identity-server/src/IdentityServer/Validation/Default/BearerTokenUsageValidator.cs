@@ -20,10 +20,7 @@ internal class BearerTokenUsageValidator
     /// Initializes a new instance of the <see cref="BearerTokenUsageValidator"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    public BearerTokenUsageValidator(ILogger<BearerTokenUsageValidator> logger)
-    {
-        _logger = logger;
-    }
+    public BearerTokenUsageValidator(ILogger<BearerTokenUsageValidator> logger) => _logger = logger;
 
     /// <summary>
     /// Validates the request.

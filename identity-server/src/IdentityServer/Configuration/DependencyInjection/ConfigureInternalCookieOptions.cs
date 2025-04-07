@@ -14,10 +14,7 @@ internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAut
 {
     private readonly IdentityServerOptions _idsrv;
 
-    public ConfigureInternalCookieOptions(IdentityServerOptions idsrv)
-    {
-        _idsrv = idsrv;
-    }
+    public ConfigureInternalCookieOptions(IdentityServerOptions idsrv) => _idsrv = idsrv;
 
     public void Configure(CookieAuthenticationOptions options)
     {

@@ -123,44 +123,38 @@ public class LoopbackHttpListener : IDisposable
         _host.Start();
     }
 
-    public void Dispose()
-    {
-        Task.Run(async () =>
-        {
-            await Task.Delay(500);
-            _host.Dispose();
-        });
-    }
+    public void Dispose() => Task.Run(async () =>
+                                  {
+                                      await Task.Delay(500);
+                                      _host.Dispose();
+                                  });
 
-    private void Configure(IApplicationBuilder app)
-    {
-        app.Run(async ctx =>
-        {
-            if (ctx.Request.Method == "GET")
-            {
-                await SetResultAsync(ctx.Request.QueryString.Value, ctx);
-            }
-            else if (ctx.Request.Method == "POST")
-            {
-                if (!ctx.Request.ContentType.Equals("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase))
-                {
-                    ctx.Response.StatusCode = 415;
-                }
-                else
-                {
-                    using (var sr = new StreamReader(ctx.Request.Body, Encoding.UTF8))
-                    {
-                        var body = await sr.ReadToEndAsync();
-                        await SetResultAsync(body, ctx);
-                    }
-                }
-            }
-            else
-            {
-                ctx.Response.StatusCode = 405;
-            }
-        });
-    }
+    private void Configure(IApplicationBuilder app) => app.Run(async ctx =>
+                                                            {
+                                                                if (ctx.Request.Method == "GET")
+                                                                {
+                                                                    await SetResultAsync(ctx.Request.QueryString.Value, ctx);
+                                                                }
+                                                                else if (ctx.Request.Method == "POST")
+                                                                {
+                                                                    if (!ctx.Request.ContentType.Equals("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase))
+                                                                    {
+                                                                        ctx.Response.StatusCode = 415;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        using (var sr = new StreamReader(ctx.Request.Body, Encoding.UTF8))
+                                                                        {
+                                                                            var body = await sr.ReadToEndAsync();
+                                                                            await SetResultAsync(body, ctx);
+                                                                        }
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    ctx.Response.StatusCode = 405;
+                                                                }
+                                                            });
 
     private async Task SetResultAsync(string value, HttpContext ctx)
     {

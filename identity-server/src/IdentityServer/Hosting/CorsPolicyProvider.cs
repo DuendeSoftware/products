@@ -94,8 +94,5 @@ internal class CorsPolicyProvider : ICorsPolicyProvider
         return policyBuilder.Build();
     }
 
-    private bool IsPathAllowed(PathString path)
-    {
-        return _options.Cors.CorsPaths.Any(x => path == x);
-    }
+    private bool IsPathAllowed(PathString path) => _options.Cors.CorsPaths.Any(x => path == x);
 }

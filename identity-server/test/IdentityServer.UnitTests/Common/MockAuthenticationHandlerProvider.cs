@@ -11,8 +11,5 @@ internal class MockAuthenticationHandlerProvider : IAuthenticationHandlerProvide
 {
     public IAuthenticationHandler Handler { get; set; }
 
-    public Task<IAuthenticationHandler> GetHandlerAsync(HttpContext context, string authenticationScheme)
-    {
-        return Task.FromResult(Handler);
-    }
+    public Task<IAuthenticationHandler> GetHandlerAsync(HttpContext context, string authenticationScheme) => Task.FromResult(Handler);
 }

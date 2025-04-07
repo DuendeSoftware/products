@@ -259,10 +259,7 @@ public class CustomTokenResponseClients
         response.RefreshToken.ShouldBeNull();
     }
 
-    private CustomResponseDto GetDto(JsonElement responseObject)
-    {
-        return responseObject.ToObject<CustomResponseDto>();
-    }
+    private CustomResponseDto GetDto(JsonElement responseObject) => responseObject.ToObject<CustomResponseDto>();
 
     private Dictionary<string, JsonElement> GetFields(TokenResponse response) => response.Raw.GetFields();
 

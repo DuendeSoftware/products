@@ -29,10 +29,7 @@ public class EndSessionResult : EndpointResult<EndSessionResult>
     /// </summary>
     /// <param name="result">The result.</param>
     /// <exception cref="System.ArgumentNullException">result</exception>
-    public EndSessionResult(EndSessionValidationResult result)
-    {
-        Result = result ?? throw new ArgumentNullException(nameof(result));
-    }
+    public EndSessionResult(EndSessionValidationResult result) => Result = result ?? throw new ArgumentNullException(nameof(result));
 }
 
 internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>

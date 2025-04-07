@@ -382,26 +382,20 @@ public class ServerSideSessionStore : IServerSideSessionStore
         return result;
     }
 
-    private static bool AtStartWithDeletedItems(SessionPaginationContext pagination)
-    {
-        return pagination.CurrentPage == 1 && pagination.HasNext && pagination.Items.Length < pagination.CountRequested;
-    }
+    private static bool AtStartWithDeletedItems(SessionPaginationContext pagination) => pagination.CurrentPage == 1 && pagination.HasNext && pagination.Items.Length < pagination.CountRequested;
 
-    private static ServerSideSession[] MapEntitiesToModels(Entities.ServerSideSession[] items)
+    private static ServerSideSession[] MapEntitiesToModels(Entities.ServerSideSession[] items) => items.Select(entity => new ServerSideSession
     {
-        return items.Select(entity => new ServerSideSession
-        {
-            Key = entity.Key,
-            Scheme = entity.Scheme,
-            SubjectId = entity.SubjectId,
-            SessionId = entity.SessionId,
-            DisplayName = entity.DisplayName,
-            Created = entity.Created,
-            Renewed = entity.Renewed,
-            Expires = entity.Expires,
-            Ticket = entity.Data,
-        }).ToArray();
-    }
+        Key = entity.Key,
+        Scheme = entity.Scheme,
+        SubjectId = entity.SubjectId,
+        SessionId = entity.SessionId,
+        DisplayName = entity.DisplayName,
+        Created = entity.Created,
+        Renewed = entity.Renewed,
+        Expires = entity.Expires,
+        Ticket = entity.Data,
+    }).ToArray();
 
     private static async Task NextPage(IQueryable<Entities.ServerSideSession> query, int last, SessionPaginationContext pagination, CancellationToken cancellationToken)
     {

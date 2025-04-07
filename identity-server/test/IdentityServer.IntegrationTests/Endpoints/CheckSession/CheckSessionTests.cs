@@ -13,10 +13,7 @@ public class CheckSessionTests
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
-    public CheckSessionTests()
-    {
-        _mockPipeline.Initialize();
-    }
+    public CheckSessionTests() => _mockPipeline.Initialize();
 
     [Fact]
     [Trait("Category", Category)]

@@ -503,15 +503,9 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
 
 
-    private BackchannelAuthenticationRequestValidationResult Invalid(string error, string errorDescription = null)
-    {
-        return new BackchannelAuthenticationRequestValidationResult(_validatedRequest, error, errorDescription);
-    }
+    private BackchannelAuthenticationRequestValidationResult Invalid(string error, string errorDescription = null) => new BackchannelAuthenticationRequestValidationResult(_validatedRequest, error, errorDescription);
 
-    private void LogError(string message = null, object values = null)
-    {
-        LogWithRequestDetails(LogLevel.Error, message, values);
-    }
+    private void LogError(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Error, message, values);
 
     private void LogWithRequestDetails(LogLevel logLevel, string message = null, object values = null)
     {
@@ -542,8 +536,5 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         }
     }
 
-    private void LogSuccess()
-    {
-        LogWithRequestDetails(LogLevel.Information, "Backchannel authentication request validation success");
-    }
+    private void LogSuccess() => LogWithRequestDetails(LogLevel.Information, "Backchannel authentication request validation success");
 }

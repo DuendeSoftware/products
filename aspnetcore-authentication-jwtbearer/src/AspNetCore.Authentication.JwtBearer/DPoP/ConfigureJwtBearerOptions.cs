@@ -16,10 +16,7 @@ public sealed class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerO
     /// <summary>
     /// Constructs a new instance of <see cref="ConfigureJwtBearerOptions"/> that will operate on the specified scheme name.
     /// </summary>
-    public ConfigureJwtBearerOptions(string configScheme)
-    {
-        _configScheme = configScheme;
-    }
+    public ConfigureJwtBearerOptions(string configScheme) => _configScheme = configScheme;
 
     /// <inheritdoc/>
     public void PostConfigure(string? name, JwtBearerOptions options)

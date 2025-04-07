@@ -41,11 +41,8 @@ public class RsaKeyContainer : KeyContainer
     public RSAParameters Parameters { get; set; }
 
     /// <inheritdoc/>
-    public override AsymmetricSecurityKey ToSecurityKey()
+    public override AsymmetricSecurityKey ToSecurityKey() => new RsaSecurityKey(Parameters)
     {
-        return new RsaSecurityKey(Parameters)
-        {
-            KeyId = Id
-        };
-    }
+        KeyId = Id
+    };
 }

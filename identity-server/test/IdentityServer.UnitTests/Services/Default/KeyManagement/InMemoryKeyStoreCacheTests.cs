@@ -11,10 +11,7 @@ public class InMemoryKeyStoreCacheTests
     private InMemoryKeyStoreCache _subject;
     private MockClock _mockClock = new MockClock(new DateTime(2018, 3, 1, 9, 0, 0));
 
-    public InMemoryKeyStoreCacheTests()
-    {
-        _subject = new InMemoryKeyStoreCache(_mockClock);
-    }
+    public InMemoryKeyStoreCacheTests() => _subject = new InMemoryKeyStoreCache(_mockClock);
 
     [Fact]
     public async Task GetKeysAsync_within_expiration_should_return_keys()

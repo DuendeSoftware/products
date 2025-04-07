@@ -464,8 +464,5 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         return services.BuildServiceProvider().GetRequiredService<ITokenCleanupService>() as TokenCleanupService;
     }
 
-    private TokenCleanupService CreateSut(DbContextOptions<PersistedGrantDbContext> options)
-    {
-        return CreateSut(options, _ => { });
-    }
+    private TokenCleanupService CreateSut(DbContextOptions<PersistedGrantDbContext> options) => CreateSut(options, _ => { });
 }

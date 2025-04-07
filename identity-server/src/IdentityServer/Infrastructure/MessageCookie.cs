@@ -54,10 +54,7 @@ internal class MessageCookie<TModel>
 
     private string CookiePrefix => MessageType + ".";
 
-    private string GetCookieFullName(string id)
-    {
-        return CookiePrefix + id;
-    }
+    private string GetCookieFullName(string id) => CookiePrefix + id;
 
     private string CookiePath => _urls.BasePath.CleanUrlPath();
 
@@ -129,9 +126,7 @@ internal class MessageCookie<TModel>
         ClearByCookieName(name);
     }
 
-    private void ClearByCookieName(string name)
-    {
-        _context.HttpContext.Response.Cookies.Append(
+    private void ClearByCookieName(string name) => _context.HttpContext.Response.Cookies.Append(
             name,
             ".",
             new CookieOptions
@@ -142,7 +137,6 @@ internal class MessageCookie<TModel>
                 Path = CookiePath,
                 IsEssential = true
             });
-    }
 
     private long GetCookieRank(string name)
     {

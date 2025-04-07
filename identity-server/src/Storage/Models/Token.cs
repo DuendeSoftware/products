@@ -25,10 +25,7 @@ public class Token
     /// Initializes a new instance of the <see cref="Token"/> class.
     /// </summary>
     /// <param name="tokenType">Type of the token.</param>
-    public Token(string tokenType)
-    {
-        Type = tokenType;
-    }
+    public Token(string tokenType) => Type = tokenType;
 
     /// <summary>
     /// A list of allowed algorithm for signing the token. If null or empty, will use the default algorithm.

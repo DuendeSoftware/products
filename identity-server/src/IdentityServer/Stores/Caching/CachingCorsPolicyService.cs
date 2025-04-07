@@ -22,10 +22,7 @@ public class CachingCorsPolicyService<T> : ICorsPolicyService
         /// <summary>
         /// Ctor.
         /// </summary>
-        public CorsCacheEntry(bool allowed)
-        {
-            Allowed = allowed;
-        }
+        public CorsCacheEntry(bool allowed) => Allowed = allowed;
 
         /// <summary>
         /// Is origin allowed.

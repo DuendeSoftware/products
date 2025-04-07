@@ -13,10 +13,7 @@ public class MockConsentService : IConsentService
 {
     public bool RequiresConsentResult { get; set; }
 
-    public Task<bool> RequiresConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes)
-    {
-        return Task.FromResult(RequiresConsentResult);
-    }
+    public Task<bool> RequiresConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes) => Task.FromResult(RequiresConsentResult);
 
     public ClaimsPrincipal ConsentSubject { get; set; }
     public Client ConsentClient { get; set; }

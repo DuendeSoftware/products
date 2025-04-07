@@ -22,10 +22,7 @@ public class UserInfoResult : EndpointResult<UserInfoResult>
     /// Ctor
     /// </summary>
     /// <param name="claims"></param>
-    public UserInfoResult(Dictionary<string, object> claims)
-    {
-        Claims = claims ?? throw new ArgumentNullException(nameof(claims));
-    }
+    public UserInfoResult(Dictionary<string, object> claims) => Claims = claims ?? throw new ArgumentNullException(nameof(claims));
 }
 
 internal class UserInfoHttpWriter : IHttpResponseWriter<UserInfoResult>

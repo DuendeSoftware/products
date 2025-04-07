@@ -38,10 +38,7 @@ public class ExtensionGrantValidator
     /// Gets the available grant types.
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<string> GetAvailableGrantTypes()
-    {
-        return _validators.Select(v => v.GrantType);
-    }
+    public IEnumerable<string> GetAvailableGrantTypes() => _validators.Select(v => v.GrantType);
 
     /// <summary>
     /// Validates the request.

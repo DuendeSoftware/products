@@ -15,10 +15,7 @@ public class InMemoryCorsPolicyServiceTests
     private InMemoryCorsPolicyService _subject;
     private List<Client> _clients = new List<Client>();
 
-    public InMemoryCorsPolicyServiceTests()
-    {
-        _subject = new InMemoryCorsPolicyService(TestLogger.Create<InMemoryCorsPolicyService>(), _clients);
-    }
+    public InMemoryCorsPolicyServiceTests() => _subject = new InMemoryCorsPolicyService(TestLogger.Create<InMemoryCorsPolicyService>(), _clients);
 
     [Fact]
     [Trait("Category", Category)]

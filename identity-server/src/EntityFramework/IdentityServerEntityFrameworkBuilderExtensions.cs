@@ -29,10 +29,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
     /// <returns></returns>
     public static IIdentityServerBuilder AddConfigurationStore(
         this IIdentityServerBuilder builder,
-        Action<ConfigurationStoreOptions>? storeOptionsAction = null)
-    {
-        return builder.AddConfigurationStore<ConfigurationDbContext>(storeOptionsAction);
-    }
+        Action<ConfigurationStoreOptions>? storeOptionsAction = null) => builder.AddConfigurationStore<ConfigurationDbContext>(storeOptionsAction);
 
     /// <summary>
     /// Configures EF implementation of IClientStore, IResourceStore, and ICorsPolicyService with IdentityServer.
@@ -83,10 +80,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
     /// <returns></returns>
     public static IIdentityServerBuilder AddOperationalStore(
         this IIdentityServerBuilder builder,
-        Action<OperationalStoreOptions>? storeOptionsAction = null)
-    {
-        return builder.AddOperationalStore<PersistedGrantDbContext>(storeOptionsAction);
-    }
+        Action<OperationalStoreOptions>? storeOptionsAction = null) => builder.AddOperationalStore<PersistedGrantDbContext>(storeOptionsAction);
 
     /// <summary>
     /// Configures EF implementation of IPersistedGrantStore with IdentityServer.

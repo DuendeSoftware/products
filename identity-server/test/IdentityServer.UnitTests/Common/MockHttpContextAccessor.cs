@@ -74,14 +74,8 @@ internal class MockHttpContextAccessor : IHttpContextAccessor
 
     public HttpContext HttpContext
     {
-        get
-        {
-            return _context;
-        }
+        get => _context;
 
-        set
-        {
-            _context = value;
-        }
+        set => _context = value;
     }
 }

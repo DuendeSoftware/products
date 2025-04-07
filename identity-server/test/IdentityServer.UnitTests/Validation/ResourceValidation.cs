@@ -104,10 +104,7 @@ public class ResourceValidation
 
     private IResourceStore _subject;
 
-    public ResourceValidation()
-    {
-        _subject = new InMemoryResourcesStore(_identityResources, _apiResources, _scopes);
-    }
+    public ResourceValidation() => _subject = new InMemoryResourcesStore(_identityResources, _apiResources, _scopes);
 
     // scope validation
 

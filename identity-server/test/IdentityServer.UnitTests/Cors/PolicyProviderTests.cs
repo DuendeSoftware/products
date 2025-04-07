@@ -25,10 +25,7 @@ public class PolicyProviderTests
     private MockCorsPolicyService _mockPolicy = new MockCorsPolicyService();
     private IdentityServerOptions _options;
 
-    public PolicyProviderTests()
-    {
-        Init();
-    }
+    public PolicyProviderTests() => Init();
 
     internal void Init()
     {

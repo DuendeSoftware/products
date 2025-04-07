@@ -11,8 +11,5 @@ internal class StubTokenResponseGenerator : ITokenResponseGenerator
 {
     public TokenResponse Response { get; set; } = new TokenResponse();
 
-    public Task<TokenResponse> ProcessAsync(TokenRequestValidationResult validationResult)
-    {
-        return Task.FromResult(Response);
-    }
+    public Task<TokenResponse> ProcessAsync(TokenRequestValidationResult validationResult) => Task.FromResult(Response);
 }

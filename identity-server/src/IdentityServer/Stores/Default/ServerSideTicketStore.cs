@@ -228,9 +228,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         return AsUserSessions(sessions);
     }
 
-    private UserSession[] AsUserSessions(IEnumerable<ServerSideSession> sessions)
-    {
-        return sessions
+    private UserSession[] AsUserSessions(IEnumerable<ServerSideSession> sessions) => sessions
             .Select(x => new { x.Created, Ticket = x.Deserialize(_protector, _logger)! })
             .Where(x => x != null && x.Ticket != null)
             .Select(item => new UserSession
@@ -246,5 +244,4 @@ public class ServerSideTicketStore : IServerSideTicketStore
                 AuthenticationTicket = item.Ticket
             })
             .ToArray();
-    }
 }

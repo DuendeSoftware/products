@@ -11,10 +11,7 @@ public class ROController : Controller
 {
     private readonly RequestUriService _requestUriService;
 
-    public ROController(RequestUriService requestUriService)
-    {
-        _requestUriService = requestUriService;
-    }
+    public ROController(RequestUriService requestUriService) => _requestUriService = requestUriService;
 
     public IActionResult Index(string id)
     {

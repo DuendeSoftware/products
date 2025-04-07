@@ -19,15 +19,12 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
     private MockConsentService _mockConsentService = new MockConsentService();
     private StubClock _clock = new StubClock();
 
-    public AuthorizeInteractionResponseGeneratorTests_Login()
-    {
-        _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
+    public AuthorizeInteractionResponseGeneratorTests_Login() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,
             _clock,
             TestLogger.Create<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator>(),
             _mockConsentService,
             new MockProfileService());
-    }
 
     [Fact]
     public async Task Anonymous_User_must_SignIn()

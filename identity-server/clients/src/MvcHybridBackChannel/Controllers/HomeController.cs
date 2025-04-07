@@ -23,16 +23,10 @@ public class HomeController : Controller
         _configuration = configuration;
     }
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+    public IActionResult Index() => View();
 
     [Authorize]
-    public IActionResult Secure()
-    {
-        return View();
-    }
+    public IActionResult Secure() => View();
 
     [Authorize]
     public async Task<IActionResult> CallApi()
@@ -87,13 +81,7 @@ public class HomeController : Controller
         return View("Error");
     }
 
-    public IActionResult Logout()
-    {
-        return new SignOutResult(new[] { "Cookies", "oidc" });
-    }
+    public IActionResult Logout() => new SignOutResult(new[] { "Cookies", "oidc" });
 
-    public IActionResult Error()
-    {
-        return View();
-    }
+    public IActionResult Error() => View();
 }

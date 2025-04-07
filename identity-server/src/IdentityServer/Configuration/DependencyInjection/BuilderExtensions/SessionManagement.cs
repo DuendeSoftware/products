@@ -24,13 +24,11 @@ public static class SessionManagementServiceCollectionExtensions
     /// </summary>
     /// <returns></returns>
     public static IIdentityServerBuilder AddServerSideSessions<T>(this IIdentityServerBuilder builder)
-        where T : class, IServerSideSessionStore
-    {
+        where T : class, IServerSideSessionStore =>
         // the order of these two calls is important
-        return builder
+        builder
             .AddServerSideSessionStore<T>()
             .AddServerSideSessions();
-    }
 
     /// <summary>
     /// Adds a server-side session store using the in-memory store

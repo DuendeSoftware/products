@@ -19,10 +19,7 @@ public class PushedAuthorizationSerializer : IPushedAuthorizationSerializer
     /// Initializes a new instance of the <see cref="PushedAuthorizationSerializer"/>. 
     /// </summary>
     /// <param name="dataProtectionProvider">The data protection provider.</param>
-    public PushedAuthorizationSerializer(IDataProtectionProvider dataProtectionProvider)
-    {
-        _dataProtector = dataProtectionProvider.CreateProtector("PAR");
-    }
+    public PushedAuthorizationSerializer(IDataProtectionProvider dataProtectionProvider) => _dataProtector = dataProtectionProvider.CreateProtector("PAR");
 
     /// <inheritdoc />
     public NameValueCollection Deserialize(string raw)

@@ -12,25 +12,13 @@ namespace Duende.IdentityServer.Extensions;
 /// </summary>
 public static class KeyManagementExtensions
 {
-    internal static RsaSecurityKey CreateRsaSecurityKey(this KeyManagementOptions options)
-    {
-        return CryptoHelper.CreateRsaSecurityKey(options.RsaKeySize);
-    }
+    internal static RsaSecurityKey CreateRsaSecurityKey(this KeyManagementOptions options) => CryptoHelper.CreateRsaSecurityKey(options.RsaKeySize);
 
-    internal static bool IsRetired(this KeyManagementOptions options, TimeSpan age)
-    {
-        return (age >= options.KeyRetirementAge);
-    }
+    internal static bool IsRetired(this KeyManagementOptions options, TimeSpan age) => (age >= options.KeyRetirementAge);
 
-    internal static bool IsExpired(this KeyManagementOptions options, TimeSpan age)
-    {
-        return (age >= options.RotationInterval);
-    }
+    internal static bool IsExpired(this KeyManagementOptions options, TimeSpan age) => (age >= options.RotationInterval);
 
-    internal static bool IsWithinInitializationDuration(this KeyManagementOptions options, TimeSpan age)
-    {
-        return (age <= options.InitializationDuration);
-    }
+    internal static bool IsWithinInitializationDuration(this KeyManagementOptions options, TimeSpan age) => (age <= options.InitializationDuration);
 
     internal static TimeSpan GetAge(this IClock clock, DateTime date)
     {

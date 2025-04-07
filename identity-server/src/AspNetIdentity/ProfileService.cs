@@ -153,20 +153,14 @@ public class ProfileService<TUser> : IProfileService
     /// <param name="context"></param>
     /// <param name="user"></param>
     /// <returns></returns>
-    protected virtual async Task IsActiveAsync(IsActiveContext context, TUser user)
-    {
-        context.IsActive = await IsUserActiveAsync(user);
-    }
+    protected virtual async Task IsActiveAsync(IsActiveContext context, TUser user) => context.IsActive = await IsUserActiveAsync(user);
 
     /// <summary>
     /// Returns if the user is active.
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
-    public virtual Task<bool> IsUserActiveAsync(TUser user)
-    {
-        return Task.FromResult(true);
-    }
+    public virtual Task<bool> IsUserActiveAsync(TUser user) => Task.FromResult(true);
 
     /// <summary>
     /// Loads the user by the subject id.

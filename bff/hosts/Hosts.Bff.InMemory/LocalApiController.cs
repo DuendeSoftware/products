@@ -10,10 +10,7 @@ public class LocalApiController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public LocalApiController(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
+    public LocalApiController(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
     [Route("self-contained")]
     [HttpGet]

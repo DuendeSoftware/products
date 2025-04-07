@@ -9,10 +9,7 @@ internal class CallbackManager
 {
     private readonly string _name;
 
-    public CallbackManager(string name)
-    {
-        _name = name ?? throw new ArgumentNullException(nameof(name));
-    }
+    public CallbackManager(string name) => _name = name ?? throw new ArgumentNullException(nameof(name));
 
     public int ClientConnectTimeoutSeconds { get; set; } = 1;
 

@@ -21,10 +21,7 @@ public static class AuthenticationPropertiesExtensions
     /// </summary>
     /// <param name="properties"></param>
     /// <returns></returns>
-    public static string GetSessionId(this AuthenticationProperties properties)
-    {
-        return properties?.Items.TryGetValue(SessionIdKey, out var value) == true ? value : null;
-    }
+    public static string GetSessionId(this AuthenticationProperties properties) => properties?.Items.TryGetValue(SessionIdKey, out var value) == true ? value : null;
 
     /// <summary>
     /// Sets the user's session identifier.
@@ -32,10 +29,7 @@ public static class AuthenticationPropertiesExtensions
     /// <param name="properties"></param>
     /// <param name="sid">The session id</param>
     /// <returns></returns>
-    public static void SetSessionId(this AuthenticationProperties properties, string sid)
-    {
-        properties.Items[SessionIdKey] = sid;
-    }
+    public static void SetSessionId(this AuthenticationProperties properties, string sid) => properties.Items[SessionIdKey] = sid;
 
     /// <summary>
     /// Gets the list of client ids the user has signed into during their session.
@@ -56,10 +50,7 @@ public static class AuthenticationPropertiesExtensions
     /// Removes the list of client ids.
     /// </summary>
     /// <param name="properties"></param>
-    public static void RemoveClientList(this AuthenticationProperties properties)
-    {
-        properties?.Items.Remove(ClientListKey);
-    }
+    public static void RemoveClientList(this AuthenticationProperties properties) => properties?.Items.Remove(ClientListKey);
 
     /// <summary>
     /// Sets the list of client ids.

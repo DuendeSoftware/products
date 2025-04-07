@@ -14,10 +14,7 @@ internal class NullHttpContextAccessor : IHttpContextAccessor
 {
     public HttpContext HttpContext
     {
-        get
-        {
-            return null;
-        }
+        get => null;
         set
         {
             // Deliberate no-op

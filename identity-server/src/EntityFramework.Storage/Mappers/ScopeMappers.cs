@@ -16,9 +16,7 @@ public static class ScopeMappers
     /// </summary>
     /// <param name="entity">The entity.</param>
     /// <returns></returns>
-    public static Models.ApiScope ToModel(this ApiScope entity)
-    {
-        return entity == null ? null :
+    public static Models.ApiScope ToModel(this ApiScope entity) => entity == null ? null :
             new Models.ApiScope
             {
                 Enabled = entity.Enabled,
@@ -32,16 +30,13 @@ public static class ScopeMappers
                 Required = entity.Required,
                 Emphasize = entity.Emphasize
             };
-    }
 
     /// <summary>
     /// Maps a model to an entity.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns></returns>
-    public static Entities.ApiScope ToEntity(this Models.ApiScope model)
-    {
-        return model == null ? null :
+    public static Entities.ApiScope ToEntity(this Models.ApiScope model) => model == null ? null :
             new Entities.ApiScope
             {
                 Enabled = model.Enabled,
@@ -62,5 +57,4 @@ public static class ScopeMappers
                 Required = model.Required,
                 Emphasize = model.Emphasize
             };
-    }
 }

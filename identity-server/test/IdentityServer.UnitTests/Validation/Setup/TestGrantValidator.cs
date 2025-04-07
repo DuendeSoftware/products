@@ -42,8 +42,5 @@ internal class TestGrantValidator : IExtensionGrantValidator
         return Task.CompletedTask;
     }
 
-    public string GrantType
-    {
-        get { return "custom_grant"; }
-    }
+    public string GrantType => "custom_grant";
 }

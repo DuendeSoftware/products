@@ -11,23 +11,17 @@ public class NewModel : PageModel
 {
     private readonly ClientRepository _repository;
 
-    public NewModel(ClientRepository repository)
-    {
-        _repository = repository;
-    }
+    public NewModel(ClientRepository repository) => _repository = repository;
 
     [BindProperty]
     public CreateClientModel InputModel { get; set; } = default!;
 
     public bool Created { get; set; }
 
-    public void OnGet()
+    public void OnGet() => InputModel = new CreateClientModel
     {
-        InputModel = new CreateClientModel
-        {
-            Secret = Convert.ToBase64String(CryptoRandom.CreateRandomKey(16))
-        };
-    }
+        Secret = Convert.ToBase64String(CryptoRandom.CreateRandomKey(16))
+    };
 
     public async Task<IActionResult> OnPostAsync()
     {

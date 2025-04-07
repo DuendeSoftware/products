@@ -25,13 +25,7 @@ public class TestEventService : IEventService
     }
 
     public void AssertEventWasNotRaised<T>()
-        where T : class
-    {
-        _events.ShouldNotContainKey(typeof(T));
-    }
+        where T : class => _events.ShouldNotContainKey(typeof(T));
 
-    public bool CanRaiseEventType(EventTypes evtType)
-    {
-        return true;
-    }
+    public bool CanRaiseEventType(EventTypes evtType) => true;
 }
