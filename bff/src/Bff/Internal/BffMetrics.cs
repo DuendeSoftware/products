@@ -19,18 +19,9 @@ public sealed class BffMetrics
         _sessionEnded = meter.CreateCounter<int>("session.ended", "count", "Number of sessions ended");
     }
 
-    public void SessionStarted()
-    {
-        _sessionStarted.Add(1);
-    }
+    public void SessionStarted() => _sessionStarted.Add(1);
 
-    public void SessionEnded()
-    {
-        _sessionEnded.Add(1);
-    }
+    public void SessionEnded() => _sessionEnded.Add(1);
 
-    public void SessionsEnded(int count)
-    {
-        _sessionEnded.Add(count);
-    }
+    public void SessionsEnded(int count) => _sessionEnded.Add(count);
 }

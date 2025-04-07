@@ -66,7 +66,6 @@ internal static partial class Log
         message: $"Failed to request new User Access Token due to: {{{OTelParameters.Error}}}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.")]
     public static partial void UserSessionRevoked(this ILogger logger, string error);
 
-<<<<<<< HEAD
     [LoggerMessage(
         level: LogLevel.Debug,
         message: $"BFF management endpoint {{endpoint}} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.")]

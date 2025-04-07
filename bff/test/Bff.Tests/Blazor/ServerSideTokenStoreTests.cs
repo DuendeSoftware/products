@@ -100,10 +100,7 @@ public class ServerSideTokenStoreTests
         {
         }
 
-        public Meter Create(MeterOptions options)
-        {
-            return new Meter(options);
-        }
+        public Meter Create(MeterOptions options) => new Meter(options);
     }
 
 }
