@@ -3,17 +3,30 @@
 
 using System.Net;
 using Duende.Bff.Configuration;
-using Duende.Bff.Tests.TestHosts;
+using Duende.Bff.Tests.TestInfra;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 
-public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBase(output)
+public class LoginEndpointTests : BffTestBase
 {
+    public LoginEndpointTests(ITestOutputHelper output) : base(output)
+    {
+        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        Bff.SetBffOptions += options =>
+        {
+            options.ConfigureOpenIdConnectDefaults = opt =>
+            {
+                The.DefaultOpenIdConnectConfiguration(opt);
+            };
+        };
+    }
+
     [Fact]
     public async Task login_should_allow_anonymous()
     {
-        BffHost.OnConfigureServices += svcs =>
+
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.AddAuthorization(opts =>
             {
@@ -23,56 +36,70 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
                         .Build();
             });
         };
-        await BffHost.InitializeAsync();
+        await InitializeAsync();
 
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login"));
+        var response = await Bff.BrowserClient.Login();
         response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
-    public async Task silent_login_should_challenge_and_redirect_to_root()
+    public async Task when_unauthenticated_silent_login_should_return_isLoggedIn_false()
     {
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/silent-login?redirectUri=/"));
+        await InitializeAsync();
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
-        response.Headers.Location!.ToString().ShouldNotContain("error");
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/silent-login?redirectUri=/"))
+            .CheckHttpStatusCode();
+        response.Content.Headers.ContentType!.MediaType.ShouldBe("text/html");
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/bff/silent-login-callback"));
+        var message = await response.Content.ReadAsStringAsync();
+        message.ShouldContain("source:'bff-silent-login");
+        message.ShouldContain("isLoggedIn:false");
+    }
 
+    [Fact]
+    public async Task silent_login_should_challenge_and_return_silent_login_html()
+    {
+        await InitializeAsync();
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
-        response.Headers.Location!.ToString().ShouldNotContain("error");
+        await Bff.BrowserClient.Login();
 
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/bff/silent-login-callback");
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/silent-login?redirectUri=/"))
+            .CheckHttpStatusCode();
+
+        response.Content.Headers.ContentType!.MediaType.ShouldBe("text/html");
+
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/bff/silent-login-callback"));
+
+        var message = await response.Content.ReadAsStringAsync();
+        message.ShouldContain("source:'bff-silent-login");
+        message.ShouldContain($"isLoggedIn:true");
     }
 
     [Fact]
     public async Task can_issue_silent_login_with_prompt_none()
     {
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=none"));
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
-        response.Headers.Location!.ToString().ShouldNotContain("error");
+        await InitializeAsync();
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
-        response.Headers.Location!.ToString().ShouldNotContain("error");
+        await Bff.BrowserClient.Login();
 
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/bff/silent-login-callback");
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
+            .CheckHttpStatusCode();
+
+        response.Content.Headers.ContentType!.MediaType.ShouldBe("text/html");
+
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/bff/silent-login-callback"));
+
+        var message = await response.Content.ReadAsStringAsync();
+        message.ShouldContain("source:'bff-silent-login");
+        message.ShouldContain($"isLoggedIn:true");
     }
 
     [Fact]
     public async Task login_with_unsupported_prompt_is_rejected()
     {
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=not_supported_prompt"));
+        await InitializeAsync();
+
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=not_supported_prompt"));
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         var problem = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>();
@@ -83,149 +110,122 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
     [Fact]
     public async Task can_use_prompt_supported_by_IdentityServer()
     {
+        await InitializeAsync();
+
         // Prompt=create is enabled in identity server configuration:
         // https://docs.duendesoftware.com/identityserver/reference/options#userinteraction
         // by setting CreateAccountUrl 
 
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=create"));
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
-        response.Headers.Location!.ToString().ShouldNotContain("error");
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=create"))
+            .CheckHttpStatusCode();
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/account/create"));
-        response.Headers.Location!.ToString().ShouldNotContain("error");
+        response.RequestMessage!.RequestUri!.ToString().ShouldStartWith(IdentityServer.Url("/account/create").ToString());
+        response.RequestMessage!.RequestUri!.ToString().ShouldNotContain("error");
     }
 
     [Fact]
-    public async Task login_endpoint_should_challenge_and_redirect_to_root()
+    public async Task login_endpoint_should_authenticatre_and_redirect_to_root()
     {
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login"));
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
+        await InitializeAsync();
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
+        var response = await Bff.BrowserClient.Login();
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/"));
 
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/");
     }
 
     [Fact]
     public async Task login_endpoint_should_challenge_and_redirect_to_root_with_custom_prefix()
     {
-        BffHost.OnConfigureServices += svcs =>
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.Configure<BffOptions>(options =>
             {
                 options.ManagementBasePath = "/custom/bff";
             });
         };
-        await BffHost.InitializeAsync();
+        await InitializeAsync();
 
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/custom/bff/login"));
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
+        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
 
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/");
+        var response = await Bff.BrowserClient.Login("/custom");
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/"));
+
     }
 
     [Fact]
     public async Task login_endpoint_should_challenge_and_redirect_to_root_with_custom_prefix_trailing_slash()
     {
-        BffHost.OnConfigureServices += svcs =>
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.Configure<BffOptions>(options =>
             {
                 options.ManagementBasePath = "/custom/bff/";
             });
         };
-        await BffHost.InitializeAsync();
+        await InitializeAsync();
 
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/custom/bff/login"));
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
+        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
-
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/");
+        var response = await Bff.BrowserClient.Login("/custom");
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/"));
     }
 
     [Fact]
     public async Task login_endpoint_should_challenge_and_redirect_to_root_with_root_prefix()
     {
-        BffHost.OnConfigureServices += svcs =>
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.Configure<BffOptions>(options =>
             {
                 options.ManagementBasePath = "/";
             });
         };
-        await BffHost.InitializeAsync();
+        await InitializeAsync();
 
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/login"));
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/login"))
+            .CheckHttpStatusCode();
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/"));
 
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/");
     }
 
     [Fact]
     public async Task login_endpoint_with_existing_session_should_challenge()
     {
-        await BffHost.BffLoginAsync("alice");
+        await InitializeAsync();
 
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login"));
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
+        await Bff.BrowserClient.Login();
+
+        // Disable auto redirects, to see if we get a challenge
+        Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
+
+        var response = await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.Redirect);
+        response.Headers.Location!.ToString().ShouldStartWith(IdentityServer.Url("/connect/authorize").ToString());
     }
 
     [Fact]
     public async Task login_endpoint_should_accept_returnUrl()
     {
-        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login") + "?returnUrl=/foo");
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
+        Bff.OnConfigureEndpoints += endpoints => endpoints.MapGet("/foo", () => "foo'd you");
 
-        await IdentityServerHost.IssueSessionCookieAsync("alice");
-        response = await IdentityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldStartWith(BffHost.Url("/signin-oidc"));
+        await InitializeAsync();
 
-        response = await BffHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location!.ToString().ShouldBe("/foo");
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login") + "?returnUrl=/foo")
+            .CheckHttpStatusCode();
+
+        var result = await response.Content.ReadAsStringAsync();
+        result.ShouldBe("foo'd you");
     }
 
     [Fact]
     public async Task login_endpoint_should_not_accept_non_local_returnUrl()
     {
-        Func<Task> f = () => BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login") + "?returnUrl=https://foo");
-        var exception = (await f.ShouldThrowAsync<Exception>());
-        exception.Message.ShouldContain("returnUrl");
+        await InitializeAsync();
+
+        var problem = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login") + "?returnUrl=https://foo")
+            .ShouldBeProblem();
+
+        problem.Errors.ShouldContainKey(Constants.RequestParameters.ReturnUrl);
     }
 }

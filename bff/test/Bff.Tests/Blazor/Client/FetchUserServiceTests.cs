@@ -60,7 +60,7 @@ public class MockHttpMessageHandler : HttpMessageHandler
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+        CT ct)
     {
         if (request.Content != null) // Could be a GET-request without a body
         {

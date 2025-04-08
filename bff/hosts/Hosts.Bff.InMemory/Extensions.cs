@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
@@ -128,34 +129,34 @@ internal static class Extensions
 
         // On this path, we use a client credentials token
         app.MapRemoteBffApiEndpoint("/api/client-token", "https://localhost:5010")
-            .RequireAccessToken(TokenType.Client);
+            .WithAccessToken(RequiredTokenType.Client);
 
         // On this path, we use a user token if logged in, and fall back to a client credentials token if not
         app.MapRemoteBffApiEndpoint("/api/user-or-client-token", "https://localhost:5010")
-            .RequireAccessToken(TokenType.UserOrClient);
+            .WithAccessToken(RequiredTokenType.UserOrClient);
 
         // On this path, we make anonymous requests
         app.MapRemoteBffApiEndpoint("/api/anonymous", "https://localhost:5010");
 
         // On this path, we use the client token only if the user is logged in
         app.MapRemoteBffApiEndpoint("/api/optional-user-token", "https://localhost:5010")
-            .WithOptionalUserAccessToken();
+            .WithAccessToken(RequiredTokenType.UserOrNone);
 
         // On this path, we require the user token
         app.MapRemoteBffApiEndpoint("/api/user-token", "https://localhost:5010")
-            .RequireAccessToken();
+            .WithAccessToken();
 
         // On this path, we perform token exchange to impersonate a different user
         // before making the api request
         app.MapRemoteBffApiEndpoint("/api/impersonation", "https://localhost:5010")
-            .RequireAccessToken()
+            .WithAccessToken()
             .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>();
 
         // On this path, we obtain an audience constrained token and invoke
         // a different api that requires such a token
         app.MapRemoteBffApiEndpoint("/api/audience-constrained", "https://localhost:5012")
-            .RequireAccessToken()
-            .WithUserAccessTokenParameter(new BffUserAccessTokenParameters(resource: "urn:isolated-api"));
+            .WithAccessToken()
+            .WithUserAccessTokenParameter(new BffUserAccessTokenParameters { Resource = Resource.Parse("urn:isolated-api") });
 
         return app;
     }

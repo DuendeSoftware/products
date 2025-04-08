@@ -18,6 +18,16 @@ var bff = builder.AddProject<Projects.Hosts_Bff_InMemory>(AppHostServices.Bff)
     .WithAwaitedReference(api)
     ;
 
+var bffMulti = builder.AddProject<Projects.Hosts_Bff_MultiFrontend>(AppHostServices.BffMultiFrontend)
+    .WithExternalHttpEndpoints()
+    .WithUrl("https://app1.localhost:5005", "https://app1.localhost:5005")
+    .WithUrl("https://localhost:5005/with-path", "https://localhost/with-path")
+    .WithAwaitedReference(idServer)
+    .WithAwaitedReference(isolatedApi)
+    .WithAwaitedReference(api)
+    ;
+
+
 var bffEf = builder.AddProject<Projects.Hosts_Bff_EF>(AppHostServices.BffEf)
     .WithExternalHttpEndpoints()
     .WithAwaitedReference(idServer)
@@ -48,11 +58,13 @@ builder.AddProject<Projects.UserSessionDb>(AppHostServices.Migrations);
 
 idServer
     .WithReference(bff)
+    .WithReference(bffMulti)
     .WithReference(bffEf)
     .WithReference(bffBlazorPerComponent)
     .WithReference(bffBlazorWebAssembly)
     .WithReference(apiDPop)
-    .WithReference(bffDPop);
+    .WithReference(bffDPop)
+    ;
 
 builder.AddProject<BffLocalApi>(AppHostServices.TemplateBffLocal, launchProfileName: null)
     .WithHttpsEndpoint(5300, name: "bff-local");
@@ -61,6 +73,8 @@ builder.AddProject<BffRemoteApi>(AppHostServices.TemplateBffRemote, launchProfil
     .WithHttpsEndpoint(5310, name: "bff-remote");
 
 builder.AddProject<BffBlazorAutoRenderMode>(AppHostServices.TemplateBffBlazor);
+
+
 
 builder.Build().Run();
 

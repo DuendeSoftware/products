@@ -18,6 +18,8 @@
     <PackageReference Include="PublicApiGenerator" />
     <PackageReference Include="Verify.Xunit" />
 
+    <PackageReference Include="RichardSzalay.MockHttp" />
+
   </ItemGroup>
 
   <ItemGroup>

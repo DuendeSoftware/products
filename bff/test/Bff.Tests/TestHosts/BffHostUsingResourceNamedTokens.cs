@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Yarp;
@@ -142,13 +143,23 @@ public class BffHostUsingResourceNamedTokens : GenericHost
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_user_with_useraccesstokenparameters_having_stored_named_token", _apiHost.Url())
-                .WithUserAccessTokenParameter(new BffUserAccessTokenParameters("cookie", null, true, "named_token_stored"))
-                .RequireAccessToken();
+                .WithUserAccessTokenParameter(new BffUserAccessTokenParameters
+                {
+                    SignInScheme = Scheme.Parse("cookie"),
+                    ForceRenewal = true,
+                    Resource = Resource.Parse("named_token_stored")
+                })
+                .WithAccessToken();
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_user_with_useraccesstokenparameters_having_not_stored_named_token", _apiHost.Url())
-                .WithUserAccessTokenParameter(new BffUserAccessTokenParameters("cookie", null, true, "named_token_not_stored"))
-                .RequireAccessToken();
+                .WithUserAccessTokenParameter(new BffUserAccessTokenParameters
+                {
+                    SignInScheme = Scheme.Parse("cookie"),
+                    ForceRenewal = true,
+                    Resource = Resource.Parse("named_token_not_stored")
+                })
+                .WithAccessToken();
         });
     }
 

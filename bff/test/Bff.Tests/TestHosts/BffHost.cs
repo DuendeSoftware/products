@@ -127,6 +127,7 @@ public class BffHost : GenericHost
         app.UseRouting();
 
         app.UseBff();
+
         app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
@@ -153,8 +154,8 @@ public class BffHost : GenericHost
                         requestHeaders.Add(header.Key, values);
                     }
 
-                    var response = new ApiResponse(
-                        context.Request.Method,
+                    var response = new ApiCallDetails(
+                        HttpMethod.Parse(context.Request.Method),
                         context.Request.Path.Value ?? "/",
                         context.User.FindFirst("sub")?.Value,
                         context.User.FindFirst("client_id")?.Value,
@@ -206,8 +207,8 @@ public class BffHost : GenericHost
                         requestHeaders.Add(header.Key, values);
                     }
 
-                    var response = new ApiResponse(
-                        context.Request.Method,
+                    var response = new ApiCallDetails(
+                        HttpMethod.Parse(context.Request.Method),
                         context.Request.Path.Value ?? "/",
                         context.User.FindFirst("sub")?.Value,
                         context.User.FindFirst("client_id")?.Value,
@@ -260,8 +261,8 @@ public class BffHost : GenericHost
                     requestHeaders.Add(header.Key, values);
                 }
 
-                var response = new ApiResponse(
-                    context.Request.Method,
+                var response = new ApiCallDetails(
+                    HttpMethod.Parse(context.Request.Method),
                     context.Request.Path.Value ?? "/",
                     context.User.FindFirst("sub")?.Value,
                     context.User.FindFirst("client_id")?.Value,
@@ -313,8 +314,8 @@ public class BffHost : GenericHost
                         }
                     }
 
-                    var response = new ApiResponse(
-                        context.Request.Method,
+                    var response = new ApiCallDetails(
+                        HttpMethod.Parse(context.Request.Method),
                         context.Request.Path.Value ?? "/",
                         sub,
                         context.User.FindFirst("client_id")?.Value,
@@ -363,8 +364,8 @@ public class BffHost : GenericHost
                         }
                     }
 
-                    var response = new ApiResponse(
-                        context.Request.Method,
+                    var response = new ApiCallDetails(
+                        HttpMethod.Parse(context.Request.Method),
                         context.Request.Path.Value ?? "/",
                         sub,
                         context.User.FindFirst("client_id")?.Value,
@@ -407,34 +408,36 @@ public class BffHost : GenericHost
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_user", _apiHost.Url())
-                .RequireAccessToken();
+                .WithAccessToken();
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_user_no_csrf", _apiHost.Url())
                 .SkipAntiforgery()
-                .RequireAccessToken();
+                .WithAccessToken();
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_client", _apiHost.Url())
-                .RequireAccessToken(TokenType.Client);
+                .WithAccessToken(RequiredTokenType.Client);
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_user_or_client", _apiHost.Url())
-                .RequireAccessToken(TokenType.UserOrClient);
+                .WithAccessToken(RequiredTokenType.UserOrClient);
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_unauthenticated", _apiHost.Url() + "return_unauthenticated")
-                .RequireAccessToken(TokenType.UserOrClient);
+                .WithAccessToken(RequiredTokenType.UserOrClient);
 
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_forbidden", _apiHost.Url() + "return_forbidden")
-                .RequireAccessToken(TokenType.UserOrClient);
+                .WithAccessToken(RequiredTokenType.UserOrClient);
 
 
+#pragma warning disable CS0618 // Type or member is obsolete
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_user_or_anon", _apiHost.Url())
                 .WithOptionalUserAccessToken();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             endpoints.MapRemoteBffApiEndpoint(
                 "/api_anon_only", _apiHost.Url());
@@ -451,12 +454,12 @@ public class BffHost : GenericHost
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_with_access_token_retriever", _apiHost.Url())
-                .RequireAccessToken(TokenType.UserOrClient)
+                .WithAccessToken(RequiredTokenType.UserOrClient)
                 .WithAccessTokenRetriever<TestAccessTokenRetriever>();
 
             endpoints.MapRemoteBffApiEndpoint(
                     "/api_with_access_token_retrieval_that_fails", _apiHost.Url())
-                .RequireAccessToken(TokenType.UserOrClient)
+                .WithAccessToken(RequiredTokenType.UserOrClient)
                 .WithAccessTokenRetriever<FailureAccessTokenRetriever>();
         });
     }

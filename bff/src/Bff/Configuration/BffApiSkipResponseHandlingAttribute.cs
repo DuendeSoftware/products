@@ -10,6 +10,4 @@ namespace Duende.Bff.Configuration;
 /// This attribute indicates that the BFF middleware will not override the HTTP response status code.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class BffApiSkipResponseHandlingAttribute : Attribute, IBffApiSkipResponseHandling
-{
-}
+public sealed class BffApiSkipResponseHandlingAttribute : Attribute, IBffApiSkipResponseHandling;

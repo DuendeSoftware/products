@@ -8,10 +8,12 @@ namespace Duende.Bff.AccessTokenManagement;
 /// <summary>
 /// Represents a bearer token result obtained during access token retrieval.
 /// </summary>
-public class BearerTokenResult(string accessToken) : AccessTokenResult
+public sealed record BearerTokenResult : AccessTokenResult
 {
     /// <summary>
     /// The access token.
     /// </summary>
-    public string AccessToken => accessToken;
+    public required AccessToken AccessToken { get; init; }
+
 }
+

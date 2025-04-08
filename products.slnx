@@ -20,6 +20,7 @@
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.EF/Hosts.Bff.EF.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.InMemory/Hosts.Bff.InMemory.csproj" />
+    <Project Path="bff/hosts/Hosts.Bff.MultiFrontend/Hosts.Bff.MultiFrontend.csproj" />
     <Project Path="bff/hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj" />
     <Project Path="bff/hosts/Hosts.ServiceDefaults/Hosts.ServiceDefaults.csproj" />
   </Folder>

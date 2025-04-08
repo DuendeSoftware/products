@@ -6,7 +6,7 @@ namespace Duende.Bff.EntityFramework;
 /// <summary>
 /// Class to control a table's name and schema.
 /// </summary>
-public class TableConfiguration
+public sealed record TableConfiguration
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TableConfiguration"/> class.

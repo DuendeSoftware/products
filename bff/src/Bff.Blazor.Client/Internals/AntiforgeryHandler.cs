@@ -3,12 +3,12 @@
 
 namespace Duende.Bff.Blazor.Client.Internals;
 
-internal class AntiforgeryHandler : DelegatingHandler
+internal class AntiForgeryHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+        CT ct)
     {
         request.Headers.Add("X-CSRF", "1");
-        return base.SendAsync(request, cancellationToken);
+        return base.SendAsync(request, ct);
     }
 }

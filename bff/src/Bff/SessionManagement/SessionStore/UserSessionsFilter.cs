@@ -6,7 +6,7 @@ namespace Duende.Bff.SessionManagement.SessionStore;
 /// <summary>
 /// Filter to query user sessions
 /// </summary>
-public class UserSessionsFilter
+public sealed class UserSessionsFilter
 {
     /// <summary>
     /// The subject ID

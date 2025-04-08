@@ -8,6 +8,7 @@ public static class AppHostServices
     public const string Api = "api";
     public const string IsolatedApi = "api-isolated";
     public const string Bff = "bff";
+    public const string BffMultiFrontend = "bff-multi-frontend";
     public const string BffEf = "bff-ef";
     public const string BffBlazorWebassembly = "bff-blazor-webassembly";
     public const string BffBlazorPerComponent = "bff-blazor-per-component";
@@ -34,4 +35,26 @@ public static class AppHostServices
         TemplateBffRemote
     ];
 
+}
+
+public static class ServiceDiscovery
+{
+    public static Uri ResolveService(string serviceName)
+    {
+        var scheme = "https";
+        var host = serviceName;
+
+        // Compose the environment variable key
+        var envVarKey = $"services__{host}__{scheme}__0";
+
+        // Try to get the value from environment variables
+        var value = Environment.GetEnvironmentVariable(envVarKey);
+
+        if (string.IsNullOrEmpty(value))
+        {
+            throw new InvalidOperationException($"Service endpoint for '{serviceName}' not found in environment variable '{envVarKey}'.");
+        }
+
+        return new Uri(value);
+    }
 }

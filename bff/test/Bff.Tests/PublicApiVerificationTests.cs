@@ -69,7 +69,7 @@ public class PublicApiVerificationTests
         {
             IncludeAssemblyAttributes = false
         };
-        var publicApi = typeof(AntiforgeryHandler).Assembly.GeneratePublicApi(apiGeneratorOptions);
+        var publicApi = typeof(AntiForgeryHandler).Assembly.GeneratePublicApi(apiGeneratorOptions);
         var settings = new VerifySettings();
         await Verify(publicApi, settings);
     }

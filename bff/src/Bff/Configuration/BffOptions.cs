@@ -1,6 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 
@@ -9,7 +12,7 @@ namespace Duende.Bff.Configuration;
 /// <summary>
 /// Options for BFF
 /// </summary>
-public class BffOptions
+public sealed class BffOptions
 {
     /// <summary>
     /// Base path for management endpoints. Defaults to "/bff".
@@ -132,7 +135,7 @@ public class BffOptions
     /// The Json Web Key to use when creating DPoP proof tokens. Defaults to
     /// null, which is appropriate when not using DPoP.
     /// </summary>
-    public string? DPoPJsonWebKey { get; set; }
+    public DPoPProofKey? DPoPJsonWebKey { get; set; }
 
     /// <summary>
     /// Flag that specifies if a user session should be removed after an attempt to use a Refresh Token to acquire
@@ -147,4 +150,15 @@ public class BffOptions
     /// </summary>
     public DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; } = (c) => false;
 
+    internal Action<OpenIdConnectOptions>? ConfigureOpenIdConnectDefaults { get; set; }
+    internal Action<CookieAuthenticationOptions>? ConfigureCookieDefaults { get; set; }
+
+    public HttpMessageHandler? BackchannelMessageHandler { get; set; }
+
+    public string? IndexHtmlClientName { get; set; }
+
+    /// <summary>
+    /// Indicates if we should automatically register the BFF middleware in the pipeline.
+    /// </summary>
+    public bool AutomaticallyRegisterBffMiddleware { get; set; } = true;
 }

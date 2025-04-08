@@ -20,19 +20,19 @@ public class ManagementBasePathTests(ITestOutputHelper output) : BffIntegrationT
     [InlineData(Constants.ManagementEndpoints.User)]
     public async Task custom_ManagementBasePath_should_affect_basepath(string path)
     {
-        BffHost.OnConfigureServices += svcs =>
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.Configure<BffOptions>(options =>
             {
                 options.ManagementBasePath = new PathString("/{path:regex(^[a-zA-Z\\d-]+$)}/bff");
             });
         };
-        await BffHost.InitializeAsync();
+        await Bff.InitializeAsync();
 
-        var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/custom/bff" + path));
+        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/custom/bff" + path));
         req.Headers.Add("x-csrf", "1");
 
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var response = await Bff.BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldNotBe(HttpStatusCode.NotFound);
     }

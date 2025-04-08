@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Configuration;
 using Duende.Bff.SessionManagement.SessionStore;
@@ -18,13 +19,13 @@ internal class SessionRevocationService(
     IOptions<BffOptions> options,
     IServerTicketStore ticketStore,
     IUserSessionStore sessionStore,
-    IUserTokenEndpointService tokenEndpoint,
+    IOpenIdConnectUserTokenEndpoint tokenEndpoint,
     ILogger<SessionRevocationService> logger) : ISessionRevocationService
 {
     private readonly BffOptions _options = options.Value;
 
     /// <inheritdoc/>
-    public async Task RevokeSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
+    public async Task RevokeSessionsAsync(UserSessionsFilter filter, CT ct = default)
     {
         if (_options.BackchannelLogoutAllUserSessions)
         {
@@ -35,19 +36,21 @@ internal class SessionRevocationService(
 
         if (_options.RevokeRefreshTokenOnLogout)
         {
-            var tickets = await ticketStore.GetUserTicketsAsync(filter, cancellationToken);
+            var tickets = await ticketStore.GetUserTicketsAsync(filter, ct);
             foreach (var ticket in tickets)
             {
                 var refreshToken = ticket.Properties.GetTokenValue("refresh_token");
                 if (!string.IsNullOrWhiteSpace(refreshToken))
                 {
-                    await tokenEndpoint.RevokeRefreshTokenAsync(new UserToken { RefreshToken = refreshToken }, new UserTokenRequestParameters(), cancellationToken);
+                    await tokenEndpoint.RevokeRefreshTokenAsync(
+                        new UserRefreshToken(RefreshToken.Parse(refreshToken),
+                        options.Value.DPoPJsonWebKey), new UserTokenRequestParameters(), ct);
 
                     logger.LogDebug("Refresh token revoked for sub {sub} and sid {sid}", ticket.GetSubjectId(), ticket.GetSessionId());
                 }
             }
         }
 
-        await sessionStore.DeleteUserSessionsAsync(filter, cancellationToken);
+        await sessionStore.DeleteUserSessionsAsync(filter, ct);
     }
 }

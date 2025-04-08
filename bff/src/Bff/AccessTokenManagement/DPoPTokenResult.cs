@@ -8,15 +8,15 @@ namespace Duende.Bff.AccessTokenManagement;
 /// <summary>
 /// Represents a DPoP token result obtained during access token retrieval.
 /// </summary>
-public class DPoPTokenResult(string accessToken, string dpopJWK) : AccessTokenResult
+public sealed record DPoPTokenResult : AccessTokenResult
 {
     /// <summary>
     /// The access token.
     /// </summary>
-    public string AccessToken => accessToken;
+    public required AccessToken AccessToken { get; init; }
 
     /// <summary>
     /// The DPoP Json Web key
     /// </summary>
-    public string DPoPJsonWebKey => dpopJWK;
+    public required DPoPProofKey DPoPJsonWebKey { get; init; }
 }

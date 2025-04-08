@@ -1,6 +1,6 @@
 ﻿namespace Duende.Bff.Blazor.Client
 {
-    public class BffBlazorClientOptions
+    public sealed class BffBlazorClientOptions : System.IEquatable<Duende.Bff.Blazor.Client.BffBlazorClientOptions>
     {
         public BffBlazorClientOptions() { }
         public string? RemoteApiBaseAddress { get; set; }

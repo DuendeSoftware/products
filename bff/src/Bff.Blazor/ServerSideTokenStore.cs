@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
-using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
 using Microsoft.AspNetCore.Authentication;
@@ -29,7 +30,8 @@ internal class ServerSideTokenStore(
     private readonly IHostEnvironmentAuthenticationStateProvider _authenticationStateProvider = authenticationStateProvider as IHostEnvironmentAuthenticationStateProvider
         ?? throw new ArgumentException("AuthenticationStateProvider must implement IHostEnvironmentAuthenticationStateProvider");
 
-    public async Task<UserToken> GetTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null)
+    public async Task<TokenResult<TokenForParameters>> GetTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null,
+        CancellationToken ct = default)
     {
         logger.RetrievingTokenForUser(user.Identity?.Name);
         var session = await GetSession(user);
@@ -38,7 +40,7 @@ internal class ServerSideTokenStore(
             var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
             var loggedOutTask = Task.FromResult(new AuthenticationState(user: anonymous));
             _authenticationStateProvider.SetAuthenticationState(loggedOutTask);
-            return new UserToken();
+            return new FailedResult("Session not found");
         }
 
         var ticket = session.Deserialize(_protector, logger) ??
@@ -78,20 +80,25 @@ internal class ServerSideTokenStore(
     }
 
     public async Task StoreTokenAsync(ClaimsPrincipal user, UserToken token,
-        UserTokenRequestParameters? parameters = null)
+        UserTokenRequestParameters? parameters = null, CT ct = default)
     {
         logger.StoringTokenForUser(user.Identity?.Name);
         await UpdateTicket(user,
-            ticket => { tokensInAuthProperties.SetUserToken(token, ticket.Properties, parameters); });
+            async ticket => { await tokensInAuthProperties.SetUserTokenAsync(token, ticket.Properties, parameters, ct); });
     }
 
-    public async Task ClearTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null)
+
+    public async Task ClearTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null, CT ct = default)
     {
         logger.RemovingTokenForUser(user.Identity?.Name);
-        await UpdateTicket(user, ticket => { tokensInAuthProperties.RemoveUserToken(ticket.Properties, parameters); });
+        await UpdateTicket(user, ticket =>
+        {
+            tokensInAuthProperties.RemoveUserToken(ticket.Properties, parameters);
+            return Task.CompletedTask;
+        });
     }
 
-    protected async Task UpdateTicket(ClaimsPrincipal user, Action<AuthenticationTicket> updateAction)
+    protected async Task UpdateTicket(ClaimsPrincipal user, Func<AuthenticationTicket, Task> updateAction)
     {
         var session = await GetSession(user);
         if (session == null)
@@ -103,7 +110,7 @@ internal class ServerSideTokenStore(
         var ticket = session.Deserialize(_protector, logger) ??
                      throw new InvalidOperationException("Failed to deserialize authentication ticket from session");
 
-        updateAction(ticket);
+        await updateAction(ticket);
 
         session.Ticket = ticket.Serialize(_protector);
 

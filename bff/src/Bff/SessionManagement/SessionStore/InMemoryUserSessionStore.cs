@@ -13,7 +13,7 @@ internal class InMemoryUserSessionStore : IUserSessionStore
     private readonly ConcurrentDictionary<string, UserSession> _store = new();
 
     /// <inheritdoc />
-    public Task CreateUserSessionAsync(UserSession session, CancellationToken cancellationToken = default)
+    public Task CreateUserSessionAsync(UserSession session, CT ct = default)
     {
         if (!_store.TryAdd(session.Key, session.Clone()))
         {
@@ -24,14 +24,14 @@ internal class InMemoryUserSessionStore : IUserSessionStore
     }
 
     /// <inheritdoc />
-    public Task<UserSession?> GetUserSessionAsync(string key, CancellationToken cancellationToken = default)
+    public Task<UserSession?> GetUserSessionAsync(string key, CT ct = default)
     {
         _store.TryGetValue(key, out var item);
         return Task.FromResult(item?.Clone());
     }
 
     /// <inheritdoc />
-    public Task UpdateUserSessionAsync(string key, UserSessionUpdate session, CancellationToken cancellationToken = default)
+    public Task UpdateUserSessionAsync(string key, UserSessionUpdate session, CT ct = default)
     {
         var item = _store[key].Clone();
         session.CopyTo(item);
@@ -40,14 +40,14 @@ internal class InMemoryUserSessionStore : IUserSessionStore
     }
 
     /// <inheritdoc />
-    public Task DeleteUserSessionAsync(string key, CancellationToken cancellationToken = default)
+    public Task DeleteUserSessionAsync(string key, CT ct = default)
     {
         _store.TryRemove(key, out _);
         return Task.CompletedTask;
     }
 
     /// <inheritdoc />
-    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CT ct = default)
     {
         filter.Validate();
 
@@ -67,7 +67,7 @@ internal class InMemoryUserSessionStore : IUserSessionStore
     }
 
     /// <inheritdoc />
-    public Task DeleteUserSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
+    public Task DeleteUserSessionsAsync(UserSessionsFilter filter, CT ct = default)
     {
         filter.Validate();
 
