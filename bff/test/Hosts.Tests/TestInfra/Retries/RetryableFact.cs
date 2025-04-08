@@ -6,10 +6,10 @@ using Xunit.Sdk;
 namespace Duende.Hosts.Tests.TestInfra.Retries;
 
 [XunitTestCaseDiscoverer(
-    typeName: "Duende.Hosts.Tests.TestInfra.Retries.RetriableTestDiscoverer",
+    typeName: "Duende.Hosts.Tests.TestInfra.Retries.RetryableTestDiscoverer",
     assemblyName: "Duende.Hosts.Tests"
 )]
-public class RetriableFact : FactAttribute
+public class RetryableFact : FactAttribute
 {
     public int MaxRetries { get; set; } = 5;
 }

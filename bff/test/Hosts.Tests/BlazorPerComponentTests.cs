@@ -22,7 +22,7 @@ public class BlazorPerComponentTests(ITestOutputHelper output, AppHostFixture fi
         };
     }
 
-    [RetriableFact]
+    [RetryableFact]
     public async Task Can_load_blazor_webassembly_app()
     {
         await Warmup();

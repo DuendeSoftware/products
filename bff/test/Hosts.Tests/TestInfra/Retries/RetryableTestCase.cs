@@ -6,7 +6,7 @@ using Xunit.Sdk;
 
 namespace Duende.Hosts.Tests.TestInfra.Retries;
 
-public class RetriableTestCase(
+public class RetryableTestCase(
     IMessageSink sink,
     TestMethodDisplay display,
     TestMethodDisplayOptions methodDisplayOptions,
@@ -25,7 +25,7 @@ public class RetriableTestCase(
         CancellationTokenSource cts)
     {
         var retryCount = 0;
-        var maxRetries = Method.GetCustomAttributes(typeof(RetriableFact)).FirstOrDefault()?.GetNamedArgument<int>(nameof(RetriableFact.MaxRetries)) ?? 5;
+        var maxRetries = Method.GetCustomAttributes(typeof(RetryableFact)).FirstOrDefault()?.GetNamedArgument<int>(nameof(RetryableFact.MaxRetries)) ?? 5;
 
         while (true)
         {

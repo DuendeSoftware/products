@@ -6,14 +6,14 @@ using Xunit.Sdk;
 
 namespace Duende.Hosts.Tests.TestInfra.Retries;
 
-public class RetriableTestDiscoverer(IMessageSink messageSink) : IXunitTestCaseDiscoverer
+public class RetryableTestDiscoverer(IMessageSink messageSink) : IXunitTestCaseDiscoverer
 {
     public IEnumerable<IXunitTestCase> Discover(
         ITestFrameworkDiscoveryOptions discoveryOptions,
         ITestMethod testMethod,
         IAttributeInfo factAttribute)
     {
-        yield return new RetriableTestCase(
+        yield return new RetryableTestCase(
             messageSink,
             discoveryOptions.MethodDisplayOrDefault(),
             discoveryOptions.MethodDisplayOptionsOrDefault(),
