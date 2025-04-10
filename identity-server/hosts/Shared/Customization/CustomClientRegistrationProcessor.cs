@@ -8,8 +8,9 @@ using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
 using Duende.IdentityServer.Configuration.RequestProcessing;
 using Duende.IdentityServer.Models;
 
-namespace IdentityServerHost;
+namespace IdentityServerHost.Extensions;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated via DI container")]
 internal sealed class CustomClientRegistrationProcessor : DynamicClientRegistrationRequestProcessor
 {
     private readonly ICollection<Client> _clients;

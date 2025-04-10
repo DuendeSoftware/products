@@ -7,25 +7,23 @@ using Duende.IdentityServer.Models;
 
 namespace IdentityServerHost.Configuration;
 
-public static class Resources
+public static class TestResources
 {
     // identity resources represent identity data about a user that can be requested via the scope parameter (OpenID Connect)
     public static readonly IEnumerable<IdentityResource> IdentityResources =
-        new[]
-        {
+        [
             // some standard scopes from the OIDC spec
             new IdentityResources.OpenId(),
             new IdentityResources.Profile(),
             new IdentityResources.Email(),
 
             // custom identity resource with some consolidated claims
-            new IdentityResource("custom.profile", new[] { JwtClaimTypes.Name, JwtClaimTypes.Email, "location", JwtClaimTypes.Address })
-        };
+            new IdentityResource("custom.profile", [JwtClaimTypes.Name, JwtClaimTypes.Email, "location", JwtClaimTypes.Address])
+        ];
 
     // API scopes represent values that describe scope of access and can be requested by the scope parameter (OAuth)
     public static readonly IEnumerable<ApiScope> ApiScopes =
-        new[]
-        {
+        [
             // local API scope
             new ApiScope(IdentityServerConstants.LocalApi.ScopeName),
 
@@ -51,12 +49,11 @@ public static class Resources
             {
                 Description = "Some Transaction"
             }
-        };
+        ];
 
     // API resources are more formal representation of a resource with processing rules and their scopes (if any)
     public static readonly IEnumerable<ApiResource> ApiResources =
-        new[]
-        {
+        [
             new ApiResource("urn:resource1", "Resource 1")
             {
                 Description = "Something very long and descriptive",
@@ -87,5 +84,5 @@ public static class Resources
                 RequireResourceIndicator = true,
                 Scopes = { "resource3.scope1", "resource3.scope2", "shared.scope" }
             }
-        };
+        ];
 }

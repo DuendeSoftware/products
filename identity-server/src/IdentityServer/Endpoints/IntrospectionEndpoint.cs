@@ -94,7 +94,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         _logger.LogDebug("Starting introspection request.");
 
         // caller validation
-        ClientSecretValidationResult clientResult = null;
+        ClientSecretValidationResult clientResult;
 
         ApiResource api = null;
         Client client = null;

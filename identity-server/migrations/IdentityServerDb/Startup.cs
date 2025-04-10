@@ -5,7 +5,7 @@
 using Duende.IdentityServer.EntityFramework.Storage;
 using Microsoft.EntityFrameworkCore;
 
-namespace SqlServer;
+namespace IdentityServerDb;
 
 public class Startup
 {

@@ -178,7 +178,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         var hasNext = false;
         var hasPrev = false;
-        ServerSideSession[] items = null;
+        ServerSideSession[] items;
 
         if (filter.RequestPriorResults)
         {

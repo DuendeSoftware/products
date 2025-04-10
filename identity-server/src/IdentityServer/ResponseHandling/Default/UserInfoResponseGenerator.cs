@@ -136,7 +136,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     /// <returns></returns>
     protected internal virtual Task<IEnumerable<string>> GetRequestedClaimTypesAsync(ResourceValidationResult resourceValidationResult)
     {
-        IEnumerable<string> result = null;
+        IEnumerable<string> result;
 
         if (resourceValidationResult == null)
         {

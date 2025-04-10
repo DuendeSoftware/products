@@ -8,8 +8,8 @@ namespace IdentityServerHost.Configuration;
 
 public static class ClientsWeb
 {
-    private static string[] allowedScopes =
-    {
+    private static readonly string[] allowedScopes =
+    [
         IdentityServerConstants.StandardScopes.OpenId,
         IdentityServerConstants.StandardScopes.Profile,
         IdentityServerConstants.StandardScopes.Email,
@@ -17,7 +17,7 @@ public static class ClientsWeb
         "resource2.scope1",
         "transaction",
         "custom.profile"
-    };
+    ];
 
     public static IEnumerable<Client> Get() => new List<Client>
         {

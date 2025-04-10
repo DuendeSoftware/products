@@ -6,7 +6,7 @@ using IdentityServerHost.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace SqlServer;
+namespace AspNetIdentityDb;
 
 public class Startup
 {

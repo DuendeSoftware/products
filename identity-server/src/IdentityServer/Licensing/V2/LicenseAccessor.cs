@@ -90,7 +90,7 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
         var validateResult = handler.ValidateTokenAsync(licenseKey, parms).Result;
         if (!validateResult.IsValid)
         {
-            logger.LogCritical(validateResult.Exception, "Error validating the Duende software license key");
+            logger.ErrorValidatingLicenseKey(validateResult.Exception);
         }
 
         return validateResult.ClaimsIdentity?.Claims.ToArray() ?? [];

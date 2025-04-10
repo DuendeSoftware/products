@@ -1,55 +1,50 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>IdentityServerHost</RootNamespace>
-    <Nullable>enable</Nullable>
-    <AnalysisMode>all</AnalysisMode>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<RootNamespace>IdentityServerHost</RootNamespace>
+		<Nullable>enable</Nullable>
+		<AnalysisMode>all</AnalysisMode>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Serilog.AspNetCore" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
+	<ItemGroup>
+		<PackageReference Include="Serilog.AspNetCore" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
 
-    <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
-  </ItemGroup>
+		<PackageReference Include="OpenTelemetry" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <!-- This is a transitive dependency of Microsoft.EntityFrameworkCore.SqlServer.
+	<ItemGroup>
+		<!-- This is a transitive dependency of Microsoft.EntityFrameworkCore.SqlServer.
 Without pinning a version of this package, the sql server package would bring in
 an older version that in turn depends on vulnerable packages. Someday, it would
 be nice if we could update Microsoft.EntityFrameworkCore.SqlServer and remove
 this explicit dependency (assuming that future versions of
 Microsoft.EntityFrameworkCore.SqlServer that don't have this problem exist). -->
-    <PackageReference Include="Microsoft.Data.SqlClient" />
-  </ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference
-      Include="..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
+		<ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Config\Clients.cs">
-      <Link>Configuration\Clients.cs</Link>
-    </Compile>
-    <Compile Include="..\Config\ClientsConsole.cs">
-      <Link>Configuration\ClientsConsole.cs</Link>
-    </Compile>
-    <Compile Include="..\Config\ClientsWeb.cs">
-      <Link>Configuration\ClientsWeb.cs</Link>
-    </Compile>
-    <Compile Include="..\Config\Resources.cs">
-      <Link>Configuration\Resources.cs</Link>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Shared\Configuration\**\*.cs">
+			<Link>Shared\Configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Compile>
+		<Compile Include="..\Shared\Customization\**\*.cs">
+			<Link>Shared\Customization\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Compile>
+	</ItemGroup>
+
 </Project>

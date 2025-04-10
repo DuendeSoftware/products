@@ -28,12 +28,12 @@ internal static class IdentityServerExtensions
                 options.UserInteraction.CreateAccountUrl = "/Account/Create";
             })
             //.AddServerSideSessions()
-            .AddInMemoryClients(new List<Duende.IdentityServer.Models.Client>())
-            .AddInMemoryIdentityResources(Resources.IdentityResources)
-            .AddInMemoryApiScopes(Resources.ApiScopes)
-            .AddInMemoryApiResources(Resources.ApiResources)
-            .AddExtensionGrantValidator<Extensions.ExtensionGrantValidator>()
-            .AddExtensionGrantValidator<Extensions.NoSubjectExtensionGrantValidator>()
+            .AddInMemoryClients([])
+            .AddInMemoryIdentityResources(TestResources.IdentityResources)
+            .AddInMemoryApiScopes(TestResources.ApiScopes)
+            .AddInMemoryApiResources(TestResources.ApiResources)
+            .AddExtensionGrantValidator<ExtensionGrantValidator>()
+            .AddExtensionGrantValidator<NoSubjectExtensionGrantValidator>()
             .AddJwtBearerClientAuthentication()
             .AddAppAuthRedirectUriValidator()
             .AddTestUsers(TestUsers.Users)
@@ -41,8 +41,8 @@ internal static class IdentityServerExtensions
             .AddCustomTokenRequestValidator<ParameterizedScopeTokenRequestValidator>()
             .AddScopeParser<ParameterizedScopeParser>()
             .AddMutualTlsSecretValidators()
-            .AddInMemoryOidcProviders(new[]
-            {
+            .AddInMemoryOidcProviders(
+            [
                 new Duende.IdentityServer.Models.OidcProvider
                 {
                     Scheme = "dynamicprovider-idsvr",
@@ -52,7 +52,7 @@ internal static class IdentityServerExtensions
                     ResponseType = "id_token",
                     Scope = "openid profile"
                 }
-            });
+            ]);
 
         builder.Services.AddIdentityServerConfiguration(opt =>
         {

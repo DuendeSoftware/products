@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Hosts.Tests.TestInfra.Retries;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
@@ -20,7 +21,7 @@ public class BffBlazorWebAssemblyTests(ITestOutputHelper output, AppHostFixture 
         };
     }
 
-    [SkippableFact]
+    [RetryableFact]
     public async Task Can_login_and_load_local_api()
     {
         await Warmup();
@@ -39,7 +40,6 @@ public class BffBlazorWebAssemblyTests(ITestOutputHelper output, AppHostFixture 
         await weatherPage.VerifyWeatherListIsShown();
 
         await homePage.LogOut();
-
     }
 
     private async Task Warmup()

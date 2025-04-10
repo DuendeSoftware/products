@@ -342,7 +342,7 @@ internal class TokenValidator : ITokenValidator
         var scopes = claims.Where(c => c.Type == JwtClaimTypes.Scope).ToArray();
         foreach (var scope in scopes)
         {
-            if (scope.Value.Contains(" "))
+            if (scope.Value.Contains(' '))
             {
                 claims.Remove(scope);
                 var values = scope.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);

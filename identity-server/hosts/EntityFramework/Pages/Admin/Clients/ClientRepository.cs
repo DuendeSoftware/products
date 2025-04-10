@@ -160,7 +160,7 @@ public class ClientRepository
             client.ClientName = model.Name?.Trim();
         }
 
-        var scopes = model.AllowedScopes.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
+        var scopes = model.AllowedScopes.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var currentScopes = (client.AllowedScopes.Select(x => x.Scope) ?? Enumerable.Empty<string>()).ToArray();
 
         var scopesToAdd = scopes.Except(currentScopes).ToArray();

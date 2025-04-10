@@ -7,11 +7,13 @@ using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Test;
 
-namespace IdentityServerHost;
+namespace IdentityServerHost.Configuration;
 
 public static class TestUsers
 {
+#pragma warning disable CA1002 // Do not expose generic lists
     public static List<TestUser> Users
+#pragma warning restore CA1002 // Do not expose generic lists
     {
         get
         {
@@ -23,8 +25,8 @@ public static class TestUsers
                 country = "Germany"
             };
 
-            return new List<TestUser>
-            {
+            return
+            [
                 new TestUser
                 {
                     SubjectId = "1",
@@ -57,7 +59,7 @@ public static class TestUsers
                         new Claim(JwtClaimTypes.Address, JsonSerializer.Serialize(address), IdentityServerConstants.ClaimValueTypes.Json)
                     }
                 }
-            };
+            ];
         }
     }
 }

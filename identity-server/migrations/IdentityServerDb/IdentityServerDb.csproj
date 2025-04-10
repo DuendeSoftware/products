@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -30,19 +30,10 @@
     <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\hosts\Config\Clients.cs">
-      <Link>Configuration\Clients.cs</Link>
-    </Compile>
-    <Compile Include="..\..\hosts\Config\ClientsConsole.cs">
-      <Link>Configuration\ClientsConsole.cs</Link>
-    </Compile>
-    <Compile Include="..\..\hosts\Config\ClientsWeb.cs">
-      <Link>Configuration\ClientsWeb.cs</Link>
-    </Compile>
-    <Compile Include="..\..\hosts\Config\Resources.cs">
-      <Link>Configuration\Resources.cs</Link>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\..\hosts\Shared\Configuration\**\*.cs">
+			<Link>Shared\Configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
+		</Compile>
+	</ItemGroup>
 
 </Project>

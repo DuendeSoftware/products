@@ -159,10 +159,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
 
             if (Options.Endpoints.EnablePushedAuthorizationEndpoint)
             {
-                // TODO - Add these PAR disco values to IdentityModel
-                entries.Add("pushed_authorization_request_endpoint", baseUrl + ProtocolRoutePaths.PushedAuthorization);
-
-                entries.Add("require_pushed_authorization_requests", Options.PushedAuthorization.Required);
+                entries.Add(OidcConstants.Discovery.PushedAuthorizationRequestEndpoint, baseUrl + ProtocolRoutePaths.PushedAuthorization);
+                entries.Add(OidcConstants.Discovery.RequirePushedAuthorizationRequests, Options.PushedAuthorization.Required);
             }
 
             if (Options.MutualTls.Enabled)
