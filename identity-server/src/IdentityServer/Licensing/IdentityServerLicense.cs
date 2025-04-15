@@ -106,15 +106,12 @@ public class IdentityServerLicense : License
             else
             {
                 // defaults limits for non-ISV editions
-                switch (Edition)
+                ClientLimit = Edition switch
                 {
-                    case LicenseEdition.Business:
-                        ClientLimit = 15;
-                        break;
-                    case LicenseEdition.Starter:
-                        ClientLimit = 5;
-                        break;
-                }
+                    LicenseEdition.Business => 15,
+                    LicenseEdition.Starter => 5,
+                    _ => ClientLimit
+                };
             }
 
             if (int.TryParse(claims.FindFirst("client_limit")?.Value, out var clientLimit))
@@ -126,14 +123,13 @@ public class IdentityServerLicense : License
             if (!RedistributionFeature)
             {
                 // these for the non-ISV editions that always have unlimited, regardless of explicit value
-                switch (Edition)
+                ClientLimit = Edition switch
                 {
-                    case LicenseEdition.Enterprise:
-                    case LicenseEdition.Community:
+                    LicenseEdition.Enterprise or LicenseEdition.Community =>
                         // unlimited
-                        ClientLimit = null;
-                        break;
-                }
+                        null,
+                    _ => ClientLimit
+                };
             }
         }
 
@@ -148,14 +144,13 @@ public class IdentityServerLicense : License
             }
 
             // these for the editions that always have unlimited, regardless of explicit value
-            switch (Edition)
+            IssuerLimit = Edition switch
             {
-                case LicenseEdition.Enterprise:
-                case LicenseEdition.Community:
+                LicenseEdition.Enterprise or LicenseEdition.Community =>
                     // unlimited
-                    IssuerLimit = null;
-                    break;
-            }
+                    null,
+                _ => IssuerLimit
+            };
         }
     }
 
