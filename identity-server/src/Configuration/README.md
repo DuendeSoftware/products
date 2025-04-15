@@ -6,7 +6,7 @@ Duende.IdentityServer.Configuration provides a collection of endpoints that allo
 This package includes abstractions for interacting with the IdentityServer configuration data store. You can either implement the store yourself or use [Duende.IdentityServer.Configuration.EntityFramework](https://www.nuget.org/packages/Duende.IdentityServer.Configuration.EntityFramework) for our default store implementation built with Entity Framework.
 
 ## Getting Started
-A guide to installing and hosting the Configuration API is available [here](https://docs.duendesoftware.com/identityserver/v7/configuration/dcr/installation/). More [documentation](https://docs.duendesoftware.com/identityserver/v7/configuration/) and an [API reference](https://docs.duendesoftware.com/identityserver/v7/configuration/dcr/reference/) are also available.
+A guide to installing and hosting the Configuration API is available [here](https://docs.duendesoftware.com/identityserver/configuration/dcr#installation-and-hosting). More [documentation](https://docs.duendesoftware.com/identityserver/configuration) and an [API reference](https://docs.duendesoftware.com/identityserver/reference/dcr/models/) are also available.
 
 ## Licensing
 Duende IdentityServer is source-available, but requires a paid [license](https://duendesoftware.com/products/identityserver) for production use.
@@ -16,7 +16,7 @@ Duende IdentityServer is source-available, but requires a paid [license](https:/
 - **Free Community Edition**: A free Community Edition license is available for qualifying companies and non-profit organizations. Learn more [here](https://duendesoftware.com/products/communityedition).
 
 ## Reporting Issues and Getting Support
-- For bug reports or feature requests, [use our developer community forum](https://github.com/DuendeSoftware/community).
+- For bug reports or feature requests, [use our developer community forum](https://duende.link/community).
 - For security-related concerns, please contact us privately at: **security@duendesoftware.com**.
 
 ## Related Packages
