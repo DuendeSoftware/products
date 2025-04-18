@@ -12,11 +12,18 @@ public static class Config
     [
         new IdentityResources.OpenId(),
         new IdentityResources.Profile(),
+
+        // 1. The email resource must be added to the system. 
+        // This maps the email scope to the email claim. 
+        new IdentityResources.Email()
     ];
 
     public static IEnumerable<ApiScope> ApiScopes =>
     [
-        new("api", ["name"]),
+        // 3. The API scope, requested by the BFF needs to also require the email claim. 
+        // Basically, you're telling that, if you want to call this api, it also needs the email claim
+        new("api", ["name", "email"]),
+
         new("scope-for-isolated-api", ["name"]),
     ];
 

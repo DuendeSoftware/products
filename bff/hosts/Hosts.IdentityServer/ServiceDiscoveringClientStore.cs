@@ -56,7 +56,9 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
                     PostLogoutRedirectUris = { $"{bffUrl}signout-callback-oidc" },
 
                     AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
+
+                    // 2. The client needs to be allowed to request the email scope (which maps to the email claim)
+                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api", "email" },
 
                     RefreshTokenExpiration = TokenExpiration.Absolute,
                     AbsoluteRefreshTokenLifetime = 60,

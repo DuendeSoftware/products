@@ -76,6 +76,9 @@ internal static class Extensions
                 options.Scope.Add("scope-for-isolated-api");
                 options.Scope.Add("offline_access");
 
+                // 4. The client needs to request the email claim. 
+                options.Scope.Add("email");
+
                 options.Resource = "urn:isolated-api";
             });
         services.AddTransient<ImpersonationAccessTokenRetriever>();
