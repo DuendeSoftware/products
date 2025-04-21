@@ -783,16 +783,16 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         // DPoP
         //////////////////////////////////////////////////////////
-        var dpop_jwt = request.Raw.Get(OidcConstants.AuthorizeRequest.DPoPKeyThumbprint);
-        if (dpop_jwt.IsPresent())
+        var dpop_jkt = request.Raw.Get(OidcConstants.AuthorizeRequest.DPoPKeyThumbprint);
+        if (dpop_jkt.IsPresent())
         {
-            if (dpop_jwt.Length > _options.InputLengthRestrictions.DPoPKeyThumbprint)
+            if (dpop_jkt.Length > _options.InputLengthRestrictions.DPoPKeyThumbprint)
             {
                 LogError("dpop_jwt value too long", request);
                 return Invalid(request, description: "Invalid dpop_jwt");
             }
 
-            request.DPoPKeyThumbprint = dpop_jwt;
+            request.DPoPKeyThumbprint = dpop_jkt;
         }
 
         return Valid(request);
