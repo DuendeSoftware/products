@@ -74,8 +74,22 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
                 client.ErrorDescription);
         }
 
+        var validationContext = new PushedAuthorizationRequestValidationContext(values, client.Client);
+
+        if (context.Request.Headers.TryGetValue(OidcConstants.HttpHeaders.DPoP, out var dpopHeader))
+        {
+            if (dpopHeader.Count > 1)
+            {
+                return CreateErrorResult(
+                    logMessage: "Too many DPoP headers provided.",
+                    error: OidcConstants.AuthorizeErrors.InvalidRequest);
+            }
+
+            validationContext.DPoPProofToken = dpopHeader.First();
+        }
+
         // Perform validations specific to PAR, as well as validation of the pushed parameters
-        var parValidationResult = await _parValidator.ValidateAsync(new PushedAuthorizationRequestValidationContext(values, client.Client));
+        var parValidationResult = await _parValidator.ValidateAsync(validationContext);
         if (parValidationResult.IsError)
         {
             return CreateErrorResult(

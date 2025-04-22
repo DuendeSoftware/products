@@ -230,6 +230,17 @@ public class PushedAuthorizationTests
         authorizeCallbackResponse.Headers.Location!.ToString().ShouldStartWith(expectedCallback);
     }
 
+    [Fact]
+    public async Task multiple_dpop_headers_sent_to_the_par_endpoint_fails()
+    {
+        _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("DPoP", "first");
+        _mockPipeline.BackChannelClient.DefaultRequestHeaders.Add("DPoP", "second");
+        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync();
+        statusCode.ShouldBe(HttpStatusCode.BadRequest);
+        parJson.RootElement.GetProperty("error").GetString()
+            .ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
     private void ConfigureScopesAndResources()
     {
         _mockPipeline.IdentityScopes.AddRange(new IdentityResource[] {

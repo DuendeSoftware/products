@@ -22,6 +22,7 @@ public class PushedAuthorizationRequestValidationContext
         RequestParameters = requestParameters;
         Client = client;
     }
+
     /// <summary>
     /// The request form parameters
     /// </summary>
@@ -31,4 +32,9 @@ public class PushedAuthorizationRequestValidationContext
     /// The validation result of client authentication
     /// </summary>
     public Client Client { get; set; }
+
+    /// <summary>
+    /// The DPoP proof token sent to the endpoint, if any
+    /// </summary>
+    public string DPoPProofToken { get; set; }
 }
