@@ -57,9 +57,13 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
+    [Theory]
+    [InlineData("DPOP")] // upper
+    [InlineData("dpop")] // lower
+    [InlineData("DPoP")] // mixed, but normal
+    [InlineData("dpOP")] // nonsense
     [Trait("Category", "Integration")]
-    public async Task valid_token_and_proof_succeeds()
+    public async Task valid_token_and_proof_succeeds_with_case_insensitive_http_header_authentication_scheme(string scheme)
     {
         var identityServer = await CreateIdentityServer();
         identityServer.Clients.Add(DPoPOnlyClient);
@@ -77,7 +81,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         token.ShouldNotBeNull();
         token.AccessToken.ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
-        api.HttpClient.SetToken(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP, token.AccessToken);
+        api.HttpClient.SetToken(scheme, token.AccessToken);
 
         // Create proof token for api call
         var dpopService =

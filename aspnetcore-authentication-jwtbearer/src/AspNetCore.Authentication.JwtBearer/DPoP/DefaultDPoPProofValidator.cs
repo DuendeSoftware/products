@@ -62,14 +62,14 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// The logger.
     /// </summary>
-    protected readonly ILogger<DPoPJwtBearerEvents> Logger;
+    protected readonly ILogger<DefaultDPoPProofValidator> Logger;
 
     /// <summary>
     /// Constructs a new instance of the <see cref="DefaultDPoPProofValidator"/>.
     /// </summary>
     public DefaultDPoPProofValidator(IOptionsMonitor<DPoPOptions> optionsMonitor,
         IDataProtectionProvider dataProtectionProvider, IReplayCache replayCache,
-        TimeProvider timeProvider, ILogger<DPoPJwtBearerEvents> logger)
+        TimeProvider timeProvider, ILogger<DefaultDPoPProofValidator> logger)
     {
         OptionsMonitor = optionsMonitor;
         DataProtector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
@@ -83,11 +83,13 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// </summary>
     public async Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, CancellationToken cancellationToken = default)
     {
+        Logger.LogDebug("Validating DPoP proof token");
         var result = new DPoPProofValidationResult();
 
         if (string.IsNullOrEmpty(context.ProofToken))
         {
-            result.SetError("Missing DPoP proof value.");
+            Logger.LogDebug("Missing DPoP proof value");
+            result.SetError("Missing DPoP proof value");
             return result;
         }
 

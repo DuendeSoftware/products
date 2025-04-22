@@ -71,4 +71,19 @@ public class TokenExtensionsTests
 
         thumbprint.ShouldBe(expected);
     }
+
+    [Fact]
+    public void introspection_token_does_not_include_claims_disallowed_by_spec()
+    {
+        var token = new Token(JwtClaimTypes.JwtTypes.IntrospectionJwtResponse)
+        {
+            Issuer = "issuer"
+        };
+
+        var result = token.CreateJwtPayloadDictionary(new IdentityServerOptions(), new DefaultClock(),
+            TestLogger.Create<TokenExtensionsTests>());
+
+        result.Keys.ShouldNotContain(JwtClaimTypes.Expiration);
+        result.Keys.ShouldNotContain(JwtClaimTypes.Subject);
+    }
 }

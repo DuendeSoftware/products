@@ -92,13 +92,14 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             // Read the token so we can get the "typ" header value if it exists.
             var handlerForHeader = new JsonWebTokenHandler();
             var tokenForHeader = handlerForHeader.ReadJsonWebToken(jwtTokenString);
-            var jwtTyp = tokenForHeader.GetHeaderValue<string>("typ");
-
             // If strict mode is not enabled by option but the "typ" header value "client-authentication+jwt" is provided,
             // enforce strict audience validation.
-            if (string.Equals(jwtTyp, "client-authentication+jwt", StringComparison.OrdinalIgnoreCase))
+            if (tokenForHeader.TryGetHeaderValue<string>("typ", out var jwtTyp))
             {
-                enforceStrictAud = true;
+                if (string.Equals(jwtTyp, "client-authentication+jwt", StringComparison.OrdinalIgnoreCase))
+                {
+                    enforceStrictAud = true;
+                }
             }
         }
         catch (Exception ex)

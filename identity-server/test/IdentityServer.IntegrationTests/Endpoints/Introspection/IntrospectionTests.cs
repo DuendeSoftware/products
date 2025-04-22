@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using IntegrationTests.Endpoints.Introspection.Setup;
@@ -118,7 +120,8 @@ public class IntrospectionTests
         var json = JsonSerializer.Serialize(data);
 
         var client = new HttpClient(_handler);
-        var response = await client.PostAsync(IntrospectionEndpoint, new StringContent(json, Encoding.UTF8, "application/json"));
+        var response = await client.PostAsync(IntrospectionEndpoint,
+            new StringContent(json, Encoding.UTF8, "application/json"));
         response.StatusCode.ShouldBe(HttpStatusCode.UnsupportedMediaType);
     }
 
@@ -209,7 +212,8 @@ public class IntrospectionTests
     [InlineData("api1", Constants.TokenTypeHints.AccessToken, false)]
     [InlineData("api1", "bogus", false)]
 
-    public async Task Refresh_tokens_can_be_introspected_by_their_client_with_any_hint(string introspectedBy, string hint, bool isActive)
+    public async Task Refresh_tokens_can_be_introspected_by_their_client_with_any_hint(string introspectedBy,
+        string hint, bool isActive)
     {
         TokenResponse tokenResponse;
 
@@ -589,7 +593,8 @@ public class IntrospectionTests
         introspectionResponse.IsError.ShouldBeFalse();
         introspectionResponse.Claims.Single(x => x.Type == "client_id").Value.ShouldBe("ro.client");
         introspectionResponse.Claims.Single(x => x.Type == "sub").Value.ShouldBe("1");
-        introspectionResponse.Claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["api1", "offline_access"]);
+        introspectionResponse.Claims.Where(x => x.Type == "scope").Select(x => x.Value)
+            .ShouldBe(["api1", "offline_access"]);
     }
 
     [Fact]
@@ -706,6 +711,213 @@ public class IntrospectionTests
 
         introspectionResponse.IsActive.ShouldBeFalse();
         introspectionResponse.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task jwt_response_type_requested_returns_jwt_response()
+    {
+        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        {
+            Address = TokenEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+            UserName = "bob",
+            Password = "bob",
+            Scope = "api1 offline_access"
+        });
+
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Token = tokenResponse.AccessToken,
+            TokenTypeHint = Constants.TokenTypeHints.AccessToken,
+            ResponseFormat = ResponseFormat.Jwt
+        });
+
+        introspectionResponse.HttpResponse.Content.Headers.ContentType.MediaType.ShouldBe($"application/{JwtClaimTypes.JwtTypes.IntrospectionJwtResponse}");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task jwt_response_type_returns_expected_required_jwt_structure()
+    {
+        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        {
+            Address = TokenEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+            UserName = "bob",
+            Password = "bob",
+            Scope = "api1 offline_access"
+        });
+
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Token = tokenResponse.AccessToken,
+            TokenTypeHint = Constants.TokenTypeHints.AccessToken,
+            ResponseFormat = ResponseFormat.Jwt
+        });
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(introspectionResponse.Raw);
+        jwt.Header.Typ.ShouldBe(JwtClaimTypes.JwtTypes.IntrospectionJwtResponse);
+        jwt.Audiences.SingleOrDefault(aud => aud == "ro.client").ShouldNotBeNull();
+        jwt.Claims.SingleOrDefault(claim => claim.Type == JwtClaimTypes.Expiration).ShouldBeNull();
+        jwt.Claims.SingleOrDefault(claim => claim.Type == JwtClaimTypes.Subject).ShouldBeNull();
+
+        var tokenIntrospectionClaim = jwt.Claims.SingleOrDefault(claim => claim.Type == "token_introspection");
+        tokenIntrospectionClaim.ShouldNotBeNull();
+        tokenIntrospectionClaim.ValueType.ShouldBe(IdentityServerConstants.ClaimValueTypes.Json, StringCompareShould.IgnoreCase);
+        var introspectionFields = tokenIntrospectionClaim.Value.GetFields();
+        introspectionFields["active"].GetBoolean().ShouldBeTrue();
+        introspectionFields["scope"].GetString().ShouldBe("api1 offline_access");
+        introspectionFields["iss"].GetString().ShouldBe("https://idsvr4");
+        introspectionFields["aud"].GetString().ShouldBe("api1");
+        introspectionFields["client_id"].GetString().ShouldBe("ro.client");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task jwt_response_type_for_revoked_token_only_includes_active_claim_in_introspection_claim()
+    {
+        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        {
+            Address = TokenEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+            UserName = "bob",
+            Password = "bob",
+            Scope = "api1 offline_access"
+        });
+
+        var revocationResponse = await _client.RevokeTokenAsync(new TokenRevocationRequest
+        {
+            Address = RevocationEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Token = tokenResponse.RefreshToken
+        });
+        revocationResponse.IsError.ShouldBeFalse();
+
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Token = tokenResponse.AccessToken,
+            TokenTypeHint = Constants.TokenTypeHints.AccessToken,
+            ResponseFormat = ResponseFormat.Jwt
+        });
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(introspectionResponse.Raw);
+
+        var tokenIntrospectionClaim = jwt.Claims.SingleOrDefault(claim => claim.Type == "token_introspection");
+        tokenIntrospectionClaim.ShouldNotBeNull();
+        tokenIntrospectionClaim.ValueType.ShouldBe(IdentityServerConstants.ClaimValueTypes.Json, StringCompareShould.IgnoreCase);
+        var introspectionFields = tokenIntrospectionClaim.Value.GetFields();
+        introspectionFields["active"].GetBoolean().ShouldBeFalse();
+        introspectionFields.Keys.Count(key => key != "active").ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task jwt_response_type_for_invalid_token_only_includes_active_claim_in_introspection_claim()
+    {
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Token = "invalid",
+            ResponseFormat = ResponseFormat.Jwt
+        });
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(introspectionResponse.Raw);
+
+        var tokenIntrospectionClaim = jwt.Claims.SingleOrDefault(claim => claim.Type == "token_introspection");
+        tokenIntrospectionClaim.ShouldNotBeNull();
+        tokenIntrospectionClaim.ValueType.ShouldBe(IdentityServerConstants.ClaimValueTypes.Json, StringCompareShould.IgnoreCase);
+        var introspectionFields = tokenIntrospectionClaim.Value.GetFields();
+        introspectionFields["active"].GetBoolean().ShouldBeFalse();
+        introspectionFields.Keys.Count(key => key != "active").ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task jwt_response_type_should_handle_nested_claim_in_introspection_claim()
+    {
+        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        {
+            Address = TokenEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Scope = "api1 offline_access roles address",
+            UserName = "bob",
+            Password = "bob"
+        });
+
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Token = tokenResponse.AccessToken,
+            TokenTypeHint = Constants.TokenTypeHints.AccessToken,
+            ResponseFormat = ResponseFormat.Jwt
+        });
+
+        introspectionResponse.Json.ShouldNotBeNull();
+        var addressClaim = introspectionResponse.Json.Value.TryGetString("address");
+        addressClaim.ShouldBe("{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task jwt_response_type_should_handle_complex_claim_in_introspection_claim()
+    {
+        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        {
+            Address = TokenEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Scope = "api1 offline_access roles",
+            UserName = "bob",
+            Password = "bob"
+        });
+
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "ro.client",
+            ClientSecret = "secret",
+
+            Token = tokenResponse.AccessToken,
+            TokenTypeHint = Constants.TokenTypeHints.AccessToken,
+            ResponseFormat = ResponseFormat.Jwt
+        });
+
+        introspectionResponse.Json.ShouldNotBeNull();
+        var rolesClaim = introspectionResponse.Json.Value.TryGetStringArray("role").ToList();
+        rolesClaim.ShouldNotBeNull();
+        rolesClaim.Count.ShouldBe(2);
+        rolesClaim.ShouldContain("Admin");
+        rolesClaim.ShouldContain("Geek");
     }
 
     private Dictionary<string, JsonElement> GetFields(TokenIntrospectionResponse response) => response.Raw.GetFields();

@@ -3,6 +3,7 @@
 
 
 using System.Text.Json;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -105,6 +106,10 @@ public class DefaultTokenCreationService : ITokenCreationService
             {
                 additionalHeaderElements.Add("typ", Options.LogoutTokenJwtType);
             }
+        }
+        else if (token.Type == JwtClaimTypes.JwtTypes.IntrospectionJwtResponse)
+        {
+            additionalHeaderElements.Add("typ", "token-introspection+jwt");
         }
 
         return Task.FromResult(additionalHeaderElements);

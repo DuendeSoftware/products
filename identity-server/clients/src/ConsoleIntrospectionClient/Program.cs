@@ -14,7 +14,8 @@ var authority = builder.Configuration["is-host"];
 IDiscoveryCache _cache = new DiscoveryCache(authority);
 
 var response = await RequestTokenAsync();
-await IntrospectAsync(response.AccessToken);
+await IntrospectAsync(response.AccessToken, ResponseFormat.Json);
+await IntrospectAsync(response.AccessToken, ResponseFormat.Jwt);
 
 // Graceful shutdown
 Environment.Exit(0);
@@ -34,14 +35,14 @@ async Task<TokenResponse> RequestTokenAsync()
 
         UserName = "bob",
         Password = "bob",
-        Scope = "resource1.scope1 resource2.scope1"
+        Scope = "resource1.scope1 resource2.scope1",
     });
 
     if (response.IsError) throw new Exception(response.Error);
     return response;
 }
 
-async Task IntrospectAsync(string accessToken)
+async Task IntrospectAsync(string accessToken, ResponseFormat responseFormat)
 {
     var disco = await _cache.GetAsync();
     if (disco.IsError) throw new Exception(disco.Error);
@@ -53,7 +54,8 @@ async Task IntrospectAsync(string accessToken)
 
         ClientId = "urn:resource1",
         ClientSecret = "secret",
-        Token = accessToken
+        Token = accessToken,
+        ResponseFormat = responseFormat
     });
 
     if (result.IsError)
@@ -65,6 +67,11 @@ async Task IntrospectAsync(string accessToken)
         if (result.IsActive)
         {
             result.Claims.ToList().ForEach(c => Console.WriteLine($"{c.Type}: {c.Value}"));
+
+            if (responseFormat == ResponseFormat.Jwt)
+            {
+                Console.WriteLine($"Raw JWT Response: {result.Raw}");
+            }
         }
         else
         {

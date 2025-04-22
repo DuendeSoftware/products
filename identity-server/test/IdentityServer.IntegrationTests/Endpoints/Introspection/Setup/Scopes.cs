@@ -8,6 +8,14 @@ namespace IntegrationTests.Endpoints.Introspection.Setup;
 
 internal class Scopes
 {
+    public static IEnumerable<IdentityResource> GetIdentityScopes() => new IdentityResource[]
+    {
+        new IdentityResources.OpenId(),
+        new IdentityResources.Email(),
+        new IdentityResources.Address(),
+        new IdentityResource("roles", new[] { "role" })
+    };
+
     public static IEnumerable<ApiResource> GetApis() => new ApiResource[]
         {
             new ApiResource
@@ -17,7 +25,8 @@ internal class Scopes
                 {
                     new Secret("secret".Sha256())
                 },
-                Scopes = { "api1" }
+                Scopes = { "api1" },
+                UserClaims = { "role", "address" }
             },
             new ApiResource
             {

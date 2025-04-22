@@ -111,6 +111,13 @@ public static class TokenExtensions
                 }
             }
 
+            if (token.Type == JwtClaimTypes.JwtTypes.IntrospectionJwtResponse)
+            {
+                payload.Remove(JwtClaimTypes.Expiration);
+                payload.Remove(JwtClaimTypes.NotBefore);
+                payload.Remove(JwtClaimTypes.Subject);
+            }
+
             return payload;
         }
         catch (Exception ex)

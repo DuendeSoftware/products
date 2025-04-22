@@ -55,7 +55,7 @@ internal class Clients
                 },
 
                 AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-                AllowedScopes = { "api1", "api2", "api3-a", "api3-b" },
+                AllowedScopes = { "api1", "api2", "api3-a", "api3-b", "roles", "address" },
                 AllowOfflineAccess = true,
                 AccessTokenType = AccessTokenType.Reference
             },

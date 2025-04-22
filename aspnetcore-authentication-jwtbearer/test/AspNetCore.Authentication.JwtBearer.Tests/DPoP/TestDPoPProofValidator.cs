@@ -18,7 +18,7 @@ public class TestDPoPProofValidator : DefaultDPoPProofValidator
             new EphemeralDataProtectionProvider(),
             replayCache,
             new FakeTimeProvider(),
-            Substitute.For<ILogger<DPoPJwtBearerEvents>>())
+            Substitute.For<ILogger<DefaultDPoPProofValidator>>())
     { }
 
     public IDataProtector TestDataProtector => DataProtector;

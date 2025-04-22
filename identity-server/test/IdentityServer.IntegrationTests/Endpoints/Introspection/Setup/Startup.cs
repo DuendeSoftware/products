@@ -22,6 +22,7 @@ public class Startup
         builder.AddInMemoryClients(Clients.Get());
         builder.AddInMemoryApiResources(Scopes.GetApis());
         builder.AddInMemoryApiScopes(Scopes.GetScopes());
+        builder.AddInMemoryIdentityResources(Scopes.GetIdentityScopes());
         builder.AddTestUsers(Users.Get());
         builder.AddDeveloperSigningCredential(persistKey: false);
     }

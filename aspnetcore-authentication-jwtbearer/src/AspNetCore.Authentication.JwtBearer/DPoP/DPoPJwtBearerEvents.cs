@@ -41,6 +41,8 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// </summary>
     public override Task MessageReceived(MessageReceivedContext context)
     {
+        _logger.LogDebug("MessageReceived invoked in a JWT bearer authentication scheme using DPoP");
+
         var dpopOptions = _optionsMonitor.Get(context.Scheme.Name);
 
         if (TryGetDPoPAccessToken(context.HttpContext.Request, dpopOptions.ProofTokenMaxLength, out var token))
@@ -58,10 +60,12 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     }
 
     /// <summary>
-    /// Ensures that a valid DPoP proof proof accompanies DPoP access tokens.
+    /// Ensures that a valid DPoP proof token accompanies DPoP access tokens.
     /// </summary>
     public override async Task TokenValidated(TokenValidatedContext context)
     {
+        _logger.LogDebug("TokenValidated invoked in a JWT bearer authentication scheme using DPoP");
+
         var dPoPOptions = _optionsMonitor.Get(context.Scheme.Name);
 
         if (TryGetDPoPAccessToken(context.HttpContext.Request, dPoPOptions.ProofTokenMaxLength, out var at))
@@ -111,7 +115,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
         }
     }
 
-    private const string DPoPPrefix = OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP + " ";
+    private const string DPoPPrefix = AuthenticationSchemes.AuthorizationHeaderDPoP + " ";
 
     /// <summary>
     /// Checks if the HTTP authorization header's 'scheme' is DPoP.
@@ -119,7 +123,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     protected static bool IsDPoPAuthorizationScheme(HttpRequest request)
     {
         var authz = request.Headers.Authorization.FirstOrDefault();
-        return authz?.StartsWith(DPoPPrefix, StringComparison.Ordinal) == true;
+        return authz?.StartsWith(DPoPPrefix, StringComparison.OrdinalIgnoreCase) == true;
     }
 
     /// <summary>
@@ -137,11 +141,13 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
             _logger.LogInformation("DPoP proof rejected because it exceeded ProofTokenMaxLength.");
             return false;
         }
-        if (authz?.StartsWith(DPoPPrefix, StringComparison.Ordinal) == true)
+        if (authz?.StartsWith(DPoPPrefix, StringComparison.OrdinalIgnoreCase) == true)
         {
             token = authz[DPoPPrefix.Length..].Trim();
+            _logger.LogDebug("DPoP access token found");
             return true;
         }
+        _logger.LogDebug("DPoP access token not found");
         return false;
     }
 
@@ -151,6 +157,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// </summary>
     public override Task Challenge(JwtBearerChallengeContext context)
     {
+        _logger.LogDebug("Challenge invoked in a JWT bearer authentication scheme using DPoP");
         var dPoPOptions = _optionsMonitor.Get(context.Scheme.Name);
 
         if (dPoPOptions.TokenMode == DPoPMode.DPoPOnly)
