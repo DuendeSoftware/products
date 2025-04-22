@@ -11,7 +11,7 @@ This repository contains the core products developed by Duende Software.
 
 Duende IdentityServer is a modern, standards-compliant OpenID Connect and OAuth 2.0 framework for ASP.NET Core, designed to provide secure authentication and API access control for modern applications. It supports a wide range of authentication flows, token types, and extension points for customization.
 
-- [Documentation](https://docs.duendesoftware.com/identityserver/v7)
+- [Documentation](https://docs.duendesoftware.com/identityserver/)
 - [Source Code](./identity-server)
 
 ### Duende BFF (Backend for Frontend)
@@ -21,7 +21,7 @@ Duende IdentityServer is a modern, standards-compliant OpenID Connect and OAuth 
 
 The Backend for Frontend (BFF) pattern is a security architecture for browser-based JavaScript applications. It keeps access and refresh tokens on the server and eliminates the need for CORS, providing improved security for your web applications.
 
-- [Documentation](https://docs.duendesoftware.com/identityserver/v7/bff/)
+- [Documentation](https://docs.duendesoftware.com//bff/)
 - [Source Code](./bff)
 
 ### AspNet Core JWT Bearer Authentication Extensions
@@ -31,7 +31,7 @@ The Backend for Frontend (BFF) pattern is a security architecture for browser-ba
 
 Extends the ASP.NET Core JWT Bearer authentication handler with support for OAuth 2.0 Demonstrating Proof-of-Possession (DPoP), enhancing security for bearer tokens by proving possession of a private key.
 
-- [Documentation](https://docs.duendesoftware.com/identityserver/v7/apis/aspnetcore/dpop/)
+- [Documentation](https://docs.duendesoftware.com/identityserver/tokens/pop/)
 - [Source Code](./aspnetcore-authentication-jwtbearer)
 
 ## License

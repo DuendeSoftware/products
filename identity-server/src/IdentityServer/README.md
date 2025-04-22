@@ -6,7 +6,7 @@ _The most flexible and standards-compliant OpenID Connect and OAuth 2.x framewor
 Duende IdentityServer is a highly extensible, standards-compliant framework for implementing the OpenID Connect and OAuth 2.x protocols in ASP.NET Core. It offers deep flexibility for handling authentication, authorization, and token issuance and can be adapted to fit complex custom security scenarios.
 
 ## Getting Started
-If you're ready to dive into development, check out our [Quickstart Tutorial Series](https://docs.duendesoftware.com/quickstarts) for step-by-step guidance.
+If you're ready to dive into development, check out our [Quickstart Tutorial Series](https://docs.duendesoftware.com/identityserver/quickstarts/0-overview/) for step-by-step guidance.
 
 For more in-depth documentation, visit [our documentation portal](https://docs.duendesoftware.com).
 
