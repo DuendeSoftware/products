@@ -84,7 +84,7 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffIntegrationTestBa
     public async Task can_use_prompt_supported_by_IdentityServer()
     {
         // Prompt=create is enabled in identity server configuration:
-        //https://docs.duendesoftware.com/identityserver/v7/reference/options/#userinteraction
+        // https://docs.duendesoftware.com/identityserver/reference/options#userinteraction
         // by setting CreateAccountUrl 
 
         var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/login?prompt=create"));

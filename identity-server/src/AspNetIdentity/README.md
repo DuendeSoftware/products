@@ -7,7 +7,7 @@ Duende.IdentityServer.AspNetIdentity integrates ASP.NET Core Identity with Duend
 [IdentityServer](https://www.nuget.org/packages/Duende.IdentityServer) is a highly extensible, standards-compliant framework for implementing the OpenID Connect and OAuth 2.x protocols in ASP.NET Core. 
 
 ## Getting Started
-Check out our [Quickstart Tutorial Series](https://docs.duendesoftware.com/identityserver/v7/quickstarts/) for step-by-step guidance. In particular, [QuickStart 5](https://docs.duendesoftware.com/identityserver/v7/quickstarts/5_aspnetid/) shows how to use ASP.NET Core Identity with IdentityServer using this package.
+Check out our [Quickstart Tutorial Series](https://docs.duendesoftware.com/quickstarts) for step-by-step guidance. In particular, [QuickStart 5](https://docs.duendesoftware.com/quickstarts5_aspnetid/) shows how to use ASP.NET Core Identity with IdentityServer using this package.
 
 ## Licensing
 Duende IdentityServer is source-available, but requires a paid [license](https://duendesoftware.com/products/identityserver) for production use.
@@ -17,7 +17,7 @@ Duende IdentityServer is source-available, but requires a paid [license](https:/
 - **Free Community Edition**: A free Community Edition license is available for qualifying companies and non-profit organizations. Learn more [here](https://duendesoftware.com/products/communityedition).
 
 ## Reporting Issues and Getting Support
-- For bug reports or feature requests, [use our developer community forum](https://github.com/DuendeSoftware/community).
+- For bug reports or feature requests, [use our developer community forum](https://duende.link/community).
 - For security-related concerns, please contact us privately at: **security@duendesoftware.com**.
 
 ## Related Packages
