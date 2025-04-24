@@ -11,7 +11,6 @@ using IntegrationTests.Common;
 
 namespace IntegrationTests.Endpoints.Authorize;
 
-
 public class PushedAuthorizationTests
 {
     private readonly IdentityServerPipeline _mockPipeline = new();
@@ -284,6 +283,4 @@ public class PushedAuthorizationTests
                 RedirectUris = new List<string> { "https://client1/callback" },
             },
         });
-
-
 }

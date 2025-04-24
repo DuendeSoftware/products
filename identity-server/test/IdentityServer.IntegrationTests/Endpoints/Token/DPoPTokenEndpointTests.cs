@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Net;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
@@ -36,48 +35,6 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
             request.Headers.Add("DPoP", proofToken);
         }
         return request;
-    }
-
-    private async Task<AuthorizationCodeTokenRequest> CreateAuthCodeTokenRequestAsync(
-        string clientId = "client1", bool omitDPoPProof = false, string dpopJkt = null)
-    {
-        await Pipeline.LoginAsync("bob");
-
-        Pipeline.BrowserClient.AllowAutoRedirect = false;
-
-        var scope = clientId == "client1" ? "scope1" : "scope2";
-
-        var url = Pipeline.CreateAuthorizeUrl(
-            clientId: clientId,
-            responseType: "code",
-            responseMode: "query",
-            scope: $"openid {scope} offline_access",
-            redirectUri: $"https://{clientId}/callback",
-            extra: dpopJkt != null ? new
-            {
-                dpop_jkt = dpopJkt
-            } : null);
-        var response = await Pipeline.BrowserClient.GetAsync(url);
-
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location.ToString().ShouldStartWith($"https://{clientId}/callback");
-
-        var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
-        authorization.IsError.ShouldBeFalse();
-
-        var codeRequest = new AuthorizationCodeTokenRequest
-        {
-            Address = IdentityServerPipeline.TokenEndpoint,
-            ClientId = clientId,
-            ClientSecret = "secret",
-            Code = authorization.Code,
-            RedirectUri = $"https://{clientId}/callback",
-        };
-        if (!omitDPoPProof)
-        {
-            codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
-        }
-        return codeRequest;
     }
 
     private RefreshTokenRequest CreateRefreshTokenRequest(
@@ -202,11 +159,12 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         response.Error.ShouldBe("invalid_dpop_proof");
     }
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task valid_dpop_request_should_return_bound_refresh_token()
+    public async Task valid_dpop_request_should_return_bound_refresh_token(ParMode parMode)
     {
-        var codeRequest = await CreateAuthCodeTokenRequestAsync();
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.ShouldHaveDPoPThumbprint(JKT);
 
@@ -215,11 +173,12 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         rtResponse.ShouldHaveDPoPThumbprint(JKT);
     }
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task confidential_client_dpop_proof_should_be_required_on_renewal()
+    public async Task confidential_client_dpop_proof_should_be_required_on_renewal(ParMode parMode)
     {
-        var codeRequest = await CreateAuthCodeTokenRequestAsync();
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.ShouldHaveDPoPThumbprint(JKT);
 
@@ -229,11 +188,12 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         rtResponse.Error.ShouldBe("invalid_request");
     }
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task public_client_dpop_proof_should_be_required_on_renewal()
+    public async Task public_client_dpop_proof_should_be_required_on_renewal(ParMode parMode)
     {
-        var codeRequest = await CreateAuthCodeTokenRequestAsync(clientId: "client2");
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(clientId: "client2", parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.ShouldHaveDPoPThumbprint(JKT);
 
@@ -243,12 +203,14 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         rtResponse.Error.ShouldBe("invalid_request");
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(ParMode.Unused)]
+    [InlineData(ParMode.NoBinding)]
     [Trait("Category", Category)]
-    public async Task dpop_should_not_be_able_to_start_on_renewal()
+    public async Task dpop_should_not_be_able_to_start_on_renewal(ParMode parMode)
     {
         // Initial code flow doesn't use dpop
-        var codeRequest = await CreateAuthCodeTokenRequestAsync(omitDPoPProof: true);
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(omitDPoPProofAtTokenEndpoint: true, parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.IsError.ShouldBeFalse();
 
@@ -259,11 +221,12 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         rtResponse.IsError.ShouldBeTrue();
     }
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task confidential_client_should_be_able_to_use_different_dpop_key_for_refresh_token_request()
+    public async Task confidential_client_should_be_able_to_use_different_dpop_key_for_refresh_token_request(ParMode parMode)
     {
-        var codeRequest = await CreateAuthCodeTokenRequestAsync();
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.ShouldHaveDPoPThumbprint(JKT);
 
@@ -274,11 +237,12 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         rtResponse.ShouldHaveDPoPThumbprint(JKT);
     }
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task public_client_should_not_be_able_to_use_different_dpop_key_for_refresh_token_request()
+    public async Task public_client_should_not_be_able_to_use_different_dpop_key_for_refresh_token_request(ParMode parMode)
     {
-        var codeRequest = await CreateAuthCodeTokenRequestAsync(clientId: "client2");
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(clientId: "client2", parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.ShouldHaveDPoPThumbprint(JKT);
 
@@ -290,11 +254,12 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         rtResponse.Error.ShouldBe("invalid_dpop_proof");
     }
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task public_client_using_same_dpop_key_for_refresh_token_request_should_succeed()
+    public async Task public_client_using_same_dpop_key_for_refresh_token_request_should_succeed(ParMode parMode)
     {
-        var codeRequest = await CreateAuthCodeTokenRequestAsync(clientId: "client2");
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(clientId: "client2", parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.ShouldHaveDPoPThumbprint(JKT);
 
@@ -308,13 +273,14 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
     }
 
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task missing_proof_token_when_required_on_refresh_token_request_should_fail()
+    public async Task missing_proof_token_when_required_on_refresh_token_request_should_fail(ParMode parMode)
     {
         ConfidentialClient.RequireDPoP = true;
 
-        var codeRequest = await CreateAuthCodeTokenRequestAsync();
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode);
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.ShouldHaveDPoPThumbprint(JKT);
 
@@ -323,7 +289,6 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         rtResponse.IsError.ShouldBeTrue();
         rtResponse.Error.ShouldBe("invalid_dpop_proof");
     }
-
 
     [Theory]
     [InlineData(AccessTokenType.Reference)]
@@ -376,20 +341,29 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         Pipeline.ErrorWasCalled.ShouldBeTrue();
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(ParMode.Unused)]
+    [InlineData(ParMode.DpopJktParameter)]
+    [InlineData(ParMode.DpopHeader)]
+    [InlineData(ParMode.Both)]
     [Trait("Category", Category)]
-    public async Task mismatched_dpop_key_thumbprint_on_authorize_endpoint_and_token_endpoint_should_fail()
+    public async Task mismatched_dpop_key_thumbprint_on_authorize_endpoint_and_token_endpoint_should_fail(ParMode parMode)
     {
-        var codeRequest = await CreateAuthCodeTokenRequestAsync(dpopJkt: "invalid");
+        var oldJkt = JKT;
+        var oldProof = CreateDPoPProofToken(htu: IdentityServerPipeline.ParEndpoint);
+        CreateNewRSAKey();
+        JKT.ShouldNotBe(oldJkt);
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode, dpopJkt: oldJkt, dpopProof: oldProof);
 
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.IsError.ShouldBeTrue();
         codeResponse.Error.ShouldBe("invalid_dpop_proof");
     }
 
-    [Fact]
+    [Theory]
+    [ClassData(typeof(ParModes))]
     [Trait("Category", Category)]
-    public async Task server_issued_nonce_should_be_emitted()
+    public async Task server_issued_nonce_should_be_emitted(ParMode parMode)
     {
         var expectedNonce = "nonce";
 
@@ -405,7 +379,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         };
         Pipeline.Initialize();
 
-        var codeRequest = await CreateAuthCodeTokenRequestAsync();
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode);
 
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.IsError.ShouldBeTrue();
@@ -467,5 +441,17 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         response.TokenType.ShouldBe("DPoP");
         var jkt = GetJKTFromAccessToken(response);
         jkt.ShouldBe(JKT);
+    }
+}
+
+public class ParModes : TheoryData<ParMode>
+{
+    public ParModes()
+    {
+        Add(ParMode.Unused);
+        Add(ParMode.NoBinding);
+        Add(ParMode.DpopHeader);
+        Add(ParMode.DpopJktParameter);
+        Add(ParMode.Both);
     }
 }

@@ -3,6 +3,7 @@
 
 
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
@@ -74,9 +75,28 @@ public abstract class DPoPEndpointTestBase
     }
 
     protected Dictionary<string, object> Header;
-    protected Dictionary<string, object> Payload;
-    protected string PrivateJWK = "{\"Crv\":null,\"D\":\"QeBWodq0hSYjfAxxo0VZleXLqwwZZeNWvvFfES4WyItao_-OJv1wKA7zfkZxbWkpK5iRbKrl2AMJ52AtUo5JJ6QZ7IjAQlgM0lBg3ltjb1aA0gBsK5XbiXcsV8DiAnRuy6-XgjAKPR8Lo-wZl_fdPbVoAmpSdmfn_6QXXPBai5i7FiyDbQa16pI6DL-5SCj7F78QDTRiJOqn5ElNvtoJEfJBm13giRdqeriFi3pCWo7H3QBgTEWtDNk509z4w4t64B2HTXnM0xj9zLnS42l7YplJC7MRibD4nVBMtzfwtGRKLj8beuDgtW9pDlQqf7RVWX5pHQgiHAZmUi85TEbYdQ\",\"DP\":\"h2F54OMaC9qq1yqR2b55QNNaChyGtvmTHSdqZJ8lJFqvUorlz-Uocj2BTowWQnaMd8zRKMdKlSeUuSv4Z6WmjSxSsNbonI6_II5XlZLWYqFdmqDS-xCmJY32voT5Wn7OwB9xj1msDqrFPg-PqSBOh5OppjCqXqDFcNvSkQSajXc\",\"DQ\":\"VABdS20Nxkmq6JWLQj7OjRxVJuYsHrfmWJmDA7_SYtlXaPUcg-GiHGQtzdDWEeEi0dlJjv9I3FdjKGC7CGwqtVygW38DzVYJsV2EmRNJc1-j-1dRs_pK9GWR4NYm0mVz_IhS8etIf9cfRJk90xU3AL3_J6p5WNF7I5ctkLpnt8M\",\"E\":\"AQAB\",\"K\":null,\"KeyOps\":[],\"Kty\":\"RSA\",\"N\":\"yWWAOSV3Z_BW9rJEFvbZyeU-q2mJWC0l8WiHNqwVVf7qXYgm9hJC0j1aPHku_Wpl38DpK3Xu3LjWOFG9OrCqga5Pzce3DDJKI903GNqz5wphJFqweoBFKOjj1wegymvySsLoPqqDNVYTKp4nVnECZS4axZJoNt2l1S1bC8JryaNze2stjW60QT-mIAGq9konKKN3URQ12dr478m0Oh-4WWOiY4HrXoSOklFmzK-aQx1JV_SZ04eIGfSw1pZZyqTaB1BwBotiy-QA03IRxwIXQ7BSx5EaxC5uMCMbzmbvJqjt-q8Y1wyl-UQjRucgp7hkfHSE1QT3zEex2Q3NFux7SQ\",\"Oth\":null,\"P\":\"_T7MTkeOh5QyqlYCtLQ2RWf2dAJ9i3wrCx4nEDm1c1biijhtVTL7uJTLxwQIM9O2PvOi5Dq-UiGy6rhHZqf5akWTeHtaNyI-2XslQfaS3ctRgmGtRQL_VihK-R9AQtDx4eWL4h-bDJxPaxby_cVo_j2MX5AeoC1kNmcCdDf_X0M\",\"Q\":\"y5ZSThaGLjaPj8Mk2nuD8TiC-sb4aAZVh9K-W4kwaWKfDNoPcNb_dephBNMnOp9M1br6rDbyG7P-Sy_LOOsKg3Q0wHqv4hnzGaOQFeMJH4HkXYdENC7B5JG9PefbC6zwcgZWiBnsxgKpScNWuzGF8x2CC-MdsQ1bkQeTPbJklIM\",\"QI\":\"i716Vt9II_Rt6qnjsEhfE4bej52QFG9a1hSnx5PDNvRrNqR_RpTA0lO9qeXSZYGHTW_b6ZXdh_0EUwRDEDHmaxjkIcTADq6JLuDltOhZuhLUSc5NCKLAVCZlPcaSzv8-bZm57mVcIpx0KyFHxvk50___Jgx1qyzwLX03mPGUbDQ\",\"Use\":null,\"X\":null,\"X5c\":[],\"X5t\":null,\"X5tS256\":null,\"X5u\":null,\"Y\":null,\"KeySize\":2048,\"HasPrivateKey\":true,\"CryptoProviderFactory\":{\"CryptoProviderCache\":{},\"CustomCryptoProvider\":null,\"CacheSignatureProviders\":true,\"SignatureProviderObjectPoolCacheSize\":80}}";
-    protected string PublicJWK = "{\"kty\":\"RSA\",\"use\":\"sig\",\"x5t\":null,\"e\":\"AQAB\",\"n\":\"yWWAOSV3Z_BW9rJEFvbZyeU-q2mJWC0l8WiHNqwVVf7qXYgm9hJC0j1aPHku_Wpl38DpK3Xu3LjWOFG9OrCqga5Pzce3DDJKI903GNqz5wphJFqweoBFKOjj1wegymvySsLoPqqDNVYTKp4nVnECZS4axZJoNt2l1S1bC8JryaNze2stjW60QT-mIAGq9konKKN3URQ12dr478m0Oh-4WWOiY4HrXoSOklFmzK-aQx1JV_SZ04eIGfSw1pZZyqTaB1BwBotiy-QA03IRxwIXQ7BSx5EaxC5uMCMbzmbvJqjt-q8Y1wyl-UQjRucgp7hkfHSE1QT3zEex2Q3NFux7SQ\",\"x5c\":null,\"x\":null,\"y\":null,\"crv\":null}";
+    protected Dictionary<string, object> Payload = new();
+
+    protected string PrivateJWK =
+        """
+        {
+            "kty":"RSA",
+            "d": "QeBWodq0hSYjfAxxo0VZleXLqwwZZeNWvvFfES4WyItao_-OJv1wKA7zfkZxbWkpK5iRbKrl2AMJ52AtUo5JJ6QZ7IjAQlgM0lBg3ltjb1aA0gBsK5XbiXcsV8DiAnRuy6-XgjAKPR8Lo-wZl_fdPbVoAmpSdmfn_6QXXPBai5i7FiyDbQa16pI6DL-5SCj7F78QDTRiJOqn5ElNvtoJEfJBm13giRdqeriFi3pCWo7H3QBgTEWtDNk509z4w4t64B2HTXnM0xj9zLnS42l7YplJC7MRibD4nVBMtzfwtGRKLj8beuDgtW9pDlQqf7RVWX5pHQgiHAZmUi85TEbYdQ","DP":"h2F54OMaC9qq1yqR2b55QNNaChyGtvmTHSdqZJ8lJFqvUorlz-Uocj2BTowWQnaMd8zRKMdKlSeUuSv4Z6WmjSxSsNbonI6_II5XlZLWYqFdmqDS-xCmJY32voT5Wn7OwB9xj1msDqrFPg-PqSBOh5OppjCqXqDFcNvSkQSajXc",
+            "dq":"VABdS20Nxkmq6JWLQj7OjRxVJuYsHrfmWJmDA7_SYtlXaPUcg-GiHGQtzdDWEeEi0dlJjv9I3FdjKGC7CGwqtVygW38DzVYJsV2EmRNJc1-j-1dRs_pK9GWR4NYm0mVz_IhS8etIf9cfRJk90xU3AL3_J6p5WNF7I5ctkLpnt8M",
+            "e":"AQAB",
+            "n":"yWWAOSV3Z_BW9rJEFvbZyeU-q2mJWC0l8WiHNqwVVf7qXYgm9hJC0j1aPHku_Wpl38DpK3Xu3LjWOFG9OrCqga5Pzce3DDJKI903GNqz5wphJFqweoBFKOjj1wegymvySsLoPqqDNVYTKp4nVnECZS4axZJoNt2l1S1bC8JryaNze2stjW60QT-mIAGq9konKKN3URQ12dr478m0Oh-4WWOiY4HrXoSOklFmzK-aQx1JV_SZ04eIGfSw1pZZyqTaB1BwBotiy-QA03IRxwIXQ7BSx5EaxC5uMCMbzmbvJqjt-q8Y1wyl-UQjRucgp7hkfHSE1QT3zEex2Q3NFux7SQ","Oth":null,"P":"_T7MTkeOh5QyqlYCtLQ2RWf2dAJ9i3wrCx4nEDm1c1biijhtVTL7uJTLxwQIM9O2PvOi5Dq-UiGy6rhHZqf5akWTeHtaNyI-2XslQfaS3ctRgmGtRQL_VihK-R9AQtDx4eWL4h-bDJxPaxby_cVo_j2MX5AeoC1kNmcCdDf_X0M","Q":"y5ZSThaGLjaPj8Mk2nuD8TiC-sb4aAZVh9K-W4kwaWKfDNoPcNb_dephBNMnOp9M1br6rDbyG7P-Sy_LOOsKg3Q0wHqv4hnzGaOQFeMJH4HkXYdENC7B5JG9PefbC6zwcgZWiBnsxgKpScNWuzGF8x2CC-MdsQ1bkQeTPbJklIM","QI":"i716Vt9II_Rt6qnjsEhfE4bej52QFG9a1hSnx5PDNvRrNqR_RpTA0lO9qeXSZYGHTW_b6ZXdh_0EUwRDEDHmaxjkIcTADq6JLuDltOhZuhLUSc5NCKLAVCZlPcaSzv8-bZm57mVcIpx0KyFHxvk50___Jgx1qyzwLX03mPGUbDQ"
+        }
+        """;
+
+    protected string PublicJWK =
+        """
+        {
+            "kty":"RSA",
+            "use":"sig",
+            "e":"AQAB",
+            "n":"yWWAOSV3Z_BW9rJEFvbZyeU-q2mJWC0l8WiHNqwVVf7qXYgm9hJC0j1aPHku_Wpl38DpK3Xu3LjWOFG9OrCqga5Pzce3DDJKI903GNqz5wphJFqweoBFKOjj1wegymvySsLoPqqDNVYTKp4nVnECZS4axZJoNt2l1S1bC8JryaNze2stjW60QT-mIAGq9konKKN3URQ12dr478m0Oh-4WWOiY4HrXoSOklFmzK-aQx1JV_SZ04eIGfSw1pZZyqTaB1BwBotiy-QA03IRxwIXQ7BSx5EaxC5uMCMbzmbvJqjt-q8Y1wyl-UQjRucgp7hkfHSE1QT3zEex2Q3NFux7SQ"
+        }
+        """;
     protected string JKT = "JGSVlE73oKtQQI1dypYg8_JNat0xJjsQNyOI5oxaZf4";
 
     public DPoPEndpointTestBase()
@@ -163,14 +183,6 @@ public abstract class DPoPEndpointTestBase
 
         Pipeline.Initialize();
 
-        Payload = new Dictionary<string, object>
-        {
-            //{ "jti", CryptoRandom.CreateUniqueId() }, // added dynamically below in CreateDPoPProofToken
-            //{ "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() }, // added dynamically below in CreateDPoPProofToken
-            { "htm", "POST" },
-            { "htu", IdentityServerPipeline.TokenEndpoint },
-        };
-
         CreateHeaderValuesFromPublicKey();
     }
 
@@ -242,17 +254,15 @@ public abstract class DPoPEndpointTestBase
         };
     }
 
-    protected string CreateDPoPProofToken(string alg = "RS256", SecurityKey key = null)
+    protected string CreateDPoPProofToken(string alg = "RS256", SecurityKey key = null, string htu = IdentityServerPipeline.TokenEndpoint, string htm = "POST")
     {
-        var payload = new Dictionary<string, object>(Payload);
-        if (!payload.ContainsKey("jti"))
+        var payload = new Dictionary<string, object>(Payload)
         {
-            payload.Add("jti", CryptoRandom.CreateUniqueId());
-        }
-        if (!payload.ContainsKey("iat"))
-        {
-            payload.Add("iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-        }
+            { "jti", CryptoRandom.CreateUniqueId() },
+            { "iat", DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+            { "htm", htm },
+            { "htu", htu }
+        };
 
         key ??= new Microsoft.IdentityModel.Tokens.JsonWebKey(PrivateJWK);
         var handler = new JsonWebTokenHandler() { SetDefaultTimesOnTokenCreation = false };
@@ -283,4 +293,86 @@ public abstract class DPoPEndpointTestBase
         }
         return null;
     }
+
+    protected async Task<AuthorizationCodeTokenRequest> CreateAuthCodeTokenRequestAsync(
+        string clientId = "client1",
+        bool omitDPoPProofAtTokenEndpoint = false,
+        string dpopJkt = null,
+        string dpopProof = null,
+        ParMode parMode = ParMode.Unused)
+    {
+
+        await Pipeline.LoginAsync("bob");
+
+        Pipeline.BrowserClient.AllowAutoRedirect = false;
+
+        var scope = clientId == "client1" ? "scope1" : "scope2";
+
+        string url;
+
+        if (parMode != ParMode.Unused)
+        {
+            var parRequest = new Duende.IdentityModel.Client.PushedAuthorizationRequest
+            {
+                Address = IdentityServerPipeline.ParEndpoint,
+                ClientId = clientId,
+                ClientSecret = "secret",
+                Scope = $"openid {scope} offline_access",
+                ResponseType = OidcConstants.ResponseTypes.Code,
+                ResponseMode = OidcConstants.ResponseModes.Query,
+                RedirectUri = $"https://{clientId}/callback",
+                DPoPKeyThumbprint = dpopJkt ?? (parMode is ParMode.Both or ParMode.DpopJktParameter ? JKT : null)
+            };
+            if (parMode is ParMode.Both or ParMode.DpopHeader)
+            {
+                parRequest.Headers.Add("DPoP", dpopProof ?? CreateDPoPProofToken(htu: IdentityServerPipeline.ParEndpoint));
+            }
+            var parResponse = await Pipeline.BackChannelClient.PushAuthorizationAsync(parRequest);
+            parResponse.IsError.ShouldBeFalse($"Error from PAR request: {parResponse.Error}");
+            url = Pipeline.CreateAuthorizeUrl(
+                clientId: clientId,
+                requestUri: parResponse.RequestUri);
+        }
+        else
+        {
+            url = Pipeline.CreateAuthorizeUrl(
+                clientId: clientId,
+                responseType: OidcConstants.ResponseTypes.Code,
+                responseMode: OidcConstants.ResponseModes.Query,
+                scope: $"openid {scope} offline_access",
+                redirectUri: $"https://{clientId}/callback",
+                extra: new { dpop_jkt = dpopJkt });
+        }
+        var response = await Pipeline.BrowserClient.GetAsync(url);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ToString().ShouldStartWith($"https://{clientId}/callback");
+
+        var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
+        authorization.IsError.ShouldBeFalse();
+
+        var codeRequest = new AuthorizationCodeTokenRequest
+        {
+            Address = IdentityServerPipeline.TokenEndpoint,
+            ClientId = clientId,
+            ClientSecret = "secret",
+            Code = authorization.Code,
+            RedirectUri = $"https://{clientId}/callback",
+        };
+        if (!omitDPoPProofAtTokenEndpoint)
+        {
+            codeRequest.Headers.Add("DPoP", CreateDPoPProofToken());
+        }
+        return codeRequest;
+    }
+}
+
+public enum ParMode
+{
+    Unused,
+    NoBinding,
+    DpopJktParameter,
+    DpopHeader,
+    Both
+
 }
