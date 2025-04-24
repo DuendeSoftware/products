@@ -299,7 +299,8 @@ public abstract class DPoPEndpointTestBase
         bool omitDPoPProofAtTokenEndpoint = false,
         string dpopJkt = null,
         string dpopProof = null,
-        ParMode parMode = ParMode.Unused)
+        ParMode parMode = ParMode.Unused,
+        string expectedDpopNonce = null)
     {
 
         await Pipeline.LoginAsync("bob");
@@ -328,6 +329,17 @@ public abstract class DPoPEndpointTestBase
                 parRequest.Headers.Add("DPoP", dpopProof ?? CreateDPoPProofToken(htu: IdentityServerPipeline.ParEndpoint));
             }
             var parResponse = await Pipeline.BackChannelClient.PushAuthorizationAsync(parRequest);
+            if (expectedDpopNonce is not null)
+            {
+                if (parMode is ParMode.Both or ParMode.DpopHeader)
+                {
+                    parResponse.IsError.ShouldBeTrue();
+                    parResponse.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
+                    parResponse.DPoPNonce.ShouldBe(expectedDpopNonce);
+                    return null;
+                }
+            }
+
             parResponse.IsError.ShouldBeFalse($"Error from PAR request: {parResponse.Error}");
             url = Pipeline.CreateAuthorizeUrl(
                 clientId: clientId,

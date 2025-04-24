@@ -3,6 +3,7 @@
 
 
 using System.Net;
+using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.ResponseHandling;
@@ -34,6 +35,12 @@ internal class PushedAuthorizationErrorHttpWriter : IHttpResponseWriter<PushedAu
     {
         context.Response.SetNoCache();
         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+        if (result.Response.DPoPNonce.IsPresent())
+        {
+            context.Response.Headers.Append(OidcConstants.HttpHeaders.DPoPNonce, result.Response.DPoPNonce);
+        }
+
         var dto = new ResultDto
         {
             error = result.Response.Error,

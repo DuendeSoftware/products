@@ -95,6 +95,11 @@ internal class PushedAuthorizationRequestValidator(
                 Url = parUrl
             };
             var dpopValidationResult = await dpopProofValidator.ValidateAsync(dpopContext);
+            if (dpopValidationResult.ServerIssuedNonce != null)
+            {
+                return PushedAuthorizationValidationResult.CreateServerNonceResult(dpopValidationResult.ServerIssuedNonce);
+            }
+
             if (dpopValidationResult.Error != null)
             {
                 return new PushedAuthorizationValidationResult(

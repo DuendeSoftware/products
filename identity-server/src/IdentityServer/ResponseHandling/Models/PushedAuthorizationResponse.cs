@@ -26,6 +26,11 @@ public class PushedAuthorizationFailure : PushedAuthorizationResponse
     /// understanding the error that occurred."
     /// </summary>
     public required string ErrorDescription { get; set; }
+
+    /// <summary>
+    /// The DPoP nonce header to emit, or null if no nonce is to be emitted.
+    /// </summary>
+    public string DPoPNonce { get; set; }
 }
 
 /// <summary>

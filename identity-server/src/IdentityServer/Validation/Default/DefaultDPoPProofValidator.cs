@@ -470,6 +470,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             Logger.LogDebug("Invalid time value read from the 'nonce' value");
 
             result.IsError = true;
+            result.Error = OidcConstants.TokenErrors.UseDPoPNonce;
             result.ErrorDescription = "Invalid 'nonce' value.";
             result.ServerIssuedNonce = CreateNonce(context, result);
             return;
@@ -480,6 +481,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             Logger.LogDebug("DPoP 'nonce' expiration failed. It's possible that the server farm clocks might not be closely synchronized, so consider setting the ServerClockSkew on the DPoPOptions on the IdentityServerOptions.");
 
             result.IsError = true;
+            result.Error = OidcConstants.TokenErrors.UseDPoPNonce;
             result.ErrorDescription = "Invalid 'nonce' value.";
             result.ServerIssuedNonce = CreateNonce(context, result);
             return;

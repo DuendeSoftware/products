@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
@@ -379,11 +380,15 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         };
         Pipeline.Initialize();
 
-        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode);
+        var codeRequest = await CreateAuthCodeTokenRequestAsync(parMode: parMode, expectedDpopNonce: expectedNonce);
 
+        if (parMode is ParMode.DpopHeader or ParMode.Both)
+        {
+            return;
+        }
         var codeResponse = await Pipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(codeRequest);
         codeResponse.IsError.ShouldBeTrue();
-        codeResponse.Error.ShouldBe("invalid_dpop_proof");
+        codeResponse.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
         codeResponse.DPoPNonce.ShouldBe(expectedNonce);
     }
 
@@ -401,6 +406,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
             {
                 result.ServerIssuedNonce = ServerIssuedNonce;
                 result.IsError = true;
+                result.Error = OidcConstants.TokenErrors.UseDPoPNonce;
                 return;
             }
 
