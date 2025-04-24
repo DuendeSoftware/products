@@ -74,7 +74,7 @@ public class PushedAuthorizationValidationResult : ValidationResult
     }
 
     public static PushedAuthorizationValidationResult CreateServerNonceResult(string nonce) =>
-        new(OidcConstants.TokenErrors.UseDPoPNonce, null)
+        new(OidcConstants.TokenErrors.UseDPoPNonce, "")
         {
             ServerIssuedNonce = nonce
         };
