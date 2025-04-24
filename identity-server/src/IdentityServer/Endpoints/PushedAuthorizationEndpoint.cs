@@ -101,7 +101,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         }
 
         // This "can't happen", because PAR validation results don't have a constructor that
-        // allows you to create a successful result with a validated request, but static analysis
+        // allows you to create a successful result without a validated request, but static analysis
         // doesn't know that.
         if (parValidationResult.ValidatedRequest is null)
         {
