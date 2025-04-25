@@ -16,11 +16,11 @@ public class MockLogger : ILogger
     }
 
     public readonly List<string> LogMessages = new();
-    
-    
+
+
     private readonly LoggerExternalScopeProvider _scopeProvider;
-    
-    
+
+
     public IDisposable BeginScope<TState>(TState state) where TState : notnull => _scopeProvider.Push(state);
 
     public bool IsEnabled(LogLevel logLevel) => true;
