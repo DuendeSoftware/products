@@ -22,14 +22,15 @@ public class PushedAuthorizationTests
 {
     private readonly IdentityServerPipeline _mockPipeline = new();
     private Client _client;
-
+    private string clientSecret = Guid.NewGuid().ToString();
+    
     public PushedAuthorizationTests()
     {
         ConfigureClients();
         ConfigureUsers();
         ConfigureScopesAndResources();
 
-        _mockPipeline.Initialize();
+        _mockPipeline.Initialize(enableLogging: true);
 
         _mockPipeline.Options.Endpoints.EnablePushedAuthorizationEndpoint = true;
     }
@@ -69,11 +70,31 @@ public class PushedAuthorizationTests
     }
 
     [Fact]
+    public async Task sensitive_values_should_not_be_logged_on_bad_request_to_par_endpoint()
+    {
+        // Login
+        await _mockPipeline.LoginAsync("bob");
+        _mockPipeline.BrowserClient.AllowAutoRedirect = false;
+
+        // Push Authorization
+        var expectedCallback = _client.RedirectUris.First();
+        var expectedState = "123_state";
+        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync(
+            clientSecret: clientSecret,
+            redirectUri: "bogus", // <-- Intentionally wrong, to provoke logging an error with raw request
+            state: expectedState
+        );
+       
+        _mockPipeline.MockLogger.LogMessages.Should().ContainMatch("*\"client_secret\": \"***REDACTED***\"*");
+        _mockPipeline.MockLogger.LogMessages.Should().NotContainMatch(clientSecret);
+    }
+
+    [Fact]
     public async Task using_pushed_authorization_when_it_is_globally_disabled_fails()
     {
         _mockPipeline.Options.Endpoints.EnablePushedAuthorizationEndpoint = false;
         
-        var (_, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync();
+        var (_, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync(clientSecret: clientSecret);
         statusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -123,7 +144,7 @@ public class PushedAuthorizationTests
     public async Task existing_pushed_authorization_request_uris_become_invalid_when_par_is_disabled()
     {
         // PAR is enabled when we push authorization...
-        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync();
+        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync(clientSecret: clientSecret);
         statusCode.Should().Be(HttpStatusCode.Created);
         parJson.Should().NotBeNull();
 
@@ -154,7 +175,7 @@ public class PushedAuthorizationTests
         // Login
         await _mockPipeline.LoginAsync("bob");
 
-        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync();
+        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestAsync(clientSecret: clientSecret);;
         statusCode.Should().Be(HttpStatusCode.Created);
         parJson.Should().NotBeNull();
 
@@ -298,7 +319,7 @@ public class PushedAuthorizationTests
                 ClientId = "client1",
                 ClientSecrets = new []
                 {
-                     new Secret("secret".Sha256())
+                     new Secret(clientSecret.Sha256())
                 },
                 AllowedGrantTypes = GrantTypes.Implicit,
                 RequireConsent = false,
