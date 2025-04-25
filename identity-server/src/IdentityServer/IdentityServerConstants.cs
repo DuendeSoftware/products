@@ -69,6 +69,7 @@ public static class IdentityServerConstants
         public const string SharedSecret = "SharedSecret";
         public const string X509Certificate = "X509Certificate";
         public const string JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+        public const string AttestationBased = "AttestationBased";
     }
 
     public static class SecretTypes
@@ -131,6 +132,21 @@ public static class IdentityServerConstants
         SecurityAlgorithms.EcdsaSha384,
         SecurityAlgorithms.EcdsaSha512
     };
+
+    public readonly static IEnumerable<string> SupportedAttestationBasedClientAuthSigningAlgorithms =
+    [
+        SecurityAlgorithms.RsaSha256,
+        SecurityAlgorithms.RsaSha384,
+        SecurityAlgorithms.RsaSha512,
+
+        SecurityAlgorithms.RsaSsaPssSha256,
+        SecurityAlgorithms.RsaSsaPssSha384,
+        SecurityAlgorithms.RsaSsaPssSha512,
+
+        SecurityAlgorithms.EcdsaSha256,
+        SecurityAlgorithms.EcdsaSha384,
+        SecurityAlgorithms.EcdsaSha512
+    ];
 
     public enum RsaSigningAlgorithm
     {
