@@ -4,6 +4,8 @@
 
 #nullable enable
 
+using Duende.IdentityModel;
+
 namespace Duende.IdentityServer.Validation;
 
 /// <summary>
@@ -71,6 +73,13 @@ public class PushedAuthorizationValidationResult : ValidationResult
         PartiallyValidatedAuthorizeRequest = authorizeRequest;
     }
 
+    public static PushedAuthorizationValidationResult CreateServerNonceResult(string nonce) =>
+        new(OidcConstants.TokenErrors.UseDPoPNonce, "")
+        {
+            ServerIssuedNonce = nonce
+        };
+
+
     /// <summary>
     /// The validated pushed authorization request, or null if a validation error occurred. 
     /// </summary>
@@ -88,4 +97,6 @@ public class PushedAuthorizationValidationResult : ValidationResult
     /// </para>
     /// </summary>
     public ValidatedAuthorizeRequest? PartiallyValidatedAuthorizeRequest { get; set; }
+
+    public string? ServerIssuedNonce { get; set; }
 }

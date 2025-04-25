@@ -783,19 +783,30 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         // DPoP
         //////////////////////////////////////////////////////////
-        var dpop_jwt = request.Raw.Get(OidcConstants.AuthorizeRequest.DPoPKeyThumbprint);
-        if (dpop_jwt.IsPresent())
+        if (!ValidateDpopThumbprint(request))
         {
-            if (dpop_jwt.Length > _options.InputLengthRestrictions.DPoPKeyThumbprint)
-            {
-                LogError("dpop_jwt value too long", request);
-                return Invalid(request, description: "Invalid dpop_jwt");
-            }
-
-            request.DPoPKeyThumbprint = dpop_jwt;
+            return Invalid(request, description: "Invalid dpop_jkt");
         }
 
         return Valid(request);
+    }
+
+
+    private bool ValidateDpopThumbprint(ValidatedAuthorizeRequest request)
+    {
+        var dpop_jkt = request.Raw.Get(OidcConstants.AuthorizeRequest.DPoPKeyThumbprint);
+        if (dpop_jkt.IsPresent())
+        {
+            if (dpop_jkt.Length > _options.InputLengthRestrictions.DPoPKeyThumbprint)
+            {
+                LogError("dpop_jwt value too long", request);
+                return false;
+            }
+
+            request.DPoPKeyThumbprint = dpop_jkt;
+        }
+
+        return true;
     }
 
     private AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new AuthorizeRequestValidationResult(request, error, description);

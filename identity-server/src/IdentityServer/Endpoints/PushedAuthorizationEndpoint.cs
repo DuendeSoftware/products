@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+#nullable enable
 
 using System.Collections.Specialized;
 using System.Net;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
+
 internal class PushedAuthorizationEndpoint : IEndpointHandler
 {
     private readonly IClientSecretValidator _clientValidator;
@@ -43,7 +45,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         _logger = logger;
     }
 
-    public async Task<IEndpointResult> ProcessAsync(HttpContext context)
+    public async Task<IEndpointResult?> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.PushedAuthorization);
 
@@ -52,10 +54,9 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         _features.FeatureUsed(LicenseFeature.PAR);
 
         NameValueCollection values;
-        IFormCollection form;
         if (HttpMethods.IsPost(context.Request.Method))
         {
-            form = await context.Request.ReadFormAsync();
+            var form = await context.Request.ReadFormAsync();
             values = form.AsNameValueCollection();
         }
         else
@@ -69,20 +70,42 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
         {
             return CreateErrorResult(
                 logMessage: "Client secret validation failed",
-                request: null,
-                client.Error,
-                client.ErrorDescription);
+                error: client.Error ?? OidcConstants.AuthorizeErrors.InvalidRequest,
+                errorDescription: client.ErrorDescription);
+        }
+
+        var validationContext = new PushedAuthorizationRequestValidationContext(values, client.Client);
+
+        if (context.Request.Headers.TryGetValue(OidcConstants.HttpHeaders.DPoP, out var dpopHeader))
+        {
+            if (dpopHeader.Count > 1)
+            {
+                return CreateErrorResult(
+                    logMessage: "Too many DPoP headers provided.",
+                    error: OidcConstants.AuthorizeErrors.InvalidRequest);
+            }
+
+            validationContext.DPoPProofToken = dpopHeader.First();
         }
 
         // Perform validations specific to PAR, as well as validation of the pushed parameters
-        var parValidationResult = await _parValidator.ValidateAsync(new PushedAuthorizationRequestValidationContext(values, client.Client));
+        var parValidationResult = await _parValidator.ValidateAsync(validationContext);
         if (parValidationResult.IsError)
         {
             return CreateErrorResult(
                 logMessage: "Pushed authorization validation failed",
                 request: parValidationResult.ValidatedRequest,
-                parValidationResult.Error,
-                parValidationResult.ErrorDescription);
+                serverNonce: parValidationResult.ServerIssuedNonce,
+                error: parValidationResult.Error ?? OidcConstants.AuthorizeErrors.InvalidRequest,
+                errorDescription: parValidationResult.ErrorDescription);
+        }
+
+        // This "can't happen", because PAR validation results don't have a constructor that
+        // allows you to create a successful result without a validated request, but static analysis
+        // doesn't know that.
+        if (parValidationResult.ValidatedRequest is null)
+        {
+            throw new InvalidOperationException("Invalid PAR validation result: success without a validated request");
         }
 
         var response = await _responseGenerator.CreateResponseAsync(parValidationResult.ValidatedRequest);
@@ -102,9 +125,10 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
     private PushedAuthorizationErrorResult CreateErrorResult(
         string logMessage,
-        ValidatedPushedAuthorizationRequest request = null,
+        ValidatedPushedAuthorizationRequest? request = null,
+        string? serverNonce = null,
         string error = OidcConstants.AuthorizeErrors.ServerError,
-        string errorDescription = null,
+        string? errorDescription = null,
         bool logError = true)
     {
         if (logError)
@@ -118,12 +142,22 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
             _logger.LogInformation("{@validationDetails}", details);
         }
 
-        Telemetry.Metrics.PushedAuthorizationRequestFailure(request?.Client.ClientId, logMessage);
+        // Note: this is an expected case in the normal DPoP flow and is not a real failure event.
+        // Keeping a debug log to help with troubleshooting in the case of a buggy client.
+        if (serverNonce != null)
+        {
+            _logger.LogDebug("Pushed authorization request returned an error with a server issued nonce. This is an expected event when using DPoP server nonces.");
+        }
+        else
+        {
+            Telemetry.Metrics.PushedAuthorizationRequestFailure(request?.Client.ClientId, logMessage);
+        }
 
         return new PushedAuthorizationErrorResult(new PushedAuthorizationFailure
         {
             Error = error,
             ErrorDescription = errorDescription,
+            DPoPNonce = serverNonce
         });
     }
 }

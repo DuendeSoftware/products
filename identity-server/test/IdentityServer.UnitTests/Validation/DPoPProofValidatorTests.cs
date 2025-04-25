@@ -854,7 +854,7 @@ public class DPoPProofValidatorTests
         result = await _subject.ValidateAsync(_context);
 
         result.IsError.ShouldBeTrue();
-        result.Error.ShouldBe("invalid_dpop_proof");
+        result.Error.ShouldBe("use_dpop_nonce");
         result.ServerIssuedNonce.ShouldNotBeNullOrEmpty();
     }
 
@@ -878,7 +878,7 @@ public class DPoPProofValidatorTests
         result = await _subject.ValidateAsync(_context);
 
         result.IsError.ShouldBeTrue();
-        result.Error.ShouldBe("invalid_dpop_proof");
+        result.Error.ShouldBe("use_dpop_nonce");
         result.ServerIssuedNonce.ShouldNotBeNullOrEmpty();
 
 
@@ -891,7 +891,7 @@ public class DPoPProofValidatorTests
         result = await _subject.ValidateAsync(_context);
 
         result.IsError.ShouldBeTrue();
-        result.Error.ShouldBe("invalid_dpop_proof");
+        result.Error.ShouldBe("use_dpop_nonce");
         result.ServerIssuedNonce.ShouldNotBeNullOrEmpty();
     }
 }
