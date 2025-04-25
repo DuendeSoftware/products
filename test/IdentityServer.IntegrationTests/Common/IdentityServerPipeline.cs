@@ -21,6 +21,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
 using FluentAssertions;
 using IdentityModel.Client;
+using IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -75,6 +76,9 @@ public class IdentityServerPipeline
     public MockMessageHandler BackChannelMessageHandler { get; set; } = new MockMessageHandler();
     public MockMessageHandler JwtRequestMessageHandler { get; set; } = new MockMessageHandler();
 
+    public MockLogger MockLogger { get; set; } = MockLogger.Create();
+
+    
     public event Action<IServiceCollection> OnPreConfigureServices = services => { };
     public event Action<IServiceCollection> OnPostConfigureServices = services => { };
     public event Action<IApplicationBuilder> OnPreConfigure = app => { };
@@ -103,7 +107,10 @@ public class IdentityServerPipeline
 
         if (enableLogging)
         {
-            builder.ConfigureLogging((ctx, b) => b.AddConsole());
+            // Configure logging so that the logger provider will always use our mock logger
+            // The MockLogger allows us to verify that particular messages were logged.
+            builder.ConfigureLogging((ctx, b) =>
+                b.Services.AddSingleton<ILoggerProvider>(new MockLoggerProvider(MockLogger)));
         }
 
         Server = new TestServer(builder);

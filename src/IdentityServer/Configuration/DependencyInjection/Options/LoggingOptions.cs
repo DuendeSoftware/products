@@ -51,6 +51,9 @@ public class LoggingOptions
     public ICollection<string> AuthorizeRequestSensitiveValuesFilter { get; set; } = 
         new HashSet<string>
         {
+            // Secrets and assertions may be passed to the authorize endpoint via PAR
+            OidcConstants.TokenRequest.ClientSecret,
+            OidcConstants.TokenRequest.ClientAssertion,
             OidcConstants.AuthorizeRequest.IdTokenHint
         };
 
@@ -58,11 +61,15 @@ public class LoggingOptions
     /// Gets or sets the collection of keys that will be used to redact sensitive values from a pushed authorization request log.
     /// </summary>
     /// <remarks>Please be aware that initializing this property could expose sensitive information in your logs.</remarks>
+    /// <remarks>Note that pushed authorization parameters are eventually handled by the authorize request pipeline.
+    /// In most cases, changes to this collection should also be made to <see cref="AuthorizeRequestSensitiveValuesFilter"/>
+    /// </remarks>
     public ICollection<string> PushedAuthorizationSensitiveValuesFilter { get; set; } =
         new HashSet<string>
         {
             OidcConstants.TokenRequest.ClientSecret,
-            OidcConstants.TokenRequest.ClientAssertion
+            OidcConstants.TokenRequest.ClientAssertion,
+            OidcConstants.AuthorizeRequest.IdTokenHint
         };
 
     /// <summary>
