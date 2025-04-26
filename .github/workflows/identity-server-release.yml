@@ -65,7 +65,7 @@ jobs:
       with:
         dotnet-version: |-
           8.0.x
-          9.0.103
+          9.0.203
     - name: Pack identity-server.slnf
       run: dotnet pack -c Release identity-server.slnf -o artifacts
     - name: Tool restore
@@ -106,7 +106,7 @@ jobs:
       with:
         dotnet-version: |-
           8.0.x
-          9.0.103
+          9.0.203
     - name: List files
       run: tree
       shell: bash

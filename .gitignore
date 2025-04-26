@@ -204,7 +204,7 @@ docs/_build/
 tools/
 
 # Visual Studio Code workspace options
-.vscode/settings.json
+**/.vscode/settings.json
 
 # IdentityServer temp files
 identityserver4_log.txt
