@@ -52,7 +52,7 @@ jobs:
       with:
         dotnet-version: |-
           8.0.x
-          9.0.103
+          9.0.x
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Verify Formatting
@@ -83,7 +83,7 @@ jobs:
       with:
         dotnet-version: |-
           8.0.x
-          9.0.103
+          9.0.x
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
@@ -131,7 +131,7 @@ jobs:
       with:
         dotnet-version: |-
           8.0.x
-          9.0.103
+          9.0.x
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
@@ -190,7 +190,7 @@ jobs:
       with:
         dotnet-version: |-
           8.0.x
-          9.0.103
+          9.0.x
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
@@ -232,7 +232,7 @@ jobs:
       with:
         dotnet-version: |-
           8.0.x
-          9.0.103
+          9.0.x
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack bff.slnf
