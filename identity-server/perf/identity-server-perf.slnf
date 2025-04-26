@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "..\\..\\products.sln",
+    "path": "..\\..\\products.slnx",
     "projects": [
       "identity-server\\perf\\IdentityServer.PerfTests\\IdentityServer.PerfTests.csproj"
     ]

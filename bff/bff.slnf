@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "..\\products.sln",
+    "path": "..\\products.slnx",
     "projects": [
       ".github\\workflow-gen\\workflow-gen.csproj",
       "bff\\hosts\\Blazor\\PerComponent\\Hosts.Bff.Blazor.PerComponent.Client\\Hosts.Bff.Blazor.PerComponent.Client.csproj",
