@@ -81,7 +81,7 @@ public static class CryptoHelper
     /// <exception cref="InvalidOperationException"></exception>
     public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(string signingAlgorithm)
     {
-        var hashLength = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
+        var hashLength = int.Parse(signingAlgorithm.AsSpan()[^3..]);
 
         Func<byte[], byte[]> hashFunction = hashLength switch
         {
@@ -90,7 +90,6 @@ public static class CryptoHelper
             512 => SHA512.HashData,
             _ => throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}"),
         };
-
 
         return (hashFunction, hashLength);
     }
@@ -103,7 +102,7 @@ public static class CryptoHelper
     [Obsolete("This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
     public static HashAlgorithm GetHashAlgorithmForSigningAlgorithm(string signingAlgorithm)
     {
-        var signingAlgorithmBits = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
+        var signingAlgorithmBits = int.Parse(signingAlgorithm.AsSpan()[^3..]);
 
         return signingAlgorithmBits switch
         {
