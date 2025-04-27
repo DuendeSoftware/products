@@ -86,18 +86,27 @@ public static class CryptoHelper
     /// <exception cref="InvalidOperationException"></exception>
     public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(string signingAlgorithm)
     {
-        var hashLength = int.Parse(signingAlgorithm.AsSpan(signingAlgorithm.Length - 3), CultureInfo.InvariantCulture);
-
-        Func<byte[], byte[]> hashFunction = hashLength switch
+        if (signingAlgorithm.Length < 3)
         {
-            256 => SHA256.HashData,
-            384 => SHA384.HashData,
-            512 => SHA512.HashData,
-            _ => throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}"),
-        };
+            throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}");
+        }
 
+        var algorithm = signingAlgorithm.AsSpan().Trim()[^3..];
 
-        return (hashFunction, hashLength);
+        if (int.TryParse(algorithm, out var hashLength))
+        {
+            Func<byte[], byte[]> hashFunction = hashLength switch
+            {
+                256 => SHA256.HashData,
+                384 => SHA384.HashData,
+                512 => SHA512.HashData,
+                _ => throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}"),
+            };
+
+            return (hashFunction, hashLength);
+        }
+
+        throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}");
     }
 
     /// <summary>
@@ -108,7 +117,7 @@ public static class CryptoHelper
     [Obsolete("This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
     public static HashAlgorithm GetHashAlgorithmForSigningAlgorithm(string signingAlgorithm)
     {
-        var signingAlgorithmBits = int.Parse(signingAlgorithm.AsSpan(signingAlgorithm.Length - 3), CultureInfo.InvariantCulture);
+        var signingAlgorithmBits = int.Parse(signingAlgorithm.AsSpan()[^3..], CultureInfo.InvariantCulture);
 
         return signingAlgorithmBits switch
         {
@@ -165,6 +174,7 @@ public static class CryptoHelper
 
         return true;
     }
+
     internal static bool IsValidCrvValueForAlgorithm(string crv) => crv == JsonWebKeyECTypes.P256 ||
                crv == JsonWebKeyECTypes.P384 ||
                crv == JsonWebKeyECTypes.P521;
