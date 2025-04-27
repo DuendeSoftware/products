@@ -30,6 +30,5 @@ public interface IUserCodeGenerator
     /// <summary>
     /// Generates the user code.
     /// </summary>
-    /// <returns></returns>
     Task<string> GenerateAsync();
 }

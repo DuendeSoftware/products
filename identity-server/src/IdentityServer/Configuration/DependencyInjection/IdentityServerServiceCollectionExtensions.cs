@@ -20,14 +20,12 @@ public static class IdentityServerServiceCollectionExtensions
     /// Creates a builder.
     /// </summary>
     /// <param name="services">The services.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityServerBuilder(this IServiceCollection services) => new IdentityServerBuilder(services);
 
     /// <summary>
     /// Adds IdentityServer.
     /// </summary>
     /// <param name="services">The services.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services)
     {
         var builder = services.AddIdentityServerBuilder();
@@ -58,7 +56,6 @@ public static class IdentityServerServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The services.</param>
     /// <param name="setupAction">The setup action.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services, Action<IdentityServerOptions> setupAction)
     {
         services.Configure(setupAction);
@@ -70,7 +67,6 @@ public static class IdentityServerServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The services.</param>
     /// <param name="configuration">The configuration.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<IdentityServerOptions>(configuration);

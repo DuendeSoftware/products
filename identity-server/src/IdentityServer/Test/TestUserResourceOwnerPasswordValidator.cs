@@ -31,7 +31,6 @@ public class TestUserResourceOwnerPasswordValidator : IResourceOwnerPasswordVali
     /// Validates the resource owner password credential
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
     {
         if (_users.ValidateCredentials(context.UserName, context.Password))

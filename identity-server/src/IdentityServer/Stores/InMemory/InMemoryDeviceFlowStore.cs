@@ -20,7 +20,6 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     /// <param name="deviceCode">The device code.</param>
     /// <param name="userCode">The user code.</param>
     /// <param name="data">The data.</param>
-    /// <returns></returns>
     public Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.StoreDeviceAuthorization");
@@ -95,7 +94,6 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
     /// Removes the device authorization, searching by device code.
     /// </summary>
     /// <param name="deviceCode">The device code.</param>
-    /// <returns></returns>
     public Task RemoveByDeviceCodeAsync(string deviceCode)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryDeviceFlowStore.RemoveByDeviceCode");

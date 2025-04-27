@@ -186,7 +186,6 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     /// </summary>
     /// <param name="message"></param>
     /// <param name="request"></param>
-    /// <returns></returns>
     protected virtual EndSessionValidationResult Invalid(string message, ValidatedEndSessionRequest request = null)
     {
         message = "End session request validation failure: " + message;

@@ -13,6 +13,5 @@ public interface IReturnUrlValidator
     /// Returns true is the returnUrl is valid and safe to redirect to.
     /// </summary>
     /// <param name="returnUrl"></param>
-    /// <returns></returns>
     public Task<bool> IsValidAsync(string returnUrl);
 }

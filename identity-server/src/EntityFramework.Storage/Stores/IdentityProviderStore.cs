@@ -86,7 +86,6 @@ public class IdentityProviderStore : IIdentityProviderStore
     /// Maps from the identity provider entity to identity provider model.
     /// </summary>
     /// <param name="idp"></param>
-    /// <returns></returns>
     protected virtual IdentityProvider MapIdp(Entities.IdentityProvider idp)
     {
         if (idp.Type == "oidc")

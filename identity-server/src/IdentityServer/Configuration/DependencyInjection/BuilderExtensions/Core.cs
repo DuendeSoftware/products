@@ -47,7 +47,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the required platform services.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddRequiredPlatformServices(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -65,7 +64,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the default infrastructure for cookie authentication in IdentityServer.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddCookieAuthentication(this IIdentityServerBuilder builder) => builder
             .AddDefaultCookieHandlers()
             .AddCookieAuthenticationExtensions();
@@ -74,7 +72,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the default cookie handlers and corresponding configuration
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultCookieHandlers(this IIdentityServerBuilder builder)
     {
         builder.Services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme)
@@ -89,7 +86,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the necessary decorators for cookie authentication required by IdentityServer
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddCookieAuthenticationExtensions(this IIdentityServerBuilder builder)
     {
         builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureInternalCookieOptions>();
@@ -103,7 +99,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the default endpoints.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultEndpoints(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<IEndpointRouter, EndpointRouter>();
@@ -217,7 +212,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the pluggable services.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddPluggableServices(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddTransient<ICancellationTokenProvider, DefaultCancellationTokenProvider>();
@@ -277,7 +271,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds key management services.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddKeyManagement(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddTransient<IAutomaticKeyManagerKeyStore, AutomaticKeyManagerKeyStore>();
@@ -299,7 +292,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the core services for dynamic external providers.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddDynamicProvidersCore(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient(svcs => svcs.GetRequiredService<IdentityServerOptions>().DynamicProviders);
@@ -317,7 +309,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the validators.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddValidators(this IIdentityServerBuilder builder)
     {
         // core
@@ -354,7 +345,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the response generators.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddResponseGenerators(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddTransient<ITokenResponseGenerator, TokenResponseGenerator>();
@@ -375,7 +365,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the default secret parsers.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultSecretParsers(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<ISecretParser, BasicAuthenticationSecretParser>();
@@ -388,7 +377,6 @@ public static class IdentityServerBuilderExtensionsCore
     /// Adds the default secret validators.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultSecretValidators(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<ISecretValidator, HashedSharedSecretValidator>();

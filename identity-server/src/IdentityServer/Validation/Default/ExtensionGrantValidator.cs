@@ -37,14 +37,12 @@ public class ExtensionGrantValidator
     /// <summary>
     /// Gets the available grant types.
     /// </summary>
-    /// <returns></returns>
     public IEnumerable<string> GetAvailableGrantTypes() => _validators.Select(v => v.GrantType);
 
     /// <summary>
     /// Validates the request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     public async Task<GrantValidationResult> ValidateAsync(ValidatedTokenRequest request)
     {
         var validator = _validators.FirstOrDefault(v => v.GrantType.Equals(request.GrantType, StringComparison.Ordinal));

@@ -26,7 +26,6 @@ internal class BearerTokenUsageValidator
     /// Validates the request.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public async Task<BearerTokenUsageValidationResult> ValidateAsync(HttpContext context)
     {
         var result = ValidateAuthorizationHeader(context);
@@ -54,7 +53,6 @@ internal class BearerTokenUsageValidator
     /// Validates the authorization header.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public BearerTokenUsageValidationResult ValidateAuthorizationHeader(HttpContext context)
     {
         var authorizationHeader = context.Request.Headers.Authorization.FirstOrDefault();
@@ -87,7 +85,6 @@ internal class BearerTokenUsageValidator
     /// Validates the post body.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public async Task<BearerTokenUsageValidationResult> ValidatePostBodyAsync(HttpContext context)
     {
         var token = (await context.Request.ReadFormAsync())["access_token"].FirstOrDefault();

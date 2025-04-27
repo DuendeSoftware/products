@@ -24,7 +24,6 @@ public static class ClientExtensions
     /// Constructs a list of SecurityKey from a Secret collection
     /// </summary>
     /// <param name="secrets">The secrets</param>
-    /// <returns></returns>
     public static Task<List<SecurityKey>> GetKeysAsync(this IEnumerable<Secret> secrets)
     {
         var secretList = secrets.ToList().AsReadOnly();

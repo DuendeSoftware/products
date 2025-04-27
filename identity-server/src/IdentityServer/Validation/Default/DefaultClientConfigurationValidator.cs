@@ -25,7 +25,6 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Determines whether the configuration of a client is valid.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public async Task ValidateAsync(ClientConfigurationValidationContext context)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultClientConfigurationValidator.Validate");
@@ -59,7 +58,6 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Validates grant type related configuration settings.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     protected virtual Task ValidateGrantTypesAsync(ClientConfigurationValidationContext context)
     {
         if (context.Client.AllowedGrantTypes?.Any() != true)
@@ -74,7 +72,6 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Validates lifetime related configuration settings.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     protected virtual Task ValidateLifetimesAsync(ClientConfigurationValidationContext context)
     {
         if (context.Client.AccessTokenLifetime <= 0)
@@ -116,7 +113,6 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Validates redirect URI related configuration.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     protected virtual Task ValidateRedirectUriAsync(ClientConfigurationValidationContext context)
     {
         if (context.Client.AllowedGrantTypes?.Any() == true)
@@ -146,7 +142,6 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Validates allowed CORS origins for valid format.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     protected virtual Task ValidateAllowedCorsOriginsAsync(ClientConfigurationValidationContext context)
     {
         if (context.Client.AllowedCorsOrigins?.Any() == true)
@@ -187,7 +182,6 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Validates that URI schemes is not in the list of invalid URI scheme prefixes, as controlled by the ValidationOptions.
     /// </summary>
     /// <param name="context"></param>
-    /// <returns></returns>
     protected virtual Task ValidateUriSchemesAsync(ClientConfigurationValidationContext context)
     {
         if (context.Client.RedirectUris?.Any() == true)
@@ -221,7 +215,6 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Validates secret related configuration.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     protected virtual Task ValidateSecretsAsync(ClientConfigurationValidationContext context)
     {
         if (context.Client.AllowedGrantTypes?.Any() == true)
@@ -252,6 +245,5 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// Validates properties related configuration settings.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     protected virtual Task ValidatePropertiesAsync(ClientConfigurationValidationContext context) => Task.CompletedTask;
 }

@@ -46,7 +46,6 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     /// Stores the user consent asynchronous.
     /// </summary>
     /// <param name="consent">The consent.</param>
-    /// <returns></returns>
     public Task StoreUserConsentAsync(Consent consent)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.StoreUserConsent");
@@ -60,7 +59,6 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
-    /// <returns></returns>
     public async Task<Consent> GetUserConsentAsync(string subjectId, string clientId)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.GetUserConsent");
@@ -86,7 +84,6 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
-    /// <returns></returns>
     public Task RemoveUserConsentAsync(string subjectId, string clientId)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.RemoveUserConsent");

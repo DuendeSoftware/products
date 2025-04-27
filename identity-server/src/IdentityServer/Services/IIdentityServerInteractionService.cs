@@ -40,7 +40,6 @@ public interface IIdentityServerInteractionService
     /// <summary>
     /// Used to create a logoutId if there is not one presently.
     /// </summary>
-    /// <returns></returns>
     Task<string?> CreateLogoutContextAsync();
 
     /// <summary>

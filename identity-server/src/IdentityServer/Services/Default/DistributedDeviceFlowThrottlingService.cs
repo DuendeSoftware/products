@@ -46,7 +46,6 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
     /// </summary>
     /// <param name="deviceCode">The device code.</param>
     /// <param name="details">The device code details.</param>
-    /// <returns></returns>
     /// <exception cref="ArgumentNullException">deviceCode</exception>
     public async Task<bool> ShouldSlowDown(string deviceCode, DeviceCode details)
     {

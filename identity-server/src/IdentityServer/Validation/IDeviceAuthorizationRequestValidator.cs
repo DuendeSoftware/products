@@ -16,6 +16,5 @@ public interface IDeviceAuthorizationRequestValidator
     /// </summary>
     /// <param name="parameters"></param>
     /// <param name="clientValidationResult"></param>
-    /// <returns></returns>
     Task<DeviceAuthorizationRequestValidationResult> ValidateAsync(NameValueCollection parameters, ClientSecretValidationResult clientValidationResult);
 }

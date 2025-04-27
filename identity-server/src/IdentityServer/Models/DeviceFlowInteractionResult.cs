@@ -39,7 +39,6 @@ public class DeviceFlowInteractionResult
     /// Create failure result
     /// </summary>
     /// <param name="errorDescription">The error description.</param>
-    /// <returns></returns>
     public static DeviceFlowInteractionResult Failure(string? errorDescription = null) => new DeviceFlowInteractionResult
     {
         IsError = true,

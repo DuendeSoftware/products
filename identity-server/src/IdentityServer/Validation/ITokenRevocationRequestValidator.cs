@@ -17,6 +17,5 @@ public interface ITokenRevocationRequestValidator
     /// </summary>
     /// <param name="parameters">The parameters.</param>
     /// <param name="client">The client.</param>
-    /// <returns></returns>
     Task<TokenRevocationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, Client client);
 }

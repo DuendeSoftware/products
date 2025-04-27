@@ -17,7 +17,6 @@ public interface IReturnUrlParser
     /// Parses a return URL.
     /// </summary>
     /// <param name="returnUrl">The return URL.</param>
-    /// <returns></returns>
     Task<AuthorizationRequest?> ParseAsync(string returnUrl);
 
     /// <summary>

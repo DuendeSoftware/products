@@ -17,7 +17,6 @@ public class UserSession : UserSessionUpdate
     /// <summary>
     /// Clones the instance
     /// </summary>
-    /// <returns></returns>
     public UserSession Clone()
     {
         var other = new UserSession();
@@ -29,7 +28,6 @@ public class UserSession : UserSessionUpdate
     /// Copies this instance into another
     /// </summary>
     /// <param name="other"></param>
-    /// <returns></returns>
     public void CopyTo(UserSession other)
     {
         other.Key = Key;

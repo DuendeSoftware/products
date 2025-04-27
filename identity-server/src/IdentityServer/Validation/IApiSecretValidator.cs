@@ -17,6 +17,5 @@ public interface IApiSecretValidator
     /// Tries to authenticate an API client based on the incoming request
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     Task<ApiSecretValidationResult> ValidateAsync(HttpContext context);
 }

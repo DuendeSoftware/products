@@ -18,7 +18,6 @@ public static class ProfileDataRequestContextExtensions
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="claims">The claims.</param>
-    /// <returns></returns>
     public static List<Claim> FilterClaims(this ProfileDataRequestContext context, IEnumerable<Claim> claims)
     {
         ArgumentNullException.ThrowIfNull(context);

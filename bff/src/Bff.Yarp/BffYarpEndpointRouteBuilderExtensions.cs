@@ -22,7 +22,6 @@ public static class BffYarpEndpointRouteBuilderExtensions
     /// <param name="localPath"></param>
     /// <param name="apiAddress"></param>
     /// <param name="yarpTransformBuilder"></param>
-    /// <returns></returns>
     public static IEndpointConventionBuilder MapRemoteBffApiEndpoint(
         this IEndpointRouteBuilder endpoints,
         PathString localPath,

@@ -15,6 +15,5 @@ public interface IBackchannelAuthenticationUserValidator
     /// Validates the user.
     /// </summary>
     /// <param name="userValidatorContext"></param>
-    /// <returns></returns>
     Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext);
 }

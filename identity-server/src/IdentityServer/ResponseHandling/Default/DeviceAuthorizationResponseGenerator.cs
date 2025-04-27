@@ -64,7 +64,6 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
     /// <param name="baseUrl">The base URL.</param>
-    /// <returns></returns>
     /// <exception cref="ArgumentNullException">validationResult or Client</exception>
     /// <exception cref="ArgumentException">Value cannot be null or whitespace. - baseUrl</exception>
     public virtual async Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl)

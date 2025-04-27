@@ -22,13 +22,11 @@ public interface IConsentMessageStore
     /// Reads the consent response message.
     /// </summary>
     /// <param name="id">The identifier.</param>
-    /// <returns></returns>
     Task<Message<ConsentResponse>> ReadAsync(string id);
 
     /// <summary>
     /// Deletes the consent response message.
     /// </summary>
     /// <param name="id">The identifier.</param>
-    /// <returns></returns>
     Task DeleteAsync(string id);
 }

@@ -28,7 +28,6 @@ public static class BffServiceCollectionExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configureAction"></param>
-    /// <returns></returns>
     public static BffBuilder AddBff(this IServiceCollection services, Action<BffOptions>? configureAction = null)
     {
         if (configureAction != null)

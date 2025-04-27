@@ -14,7 +14,6 @@ public static class ReverseProxyBuilderExtensions
     /// Wire up BFF YARP extensions to DI
     /// </summary>
     /// <param name="builder"></param>
-    /// <returns></returns>
     public static IReverseProxyBuilder AddBffExtensions(this IReverseProxyBuilder builder)
     {
         builder.AddTransforms<AccessTokenTransformProvider>();

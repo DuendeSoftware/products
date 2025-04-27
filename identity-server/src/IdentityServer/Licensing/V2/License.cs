@@ -184,7 +184,6 @@ internal class License
     /// is no configured license, this always returns true.
     /// </summary>
     /// <param name="feature"></param>
-    /// <returns></returns>
     public bool IsEnabled(LicenseFeature feature) => !IsConfigured || (AllowedFeatureMask & (ulong)feature) != 0;
 
 

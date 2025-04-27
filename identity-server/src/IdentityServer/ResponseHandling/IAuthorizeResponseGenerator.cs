@@ -15,6 +15,5 @@ public interface IAuthorizeResponseGenerator
     /// Creates the response
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request);
 }

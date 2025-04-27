@@ -53,7 +53,6 @@ public class CachingCorsPolicyService<T> : ICorsPolicyService
     /// Determines whether origin is allowed.
     /// </summary>
     /// <param name="origin">The origin.</param>
-    /// <returns></returns>
     public virtual async Task<bool> IsOriginAllowedAsync(string origin)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingCorsPolicyService.IsOriginAllowed");

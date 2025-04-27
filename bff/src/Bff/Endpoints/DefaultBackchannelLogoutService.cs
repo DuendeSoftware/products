@@ -100,7 +100,6 @@ internal class DefaultBackchannelLogoutService(
     /// Validates the logout token
     /// </summary>
     /// <param name="logoutToken"></param>
-    /// <returns></returns>
     protected virtual async Task<ClaimsIdentity?> ValidateLogoutTokenAsync(string logoutToken)
     {
         var claims = await ValidateJwt(logoutToken);
@@ -156,7 +155,6 @@ internal class DefaultBackchannelLogoutService(
     /// Validates and parses the logout token JWT 
     /// </summary>
     /// <param name="jwt"></param>
-    /// <returns></returns>
     protected virtual async Task<ClaimsIdentity?> ValidateJwt(string jwt)
     {
         var handler = new JsonWebTokenHandler();
@@ -176,7 +174,6 @@ internal class DefaultBackchannelLogoutService(
     /// <summary>
     /// Creates the token validation parameters based on the OIDC configuration
     /// </summary>
-    /// <returns></returns>
     /// <exception cref="Exception"></exception>
     protected virtual async Task<TokenValidationParameters> GetTokenValidationParameters()
     {

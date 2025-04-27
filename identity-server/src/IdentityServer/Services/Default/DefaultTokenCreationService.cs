@@ -77,7 +77,6 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// Creates the JWT payload
     /// </summary>
     /// <param name="token"></param>
-    /// <returns></returns>
     protected virtual Task<string> CreatePayloadAsync(Token token)
     {
         var payload = token.CreateJwtPayloadDictionary(Options, Clock, Logger);
@@ -88,7 +87,6 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// Creates additional JWT header elements
     /// </summary>
     /// <param name="token"></param>
-    /// <returns></returns>
     protected virtual Task<Dictionary<string, object>> CreateHeaderElementsAsync(Token token)
     {
         var additionalHeaderElements = new Dictionary<string, object>();
@@ -121,7 +119,6 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <param name="token"></param>
     /// <param name="payload"></param>
     /// <param name="headerElements"></param>
-    /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     protected virtual async Task<string> CreateJwtAsync(Token token, string payload,
         Dictionary<string, object> headerElements)

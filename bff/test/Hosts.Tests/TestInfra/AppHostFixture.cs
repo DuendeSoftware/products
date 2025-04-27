@@ -169,7 +169,6 @@ public class AppHostFixture : IAsyncLifetime
     ///     This method builds a http client.
     /// </summary>
     /// <param name="clientName"></param>
-    /// <returns></returns>
     public HttpClient CreateHttpClient(string clientName)
     {
         HttpMessageHandler inner;

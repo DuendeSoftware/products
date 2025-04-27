@@ -24,7 +24,6 @@ public interface IDeviceFlowCodeService
     /// Finds device authorization by user code.
     /// </summary>
     /// <param name="userCode">The user code.</param>
-    /// <returns></returns>
     Task<DeviceCode?> FindByUserCodeAsync(string userCode);
 
     /// <summary>

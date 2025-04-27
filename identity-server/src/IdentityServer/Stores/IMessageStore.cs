@@ -23,6 +23,5 @@ public interface IMessageStore<TModel>
     /// Reads the message.
     /// </summary>
     /// <param name="id">The identifier.</param>
-    /// <returns></returns>
     Task<Message<TModel>> ReadAsync(string id);
 }

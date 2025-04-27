@@ -15,6 +15,5 @@ public interface IClientConfigurationValidator
     /// Determines whether the configuration of a client is valid.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     Task ValidateAsync(ClientConfigurationValidationContext context);
 }

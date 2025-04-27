@@ -66,7 +66,6 @@ public interface IConfigurationDbContext : IDisposable
     /// <summary>
     /// Saves the changes.
     /// </summary>
-    /// <returns></returns>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 
     // this is here only because of this: https://github.com/DuendeSoftware/IdentityServer/issues/472
@@ -75,6 +74,5 @@ public interface IConfigurationDbContext : IDisposable
     /// <summary>
     /// Saves the changes.
     /// </summary>
-    /// <returns></returns>
     Task<int> SaveChangesAsync() => SaveChangesAsync(CancellationToken.None);
 }

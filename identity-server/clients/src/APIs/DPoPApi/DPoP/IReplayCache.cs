@@ -11,7 +11,6 @@ public interface IReplayCache
     /// <param name="purpose"></param>
     /// <param name="handle"></param>
     /// <param name="expiration"></param>
-    /// <returns></returns>
     Task AddAsync(string purpose, string handle, DateTimeOffset expiration);
 
 
@@ -20,6 +19,5 @@ public interface IReplayCache
     /// </summary>
     /// <param name="purpose"></param>
     /// <param name="handle"></param>
-    /// <returns></returns>
     Task<bool> ExistsAsync(string purpose, string handle);
 }

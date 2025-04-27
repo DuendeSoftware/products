@@ -16,6 +16,5 @@ public interface IDeviceAuthorizationResponseGenerator
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
     /// <param name="baseUrl">The base URL.</param>
-    /// <returns></returns>
     Task<DeviceAuthorizationResponse> ProcessAsync(DeviceAuthorizationRequestValidationResult validationResult, string baseUrl);
 }

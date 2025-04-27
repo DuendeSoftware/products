@@ -14,7 +14,6 @@ public static class BffBuilderExtensions
     /// Adds the services required for the YARP HTTP forwarder
     /// </summary>
     /// <param name="builder"></param>
-    /// <returns></returns>
     public static BffBuilder AddRemoteApis(this BffBuilder builder)
     {
         builder.Services.AddHttpForwarder();

@@ -15,13 +15,11 @@ public interface ISigningKeyProtector
     /// Protects KeyContainer.
     /// </summary>
     /// <param name="key"></param>
-    /// <returns></returns>
     SerializedKey Protect(KeyContainer key);
 
     /// <summary>
     /// Unprotects KeyContainer.
     /// </summary>
     /// <param name="key"></param>
-    /// <returns></returns>
     KeyContainer Unprotect(SerializedKey key);
 }

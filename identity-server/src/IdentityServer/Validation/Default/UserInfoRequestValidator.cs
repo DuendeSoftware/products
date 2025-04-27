@@ -46,7 +46,6 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
     /// Validates a userinfo request.
     /// </summary>
     /// <param name="accessToken">The access token.</param>
-    /// <returns></returns>
     /// <exception cref="System.NotImplementedException"></exception>
     public async Task<UserInfoRequestValidationResult> ValidateRequestAsync(string accessToken)
     {

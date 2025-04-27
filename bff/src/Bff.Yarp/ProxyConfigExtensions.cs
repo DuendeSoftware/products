@@ -16,7 +16,6 @@ public static class ProxyConfigExtensions
     /// </summary>
     /// <param name="config"></param>
     /// <param name="tokenType"></param>
-    /// <returns></returns>
     public static RouteConfig WithAccessToken(this RouteConfig config, TokenType tokenType) => config.WithMetadata(Constants.Yarp.TokenTypeMetadata, tokenType.ToString());
 
     /// <summary>
@@ -25,14 +24,12 @@ public static class ProxyConfigExtensions
     /// but fall back to an anonymous request if not.
     /// </summary>
     /// <param name="config"></param>
-    /// <returns></returns>
     public static RouteConfig WithOptionalUserAccessToken(this RouteConfig config) => config.WithMetadata(Constants.Yarp.OptionalUserTokenMetadata, "true");
 
     /// <summary>
     /// Adds anti-forgery metadata to a route configuration
     /// </summary>
     /// <param name="config"></param>
-    /// <returns></returns>
     public static RouteConfig WithAntiforgeryCheck(this RouteConfig config) => config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
 
     private static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
@@ -59,7 +56,6 @@ public static class ProxyConfigExtensions
     /// </summary>
     /// <param name="config"></param>
     /// <param name="tokenType"></param>
-    /// <returns></returns>
     public static ClusterConfig WithAccessToken(this ClusterConfig config, TokenType tokenType)
     {
         Dictionary<string, string> metadata;

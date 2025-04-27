@@ -255,7 +255,6 @@ public class DefaultClaimsService : IClaimsService
     /// Filters out protocol claims like amr, nonce etc..
     /// </summary>
     /// <param name="claims">The claims.</param>
-    /// <returns></returns>
     protected virtual IEnumerable<Claim> FilterProtocolClaims(IEnumerable<Claim> claims)
     {
         var claimsToFilter = claims.Where(x => Constants.Filters.ClaimsServiceFilterClaimTypes.Contains(x.Type));

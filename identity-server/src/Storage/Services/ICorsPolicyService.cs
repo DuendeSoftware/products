@@ -15,6 +15,5 @@ public interface ICorsPolicyService
     /// Determines whether origin is allowed.
     /// </summary>
     /// <param name="origin">The origin.</param>
-    /// <returns></returns>
     Task<bool> IsOriginAllowedAsync(string origin);
 }

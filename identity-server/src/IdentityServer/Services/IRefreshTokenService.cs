@@ -19,7 +19,6 @@ public interface IRefreshTokenService
     /// </summary>
     /// <param name="token">The refresh token.</param>
     /// <param name="client">The client.</param>
-    /// <returns></returns>
     Task<TokenValidationResult> ValidateRefreshTokenAsync(string token, Client client);
 
     /// <summary>

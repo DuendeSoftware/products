@@ -34,7 +34,6 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
     /// </summary>
     /// <param name="url"></param>
     /// <param name="payload"></param>
-    /// <returns></returns>
     public async Task PostAsync(string url, Dictionary<string, string> payload)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackChannelLogoutHttpClient.Post");

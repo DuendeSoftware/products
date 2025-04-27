@@ -74,7 +74,6 @@ internal class DefaultUserService(IOptions<BffOptions> options, ILoggerFactory l
     /// Collect user-centric claims
     /// </summary>
     /// <param name="authenticateResult"></param>
-    /// <returns></returns>
     protected virtual Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult) => Task.FromResult(authenticateResult.Principal?.Claims.Select(x => new ClaimRecord(x.Type, x.Value)) ?? Enumerable.Empty<ClaimRecord>());
 
     /// <summary>
@@ -82,7 +81,6 @@ internal class DefaultUserService(IOptions<BffOptions> options, ILoggerFactory l
     /// </summary>
     /// <param name="context"></param>
     /// <param name="authenticateResult"></param>
-    /// <returns></returns>
     protected virtual Task<IEnumerable<ClaimRecord>> GetManagementClaimsAsync(HttpContext context, AuthenticateResult authenticateResult)
     {
         var claims = new List<ClaimRecord>();

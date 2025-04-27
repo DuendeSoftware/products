@@ -54,7 +54,6 @@ internal class TokenRevocationEndpoint : IEndpointHandler
     /// Processes the request.
     /// </summary>
     /// <param name="context">The HTTP context.</param>
-    /// <returns></returns>
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity(IdentityServerConstants.EndpointNames.Revocation + "Endpoint");

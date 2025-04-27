@@ -22,6 +22,5 @@ public interface ISessionDbContext
     /// <summary>
     /// Saves the changes.
     /// </summary>
-    /// <returns></returns>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

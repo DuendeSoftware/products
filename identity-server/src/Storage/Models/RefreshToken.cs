@@ -59,7 +59,6 @@ public class RefreshToken
     /// Returns the access token based on the resource indicator.
     /// </summary>
     /// <param name="resourceIndicator"></param>
-    /// <returns></returns>
     public Token? GetAccessToken(string? resourceIndicator = null)
     {
         AccessTokens.TryGetValue(resourceIndicator ?? string.Empty, out var token);
@@ -71,7 +70,6 @@ public class RefreshToken
     /// </summary>
     /// <param name="resourceIndicator"></param>
     /// <param name="token"></param>
-    /// <returns></returns>
     public void SetAccessToken(Token token, string? resourceIndicator = null) => AccessTokens[resourceIndicator ?? string.Empty] = token;
 
     /// <summary>

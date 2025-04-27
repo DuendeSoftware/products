@@ -12,7 +12,6 @@ public static class Selector
     /// Provides a forwarding func for JWT vs reference tokens (based on existence of dot in token)
     /// </summary>
     /// <param name="introspectionScheme">Scheme name of the introspection handler</param>
-    /// <returns></returns>
     public static Func<HttpContext, string> ForwardReferenceToken(string introspectionScheme = "introspection")
     {
         string Select(HttpContext context)
@@ -34,7 +33,6 @@ public static class Selector
     /// Extracts scheme and credential from Authorization header (if present)
     /// </summary>
     /// <param name="context"></param>
-    /// <returns></returns>
     public static (string, string) GetSchemeAndCredential(HttpContext context)
     {
         var header = context.Request.Headers["Authorization"].FirstOrDefault();

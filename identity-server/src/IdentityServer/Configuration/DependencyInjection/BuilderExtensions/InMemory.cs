@@ -22,7 +22,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// Adds the in memory caching.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryCaching(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IMemoryCache, MemoryCache>();
@@ -36,7 +35,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="identityResources">The identity resources.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryIdentityResources(this IIdentityServerBuilder builder, IEnumerable<IdentityResource> identityResources)
     {
         builder.Services.AddSingleton(identityResources);
@@ -50,7 +48,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="section">The configuration section containing the configuration data.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryIdentityResources(this IIdentityServerBuilder builder, IConfigurationSection section)
     {
         var resources = new List<IdentityResource>();
@@ -64,7 +61,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="apiResources">The API resources.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryApiResources(this IIdentityServerBuilder builder, IEnumerable<ApiResource> apiResources)
     {
         builder.Services.AddSingleton(apiResources);
@@ -78,7 +74,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="section">The configuration section containing the configuration data.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryApiResources(this IIdentityServerBuilder builder, IConfigurationSection section)
     {
         var resources = new List<ApiResource>();
@@ -92,7 +87,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="apiScopes">The API scopes.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryApiScopes(this IIdentityServerBuilder builder, IEnumerable<ApiScope> apiScopes)
     {
         builder.Services.AddSingleton(apiScopes);
@@ -106,7 +100,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="section">The configuration section containing the configuration data.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryApiScopes(this IIdentityServerBuilder builder, IConfigurationSection section)
     {
         var resources = new List<ApiScope>();
@@ -132,7 +125,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="clients">The clients.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryClients(this IIdentityServerBuilder builder, IEnumerable<Client> clients)
     {
         builder.Services.AddSingleton(clients);
@@ -157,7 +149,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="section">The configuration section containing the configuration data.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryClients(this IIdentityServerBuilder builder, IConfigurationSection section)
     {
         var clients = new List<Client>();
@@ -171,7 +162,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// Adds the in memory stores.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryPersistedGrants(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IPersistedGrantStore, InMemoryPersistedGrantStore>();
@@ -184,7 +174,6 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// Adds the in memory pushed authorization request store.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryPushedAuthorizationRequests(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IPushedAuthorizationRequestStore, InMemoryPushedAuthorizationRequestStore>();

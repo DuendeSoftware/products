@@ -24,7 +24,6 @@ public static class TokenExtensions
     /// <param name="options"></param>
     /// <param name="clock"></param>
     /// <param name="logger"></param>
-    /// <returns></returns>
     public static Dictionary<string, object> CreateJwtPayloadDictionary(this Token token,
         IdentityServerOptions options, IClock clock, ILogger logger)
     {

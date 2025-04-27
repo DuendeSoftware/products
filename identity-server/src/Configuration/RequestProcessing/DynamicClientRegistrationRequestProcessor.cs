@@ -133,7 +133,6 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model, the DCR request, and other contextual
     /// information.</param>
-    /// <returns></returns>
     protected virtual Task<IStepResult> AddClientId(
         DynamicClientRegistrationContext context)
     {

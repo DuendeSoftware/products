@@ -17,7 +17,6 @@ public static class ClientMappers
     /// Maps an entity to a model.
     /// </summary>
     /// <param name="entity">The entity.</param>
-    /// <returns></returns>
     public static Models.Client ToModel(this Entities.Client entity) => new Models.Client
     {
         Enabled = entity.Enabled,
@@ -94,7 +93,6 @@ public static class ClientMappers
     /// Maps a model to an entity.
     /// </summary>
     /// <param name="model">The model.</param>
-    /// <returns></returns>
     public static Entities.Client ToEntity(this Models.Client model) => new Entities.Client
     {
         Enabled = model.Enabled,

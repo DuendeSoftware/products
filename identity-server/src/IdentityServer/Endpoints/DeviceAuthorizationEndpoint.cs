@@ -48,7 +48,6 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
     /// Processes the request.
     /// </summary>
     /// <param name="context">The HTTP context.</param>
-    /// <returns></returns>
     /// <exception cref="System.NotImplementedException"></exception>
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {

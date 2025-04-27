@@ -13,7 +13,6 @@ public static class ApiResourceMappers
     /// Maps an entity to a model.
     /// </summary>
     /// <param name="entity">The entity.</param>
-    /// <returns></returns>
     public static Models.ApiResource ToModel(this Entities.ApiResource entity) => entity == null ? null :
             new Models.ApiResource
             {
@@ -41,7 +40,6 @@ public static class ApiResourceMappers
     /// Maps a model to an entity.
     /// </summary>
     /// <param name="model">The model.</param>
-    /// <returns></returns>
     public static Entities.ApiResource ToEntity(this Models.ApiResource model) => model == null ? null :
             new Entities.ApiResource
             {

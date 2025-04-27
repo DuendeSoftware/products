@@ -143,7 +143,6 @@ public class DefaultConsentService : IConsentService
     /// <param name="client">The client.</param>
     /// <param name="subject">The subject.</param>
     /// <param name="parsedScopes">The parsed scopes.</param>
-    /// <returns></returns>
     /// <exception cref="System.ArgumentNullException">
     /// client
     /// or

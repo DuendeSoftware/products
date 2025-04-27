@@ -24,7 +24,6 @@ public class InMemoryValidationKeysStore : IValidationKeysStore
     /// <summary>
     /// Gets all validation keys.
     /// </summary>
-    /// <returns></returns>
     public Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryValidationKeysStore.GetValidationKeys");

@@ -17,7 +17,6 @@ public class BffUserAccessTokenParameters(
     /// <summary>
     /// Retrieve a UserAccessTokenParameters
     /// </summary>
-    /// <returns></returns>
     public UserTokenRequestParameters ToUserAccessTokenRequestParameters() => new UserTokenRequestParameters()
     {
         SignInScheme = signInScheme,

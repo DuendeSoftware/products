@@ -42,7 +42,6 @@ public class ResourceOwnerPasswordValidator<TUser> : IResourceOwnerPasswordValid
     /// Validates the resource owner password credential
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public virtual async Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
     {
         var user = await _userManager.FindByNameAsync(context.UserName);

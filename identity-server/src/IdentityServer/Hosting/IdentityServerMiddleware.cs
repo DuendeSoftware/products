@@ -44,7 +44,6 @@ public class IdentityServerMiddleware
     /// <param name="events">The event service.</param>
     /// <param name="issuerNameService">The issuer name service</param>
     /// <param name="sessionCoordinationService"></param>
-    /// <returns></returns>
     public async Task Invoke(
         HttpContext context,
         IdentityServerOptions options,

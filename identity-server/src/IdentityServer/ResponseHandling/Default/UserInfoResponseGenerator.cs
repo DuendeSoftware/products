@@ -51,7 +51,6 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     /// Creates the response.
     /// </summary>
     /// <param name="validationResult">The userinfo request validation result.</param>
-    /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">Profile service returned incorrect subject value</exception>
     public virtual async Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult)
     {
@@ -109,7 +108,6 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     ///  Gets the identity resources from the scopes.
     /// </summary>
     /// <param name="scopes"></param>
-    /// <returns></returns>
     protected internal virtual async Task<ResourceValidationResult> GetRequestedResourcesAsync(IEnumerable<string> scopes)
     {
         if (scopes == null || !scopes.Any())
@@ -133,7 +131,6 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     /// Gets the requested claim types.
     /// </summary>
     /// <param name="resourceValidationResult"></param>
-    /// <returns></returns>
     protected internal virtual Task<IEnumerable<string>> GetRequestedClaimTypesAsync(ResourceValidationResult resourceValidationResult)
     {
         IEnumerable<string> result;

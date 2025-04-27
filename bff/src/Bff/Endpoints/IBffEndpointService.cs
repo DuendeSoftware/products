@@ -14,6 +14,5 @@ public interface IBffEndpointService
     /// Process a request
     /// </summary>
     /// <param name="context"></param>
-    /// <returns></returns>
     Task ProcessRequestAsync(HttpContext context);
 }

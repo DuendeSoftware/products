@@ -27,7 +27,6 @@ public static class IdentityServerBuilderExtensions
     /// </summary>
     /// <typeparam name="TUser">The type of the user.</typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddAspNetIdentity<TUser>(this IIdentityServerBuilder builder)
         where TUser : class
     {

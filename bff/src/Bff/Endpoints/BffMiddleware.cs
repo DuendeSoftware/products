@@ -22,7 +22,6 @@ internal class BffMiddleware(
     /// Request processing
     /// </summary>
     /// <param name="context"></param>
-    /// <returns></returns>
     public async Task Invoke(HttpContext context)
     {
         // add marker so we can determine if middleware has run later in the pipeline

@@ -13,6 +13,5 @@ public interface IDeviceCodeValidator
     /// Validates the device code.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     Task ValidateAsync(DeviceCodeValidationContext context);
 }

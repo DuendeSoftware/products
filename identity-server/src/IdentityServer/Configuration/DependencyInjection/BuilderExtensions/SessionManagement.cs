@@ -22,7 +22,6 @@ public static class SessionManagementServiceCollectionExtensions
     /// <summary>
     /// Adds a server-side session store using the provided store type
     /// </summary>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddServerSideSessions<T>(this IIdentityServerBuilder builder)
         where T : class, IServerSideSessionStore =>
         // the order of these two calls is important
@@ -33,7 +32,6 @@ public static class SessionManagementServiceCollectionExtensions
     /// <summary>
     /// Adds a server-side session store using the in-memory store
     /// </summary>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddServerSideSessions(this IIdentityServerBuilder builder)
     {
         builder.Services.AddSingleton<IServerSideSessionsMarker, NopIServerSideSessionsMarker>();
@@ -71,7 +69,6 @@ public static class SessionManagementServiceCollectionExtensions
     /// Adds a server-side session store using the supplied session store implementation
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddServerSideSessionStore<T>(this IIdentityServerBuilder builder)
         where T : class, IServerSideSessionStore
     {

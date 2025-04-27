@@ -26,7 +26,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddExtensionGrantValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IExtensionGrantValidator
     {
@@ -40,7 +39,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddRedirectUriValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IRedirectUriValidator
     {
@@ -53,7 +51,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// Adds an "AppAuth" (OAuth 2.0 for Native Apps) compliant redirect URI validator (does strict validation but also allows http://127.0.0.1 with random port)
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddAppAuthRedirectUriValidator(this IIdentityServerBuilder builder) => builder.AddRedirectUriValidator<StrictRedirectUriValidatorAppAuth>();
 
     /// <summary>
@@ -61,7 +58,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddResourceOwnerValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IResourceOwnerPasswordValidator
     {
@@ -75,7 +71,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddProfileService<T>(this IIdentityServerBuilder builder)
         where T : class, IProfileService
     {
@@ -89,7 +84,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddResourceValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IResourceValidator
     {
@@ -103,7 +97,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddScopeParser<T>(this IIdentityServerBuilder builder)
         where T : class, IScopeParser
     {
@@ -117,7 +110,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddClientStore<T>(this IIdentityServerBuilder builder)
         where T : class, IClientStore
     {
@@ -132,7 +124,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddResourceStore<T>(this IIdentityServerBuilder builder)
         where T : class, IResourceStore
     {
@@ -201,7 +192,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T">The type of the concrete CORS policy service that is registered in DI.</typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddCorsPolicyService<T>(this IIdentityServerBuilder builder)
         where T : class, ICorsPolicyService
     {
@@ -214,7 +204,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T">The type of the concrete CORS policy service that is registered in DI.</typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddCorsPolicyCache<T>(this IIdentityServerBuilder builder)
         where T : class, ICorsPolicyService
     {
@@ -228,7 +217,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddSecretParser<T>(this IIdentityServerBuilder builder)
         where T : class, ISecretParser
     {
@@ -242,7 +230,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddSecretValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ISecretValidator
     {
@@ -256,7 +243,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T">The type of the concrete client store class that is registered in DI.</typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddClientStoreCache<T>(this IIdentityServerBuilder builder)
         where T : IClientStore
     {
@@ -272,7 +258,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T">The type of the concrete scope store class that is registered in DI.</typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddResourceStoreCache<T>(this IIdentityServerBuilder builder)
         where T : IResourceStore
     {
@@ -285,7 +270,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// Adds the identity provider store cache.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityProviderStoreCache<T>(this IIdentityServerBuilder builder)
         where T : IIdentityProviderStore
     {
@@ -303,7 +287,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddAuthorizeInteractionResponseGenerator<T>(this IIdentityServerBuilder builder)
         where T : class, IAuthorizeInteractionResponseGenerator
     {
@@ -317,7 +300,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddCustomAuthorizeRequestValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ICustomAuthorizeRequestValidator
     {
@@ -331,7 +313,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddCustomTokenRequestValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ICustomTokenRequestValidator
     {
@@ -345,7 +326,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddCustomBackchannelAuthenticationRequestValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ICustomBackchannelAuthenticationValidator
     {
@@ -358,7 +338,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// Adds support for client authentication using JWT bearer assertions.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddJwtBearerClientAuthentication(this IIdentityServerBuilder builder)
     {
         builder.AddSecretParser<JwtBearerClientAssertionSecretParser>();
@@ -372,7 +351,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddClientConfigurationValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IClientConfigurationValidator
     {
@@ -387,7 +365,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityProviderConfigurationValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IIdentityProviderConfigurationValidator
     {
@@ -400,7 +377,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// Adds the X509 secret validators for mutual TLS.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddMutualTlsSecretValidators(this IIdentityServerBuilder builder)
     {
         builder.AddSecretParser<MutualTlsSecretParser>();
@@ -415,7 +391,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddBackChannelLogoutService<T>(this IIdentityServerBuilder builder)
         where T : class, IBackChannelLogoutService
     {
@@ -429,7 +404,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureClient">The configuration callback.</param>
-    /// <returns></returns>
     public static IHttpClientBuilder AddBackChannelLogoutHttpClient(this IIdentityServerBuilder builder, Action<HttpClient>? configureClient = null)
     {
         const string name = IdentityServerConstants.HttpClients.BackChannelLogoutHttpClient;
@@ -465,7 +439,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureClient">The configuration callback.</param>
-    /// <returns></returns>
     public static IHttpClientBuilder AddJwtRequestUriHttpClient(this IIdentityServerBuilder builder, Action<HttpClient>? configureClient = null)
     {
         const string name = IdentityServerConstants.HttpClients.JwtRequestUriHttpClient;
@@ -502,7 +475,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     [Obsolete("This feature is deprecated. Consider using Pushed Authorization Requests instead.")]
     public static IIdentityServerBuilder AddAuthorizationParametersMessageStore<T>(this IIdentityServerBuilder builder)
         where T : class, IAuthorizationParametersMessageStore
@@ -517,7 +489,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddUserSession<T>(this IIdentityServerBuilder builder)
         where T : class, IUserSession
     {
@@ -534,7 +505,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityProviderStore<T>(this IIdentityServerBuilder builder)
         where T : class, IIdentityProviderStore
     {
@@ -551,7 +521,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddBackchannelAuthenticationUserValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IBackchannelAuthenticationUserValidator
     {
@@ -565,7 +534,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddBackchannelAuthenticationUserNotificationService<T>(this IIdentityServerBuilder builder)
         where T : class, IBackchannelAuthenticationUserNotificationService
     {
@@ -578,7 +546,6 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// Adds the legacy clock based on the pre-.NET8 ISystemClock.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddLegacyClock(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<IClock, LegacyClock>();

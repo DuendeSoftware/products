@@ -26,7 +26,6 @@ public class BffBuilder(IServiceCollection services)
     /// <summary>
     /// Adds a server-side session store using the in-memory store
     /// </summary>
-    /// <returns></returns>
     public BffBuilder AddServerSideSessions()
     {
         Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
@@ -43,7 +42,6 @@ public class BffBuilder(IServiceCollection services)
     /// Adds a server-side session store using the supplied session store implementation
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
     public BffBuilder AddServerSideSessions<T>()
         where T : class, IUserSessionStore
     {

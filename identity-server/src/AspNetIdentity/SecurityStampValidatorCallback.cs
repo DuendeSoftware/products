@@ -16,7 +16,6 @@ public class SecurityStampValidatorCallback
     /// This is needed to preserve claims such as idp, auth_time, amr.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public static Task UpdatePrincipal(SecurityStampRefreshingPrincipalContext context)
     {
         var newClaimTypes = context.NewPrincipal.Claims.Select(x => x.Type).ToArray();

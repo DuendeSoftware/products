@@ -15,6 +15,5 @@ public interface IBackchannelAuthenticationResponseGenerator
     /// Processes the response.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
-    /// <returns></returns>
     Task<BackchannelAuthenticationResponse> ProcessAsync(BackchannelAuthenticationRequestValidationResult validationResult);
 }

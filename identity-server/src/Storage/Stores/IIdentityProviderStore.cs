@@ -22,6 +22,5 @@ public interface IIdentityProviderStore
     /// Gets the identity provider by scheme name.
     /// </summary>
     /// <param name="scheme"></param>
-    /// <returns></returns>
     Task<IdentityProvider?> GetBySchemeAsync(string scheme);
 }

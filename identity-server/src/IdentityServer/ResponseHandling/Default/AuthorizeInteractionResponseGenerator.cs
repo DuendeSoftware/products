@@ -70,7 +70,6 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="consent">The consent.</param>
-    /// <returns></returns>
     public virtual async Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeInteractionResponseGenerator.ProcessInteraction");
@@ -134,7 +133,6 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// Processes the create account logic.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected internal virtual Task<InteractionResponse> ProcessCreateAccountAsync(ValidatedAuthorizeRequest request)
     {
         InteractionResponse result;
@@ -161,7 +159,6 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// Processes the login logic.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected internal virtual async Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeInteractionResponseGenerator.ProcessLogin");
@@ -305,7 +302,6 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="consent">The consent.</param>
-    /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException">Invalid PromptMode</exception>
     protected internal virtual async Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)

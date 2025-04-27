@@ -32,6 +32,5 @@ public interface IConsentService
     /// <param name="subject">The subject.</param>
     /// <param name="client">The client.</param>
     /// <param name="parsedScopes">The parsed scopes.</param>
-    /// <returns></returns>
     Task UpdateConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes);
 }

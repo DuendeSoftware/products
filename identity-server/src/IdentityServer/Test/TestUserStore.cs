@@ -26,7 +26,6 @@ public class TestUserStore
     /// </summary>
     /// <param name="username">The username.</param>
     /// <param name="password">The password.</param>
-    /// <returns></returns>
     public bool ValidateCredentials(string username, string password)
     {
         var user = FindByUsername(username);
@@ -48,14 +47,12 @@ public class TestUserStore
     /// Finds the user by subject identifier.
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
-    /// <returns></returns>
     public TestUser FindBySubjectId(string subjectId) => _users.FirstOrDefault(x => x.SubjectId == subjectId);
 
     /// <summary>
     /// Finds the user by username.
     /// </summary>
     /// <param name="username">The username.</param>
-    /// <returns></returns>
     public TestUser FindByUsername(string username) => _users.FirstOrDefault(x => x.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
@@ -63,7 +60,6 @@ public class TestUserStore
     /// </summary>
     /// <param name="provider">The provider.</param>
     /// <param name="userId">The user identifier.</param>
-    /// <returns></returns>
     public TestUser FindByExternalProvider(string provider, string userId) => _users.FirstOrDefault(x =>
                                                                                        x.ProviderName == provider &&
                                                                                        x.ProviderSubjectId == userId);
@@ -74,7 +70,6 @@ public class TestUserStore
     /// <param name="provider">The provider.</param>
     /// <param name="userId">The user identifier.</param>
     /// <param name="claims">The claims.</param>
-    /// <returns></returns>
     public TestUser AutoProvisionUser(string provider, string userId, List<Claim> claims)
     {
         // create a list of claims that we want to transfer into our store
@@ -143,7 +138,6 @@ public class TestUserStore
     /// <summary>
     /// Adds a new a user.
     /// </summary>
-    /// <returns></returns>
     public TestUser CreateUser(string username, string password, string name = null, string email = null)
     {
         if (_users.Any(x => x.Username == username))

@@ -58,7 +58,6 @@ public class DefaultCache<T> : ICache<T>
     /// Used to create the key for the cache based on the data type being cached.
     /// </summary>
     /// <param name="key"></param>
-    /// <returns></returns>
     protected string GetKey(string key) => typeof(T).FullName + KeySeparator + key;
 
     /// <inheritdoc/>

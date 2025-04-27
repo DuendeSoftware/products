@@ -25,7 +25,6 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// <summary>
     /// Returns cached keys.
     /// </summary>
-    /// <returns></returns>
     public Task<IEnumerable<KeyContainer>> GetKeysAsync()
     {
         DateTime expires;
@@ -50,7 +49,6 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// </summary>
     /// <param name="keys"></param>
     /// <param name="duration"></param>
-    /// <returns></returns>
     public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration)
     {
         lock (_lock)

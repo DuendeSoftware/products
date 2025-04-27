@@ -29,7 +29,6 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
     /// </summary>
     /// <param name="parameters">The parameters.</param>
     /// <param name="client">The client.</param>
-    /// <returns></returns>
     /// <exception cref="System.ArgumentNullException">
     /// parameters
     /// or

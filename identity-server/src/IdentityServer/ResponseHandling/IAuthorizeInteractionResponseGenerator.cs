@@ -19,6 +19,5 @@ public interface IAuthorizeInteractionResponseGenerator
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="consent">The consent.</param>
-    /// <returns></returns>
     Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse? consent = null);
 }

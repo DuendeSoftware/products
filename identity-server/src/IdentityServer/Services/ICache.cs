@@ -36,7 +36,6 @@ public interface ICache<T>
     /// <param name="key">The key.</param>
     /// <param name="item">The item.</param>
     /// <param name="expiration">The expiration.</param>
-    /// <returns></returns>
     Task SetAsync(string key, T item, TimeSpan expiration);
 
     /// <summary>

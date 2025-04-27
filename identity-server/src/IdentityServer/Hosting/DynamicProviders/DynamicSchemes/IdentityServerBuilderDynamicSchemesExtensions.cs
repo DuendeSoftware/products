@@ -18,7 +18,6 @@ public static class IdentityServerBuilderDynamicSchemesExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="providers"></param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryIdentityProviders(
         this IIdentityServerBuilder builder, IEnumerable<IdentityProvider> providers)
     {

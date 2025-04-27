@@ -14,6 +14,5 @@ public interface IValidationKeysStore
     /// <summary>
     /// Gets all validation keys.
     /// </summary>
-    /// <returns></returns>
     Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync();
 }

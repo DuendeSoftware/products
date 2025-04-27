@@ -15,6 +15,5 @@ public static class BffApplicationBuilderExtensions
     /// Adds the Duende.BFF middleware to the pipeline
     /// </summary>
     /// <param name="app"></param>
-    /// <returns></returns>
     public static IApplicationBuilder UseBff(this IApplicationBuilder app) => app.UseMiddleware<BffMiddleware>();
 }

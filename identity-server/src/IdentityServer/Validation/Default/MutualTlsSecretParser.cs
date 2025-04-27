@@ -38,7 +38,6 @@ public class MutualTlsSecretParser : ISecretParser
     /// Parses the HTTP context
     /// </summary>
     /// <param name="context"></param>
-    /// <returns></returns>
     public async Task<ParsedSecret> ParseAsync(HttpContext context)
     {
         _logger.LogDebug("Start parsing for client id in post body");

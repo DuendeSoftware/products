@@ -34,7 +34,6 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     /// Stores the refresh token.
     /// </summary>
     /// <param name="refreshToken">The refresh token.</param>
-    /// <returns></returns>
     public async Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.StoreRefreshTokenAsync");
@@ -47,7 +46,6 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     /// </summary>
     /// <param name="handle">The handle.</param>
     /// <param name="refreshToken">The refresh token.</param>
-    /// <returns></returns>
     public Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.UpdateRefreshToken");
@@ -59,7 +57,6 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     /// Gets the refresh token.
     /// </summary>
     /// <param name="refreshTokenHandle">The refresh token handle.</param>
-    /// <returns></returns>
     public Task<RefreshToken> GetRefreshTokenAsync(string refreshTokenHandle)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.GetRefreshToken");
@@ -71,7 +68,6 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     /// Removes the refresh token.
     /// </summary>
     /// <param name="refreshTokenHandle">The refresh token handle.</param>
-    /// <returns></returns>
     public Task RemoveRefreshTokenAsync(string refreshTokenHandle)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.RemoveRefreshToken");
@@ -84,7 +80,6 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
-    /// <returns></returns>
     public Task RemoveRefreshTokensAsync(string subjectId, string clientId)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.RemoveRefreshTokens");

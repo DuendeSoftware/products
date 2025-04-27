@@ -35,7 +35,6 @@ public class SecretValidator : ISecretsListValidator
     /// </summary>
     /// <param name="parsedSecret">The parsed secret.</param>
     /// <param name="secrets">The secrets.</param>
-    /// <returns></returns>
     public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
     {
         var secretsArray = secrets as Secret[] ?? secrets.ToArray();

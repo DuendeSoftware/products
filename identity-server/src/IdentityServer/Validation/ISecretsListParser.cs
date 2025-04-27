@@ -26,6 +26,5 @@ public interface ISecretsListParser
     /// <summary>
     /// Gets all available authentication methods.
     /// </summary>
-    /// <returns></returns>
     IEnumerable<string> GetAvailableAuthenticationMethods();
 }

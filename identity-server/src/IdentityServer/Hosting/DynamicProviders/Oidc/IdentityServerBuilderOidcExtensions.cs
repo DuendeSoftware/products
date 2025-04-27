@@ -22,7 +22,6 @@ public static class IdentityServerBuilderOidcExtensions
     /// Adds the OIDC dynamic provider feature.
     /// </summary>
     /// <param name="builder"></param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddOidcDynamicProvider(this IIdentityServerBuilder builder)
     {
         builder.Services.Configure<IdentityServerOptions>(options =>
@@ -48,6 +47,5 @@ public static class IdentityServerBuilderOidcExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="providers"></param>
-    /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryOidcProviders(this IIdentityServerBuilder builder, IEnumerable<OidcProvider> providers) => builder.AddInMemoryIdentityProviders(providers);
 }

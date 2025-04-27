@@ -17,7 +17,6 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
-    /// <returns></returns>
     public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action) => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
 
     /// <summary>
@@ -25,7 +24,6 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
-    /// <returns></returns>
     public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<DbContextOptionsBuilder> action) => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
 
     /// <summary>
@@ -33,7 +31,6 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
-    /// <returns></returns>
     public static BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this BffBuilder bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action)
         where TContext : DbContext, ISessionDbContext
     {
@@ -46,7 +43,6 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
-    /// <returns></returns>
     public static BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this BffBuilder bffBuilder, Action<DbContextOptionsBuilder> action)
         where TContext : DbContext, ISessionDbContext
     {
@@ -60,7 +56,6 @@ public static class BffBuilderExtensions
     /// Use this API to register the BFF Entity Framework services when you plan to register your own DbContext (e.g. with AddDbContextPool).
     /// </summary>
     /// <param name="bffBuilder"></param>
-    /// <returns></returns>
     public static BffBuilder AddEntityFrameworkServerSideSessionsServices<TContext>(this BffBuilder bffBuilder)
         where TContext : ISessionDbContext
     {

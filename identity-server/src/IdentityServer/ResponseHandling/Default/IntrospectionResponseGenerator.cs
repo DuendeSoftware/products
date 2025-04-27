@@ -45,7 +45,6 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// Processes the response.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
-    /// <returns></returns>
     public virtual async Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("IntrospectionResponseGenerator.Process");
@@ -105,7 +104,6 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     /// Checks if the API resource is allowed to introspect the scopes.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
-    /// <returns></returns>
     protected virtual async Task<bool> AreExpectedScopesPresentAsync(IntrospectionRequestValidationResult validationResult)
     {
         var apiScopes = validationResult.Api.Scopes;

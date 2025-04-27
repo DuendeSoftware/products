@@ -52,7 +52,6 @@ public class ResourceStore : IResourceStore
     /// Finds the API resources by name.
     /// </summary>
     /// <param name="apiResourceNames">The names.</param>
-    /// <returns></returns>
     public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByName");
@@ -92,7 +91,6 @@ public class ResourceStore : IResourceStore
     /// Gets API resources by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
-    /// <returns></returns>
     public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByScopeName");
@@ -125,7 +123,6 @@ public class ResourceStore : IResourceStore
     /// Gets identity resources by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
-    /// <returns></returns>
     public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindIdentityResourcesByScopeName");
@@ -155,7 +152,6 @@ public class ResourceStore : IResourceStore
     /// Gets scopes by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
-    /// <returns></returns>
     public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiScopesByName");
@@ -184,7 +180,6 @@ public class ResourceStore : IResourceStore
     /// <summary>
     /// Gets all resources.
     /// </summary>
-    /// <returns></returns>
     public virtual async Task<Resources> GetAllResourcesAsync()
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.GetAllResources");

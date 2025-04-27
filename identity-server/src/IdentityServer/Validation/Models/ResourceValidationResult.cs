@@ -75,7 +75,6 @@ public class ResourceValidationResult
     /// Returns new result filted by the scope values.
     /// </summary>
     /// <param name="scopeValues"></param>
-    /// <returns></returns>
     public ResourceValidationResult Filter(IEnumerable<string> scopeValues)
     {
         scopeValues ??= Enumerable.Empty<string>();

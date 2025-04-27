@@ -42,7 +42,6 @@ public class ApiSecretValidator : IApiSecretValidator
     /// Validates the secret on the current request.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     public async Task<ApiSecretValidationResult> ValidateAsync(HttpContext context)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("ApiSecretValidator.Validate");

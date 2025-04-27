@@ -18,7 +18,6 @@ public static class PrincipalExtensions
     /// Gets the authentication time.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static DateTime GetAuthenticationTime(this IPrincipal principal) => DateTimeOffset.FromUnixTimeSeconds(principal.GetAuthenticationTimeEpoch()).UtcDateTime;
 
@@ -26,7 +25,6 @@ public static class PrincipalExtensions
     /// Gets the authentication epoch time.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static long GetAuthenticationTimeEpoch(this IPrincipal principal) => principal.Identity.GetAuthenticationTimeEpoch();
 
@@ -34,7 +32,6 @@ public static class PrincipalExtensions
     /// Gets the authentication epoch time.
     /// </summary>
     /// <param name="identity">The identity.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static long GetAuthenticationTimeEpoch(this IIdentity identity)
     {
@@ -50,7 +47,6 @@ public static class PrincipalExtensions
     /// Gets the subject identifier.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static string GetSubjectId(this IPrincipal principal) => principal.Identity.GetSubjectId();
 
@@ -58,7 +54,6 @@ public static class PrincipalExtensions
     /// Gets the subject identifier.
     /// </summary>
     /// <param name="identity">The identity.</param>
-    /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">sub claim is missing</exception>
     [DebuggerStepThrough]
     public static string GetSubjectId(this IIdentity identity)
@@ -74,7 +69,6 @@ public static class PrincipalExtensions
     /// Gets the name.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static string GetDisplayName(this ClaimsPrincipal principal)
     {
@@ -91,7 +85,6 @@ public static class PrincipalExtensions
     /// Gets the authentication method.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static string GetAuthenticationMethod(this IPrincipal principal) => principal.Identity.GetAuthenticationMethod();
 
@@ -99,7 +92,6 @@ public static class PrincipalExtensions
     /// Gets the authentication method claims.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static IEnumerable<Claim> GetAuthenticationMethods(this IPrincipal principal) => principal.Identity.GetAuthenticationMethods();
 
@@ -107,7 +99,6 @@ public static class PrincipalExtensions
     /// Gets the authentication method.
     /// </summary>
     /// <param name="identity">The identity.</param>
-    /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">amr claim is missing</exception>
     [DebuggerStepThrough]
     public static string GetAuthenticationMethod(this IIdentity identity)
@@ -123,7 +114,6 @@ public static class PrincipalExtensions
     /// Gets the authentication method claims.
     /// </summary>
     /// <param name="identity">The identity.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static IEnumerable<Claim> GetAuthenticationMethods(this IIdentity identity)
     {
@@ -135,7 +125,6 @@ public static class PrincipalExtensions
     /// Gets the identity provider.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static string GetIdentityProvider(this IPrincipal principal) => principal.Identity.GetIdentityProvider();
 
@@ -143,7 +132,6 @@ public static class PrincipalExtensions
     /// Gets the identity provider.
     /// </summary>
     /// <param name="identity">The identity.</param>
-    /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">idp claim is missing</exception>
     [DebuggerStepThrough]
     public static string GetIdentityProvider(this IIdentity identity)
@@ -159,7 +147,6 @@ public static class PrincipalExtensions
     /// Gets the tenant.
     /// </summary>
     /// <param name="principal">The principal.</param>
-    /// <returns></returns>
     [DebuggerStepThrough]
     public static string GetTenant(this ClaimsPrincipal principal) => principal.FindFirst(IdentityServerConstants.ClaimTypes.Tenant)?.Value;
 

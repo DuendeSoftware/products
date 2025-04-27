@@ -78,7 +78,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Processes the response.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     public virtual async Task<TokenResponse> ProcessAsync(TokenRequestValidationResult request)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenResponseGenerator.Process");
@@ -101,7 +100,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for a client credentials request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected virtual Task<TokenResponse> ProcessClientCredentialsRequestAsync(TokenRequestValidationResult request)
     {
         Logger.LogTrace("Creating response for client credentials request");
@@ -113,7 +111,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for a password request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected virtual Task<TokenResponse> ProcessPasswordRequestAsync(TokenRequestValidationResult request)
     {
         Logger.LogTrace("Creating response for password request");
@@ -125,7 +122,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for an authorization code request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">Client does not exist anymore.</exception>
     protected virtual async Task<TokenResponse> ProcessAuthorizationCodeRequestAsync(TokenRequestValidationResult request)
     {
@@ -169,7 +165,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for a refresh token request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected virtual async Task<TokenResponse> ProcessRefreshTokenRequestAsync(TokenRequestValidationResult request)
     {
         Logger.LogTrace("Creating response for refresh token request");
@@ -229,7 +224,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Processes the response for device code grant request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected virtual async Task<TokenResponse> ProcessDeviceCodeRequestAsync(TokenRequestValidationResult request)
     {
         Logger.LogTrace("Creating response for device code request");
@@ -270,7 +264,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Processes the response for CIBA request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected virtual async Task<TokenResponse> ProcessCibaRequestAsync(TokenRequestValidationResult request)
     {
         Logger.LogTrace("Creating response for CIBA request");
@@ -308,7 +301,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for an extension grant request.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     protected virtual Task<TokenResponse> ProcessExtensionGrantRequestAsync(TokenRequestValidationResult request)
     {
         Logger.LogTrace("Creating response for extension grant request");
@@ -345,7 +337,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the access/refresh token.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">Client does not exist anymore.</exception>
     protected virtual async Task<(string accessToken, string refreshToken)> CreateAccessTokenAsync(ValidatedTokenRequest request)
     {
@@ -452,7 +443,6 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="newAccessToken">The new access token.</param>
-    /// <returns></returns>
     protected virtual async Task<string> CreateIdTokenFromRefreshTokenRequestAsync(ValidatedTokenRequest request, string newAccessToken)
     {
         if (request.RefreshToken.AuthorizedScopes.Contains(OidcConstants.StandardScopes.OpenId))

@@ -20,7 +20,6 @@ internal static class LogoutUrlBuilder
     /// <param name="basePath"></param>
     /// <param name="options"></param>
     /// <param name="sessionId"></param>
-    /// <returns></returns>
     internal static Uri Build(PathString basePath, BffOptions options, string? sessionId)
     {
         string logoutUrl = basePath + options.LogoutPath;

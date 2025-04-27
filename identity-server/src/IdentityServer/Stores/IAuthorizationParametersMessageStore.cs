@@ -22,13 +22,11 @@ public interface IAuthorizationParametersMessageStore
     /// Reads the authorization parameters.
     /// </summary>
     /// <param name="id">The identifier.</param>
-    /// <returns></returns>
     Task<Message<IDictionary<string, string[]>>> ReadAsync(string id);
 
     /// <summary>
     /// Deletes the authorization parameters.
     /// </summary>
     /// <param name="id">The identifier.</param>
-    /// <returns></returns>
     Task DeleteAsync(string id);
 }

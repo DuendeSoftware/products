@@ -44,7 +44,6 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// <summary>
     /// Returns all the keys in storage.
     /// </summary>
-    /// <returns></returns>
     public async Task<IEnumerable<SerializedKey>> LoadKeysAsync()
     {
         var list = new List<SerializedKey>();
@@ -80,7 +79,6 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// Persists new key in storage.
     /// </summary>
     /// <param name="key"></param>
-    /// <returns></returns>
     public Task StoreKeyAsync(SerializedKey key)
     {
         if (!_directory.Exists)
@@ -100,7 +98,6 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// Deletes key from storage.
     /// </summary>
     /// <param name="id"></param>
-    /// <returns></returns>
     public Task DeleteKeyAsync(string id)
     {
         var path = Path.Combine(_directory.FullName, KeyFilePrefix + id + KeyFileExtension);

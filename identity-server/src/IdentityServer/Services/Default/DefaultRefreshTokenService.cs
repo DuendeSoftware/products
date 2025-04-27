@@ -70,7 +70,6 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     /// </summary>
     /// <param name="tokenHandle">The token handle.</param>
     /// <param name="client">The client.</param>
-    /// <returns></returns>
     public virtual async Task<TokenValidationResult> ValidateRefreshTokenAsync(string tokenHandle, Client client)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultRefreshTokenService.ValidateRefreshToken");
@@ -160,7 +159,6 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     /// Callback to decide if an already consumed token should be accepted.
     /// </summary>
     /// <param name="refreshToken"></param>
-    /// <returns></returns>
     protected virtual Task<bool> AcceptConsumedTokenAsync(RefreshToken refreshToken) =>
         // by default we will not accept consumed tokens
         // change the behavior here to implement a time window

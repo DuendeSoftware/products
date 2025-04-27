@@ -55,7 +55,6 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     /// Creates the revocation endpoint response and processes the revocation request.
     /// </summary>
     /// <param name="validationResult">The userinfo request validation result.</param>
-    /// <returns></returns>
     public virtual async Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRevocationResponseGenerator.Process");

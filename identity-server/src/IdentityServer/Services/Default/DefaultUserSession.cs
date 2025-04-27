@@ -154,7 +154,6 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="principal"></param>
     /// <param name="properties"></param>
-    /// <returns></returns>
     /// <exception cref="ArgumentNullException">
     /// principal
     /// or
@@ -198,7 +197,6 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Gets the current authenticated user.
     /// </summary>
-    /// <returns></returns>
     public virtual async Task<ClaimsPrincipal> GetUserAsync()
     {
         await AuthenticateAsync();
@@ -209,7 +207,6 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Gets the current session identifier.
     /// </summary>
-    /// <returns></returns>
     public virtual async Task<string> GetSessionIdAsync()
     {
         await AuthenticateAsync();
@@ -222,7 +219,6 @@ public class DefaultUserSession : IUserSession
     /// session identifier. If there is no sid, the cookie is removed. If there
     /// is a sid, and the session identifier cookie is missing, it is issued. 
     /// </summary>
-    /// <returns></returns>
     public virtual async Task EnsureSessionIdCookieAsync()
     {
         var sid = await GetSessionIdAsync();
@@ -239,7 +235,6 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Removes the session identifier cookie.
     /// </summary>
-    /// <returns></returns>
     public virtual Task RemoveSessionIdCookieAsync()
     {
         if (HttpContext.Request.Cookies.ContainsKey(CheckSessionCookieName))
@@ -297,7 +292,6 @@ public class DefaultUserSession : IUserSession
     /// Adds a client to the list of clients the user has signed into during their session.
     /// </summary>
     /// <param name="clientId">The client identifier.</param>
-    /// <returns></returns>
     /// <exception cref="ArgumentNullException">clientId</exception>
     public virtual async Task AddClientIdAsync(string clientId)
     {
@@ -318,7 +312,6 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Gets the list of clients the user has signed into during their session.
     /// </summary>
-    /// <returns></returns>
     public virtual async Task<IEnumerable<string>> GetClientListAsync()
     {
         await AuthenticateAsync();

@@ -31,7 +31,6 @@ public class NumericUserCodeGenerator : IUserCodeGenerator
     /// <summary>
     /// Generates the user code.
     /// </summary>
-    /// <returns></returns>
     public Task<string> GenerateAsync()
     {
         var next = RandomNumberGenerator.GetInt32(100000000, 1000000000);

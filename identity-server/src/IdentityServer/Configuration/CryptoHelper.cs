@@ -20,7 +20,6 @@ public static class CryptoHelper
     /// <summary>
     /// Creates a new RSA security key.
     /// </summary>
-    /// <returns></returns>
     public static RsaSecurityKey CreateRsaSecurityKey(int keySize = 2048) => new RsaSecurityKey(RSA.Create(keySize))
     {
         KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)
@@ -31,7 +30,6 @@ public static class CryptoHelper
     /// </summary>
     /// <param name="curve">The name of the curve as defined in
     /// https://tools.ietf.org/html/rfc7518#section-6.2.1.1.</param>
-    /// <returns></returns>
     public static ECDsaSecurityKey CreateECDsaSecurityKey(string curve = JsonWebKeyECTypes.P256) => new ECDsaSecurityKey(ECDsa.Create(GetCurveFromCrvValue(curve)))
     {
         KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)
@@ -42,7 +40,6 @@ public static class CryptoHelper
     /// </summary>
     /// <param name="parameters">The parameters.</param>
     /// <param name="id">The identifier.</param>
-    /// <returns></returns>
     public static RsaSecurityKey CreateRsaSecurityKey(RSAParameters parameters, string id)
     {
         var key = new RsaSecurityKey(parameters)
@@ -58,7 +55,6 @@ public static class CryptoHelper
     /// </summary>
     /// <param name="value">The value to hash.</param>
     /// <param name="tokenSigningAlgorithm">The token signing algorithm</param>
-    /// <returns></returns>
     public static string CreateHashClaimValue(string value, string tokenSigningAlgorithm)
     {
         var (hashFunction, hashLength) = GetHashFunctionForSigningAlgorithm(tokenSigningAlgorithm);
@@ -77,7 +73,6 @@ public static class CryptoHelper
     /// Returns the matching hash function for a token signing algorithm
     /// </summary>
     /// <param name="signingAlgorithm"></param>
-    /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(string signingAlgorithm)
     {
@@ -99,7 +94,6 @@ public static class CryptoHelper
     /// Returns the matching hashing algorithm for a token signing algorithm
     /// </summary>
     /// <param name="signingAlgorithm">The signing algorithm</param>
-    /// <returns></returns>
     [Obsolete("This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
     public static HashAlgorithm GetHashAlgorithmForSigningAlgorithm(string signingAlgorithm)
     {

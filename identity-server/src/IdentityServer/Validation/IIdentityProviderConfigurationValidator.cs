@@ -15,6 +15,5 @@ public interface IIdentityProviderConfigurationValidator
     /// Determines whether the configuration of an identity provider is valid.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <returns></returns>
     Task ValidateAsync(IdentityProviderConfigurationValidationContext context);
 }

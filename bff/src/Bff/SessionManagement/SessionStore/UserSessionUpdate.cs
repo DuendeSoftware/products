@@ -43,7 +43,6 @@ public class UserSessionUpdate
     /// Copies this instance into another
     /// </summary>
     /// <param name="other"></param>
-    /// <returns></returns>
     public void CopyTo(UserSessionUpdate other)
     {
         other.SubjectId = SubjectId;
