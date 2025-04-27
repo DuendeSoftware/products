@@ -40,12 +40,14 @@ internal static class DPoPExtensions
 
     public static string GetDPoPNonce(this AuthenticationProperties props)
     {
-        if (props.Items.ContainsKey("DPoP-Nonce"))
+        if (props.Items.TryGetValue("DPoP-Nonce", out var item))
         {
-            return props.Items["DPoP-Nonce"] as string;
+            return item;
         }
+
         return null;
     }
+
     public static void SetDPoPNonce(this AuthenticationProperties props, string nonce) => props.Items["DPoP-Nonce"] = nonce;
 
     /// <summary>

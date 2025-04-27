@@ -168,10 +168,9 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
             context.Response.StatusCode = 401;
             context.HandleResponse();
         }
-        else if (context.HttpContext.Items.ContainsKey("Bearer-ErrorDescription"))
+        else if (context.HttpContext.Items.TryGetValue("Bearer-ErrorDescription", out var description))
         {
-            var description = context.HttpContext.Items["Bearer-ErrorDescription"] as string;
-            context.ErrorDescription = description;
+            context.ErrorDescription = (string?) description;
         }
 
         if (IsDPoPAuthorizationScheme(context.HttpContext.Request))
@@ -186,17 +185,14 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
         var sb = new StringBuilder();
         sb.Append(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP);
 
-        if (context.HttpContext.Items.ContainsKey("DPoP-Error"))
+        if (context.HttpContext.Items.TryGetValue("DPoP-Error", out var error))
         {
-            var error = context.HttpContext.Items["DPoP-Error"] as string;
             sb.Append(" error=\"");
             sb.Append(error);
             sb.Append('\"');
 
-            if (context.HttpContext.Items.ContainsKey("DPoP-ErrorDescription"))
+            if (context.HttpContext.Items.TryGetValue("DPoP-ErrorDescription", out var description))
             {
-                var description = context.HttpContext.Items["DPoP-ErrorDescription"] as string;
-
                 sb.Append(", error_description=\"");
                 sb.Append(description);
                 sb.Append('\"');
@@ -205,10 +201,9 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
 
         context.Response.Headers.Append(HeaderNames.WWWAuthenticate, sb.ToString());
 
-        if (context.HttpContext.Items.ContainsKey("DPoP-Nonce"))
+        if (context.HttpContext.Items.TryGetValue("DPoP-Nonce", out var nonceValue))
         {
-            var nonce = context.HttpContext.Items["DPoP-Nonce"] as string;
-            context.Response.Headers[HttpHeaders.DPoPNonce] = nonce;
+            context.Response.Headers[HttpHeaders.DPoPNonce] = nonceValue as string;
         }
         else
         {
