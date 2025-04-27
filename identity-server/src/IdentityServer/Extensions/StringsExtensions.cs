@@ -97,18 +97,6 @@ internal static class StringExtensions
 
     [DebuggerStepThrough]
     [return: NotNullIfNotNull("url")]
-    public static string? RemoveLeadingSlash(this string? url)
-    {
-        if (url != null && url.StartsWith('/'))
-        {
-            url = url.Substring(1);
-        }
-
-        return url;
-    }
-
-    [DebuggerStepThrough]
-    [return: NotNullIfNotNull("url")]
     public static string? RemoveTrailingSlash(this string? url)
     {
         if (url != null && url.EndsWith('/'))
