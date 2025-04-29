@@ -7,9 +7,11 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.EntityFramework;
 using Duende.IdentityServer.Configuration.RequestProcessing;
+using Duende.IdentityServer.Hosting;
 using IdentityServerHost.Configuration;
 using IdentityServerHost.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
@@ -97,6 +99,8 @@ internal static class IdentityServerExtensions
             ])
 
             .AddLicenseSummary();
+
+        builder.Services.AddOtelEndpointRouter();
 
         builder.Services.AddDistributedMemoryCache();
 
