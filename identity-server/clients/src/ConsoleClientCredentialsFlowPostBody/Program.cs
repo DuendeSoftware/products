@@ -39,7 +39,10 @@ async Task<TokenResponse> RequestTokenAsync()
     var client = new HttpClient();
 
     var disco = await client.GetDiscoveryDocumentAsync(authority);
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
     {
@@ -51,7 +54,11 @@ async Task<TokenResponse> RequestTokenAsync()
         Scope = "resource1.scope1"
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 

@@ -34,10 +34,16 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
     public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode)
     {
         var deviceAuth = await _devices.FindByUserCodeAsync(userCode);
-        if (deviceAuth == null) return null;
+        if (deviceAuth == null)
+        {
+            return null;
+        }
 
         var client = await _clients.FindEnabledClientByIdAsync(deviceAuth.ClientId);
-        if (client == null) return null;
+        if (client == null)
+        {
+            return null;
+        }
 
         var validatedResources = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest
         {
@@ -58,13 +64,22 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         ArgumentNullException.ThrowIfNull(consent);
 
         var deviceAuth = await _devices.FindByUserCodeAsync(userCode);
-        if (deviceAuth == null) return LogAndReturnError("Invalid user code", "Device authorization failure - user code is invalid");
+        if (deviceAuth == null)
+        {
+            return LogAndReturnError("Invalid user code", "Device authorization failure - user code is invalid");
+        }
 
         var client = await _clients.FindEnabledClientByIdAsync(deviceAuth.ClientId);
-        if (client == null) return LogAndReturnError("Invalid client", "Device authorization failure - requesting client is invalid");
+        if (client == null)
+        {
+            return LogAndReturnError("Invalid client", "Device authorization failure - requesting client is invalid");
+        }
 
         var subject = await _session.GetUserAsync();
-        if (subject == null) return LogAndReturnError("No user present in device flow request", "Device authorization failure - no user found");
+        if (subject == null)
+        {
+            return LogAndReturnError("No user present in device flow request", "Device authorization failure - no user found");
+        }
 
         var sid = await _session.GetSessionIdAsync();
 

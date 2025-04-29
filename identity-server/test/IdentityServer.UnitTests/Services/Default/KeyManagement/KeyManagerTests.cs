@@ -55,7 +55,10 @@ public class KeyManagerTests
         var key = _options.KeyManagement.CreateRsaSecurityKey();
 
         var date = _mockClock.UtcNow.UtcDateTime;
-        if (age.HasValue) date = date.Subtract(age.Value);
+        if (age.HasValue)
+        {
+            date = date.Subtract(age.Value);
+        }
 
         var container = x509 ?
             new X509KeyContainer(key, alg, date, _options.KeyManagement.KeyRetirementAge) :

@@ -14,7 +14,10 @@ internal class RegistryConfig
 
     public void Configure()
     {
-        if (NeedToAddKeys()) AddRegKeys();
+        if (NeedToAddKeys())
+        {
+            AddRegKeys();
+        }
     }
 
     private string CustomUriScheme { get; }

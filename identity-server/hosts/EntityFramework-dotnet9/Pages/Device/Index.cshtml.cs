@@ -65,7 +65,10 @@ public class Index : PageModel
     public async Task<IActionResult> OnPost()
     {
         var request = await _interaction.GetAuthorizationContextAsync(Input.UserCode ?? throw new ArgumentNullException(nameof(Input.UserCode)));
-        if (request == null) return RedirectToPage("/Home/Error/Index");
+        if (request == null)
+        {
+            return RedirectToPage("/Home/Error/Index");
+        }
 
         ConsentResponse? grantedConsent = null;
 

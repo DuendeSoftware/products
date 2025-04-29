@@ -69,7 +69,11 @@ public abstract class DPoPEndpointTestBase
     {
         get
         {
-            if (Now > DateTime.MinValue) return Now;
+            if (Now > DateTime.MinValue)
+            {
+                return Now;
+            }
+
             return DateTime.UtcNow;
         }
     }

@@ -246,7 +246,10 @@ public class DefaultClaimsService : IClaimsService
         var claims = new List<Claim>();
 
         var acr = subject.FindFirst(JwtClaimTypes.AuthenticationContextClassReference);
-        if (acr != null) claims.Add(acr);
+        if (acr != null)
+        {
+            claims.Add(acr);
+        }
 
         return claims;
     }

@@ -41,7 +41,10 @@ public static class PrincipalExtensions
         var id = (ClaimsIdentity)identity;
         var claim = id.FindFirst(JwtClaimTypes.AuthenticationTime);
 
-        if (claim == null) throw new InvalidOperationException("auth_time is missing.");
+        if (claim == null)
+        {
+            throw new InvalidOperationException("auth_time is missing.");
+        }
 
         return long.Parse(claim.Value);
     }
@@ -66,7 +69,11 @@ public static class PrincipalExtensions
         var id = identity as ClaimsIdentity;
         var claim = id.FindFirst(JwtClaimTypes.Subject);
 
-        if (claim == null) throw new InvalidOperationException("sub claim is missing");
+        if (claim == null)
+        {
+            throw new InvalidOperationException("sub claim is missing");
+        }
+
         return claim.Value;
     }
 
@@ -79,10 +86,16 @@ public static class PrincipalExtensions
     public static string GetDisplayName(this ClaimsPrincipal principal)
     {
         var name = principal.Identity.Name;
-        if (name.IsPresent()) return name;
+        if (name.IsPresent())
+        {
+            return name;
+        }
 
         var sub = principal.FindFirst(JwtClaimTypes.Subject);
-        if (sub != null) return sub.Value;
+        if (sub != null)
+        {
+            return sub.Value;
+        }
 
         return string.Empty;
     }
@@ -115,7 +128,11 @@ public static class PrincipalExtensions
         var id = identity as ClaimsIdentity;
         var claim = id.FindFirst(JwtClaimTypes.AuthenticationMethod);
 
-        if (claim == null) throw new InvalidOperationException("amr claim is missing");
+        if (claim == null)
+        {
+            throw new InvalidOperationException("amr claim is missing");
+        }
+
         return claim.Value;
     }
 
@@ -151,7 +168,11 @@ public static class PrincipalExtensions
         var id = identity as ClaimsIdentity;
         var claim = id.FindFirst(JwtClaimTypes.IdentityProvider);
 
-        if (claim == null) throw new InvalidOperationException("idp claim is missing");
+        if (claim == null)
+        {
+            throw new InvalidOperationException("idp claim is missing");
+        }
+
         return claim.Value;
     }
 
