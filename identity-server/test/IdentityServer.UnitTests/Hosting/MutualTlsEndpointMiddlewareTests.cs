@@ -39,6 +39,8 @@ public class MutualTlsEndpointMiddlewareTests
 
     [Theory]
     [InlineData("mtls.example.com", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.SeparateDomain)]
+    [InlineData("mTLS.example.com", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.SeparateDomain)]
+    [InlineData("mtls.example.com", "mTLS.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.SeparateDomain)]
     [InlineData("mtls.example.com:443", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.SeparateDomain)]
     [InlineData("mtls.example.com:5001", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
     [InlineData("mtls.example.com", "mtls.example.com:443", MutualTlsEndpointMiddleware.MtlsEndpointType.SeparateDomain)]
@@ -63,16 +65,16 @@ public class MutualTlsEndpointMiddlewareTests
     }
 
     [Theory]
-    [InlineData("example.com", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("example.com:443", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("example.com:5001", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("other.example.com", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("other.example.com:443", "mtls.example.com", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("example.com", "mtls.example.com:443", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("example.com:443", "mtls.example.com:443", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("other.example.com", "mtls.example.com:5001", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    [InlineData("other.example.com:5001", "mtls.example.com:5001", MutualTlsEndpointMiddleware.MtlsEndpointType.None)]
-    internal void mtls_endpoint_type_separate_domain_should_not_match_different_domain(string requestedHost, string configuredDomainName, MutualTlsEndpointMiddleware.MtlsEndpointType expectedType)
+    [InlineData("example.com", "mtls.example.com")]
+    [InlineData("example.com:443", "mtls.example.com")]
+    [InlineData("example.com:5001", "mtls.example.com")]
+    [InlineData("other.example.com", "mtls.example.com")]
+    [InlineData("other.example.com:443", "mtls.example.com")]
+    [InlineData("example.com", "mtls.example.com:443")]
+    [InlineData("example.com:443", "mtls.example.com:443")]
+    [InlineData("other.example.com", "mtls.example.com:5001")]
+    [InlineData("other.example.com:5001", "mtls.example.com:5001")]
+    internal void mtls_endpoint_type_separate_domain_should_not_match_different_domain(string requestedHost, string configuredDomainName)
     {
         // Arrange
         _options.MutualTls.Enabled = true;
@@ -83,12 +85,14 @@ public class MutualTlsEndpointMiddlewareTests
         var result = _middleware.DetermineMtlsEndpointType(_httpContext, out var subPath);
 
         // Assert
-        Assert.Equal(expectedType, result);
+        Assert.Equal(MutualTlsEndpointMiddleware.MtlsEndpointType.None, result);
         Assert.Null(subPath);
     }
 
     [Theory]
     [InlineData("mtls.example.com", "mtls")]
+    [InlineData("mtls.example.com", "mTLS")]
+    [InlineData("mTLS.example.com", "mtls")]
     [InlineData("mtls.example.com:443", "mtls")]
     [InlineData("mtls.example.com:5001", "mtls")]
     internal void mtls_endpoint_type_subdomain_should_be_detected(string requestedHost, string configuredDomainName)
@@ -126,12 +130,14 @@ public class MutualTlsEndpointMiddlewareTests
         Assert.Null(subPath);
     }
 
-    [Fact]
-    internal void mtls_endpoint_type_path_based_should_be_detected()
+    [Theory]
+    [InlineData("/connect/mtls/token")]
+    [InlineData("/connect/mTLS/token")]
+    internal void mtls_endpoint_type_path_based_should_be_detected(string requestedPath)
     {
         // Arrange
         _options.MutualTls.Enabled = true;
-        _httpContext.Request.Path = new PathString("/connect/mtls/token");
+        _httpContext.Request.Path = new PathString(requestedPath);
 
         // Act
         var result = _middleware.DetermineMtlsEndpointType(_httpContext, out var subPath);
