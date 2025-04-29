@@ -8,6 +8,8 @@ using UnitTests.Common;
 using System.Threading.Tasks;
 using Xunit;
 
+namespace UnitTests.Hosting;
+
 public class MutualTlsEndpointMiddlewareTests
 {
     private readonly IdentityServerOptions _options;

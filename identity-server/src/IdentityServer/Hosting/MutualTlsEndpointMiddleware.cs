@@ -8,6 +8,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using static Duende.IdentityServer.IdentityServerConstants;
 
@@ -57,8 +58,9 @@ public class MutualTlsEndpointMiddleware
         {
             if (_options.MutualTls.DomainName.Contains('.'))
             {
+                var requestedHost = HostString.FromUriComponent(_options.MutualTls.DomainName);
                 // Separate domain
-                if (context.Request.Host.Host.Equals(_options.MutualTls.DomainName, StringComparison.OrdinalIgnoreCase))
+                if (RequestedHostMatches(context.Request.Host, _options.MutualTls.DomainName))
                 {
                     _logger.LogDebug("Requiring mTLS because the request's domain matches the configured mTLS domain name.");
                     return MtlsEndpointType.SeparateDomain;
@@ -116,6 +118,33 @@ public class MutualTlsEndpointMiddleware
         }
 
         await _next(context);
+    }
+
+
+    private bool RequestedHostMatches(HostString requestHost, string configuredDomain)
+    {
+        // Parse the configured domain which might contain a port
+        string configuredHostname = configuredDomain;
+        int configuredPort = 443;
+
+        int colonIndex = configuredDomain.IndexOf(':');
+        if (colonIndex >= 0)
+        {
+            configuredHostname = configuredDomain.Substring(0, colonIndex);
+            if (int.TryParse(configuredDomain.Substring(colonIndex + 1), out int port))
+            {
+                configuredPort = port;
+            }
+        }
+
+        // Compare hostnames (case-insensitive)
+        if (!string.Equals(requestHost.Host, configuredHostname, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var requestPort = requestHost.Port ?? 443;
+        return requestPort == configuredPort;
     }
 
     private async Task<AuthenticateResult> TriggerCertificateAuthentication(HttpContext context)
