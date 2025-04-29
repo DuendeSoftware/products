@@ -36,62 +36,85 @@ public class MutualTlsEndpointMiddleware
         _logger = logger;
     }
 
+    internal enum MtlsEndpointType
+    {
+        None,
+        SeparateDomain,
+        Subdomain,
+        PathBased
+    }
+
+    internal MtlsEndpointType DetermineMtlsEndpointType(HttpContext context, out PathString? subPath)
+    {
+        subPath = null;
+
+        if (!_options.MutualTls.Enabled)
+        {
+            return MtlsEndpointType.None;
+        }
+
+        if (_options.MutualTls.DomainName.IsPresent())
+        {
+            if (_options.MutualTls.DomainName.Contains('.'))
+            {
+                // Separate domain
+                if (context.Request.Host.Host.Equals(_options.MutualTls.DomainName, StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogDebug("Requiring mTLS because the request's domain matches the configured mTLS domain name.");
+                    return MtlsEndpointType.SeparateDomain;
+                }
+            }
+            else
+            {
+                // Subdomain
+                if (context.Request.Host.Host.StartsWith(_options.MutualTls.DomainName + ".", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogDebug("Requiring mTLS because the request's subdomain matches the configured mTLS domain name.");
+                    return MtlsEndpointType.Subdomain;
+                }
+            }
+
+            _logger.LogDebug("Not requiring mTLS because this request's domain does not match the configured mTLS domain name.");
+            return MtlsEndpointType.None;
+        }
+
+        // Check path-based MTLS
+        if (context.Request.Path.StartsWithSegments(
+            ProtocolRoutePaths.MtlsPathPrefix.EnsureLeadingSlash(), out var path))
+        {
+            _logger.LogDebug("Requiring mTLS because the request's path begins with the configured mTLS path prefix.");
+            subPath = path;
+            return MtlsEndpointType.PathBased;
+        }
+
+        return MtlsEndpointType.None;
+    }
+
     /// <inheritdoc />
     public async Task Invoke(HttpContext context, IAuthenticationSchemeProvider schemes)
     {
-        if (_options.MutualTls.Enabled)
+        var mtlsConfigurationStyle = DetermineMtlsEndpointType(context, out var subPath);
+
+        if (mtlsConfigurationStyle != MtlsEndpointType.None)
         {
-            // domain-based MTLS
-            if (_options.MutualTls.DomainName.IsPresent())
+            var result = await TriggerCertificateAuthentication(context);
+            if (!result.Succeeded)
             {
-                // separate domain
-                if (_options.MutualTls.DomainName.Contains('.'))
-                {
-                    if (context.Request.Host.Host.Equals(_options.MutualTls.DomainName,
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        var result = await TriggerCertificateAuthentication(context);
-                        if (!result.Succeeded)
-                        {
-                            return;
-                        }
-                    }
-                }
-                // sub-domain
-                else
-                {
-                    if (context.Request.Host.Host.StartsWith(_options.MutualTls.DomainName + ".", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var result = await TriggerCertificateAuthentication(context);
-                        if (!result.Succeeded)
-                        {
-                            return;
-                        }
-                    }
-                }
+                return;
             }
-            // path based MTLS
-            else if (context.Request.Path.StartsWithSegments(ProtocolRoutePaths.MtlsPathPrefix.EnsureLeadingSlash(), out var subPath))
+
+            // Additional processing for path-based MTLS
+            if (mtlsConfigurationStyle == MtlsEndpointType.PathBased && subPath.HasValue)
             {
-                var result = await TriggerCertificateAuthentication(context);
+                var path = ProtocolRoutePaths.ConnectPathPrefix + subPath.Value.ToString().EnsureLeadingSlash();
+                path = path.EnsureLeadingSlash();
 
-                if (result.Succeeded)
-                {
-                    var path = ProtocolRoutePaths.ConnectPathPrefix +
-                               subPath.ToString().EnsureLeadingSlash();
-                    path = path.EnsureLeadingSlash();
-
-                    _logger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
-                        context.Request.Path.ToString(), path);
-                    context.Request.Path = path;
-                }
-                else
-                {
-                    return;
-                }
+                _logger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
+                    context.Request.Path.ToString(), path);
+                context.Request.Path = path;
             }
         }
-            
+
         await _next(context);
     }
 
