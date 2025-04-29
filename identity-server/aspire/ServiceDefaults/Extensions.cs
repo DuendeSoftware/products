@@ -51,7 +51,9 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    .AddMeter(Duende.IdentityServer.Telemetry.ServiceName)
+                    .AddMeter(Duende.IdentityServer.Telemetry.ServiceNameExperimental);
             })
             .WithTracing(tracing =>
             {

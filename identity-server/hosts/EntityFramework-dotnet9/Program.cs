@@ -24,6 +24,8 @@ try
         .Enrich.FromLogContext()
         .ReadFrom.Configuration(ctx.Configuration));
 
+    builder.AddServiceDefaults();
+
     var app = builder
         .ConfigureServices()
         .ConfigurePipeline();
