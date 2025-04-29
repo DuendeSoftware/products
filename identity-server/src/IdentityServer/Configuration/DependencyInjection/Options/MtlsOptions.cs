@@ -23,9 +23,18 @@ public class MutualTlsOptions
 
     /// <summary>
     /// Specifies a separate domain to run the MTLS endpoints on.
-    /// If the string does not contain any dots, a subdomain is assumed - e.g. main domain: identityserver.local, MTLS domain: mtls.identityserver.local
-    /// If the string contains dots, a completely separate domain is assumend, e.g. main domain: identity.app.com, MTLS domain: mtls.app.com. In this case you must set a static issuer name on the options.
     /// </summary>
+    /// <remarks>If the string does not contain any dots, it is treated as a 
+    /// subdomain. For example, if the non-mTLS endpoints are hosted at 
+    /// example.com, configuring this option with the value "mtls" means that 
+    /// mtls is required for requests to mtls.example.com.
+    /// 
+    /// If the string contains dots, it is treated as a complete domain.
+    /// mTLS will be required for requests whose host name matches the 
+    /// configured domain name completely, including the port number. 
+    /// This allows for separate domains for the mTLS and non-mTLS endpoints. 
+    /// For example, identity.example.com and mtls.example.com.
+    /// </remarks>
     public string? DomainName { get; set; }
 
     /// <summary>
