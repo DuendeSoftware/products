@@ -13,23 +13,23 @@ public class AccessTokenCnfTests : DPoPProofValidatorTestBase
 {
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task missing_cnf_should_fail()
+    public void missing_cnf_should_fail()
     {
         Context.AccessTokenClaims
             .ShouldNotContain(c => c.Type == JwtClaimTypes.Confirmation);
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        ProofValidator.ValidateCnf(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Missing 'cnf' value.");
     }
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task empty_cnf_value_should_fail()
+    public void empty_cnf_value_should_fail()
     {
         Context = Context with { AccessTokenClaims = [new Claim(JwtClaimTypes.Confirmation, string.Empty)] };
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        ProofValidator.ValidateCnf(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Missing 'cnf' value.");
     }
@@ -46,18 +46,18 @@ public class AccessTokenCnfTests : DPoPProofValidatorTestBase
     [InlineData("[123]")]
     [InlineData("[\"asdf\"]")]
     [InlineData("null")]
-    public async Task non_json_object_cnf_should_fail(string cnf)
+    public void non_json_object_cnf_should_fail(string cnf)
     {
         Context = Context with { AccessTokenClaims = [new Claim(JwtClaimTypes.Confirmation, cnf)] };
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        ProofValidator.ValidateCnf(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'cnf' value.");
     }
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task cnf_missing_jkt_should_fail()
+    public void cnf_missing_jkt_should_fail()
     {
         var cnfObject = new Dictionary<string, string>
         {
@@ -65,20 +65,20 @@ public class AccessTokenCnfTests : DPoPProofValidatorTestBase
         };
         Context = Context with { AccessTokenClaims = [new Claim(JwtClaimTypes.Confirmation, JsonSerializer.Serialize(cnfObject))] };
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        ProofValidator.ValidateCnf(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'cnf' value.");
     }
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task mismatched_jkt_should_fail()
+    public void mismatched_jkt_should_fail()
     {
         // Generate a new key, and use that in the access token's cnf claim
         // to simulate using the wrong key.
         Context = Context with { AccessTokenClaims = [CnfClaim(GenerateJwk())] };
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        ProofValidator.ValidateCnf(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'cnf' value.");
     }

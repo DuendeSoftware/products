@@ -9,7 +9,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Ensures that the <see cref="JwtBearerOptions"/> are configured with <see cref="DPoPJwtBearerEvents"/>.
 /// </summary>
-public sealed class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
+internal sealed class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
 {
     private readonly string _configScheme;
 

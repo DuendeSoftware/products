@@ -10,22 +10,22 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 {
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task can_retrieve_issued_at_unix_time_from_nonce()
+    public void can_retrieve_issued_at_unix_time_from_nonce()
     {
         Result.Nonce = ProofValidator.TestDataProtector.Protect(IssuedAt.ToString());
 
-        var actual = await ProofValidator.GetUnixTimeFromNonceAsync(Context, Result);
+        var actual = ProofValidator.GetUnixTimeFromNonce(Context, Result);
 
         actual.ShouldBe(IssuedAt);
     }
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task invalid_nonce_is_treated_as_zero()
+    public void invalid_nonce_is_treated_as_zero()
     {
         Result.Nonce = ProofValidator.TestDataProtector.Protect("garbage that isn't a long");
 
-        var actual = await ProofValidator.GetUnixTimeFromNonceAsync(Context, Result);
+        var actual = ProofValidator.GetUnixTimeFromNonce(Context, Result);
 
         actual.ShouldBe(0);
     }
@@ -46,12 +46,12 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [InlineData((string?)null)]
     [InlineData("")]
     [InlineData(" ")]
-    public async Task missing_nonce_returns_use_dpop_nonce_with_server_issued_nonce(string? nonce)
+    public void missing_nonce_returns_use_dpop_nonce_with_server_issued_nonce(string? nonce)
     {
         Result.Nonce = nonce;
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
 
-        await ProofValidator.ValidateNonce(Context, Result);
+        ProofValidator.ValidateNonce(Context, Result);
 
         Result.IsError.ShouldBeTrue();
         Result.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
@@ -64,12 +64,12 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Trait("Category", "Unit")]
     [InlineData("null")]
     [InlineData("garbage")]
-    public async Task invalid_nonce_returns_use_dpop_nonce_with_server_issued_nonce(string? nonce)
+    public void invalid_nonce_returns_use_dpop_nonce_with_server_issued_nonce(string? nonce)
     {
         Result.Nonce = nonce;
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
 
-        await ProofValidator.ValidateNonce(Context, Result);
+        ProofValidator.ValidateNonce(Context, Result);
 
         Result.IsError.ShouldBeTrue();
         Result.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
@@ -80,7 +80,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task expired_nonce_returns_use_dpop_nonce_with_server_issued_nonce()
+    public void expired_nonce_returns_use_dpop_nonce_with_server_issued_nonce()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
         Options.ServerClockSkew = TimeSpan.FromSeconds(ClockSkew);
@@ -92,7 +92,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 
         Result.Nonce = ProofValidator.TestDataProtector.Protect(IssuedAt.ToString());
 
-        await ProofValidator.ValidateNonce(Context, Result);
+        ProofValidator.ValidateNonce(Context, Result);
 
         Result.IsError.ShouldBeTrue();
         Result.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
@@ -169,7 +169,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
 
-        await ProofValidator.ValidateIat(Context, Result);
+        ProofValidator.ValidateIat(Context, Result);
 
         Result.IsError.ShouldBeFalse();
         Result.Error.ShouldBeNull();
@@ -188,7 +188,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         var now = IssuedAt + ClockSkew + ValidFor + 1;
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(now));
 
-        await ProofValidator.ValidateIat(Context, Result);
+        ProofValidator.ValidateIat(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'iat' value.");
     }
@@ -212,12 +212,12 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         // Adjust time to exactly on the expiration
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + ClockSkew));
 
-        await ProofValidator.ValidateFreshness(Context, Result);
+        ProofValidator.ValidateFreshness(Context, Result);
         Result.IsError.ShouldBeFalse();
 
         // Now adjust time to one second later and try again
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + ClockSkew + 1));
-        await ProofValidator.ValidateFreshness(Context, Result);
+        ProofValidator.ValidateFreshness(Context, Result);
         Result.IsError.ShouldBeTrue();
     }
 
@@ -239,12 +239,12 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         // Adjust time to exactly on the expiration
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + ClockSkew));
 
-        await ProofValidator.ValidateFreshness(Context, Result);
+        ProofValidator.ValidateFreshness(Context, Result);
         Result.IsError.ShouldBeFalse();
 
         // Now adjust time to one second later and try again
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + ClockSkew + 1));
-        await ProofValidator.ValidateFreshness(Context, Result);
+        ProofValidator.ValidateFreshness(Context, Result);
         Result.IsError.ShouldBeTrue();
     }
 }

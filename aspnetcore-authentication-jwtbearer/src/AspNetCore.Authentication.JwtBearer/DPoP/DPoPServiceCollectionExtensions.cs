@@ -20,9 +20,9 @@ public static class DPoPServiceCollectionExtensions
         services.AddOptions<DPoPOptions>();
 
         services.AddTransient<DPoPJwtBearerEvents>();
-        services.AddTransient<IDPoPProofValidator, DefaultDPoPProofValidator>();
+        services.AddTransient<IDPoPProofValidator, DPoPProofValidator>();
         services.AddDistributedMemoryCache();
-        services.AddTransient<IReplayCache, DefaultReplayCache>();
+        services.AddTransient<IReplayCache, ReplayCache>();
 
         services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(new ConfigureJwtBearerOptions(scheme));
 

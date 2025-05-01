@@ -13,6 +13,10 @@ using static Duende.IdentityModel.OidcConstants;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
+
+// TODO - refactor this to instead create callbacks that wrap any existing events, a la
+// Duende.Bff.SessionManagement.Configuration.PostConfigureSlidingExpirationCheck
+
 /// <summary>
 /// Events for the Jwt Bearer authentication handler that enable DPoP.
 /// </summary>
@@ -78,12 +82,13 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
 
             var result = await _validator.Validate(new DPoPProofValidationContext
             {
+                Options = dPoPOptions,
                 Scheme = context.Scheme.Name,
                 ProofToken = proofToken,
                 AccessToken = at,
                 AccessTokenClaims = context.Principal?.Claims ?? [],
-                Method = context.HttpContext.Request.Method,
-                Url = context.HttpContext.Request.Scheme + "://" + context.HttpContext.Request.Host + context.HttpContext.Request.PathBase + context.HttpContext.Request.Path
+                ExpectedMethod = context.HttpContext.Request.Method,
+                ExpectedUrl = context.HttpContext.Request.Scheme + "://" + context.HttpContext.Request.Host + context.HttpContext.Request.PathBase + context.HttpContext.Request.Path
             });
 
             if (result.IsError)

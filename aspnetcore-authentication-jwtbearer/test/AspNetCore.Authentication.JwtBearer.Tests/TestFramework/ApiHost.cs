@@ -60,46 +60,5 @@ public class ApiHost : GenericHost
 
         app.UseAuthentication();
         app.UseAuthorization();
-
-        // app.UseEndpoints(endpoints =>
-        // {
-        //     // endpoints.Map("/{**catch-all}", async context =>
-        //     // {
-        //     //     // capture body if present
-        //     //     var body = default(string);
-        //     //     if (context.Request.HasJsonContentType())
-        //     //     {
-        //     //         using (var sr = new StreamReader(context.Request.Body))
-        //     //         {
-        //     //             body = await sr.ReadToEndAsync();
-        //     //         }
-        //     //     }
-        //     //     
-        //     //     // capture request headers
-        //     //     var requestHeaders = new Dictionary<string, List<string>>();
-        //     //     foreach (var header in context.Request.Headers)
-        //     //     {
-        //     //         var values = new List<string>(header.Value.Select(v => v));
-        //     //         requestHeaders.Add(header.Key, values);
-        //     //     }
-        //     //
-        //     //     var response = new ApiResponse(
-        //     //         context.Request.Method,
-        //     //         context.Request.Path.Value,
-        //     //         context.User.FindFirst(("sub"))?.Value,
-        //     //         context.User.FindFirst(("client_id"))?.Value,
-        //     //         context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
-        //     //     {
-        //     //         Body = body,
-        //     //         RequestHeaders = requestHeaders
-        //     //     };
-        //     //
-        //     //     context.Response.StatusCode = ApiStatusCodeToReturn ?? 200;
-        //     //     ApiStatusCodeToReturn = null;
-        //     //
-        //     //     context.Response.ContentType = "application/json";
-        //     //     await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-        //     // });
-        // });
     }
 }
