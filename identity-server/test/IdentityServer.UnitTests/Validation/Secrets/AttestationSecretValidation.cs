@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
+using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
 namespace UnitTests.Validation.Secrets;
 
@@ -28,11 +29,12 @@ public class AttestationSecretValidation
     private readonly AttestationSecretValidator _subject;
 
     private readonly IClientStore _clients;
-    private readonly RsaSecurityKey _defaultPrivateKey;
-    private readonly RsaSecurityKey _defaultPublicKey;
+    private readonly string _privateKeyJwk = "{\"d\":\"AmdW9v0RgI8xzo4pe7jY1HMUCwxlPLdFXJhS_lm61Uwbx-KOW0DKvXByP-q0cvMWJU7BIT7TFOykpTn_-y9GyvHhbI_l7bFnhvUDNZ8DbayIXdRt7liAwOdEFmaRcgD0Mx3TAV-GZZc4I8IKBIH9fKyZECYe1jmNxEx2fuVdnQEvnAZeDsR4QUkVDy3QxNieRRTuPa5WiXoXgGBbTYxDiumII5CteM79HYHjD9rE5zhlVvFcPOWiQMlrSFoZgSJITrrKHhPOazR9rb7kacmtNaC_vLw6AQGPflmRk2Qw4CSWDfpePAs_4lF3Cd_4wr4QZI2wVziPWv0T-WCm3nZyNQ\",\"dp\":\"FNnpZ2fo7QQvLPMGe54i7IlotYWI1wFu9irCbVjFmwXi22mM9yxmfKF2YeLoS7bEj2Oxz4PKkTbgcP6LdBHp8HKRycbMRBiRqFxQLwZDSdzdlpWNH2oZdrTccTo_NboYYIW26iO84wV43_Y5N0Hlyi4aeN6oNiQC641JZu0KSd0\",\"dq\":\"fgVRYnzeu5u7r8ECGB0U6PxSNo3Fq0a0KuwQEy2NC7Dy5vNN8pFwPfMYbwdGOW6PVRekWcY9f8PfH7Ph5e-Mp5EibK5ESgHIltdc_OaTNyXugToAIXOov8xn2ESzcVBi-fZMhTcI49pWte8mLrdt79BgbRR7v0aSykN3B8kEb28\",\"e\":\"AQAB\",\"key_ops\":[],\"kid\":\"30A14F8199B04DA9B8EA0490B558AF0C\",\"kty\":\"RSA\",\"n\":\"xPYA343z2Ih4p3S2qiHZXX98S63lFbxshzqy8topTItjSWf5qlR_uM9P8bW7AheGPVwAxKR_cIQejtWPU6_5B3MG3QW59rI6HTxrnyaueLjDXWXmpEakM_y7dc6oi439E-qoXHsX2doEJ1zxg_CBpyxHbMIHJvuUiK8EmJHdCaxORB7y7VKrqNCLW1vP-9lx8lW4MZUbwlX7FbsPhxlqfoA5FrYtDzKyM3n1wLQlsJN7n6GVLTwhoy7V80CsPuqQ577abVhrfyPZplxLCRAQVoyhAovXHr4h4mS0vQDYyyHuNi4DzrxHjTfyeLhWLOQa_KsF7ZAWOjXD7K8lWVToPQ\",\"oth\":[],\"p\":\"93gtTvc0_G91V-hsO-0Ee1VEeHRhYY3cMQk08rQy_Iu5ONs1KYJZPpVrPzO_CDVrYIiKHb6i3O0RtBumvTZVmOs93Dy7zKv79qJJCF2Rq0LTYEvU1lUoXt4eI1u4az6u_cdqKF0Lt8mpR9Dz7B3nhogkq2Yih2Gu8URg_rjwpn8\",\"q\":\"y8AbvJB7VSr5BKI4QNFAqkZC8zx4_KYYTL9uFMnSCx2EJt34pd4AlvzM6hoqtcdN0va7SieEm3JMOcsftYlSgb6yhrbxFzw8Jy5mLJ9uElW8yOmu5Htea4kWxZDbg-lRAvHc0cYZkiSOzvi-g2-093t59-jDmmKZNRilIjyeK0M\",\"qi\":\"FRKbtYPrSpODbSuuh8xSeonSqNhBDrkUbnwGSvA8FUBNqOiEnGiMjin1t9UXWckgY8-GYztPKWp-UcPIcBAKRlHJX9ag5jusmWmPRSCu2aHOqzmEBY8cyAmZVzwiLF3gJmiORpv4XDkFJaPj904HI8Z7dywCHseUTAwZvteEhEI\",\"x5c\":[]}";
+    private readonly string _publicKeyJwk = "{\"e\":\"AQAB\",\"key_ops\":[],\"kty\":\"RSA\",\"n\":\"xPYA343z2Ih4p3S2qiHZXX98S63lFbxshzqy8topTItjSWf5qlR_uM9P8bW7AheGPVwAxKR_cIQejtWPU6_5B3MG3QW59rI6HTxrnyaueLjDXWXmpEakM_y7dc6oi439E-qoXHsX2doEJ1zxg_CBpyxHbMIHJvuUiK8EmJHdCaxORB7y7VKrqNCLW1vP-9lx8lW4MZUbwlX7FbsPhxlqfoA5FrYtDzKyM3n1wLQlsJN7n6GVLTwhoy7V80CsPuqQ577abVhrfyPZplxLCRAQVoyhAovXHr4h4mS0vQDYyyHuNi4DzrxHjTfyeLhWLOQa_KsF7ZAWOjXD7K8lWVToPQ\",\"oth\":[],\"x5c\":[]}";
+    private readonly SigningCredentials _defaultSigningCredential;
 
     private const string AuthServerIdentity = "https://identityserver.io";
-    private const string ValidClientId = "no_secret_client";
+    private const string ValidClientId = "attestation_client_valid";
 
     public AttestationSecretValidation()
     {
@@ -43,10 +45,32 @@ public class AttestationSecretValidation
         _logger = new NullLogger<AttestationSecretValidator>();
         _subject = new AttestationSecretValidator(_issuerNameService, _replayCache, Options.Create(_options), _logger);
 
-        _defaultPrivateKey = CryptoHelper.CreateRsaSecurityKey();
-        _defaultPublicKey = new RsaSecurityKey(_defaultPrivateKey.Rsa.ExportParameters(false));
+        _defaultSigningCredential = new SigningCredentials(new JsonWebKey(_privateKeyJwk), SecurityAlgorithms.RsaSha256);
 
         _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
+    }
+
+    [Fact]
+    public async Task Invalid_Client_Secrets()
+    {
+        var client = await _clients.FindClientByIdAsync("attestation_client_invalid");
+        var (attestationJwt, popJwt) = CreateValidJwtPair();
+        var context = new AttestationSecretValidationContext
+        {
+            ClientId = ValidClientId,
+            ClientAttestationJwt = attestationJwt,
+            ClientAttestationPopJwt = popJwt
+        };
+        var parsedSecret = new ParsedSecret
+        {
+            Id = ValidClientId,
+            Type = IdentityServerConstants.ParsedSecretTypes.AttestationBased,
+            Credential = context
+        };
+
+        var result = await _subject.ValidateAsync(client.ClientSecrets, parsedSecret);
+
+        result.Success.ShouldBeFalse();
     }
 
     [Fact]
@@ -97,12 +121,39 @@ public class AttestationSecretValidation
     }
 
     [Fact]
+    public async Task Attestation_Jwt_Not_Signed_By_Key_In_ClientSecrets()
+    {
+        var client = await _clients.FindClientByIdAsync(ValidClientId);
+        var (_, popJwt) = CreateValidJwtPair();
+        var signingKey = CryptoHelper.CreateRsaSecurityKey();
+        var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256);
+        var attestationJwt = CreateAttestationJwt(signingCredentials: signingCredentials);
+        var context = new AttestationSecretValidationContext
+        {
+            ClientId = ValidClientId,
+            ClientAttestationJwt = attestationJwt,
+            ClientAttestationPopJwt = popJwt
+        };
+        var parsedSecret = new ParsedSecret
+        {
+            Id = ValidClientId,
+            Type = IdentityServerConstants.ParsedSecretTypes.AttestationBased,
+            Credential = context
+        };
+
+        var result = await _subject.ValidateAsync(client.ClientSecrets, parsedSecret);
+
+        result.Success.ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task Unsupported_Algorithm_In_Attestation_Jwt()
     {
         var client = await _clients.FindClientByIdAsync(ValidClientId);
         var (_, popJwt) = CreateValidJwtPair();
         var signingKey = new SymmetricSecurityKey("a-secret-key-of-at-least-128-bits"u8.ToArray());
-        var attestationJwt = CreateAttestationJwt(signingKey: signingKey, algValue: SecurityAlgorithms.HmacSha256);
+        var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+        var attestationJwt = CreateAttestationJwt(signingCredentials: signingCredentials);
         var context = new AttestationSecretValidationContext
         {
             ClientId = ValidClientId,
@@ -297,7 +348,8 @@ public class AttestationSecretValidation
         var client = await _clients.FindClientByIdAsync(ValidClientId);
         var (attestationJwt, _) = CreateValidJwtPair();
         var signingKey = new SymmetricSecurityKey("a-secret-key-of-at-least-128-bits"u8.ToArray());
-        var popJwt = CreatePopJwt(signingKey: signingKey, algValue: SecurityAlgorithms.HmacSha256);
+        var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+        var popJwt = CreatePopJwt(signingCredentials: signingCredentials);
         var context = new AttestationSecretValidationContext
         {
             ClientId = ValidClientId,
@@ -453,7 +505,8 @@ public class AttestationSecretValidation
         var client = await _clients.FindClientByIdAsync(ValidClientId);
         var (attestationJwt, _) = CreateValidJwtPair();
         var rsaKey = CryptoHelper.CreateRsaSecurityKey();
-        var popJwt = CreatePopJwt(signingKey: rsaKey);
+        var signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
+        var popJwt = CreatePopJwt(signingCredentials: signingCredentials);
         var context = new AttestationSecretValidationContext
         {
             ClientId = ValidClientId,
@@ -524,8 +577,10 @@ public class AttestationSecretValidation
 
     private (string attestationJwt, string popJwt) CreateValidJwtPair()
     {
-        var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(_defaultPublicKey);
-        jwk.KeyId = "test-key-id";
+        var jwk = new JsonWebKey(_publicKeyJwk)
+        {
+            KeyId = "test-key-id"
+        };
 
         // Current time values
         var now = _clock.UtcNow.ToUnixTimeSeconds();
@@ -533,7 +588,6 @@ public class AttestationSecretValidation
 
         var attestationJwt = CreateAttestationJwt(
             typValue: "oauth-client-attestation+jwt",
-            algValue: "RS256",
             issValue: "https://client-issuer.example.com",
             subValue: ValidClientId,
             expValue: exp,
@@ -544,12 +598,11 @@ public class AttestationSecretValidation
             {
                 { "jwk", JsonSerializer.Deserialize<Dictionary<string, object>>(JsonSerializer.Serialize(jwk)) }
             }),
-            signingKey: _defaultPrivateKey
+            signingCredentials: _defaultSigningCredential
         );
 
         var popJwt = CreatePopJwt(
             typValue: "oauth-client-attestation-pop+jwt",
-            algValue: "RS256",
             issValue: ValidClientId,
             expValue: exp,
             iatValue: now,
@@ -557,7 +610,7 @@ public class AttestationSecretValidation
             audValue: AuthServerIdentity,
             jtiValue: Guid.NewGuid().ToString(),
             nonceValue: "test-nonce",
-            signingKey: _defaultPrivateKey
+            signingCredentials: _defaultSigningCredential
         );
 
         return (attestationJwt, popJwt);
@@ -565,7 +618,6 @@ public class AttestationSecretValidation
 
     private string CreateAttestationJwt(
         string typValue = "oauth-client-attestation+jwt",
-        string algValue = "RS256",
         bool includeIss = true,
         string issValue = "https://client-issuer.example.com",
         string subValue = null,
@@ -574,14 +626,14 @@ public class AttestationSecretValidation
         long? nbfValue = null,
         string audValue = null,
         string cnfValue = null,
-        SecurityKey signingKey = null)
+        SigningCredentials signingCredentials = null)
     {
         subValue ??= ValidClientId;
         expValue ??= _clock.UtcNow.AddHours(1).ToUnixTimeSeconds();
         iatValue ??= _clock.UtcNow.ToUnixTimeSeconds();
         nbfValue ??= _clock.UtcNow.ToUnixTimeSeconds();
         audValue ??= AuthServerIdentity;
-        signingKey ??= _defaultPrivateKey;
+        signingCredentials ??= _defaultSigningCredential;
 
         var header = new Dictionary<string, object>
         {
@@ -607,13 +659,7 @@ public class AttestationSecretValidation
         }
         else
         {
-            // Create a default cnf with jwk
-            var jwk = signingKey switch
-            {
-                RsaSecurityKey rsaKey => JsonWebKeyConverter.ConvertFromRSASecurityKey(new RsaSecurityKey(rsaKey.Rsa.ExportParameters(false))),
-                SymmetricSecurityKey symmetricKey => JsonWebKeyConverter.ConvertFromSymmetricSecurityKey(symmetricKey),
-                _ => throw new NotSupportedException($"Algorithm {algValue} is not supported.")
-            };
+            var jwk = signingCredentials.Key;
             jwk.KeyId = "test-key-id";
             payload["cnf"] = JsonSerializer.Serialize(new Dictionary<string, object>
             {
@@ -622,14 +668,13 @@ public class AttestationSecretValidation
         }
 
         var handler = new JsonWebTokenHandler();
-        var token = handler.CreateToken(JsonSerializer.Serialize(payload), new SigningCredentials(signingKey, algValue), header);
+        var token = handler.CreateToken(JsonSerializer.Serialize(payload), signingCredentials, header);
 
         return token;
     }
 
     private string CreatePopJwt(
         string typValue = "oauth-client-attestation-pop+jwt",
-        string algValue = "RS256",
         string issValue = null,
         long? expValue = null,
         long? iatValue = null,
@@ -637,7 +682,7 @@ public class AttestationSecretValidation
         string audValue = null,
         string jtiValue = null,
         string nonceValue = null,
-        SecurityKey signingKey = null)
+        SigningCredentials signingCredentials = null)
     {
         issValue ??= ValidClientId;
         expValue ??= _clock.UtcNow.AddHours(1).ToUnixTimeSeconds();
@@ -646,7 +691,7 @@ public class AttestationSecretValidation
         audValue ??= AuthServerIdentity;
         jtiValue ??= Guid.NewGuid().ToString();
         nonceValue ??= "test-nonce";
-        signingKey ??= _defaultPrivateKey;
+        signingCredentials ??= _defaultSigningCredential;
 
         var header = new Dictionary<string, object>
         {
@@ -665,7 +710,7 @@ public class AttestationSecretValidation
         };
 
         var handler = new JsonWebTokenHandler();
-        var token = handler.CreateToken(JsonSerializer.Serialize(payload), new SigningCredentials(signingKey, algValue), header);
+        var token = handler.CreateToken(JsonSerializer.Serialize(payload), signingCredentials, header);
 
         return token;
     }

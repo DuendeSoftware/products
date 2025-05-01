@@ -44,6 +44,20 @@ public static class ClientExtensions
         return Task.FromResult(keys);
     }
 
+    public static List<SecurityKey> GetAttestationKeys(this IEnumerable<Secret> secrets)
+    {
+        var secretList = secrets.ToList().AsReadOnly();
+        var keys = new List<SecurityKey>();
+
+        var attestationKeys = secretList
+            .Where(secret => secret.Type == IdentityServerConstants.SecretTypes.AttestationJsonWebKey)
+            .Select(secret => new Microsoft.IdentityModel.Tokens.JsonWebKey(secret.Value))
+            .ToList();
+        keys.AddRange(attestationKeys);
+
+        return keys;
+    }
+
     private static List<X509Certificate2> GetCertificates(IEnumerable<Secret> secrets) =>
 #pragma warning disable SYSLIB0057 // Type or member is obsolete
         // TODO - Use X509CertificateLoader in a future release (when we drop NET8 support)

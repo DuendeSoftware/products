@@ -79,6 +79,7 @@ public static class IdentityServerConstants
         public const string X509CertificateName = "X509Name";
         public const string X509CertificateBase64 = "X509CertificateBase64";
         public const string JsonWebKey = "JWK";
+        public const string AttestationJsonWebKey = "AttestationJWK";
     }
 
     public static class ProfileDataCallers

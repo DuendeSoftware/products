@@ -28,7 +28,24 @@ public class AttestationSecretValidator(IIssuerNameService issuerNameService, IR
             return fail;
         }
 
-        var (clientAttestationJwtWasValid, extractedJwk) = await ValidateClientAttestationJwt(context.ClientAttestationJwt, context.ClientId);
+        List<SecurityKey> trustedKeys;
+        try
+        {
+            trustedKeys = secrets.GetAttestationKeys();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Could not parse secrets");
+            return fail;
+        }
+
+        if (trustedKeys != null && !trustedKeys.Any())
+        {
+            logger.LogError("There are no keys available to validate client attestation.");
+            return fail;
+        }
+
+        var (clientAttestationJwtWasValid, extractedJwk) = await ValidateClientAttestationJwt(context.ClientAttestationJwt, context.ClientId, trustedKeys);
         if (!clientAttestationJwtWasValid || !await ValidateClientAttestationPopJwt(context.ClientAttestationPopJwt, context.ClientId, extractedJwk))
         {
             return fail;
@@ -37,7 +54,8 @@ public class AttestationSecretValidator(IIssuerNameService issuerNameService, IR
         return success;
     }
 
-    private async Task<(bool, JsonWebKey)> ValidateClientAttestationJwt(string clientAttestationJwt, string clientId)
+    private async Task<(bool, JsonWebKey)> ValidateClientAttestationJwt(string clientAttestationJwt, string clientId,
+        List<SecurityKey> trustedKeys)
     {
         JsonWebToken token;
         var handler = new JsonWebTokenHandler();
@@ -77,9 +95,9 @@ public class AttestationSecretValidator(IIssuerNameService issuerNameService, IR
         {
             ValidIssuer = "TODO",
             ValidateIssuer = false, //TODO: set true when we know how we're handling issuer
+            IssuerSigningKeys = trustedKeys,
+            ValidateIssuerSigningKey = true,
             ValidateAudience = false, //TODO: is it weird we don't expect an audience for this claim - the spec doesn't require it
-            ValidateIssuerSigningKey = false, //TODO: this seems bad
-            SignatureValidator = (jwtEncodedString, _) => new JsonWebToken(jwtEncodedString),
             ClockSkew = options.Value.JwtValidationClockSkew
         };
         var tokenValidationResult = await handler.ValidateTokenAsync(token, tokenValidationParameters);
