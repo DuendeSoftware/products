@@ -52,9 +52,9 @@
     <Project Path="bff/templates/src/BffLocalApi/BffLocalApi.csproj" />
     <Project Path="bff/templates/src/BffRemoteApi/BffRemoteApi.csproj" />
   </Folder>
-  <Folder Name="/bff/templates/src/BffBlazor/">
-    <Project Path="bff/templates/src/BffBlazor/BffBlazor.Client/BffBlazor.Client.csproj" />
-    <Project Path="bff/templates/src/BffBlazor/BffBlazor/BffBlazor.csproj" />
+  <Folder Name="/bff/templates/src/BffBlazorAutoRenderMode/">
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj" />
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj" />
   </Folder>
   <Folder Name="/bff/test/">
     <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
