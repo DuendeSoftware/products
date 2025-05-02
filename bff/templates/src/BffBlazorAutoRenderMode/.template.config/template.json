@@ -13,13 +13,13 @@
     "language": "C#",
     "type": "project"
   },
-  "sourceName": "BffBlazor",
+  "sourceName": "BffBlazorAutoRenderMode",
   "preferNameDirectory": true,
   "symbols": {
     "ProjectName": {
       "type": "parameter",
       "datatype": "string",
-      "replaces": "BffBlazor"
+      "replaces": "BffBlazorAutoRenderMode"
     }
   },
   "primaryOutputs": [

@@ -41,7 +41,7 @@
 
     <ProjectReference Include="..\..\templates\src\BffLocalApi\BffLocalApi.csproj" />
     <ProjectReference Include="..\..\templates\src\BffRemoteApi\BffRemoteApi.csproj" />
-    <ProjectReference Include="..\..\templates\src\BffBlazor\BffBlazor\BffBlazor.csproj" />
+    <ProjectReference Include="..\..\templates\src\BffBlazor\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj" />
 
   </ItemGroup>
 
