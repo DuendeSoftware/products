@@ -81,7 +81,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
             Logger.LogDebug("Failed to validate DPoP jwk");
             return result;
         }
-        
+
         await ValidateToken(context, result);
         if (result.IsError)
         {
@@ -109,7 +109,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         {
             Logger.LogDebug("Detected replay of DPoP proof token");
         }
-        
+
         Logger.LogDebug("Successfully validated DPoP proof token");
         return result;
     }

@@ -161,7 +161,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task unexpired_proofs_do_not_set_errors()
+    public void unexpired_proofs_do_not_set_errors()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
         Options.ClientClockSkew = TimeSpan.FromSeconds(ClockSkew);
@@ -178,7 +178,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task expired_proofs_set_errors()
+    public void expired_proofs_set_errors()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
         Options.ClientClockSkew = TimeSpan.FromSeconds(ClockSkew);
@@ -197,7 +197,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [InlineData(ExpirationValidationMode.IssuedAt)]
     [InlineData(ExpirationValidationMode.Both)]
     [Trait("Category", "Unit")]
-    public async Task validate_iat_when_option_is_set(ExpirationValidationMode mode)
+    public void validate_iat_when_option_is_set(ExpirationValidationMode mode)
     {
         Options.ValidationMode = mode;
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
@@ -225,7 +225,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [InlineData(ExpirationValidationMode.Nonce)]
     [InlineData(ExpirationValidationMode.Both)]
     [Trait("Category", "Unit")]
-    public async Task validate_nonce_when_option_is_set(ExpirationValidationMode mode)
+    public void validate_nonce_when_option_is_set(ExpirationValidationMode mode)
     {
         Options.ValidationMode = mode;
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);

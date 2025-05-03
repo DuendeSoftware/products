@@ -12,7 +12,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 internal sealed class ConfigureJwtBearerOptions(DPoPJwtBearerEvents dpopEvents) : IPostConfigureOptions<JwtBearerOptions>
 {
     public string? Scheme { get; set; }
-    
+
     public void PostConfigure(string? name, JwtBearerOptions options)
     {
         if (Scheme == name)
@@ -33,7 +33,7 @@ internal sealed class ConfigureJwtBearerOptions(DPoPJwtBearerEvents dpopEvents) 
         }
         return Callback;
     }
-    
+
     private Func<MessageReceivedContext, Task> CreateMessageReceivedCallback(Func<MessageReceivedContext, Task> inner, DPoPJwtBearerEvents dpopEvents)
     {
         async Task Callback(MessageReceivedContext ctx)
@@ -43,7 +43,7 @@ internal sealed class ConfigureJwtBearerOptions(DPoPJwtBearerEvents dpopEvents) 
         }
         return Callback;
     }
-    
+
     private Func<TokenValidatedContext, Task> CreateTokenValidatedCallback(Func<TokenValidatedContext, Task> inner, DPoPJwtBearerEvents dpopEvents)
     {
         async Task Callback(TokenValidatedContext ctx)

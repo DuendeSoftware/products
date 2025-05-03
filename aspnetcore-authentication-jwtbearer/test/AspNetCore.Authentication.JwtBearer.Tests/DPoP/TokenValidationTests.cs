@@ -24,7 +24,7 @@ public class TokenValidationTests : DPoPProofValidatorTestBase
     {
         Context = Context with { ProofToken = CreateDPoPProofToken(typ: "dpop+at") }; //Not dpop+jwt!
         ProofValidator.ValidateJwk(Context, Result); // Validate jwk first, as we need it to validate the token.
-        
+
         await ProofValidator.ValidateToken(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid DPoP proof token.");

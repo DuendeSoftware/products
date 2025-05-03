@@ -17,7 +17,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Events for the Jwt Bearer authentication handler that enable DPoP.
 /// </summary>
-internal class DPoPJwtBearerEvents : JwtBearerEvents
+internal class DPoPJwtBearerEvents
 {
     private readonly IOptionsMonitor<DPoPOptions> _optionsMonitor;
     private readonly IDPoPProofValidator _validator;
@@ -26,9 +26,6 @@ internal class DPoPJwtBearerEvents : JwtBearerEvents
     /// <summary>
     /// Constructs a new instance of <see cref="DPoPJwtBearerEvents"/>. 
     /// </summary>
-    /// <param name="optionsMonitor"></param>
-    /// <param name="validator"></param>
-    /// <param name="logger"></param>
     public DPoPJwtBearerEvents(IOptionsMonitor<DPoPOptions> optionsMonitor, IDPoPProofValidator validator, ILogger<DPoPJwtBearerEvents> logger)
     {
         _optionsMonitor = optionsMonitor;
