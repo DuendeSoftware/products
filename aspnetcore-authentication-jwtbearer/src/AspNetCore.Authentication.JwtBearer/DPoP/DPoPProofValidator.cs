@@ -469,10 +469,10 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            // TODO - Should we swallow this error? Really?
             Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
         }
 
+        // We return 0 to indicate failure.
         return 0;
     }
 

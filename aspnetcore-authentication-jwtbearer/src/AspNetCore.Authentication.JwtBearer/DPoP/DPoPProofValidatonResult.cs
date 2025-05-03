@@ -8,7 +8,6 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Describes the result of validating a DPoP Proof.
 /// </summary>
-// TODO - Consider success and error types
 public sealed class DPoPProofValidationResult
 {
     /// <summary>
