@@ -14,13 +14,10 @@ using static Duende.IdentityModel.OidcConstants;
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 
-// TODO - refactor this to instead create callbacks that wrap any existing events, a la
-// Duende.Bff.SessionManagement.Configuration.PostConfigureSlidingExpirationCheck
-
 /// <summary>
 /// Events for the Jwt Bearer authentication handler that enable DPoP.
 /// </summary>
-public class DPoPJwtBearerEvents : JwtBearerEvents
+internal class DPoPJwtBearerEvents : JwtBearerEvents
 {
     private readonly IOptionsMonitor<DPoPOptions> _optionsMonitor;
     private readonly IDPoPProofValidator _validator;
@@ -43,7 +40,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// Attempts to retrieve a DPoP access token from incoming requests, and
     /// optionally enforces its presence.
     /// </summary>
-    public override Task MessageReceived(MessageReceivedContext context)
+    public Task MessageReceived(MessageReceivedContext context)
     {
         _logger.LogDebug("MessageReceived invoked in a JWT bearer authentication scheme using DPoP");
 
@@ -66,7 +63,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// <summary>
     /// Ensures that a valid DPoP proof token accompanies DPoP access tokens.
     /// </summary>
-    public override async Task TokenValidated(TokenValidatedContext context)
+    public async Task TokenValidated(TokenValidatedContext context)
     {
         _logger.LogDebug("TokenValidated invoked in a JWT bearer authentication scheme using DPoP");
 
@@ -160,7 +157,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// Adds the necessary HTTP headers and response codes for DPoP error
     /// handling and nonce generation.
     /// </summary>
-    public override Task Challenge(JwtBearerChallengeContext context)
+    public Task Challenge(JwtBearerChallengeContext context)
     {
         _logger.LogDebug("Challenge invoked in a JWT bearer authentication scheme using DPoP");
         var dPoPOptions = _optionsMonitor.Get(context.Scheme.Name);
