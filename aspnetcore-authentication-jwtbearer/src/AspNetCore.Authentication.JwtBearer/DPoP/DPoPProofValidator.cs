@@ -158,7 +158,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
     }
 
-    internal bool ValidateJwk(DPoPProofValidationContext context, DPoPProofValidationResult result)
+    internal void ValidateJwk(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         JsonWebToken token;
 
@@ -171,14 +171,14 @@ internal class DPoPProofValidator : IDPoPProofValidator
         {
             Logger.LogDebug("Error parsing DPoP proof token: {error}", ex.Message);
             result.SetError("Malformed DPoP proof token.");
-            return false;
+            return;
         }
 
         if (!token.TryGetHeaderValue<JsonElement>(JwtClaimTypes.JsonWebKey, out var jwkValues))
         {
             Logger.LogDebug("Failed to get jwk header");
             result.SetError("Invalid 'jwk' value.");
-            return false;
+            return;
         }
 
         var jwkJson = JsonSerializer.Serialize(jwkValues);
@@ -192,20 +192,18 @@ internal class DPoPProofValidator : IDPoPProofValidator
         {
             Logger.LogDebug("Error parsing DPoP jwk value: {error}", ex.Message);
             result.SetError("Invalid 'jwk' value.");
-            return false;
+            return;
         }
 
         if (jwk.HasPrivateKey)
         {
             Logger.LogDebug("'jwk' value contains a private key.");
             result.SetError("'jwk' value contains a private key.");
-            return false;
+            return;
         }
 
         result.JsonWebKey = jwkJson;
         result.JsonWebKeyThumbprint = jwk.CreateThumbprint();
-
-        return true;
     }
 
     /// <summary>

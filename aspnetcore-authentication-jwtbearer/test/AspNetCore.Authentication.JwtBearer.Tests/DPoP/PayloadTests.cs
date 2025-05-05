@@ -9,7 +9,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
 {
     [Fact]
     [Trait("Category", "Unit")]
-    public Task missing_payload_fails()
+    public void missing_payload_fails()
     {
         Result.Payload = null;
 
@@ -17,12 +17,11 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
         Result.ShouldBeInvalidProofWithDescription("Missing payload");
         ProofValidator.ReplayCacheShouldNotBeCalled();
-        return Task.CompletedTask;
     }
 
     [Fact]
     [Trait("Category", "Unit")]
-    public Task missing_ath_fails()
+    public void missing_ath_fails()
     {
         Result.Payload = new Dictionary<string, object>();
         Result.Payload.ShouldNotContainKey(JwtClaimTypes.DPoPAccessTokenHash);
@@ -31,7 +30,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'ath' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
-        return Task.CompletedTask;
     }
 
     [Fact]

@@ -59,7 +59,7 @@ public class TestDPoPProofValidator
     public async Task ValidateToken(DPoPProofValidationContext context, DPoPProofValidationResult result)
         => await _internalValidator.ValidateToken(context, result);
 
-    public bool ValidateJwk(DPoPProofValidationContext context, DPoPProofValidationResult result)
+    public void ValidateJwk(DPoPProofValidationContext context, DPoPProofValidationResult result)
         => _internalValidator.ValidateJwk(context, result);
 
 }
