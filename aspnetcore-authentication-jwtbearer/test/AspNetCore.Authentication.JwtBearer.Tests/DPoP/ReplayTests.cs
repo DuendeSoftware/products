@@ -1,32 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.IdentityModel;
 using NSubstitute;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 public class ReplayTests : DPoPProofValidatorTestBase
 {
-    [Fact]
-    [Trait("Category", "Unit")]
-    public async Task replays_detected_in_ValidatePayload_fail()
-    {
-        ProofValidator.TestReplayCache.Exists(TokenIdHash).Returns(true);
-        Result.Payload = new Dictionary<string, object>
-        {
-            { JwtClaimTypes.DPoPAccessTokenHash, AccessTokenHash },
-            { JwtClaimTypes.JwtId, TokenId },
-            { JwtClaimTypes.DPoPHttpMethod, HttpMethod },
-            { JwtClaimTypes.DPoPHttpUrl, HttpUrl },
-            { JwtClaimTypes.IssuedAt, IssuedAt },
-        };
-        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
-        await ProofValidator.ValidatePayload(Context, Result);
-
-        Result.ShouldBeInvalidProofWithDescription("Detected DPoP proof token replay.");
-    }
-
     [Fact]
     [Trait("Category", "Unit")]
     public async Task replays_detected_in_ValidateReplay_fail()

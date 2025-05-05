@@ -9,11 +9,11 @@ public class PayloadTests : DPoPProofValidatorTestBase
 {
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task missing_payload_fails()
+    public void missing_payload_fails()
     {
         Result.Payload = null;
 
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Missing payload");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -21,12 +21,12 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task missing_ath_fails()
+    public void missing_ath_fails()
     {
         Result.Payload = new Dictionary<string, object>();
         Result.Payload.ShouldNotContainKey(JwtClaimTypes.DPoPAccessTokenHash);
 
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'ath' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -34,14 +34,14 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task mismatched_ath_fails()
+    public void mismatched_ath_fails()
     {
         Result.Payload = new Dictionary<string, object>
         {
             { JwtClaimTypes.DPoPAccessTokenHash, "garbage that does not hash to the access token" }
         };
 
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'ath' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -49,14 +49,14 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task missing_jti_fails()
+    public void missing_jti_fails()
     {
         Result.Payload = new Dictionary<string, object>
         {
             { JwtClaimTypes.DPoPAccessTokenHash, AccessTokenHash },
         };
 
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'jti' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -64,7 +64,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task missing_htm_fails()
+    public void missing_htm_fails()
     {
         Result.Payload = new Dictionary<string, object>
         {
@@ -72,7 +72,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.JwtId, TokenId },
         };
 
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'htm' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -80,7 +80,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task missing_htu_fails()
+    public void missing_htu_fails()
     {
         Result.Payload = new Dictionary<string, object>
         {
@@ -89,7 +89,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.DPoPHttpMethod, HttpMethod },
         };
 
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'htu' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -97,7 +97,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task missing_iat_fails()
+    public void missing_iat_fails()
     {
         Result.Payload = new Dictionary<string, object>
         {
@@ -107,7 +107,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.DPoPHttpUrl, HttpUrl }
         };
 
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'iat' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -115,7 +115,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task expired_payload_fails()
+    public void expired_payload_fails()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
         Options.ClientClockSkew = TimeSpan.FromSeconds(ClockSkew);
@@ -129,7 +129,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         };
 
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + ClockSkew + 1));
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'iat' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
@@ -138,7 +138,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task valid_payload_succeeds()
+    public void valid_payload_succeeds()
     {
         Result.Payload = new Dictionary<string, object>
         {
@@ -150,7 +150,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         };
 
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
-        await ProofValidator.ValidatePayload(Context, Result);
+        ProofValidator.ValidatePayload(Context, Result);
 
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
     }

@@ -13,10 +13,11 @@ using static Duende.IdentityModel.OidcConstants;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
+
 /// <summary>
 /// Events for the Jwt Bearer authentication handler that enable DPoP.
 /// </summary>
-public class DPoPJwtBearerEvents : JwtBearerEvents
+internal class DPoPJwtBearerEvents
 {
     private readonly IOptionsMonitor<DPoPOptions> _optionsMonitor;
     private readonly IDPoPProofValidator _validator;
@@ -25,9 +26,6 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// <summary>
     /// Constructs a new instance of <see cref="DPoPJwtBearerEvents"/>. 
     /// </summary>
-    /// <param name="optionsMonitor"></param>
-    /// <param name="validator"></param>
-    /// <param name="logger"></param>
     public DPoPJwtBearerEvents(IOptionsMonitor<DPoPOptions> optionsMonitor, IDPoPProofValidator validator, ILogger<DPoPJwtBearerEvents> logger)
     {
         _optionsMonitor = optionsMonitor;
@@ -39,7 +37,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// Attempts to retrieve a DPoP access token from incoming requests, and
     /// optionally enforces its presence.
     /// </summary>
-    public override Task MessageReceived(MessageReceivedContext context)
+    public Task MessageReceived(MessageReceivedContext context)
     {
         _logger.LogDebug("MessageReceived invoked in a JWT bearer authentication scheme using DPoP");
 
@@ -62,7 +60,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// <summary>
     /// Ensures that a valid DPoP proof token accompanies DPoP access tokens.
     /// </summary>
-    public override async Task TokenValidated(TokenValidatedContext context)
+    public async Task TokenValidated(TokenValidatedContext context)
     {
         _logger.LogDebug("TokenValidated invoked in a JWT bearer authentication scheme using DPoP");
 
@@ -78,12 +76,13 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
 
             var result = await _validator.Validate(new DPoPProofValidationContext
             {
+                Options = dPoPOptions,
                 Scheme = context.Scheme.Name,
                 ProofToken = proofToken,
                 AccessToken = at,
                 AccessTokenClaims = context.Principal?.Claims ?? [],
-                Method = context.HttpContext.Request.Method,
-                Url = context.HttpContext.Request.Scheme + "://" + context.HttpContext.Request.Host + context.HttpContext.Request.PathBase + context.HttpContext.Request.Path
+                ExpectedMethod = context.HttpContext.Request.Method,
+                ExpectedUrl = context.HttpContext.Request.Scheme + "://" + context.HttpContext.Request.Host + context.HttpContext.Request.PathBase + context.HttpContext.Request.Path
             });
 
             if (result.IsError)
@@ -155,7 +154,7 @@ public class DPoPJwtBearerEvents : JwtBearerEvents
     /// Adds the necessary HTTP headers and response codes for DPoP error
     /// handling and nonce generation.
     /// </summary>
-    public override Task Challenge(JwtBearerChallengeContext context)
+    public Task Challenge(JwtBearerChallengeContext context)
     {
         _logger.LogDebug("Challenge invoked in a JWT bearer authentication scheme using DPoP");
         var dPoPOptions = _optionsMonitor.Get(context.Scheme.Name);

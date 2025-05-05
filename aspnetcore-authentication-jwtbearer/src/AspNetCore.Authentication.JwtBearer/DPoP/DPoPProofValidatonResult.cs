@@ -8,7 +8,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Describes the result of validating a DPoP Proof.
 /// </summary>
-public class DPoPProofValidationResult
+public sealed class DPoPProofValidationResult
 {
     /// <summary>
     /// Indicates if the result was successful or not
@@ -73,9 +73,9 @@ public class DPoPProofValidationResult
     /// <summary>
     /// Sets the error properties of the result.
     /// </summary>
-    public void SetError(string description, string message = OidcConstants.TokenErrors.InvalidDPoPProof)
+    public void SetError(string description, string error = OidcConstants.TokenErrors.InvalidDPoPProof)
     {
-        Error = message;
+        Error = error;
         ErrorDescription = description;
         IsError = true;
     }
