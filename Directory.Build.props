@@ -28,7 +28,8 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <MinVerAutoIncrement>minor</MinVerAutoIncrement>
+        <MinVerAutoIncrement>patch</MinVerAutoIncrement>
+        <MinVerTagPrefix>is-</MinVerTagPrefix>
         <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     </PropertyGroup>
 </Project>
