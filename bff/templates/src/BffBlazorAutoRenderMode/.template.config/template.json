@@ -41,10 +41,43 @@
     "UseMapStaticAssets": {
       "type": "computed",
       "value": "Framework != net8.0"
+    },
+    "IsDevelopmentTime": {
+      "type": "computed",
+      "value": "Framework == ''"
     }
   },
-  "primaryOutputs": [
-    { "path": "BffBlazor/{{ProjectName}}.csproj" },
-    { "path": "BffBlazor.Client/{{ProjectName}}.Client.csproj" }
+  "sources": [
+    {
+      "exclude": [
+        "**/[Bb]in/**",
+        "**/[Oo]bj/**",
+        ".template.config/**/*",
+        "**/*.filelist",
+        "**/*.user",
+        "**/*.lock.json",
+        "BffBlazorAutoRenderMode/Components/CssLinks.razor"
+      ],
+      "modifiers": [
+        {
+          "condition": "(UseMapStaticAssets)",
+          "rename": {
+            "BffBlazorAutoRenderMode/Components/MapStaticAssetsLinkTags.razor": "BffBlazorAutoRenderMode/Components/CssLinks.razor"
+          },
+          "exclude": [
+            "BffBlazorAutoRenderMode/Components/LegacyLinkTags.razor"
+          ]
+        },
+        {
+          "condition": "(!UseMapStaticAssets)",
+          "rename": {
+            "BffBlazorAutoRenderMode/Components/LegacyLinkTags.razor": "BffBlazorAutoRenderMode/Components/CssLinks.razor"
+          },
+          "exclude": [
+            "BffBlazorAutoRenderMode/Components/MapStaticAssetsLinkTags.razor"
+          ]
+        }
+      ]
+    }
   ]
 }
