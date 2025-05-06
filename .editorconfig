@@ -46,3 +46,6 @@ dotnet_style_qualification_for_method = false:error
 dotnet_style_qualification_for_property = false:error
 file_header_template = Copyright (c) Duende Software. All rights reserved.\nSee LICENSE in the project root for license information.
 indent_size = 4
+
+[*.razor]
+indent_size = 4
