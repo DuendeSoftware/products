@@ -30,7 +30,10 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// <returns></returns>
     protected bool StringCollectionContainsString(IEnumerable<string> uris, string requestedUri)
     {
-        if (IEnumerableExtensions.IsNullOrEmpty(uris)) return false;
+        if (IEnumerableExtensions.IsNullOrEmpty(uris))
+        {
+            return false;
+        }
 
         return uris.Contains(requestedUri, StringComparer.OrdinalIgnoreCase);
     }

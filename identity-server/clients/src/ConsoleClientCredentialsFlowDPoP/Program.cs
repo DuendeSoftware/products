@@ -18,7 +18,10 @@ var authority = builder.Configuration["is-host"];
 
 var discoClient = new HttpClient();
 var disco = await discoClient.GetDiscoveryDocumentAsync(authority);
-if (disco.IsError) throw new Exception(disco.Error);
+if (disco.IsError)
+{
+    throw new Exception(disco.Error);
+}
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddClientCredentialsTokenManagement()

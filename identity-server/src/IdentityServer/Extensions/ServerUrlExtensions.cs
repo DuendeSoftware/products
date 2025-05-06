@@ -31,7 +31,11 @@ public static class ServerUrlExtensions
     {
         if (urlOrPath.IsLocalUrl())
         {
-            if (urlOrPath.StartsWith("~/")) urlOrPath = urlOrPath.Substring(1);
+            if (urlOrPath.StartsWith("~/"))
+            {
+                urlOrPath = urlOrPath.Substring(1);
+            }
+
             urlOrPath = urls.BaseUrl + urlOrPath.EnsureLeadingSlash();
         }
         return urlOrPath;
@@ -48,7 +52,11 @@ public static class ServerUrlExtensions
             return null;
         }
 
-        if (path.StartsWith("~/")) path = path.Substring(1);
+        if (path.StartsWith("~/"))
+        {
+            path = path.Substring(1);
+        }
+
         path = urls.BaseUrl + path.EnsureLeadingSlash();
         return path;
     }

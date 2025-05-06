@@ -39,7 +39,10 @@ async Task<TokenResponse> RequestTokenAsync()
     var client = new HttpClient();
 
     var disco = await client.GetDiscoveryDocumentAsync(authority);
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var response = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
     {
@@ -59,7 +62,11 @@ async Task<TokenResponse> RequestTokenAsync()
             }
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 

@@ -31,7 +31,10 @@ public class TokenCleanupService : ITokenCleanupService
         IOperationalStoreNotification operationalStoreNotification = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        if (_options.TokenCleanupBatchSize < 1) throw new ArgumentException("Token cleanup batch size interval must be at least 1");
+        if (_options.TokenCleanupBatchSize < 1)
+        {
+            throw new ArgumentException("Token cleanup batch size interval must be at least 1");
+        }
 
         _persistedGrantDbContext = persistedGrantDbContext ?? throw new ArgumentNullException(nameof(persistedGrantDbContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

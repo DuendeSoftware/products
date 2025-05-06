@@ -7,6 +7,7 @@ indent_style = space
 insert_final_newline = true
 
 [*.cs]
+csharp_prefer_braces = true
 csharp_style_expression_bodied_accessors = true
 csharp_style_expression_bodied_constructors = true
 csharp_style_expression_bodied_indexers = true
@@ -23,6 +24,7 @@ csharp_style_var_when_type_is_apparent = true
 dotnet_diagnostic.IDE0003.severity = error # Remove this or Me qualification
 dotnet_diagnostic.IDE0005.severity = error # Remove unnecessary using directives
 dotnet_diagnostic.IDE0007.severity = error # Use var instead of explicit type
+dotnet_diagnostic.IDE0011.severity = error # Add braces
 dotnet_diagnostic.IDE0021.severity = error # Use expression body for constructors
 dotnet_diagnostic.IDE0022.severity = error # Use expression body for methods
 dotnet_diagnostic.IDE0023.severity = error # Use expression body for conversion operators

@@ -66,7 +66,10 @@ public class NetworkHandler : HttpMessageHandler
             return _action(request);
         }
 
-        if (_behavior == Behavior.Throw) throw _exception;
+        if (_behavior == Behavior.Throw)
+        {
+            throw _exception;
+        }
 
         var response = new HttpResponseMessage(_statusCode);
 
@@ -92,7 +95,10 @@ public class NetworkHandler : HttpMessageHandler
 
     private async Task<string> SafeReadContentFrom(HttpRequestMessage request)
     {
-        if (request.Content == null) return null;
+        if (request.Content == null)
+        {
+            return null;
+        }
 
         return await request.Content.ReadAsStringAsync();
     }

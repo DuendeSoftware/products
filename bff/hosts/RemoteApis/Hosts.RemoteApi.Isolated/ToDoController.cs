@@ -32,7 +32,10 @@ public class ToDoController : ControllerBase
     public IActionResult Get(int id)
     {
         var item = Data.FirstOrDefault(x => x.Id == id);
-        if (item == null) return NotFound();
+        if (item == null)
+        {
+            return NotFound();
+        }
 
         _logger.LogInformation("Get {id}", id);
         return Ok(item);
@@ -54,7 +57,10 @@ public class ToDoController : ControllerBase
     public IActionResult Put(int id, [FromBody] ToDo model)
     {
         var item = Data.FirstOrDefault(x => x.Id == id);
-        if (item == null) return NotFound();
+        if (item == null)
+        {
+            return NotFound();
+        }
 
         item.Date = model.Date;
         item.Name = model.Name;
@@ -68,7 +74,10 @@ public class ToDoController : ControllerBase
     public IActionResult Delete(int id)
     {
         var item = Data.FirstOrDefault(x => x.Id == id);
-        if (item == null) return NotFound();
+        if (item == null)
+        {
+            return NotFound();
+        }
 
         Data.Remove(item);
         _logger.LogInformation("Delete {id}", id);

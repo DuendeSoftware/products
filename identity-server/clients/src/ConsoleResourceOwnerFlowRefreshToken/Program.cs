@@ -66,7 +66,11 @@ async Task<TokenResponse> RequestTokenAsync()
         Scope = "resource1.scope1 offline_access",
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 
@@ -84,7 +88,11 @@ async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
         RefreshToken = refreshToken
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 
