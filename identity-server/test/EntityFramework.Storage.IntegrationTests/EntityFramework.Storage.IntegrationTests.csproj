@@ -13,6 +13,7 @@
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="Shouldly" />
 
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
@@ -21,7 +22,7 @@
 
     <ItemGroup>
         <!-- The packages in this ItemGroup are all transitive dependencies that
-             would otherwise resolve to a version with a security vulnerabilitiy. 
+             would otherwise resolve to a version with a security vulnerability. 
              In future, we would like to update Microsoft.Data.SqlClient and
              Microsoft.EntityFrameworkCore, and remove these explicit dependencies
              (assuming that future versions of the intermediate dependencies that
