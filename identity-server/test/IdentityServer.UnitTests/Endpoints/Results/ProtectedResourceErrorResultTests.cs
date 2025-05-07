@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Endpoints.Results;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
+using Shouldly;
 using Xunit;
 
 namespace UnitTests.Endpoints.Results;
@@ -24,12 +24,12 @@ public class ProtectedResourceErrorResultTests
         );
 
         var wwwAuthHeader = context.Response.Headers[HeaderNames.WWWAuthenticate].ToString();
-        wwwAuthHeader.Should().BeEquivalentTo(
+        wwwAuthHeader.ShouldBe(
             """
             Bearer realm="IdentityServer",error="oops",error_description="big oops"
             """);
     }
-    
+
     [Fact]
     public void WwwAuthenticate_header_with_error_should_be_a_single_line()
     {
@@ -41,7 +41,7 @@ public class ProtectedResourceErrorResultTests
         );
 
         var wwwAuthHeader = context.Response.Headers[HeaderNames.WWWAuthenticate].ToString();
-        wwwAuthHeader.Should().BeEquivalentTo(
+        wwwAuthHeader.ShouldBe(
             """
             Bearer realm="IdentityServer",error="oops"
             """);
@@ -58,6 +58,6 @@ public class ProtectedResourceErrorResultTests
         );
 
         var wwwAuthHeader = context.Response.Headers[HeaderNames.WWWAuthenticate];
-        wwwAuthHeader.Count.Should().Be(1);
+        wwwAuthHeader.Count.ShouldBe(1);
     }
 }
