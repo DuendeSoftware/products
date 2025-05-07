@@ -23,7 +23,8 @@ public static class Telemetry
     /// <summary>
     /// Service name used for the experimental non stable counters from Duende IdentityServer
     /// </summary>
-    public const string ServiceNameExperimental = "Duende.IdentityServer.Experimental";
+    [Obsolete("The experimental service name will be removed in a future version. The associated meter is now using the Duende.IdentityServer service name.")]
+    public const string ServiceNameExperimental = ServiceName;
 
     /// <summary>
     /// Metrics configuration.
@@ -93,7 +94,8 @@ public static class Telemetry
         /// <summary>
         /// Meter for experimental counters from IdentityServer
         /// </summary>
-        public static readonly Meter ExperimentalMeter = new Meter(ServiceNameExperimental, ServiceVersion);
+        [Obsolete("The ExperimentalMeter will be removed in a future version. Use the default Meter instead.")]
+        public static readonly Meter ExperimentalMeter = Meter;
 
         /// <summary>
         /// Counter for active requests.
@@ -168,7 +170,7 @@ public static class Telemetry
         /// Successful Api Secret validations
         /// </summary>
         public static Counter<long> ApiSecretValidationCounter
-            = ExperimentalMeter.CreateCounter<long>(Counters.ApiSecretValidation);
+            = Meter.CreateCounter<long>(Counters.ApiSecretValidation);
 
         /// <summary>
         /// Helper method to increase <see cref="ApiSecretValidationCounter"/>
@@ -196,7 +198,7 @@ public static class Telemetry
         /// Successful back channel (CIBA) authentications counter
         /// </summary>
         public static readonly Counter<long> BackChannelAuthenticationCounter =
-            ExperimentalMeter.CreateCounter<long>(Counters.BackchannelAuthentication);
+            Meter.CreateCounter<long>(Counters.BackchannelAuthentication);
 
         /// <summary>
         /// Helper method to increase <see cref="BackChannelAuthenticationCounter"/>
@@ -224,7 +226,7 @@ public static class Telemetry
         /// Client configuration validation
         /// </summary>
         public static Counter<long> ClientValidationCounter =
-            ExperimentalMeter.CreateCounter<long>(Counters.ClientConfigValidation);
+            Meter.CreateCounter<long>(Counters.ClientConfigValidation);
 
         /// <summary>
         /// Helper method to increase <see cref="ClientValidationCounter"/>
@@ -251,7 +253,7 @@ public static class Telemetry
         /// Successful Client Secret validations
         /// </summary>
         public static Counter<long> ClientSecretValidationCounter =
-            ExperimentalMeter.CreateCounter<long>(Counters.ClientSecretValidation);
+            Meter.CreateCounter<long>(Counters.ClientSecretValidation);
 
         /// <summary>
         /// Helper method to increase <see cref="ClientSecretValidationCounter"/>
@@ -279,7 +281,7 @@ public static class Telemetry
         /// Successful device code authentication counter
         /// </summary>
         public static readonly Counter<long> DeviceAuthenticationCounter =
-            ExperimentalMeter.CreateCounter<long>(Counters.DeviceAuthentication);
+            Meter.CreateCounter<long>(Counters.DeviceAuthentication);
 
         /// <summary>
         /// Helper method to increase <see cref="DeviceAuthenticationCounter"/>
@@ -306,7 +308,7 @@ public static class Telemetry
         /// Dynamic identityprovider validations
         /// </summary>
         public static Counter<long> DynamicIdentityProviderValidationCounter
-            = ExperimentalMeter.CreateCounter<long>(Counters.DynamicIdentityProviderValidation);
+            = Meter.CreateCounter<long>(Counters.DynamicIdentityProviderValidation);
 
         /// <summary>
         /// Helper method to increase <see cref="DynamicIdentityProviderValidationCounter"/>
@@ -334,7 +336,7 @@ public static class Telemetry
         /// Introspection success counter
         /// </summary>
         public static readonly Counter<long> IntrospectionCounter =
-            ExperimentalMeter.CreateCounter<long>(Counters.Introspection);
+            Meter.CreateCounter<long>(Counters.Introspection);
 
         /// <summary>
         /// Helper method to increase <see cref="IntrospectionCounter"/>
@@ -362,7 +364,7 @@ public static class Telemetry
         /// Pushed Authorization Request Counter
         /// </summary>
         public static Counter<long> PushedAuthorizationRequestCounter
-            = ExperimentalMeter.CreateCounter<long>(Counters.PushedAuthorizationRequest);
+            = Meter.CreateCounter<long>(Counters.PushedAuthorizationRequest);
 
         /// <summary>
         /// Helper method to increase <see cref="PushedAuthorizationRequestCounter"/>
@@ -389,7 +391,7 @@ public static class Telemetry
         /// Resource Owner Authentication Counter
         /// </summary>
         public static Counter<long> ResourceOwnerAuthenticationCounter
-            = ExperimentalMeter.CreateCounter<long>(Counters.ResourceOwnerAuthentication);
+            = Meter.CreateCounter<long>(Counters.ResourceOwnerAuthentication);
 
         /// <summary>
         /// Helper method to increase <see cref="ResourceOwnerAuthenticationCounter"/>
@@ -416,7 +418,7 @@ public static class Telemetry
         /// Revocation success counter.
         /// </summary>
         public static readonly Counter<long> RevocationCounter =
-            ExperimentalMeter.CreateCounter<long>(Counters.Revocation);
+            Meter.CreateCounter<long>(Counters.Revocation);
 
         /// <summary>
         /// Helper method to increase <see cref="RevocationCounter"/>
@@ -443,7 +445,7 @@ public static class Telemetry
         /// Successful token issuance counter.
         /// </summary>
         public static readonly Counter<long> TokenIssuedCounter =
-            ExperimentalMeter.CreateCounter<long>(Counters.TokenIssued);
+            Meter.CreateCounter<long>(Counters.TokenIssued);
 
         /// <summary>
         /// Helper method to increase <see cref="TokenIssuedCounter"/>
