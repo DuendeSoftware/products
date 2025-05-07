@@ -34,7 +34,9 @@ public class ExceptionCapturingMessageBus(IMessageBus inner) : IMessageBus
     public bool QueueMessage(IMessageSinkMessage message)
     {
         if (_disposed)
+        {
             throw new ObjectDisposedException(nameof(ExceptionCapturingMessageBus));
+        }
 
         var skipTest = false;
 

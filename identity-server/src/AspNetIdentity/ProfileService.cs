@@ -69,7 +69,10 @@ public class ProfileService<TUser> : IProfileService
     public virtual async Task GetProfileDataAsync(ProfileDataRequestContext context)
     {
         var sub = context.Subject?.GetSubjectId();
-        if (sub == null) throw new Exception("No sub claim present");
+        if (sub == null)
+        {
+            throw new Exception("No sub claim present");
+        }
 
         await GetProfileDataAsync(context, sub);
     }
@@ -109,7 +112,10 @@ public class ProfileService<TUser> : IProfileService
     protected virtual async Task<ClaimsPrincipal> GetUserClaimsAsync(TUser user)
     {
         var principal = await ClaimsFactory.CreateAsync(user);
-        if (principal == null) throw new Exception("ClaimsFactory failed to create a principal");
+        if (principal == null)
+        {
+            throw new Exception("ClaimsFactory failed to create a principal");
+        }
 
         return principal;
     }
@@ -123,7 +129,10 @@ public class ProfileService<TUser> : IProfileService
     public virtual async Task IsActiveAsync(IsActiveContext context)
     {
         var sub = context.Subject?.GetSubjectId();
-        if (sub == null) throw new Exception("No subject Id claim present");
+        if (sub == null)
+        {
+            throw new Exception("No subject Id claim present");
+        }
 
         await IsActiveAsync(context, sub);
     }

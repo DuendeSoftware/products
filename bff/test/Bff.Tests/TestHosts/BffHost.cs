@@ -299,7 +299,10 @@ public class BffHost : GenericHost
             endpoints.Map("/local_authz", async context =>
                 {
                     var sub = context.User.FindFirst("sub")?.Value;
-                    if (sub == null) throw new Exception("sub is missing");
+                    if (sub == null)
+                    {
+                        throw new Exception("sub is missing");
+                    }
 
                     var body = default(string);
                     if (context.Request.HasJsonContentType())
@@ -346,7 +349,10 @@ public class BffHost : GenericHost
             endpoints.Map("/local_authz_no_csrf", async context =>
                 {
                     var sub = context.User.FindFirst("sub")?.Value;
-                    if (sub == null) throw new Exception("sub is missing");
+                    if (sub == null)
+                    {
+                        throw new Exception("sub is missing");
+                    }
 
                     var body = default(string);
                     if (context.Request.HasJsonContentType())
@@ -457,7 +463,10 @@ public class BffHost : GenericHost
 
     public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
     {
-        if (userQuery != null) userQuery = "?" + userQuery;
+        if (userQuery != null)
+        {
+            userQuery = "?" + userQuery;
+        }
 
         var req = new HttpRequestMessage(HttpMethod.Get, Url("/bff/user") + userQuery);
         req.Headers.Add("x-csrf", "1");

@@ -116,7 +116,9 @@ internal class AccessTokenRequestTransform(
     {
         var yarp = endpoint.Metadata.GetMetadata<RouteModel>();
         if (yarp == null)
+        {
             return null;
+        }
 
         TokenType? requiredTokenType = null;
         if (Enum.TryParse<TokenType>(yarp.Config.Metadata?.GetValueOrDefault(Constants.Yarp.TokenTypeMetadata), true, out var type))

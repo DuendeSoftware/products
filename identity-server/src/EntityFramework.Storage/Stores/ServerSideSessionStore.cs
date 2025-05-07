@@ -313,7 +313,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         var (first, last) = ParseResultsToken(filter);
         var countRequested = filter.CountRequested;
-        if (countRequested <= 0) countRequested = 25;
+        if (countRequested <= 0)
+        {
+            countRequested = 25;
+        }
+
         var totalCount = await query.CountAsync(cancellationToken);
         var pagination = new SessionPaginationContext
         {

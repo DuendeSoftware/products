@@ -156,7 +156,10 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
         }
 
         var countRequested = filter.CountRequested;
-        if (countRequested <= 0) countRequested = 25;
+        if (countRequested <= 0)
+        {
+            countRequested = 25;
+        }
 
         var query = _store.Values.AsQueryable();
 

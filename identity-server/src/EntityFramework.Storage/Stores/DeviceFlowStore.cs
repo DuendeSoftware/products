@@ -192,7 +192,10 @@ public class DeviceFlowStore : IDeviceFlowStore
     /// <returns></returns>
     protected DeviceFlowCodes ToEntity(DeviceCode model, string deviceCode, string userCode)
     {
-        if (model == null || deviceCode == null || userCode == null) return null;
+        if (model == null || deviceCode == null || userCode == null)
+        {
+            return null;
+        }
 
         return new DeviceFlowCodes
         {
@@ -215,7 +218,10 @@ public class DeviceFlowStore : IDeviceFlowStore
     /// <returns></returns>
     protected DeviceCode ToModel(string entity)
     {
-        if (entity == null) return null;
+        if (entity == null)
+        {
+            return null;
+        }
 
         return Serializer.Deserialize<DeviceCode>(entity);
     }

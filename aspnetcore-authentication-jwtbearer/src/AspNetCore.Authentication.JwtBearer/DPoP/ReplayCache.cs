@@ -8,16 +8,16 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Default implementation of the replay cache using IDistributedCache
 /// </summary>
-public class DefaultReplayCache : IReplayCache
+internal class ReplayCache : IReplayCache
 {
     private const string Prefix = "DPoPJwtBearerEvents-DPoPReplay-jti-";
 
     private readonly IDistributedCache _cache;
 
     /// <summary>
-    /// Constructs new instances of <see cref="DefaultReplayCache"/>.
+    /// Constructs new instances of <see cref="ReplayCache"/>.
     /// </summary>
-    public DefaultReplayCache(IDistributedCache cache) => _cache = cache;
+    public ReplayCache(IDistributedCache cache) => _cache = cache;
 
     /// <inheritdoc />
     public async Task Add(string handle, DateTimeOffset expiration, CancellationToken cancellationToken)

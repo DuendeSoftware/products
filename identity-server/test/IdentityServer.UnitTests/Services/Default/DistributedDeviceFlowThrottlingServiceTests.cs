@@ -111,7 +111,11 @@ internal class TestCache : IDistributedCache
 
     public byte[] Get(string key)
     {
-        if (Items.TryGetValue(key, out var value)) return value.Item1;
+        if (Items.TryGetValue(key, out var value))
+        {
+            return value.Item1;
+        }
+
         return null;
     }
 

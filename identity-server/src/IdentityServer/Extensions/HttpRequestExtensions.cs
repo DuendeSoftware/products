@@ -29,7 +29,10 @@ public static class HttpRequestExtensions
 
     internal static bool HasApplicationFormContentType(this HttpRequest request)
     {
-        if (request.ContentType is null) return false;
+        if (request.ContentType is null)
+        {
+            return false;
+        }
 
         if (MediaTypeHeaderValue.TryParse(request.ContentType, out var header))
         {

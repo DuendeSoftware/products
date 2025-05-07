@@ -101,10 +101,21 @@ public class Secret
     /// </returns>
     public override bool Equals(object? obj)
     {
-        if (obj == null) return false;
+        if (obj == null)
+        {
+            return false;
+        }
+
         var other = obj as Secret;
-        if (other == null) return false;
-        if (ReferenceEquals(other, this)) return true;
+        if (other == null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(other, this))
+        {
+            return true;
+        }
 
         return string.Equals(other.Type, Type, StringComparison.Ordinal) &&
                string.Equals(other.Value, Value, StringComparison.Ordinal);

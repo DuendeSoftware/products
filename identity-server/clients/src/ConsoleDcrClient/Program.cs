@@ -89,7 +89,10 @@ async Task<TokenResponse> RequestTokenAsync()
     var client = new HttpClient();
 
     var disco = await client.GetDiscoveryDocumentAsync(authority);
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
     {

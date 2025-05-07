@@ -74,7 +74,10 @@ public class ClientStore : IClientStore
 
         var client = (await query.ToArrayAsync(CancellationTokenProvider.CancellationToken)).
             SingleOrDefault(x => x.ClientId == clientId);
-        if (client == null) return null;
+        if (client == null)
+        {
+            return null;
+        }
 
         var model = client.ToModel();
 

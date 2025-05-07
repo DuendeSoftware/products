@@ -32,7 +32,10 @@ internal class SessionCleanupHost(
     {
         if (_options.EnableSessionCleanup)
         {
-            if (_source != null) throw new InvalidOperationException("Already started. Call Stop first.");
+            if (_source != null)
+            {
+                throw new InvalidOperationException("Already started. Call Stop first.");
+            }
 
             if (IsIUserSessionStoreCleanupRegistered())
             {
