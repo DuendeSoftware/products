@@ -21,12 +21,6 @@ public static class Telemetry
     public const string ServiceName = "Duende.IdentityServer";
 
     /// <summary>
-    /// Service name used for the experimental non stable counters from Duende IdentityServer
-    /// </summary>
-    [Obsolete("The experimental service name will be removed in a future version. The associated meter is now using the Duende.IdentityServer service name.")]
-    public const string ServiceNameExperimental = ServiceName;
-
-    /// <summary>
     /// Metrics configuration.
     /// </summary>
     public static class Metrics
@@ -90,12 +84,6 @@ public static class Telemetry
         /// Meter for IdentityServer
         /// </summary>
         public static readonly Meter Meter = new Meter(ServiceName, ServiceVersion);
-
-        /// <summary>
-        /// Meter for experimental counters from IdentityServer
-        /// </summary>
-        [Obsolete("The ExperimentalMeter will be removed in a future version. Use the default Meter instead.")]
-        public static readonly Meter ExperimentalMeter = Meter;
 
         /// <summary>
         /// Counter for active requests.
