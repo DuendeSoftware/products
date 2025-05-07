@@ -27,6 +27,7 @@
         <!--tests -->
         <PackageReference Update="FluentAssertions" Version="6.5.1"/>
         <PackageReference Update="FluentAssertions.Web" Version="1.5.0"/>
+        <PackageReference Update="Shouldly" Version="4.2.1" />
         <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
         <PackageReference Update="xunit" Version="2.9.0"/>
         <PackageReference Update="xunit.runner.visualstudio" Version="2.5.4" PrivateAssets="All"/>

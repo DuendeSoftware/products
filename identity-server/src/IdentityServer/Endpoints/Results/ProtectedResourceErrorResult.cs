@@ -9,6 +9,7 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 using Duende.IdentityModel;
+using System.Collections.Generic;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -59,16 +60,24 @@ internal class ProtectedResourceErrorHttpWriter : IHttpResponseWriter<ProtectedR
             errorDescription = "The access token expired";
         }
 
-        var errorString = string.Format($"error=\"{error}\"");
-        if (errorDescription.IsMissing())
+        var values = new List<string>
         {
-            context.Response.Headers.Append(HeaderNames.WWWAuthenticate, new StringValues(new[] { "Bearer realm=\"IdentityServer\"", errorString }));
-        }
-        else
+            """
+            Bearer realm="IdentityServer"
+            """,
+            $"""
+             error="{error}"
+             """
+        };
+        
+        if (!errorDescription.IsMissing())
         {
-            var errorDescriptionString = string.Format($"error_description=\"{errorDescription}\"");
-            context.Response.Headers.Append(HeaderNames.WWWAuthenticate, new StringValues(new[] { "Bearer realm=\"IdentityServer\"", errorString, errorDescriptionString }));
+            values.Add($"""
+                        error_description="{errorDescription}"
+                        """);
         }
+        
+        context.Response.Headers.Append(HeaderNames.WWWAuthenticate, string.Join(",", values));
 
         return Task.CompletedTask;
     }

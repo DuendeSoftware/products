@@ -18,6 +18,7 @@
         <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="FluentAssertions.Web" />
+        <PackageReference Include="Shouldly" />
     </ItemGroup>
 
     <ItemGroup>
