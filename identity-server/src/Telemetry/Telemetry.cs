@@ -7,7 +7,6 @@ using Duende.IdentityServer.Validation;
 
 namespace Duende.IdentityServer;
 
-
 /// <summary>
 /// Telemetry helpers
 /// </summary>
@@ -88,7 +87,8 @@ public static class Telemetry
         /// <summary>
         /// Counter for active requests.
         /// </summary>
-        public static readonly UpDownCounter<long> ActiveRequestCounter = Meter.CreateUpDownCounter<long>(Counters.ActiveRequests);
+        public static readonly UpDownCounter<long> ActiveRequestCounter =
+            Meter.CreateUpDownCounter<long>(Counters.ActiveRequests);
 
         /// <summary>
         /// Increase <see cref="ActiveRequestCounter"/>
@@ -136,7 +136,8 @@ public static class Telemetry
         {
             if (clientId != null)
             {
-                OperationCounter.Add(1, new(Tags.Client, clientId), new(Tags.Error, error), new(Tags.Result, TagValues.Error));
+                OperationCounter.Add(1, new(Tags.Client, clientId), new(Tags.Error, error),
+                    new(Tags.Result, TagValues.Error));
             }
             else
             {
@@ -457,7 +458,8 @@ public static class Telemetry
         /// <param name="grantType">Grant Type</param>
         /// <param name="error">Error</param>
         /// <param name="requestType">Type of authorization request</param>
-        public static void TokenIssuedFailure(string clientId, string grantType, AuthorizeRequestType? requestType, string error)
+        public static void TokenIssuedFailure(string clientId, string grantType, AuthorizeRequestType? requestType,
+            string error)
         {
             Failure(error, clientId);
             TokenIssuedCounter.Add(1,

@@ -35,35 +35,36 @@ public class TelemetryTests
         using var measurements = StartListeningForMeasurements(out var results);
 
         Duende.IdentityServer.Telemetry.Metrics.Failure("oops");
-    
+
         results.Count.ShouldBe(1);
         results[0].Name.ShouldBe("tokenservice.operation");
         results[0].Value.ShouldBe(1);
     }
-    
+
     [Fact]
     public void Success_adds_to_operation_counter()
     {
         using var measurements = StartListeningForMeasurements(out var results);
 
         Duende.IdentityServer.Telemetry.Metrics.Success("test.client");
-    
+
         results.Count.ShouldBe(1);
         results[0].Name.ShouldBe("tokenservice.operation");
         results[0].Value.ShouldBe(1);
         results[0].Tags[0].Value.ShouldBe("test.client");
     }
 
-    private static MeterListener StartListeningForMeasurements(out List<(string Name, long Value, KeyValuePair<string, object?>[] Tags)> results)
+    private static MeterListener StartListeningForMeasurements(
+        out List<(string Name, long Value, KeyValuePair<string, object?>[] Tags)> results)
     {
         var listener = new MeterListener();
-        List<(string Name, long Value, KeyValuePair<string,object?>[] Tags)> measurements = new();
-        
+        List<(string Name, long Value, KeyValuePair<string, object?>[] Tags)> measurements = new();
+
         listener.SetMeasurementEventCallback<long>((instrument, measurement, tags, _) =>
         {
             measurements.Add((instrument.Name, measurement, tags.ToArray()));
         });
-        
+
         listener.InstrumentPublished = (instrument, meterListener) =>
         {
             if (instrument.Meter.Name == "Duende.IdentityServer")
