@@ -293,7 +293,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
             return;
         }
 
-        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpUrl, out var htu) || !context.ExpectedUrl.Equals(htu))
+        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpUrl, out var htu) || !HtuValueIsValid(context.ExpectedUrl, htu as string))
         {
             result.SetError("Invalid 'htu' value.");
             return;
@@ -325,6 +325,31 @@ internal class DPoPProofValidator : IDPoPProofValidator
         {
             Logger.LogDebug("Failed to validate DPoP proof token freshness");
             return;
+        }
+    }
+
+    private bool HtuValueIsValid(string requestedUri, string? htuValue)
+    {
+        if (string.IsNullOrEmpty(requestedUri) || string.IsNullOrEmpty(htuValue))
+        {
+            return false;
+        }
+
+        try
+        {
+            var uri1 = new Uri(requestedUri);
+            var uri2 = new Uri(htuValue);
+        
+            return Uri.Compare(
+                uri1, 
+                uri2, 
+                UriComponents.Scheme | UriComponents.HostAndPort | UriComponents.Path, 
+                UriFormat.SafeUnescaped, 
+                StringComparison.OrdinalIgnoreCase) == 0;
+        }
+        catch (UriFormatException)
+        {
+            return false;
         }
     }
 
