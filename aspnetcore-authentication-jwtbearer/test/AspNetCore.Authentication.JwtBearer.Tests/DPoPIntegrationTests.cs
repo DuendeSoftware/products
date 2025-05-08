@@ -15,6 +15,7 @@ using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Xunit.Abstractions;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer;
@@ -55,6 +56,55 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task multiple_proof_tokens_fails()
+    {
+        var identityServer = await CreateIdentityServer();
+        identityServer.Clients.Add(DPoPOnlyClient);
+        var jwk = CreateJwk();
+        var api = await CreateDPoPApi();
+        
+        var app = new AppHost(identityServer, api, "client1", testOutputHelper,
+            configureUserTokenManagementOptions: opt => opt.DPoPJsonWebKey = jwk);
+        await app.Initialize();
+        
+        // Login and get token for api call
+        await app.LoginAsync("sub");
+        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
+        token.ShouldNotBeNull();
+        token.AccessToken.ShouldNotBeNull();
+        token.DPoPJsonWebKey.ShouldNotBeNull();
+        api.HttpClient.SetToken("DPoP", token.AccessToken);
+
+        // Create proof token for api call
+        var dpopService =
+            new DefaultDPoPProofService(new TestDPoPNonceStore(), new NullLogger<DefaultDPoPProofService>());
+        var proof = await dpopService.CreateProofTokenAsync(new DPoPProofRequest
+        {
+            AccessToken = token.AccessToken,
+            DPoPJsonWebKey = jwk,
+            Method = "GET",
+            Url = "http://localhost/"
+        });
+        proof.ShouldNotBeNull();
+        var anotherProof = await dpopService.CreateProofTokenAsync(new DPoPProofRequest
+        {
+            AccessToken = token.AccessToken,
+            DPoPJsonWebKey = jwk,
+            Method = "POST",
+            Url = "http://localhost/"
+        });
+        anotherProof.ShouldNotBeNull();
+        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, [proof.ProofToken, proof.ProofToken]);
+        var result = await api.HttpClient.GetAsync("/");
+
+        result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        var error = result.Headers.GetValues(HeaderNames.WWWAuthenticate).FirstOrDefault();
+        error.ShouldBe("DPoP error=\"invalid_request\"");
     }
 
     [Theory]
