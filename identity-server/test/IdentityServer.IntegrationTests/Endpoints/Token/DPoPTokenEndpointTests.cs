@@ -157,7 +157,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         var response = await Pipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
 
         response.IsError.ShouldBeTrue();
-        response.Error.ShouldBe("invalid_dpop_proof");
+        response.Error.ShouldBe("invalid_request");
     }
 
     [Theory]
