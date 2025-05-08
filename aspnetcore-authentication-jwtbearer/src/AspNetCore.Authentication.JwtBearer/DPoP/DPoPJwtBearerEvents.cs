@@ -82,7 +82,9 @@ internal class DPoPJwtBearerEvents
             }
             else
             {
-                throw new InvalidOperationException("Missing DPoP (proof token) HTTP header");
+                context.HttpContext.Items["DPoP-Error"] = "invalid_request";
+                context.Fail("No DPoP header found");
+                return;
             }
 
             var result = await _validator.Validate(new DPoPProofValidationContext
