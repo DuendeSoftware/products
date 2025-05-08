@@ -13,7 +13,7 @@ namespace Duende.IdentityServer;
 /// </summary>
 public static class Telemetry
 {
-    private readonly static string ServiceVersion = typeof(Telemetry).Assembly.GetName().Version.ToString();
+    internal static readonly string ServiceVersion = typeof(Telemetry).Assembly.GetName().Version!.ToString();
 
     /// <summary>
     /// Service name used for Duende IdentityServer.
@@ -151,7 +151,7 @@ public static class Telemetry
         public static void UnHandledException(Exception ex)
             => OperationCounter.Add(1,
                 new(Tags.Type, ex.GetType().Name),
-                new(Tags.Method, ex.TargetSite.Name),
+                new(Tags.Method, ex.TargetSite?.Name),
                 new(Tags.Result, TagValues.InternalError));
 
         /// <summary>
