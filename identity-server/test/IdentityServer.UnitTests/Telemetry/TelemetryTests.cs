@@ -67,7 +67,7 @@ public class TelemetryTests
 
         listener.InstrumentPublished = (instrument, meterListener) =>
         {
-            if (instrument.Meter.Name == "Duende.IdentityServer")
+            if (instrument.Meter.Name == Duende.IdentityServer.Telemetry.ServiceName)
             {
                 meterListener.EnableMeasurementEvents(instrument);
             }
