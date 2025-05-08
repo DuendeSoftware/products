@@ -9,18 +9,10 @@ namespace IdentityServer.UnitTests.Telemetry;
 public class TelemetryTests
 {
     [Fact]
-    public void ServiceName_is_Duende_IdentityServer()
-    {
-        Duende.IdentityServer.Telemetry.ServiceName
-            .ShouldBe("Duende.IdentityServer");
-    }
+    public void ServiceName_is_Duende_IdentityServer() => Duende.IdentityServer.Telemetry.ServiceName.ShouldBe("Duende.IdentityServer");
 
     [Fact]
-    public void ServiceVersion_is_not_null()
-    {
-        Duende.IdentityServer.Telemetry.ServiceVersion
-            .ShouldNotBeNull();
-    }
+    public void ServiceVersion_is_not_null() => Duende.IdentityServer.Telemetry.ServiceVersion.ShouldNotBeNull();
 
     [Fact]
     public void Meter_should_has_service_name_of_Duende_IdentityServer()
