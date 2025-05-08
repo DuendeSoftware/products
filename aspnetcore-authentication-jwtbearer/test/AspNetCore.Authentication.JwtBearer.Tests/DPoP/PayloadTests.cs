@@ -94,7 +94,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         Result.ShouldBeInvalidProofWithDescription("Invalid 'htu' value.");
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
-    
+
     [Theory]
     [InlineData("https://example.com?query=1#fragment")]
     [InlineData("https://example.com/#fragment")]
@@ -113,10 +113,10 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
         ProofValidator.ValidatePayload(Context, Result);
-        
+
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
     }
-    
+
     [Theory]
     [InlineData("https://example.com")]
     [InlineData("HTTPS://EXAMPLE.COM")]
@@ -136,10 +136,10 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
         ProofValidator.ValidatePayload(Context, Result);
-        
+
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
     }
-    
+
     [Theory]
     [InlineData("https://example.com", "https://example.com:443")]
     [InlineData("http://example.com", "http://example.com:80")]
@@ -158,7 +158,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
         ProofValidator.ValidatePayload(Context, Result);
-        
+
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
     }
 

@@ -339,12 +339,12 @@ internal class DPoPProofValidator : IDPoPProofValidator
         {
             var uri1 = new Uri(requestedUri);
             var uri2 = new Uri(htuValue);
-        
+
             return Uri.Compare(
-                uri1, 
-                uri2, 
-                UriComponents.Scheme | UriComponents.HostAndPort | UriComponents.Path, 
-                UriFormat.SafeUnescaped, 
+                uri1,
+                uri2,
+                UriComponents.Scheme | UriComponents.HostAndPort | UriComponents.Path,
+                UriFormat.SafeUnescaped,
                 StringComparison.OrdinalIgnoreCase) == 0;
         }
         catch (UriFormatException)

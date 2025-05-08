@@ -77,7 +77,7 @@ internal class DPoPJwtBearerEvents
                     context.Fail("Multiple DPoP headers found");
                     return;
                 }
-                
+
                 proofToken = dPopHeader.First()!;
             }
             else

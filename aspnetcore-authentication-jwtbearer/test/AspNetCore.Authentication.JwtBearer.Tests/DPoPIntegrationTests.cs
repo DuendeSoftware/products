@@ -65,11 +65,11 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         identityServer.Clients.Add(DPoPOnlyClient);
         var jwk = CreateJwk();
         var api = await CreateDPoPApi();
-        
+
         var app = new AppHost(identityServer, api, "client1", testOutputHelper,
             configureUserTokenManagementOptions: opt => opt.DPoPJsonWebKey = jwk);
         await app.Initialize();
-        
+
         // Login and get token for api call
         await app.LoginAsync("sub");
         var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
@@ -91,7 +91,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         });
         proof.ShouldNotBeNull();
         api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, [proof.ProofToken, proof.ProofToken]);
-       
+
         var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -164,7 +164,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         token.AccessToken.ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
         api.HttpClient.SetToken("DPoP", token.AccessToken);
-        
+
         var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
