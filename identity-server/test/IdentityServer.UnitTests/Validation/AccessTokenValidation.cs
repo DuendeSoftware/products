@@ -269,6 +269,23 @@ public class AccessTokenValidation
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task Jwt_created_with_signing_algorithm_not_allowed_by_identity_server_settings_is_considered_invalid()
+    {
+        var signer = Factory.CreateDefaultTokenCreator();
+        var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
+        var jwt = await signer.CreateTokenAsync(token);
+
+        var options = TestIdentityServerOptions.Create();
+        options.AllowedJwtAlgorithms = ["Test"];
+        var validator = Factory.CreateTokenValidator(options: options);
+        var result = await validator.ValidateAccessTokenAsync(jwt);
+
+        result.IsError.ShouldBeTrue();
+        result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task Valid_AccessToken_but_Client_not_active()
     {
         var store = Factory.CreateReferenceTokenStore();

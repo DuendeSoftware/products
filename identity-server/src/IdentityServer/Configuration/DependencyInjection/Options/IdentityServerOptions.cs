@@ -205,15 +205,27 @@ public class IdentityServerOptions
     public PushedAuthorizationOptions PushedAuthorization { get; set; } = new PushedAuthorizationOptions();
 
     /// <summary>
-    /// The allowed clock skew for JWT lifetime validation. All JWTs that have
-    /// their lifetime validated use this setting to control the clock skew of
-    /// lifetime validation. This includes JWT access tokens passed to the user
-    /// info, introspection, and local api endpoints, client authentication JWTs
-    /// used in private_key_jwt authentication, JWT secured authorization
-    /// requests (JAR), and custom usage of the <see cref="TokenValidator"/>,
-    /// such as in a token exchange implementation. Defaults to ten seconds.
+    /// The allowed clock skew for JWT lifetime validation. Except for DPoP proofs,
+    /// all JWTs that have their lifetime validated use this setting to control the
+    /// clock skew of lifetime validation. This includes JWT access tokens passed 
+    /// to the user info, introspection, and local api endpoints, client 
+    /// authentication JWTs used in private_key_jwt authentication, JWT secured
+    /// authorization requests (JAR), and custom usage of the 
+    /// <see cref="TokenValidator"/>, such as in a token exchange implementation. 
+    /// Defaults to ten seconds.
     /// </summary>
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromSeconds(10);
+
+    /// <summary>
+    /// The allowed algorithms for JWT validation. Except for DPoP proofs, all JWTs validated by IdentityServer use this
+    /// setting to control the allowed signing algorithms. This includes JWT
+    /// access tokens passed to the user info, introspection, and local api endpoints,
+    /// client authentication JWTs used in private_key_jwt authentication, JWT secured
+    /// authorization requests (JAR), and custom usage of the <see cref="TokenValidator"/>,
+    /// such as in a token exchange implementation. Defaults to an empty collection which
+    /// allows all algorithms.
+    /// </summary>
+    public ICollection<string> AllowedJwtAlgorithms { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the options for enabling and configuring preview features in the server.
