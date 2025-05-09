@@ -4,6 +4,7 @@
 
 using System.Security.Claims;
 using Duende.IdentityModel;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
 
@@ -91,11 +92,26 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// </summary>
     /// <param name="requests"></param>
     /// <returns></returns>
-    protected virtual Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests)
+    protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests)
     {
-        requests = requests ?? Enumerable.Empty<BackChannelLogoutRequest>();
-        var tasks = requests.Select(SendLogoutNotificationAsync).ToArray();
-        return Task.WhenAll(tasks);
+        if (requests.IsNullOrEmpty())
+        {
+            Logger.LogDebug("No back-channel logout requests to send.");
+            return;
+        }
+
+        foreach (var request in requests)
+        {
+            try
+            {
+                await SendLogoutNotificationAsync(request);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and move on
+                Logger.LogError(ex, "Exception invoking back-channel logout for client: {ClientId}", request.ClientId);
+            }
+        }
     }
 
     /// <summary>
