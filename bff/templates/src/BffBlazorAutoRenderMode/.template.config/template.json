@@ -20,10 +20,64 @@
       "type": "parameter",
       "datatype": "string",
       "replaces": "BffBlazorAutoRenderMode"
+    },
+    "Framework": {
+      "type": "parameter",
+      "description": "The target framework for the project.",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "net9.0",
+          "description": "Target net9.0"
+        },
+        {
+          "choice": "net8.0",
+          "description": "Target net8.0"
+        }
+      ],
+      "replaces": "net9.0",
+      "defaultValue": "net9.0"
+    },
+    "UseMapStaticAssets": {
+      "type": "computed",
+      "value": "Framework != net8.0"
+    },
+    "IsDevelopmentTime": {
+      "type": "computed",
+      "value": "Framework == ''"
     }
   },
-  "primaryOutputs": [
-    { "path": "BffBlazor/{{ProjectName}}.csproj" },
-    { "path": "BffBlazor.Client/{{ProjectName}}.Client.csproj" }
+  "sources": [
+    {
+      "exclude": [
+        "**/[Bb]in/**",
+        "**/[Oo]bj/**",
+        ".template.config/**/*",
+        "**/*.filelist",
+        "**/*.user",
+        "**/*.lock.json",
+        "BffBlazorAutoRenderMode/Components/CssLinks.razor"
+      ],
+      "modifiers": [
+        {
+          "condition": "(UseMapStaticAssets)",
+          "rename": {
+            "BffBlazorAutoRenderMode/Components/MapStaticAssetsLinkTags.razor": "BffBlazorAutoRenderMode/Components/CssLinks.razor"
+          },
+          "exclude": [
+            "BffBlazorAutoRenderMode/Components/LegacyLinkTags.razor"
+          ]
+        },
+        {
+          "condition": "(!UseMapStaticAssets)",
+          "rename": {
+            "BffBlazorAutoRenderMode/Components/LegacyLinkTags.razor": "BffBlazorAutoRenderMode/Components/CssLinks.razor"
+          },
+          "exclude": [
+            "BffBlazorAutoRenderMode/Components/MapStaticAssetsLinkTags.razor"
+          ]
+        }
+      ]
+    }
   ]
 }
