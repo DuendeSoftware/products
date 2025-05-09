@@ -266,7 +266,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         else if (_validatedRequest.Client.RequireDPoP)
         {
             LogError("Client requires DPoP and a DPoP header value was not provided.");
-            return Invalid(OidcConstants.TokenErrors.InvalidDPoPProof, "Client requires DPoP and a DPoP header value was not provided.");
+            return Invalid(OidcConstants.TokenErrors.InvalidRequest, "Client requires DPoP and a DPoP header value was not provided.");
         }
 
         return Valid();
