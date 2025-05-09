@@ -48,7 +48,10 @@ async Task<TokenResponse> RequestTokenAsync(string grantType)
     var client = new HttpClient();
 
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var response = await client.RequestTokenAsync(new TokenRequest
     {
@@ -65,7 +68,11 @@ async Task<TokenResponse> RequestTokenAsync(string grantType)
             }
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 

@@ -131,15 +131,40 @@ public class KeyManagementOptions
             throw new Exception($"UseX509Certificate not currently supported for EC keys. Signing algorithm(s): '{values}'.");
         }
 
-        if (InitializationDuration < TimeSpan.Zero) throw new Exception(nameof(InitializationDuration) + " must be greater than or equal to zero.");
-        if (InitializationSynchronizationDelay < TimeSpan.Zero) throw new Exception(nameof(InitializationSynchronizationDelay) + " must be greater than or equal to zero.");
+        if (InitializationDuration < TimeSpan.Zero)
+        {
+            throw new Exception(nameof(InitializationDuration) + " must be greater than or equal to zero.");
+        }
 
-        if (InitializationKeyCacheDuration < TimeSpan.Zero) throw new Exception(nameof(InitializationKeyCacheDuration) + " must be greater than or equal to zero.");
-        if (KeyCacheDuration < TimeSpan.Zero) throw new Exception(nameof(KeyCacheDuration) + " must be greater than or equal to zero.");
+        if (InitializationSynchronizationDelay < TimeSpan.Zero)
+        {
+            throw new Exception(nameof(InitializationSynchronizationDelay) + " must be greater than or equal to zero.");
+        }
 
-        if (PropagationTime <= TimeSpan.Zero) throw new Exception(nameof(PropagationTime) + " must be greater than zero.");
-        if (RotationInterval <= TimeSpan.Zero) throw new Exception(nameof(RotationInterval) + " must be greater than zero.");
-        if (RetentionDuration <= TimeSpan.Zero) throw new Exception(nameof(RetentionDuration) + " must be greater than zero.");
+        if (InitializationKeyCacheDuration < TimeSpan.Zero)
+        {
+            throw new Exception(nameof(InitializationKeyCacheDuration) + " must be greater than or equal to zero.");
+        }
+
+        if (KeyCacheDuration < TimeSpan.Zero)
+        {
+            throw new Exception(nameof(KeyCacheDuration) + " must be greater than or equal to zero.");
+        }
+
+        if (PropagationTime <= TimeSpan.Zero)
+        {
+            throw new Exception(nameof(PropagationTime) + " must be greater than zero.");
+        }
+
+        if (RotationInterval <= TimeSpan.Zero)
+        {
+            throw new Exception(nameof(RotationInterval) + " must be greater than zero.");
+        }
+
+        if (RetentionDuration <= TimeSpan.Zero)
+        {
+            throw new Exception(nameof(RetentionDuration) + " must be greater than zero.");
+        }
 
         if (KeyCacheDuration > PropagationTime / 2)
         {
@@ -149,7 +174,10 @@ public class KeyManagementOptions
             KeyCacheDuration = PropagationTime / 2;
         }
 
-        if (RotationInterval <= PropagationTime) throw new Exception(nameof(RotationInterval) + " must be longer than " + nameof(PropagationTime));
+        if (RotationInterval <= PropagationTime)
+        {
+            throw new Exception(nameof(RotationInterval) + " must be longer than " + nameof(PropagationTime));
+        }
     }
 }
 

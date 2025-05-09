@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <RootNamespace>BffBlazorAutoRenderMode.Client</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

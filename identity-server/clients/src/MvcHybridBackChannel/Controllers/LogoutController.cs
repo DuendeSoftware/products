@@ -51,17 +51,29 @@ public class LogoutController : Controller
     {
         var claims = await ValidateJwt(logoutToken);
 
-        if (claims.FindFirst("sub") == null && claims.FindFirst("sid") == null) throw new Exception("Invalid logout token");
+        if (claims.FindFirst("sub") == null && claims.FindFirst("sid") == null)
+        {
+            throw new Exception("Invalid logout token");
+        }
 
         var nonce = claims.FindFirstValue("nonce");
-        if (!string.IsNullOrWhiteSpace(nonce)) throw new Exception("Invalid logout token");
+        if (!string.IsNullOrWhiteSpace(nonce))
+        {
+            throw new Exception("Invalid logout token");
+        }
 
         var eventsJson = claims.FindFirst("events")?.Value;
-        if (string.IsNullOrWhiteSpace(eventsJson)) throw new Exception("Invalid logout token");
+        if (string.IsNullOrWhiteSpace(eventsJson))
+        {
+            throw new Exception("Invalid logout token");
+        }
 
         var events = JsonDocument.Parse(eventsJson).RootElement;
         var logoutEvent = events.TryGetString("http://schemas.openid.net/event/backchannel-logout");
-        if (logoutEvent == null) throw new Exception("Invalid logout token");
+        if (logoutEvent == null)
+        {
+            throw new Exception("Invalid logout token");
+        }
 
         return claims;
     }

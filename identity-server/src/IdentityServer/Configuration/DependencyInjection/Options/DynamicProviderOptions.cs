@@ -51,7 +51,10 @@ public class DynamicProviderOptions
         where TOptions : AuthenticationSchemeOptions, new()
         where TIdentityProvider : IdentityProvider
     {
-        if (_providers.ContainsKey(type)) throw new Exception($"Type '{type}' already configured.");
+        if (_providers.ContainsKey(type))
+        {
+            throw new Exception($"Type '{type}' already configured.");
+        }
 
         _providers.Add(type, new DynamicProviderType
         {

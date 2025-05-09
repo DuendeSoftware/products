@@ -207,7 +207,10 @@ public class KeyManager : IKeyManager
 
     internal bool IsKeyRotationRequired(IEnumerable<KeyContainer> allKeys)
     {
-        if (allKeys == null || !allKeys.Any()) return true;
+        if (allKeys == null || !allKeys.Any())
+        {
+            return true;
+        }
 
         var groupedKeys = allKeys.GroupBy(x => x.Algorithm).ToArray();
 
@@ -367,7 +370,10 @@ public class KeyManager : IKeyManager
 
     internal async Task DeleteKeysAsync(IEnumerable<string> keys)
     {
-        if (keys == null || !keys.Any()) return;
+        if (keys == null || !keys.Any())
+        {
+            return;
+        }
 
         foreach (var key in keys)
         {
@@ -577,7 +583,10 @@ public class KeyManager : IKeyManager
 
     internal KeyContainer GetCurrentSigningKey(IEnumerable<KeyContainer> keys)
     {
-        if (keys == null || !keys.Any()) return null;
+        if (keys == null || !keys.Any())
+        {
+            return null;
+        }
 
         var ignoreActivation = false;
         // look for keys past activity delay
@@ -607,7 +616,10 @@ public class KeyManager : IKeyManager
 
     internal KeyContainer GetCurrentSigningKeyInternal(IEnumerable<KeyContainer> keys, bool ignoreActivationDelay = false)
     {
-        if (keys == null) return null;
+        if (keys == null)
+        {
+            return null;
+        }
 
         keys = keys.Where(key => CanBeUsedAsCurrentSigningKey(key, ignoreActivationDelay)).ToArray();
         if (!keys.Any())
@@ -627,7 +639,10 @@ public class KeyManager : IKeyManager
 
     internal bool CanBeUsedAsCurrentSigningKey(KeyContainer key, bool ignoreActiveDelay = false)
     {
-        if (key == null) return false;
+        if (key == null)
+        {
+            return false;
+        }
 
         var alg = _options.KeyManagement.SigningAlgorithms.SingleOrDefault(x => x.Name == key.Algorithm);
         if (alg == null)

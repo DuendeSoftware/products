@@ -33,7 +33,11 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
     public string Url(string? path = null)
     {
         path ??= string.Empty;
-        if (!path.StartsWith("/")) path = "/" + path;
+        if (!path.StartsWith("/"))
+        {
+            path = "/" + path;
+        }
+
         return _baseAddress + path;
     }
 

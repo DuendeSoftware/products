@@ -69,7 +69,11 @@ public class BasicAuthenticationSecretParsing
         var encoding = Encoding.UTF8;
         var context = new DefaultHttpContext();
 
-        if (password == null) password = "";
+        if (password == null)
+        {
+            password = "";
+        }
+
         var credential = $"{Uri.EscapeDataString(userName)}:{Uri.EscapeDataString(password)}";
 
         var headerValue = $"Basic {Convert.ToBase64String(encoding.GetBytes(credential))}";

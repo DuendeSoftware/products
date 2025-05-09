@@ -1,5 +1,5 @@
-using BffBlazor;
-using BffBlazor.Components;
+using BffBlazorAutoRenderMode;
+using BffBlazorAutoRenderMode.Components;
 using Duende.Bff.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -93,7 +93,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(BffBlazor.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(BffBlazorAutoRenderMode.Client._Imports).Assembly);
 
 // Example of local api endpoints. 
 app.MapWeatherEndpoints();

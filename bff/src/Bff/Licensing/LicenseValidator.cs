@@ -66,7 +66,10 @@ internal partial class LicenseValidator
 
     public static void ValidateLicense()
     {
-        if (Logger == null) throw new Exception("LicenseValidator.Initalize has not yet been called.");
+        if (Logger == null)
+        {
+            throw new Exception("LicenseValidator.Initalize has not yet been called.");
+        }
 
         var errors = new List<string>();
 

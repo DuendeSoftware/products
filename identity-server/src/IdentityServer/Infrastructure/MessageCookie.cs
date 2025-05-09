@@ -96,7 +96,10 @@ internal class MessageCookie<TModel>
 
     public Message<TModel> Read(string id)
     {
-        if (id.IsMissing()) return null;
+        if (id.IsMissing())
+        {
+            return null;
+        }
 
         var name = GetCookieFullName(id);
         return ReadByCookieName(name);

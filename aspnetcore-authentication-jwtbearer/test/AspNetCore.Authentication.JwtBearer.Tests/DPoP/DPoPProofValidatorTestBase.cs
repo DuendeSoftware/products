@@ -20,11 +20,21 @@ public abstract class DPoPProofValidatorTestBase
         ProofValidator = CreateProofValidator();
         var jtiBytes = Encoding.UTF8.GetBytes(TokenId);
         TokenIdHash = Base64Url.Encode(SHA256.HashData(jtiBytes));
+        Context = new()
+        {
+            Options = Options,
+            Scheme = "test-auth-scheme",
+            ExpectedMethod = HttpMethod,
+            AccessToken = AccessToken,
+            ProofToken = CreateDPoPProofToken(),
+            ExpectedUrl = HttpUrl
+        };
     }
 
     // This is our system under test
     protected TestDPoPProofValidator ProofValidator { get; init; }
 
+    protected DPoPProofValidationContext Context;
     protected DPoPOptions Options = new();
     protected IReplayCache ReplayCache = Substitute.For<IReplayCache>();
 
@@ -39,14 +49,6 @@ public abstract class DPoPProofValidatorTestBase
         );
     }
 
-    protected DPoPProofValidationContext Context = new()
-    {
-        Scheme = "test-auth-scheme",
-        Method = HttpMethod,
-        AccessToken = AccessToken,
-        ProofToken = CreateDPoPProofToken(),
-        Url = HttpUrl
-    };
 
     protected DPoPProofValidationResult Result = new();
 

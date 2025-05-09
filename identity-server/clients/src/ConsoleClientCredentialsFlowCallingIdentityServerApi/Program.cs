@@ -47,7 +47,10 @@ async Task<TokenResponse> RequestTokenAsync(string clientId)
     var client = new HttpClient();
 
     var disco = await client.GetDiscoveryDocumentAsync(authority);
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
     {
@@ -58,7 +61,11 @@ async Task<TokenResponse> RequestTokenAsync(string clientId)
         Scope = "IdentityServerApi"
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 
@@ -67,7 +74,11 @@ async Task CallServiceAsync(string token)
     // Resolve the HttpClient from DI.
     var client = httpClientFactory.CreateClient("IdSrv");
 
-    if (token is not null) client.SetBearerToken(token);
+    if (token is not null)
+    {
+        client.SetBearerToken(token);
+    }
+
     try
     {
         var response = await client.GetStringAsync("localApi");

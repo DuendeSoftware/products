@@ -96,11 +96,20 @@ internal static class HttpContextExtensions
     public static bool IsAjaxRequest(this HttpContext context)
     {
         if ("cors".Equals(context.Request.Headers["Sec-Fetch-Mode"].ToString(), StringComparison.OrdinalIgnoreCase))
+        {
             return true;
+        }
+
         if ("XMLHttpRequest".Equals(context.Request.Query["X-Requested-With"].ToString(), StringComparison.OrdinalIgnoreCase))
+        {
             return true;
+        }
+
         if ("XMLHttpRequest".Equals(context.Request.Headers["X-Requested-With"].ToString(), StringComparison.OrdinalIgnoreCase))
+        {
             return true;
+        }
+
         return false;
     }
 }

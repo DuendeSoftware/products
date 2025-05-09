@@ -1,4 +1,4 @@
-namespace BffBlazor;
+namespace BffBlazorAutoRenderMode;
 
 
 /// <summary>

@@ -8,7 +8,7 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Provides contextual information about a DPoP proof during validation.
 /// </summary>
-public record DPoPProofValidationContext
+public sealed record DPoPProofValidationContext
 {
     /// <summary>
     /// The ASP.NET Core authentication scheme triggering the validation
@@ -16,14 +16,14 @@ public record DPoPProofValidationContext
     public required string Scheme { get; init; }
 
     /// <summary>
-    /// The HTTP URL to validate
+    /// The HTTP URL that is expected in the DPoP proof as the htu claim.
     /// </summary>
-    public required string Url { get; init; }
+    public required string ExpectedUrl { get; init; }
 
     /// <summary>
-    /// The HTTP method to validate
+    /// The HTTP method that is expected in the DPoP proof as the htm claim.
     /// </summary>
-    public required string Method { get; init; }
+    public required string ExpectedMethod { get; init; }
 
     /// <summary>
     /// The DPoP proof token to validate
@@ -31,7 +31,7 @@ public record DPoPProofValidationContext
     public required string ProofToken { get; init; }
 
     /// <summary>
-    /// The access token
+    /// The access token that is expected to be bound to the DPoP proof key
     /// </summary>
     public required string AccessToken { get; init; }
 
@@ -41,4 +41,9 @@ public record DPoPProofValidationContext
     /// might be an expensive operation (especially if the token is a reference token).
     /// </summary>
     public IEnumerable<Claim> AccessTokenClaims { get; init; } = [];
+
+    /// <summary>
+    /// The configured options to use when validating the DPoP proof.
+    /// </summary>
+    public required DPoPOptions Options { get; init; }
 }

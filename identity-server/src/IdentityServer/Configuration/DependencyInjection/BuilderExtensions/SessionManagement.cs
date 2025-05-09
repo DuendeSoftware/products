@@ -78,7 +78,11 @@ public static class SessionManagementServiceCollectionExtensions
         builder.Services.AddTransient<IServerSideSessionStore>(svcs =>
         {
             // odd that this Func is marked as non-null return value, since it is allowed to return null here.
-            if (svcs.GetService<IServerSideSessionsMarker>() == null) return null!;
+            if (svcs.GetService<IServerSideSessionsMarker>() == null)
+            {
+                return null!;
+            }
+
             return svcs.GetRequiredService<T>();
         });
 

@@ -60,7 +60,7 @@ builder.AddProject<BffLocalApi>(AppHostServices.TemplateBffLocal, launchProfileN
 builder.AddProject<BffRemoteApi>(AppHostServices.TemplateBffRemote, launchProfileName: null)
     .WithHttpsEndpoint(5310, name: "bff-remote");
 
-builder.AddProject<BffBlazor>(AppHostServices.TemplateBffBlazor);
+builder.AddProject<BffBlazorAutoRenderMode>(AppHostServices.TemplateBffBlazor);
 
 builder.Build().Run();
 

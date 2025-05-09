@@ -14,62 +14,43 @@ using Microsoft.IdentityModel.Tokens;
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 /// <summary>
-/// Default implementation of IDPoPProofValidator.
+/// Validates DPoP proofs.
 /// </summary>
-public class DefaultDPoPProofValidator : IDPoPProofValidator
+internal class DPoPProofValidator : IDPoPProofValidator
 {
     private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
 
     /// <summary>
-    /// The signing algorithms supported for DPoP proofs.
-    /// </summary>
-    protected readonly static IEnumerable<string> SupportedSigningAlgorithms =
-    [
-        SecurityAlgorithms.RsaSha256,
-        SecurityAlgorithms.RsaSha384,
-        SecurityAlgorithms.RsaSha512,
-
-        SecurityAlgorithms.RsaSsaPssSha256,
-        SecurityAlgorithms.RsaSsaPssSha384,
-        SecurityAlgorithms.RsaSsaPssSha512,
-
-        SecurityAlgorithms.EcdsaSha256,
-        SecurityAlgorithms.EcdsaSha384,
-        SecurityAlgorithms.EcdsaSha512
-    ];
-
-
-    /// <summary>
     /// Provides the options for DPoP proof validation. 
     /// </summary>
-    protected readonly IOptionsMonitor<DPoPOptions> OptionsMonitor;
+    internal readonly IOptionsMonitor<DPoPOptions> OptionsMonitor;
 
     /// <summary>
     /// Protects and unprotects nonce values.
     /// </summary>
-    protected readonly IDataProtector DataProtector;
+    internal readonly IDataProtector DataProtector;
 
     /// <summary>
     /// Caches proof tokens to detect replay.
     /// </summary>
-    protected readonly IReplayCache ReplayCache;
+    internal readonly IReplayCache ReplayCache;
 
     /// <summary>
     /// Clock for checking proof expiration.
     /// </summary>
-    protected readonly TimeProvider TimeProvider;
+    internal readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The logger.
     /// </summary>
-    protected readonly ILogger<DefaultDPoPProofValidator> Logger;
+    internal readonly ILogger<DPoPProofValidator> Logger;
 
     /// <summary>
-    /// Constructs a new instance of the <see cref="DefaultDPoPProofValidator"/>.
+    /// Constructs a new instance of the <see cref="DPoPProofValidator"/>.
     /// </summary>
-    public DefaultDPoPProofValidator(IOptionsMonitor<DPoPOptions> optionsMonitor,
+    public DPoPProofValidator(IOptionsMonitor<DPoPOptions> optionsMonitor,
         IDataProtectionProvider dataProtectionProvider, IReplayCache replayCache,
-        TimeProvider timeProvider, ILogger<DefaultDPoPProofValidator> logger)
+        TimeProvider timeProvider, ILogger<DPoPProofValidator> logger)
     {
         OptionsMonitor = optionsMonitor;
         DataProtector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
@@ -89,42 +70,95 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         if (string.IsNullOrEmpty(context.ProofToken))
         {
             Logger.LogDebug("Missing DPoP proof value");
-            result.SetError("Missing DPoP proof value");
+            result.SetError("Missing DPoP proof value", OidcConstants.TokenErrors.InvalidRequest);
             return result;
         }
 
-        await ValidateHeader(context, result, cancellationToken);
+        // MUST validate jwk before calling ValidateToken - the signature is validated using the jwk
+        ValidateJwk(context, result);
         if (result.IsError)
         {
-            Logger.LogDebug("Failed to validate DPoP header");
+            Logger.LogDebug("Failed to validate DPoP jwk");
             return result;
         }
 
-        await ValidateSignature(context, result, cancellationToken);
+        await ValidateToken(context, result);
         if (result.IsError)
         {
             Logger.LogDebug("Failed to validate DPoP signature");
             return result;
         }
 
-        await ValidatePayload(context, result);
+        ValidateCnf(context, result);
+        if (result.IsError)
+        {
+            Logger.LogDebug("Failed to validate DPoP cnf");
+            return result;
+        }
+
+        ValidatePayload(context, result);
         if (result.IsError)
         {
             Logger.LogDebug("Failed to validate DPoP payload");
             return result;
         }
 
+        // we do replay at the end, so we only add to the reply cache if everything else is ok
+        await ValidateReplay(context, result, cancellationToken);
+        if (result.IsError)
+        {
+            Logger.LogDebug("Detected replay of DPoP proof token");
+        }
+
         Logger.LogDebug("Successfully validated DPoP proof token");
         return result;
     }
 
-    /// <summary>
-    /// Validates the header.
-    /// </summary>
-    protected virtual Task ValidateHeader(
-        DPoPProofValidationContext context,
-        DPoPProofValidationResult result,
-        CancellationToken cancellationToken = default)
+    internal void ValidateCnf(DPoPProofValidationContext context, DPoPProofValidationResult result)
+    {
+        var cnf = context.AccessTokenClaims.FirstOrDefault(c => c.Type == JwtClaimTypes.Confirmation);
+
+        if (cnf is not { Value.Length: > 0 })
+        {
+            Logger.LogDebug("Empty cnf value in DPoP access token.");
+            result.SetError("Missing 'cnf' value.");
+            return;
+        }
+        try
+        {
+            var cnfJson = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(cnf.Value);
+            if (cnfJson == null)
+            {
+                Logger.LogDebug("Null cnf value in DPoP access token.");
+                result.SetError("Invalid 'cnf' value.");
+            }
+            else if (cnfJson.TryGetValue(JwtClaimTypes.ConfirmationMethods.JwkThumbprint, out var jktJson))
+            {
+                var accessTokenJkt = jktJson.ToString();
+                if (accessTokenJkt == result.JsonWebKeyThumbprint)
+                {
+                    result.Confirmation = cnf.Value;
+                }
+                else
+                {
+                    Logger.LogDebug("jkt in DPoP access token does not match proof token key thumbprint.");
+                    result.SetError("Invalid 'cnf' value.");
+                }
+            }
+            else
+            {
+                Logger.LogDebug("jkt member missing from cnf claim in DPoP access token.");
+                result.SetError("Invalid 'cnf' value.");
+            }
+        }
+        catch (JsonException e)
+        {
+            Logger.LogDebug("Failed to parse DPoP cnf claim: {JsonExceptionMessage}", e.Message);
+            result.SetError("Invalid 'cnf' value.");
+        }
+    }
+
+    internal void ValidateJwk(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         JsonWebToken token;
 
@@ -135,30 +169,16 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP token: {error}", ex.Message);
-            result.SetError("Malformed DPoP token.");
-            return Task.CompletedTask;
-        }
-
-        if (!token.TryGetHeaderValue<string>("typ", out var typ) || typ != JwtClaimTypes.JwtTypes.DPoPProofToken)
-        {
-            Logger.LogDebug("Failed to get typ header");
-            result.SetError("Invalid 'typ' value.");
-            return Task.CompletedTask;
-        }
-
-        if (!token.TryGetHeaderValue<string>("alg", out var alg) || !SupportedSigningAlgorithms.Contains(alg))
-        {
-            Logger.LogDebug("Failed to get valid alg header");
-            result.SetError("Invalid 'alg' value.");
-            return Task.CompletedTask;
+            Logger.LogDebug("Error parsing DPoP proof token: {error}", ex.Message);
+            result.SetError("Malformed DPoP proof token.");
+            return;
         }
 
         if (!token.TryGetHeaderValue<JsonElement>(JwtClaimTypes.JsonWebKey, out var jwkValues))
         {
             Logger.LogDebug("Failed to get jwk header");
             result.SetError("Invalid 'jwk' value.");
-            return Task.CompletedTask;
+            return;
         }
 
         var jwkJson = JsonSerializer.Serialize(jwkValues);
@@ -172,97 +192,47 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         {
             Logger.LogDebug("Error parsing DPoP jwk value: {error}", ex.Message);
             result.SetError("Invalid 'jwk' value.");
-            return Task.CompletedTask;
+            return;
         }
 
         if (jwk.HasPrivateKey)
         {
             Logger.LogDebug("'jwk' value contains a private key.");
             result.SetError("'jwk' value contains a private key.");
-            return Task.CompletedTask;
+            return;
         }
 
         result.JsonWebKey = jwkJson;
         result.JsonWebKeyThumbprint = jwk.CreateThumbprint();
-
-        var cnf = context.AccessTokenClaims.FirstOrDefault(c => c.Type == JwtClaimTypes.Confirmation);
-        if (cnf is not { Value.Length: > 0 })
-        {
-            Logger.LogDebug("Empty cnf value in DPoP access token.");
-            result.SetError("Missing 'cnf' value.");
-            return Task.CompletedTask;
-        }
-        try
-        {
-            var cnfJson = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(cnf.Value);
-            if (cnfJson == null)
-            {
-                Logger.LogDebug("Null cnf value in DPoP access token.");
-                result.SetError("Invalid 'cnf' value.");
-                return Task.CompletedTask;
-            }
-            else if (cnfJson.TryGetValue(JwtClaimTypes.ConfirmationMethods.JwkThumbprint, out var jktJson))
-            {
-                var accessTokenJkt = jktJson.ToString();
-                if (accessTokenJkt == result.JsonWebKeyThumbprint)
-                {
-                    result.Confirmation = cnf.Value;
-                }
-                else
-                {
-                    Logger.LogDebug("jkt in DPoP access token does not match proof token key thumbprint.");
-                }
-            }
-            else
-            {
-                Logger.LogDebug("jkt member missing from cnf claim in DPoP access token.");
-            }
-        }
-        catch (JsonException e)
-        {
-            Logger.LogDebug("Failed to parse DPoP cnf claim: {JsonExceptionMessage}", e.Message);
-        }
-        if (result.Confirmation == null)
-        {
-            result.SetError("Invalid 'cnf' value.");
-        }
-        return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Validates the signature.
+    /// Performs all the validation that we can using the JsonWebTokenHandler, including signature, alg, and typ validation
     /// </summary>
-    protected virtual async Task ValidateSignature(
+    internal async Task ValidateToken(
         DPoPProofValidationContext context,
-        DPoPProofValidationResult result,
-        CancellationToken cancellationToken = default)
+        DPoPProofValidationResult result)
     {
         TokenValidationResult? tokenValidationResult = null;
 
         try
         {
-            var key = new JsonWebKey(result.JsonWebKey);
-            var tvp = new TokenValidationParameters
-            {
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                ValidateLifetime = false,
-                IssuerSigningKey = key,
-            };
+            var tvp = context.Options.ProofTokenValidationParameters;
+            tvp.IssuerSigningKey = new JsonWebKey(result.JsonWebKey);
 
             var handler = new JsonWebTokenHandler();
             tokenValidationResult = await handler.ValidateTokenAsync(context.ProofToken, tvp);
         }
         catch (Exception ex)
         {
-            Logger.LogDebug("Error parsing DPoP token: {error}", ex.Message);
-            result.SetError("Invalid signature on DPoP token.");
+            Logger.LogDebug("Error parsing DPoP proof token: {error}", ex.Message);
+            result.SetError("Invalid DPoP proof token.");
         }
 
         if (tokenValidationResult?.Exception != null)
         {
-            Logger.LogDebug("Error parsing DPoP token: {error}", tokenValidationResult.Exception.Message);
-            result.SetError("Invalid signature on DPoP token.");
+            Logger.LogDebug("Error validating DPoP proof token: {error}", tokenValidationResult.Exception.Message);
+            result.SetError("Invalid DPoP proof token.");
         }
 
         if (tokenValidationResult != null)
@@ -271,10 +241,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         }
     }
 
-    /// <summary>
-    /// Validates the payload.
-    /// </summary>
-    protected virtual async Task ValidatePayload(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
+    internal void ValidatePayload(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         if (result.Payload is null)
         {
@@ -320,13 +287,13 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             return;
         }
 
-        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpMethod, out var htm) || !context.Method.Equals(htm))
+        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpMethod, out var htm) || !context.ExpectedMethod.Equals(htm))
         {
             result.SetError("Invalid 'htm' value.");
             return;
         }
 
-        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpUrl, out var htu) || !context.Url.Equals(htu))
+        if (!result.Payload.TryGetValue(JwtClaimTypes.DPoPHttpUrl, out var htu) || !HtuValueIsValid(context.ExpectedUrl, htu as string))
         {
             result.SetError("Invalid 'htu' value.");
             return;
@@ -353,25 +320,43 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             result.Nonce = nonce as string;
         }
 
-        await ValidateFreshness(context, result, cancellationToken);
+        ValidateFreshness(context, result);
         if (result.IsError)
         {
-            Logger.LogDebug("Failed to validate DPoP token freshness");
+            Logger.LogDebug("Failed to validate DPoP proof token freshness");
             return;
         }
+    }
 
-        // we do replay at the end, so we only add to the reply cache if everything else is ok
-        await ValidateReplay(context, result, cancellationToken);
-        if (result.IsError)
+    private bool HtuValueIsValid(string requestedUri, string? htuValue)
+    {
+        if (string.IsNullOrEmpty(requestedUri) || string.IsNullOrEmpty(htuValue))
         {
-            Logger.LogDebug("Detected replay of DPoP token");
+            return false;
+        }
+
+        try
+        {
+            var uri1 = new Uri(requestedUri);
+            var uri2 = new Uri(htuValue);
+
+            return Uri.Compare(
+                uri1,
+                uri2,
+                UriComponents.Scheme | UriComponents.HostAndPort | UriComponents.Path,
+                UriFormat.SafeUnescaped,
+                StringComparison.OrdinalIgnoreCase) == 0;
+        }
+        catch (UriFormatException)
+        {
+            return false;
         }
     }
 
     /// <summary>
     /// Validates if the token has been replayed.
     /// </summary>
-    protected virtual async Task ValidateReplay(
+    internal async Task ValidateReplay(
         DPoPProofValidationContext context,
         DPoPProofValidationResult result,
         CancellationToken cancellationToken = default)
@@ -384,7 +369,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             return;
         }
 
-        // get the largest skew based on how client's freshness is validated
+        // get the largest skew based on how the client's freshness is validated
         var validateIat = dPoPOptions.ValidationMode != ExpirationValidationMode.Nonce;
         var validateNonce = dPoPOptions.ValidationMode != ExpirationValidationMode.IssuedAt;
         var skew = TimeSpan.Zero;
@@ -397,7 +382,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             skew = dPoPOptions.ServerClockSkew;
         }
 
-        // we do x2 here because clock might be before or after, so we're making cache duration 
+        // we do x2 here because the clock might be before or after, so we're making cache duration 
         // longer than the likelihood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dPoPOptions.ProofTokenValidityDuration + skew;
@@ -408,17 +393,16 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates freshness of proofs.
     /// </summary>
-    protected virtual async Task ValidateFreshness(
+    internal void ValidateFreshness(
         DPoPProofValidationContext context,
-        DPoPProofValidationResult result,
-        CancellationToken cancellationToken = default)
+        DPoPProofValidationResult result)
     {
         var dPoPOptions = OptionsMonitor.Get(context.Scheme);
 
         var validateIat = dPoPOptions.ValidationMode != ExpirationValidationMode.Nonce;
         if (validateIat)
         {
-            await ValidateIat(context, result, cancellationToken);
+            ValidateIat(context, result);
             if (result.IsError)
             {
                 return;
@@ -428,7 +412,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
         var validateNonce = dPoPOptions.ValidationMode != ExpirationValidationMode.IssuedAt;
         if (validateNonce)
         {
-            await ValidateNonce(context, result, cancellationToken);
+            ValidateNonce(context, result);
             if (result.IsError)
             {
                 return;
@@ -439,26 +423,23 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the freshness of the iat value.
     /// </summary>
-    protected virtual Task ValidateIat(
+    internal void ValidateIat(
         DPoPProofValidationContext context,
-        DPoPProofValidationResult result,
-        CancellationToken _ = default)
+        DPoPProofValidationResult result)
     {
         // iat is required by an earlier validation, so result.IssuedAt will not be null
         if (IsExpired(context, result, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt))
         {
             result.SetError("Invalid 'iat' value.");
         }
-        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Validates the freshness of the nonce value.
     /// </summary>
-    protected virtual async Task ValidateNonce(
+    internal void ValidateNonce(
         DPoPProofValidationContext context,
-        DPoPProofValidationResult result,
-        CancellationToken _ = default)
+        DPoPProofValidationResult result)
     {
         if (string.IsNullOrWhiteSpace(result.Nonce))
         {
@@ -467,7 +448,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             return;
         }
 
-        var time = await GetUnixTimeFromNonceAsync(context, result);
+        var time = GetUnixTimeFromNonce(context, result);
         if (time <= 0)
         {
             Logger.LogDebug("Invalid time value read from the 'nonce' value");
@@ -490,7 +471,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Creates a nonce value to return to the client.
     /// </summary>
-    protected virtual string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
+    internal string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
         return DataProtector.Protect(now.ToString());
@@ -499,14 +480,14 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Reads the time the nonce was created.
     /// </summary>
-    protected virtual ValueTask<long> GetUnixTimeFromNonceAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
+    internal long GetUnixTimeFromNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
     {
         try
         {
             var value = DataProtector.Unprotect(result.Nonce!); // nonce is required by an earlier validation
             if (long.TryParse(value, out var iat))
             {
-                return ValueTask.FromResult(iat);
+                return iat;
             }
         }
         catch (Exception ex)
@@ -514,14 +495,15 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
         }
 
-        return ValueTask.FromResult<long>(0);
+        // We return 0 to indicate failure.
+        return 0;
     }
 
     /// <summary>
     /// Validates the expiration of the DPoP proof.
     /// Returns true if the time is beyond the allowed limits, false otherwise.
     /// </summary>
-    protected virtual bool IsExpired(DPoPProofValidationContext context, DPoPProofValidationResult result, long time,
+    internal bool IsExpired(DPoPProofValidationContext context, DPoPProofValidationResult result, long time,
         ExpirationValidationMode mode)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);

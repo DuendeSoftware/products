@@ -1,12 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityModel;
+using Microsoft.IdentityModel.Tokens;
+
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 /// <summary>
 /// Options for DPoP.
 /// </summary>
-public class DPoPOptions
+public sealed class DPoPOptions
 {
     /// <summary>
     /// Controls if both DPoP and Bearer tokens are allowed, or only DPoP. Defaults to <see cref="DPoPMode.DPoPOnly"/>.
@@ -43,4 +46,26 @@ public class DPoPOptions
     /// prevent resource-exhaustion attacks. Defaults to 4000 characters.
     /// </summary>
     public int ProofTokenMaxLength { get; set; } = 4000;
+
+    public TokenValidationParameters ProofTokenValidationParameters = new()
+    {
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        ValidateLifetime = false, // We validate lifetime manually, using either iat, server issued nonce, or both
+        ValidTypes = [JwtClaimTypes.JwtTypes.DPoPProofToken],
+        ValidAlgorithms =
+        [
+            SecurityAlgorithms.RsaSha256,
+            SecurityAlgorithms.RsaSha384,
+            SecurityAlgorithms.RsaSha512,
+
+            SecurityAlgorithms.RsaSsaPssSha256,
+            SecurityAlgorithms.RsaSsaPssSha384,
+            SecurityAlgorithms.RsaSsaPssSha512,
+
+            SecurityAlgorithms.EcdsaSha256,
+            SecurityAlgorithms.EcdsaSha384,
+            SecurityAlgorithms.EcdsaSha512
+        ],
+    };
 }

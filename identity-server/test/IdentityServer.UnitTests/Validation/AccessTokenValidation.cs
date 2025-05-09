@@ -27,7 +27,11 @@ public class AccessTokenValidation
     {
         get
         {
-            if (now > DateTime.MinValue) return now;
+            if (now > DateTime.MinValue)
+            {
+                return now;
+            }
+
             return DateTime.UtcNow;
         }
     }

@@ -2,56 +2,64 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
-using NSubstitute;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
-public class TestDPoPProofValidator : DefaultDPoPProofValidator
+public class TestDPoPProofValidator
 {
     public TestDPoPProofValidator(
         IOptionsMonitor<DPoPOptions> optionsMonitor,
-        IReplayCache replayCache) : base(
+        IReplayCache replayCache) => _internalValidator = new(
             optionsMonitor,
             new EphemeralDataProtectionProvider(),
             replayCache,
             new FakeTimeProvider(),
-            Substitute.For<ILogger<DefaultDPoPProofValidator>>())
-    { }
+            new NullLogger<DPoPProofValidator>());
 
-    public IDataProtector TestDataProtector => DataProtector;
-    public FakeTimeProvider TestTimeProvider => (FakeTimeProvider)TimeProvider;
-    public IReplayCache TestReplayCache => ReplayCache;
+    internal DPoPProofValidator _internalValidator;
 
-    public new Task ValidateHeader(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default) => base.ValidateHeader(context, result, cancellationToken);
+    public IDataProtector TestDataProtector => _internalValidator.DataProtector;
+    public FakeTimeProvider TestTimeProvider => (FakeTimeProvider)_internalValidator.TimeProvider;
+    public IReplayCache TestReplayCache => _internalValidator.ReplayCache;
 
-    public new Task ValidatePayload(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
-        => base.ValidatePayload(context, result, cancellationToken);
+    public void ValidatePayload(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.ValidatePayload(context, result);
 
-    public new Task ValidateReplay(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
-        => base.ValidateReplay(context, result, cancellationToken);
+    public Task ValidateReplay(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
+        => _internalValidator.ValidateReplay(context, result, cancellationToken);
 
-    public new Task ValidateFreshness(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
-        => base.ValidateFreshness(context, result, cancellationToken);
+    public void ValidateFreshness(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.ValidateFreshness(context, result);
 
-    public new Task ValidateIat(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
-        => base.ValidateIat(context, result, cancellationToken);
+    public void ValidateIat(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.ValidateIat(context, result);
 
-    public new Task ValidateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result, CancellationToken cancellationToken = default)
-        => base.ValidateNonce(context, result, cancellationToken);
+    public void ValidateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.ValidateNonce(context, result);
 
-    public new string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-        => base.CreateNonce(context, result);
+    public string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.CreateNonce(context, result);
 
-    public new ValueTask<long> GetUnixTimeFromNonceAsync(DPoPProofValidationContext context, DPoPProofValidationResult result)
-        => base.GetUnixTimeFromNonceAsync(context, result);
+    public long GetUnixTimeFromNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.GetUnixTimeFromNonce(context, result);
 
-    public new virtual bool IsExpired(TimeSpan validityDuration, TimeSpan clockSkew, long issuedAtTime)
-        => base.IsExpired(validityDuration, clockSkew, issuedAtTime);
+    public bool IsExpired(TimeSpan validityDuration, TimeSpan clockSkew, long issuedAtTime)
+        => _internalValidator.IsExpired(validityDuration, clockSkew, issuedAtTime);
 
-    public new virtual bool IsExpired(DPoPProofValidationContext context, DPoPProofValidationResult result, long time,
+    public bool IsExpired(DPoPProofValidationContext context, DPoPProofValidationResult result, long time,
         ExpirationValidationMode mode) =>
-        base.IsExpired(context, result, time, mode);
+        _internalValidator.IsExpired(context, result, time, mode);
+
+    public void ValidateCnf(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.ValidateCnf(context, result);
+
+    public async Task ValidateToken(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => await _internalValidator.ValidateToken(context, result);
+
+    public void ValidateJwk(DPoPProofValidationContext context, DPoPProofValidationResult result)
+        => _internalValidator.ValidateJwk(context, result);
+
 }

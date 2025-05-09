@@ -27,7 +27,10 @@ Environment.Exit(0);
 async Task<TokenResponse> RequestTokenAsync()
 {
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var response = await _tokenClient.RequestPasswordTokenAsync(new PasswordTokenRequest
     {
@@ -42,14 +45,21 @@ async Task<TokenResponse> RequestTokenAsync()
         Scope = "openid custom.profile"
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 
 async Task GetClaimsAsync(string token)
 {
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var response = await _tokenClient.GetUserInfoAsync(new UserInfoRequest
     {
@@ -57,7 +67,10 @@ async Task GetClaimsAsync(string token)
         Token = token
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
 
     "\n\nUser claims:".ConsoleGreen();
     foreach (var claim in response.Claims)

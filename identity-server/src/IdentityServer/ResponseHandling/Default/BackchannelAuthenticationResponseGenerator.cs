@@ -69,8 +69,15 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationResponseGenerator.Process");
 
         ArgumentNullException.ThrowIfNull(validationResult);
-        if (validationResult.ValidatedRequest == null) throw new ArgumentNullException(nameof(validationResult.ValidatedRequest));
-        if (validationResult.ValidatedRequest.Client == null) throw new ArgumentNullException(nameof(validationResult.ValidatedRequest.Client));
+        if (validationResult.ValidatedRequest == null)
+        {
+            throw new ArgumentNullException(nameof(validationResult.ValidatedRequest));
+        }
+
+        if (validationResult.ValidatedRequest.Client == null)
+        {
+            throw new ArgumentNullException(nameof(validationResult.ValidatedRequest.Client));
+        }
 
         Logger.LogTrace("Creating response for backchannel authentication request");
 

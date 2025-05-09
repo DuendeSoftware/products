@@ -23,7 +23,8 @@ public class LoggingOptions
         {
             OidcConstants.TokenRequest.ClientSecret,
             OidcConstants.TokenRequest.ClientAssertion,
-            OidcConstants.AuthorizeRequest.IdTokenHint
+            OidcConstants.AuthorizeRequest.IdTokenHint,
+            OidcConstants.AuthorizeRequest.Request
         };
 
     /// <summary>
@@ -49,7 +50,8 @@ public class LoggingOptions
     public ICollection<string> AuthorizeRequestSensitiveValuesFilter { get; set; } =
         new HashSet<string>
         {
-            OidcConstants.AuthorizeRequest.IdTokenHint
+            OidcConstants.AuthorizeRequest.IdTokenHint,
+            OidcConstants.AuthorizeRequest.Request
         };
 
     /// <summary>
@@ -60,7 +62,8 @@ public class LoggingOptions
         new HashSet<string>
         {
             OidcConstants.TokenRequest.ClientSecret,
-            OidcConstants.TokenRequest.ClientAssertion
+            OidcConstants.TokenRequest.ClientAssertion,
+            OidcConstants.AuthorizeRequest.Request
         };
 
     /// <summary>

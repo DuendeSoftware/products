@@ -9,33 +9,48 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// <summary>
 /// Ensures that the <see cref="JwtBearerOptions"/> are configured with <see cref="DPoPJwtBearerEvents"/>.
 /// </summary>
-public sealed class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
+internal sealed class ConfigureJwtBearerOptions(DPoPJwtBearerEvents dpopEvents) : IPostConfigureOptions<JwtBearerOptions>
 {
-    private readonly string _configScheme;
+    public string? Scheme { get; set; }
 
-    /// <summary>
-    /// Constructs a new instance of <see cref="ConfigureJwtBearerOptions"/> that will operate on the specified scheme name.
-    /// </summary>
-    public ConfigureJwtBearerOptions(string configScheme) => _configScheme = configScheme;
-
-    /// <inheritdoc/>
     public void PostConfigure(string? name, JwtBearerOptions options)
     {
-        if (_configScheme == name)
+        if (Scheme == name)
         {
-            if (options.EventsType != null && !typeof(DPoPJwtBearerEvents).IsAssignableFrom(options.EventsType))
-            {
-                throw new Exception("EventsType on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
-            }
-            if (options.Events != null && !typeof(DPoPJwtBearerEvents).IsAssignableFrom(options.Events.GetType()))
-            {
-                throw new Exception("Events on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
-            }
-
-            if (options.Events == null && options.EventsType == null)
-            {
-                options.EventsType = typeof(DPoPJwtBearerEvents);
-            }
+            options.Events ??= new JwtBearerEvents(); // Despite nullability annotations saying this is unnecessary, it sometimes is null
+            options.Events.OnChallenge = CreateChallengeCallback(options.Events.OnChallenge, dpopEvents);
+            options.Events.OnMessageReceived = CreateMessageReceivedCallback(options.Events.OnMessageReceived, dpopEvents);
+            options.Events.OnTokenValidated = CreateTokenValidatedCallback(options.Events.OnTokenValidated, dpopEvents);
         }
+    }
+
+    private Func<JwtBearerChallengeContext, Task> CreateChallengeCallback(Func<JwtBearerChallengeContext, Task> inner, DPoPJwtBearerEvents dpopEvents)
+    {
+        async Task Callback(JwtBearerChallengeContext ctx)
+        {
+            await inner(ctx);
+            await dpopEvents.Challenge(ctx);
+        }
+        return Callback;
+    }
+
+    private Func<MessageReceivedContext, Task> CreateMessageReceivedCallback(Func<MessageReceivedContext, Task> inner, DPoPJwtBearerEvents dpopEvents)
+    {
+        async Task Callback(MessageReceivedContext ctx)
+        {
+            await inner(ctx);
+            await dpopEvents.MessageReceived(ctx);
+        }
+        return Callback;
+    }
+
+    private Func<TokenValidatedContext, Task> CreateTokenValidatedCallback(Func<TokenValidatedContext, Task> inner, DPoPJwtBearerEvents dpopEvents)
+    {
+        async Task Callback(TokenValidatedContext ctx)
+        {
+            await inner(ctx);
+            await dpopEvents.TokenValidated(ctx);
+        }
+        return Callback;
     }
 }

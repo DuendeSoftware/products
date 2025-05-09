@@ -353,7 +353,10 @@ internal static class Factory
     {
         options = options ?? TestIdentityServerOptions.Create();
 
-        if (clients == null) clients = new InMemoryClientStore(TestClients.Get());
+        if (clients == null)
+        {
+            clients = new InMemoryClientStore(TestClients.Get());
+        }
 
         if (parser == null)
         {

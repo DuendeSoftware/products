@@ -28,7 +28,10 @@ public class TokenErrorResult : EndpointResult<TokenErrorResult>
     /// <exception cref="ArgumentNullException"></exception>
     public TokenErrorResult(TokenErrorResponse error)
     {
-        if (error.Error.IsMissing()) throw new ArgumentNullException(nameof(error.Error), "Error must be set");
+        if (error.Error.IsMissing())
+        {
+            throw new ArgumentNullException(nameof(error.Error), "Error must be set");
+        }
 
         Response = error;
     }

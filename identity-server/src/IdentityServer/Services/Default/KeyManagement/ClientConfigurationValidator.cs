@@ -29,7 +29,10 @@ public class ClientConfigurationValidator : DefaultClientConfigurationValidator
 
         if (context.IsValid)
         {
-            if (_keyManagerOptions == null) throw new System.Exception("KeyManagerOptions not configured.");
+            if (_keyManagerOptions == null)
+            {
+                throw new System.Exception("KeyManagerOptions not configured.");
+            }
 
             var keyMaxAge = (int)_keyManagerOptions.KeyRetirementAge.TotalSeconds;
             var accessTokenAge = context.Client.AccessTokenLifetime;

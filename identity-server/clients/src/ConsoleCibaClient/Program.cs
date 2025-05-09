@@ -45,7 +45,10 @@ Environment.Exit(0);
 async Task<BackchannelAuthenticationResponse> RequestBackchannelLoginAsync()
 {
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var cibaEp = disco.BackchannelAuthenticationEndpoint;
 
@@ -85,7 +88,10 @@ async Task<BackchannelAuthenticationResponse> RequestBackchannelLoginAsync()
     var client = new HttpClient();
     var response = await client.RequestBackchannelAuthenticationAsync(req);
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
 
     Console.WriteLine($"Login Hint                  : {username}");
     Console.WriteLine($"Binding Message             : {bindingMessage}");
@@ -102,7 +108,10 @@ async Task<TokenResponse> RequestTokenAsync(BackchannelAuthenticationResponse au
     Console.WriteLine($"Polling the token endpoint.");
 
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var client = new HttpClient();
 

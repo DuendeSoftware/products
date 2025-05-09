@@ -69,7 +69,10 @@ internal class ServerSideTokenStore(
             return null;
         }
 
-        if (sessions.Count > 1) throw new InvalidOperationException("Multiple tickets found");
+        if (sessions.Count > 1)
+        {
+            throw new InvalidOperationException("Multiple tickets found");
+        }
 
         return sessions.First();
     }

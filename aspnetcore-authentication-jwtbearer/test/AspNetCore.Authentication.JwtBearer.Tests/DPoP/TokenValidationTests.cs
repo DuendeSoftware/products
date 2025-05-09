@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
-public class HeaderTests : DPoPProofValidatorTestBase
+public class TokenValidationTests : DPoPProofValidatorTestBase
 {
     [Fact]
     [Trait("Category", "Unit")]
@@ -13,20 +13,21 @@ public class HeaderTests : DPoPProofValidatorTestBase
     {
         Context = Context with { ProofToken = "This is obviously not a jwt" };
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        await ProofValidator.ValidateToken(Context, Result);
 
-        Result.ShouldBeInvalidProofWithDescription("Malformed DPoP token.");
+        Result.ShouldBeInvalidProofWithDescription("Invalid DPoP proof token.");
     }
 
     [Fact]
     [Trait("Category", "Unit")]
     public async Task proof_tokens_with_incorrect_typ_header_fail()
     {
-        Context = Context with { ProofToken = CreateDPoPProofToken(typ: "at+jwt") }; //Not dpop+jwt!
+        Context = Context with { ProofToken = CreateDPoPProofToken(typ: "dpop+at") }; //Not dpop+jwt!
+        ProofValidator.ValidateJwk(Context, Result); // Validate jwk first, as we need it to validate the token.
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        await ProofValidator.ValidateToken(Context, Result);
 
-        Result.ShouldBeInvalidProofWithDescription("Invalid 'typ' value.");
+        Result.ShouldBeInvalidProofWithDescription("Invalid DPoP proof token.");
     }
 
     [Theory]
@@ -48,8 +49,9 @@ public class HeaderTests : DPoPProofValidatorTestBase
             ProofToken = CreateDPoPProofToken(alg: alg),
             AccessTokenClaims = [CnfClaim(useECAlgorithm ? PublicEcdsaJwk : PublicRsaJwk)]
         };
+        ProofValidator.ValidateJwk(Context, Result); // Validate jwk first, as we need it to validate the token.
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        await ProofValidator.ValidateToken(Context, Result);
 
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
     }
@@ -64,9 +66,10 @@ public class HeaderTests : DPoPProofValidatorTestBase
     public async Task disallowed_algorithms_fail(string alg)
     {
         Context = Context with { ProofToken = CreateDPoPProofToken(alg: alg) };
+        ProofValidator.ValidateJwk(Context, Result); // Validate jwk first, as we need it to validate the token.
 
-        await ProofValidator.ValidateHeader(Context, Result);
+        await ProofValidator.ValidateToken(Context, Result);
 
-        Result.ShouldBeInvalidProofWithDescription("Invalid 'alg' value.");
+        Result.ShouldBeInvalidProofWithDescription("Invalid DPoP proof token.");
     }
 }

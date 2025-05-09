@@ -26,11 +26,20 @@ public class ResponseTypeEqualityComparer : IEqualityComparer<string>
     /// <returns>true if the specified values are equal; otherwise, false.</returns>
     public bool Equals(string x, string y)
     {
-        if (x == y) return true;
+        if (x == y)
+        {
+            return true;
+        }
 
-        if (x == null || y == null) return false;
+        if (x == null || y == null)
+        {
+            return false;
+        }
 
-        if (x.Length != y.Length) return false;
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
 
         var xValues = x.Split(' ');
         var yValues = y.Split(' ');
@@ -61,7 +70,10 @@ public class ResponseTypeEqualityComparer : IEqualityComparer<string>
     /// <returns>A hash code for the value, suitable for use in hashing algorithms and data structures like a hash table.</returns>
     public int GetHashCode(string value)
     {
-        if (value == null) return 0;
+        if (value == null)
+        {
+            return 0;
+        }
 
         var values = value.Split(' ');
         if (values.Length == 1)
