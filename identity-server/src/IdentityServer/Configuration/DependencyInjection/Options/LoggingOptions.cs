@@ -76,4 +76,19 @@ public class LoggingOptions
         return result;
     };
 
+    internal bool InvokeUnhandledExceptionLoggingFilter(HttpContext context, Exception exception)
+    {
+        if (UnhandledExceptionLoggingFilter == null)
+        {
+            return true;
+        }
+
+        var list = UnhandledExceptionLoggingFilter
+            .GetInvocationList()
+            .Cast<Func<HttpContext, Exception, bool>>();
+
+        return list.Aggregate(true,
+            (current, filter) =>
+                current && filter.Invoke(context, exception));
+    }
 }
