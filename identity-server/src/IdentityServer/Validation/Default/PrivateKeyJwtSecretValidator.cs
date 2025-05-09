@@ -119,7 +119,8 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             RequireSignedTokens = true,
             RequireExpirationTime = true,
 
-            ClockSkew = _options.JwtValidationClockSkew
+            ClockSkew = _options.JwtValidationClockSkew,
+            ValidAlgorithms = _options.AllowedJwtAlgorithms
         };
 
         var issuer = await _issuerNameService.GetCurrentAsync();

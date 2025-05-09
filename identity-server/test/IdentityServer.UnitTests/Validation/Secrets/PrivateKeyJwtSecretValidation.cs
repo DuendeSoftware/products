@@ -458,4 +458,25 @@ public class PrivateKeyJwtSecretValidation
 
         result.Success.ShouldBeFalse();
     }
+
+    [Fact]
+    public async Task Signing_Algorithm_Not_Allowed_By_Configuration()
+    {
+        var clientId = "certificate_base64_valid";
+        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+
+        var token = CreateToken(clientId);
+        var secret = new ParsedSecret
+        {
+            Id = clientId,
+            Credential = new JwtSecurityTokenHandler().WriteToken(token),
+            Type = IdentityServerConstants.ParsedSecretTypes.JwtBearer
+        };
+
+        _options.AllowedJwtAlgorithms = ["Test"];
+
+        var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
+
+        result.Success.ShouldBeFalse();
+    }
 }

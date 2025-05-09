@@ -911,6 +911,43 @@ public class JwtRequestAuthorizeTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task authorize_should_reject_jwt_request_if_signed_by_algorithm_not_allowed_by_configuration()
+    {
+        _mockPipeline.Options.AllowedJwtAlgorithms = ["ES256"];
+        var requestJwt = CreateRequestJwt(
+            issuer: _client.ClientId,
+            audience: IdentityServerPipeline.BaseUrl,
+            credential: new SigningCredentials(_rsaKey, "RS256"),
+            claims: new[] {
+                new Claim("client_id", _client.ClientId),
+                new Claim("response_type", "id_token"),
+                new Claim("scope", "openid profile"),
+                new Claim("state", "123state"),
+                new Claim("nonce", "123nonce"),
+                new Claim("redirect_uri", "https://client/callback"),
+                new Claim("acr_values", "acr_1 acr_2 tenant:tenant_value idp:idp_value"),
+                new Claim("login_hint", "login_hint_value"),
+                new Claim("display", "popup"),
+                new Claim("ui_locales", "ui_locale_value"),
+                new Claim("foo", "123foo"),
+            });
+
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: _client.ClientId,
+            responseType: "id_token",
+            extra: new
+            {
+                request = requestJwt
+            });
+        _ = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_request_object");
+        _mockPipeline.ErrorMessage.ErrorDescription.ShouldBe("Invalid JWT request");
+        _mockPipeline.LoginRequest.ShouldBeNull();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task authorize_should_ignore_request_uri_when_feature_is_disabled()
     {
         _mockPipeline.Options.Endpoints.EnableJwtRequestUri = false;
