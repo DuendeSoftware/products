@@ -89,7 +89,12 @@ app.UseAntiforgery();
 // Add the BFF management endpoints, such as login, logout, etc.
 app.MapBffManagementEndpoints();
 
+#if (UseMapStaticAssets)
 app.MapStaticAssets();
+#else
+app.UseDefaultFiles();
+app.UseStaticFiles();
+#endif
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
