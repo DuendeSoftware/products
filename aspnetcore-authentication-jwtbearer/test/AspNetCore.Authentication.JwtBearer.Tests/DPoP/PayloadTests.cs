@@ -95,6 +95,73 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ReplayCacheShouldNotBeCalled();
     }
 
+    [Theory]
+    [InlineData("https://example.com?query=1#fragment")]
+    [InlineData("https://example.com/#fragment")]
+    [InlineData("https://example.com/?query=1")]
+    [Trait("Category", "Unit")]
+    public void htu_ignores_query_and_fragment_parts_in_comparison_against_requested_url(string payloadUrl)
+    {
+        Result.Payload = new Dictionary<string, object>
+        {
+            { JwtClaimTypes.DPoPAccessTokenHash, AccessTokenHash },
+            { JwtClaimTypes.JwtId, TokenId },
+            { JwtClaimTypes.DPoPHttpMethod, HttpMethod },
+            { JwtClaimTypes.DPoPHttpUrl, payloadUrl },
+            { JwtClaimTypes.IssuedAt, IssuedAt }
+        };
+
+        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
+        ProofValidator.ValidatePayload(Context, Result);
+
+        Result.IsError.ShouldBeFalse(Result.ErrorDescription);
+    }
+
+    [Theory]
+    [InlineData("https://example.com")]
+    [InlineData("HTTPS://EXAMPLE.COM")]
+    [InlineData("https://EXAMPLE.com")]
+    [InlineData("HtTpS://eXaMpLe.CoM")]
+    [Trait("Category", "Unit")]
+    public void htu_ignores_casing_in_comparison_against_requested_url(string payloadUrl)
+    {
+        Result.Payload = new Dictionary<string, object>
+        {
+            { JwtClaimTypes.DPoPAccessTokenHash, AccessTokenHash },
+            { JwtClaimTypes.JwtId, TokenId },
+            { JwtClaimTypes.DPoPHttpMethod, HttpMethod },
+            { JwtClaimTypes.DPoPHttpUrl, payloadUrl },
+            { JwtClaimTypes.IssuedAt, IssuedAt }
+        };
+
+        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
+        ProofValidator.ValidatePayload(Context, Result);
+
+        Result.IsError.ShouldBeFalse(Result.ErrorDescription);
+    }
+
+    [Theory]
+    [InlineData("https://example.com", "https://example.com:443")]
+    [InlineData("http://example.com", "http://example.com:80")]
+    [Trait("Category", "Unit")]
+    public void htu_uses_scheme_based_normalization_in_comparison_against_requested_url(string expectedUrl, string payloadUrl)
+    {
+        Context = Context with { ExpectedUrl = expectedUrl };
+        Result.Payload = new Dictionary<string, object>
+        {
+            { JwtClaimTypes.DPoPAccessTokenHash, AccessTokenHash },
+            { JwtClaimTypes.JwtId, TokenId },
+            { JwtClaimTypes.DPoPHttpMethod, HttpMethod },
+            { JwtClaimTypes.DPoPHttpUrl, payloadUrl },
+            { JwtClaimTypes.IssuedAt, IssuedAt }
+        };
+
+        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
+        ProofValidator.ValidatePayload(Context, Result);
+
+        Result.IsError.ShouldBeFalse(Result.ErrorDescription);
+    }
+
     [Fact]
     [Trait("Category", "Unit")]
     public void missing_iat_fails()
