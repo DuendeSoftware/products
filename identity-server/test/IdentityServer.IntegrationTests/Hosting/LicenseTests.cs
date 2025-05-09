@@ -31,7 +31,7 @@ public class LicenseTests : IDisposable
     public void Dispose()
     {
         // Some of our tests involve copying test license files so that the pipeline will read them.
-        // This should ensure that they are cleanup up after each test.
+        // This should ensure that they are cleaned up after each test.
         var contentRoot = Path.GetFullPath(Directory.GetCurrentDirectory());
         var path1 = Path.Combine(contentRoot, "Duende_License.key");
         if (File.Exists(path1))
