@@ -212,9 +212,9 @@ public class IdentityServerOptions
     /// authentication JWTs used in private_key_jwt authentication, JWT secured
     /// authorization requests (JAR), and custom usage of the 
     /// <see cref="TokenValidator"/>, such as in a token exchange implementation. 
-    /// Defaults to ten seconds.
+    /// Defaults to five minutes.
     /// </summary>
-    public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromSeconds(10);
+    public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
     /// The allowed algorithms for JWT validation. Except for DPoP proofs, all JWTs validated by IdentityServer use this
