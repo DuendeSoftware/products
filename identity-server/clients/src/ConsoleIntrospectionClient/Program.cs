@@ -23,7 +23,10 @@ Environment.Exit(0);
 async Task<TokenResponse> RequestTokenAsync()
 {
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var client = new HttpClient();
     var response = await client.RequestPasswordTokenAsync(new PasswordTokenRequest
@@ -38,14 +41,21 @@ async Task<TokenResponse> RequestTokenAsync()
         Scope = "resource1.scope1 resource2.scope1",
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
+
     return response;
 }
 
 async Task IntrospectAsync(string accessToken, ResponseFormat responseFormat)
 {
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var client = new HttpClient();
     var result = await client.IntrospectTokenAsync(new TokenIntrospectionRequest

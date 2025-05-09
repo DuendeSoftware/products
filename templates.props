@@ -2,10 +2,10 @@
   <PropertyGroup>
     <PackageType>Template</PackageType>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-    <PackageVersion>1.0</PackageVersion>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <language>en-US</language>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
     <Authors>Duende Software</Authors>
     <Company>Duende Software</Company>
@@ -31,10 +31,9 @@
     <PackageProjectUrl>https://github.com/duendesoftware/products</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/duendesoftware/products/releases</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-
   </PropertyGroup>
 
-    <ItemGroup>
+  <ItemGroup>
     <None Include="../icon.png" Pack="true" Visible="false" PackagePath="" />
     <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
     <None Include="../LICENSE" Pack="true" PackagePath="" />

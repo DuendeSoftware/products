@@ -43,7 +43,10 @@ Environment.Exit(0);
 async Task<DeviceAuthorizationResponse> RequestAuthorizationAsync()
 {
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var client = new HttpClient();
     var response = await client.RequestDeviceAuthorizationAsync(new DeviceAuthorizationRequest
@@ -53,7 +56,10 @@ async Task<DeviceAuthorizationResponse> RequestAuthorizationAsync()
         ClientCredentialStyle = ClientCredentialStyle.PostBody
     });
 
-    if (response.IsError) throw new Exception(response.Error);
+    if (response.IsError)
+    {
+        throw new Exception(response.Error);
+    }
 
     Console.WriteLine($"user code   : {response.UserCode}");
     Console.WriteLine($"device code : {response.DeviceCode}");
@@ -67,7 +73,10 @@ async Task<DeviceAuthorizationResponse> RequestAuthorizationAsync()
 async Task<TokenResponse> RequestTokenAsync(DeviceAuthorizationResponse authorizeResponse)
 {
     var disco = await _cache.GetAsync();
-    if (disco.IsError) throw new Exception(disco.Error);
+    if (disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
 
     var client = new HttpClient();
 

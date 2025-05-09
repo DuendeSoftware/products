@@ -72,8 +72,15 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceAuthorizationResponseGenerator.Process");
 
         ArgumentNullException.ThrowIfNull(validationResult);
-        if (validationResult.ValidatedRequest.Client == null) throw new ArgumentNullException(nameof(validationResult.ValidatedRequest.Client));
-        if (string.IsNullOrWhiteSpace(baseUrl)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(baseUrl));
+        if (validationResult.ValidatedRequest.Client == null)
+        {
+            throw new ArgumentNullException(nameof(validationResult.ValidatedRequest.Client));
+        }
+
+        if (string.IsNullOrWhiteSpace(baseUrl))
+        {
+            throw new ArgumentException("Value cannot be null or whitespace.", nameof(baseUrl));
+        }
 
         Logger.LogTrace("Creating response for device authorization request");
 

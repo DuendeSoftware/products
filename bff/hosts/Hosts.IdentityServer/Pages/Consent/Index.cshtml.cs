@@ -56,7 +56,10 @@ public class Index : PageModel
     {
         // validate return url is still valid
         var request = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
-        if (request == null) return RedirectToPage("/Error/Index");
+        if (request == null)
+        {
+            return RedirectToPage("/Error/Index");
+        }
 
         ConsentResponse grantedConsent = null;
 

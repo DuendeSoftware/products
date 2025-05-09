@@ -20,7 +20,10 @@ public static class IClientStoreExtensions
     public static async Task<Client> FindEnabledClientByIdAsync(this IClientStore store, string clientId)
     {
         var client = await store.FindClientByIdAsync(clientId);
-        if (client != null && client.Enabled) return client;
+        if (client != null && client.Enabled)
+        {
+            return client;
+        }
 
         return null;
     }
