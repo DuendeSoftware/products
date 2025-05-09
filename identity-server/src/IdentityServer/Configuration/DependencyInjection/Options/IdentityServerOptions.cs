@@ -217,7 +217,7 @@ public class IdentityServerOptions
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromSeconds(10);
 
     /// <summary>
-    /// The allowed algorithms for JWT validation. All JWTs validated use this
+    /// The allowed algorithms for JWT validation. Except for DPoP proofs, all JWTs validated by IdentityServer use this
     /// setting to control the allowed signing algorithms. This includes JWT
     /// access tokens passed to the user info, introspection, and local api endpoints,
     /// client authentication JWTs used in private_key_jwt authentication, JWT secured
