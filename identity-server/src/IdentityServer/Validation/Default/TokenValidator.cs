@@ -279,7 +279,8 @@ internal class TokenValidator : ITokenValidator
             ValidIssuer = await _issuerNameService.GetCurrentAsync(),
             IssuerSigningKeys = validationKeys.Select(k => k.Key),
             ValidateLifetime = validateLifetime,
-            ClockSkew = _options.JwtValidationClockSkew
+            ClockSkew = _options.JwtValidationClockSkew,
+            ValidAlgorithms = _options.AllowedJwtAlgorithms
         };
 
         if (audience.IsPresent())

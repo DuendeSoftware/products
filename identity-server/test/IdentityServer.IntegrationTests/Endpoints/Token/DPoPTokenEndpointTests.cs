@@ -142,7 +142,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         var response = await Pipeline.BackChannelClient.RequestClientCredentialsTokenAsync(request);
 
         response.IsError.ShouldBeTrue();
-        response.Error.ShouldBe("invalid_dpop_proof");
+        response.Error.ShouldBe("invalid_request");
     }
 
     [Fact]
@@ -288,7 +288,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         var rtRequest = CreateRefreshTokenRequest(codeResponse, omitDPoPProof: true);
         var rtResponse = await Pipeline.BackChannelClient.RequestRefreshTokenAsync(rtRequest);
         rtResponse.IsError.ShouldBeTrue();
-        rtResponse.Error.ShouldBe("invalid_dpop_proof");
+        rtResponse.Error.ShouldBe("invalid_request");
     }
 
     [Theory]

@@ -142,7 +142,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             return Task.CompletedTask;
         }
 
-        if (!token.TryGetHeaderValue<string>(JwtClaimTypes.Algorithm, out var alg) || !IdentityServerConstants.SupportedDPoPSigningAlgorithms.Contains(alg))
+        if (!token.TryGetHeaderValue<string>(JwtClaimTypes.Algorithm, out var alg) || !Options.DPoP.SupportedDPoPSigningAlgorithms.Contains(alg))
         {
             result.IsError = true;
             result.ErrorDescription = "Invalid 'alg' value.";
