@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <!-- The packages in this ItemGroup are all transitive dependencies that
-             would otherwise resolve to a version with a security vulnerabilitiy. 
+             would otherwise resolve to a version with a security vulnerability. 
              In future, we would like to update Microsoft.Data.SqlClient and
              Microsoft.EntityFrameworkCore, and remove these explicit dependencies
              (assuming that future versions of the intermediate dependencies that
@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference
-      Include="..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+      Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
     <ProjectReference
       Include="..\..\src\EntityFramework.Storage\Duende.IdentityServer.EntityFramework.Storage.csproj" />
     <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />

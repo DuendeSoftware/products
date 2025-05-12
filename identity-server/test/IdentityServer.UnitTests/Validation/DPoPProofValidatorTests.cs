@@ -531,6 +531,7 @@ public class DPoPProofValidatorTests
     [Trait("Category", Category)]
     public async Task invalid_alg_should_fail_validation()
     {
+        _options.DPoP.SupportedDPoPSigningAlgorithms = [SecurityAlgorithms.EcdsaSha512];
         var key = new SymmetricSecurityKey(Duende.IdentityModel.CryptoRandom.CreateRandomKey(32));
         _publicJWK = JsonSerializer.Serialize(key);
         CreateHeaderValuesFromPublicKey();

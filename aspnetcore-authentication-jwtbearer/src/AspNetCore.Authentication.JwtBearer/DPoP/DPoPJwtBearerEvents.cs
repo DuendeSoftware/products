@@ -68,10 +68,23 @@ internal class DPoPJwtBearerEvents
 
         if (TryGetDPoPAccessToken(context.HttpContext.Request, dPoPOptions.ProofTokenMaxLength, out var at))
         {
-            var proofToken = context.HttpContext.Request.GetDPoPProofToken();
-            if (proofToken == null)
+            string proofToken;
+            if (context.Request.Headers.TryGetValue(HttpHeaders.DPoP, out var dPopHeader))
             {
-                throw new InvalidOperationException("Missing DPoP (proof token) HTTP header");
+                if (dPopHeader.Count > 1)
+                {
+                    context.HttpContext.Items["DPoP-Error"] = "invalid_request";
+                    context.Fail("Multiple DPoP headers found");
+                    return;
+                }
+
+                proofToken = dPopHeader.First()!;
+            }
+            else
+            {
+                context.HttpContext.Items["DPoP-Error"] = "invalid_request";
+                context.Fail("No DPoP header found");
+                return;
             }
 
             var result = await _validator.Validate(new DPoPProofValidationContext

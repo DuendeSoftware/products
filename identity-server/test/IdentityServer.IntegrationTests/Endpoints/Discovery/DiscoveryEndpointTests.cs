@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
@@ -331,5 +332,25 @@ public class DiscoveryEndpointTests
 
         var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
         result.MtlsEndpointAliases.PushedAuthorizationRequestEndpoint.ShouldNotBeNull();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task dpop_signing_algorithms_supported_respects_configuration()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+
+        var supportedAlgorithms = new List<string>
+        {
+            SecurityAlgorithms.RsaSha256,
+            SecurityAlgorithms.EcdsaSha256
+        };
+        pipeline.Options.DPoP.SupportedDPoPSigningAlgorithms = supportedAlgorithms;
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        var supportedAlgorithmsFromResponse = result.TryGetStringArray(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported);
+        supportedAlgorithmsFromResponse.ShouldBe(supportedAlgorithms);
     }
 }
