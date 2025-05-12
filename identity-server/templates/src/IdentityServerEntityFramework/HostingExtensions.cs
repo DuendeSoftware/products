@@ -1,4 +1,5 @@
 using Duende.IdentityServer;
+using Google.Apis.Auth.AspNetCore3;
 using IdentityServerHost;
 using IdentityServerHost.Pages.Admin.ApiScopes;
 using IdentityServerHost.Pages.Admin.Clients;
@@ -44,16 +45,21 @@ internal static class HostingExtensions
             .AddLicenseSummary();
 
         builder.Services.AddAuthentication()
-            .AddGoogle(options =>
-            {
-                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
-                // register your IdentityServer with Google at https://console.developers.google.com
-                // enable the Google+ API
-                // set the redirect URI to https://localhost:5001/signin-google
-                options.ClientId = "copy client ID from Google here";
-                options.ClientSecret = "copy client secret from Google here";
-            });
+            .AddGoogleOpenIdConnect(
+                authenticationScheme: GoogleOpenIdConnectDefaults.AuthenticationScheme,
+                displayName: "Google",
+                configureOptions: options =>
+                {
+                    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+  
+                    // register your IdentityServer with Google at https://console.developers.google.com
+                    // enable the Google+ API
+                    // set the redirect URI to https://localhost:5001/signin-google
+                    options.ClientId = "copy client ID from Google here";
+                    options.ClientSecret = "copy client secret from Google here";
+          
+                    options.CallbackPath = "/signin-google";
+                });
 
 
         // this adds the necessary config for the simple admin/config pages
