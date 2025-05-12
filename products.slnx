@@ -61,12 +61,12 @@
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>
   <Folder Name="/identity-server/" />
-  <Folder Name="/identity-server/aspire/">
-    <Project Path="identity-server/aspire/aspire.orchestrator/aspire.orchestrator.AppHost/aspire.orchestrator.AppHost.csproj" />
-    <Project Path="identity-server/aspire/aspire.orchestrator/aspire.orchestrator.ServiceDefaults/aspire.orchestrator.ServiceDefaults.csproj" />
+  <Folder Name="/identity-server/aspire/" >
+    <Project Path="identity-server/aspire/AppHost/AppHost.csproj" />
+    <Project Path="identity-server/aspire/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/identity-server/clients/" />
-  <Folder Name="/identity-server/clients/src/">
+  <Folder Name="/identity-server/clients/src/" >
     <Project Path="identity-server/clients/src/ConsoleCibaClient/ConsoleCibaClient.csproj" />
     <Project Path="identity-server/clients/src/ConsoleClientCredentialsFlow/ConsoleClientCredentialsFlow.csproj" />
     <Project Path="identity-server/clients/src/ConsoleClientCredentialsFlowCallingIdentityServerApi/ConsoleClientCredentialsFlowCallingIdentityServerApi.csproj" />

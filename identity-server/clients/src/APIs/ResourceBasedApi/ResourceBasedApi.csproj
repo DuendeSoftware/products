@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference
-      Include="..\..\..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+      Include="..\..\..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

@@ -17,7 +17,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
     <ProjectReference
-      Include="..\..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+      Include="..\..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
 
     <ProjectReference Include="..\Constants\Constants.csproj" />
   </ItemGroup>
