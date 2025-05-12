@@ -9,10 +9,17 @@
     <RootNamespace>BffBlazorAutoRenderMode.Client</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Framework)' == ''">
+    <!-- If we do not have a value for framework from running dotnet new, default to one so things build in an IDE -->
+    <Framework>$(TargetFramework)</Framework>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.2" Condition="'$(Framework)' == 'net9.0'" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.15" Condition="'$(Framework)' == 'net8.0'" />
     <PackageReference Include="Duende.BFF.Blazor.Client" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" Condition="'$(Framework)' == 'net9.0'" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" Condition="'$(Framework)' == 'net8.0'" />
   </ItemGroup>
 
 </Project>
