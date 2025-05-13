@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Duende.IdentityServer.EntityFramework" version="7.2.0" />
-
-    <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.69.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
 
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"
