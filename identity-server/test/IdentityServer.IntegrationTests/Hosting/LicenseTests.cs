@@ -56,7 +56,7 @@ public class LicenseTests : IDisposable
         };
         _mockPipeline.Initialize(enableLogging: true);
 
-        // The actual protocol parameters aren't the point of this test, this could be any protocol request 
+        // The actual protocol parameters aren't the point of this test, this could be any protocol request
         var data = new Dictionary<string, string>
         {
             { "grant_type", "client_credentials" },
@@ -72,6 +72,6 @@ public class LicenseTests : IDisposable
         }
 
         _mockPipeline.MockLogger.LogMessages.ShouldContain(
-            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. For more information, please see https://docs.duendesoftware.com/trial-mode.");
+            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. For more information, please see http://duende.link/trialmode.");
     }
 }

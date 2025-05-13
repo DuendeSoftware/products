@@ -33,7 +33,7 @@ internal static partial class Log
     [LoggerMessage(
         LogLevel.Error,
         Message =
-            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {{{LicenseLogParameters.Threshold}}} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. For more information, please see https://docs.duendesoftware.com/trial-mode.")]
+            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {{{LicenseLogParameters.Threshold}}} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. For more information, please see http://duende.link/trialmode.")]
     public static partial void TrialModeRequestCountExceeded(this ILogger logger, ulong threshold);
 
     [LoggerMessage(
