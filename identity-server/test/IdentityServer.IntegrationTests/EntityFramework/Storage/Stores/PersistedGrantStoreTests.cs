@@ -10,6 +10,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EntityFramework.IntegrationTests.Storage.Stores;
 
@@ -43,7 +44,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             await store.StoreAsync(persistedGrant);
         }
 
@@ -68,7 +69,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PersistedGrant foundPersistedGrant;
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             foundPersistedGrant = await store.GetAsync(persistedGrant.Key);
         }
 
@@ -89,7 +90,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         IList<PersistedGrant> foundPersistedGrants;
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             foundPersistedGrants = (await store.GetAllAsync(new PersistedGrantFilter { SubjectId = persistedGrant.SubjectId })).ToList();
         }
 
@@ -118,7 +119,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             (await store.GetAllAsync(new PersistedGrantFilter
             {
@@ -190,7 +191,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             await store.RemoveAsync(persistedGrant.Key);
         }
 
@@ -214,7 +215,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
                 SubjectId = persistedGrant.SubjectId,
@@ -242,7 +243,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
                 SubjectId = persistedGrant.SubjectId,
@@ -284,7 +285,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -296,7 +297,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -308,7 +309,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -321,7 +322,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -334,7 +335,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -347,7 +348,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -360,7 +361,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -374,7 +375,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -388,7 +389,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -403,7 +404,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         PopulateDb();
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
 
             await store.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -429,7 +430,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             await store.StoreAsync(persistedGrant);
         }
 
@@ -454,7 +455,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         var newDate = persistedGrant.Expiration.Value.AddHours(1);
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new PersistedGrantStore(context, FakeLogger<PersistedGrantStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new PersistedGrantStore(context, new NullLogger<PersistedGrantStore>(), new NoneCancellationTokenProvider());
             persistedGrant.Expiration = newDate;
             await store.StoreAsync(persistedGrant);
         }

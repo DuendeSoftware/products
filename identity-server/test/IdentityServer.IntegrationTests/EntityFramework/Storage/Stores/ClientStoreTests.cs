@@ -9,6 +9,7 @@ using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit.Sdk;
 
 namespace EntityFramework.IntegrationTests.Storage.Stores;
@@ -28,7 +29,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
     public async Task FindClientByIdAsync_WhenClientDoesNotExist_ExpectNull(DbContextOptions<ConfigurationDbContext> options)
     {
         await using var context = new ConfigurationDbContext(options);
-        var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
+        var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
         var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString());
         client.ShouldBeNull();
     }
@@ -51,7 +52,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         Client client;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
             client = await store.FindClientByIdAsync(testClient.ClientId);
         }
 
@@ -85,7 +86,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         Client client;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
             client = await store.FindClientByIdAsync(testClient.ClientId);
         }
 
@@ -146,7 +147,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
 
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ClientStore(context, FakeLogger<ClientStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
 
             const int timeout = 5000;
             var task = Task.Run(() => store.FindClientByIdAsync(testClient.ClientId));

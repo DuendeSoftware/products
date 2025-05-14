@@ -13,6 +13,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.InMemory.Infrastructure.Internal;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EntityFramework.IntegrationTests.Storage.Stores;
 
@@ -43,7 +44,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             await store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
         }
 
@@ -71,7 +72,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             await store.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
         }
 
@@ -120,7 +121,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
 
             // skip odd behaviour of in-memory provider
 #pragma warning disable EF1001 // Internal EF Core API usage.
@@ -165,7 +166,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
 
             // skip odd behaviour of in-memory provider
 #pragma warning disable EF1001 // Internal EF Core API usage.
@@ -213,7 +214,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         DeviceCode code;
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             code = await store.FindByUserCodeAsync(testUserCode);
         }
 
@@ -234,7 +235,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
     {
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             var code = await store.FindByUserCodeAsync($"user_{Guid.NewGuid().ToString()}");
             code.ShouldBeNull();
         }
@@ -275,7 +276,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
         DeviceCode code;
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             code = await store.FindByDeviceCodeAsync(testDeviceCode);
         }
 
@@ -295,7 +296,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
     {
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             var code = await store.FindByDeviceCodeAsync($"device_{Guid.NewGuid().ToString()}");
             code.ShouldBeNull();
         }
@@ -345,7 +346,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             await store.UpdateByUserCodeAsync(testUserCode, authorizedDeviceCode);
         }
 
@@ -408,7 +409,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
 
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             await store.RemoveByDeviceCodeAsync(testDeviceCode);
         }
 
@@ -422,7 +423,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
     {
         await using (var context = new PersistedGrantDbContext(options))
         {
-            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), FakeLogger<DeviceFlowStore>.Create(), new NoneCancellationTokenProvider());
+            var store = new DeviceFlowStore(context, new PersistentGrantSerializer(), new NullLogger<DeviceFlowStore>(), new NoneCancellationTokenProvider());
             await store.RemoveByDeviceCodeAsync($"device_{Guid.NewGuid().ToString()}");
         }
     }
