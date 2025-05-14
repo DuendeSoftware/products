@@ -9,6 +9,7 @@ using Duende.IdentityServer.EntityFramework.Services;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EntityFramework.IntegrationTests.Services;
 
@@ -48,7 +49,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         bool result;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var service = new CorsPolicyService(context, FakeLogger<CorsPolicyService>.Create(), new NoneCancellationTokenProvider());
+            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
             result = await service.IsOriginAllowedAsync(testCorsOrigin);
         }
 
@@ -72,7 +73,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         bool result;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var service = new CorsPolicyService(context, FakeLogger<CorsPolicyService>.Create(), new NoneCancellationTokenProvider());
+            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
             result = await service.IsOriginAllowedAsync("InvalidOrigin");
         }
 

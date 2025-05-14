@@ -11,6 +11,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="AngleSharp" />
 
@@ -41,6 +44,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
+    <ProjectReference Include="..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
   </ItemGroup>
 </Project>
