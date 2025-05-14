@@ -91,21 +91,18 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// </summary>
     /// <param name="requests"></param>
     /// <returns></returns>
-    protected virtual Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests)
+    protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests)
     {
-        requests = requests ?? Enumerable.Empty<BackChannelLogoutRequest>();
-        var tasks = requests.Select(SendLogoutNotificationAsync).ToArray();
-        return Task.WhenAll(tasks);
-    }
+        requests ??= [];
+        var logoutRequestsWithPayload = new List<(BackChannelLogoutRequest, Dictionary<string, string>)>();
+        foreach (var backChannelLogoutRequest in requests)
+        {
+            var payload = await CreateFormPostPayloadAsync(backChannelLogoutRequest);
+            logoutRequestsWithPayload.Add((backChannelLogoutRequest, payload));
+        }
 
-    /// <summary>
-    /// Performs the back-channel logout for a single client.
-    /// </summary>
-    /// <param name="request"></param>
-    protected virtual async Task SendLogoutNotificationAsync(BackChannelLogoutRequest request)
-    {
-        var data = await CreateFormPostPayloadAsync(request);
-        await PostLogoutJwt(request, data);
+        var logoutRequests = logoutRequestsWithPayload.Select(request => PostLogoutJwt(request.Item1, request.Item2)).ToArray();
+        await Task.WhenAll(logoutRequests);
     }
 
     /// <summary>
