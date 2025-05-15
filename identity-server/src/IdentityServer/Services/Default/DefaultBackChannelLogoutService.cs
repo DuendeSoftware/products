@@ -91,21 +91,23 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// </summary>
     /// <param name="requests"></param>
     /// <returns></returns>
-    protected virtual Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests)
+    protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests)
     {
-        requests = requests ?? Enumerable.Empty<BackChannelLogoutRequest>();
-        var tasks = requests.Select(SendLogoutNotificationAsync).ToArray();
-        return Task.WhenAll(tasks);
-    }
+        requests ??= [];
+        var logoutRequestsWithPayload = new List<(BackChannelLogoutRequest, Dictionary<string, string>)>();
+        foreach (var backChannelLogoutRequest in requests)
+        {
+            // Creation of the payload can cause database access to retrieve the
+            // signing key. That needs to be done in serial so that our EF store
+            // implementation doesn't make parallel use of a single DB context.
+            // Since the signing key material should be cached, only the
+            // first serial operation will call the db.
+            var payload = await CreateFormPostPayloadAsync(backChannelLogoutRequest);
+            logoutRequestsWithPayload.Add((backChannelLogoutRequest, payload));
+        }
 
-    /// <summary>
-    /// Performs the back-channel logout for a single client.
-    /// </summary>
-    /// <param name="request"></param>
-    protected virtual async Task SendLogoutNotificationAsync(BackChannelLogoutRequest request)
-    {
-        var data = await CreateFormPostPayloadAsync(request);
-        await PostLogoutJwt(request, data);
+        var logoutRequests = logoutRequestsWithPayload.Select(request => PostLogoutJwt(request.Item1, request.Item2)).ToArray();
+        await Task.WhenAll(logoutRequests);
     }
 
     /// <summary>

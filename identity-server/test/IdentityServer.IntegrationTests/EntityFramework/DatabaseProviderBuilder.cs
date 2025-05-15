@@ -14,7 +14,8 @@ namespace EntityFramework.IntegrationTests;
 public class DatabaseProviderBuilder
 {
     public static DbContextOptions<TDbContext> BuildInMemory<TDbContext, TStoreOptions>(string name,
-        TStoreOptions storeOptions)
+        TStoreOptions storeOptions,
+        TimeSpan? delay = null)
         where TDbContext : DbContext
         where TStoreOptions : class
     {
@@ -23,12 +24,19 @@ public class DatabaseProviderBuilder
 
         var builder = new DbContextOptionsBuilder<TDbContext>();
         builder.UseInMemoryDatabase(name);
+
+        if (delay.HasValue)
+        {
+            builder.AddInterceptors(new NetworkDelaySimulationInterceptor(delay.Value));
+        }
+
         builder.UseApplicationServiceProvider(serviceCollection.BuildServiceProvider());
         return builder.Options;
     }
 
     public static DbContextOptions<TDbContext> BuildSqlite<TDbContext, TStoreOptions>(string name,
-        TStoreOptions storeOptions)
+        TStoreOptions storeOptions,
+        TimeSpan? delay = null)
         where TDbContext : DbContext
         where TStoreOptions : class
     {
@@ -41,12 +49,19 @@ public class DatabaseProviderBuilder
 
         var builder = new DbContextOptionsBuilder<TDbContext>();
         builder.UseSqlite(connection);
+
+        if (delay.HasValue)
+        {
+            builder.AddInterceptors(new NetworkDelaySimulationInterceptor(delay.Value));
+        }
+
         builder.UseApplicationServiceProvider(serviceCollection.BuildServiceProvider());
         return builder.Options;
     }
 
     public static DbContextOptions<TDbContext> BuildLocalDb<TDbContext, TStoreOptions>(string name,
-        TStoreOptions storeOptions)
+        TStoreOptions storeOptions,
+        TimeSpan? delay = null)
         where TDbContext : DbContext
         where TStoreOptions : class
     {
@@ -56,6 +71,12 @@ public class DatabaseProviderBuilder
         var builder = new DbContextOptionsBuilder<TDbContext>();
         builder.UseSqlServer(
             $@"Data Source=(LocalDb)\MSSQLLocalDB;database=Test.DuendeIdentityServer.EntityFramework.{name};trusted_connection=yes;");
+
+        if (delay.HasValue)
+        {
+            builder.AddInterceptors(new NetworkDelaySimulationInterceptor(delay.Value));
+        }
+
         builder.UseApplicationServiceProvider(serviceCollection.BuildServiceProvider());
         return builder.Options;
     }
