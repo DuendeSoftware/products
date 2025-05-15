@@ -21,6 +21,7 @@
   -->
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
