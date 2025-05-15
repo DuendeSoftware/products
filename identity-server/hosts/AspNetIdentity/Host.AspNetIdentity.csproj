@@ -33,7 +33,7 @@ Microsoft.EntityFrameworkCore.SqlServer that don't have this problem exist). -->
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\aspire\aspire.orchestrator\aspire.orchestrator.ServiceDefaults\aspire.orchestrator.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
 		<ProjectReference Include="..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
 		<ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
 	</ItemGroup>

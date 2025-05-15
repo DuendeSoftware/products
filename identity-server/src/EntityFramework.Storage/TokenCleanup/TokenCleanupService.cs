@@ -234,7 +234,7 @@ public class TokenCleanupService : ITokenCleanupService
                 var deleteCount = await query
                     .Where(c => c.Expiration >= expiredCodes.First().Expiration && c.Expiration <= expiredCodes.Last().Expiration)
                     .Where(c => foundCodes.Contains(c.DeviceCode))
-                    .ExecuteDeleteAsync();
+                    .ExecuteDeleteAsync(cancellationToken);
 
                 if (deleteCount != found)
                 {

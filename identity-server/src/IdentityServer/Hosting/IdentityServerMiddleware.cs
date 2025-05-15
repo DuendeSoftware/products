@@ -127,7 +127,7 @@ public class IdentityServerMiddleware
                 }
             }
         }
-        catch (Exception ex) when (options.Logging.UnhandledExceptionLoggingFilter?.Invoke(context, ex) is not false)
+        catch (Exception ex) when (options.Logging.InvokeUnhandledExceptionLoggingFilter(context, ex) is not false)
         {
             await events.RaiseAsync(new UnhandledExceptionEvent(ex));
             Telemetry.Metrics.UnHandledException(ex);
