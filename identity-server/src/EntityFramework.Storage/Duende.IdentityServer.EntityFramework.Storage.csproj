@@ -1,23 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <PackageId>Duende.IdentityServer.EntityFramework.Storage</PackageId>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-        <Description>EntityFramework persistence layer for Duende IdentityServer</Description>
-    </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>Duende.IdentityServer.EntityFramework.Storage</PackageId>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Description>EntityFramework persistence layer for Duende IdentityServer</Description>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\Telemetry\Tracing.cs">
-            <Link>Tracing.cs</Link>
-        </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Telemetry\Tracing.cs">
+      <Link>Tracing.cs</Link>
+    </Compile>
+  </ItemGroup>
 
 </Project>

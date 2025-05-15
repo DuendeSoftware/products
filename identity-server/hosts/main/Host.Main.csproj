@@ -1,60 +1,60 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-		<RootNamespace>IdentityServerHost</RootNamespace>
-		<UserSecretsId>e60c119c-8b86-4016-9d44-80e25948dbba</UserSecretsId>
-		<Nullable>enable</Nullable>
-		<AnalysisMode>all</AnalysisMode>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <RootNamespace>IdentityServerHost</RootNamespace>
+    <UserSecretsId>e60c119c-8b86-4016-9d44-80e25948dbba</UserSecretsId>
+    <Nullable>enable</Nullable>
+    <AnalysisMode>all</AnalysisMode>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<Content Remove="compilerconfig.json" />
-	</ItemGroup>
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<None Include="compilerconfig.json" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
 
-		<PackageReference Include="OpenTelemetry" />
-		<PackageReference Include="OpenTelemetry.Exporter.Console" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
-		<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
 
-		<PackageReference Include="Serilog.AspNetCore" />
-	</ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
-		<ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
-		<ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+  </ItemGroup>
 
 
-	<ItemGroup>
-		<Compile Include="..\Shared\Configuration\**\*.cs">
-			<Link>Shared\Configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
-		</Compile>
-		<Compile Include="..\Shared\Customization\**\*.cs">
-			<Link>Shared\Customization\%(RecursiveDir)%(Filename)%(Extension)</Link>
-		</Compile>
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\Configuration\**\*.cs">
+      <Link>Shared\Configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="..\Shared\Customization\**\*.cs">
+      <Link>Shared\Customization\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
 
-	<ItemGroup>
-		<Content Update="Pages\ServerSideSessions\Index.cshtml">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</Content>
-	</ItemGroup>
+  <ItemGroup>
+    <Content Update="Pages\ServerSideSessions\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
