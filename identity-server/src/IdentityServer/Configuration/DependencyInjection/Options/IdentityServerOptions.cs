@@ -207,11 +207,11 @@ public class IdentityServerOptions
     /// <summary>
     /// The allowed clock skew for JWT lifetime validation. Except for DPoP proofs,
     /// all JWTs that have their lifetime validated use this setting to control the
-    /// clock skew of lifetime validation. This includes JWT access tokens passed 
-    /// to the user info, introspection, and local api endpoints, client 
+    /// clock skew of lifetime validation. This includes JWT access tokens passed
+    /// to the user info, introspection, and local api endpoints, client
     /// authentication JWTs used in private_key_jwt authentication, JWT secured
-    /// authorization requests (JAR), and custom usage of the 
-    /// <see cref="TokenValidator"/>, such as in a token exchange implementation. 
+    /// authorization requests (JAR), and custom usage of the
+    /// <see cref="TokenValidator"/>, such as in a token exchange implementation.
     /// Defaults to five minutes.
     /// </summary>
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromMinutes(5);
@@ -236,4 +236,10 @@ public class IdentityServerOptions
     /// Options for configuring preview features in the server.
     /// </value>
     public PreviewFeatureOptions Preview { get; set; } = new PreviewFeatureOptions();
+
+    /// <summary>
+    /// Frequency at which the diagnostic summary is logged.
+    /// The default value is 1 hour.
+    /// </summary>
+    public TimeSpan DiagnosticSummaryLogFrequency { get; set; } = TimeSpan.FromHours(1);
 }
