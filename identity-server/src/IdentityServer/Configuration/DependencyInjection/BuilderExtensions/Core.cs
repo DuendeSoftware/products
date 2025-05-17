@@ -17,6 +17,8 @@ using Duende.IdentityServer.Hosting.FederatedSignOut;
 using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Licensing.V2.Diagnostics;
+using Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
@@ -210,6 +212,10 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<LicenseUsageTracker>();
         builder.Services.AddSingleton<LicenseExpirationChecker>();
 
+        builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
+        builder.Services.AddSingleton<DiagnosticSummary>();
+        builder.Services.AddHostedService<DiagnosticHostedService>();
+
         return builder;
     }
 
@@ -306,7 +312,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransientDecorator<IAuthenticationSchemeProvider, DynamicAuthenticationSchemeProvider>();
         builder.Services.TryAddSingleton<IIdentityProviderStore, NopIdentityProviderStore>();
         // the per-request cache is to ensure that a scheme loaded from the cache is still available later in the
-        // request and made available anywhere else during this request (in case the static cache times out across 
+        // request and made available anywhere else during this request (in case the static cache times out across
         // 2 calls within the same request)
         builder.Services.AddScoped<DynamicAuthenticationSchemeCache>();
 
