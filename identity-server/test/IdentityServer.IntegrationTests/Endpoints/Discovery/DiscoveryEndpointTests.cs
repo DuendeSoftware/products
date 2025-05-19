@@ -53,7 +53,7 @@ public class DiscoveryEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task Algorithms_supported_should_match_signing_key()
+    public async Task IdToken_signing_algorithms_supported_should_match_signing_key()
     {
         var key = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
         var expectedAlgorithm = SecurityAlgorithms.EcdsaSha256;
@@ -77,6 +77,26 @@ public class DiscoveryEndpointTests
         algorithmsSupported.Count.ShouldBe(2);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+    }
+
+    [Fact]
+    public async Task Token_endpoint_authentication_algorithms_supported_should_not_be_present_if_private_key_jwt_is_not_configured()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.AllowedJwtAlgorithms = [SecurityAlgorithms.RsaSha256];
+
+        var disco = await pipeline.BackChannelClient
+            .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        // Verify assumptions
+        disco.IsError.ShouldBeFalse();
+        disco.TokenEndpointAuthenticationMethodsSupported.ShouldNotContain("private_key_jwt");
+        // we don't even support client_secret_jwt, but per spec, if you DO, you must include the algs supported
+        disco.TokenEndpointAuthenticationMethodsSupported.ShouldNotContain("client_secret_jwt");
+
+        // Assert that we got no signing algs.
+        disco.TokenEndpointAuthenticationSigningAlgorithmsSupported.ShouldBeEmpty();
     }
 
     [Fact]
