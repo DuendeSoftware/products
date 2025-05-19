@@ -326,9 +326,13 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 types.Add(OidcConstants.EndpointAuthenticationMethods.TlsClientAuth);
                 types.Add(OidcConstants.EndpointAuthenticationMethods.SelfSignedTlsClientAuth);
             }
-
             entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, types);
-            entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported, Options.AllowedJwtAlgorithms);
+
+            if (types.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt))
+            {
+                entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported,
+                    Options.AllowedJwtAlgorithms);
+            }
         }
 
         var signingCredentials = await Keys.GetAllSigningCredentialsAsync();
@@ -345,6 +349,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         {
             entries.Add(OidcConstants.Discovery.RequestParameterSupported, true);
 
+            // TODO
             entries.Add(OidcConstants.Discovery.RequestObjectSigningAlgorithmsSupported, new[]
             {
                 SecurityAlgorithms.RsaSha256,

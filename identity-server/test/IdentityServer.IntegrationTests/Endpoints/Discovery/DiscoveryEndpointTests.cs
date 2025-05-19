@@ -102,7 +102,9 @@ public class DiscoveryEndpointTests
     [Fact]
     public async Task Token_endpoint_authentication_algorithms_supported_should_match_configuration()
     {
-        var pipeline = new IdentityServerPipeline();
+        var pipeline = new IdentityServerPipeline(); // The pipeline includes private_key_jwt client auth by default
+        pipeline.OnPostConfigureServices += svcs =>
+            svcs.AddIdentityServerBuilder().AddJwtBearerClientAuthentication();
         pipeline.Initialize();
         pipeline.Options.AllowedJwtAlgorithms =
         [
