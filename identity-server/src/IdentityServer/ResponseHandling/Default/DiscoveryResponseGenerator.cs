@@ -328,6 +328,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             }
 
             entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, types);
+            entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported, Options.AllowedJwtAlgorithms);
         }
 
         var signingCredentials = await Keys.GetAllSigningCredentialsAsync();
