@@ -80,7 +80,8 @@ public class DiscoveryEndpointTests
     }
 
     [Fact]
-    public async Task Token_endpoint_authentication_algorithms_supported_should_not_be_present_if_private_key_jwt_is_not_configured()
+    public async Task
+        Token_endpoint_authentication_algorithms_supported_should_not_be_present_if_private_key_jwt_is_not_configured()
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
@@ -122,6 +123,32 @@ public class DiscoveryEndpointTests
         algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
     }
+
+    [Fact]
+    public async Task Request_object_authentication_algorithms_supported_should_match_configuration()
+    {
+        var pipeline = new IdentityServerPipeline(); // The pipeline includes private_key_jwt client auth by default
+
+        pipeline.Initialize();
+        pipeline.Options.AllowedJwtAlgorithms =
+        [
+            SecurityAlgorithms.RsaSsaPssSha256,
+            SecurityAlgorithms.EcdsaSha256
+        ];
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        // TODO - Add this property to IdentityModel disco and use it here
+        var algorithmsSupported = data["request_object_signing_alg_values_supported"].EnumerateArray()
+            .Select(x => x.GetString()).ToList();
+
+        algorithmsSupported.Count().ShouldBe(2);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+    }
+
 
     [Fact]
     [Trait("Category", Category)]
