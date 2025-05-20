@@ -1,0 +1,27 @@
+@model IdentityServerQuickStart.Pages.Components.Database.DatabaseViewModel
+
+<div class="card h-100">
+    <div class="card-body">
+        <h5 class="card-title">
+            <i class="bi bi-award-fill me-2"></i>
+            Database
+        </h5>
+        @if (Model.IsSameDatabase)
+        {
+            <p class="display-4 mb-3 text-center">@Model.ConfigurationDatabase</p>
+        }
+        else
+        {
+            <ul class="mb-0">
+                <li>
+                    <i class="bi bi-database me-2"></i>
+                    Configuration: @Model.ConfigurationDatabase
+                </li>
+                <li>
+                    <i class="bi bi-database me-2"></i>
+                    Persisted Grants: @Model.PersistedGrantDatabase
+                </li>
+            </ul>
+        }
+    </div>
+</div>
