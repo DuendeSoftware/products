@@ -41,6 +41,7 @@ public static class Config
 
                 AllowedGrantTypes = GrantTypes.Code,
 
+                InitiateLoginUri = "https://localhost:44300/secure",
                 RedirectUris = { "https://localhost:44300/signin-oidc" },
                 FrontChannelLogoutUri = "https://localhost:44300/signout-oidc",
                 PostLogoutRedirectUris = { "https://localhost:44300/signout-callback-oidc" },

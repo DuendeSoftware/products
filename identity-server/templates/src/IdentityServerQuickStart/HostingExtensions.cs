@@ -14,7 +14,8 @@ internal static class HostingExtensions
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+        builder.Services.AddRazorPages()
+            .AddRazorRuntimeCompilation();
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -42,6 +43,7 @@ internal static class HostingExtensions
                 options.ConfigureDbContext = b =>
                     b.UseSqlite(connectionString, dbOpts => dbOpts.MigrationsAssembly(typeof(Program).Assembly.FullName));
             })
+            .AddServerSideSessions()
             .AddLicenseSummary();
 
         builder.Services.AddAuthentication()

@@ -17,17 +17,23 @@
 </head>
 <body>
 
-    <div class="container-fluid overflow-hidden">
-        <div class="row vh-100 overflow-auto">
-            <partial name="_nav" />
-            <div class="col d-flex flex-column h-sm-100">
-                <main class="row overflow-auto">
-                    <div class="col pt-2">
-                        @RenderBody()
-                    </div>
-                </main>
-                <partial name="_footer" />
-            </div>
+    <div class="d-flex flex-row flex-nowrap vh-100">
+        <!-- Sidebar -->
+        <div class="sidebar flex-shrink-0 h-100">
+            <partial name="_Nav" />
+        </div>
+
+        <!-- Main + Footer wrapper: now full-height column -->
+        <div class="flex-fill d-flex flex-column h-100">
+
+            <!-- Scrollable main -->
+            <main class="p-3 flex-grow-1 overflow-auto">
+                @RenderBody()
+            </main>
+
+            <!-- Footer locked to bottom, full-width of this column -->
+            <partial name="_footer" />
+
         </div>
     </div>
 

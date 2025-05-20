@@ -1,27 +1,39 @@
 @page
 @model IdentityServerHost.Pages.Grants.Index
-@{
+
+<div class="container-fluid mb-4 px-0">
+    <div class="d-flex justify-content-between align-items-center bg-body-tertiary rounded shadow-sm p-2 flex-nowrap">
+
+        <!-- Page title -->
+        <nav aria-label="breadcrumb" class="mb-0 ms-2">
+            <ol class="breadcrumb mb-0 p-0 fs-5">
+                <li class="breadcrumb-item active" aria-current="page">Grants (Client Application Permissions)</li>
+            </ol>
+        </nav>
+
+    </div>
+</div>
+
+<div class="lead">
+    <p>Below is the list of applications you have given permission to and the resources they have access to.</p>
+</div>
+
+@if (!Model.View.Grants.Any())
+{
+    <div class="row">
+        <div class="col">
+            <div class="alert alert-light text-center">
+                You have not given access to any applications.
+            </div>
+        </div>
+    </div>
 }
 
 <div class="grants-page">
-    <div class="lead">
-        <h1>Client Application Permissions</h1>
-        <p>Below is the list of applications you have given permission to and the resources they have access to.</p>
-    </div>
 
-    @if (!Model.View.Grants.Any())
+    @if (Model.View.Grants.Any())
     {
-        <div class="row">
-            <div class="col-sm-8">
-                <div class="alert alert-info">
-                    You have not given access to any applications
-                </div>
-            </div>
-        </div>
-    }
-    else
-    {
-        foreach (var grant in Model.View.Grants) 
+        foreach (var grant in Model.View.Grants)
         {
             <div class="card">
                 <div class="card-header">
@@ -42,13 +54,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <ul class="list-group list-group-flush">
                     @if (grant.Description != null)
                     {
                         <li class="list-group-item">
                             <label>Description:</label> @grant.Description
-                        </li>   
+                        </li>
                     }
                     <li class="list-group-item">
                         <label>Created:</label> @grant.Created.ToString("yyyy-MM-dd")

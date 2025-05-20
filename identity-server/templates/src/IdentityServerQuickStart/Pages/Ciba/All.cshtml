@@ -1,48 +1,52 @@
 @page
 @model IdentityServerHost.Pages.Ciba.AllModel
-@{
-}
 
-<div class="ciba-page">
+<div class="container-fluid mb-4 px-0">
+    <div class="d-flex justify-content-between align-items-center bg-body-tertiary rounded shadow-sm p-2 flex-nowrap">
+
+        <!-- Page title -->
+        <nav aria-label="breadcrumb" class="mb-0 ms-2">
+            <ol class="breadcrumb mb-0 p-0 fs-5">
+                <li class="breadcrumb-item active" aria-current="page">CIBA (Pending Backchannel Login Requests)</li>
+            </ol>
+        </nav>
+
+    </div>
+</div>
+
+@if (Model.Logins.Any())
+{
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Client Id</th>
+                <th>Binding Message</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var login in Model.Logins)
+            {
+                <tr>
+                    <td>@login.InternalId</td>
+                    <td>@login.Client.ClientId</td>
+                    <td>@login.BindingMessage</td>
+                    <td>
+                        <a asp-page="Consent" asp-route-id="@login.InternalId" class="btn btn-primary">Process</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
     <div class="row">
         <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Pending Backchannel Login Requests</h2>
-                </div>
-                <div class="card-body">
-                    @if (Model.Logins.Any())
-                    {
-                        <table class="table table-bordered table-striped table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Client Id</th>
-                                    <th>Binding Message</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var login in Model.Logins)
-                                {
-                                    <tr>
-                                        <td>@login.InternalId</td>
-                                        <td>@login.Client.ClientId</td>
-                                        <td>@login.BindingMessage</td>
-                                        <td>
-                                            <a asp-page="Consent" asp-route-id="@login.InternalId" class="btn btn-primary">Process</a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                    else
-                    {
-                        <div>No Pending Login Requests</div>
-                    }
-                </div>
+            <div class="alert alert-light text-center">
+                No Pending Login Requests.
             </div>
         </div>
     </div>
-</div>
+}

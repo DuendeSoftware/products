@@ -1,66 +1,73 @@
 @page
 @model IdentityServerHost.Pages.Diagnostics.Index
 
-<div class="diagnostics-page">
-    <div class="lead">
-        <h1>Authentication Cookie</h1>
-    </div>
+<div class="container-fluid mb-4 px-0">
+    <div class="d-flex justify-content-between align-items-center bg-body-tertiary rounded shadow-sm p-2 flex-nowrap">
 
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Claims</h2>
-                </div>
-                <div class="card-body">
-                    @if(Model.View.AuthenticateResult.Principal != null)
-                    {
-                        <dl>
-                            @foreach (var claim in Model.View.AuthenticateResult.Principal.Claims)
-                            {
-                                <dt>@claim.Type</dt>
-                                <dd>@claim.Value</dd>
-                            }
-                        </dl>
-                    }
-                </div>
+        <!-- Page title -->
+        <nav aria-label="breadcrumb" class="mb-0 ms-2">
+            <ol class="breadcrumb mb-0 p-0 fs-5">
+                <li class="breadcrumb-item active" aria-current="page">Current Authentication Cookie Info</li>
+            </ol>
+        </nav>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h2>Claims</h2>
             </div>
-        </div>
-        
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Properties</h2>
-                </div>
-                <div class="card-body">
+            <div class="card-body">
+                @if (Model.View.AuthenticateResult.Principal != null)
+                {
                     <dl>
-                        @if (Model.View.AuthenticateResult.Properties != null)
+                        @foreach (var claim in Model.View.AuthenticateResult.Principal.Claims)
                         {
-                            @foreach (var prop in Model.View.AuthenticateResult.Properties.Items)
-                            {
-                                <dt>@prop.Key</dt>
-                                <dd>@prop.Value</dd>
-                            }
-                        }
-                        @if (Model.View.Clients.Any())
-                        {
-                            <dt>Clients</dt>
-                            <dd>
-                                @{
-                                    var clients = Model.View.Clients.ToArray();
-                                    for(var i = 0; i < clients.Length; i++)
-                                    {
-                                        <text>@clients[i]</text>
-                                        if (i < clients.Length - 1)
-                                        {
-                                            <text>, </text>
-                                        }
-                                    }
-                                }
-                            </dd>
+                            <dt>@claim.Type</dt>
+                            <dd>@claim.Value</dd>
                         }
                     </dl>
-                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h2>Properties</h2>
+            </div>
+            <div class="card-body">
+                <dl>
+                    @if (Model.View.AuthenticateResult.Properties != null)
+                    {
+                        @foreach (var prop in Model.View.AuthenticateResult.Properties.Items)
+                        {
+                            <dt>@prop.Key</dt>
+                            <dd>@prop.Value</dd>
+                        }
+                    }
+                    @if (Model.View.Clients.Any())
+                    {
+                        <dt>Clients</dt>
+                        <dd>
+                            @{
+                                var clients = Model.View.Clients.ToArray();
+                                for (var i = 0; i < clients.Length; i++)
+                                {
+                                    <text>@clients[i]</text>
+                                    if (i < clients.Length - 1)
+                                    {
+                                        <text>, </text>
+                                    }
+                                }
+                            }
+                        </dd>
+                    }
+                </dl>
             </div>
         </div>
     </div>

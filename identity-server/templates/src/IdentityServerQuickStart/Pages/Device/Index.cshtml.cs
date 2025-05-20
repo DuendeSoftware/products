@@ -33,7 +33,7 @@ public class Index : PageModel
     public ViewModel View { get; set; } = default!;
 
     [BindProperty]
-    public InputModel Input { get; set; } = default!;
+    public InputModel Input { get; set; } = new();
 
     public async Task<IActionResult> OnGet(string? userCode)
     {

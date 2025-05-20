@@ -2,10 +2,21 @@
   width: 64px;
 }
 
-.w-280 {
-  width: 280px;
+@media (max-width: 576px) {
+  .sidebar {
+    width: 80px !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .sidebar .nav-link {
+    justify-content: center;
+  }
 }
-
+@media (min-width: 577px) {
+  .sidebar {
+    width: 280px !important;
+  }
+}
 .icon-banner {
   width: 32px;
 }
