@@ -13,7 +13,7 @@ using Duende.IdentityServer.Models;
 namespace Duende.IdentityServer.Validation;
 
 /// <summary>
-/// Base class for a validate authorize or token request
+/// Base class for a validated authorize or token request
 /// </summary>
 public class ValidatedRequest
 {

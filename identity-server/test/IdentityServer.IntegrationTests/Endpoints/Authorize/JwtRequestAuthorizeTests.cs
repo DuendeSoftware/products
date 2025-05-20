@@ -913,7 +913,7 @@ public class JwtRequestAuthorizeTests
     [Trait("Category", Category)]
     public async Task authorize_should_reject_jwt_request_if_signed_by_algorithm_not_allowed_by_configuration()
     {
-        _mockPipeline.Options.AllowedJwtAlgorithms = ["ES256"];
+        _mockPipeline.Options.SupportedRequestObjectSigningAlgorithms = ["ES256"];
         var requestJwt = CreateRequestJwt(
             issuer: _client.ClientId,
             audience: IdentityServerPipeline.BaseUrl,

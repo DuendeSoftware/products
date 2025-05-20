@@ -65,16 +65,13 @@ public class DiscoveryEndpointTests
             services.AddIdentityServerBuilder()
                 .AddSigningCredential(key, expectedAlgorithm);
         };
-        pipeline.Initialize("/ROOT");
+        pipeline.Initialize();
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
 
-        var json = await result.Content.ReadAsStringAsync();
-        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        var algorithmsSupported = data["id_token_signing_alg_values_supported"].EnumerateArray()
-            .Select(x => x.GetString()).ToList();
+        var algorithmsSupported = result.TryGetStringArray("id_token_signing_alg_values_supported");
 
-        algorithmsSupported.Count.ShouldBe(2);
+        algorithmsSupported.Count().ShouldBe(2);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
     }
@@ -85,7 +82,7 @@ public class DiscoveryEndpointTests
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
-        pipeline.Options.AllowedJwtAlgorithms = [SecurityAlgorithms.RsaSha256];
+        pipeline.Options.SupportedClientAssertionSigningAlgorithms = [SecurityAlgorithms.RsaSha256];
 
         var disco = await pipeline.BackChannelClient
             .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
@@ -103,11 +100,11 @@ public class DiscoveryEndpointTests
     [Fact]
     public async Task Token_endpoint_authentication_algorithms_supported_should_match_configuration()
     {
-        var pipeline = new IdentityServerPipeline(); // The pipeline includes private_key_jwt client auth by default
+        var pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += svcs =>
             svcs.AddIdentityServerBuilder().AddJwtBearerClientAuthentication();
         pipeline.Initialize();
-        pipeline.Options.AllowedJwtAlgorithms =
+        pipeline.Options.SupportedClientAssertionSigningAlgorithms =
         [
             SecurityAlgorithms.RsaSsaPssSha256,
             SecurityAlgorithms.EcdsaSha256
@@ -125,30 +122,76 @@ public class DiscoveryEndpointTests
     }
 
     [Fact]
-    public async Task Request_object_authentication_algorithms_supported_should_match_configuration()
+    public async Task Request_object_signing_alg_values_supported_should_match_configuration()
     {
-        var pipeline = new IdentityServerPipeline(); // The pipeline includes private_key_jwt client auth by default
+        var pipeline = new IdentityServerPipeline();
 
         pipeline.Initialize();
-        pipeline.Options.AllowedJwtAlgorithms =
+        pipeline.Options.SupportedRequestObjectSigningAlgorithms =
         [
             SecurityAlgorithms.RsaSsaPssSha256,
             SecurityAlgorithms.EcdsaSha256
         ];
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
-
-        var json = await result.Content.ReadAsStringAsync();
-        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        // TODO - Add this property to IdentityModel disco and use it here
-        var algorithmsSupported = data["request_object_signing_alg_values_supported"].EnumerateArray()
-            .Select(x => x.GetString()).ToList();
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        var algorithmsSupported = result.TryGetStringArray("request_object_signing_alg_values_supported");
 
         algorithmsSupported.Count().ShouldBe(2);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
     }
 
+    [Fact]
+    public async Task Default_request_object_signing_alg_values_supported_should_be_rs_ps_es_hmac()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        var algorithmsSupported = result.TryGetStringArray("request_object_signing_alg_values_supported");
+
+        algorithmsSupported.Count().ShouldBe(12);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha512);
+    }
+
+    [Fact]
+    public async Task Default_token_endpoint_auth_signing_alg_values_supported_should_be_rs_ps_es_hmac()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += svcs =>
+            svcs.AddIdentityServerBuilder().AddJwtBearerClientAuthentication();
+        pipeline.Initialize();
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        result.IsError.ShouldBeFalse();
+        var algorithmsSupported = result.TokenEndpointAuthenticationSigningAlgorithmsSupported;
+
+        algorithmsSupported.Count().ShouldBe(12);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha512);
+    }
 
     [Fact]
     [Trait("Category", Category)]
@@ -423,5 +466,27 @@ public class DiscoveryEndpointTests
 
         var supportedAlgorithmsFromResponse = result.TryGetStringArray(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported);
         supportedAlgorithmsFromResponse.ShouldBe(supportedAlgorithms);
+    }
+
+
+    [Fact]
+    public async Task Default_dpop_signing_alg_values_supported_should_be_rs_ps_es()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        var algorithmsSupported = result.TryGetStringArray("dpop_signing_alg_values_supported");
+
+        algorithmsSupported.Count().ShouldBe(9);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha512);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha384);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha512);
     }
 }

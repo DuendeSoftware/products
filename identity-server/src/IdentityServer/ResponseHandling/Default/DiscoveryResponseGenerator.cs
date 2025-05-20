@@ -331,7 +331,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             if (types.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt))
             {
                 entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported,
-                    Options.AllowedJwtAlgorithms);
+                    Options.SupportedClientAssertionSigningAlgorithms);
             }
         }
 
@@ -349,25 +349,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         {
             entries.Add(OidcConstants.Discovery.RequestParameterSupported, true);
 
-            // TODO
-            entries.Add(OidcConstants.Discovery.RequestObjectSigningAlgorithmsSupported, new[]
-            {
-                SecurityAlgorithms.RsaSha256,
-                SecurityAlgorithms.RsaSha384,
-                SecurityAlgorithms.RsaSha512,
-
-                SecurityAlgorithms.RsaSsaPssSha256,
-                SecurityAlgorithms.RsaSsaPssSha384,
-                SecurityAlgorithms.RsaSsaPssSha512,
-
-                SecurityAlgorithms.EcdsaSha256,
-                SecurityAlgorithms.EcdsaSha384,
-                SecurityAlgorithms.EcdsaSha512,
-
-                SecurityAlgorithms.HmacSha256,
-                SecurityAlgorithms.HmacSha384,
-                SecurityAlgorithms.HmacSha512
-            });
+            entries.Add(OidcConstants.Discovery.RequestObjectSigningAlgorithmsSupported, Options.SupportedRequestObjectSigningAlgorithms);
 
             if (Options.Endpoints.EnableJwtRequestUri)
             {

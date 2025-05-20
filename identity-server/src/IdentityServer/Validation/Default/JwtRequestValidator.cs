@@ -173,7 +173,7 @@ public class JwtRequestValidator : IJwtRequestValidator
             RequireExpirationTime = true,
 
             ClockSkew = Options.JwtValidationClockSkew,
-            ValidAlgorithms = Options.AllowedJwtAlgorithms
+            ValidAlgorithms = Options.SupportedRequestObjectSigningAlgorithms
         };
 
         var strictJarValidation = context.StrictJarValidation.HasValue ? context.StrictJarValidation.Value : Options.StrictJarValidation;
