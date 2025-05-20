@@ -1,0 +1,56 @@
+@page
+@model IdentityServerHost.Pages.Admin.Clients.NewModel
+@{
+}
+
+<div class="clients-page">
+    @if (Model.Created)
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Client Id <em>@Model.InputModel.ClientId</em> created</h2>
+                <p>The client secret is displayed below. Copy it now, as it won't be shown again.</p>
+                <p class="alert alert-danger">@Model.InputModel.Secret</p>
+                <p>Click here to <a asp-page="/Admin/Clients/Edit" asp-route-id="@Model.InputModel.ClientId">continue</a>.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h2>
+            New Client
+        </h2>
+
+        <partial name="_ValidationSummary" />
+
+        <div class="row">
+            <div class="col-md-6">
+                <form method="post">
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.ClientId"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.ClientId" autofocus />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.Secret"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.Secret" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.Name"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.Name" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.InputModel.Flow"></label>
+                        <select class="form-control" asp-for="@Model.InputModel.Flow">
+                            <option value="0">Client Credentials</option>
+                            <option value="1">Code Flow (with PKCE)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                        <a class="btn btn-secondary" asp-page="/Admin/Clients/Index">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+</div>
