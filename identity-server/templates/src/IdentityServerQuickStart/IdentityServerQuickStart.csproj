@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Duende.IdentityServer.EntityFramework" version="7.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
 
@@ -16,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <None Include="compilerconfig.json" />
   </ItemGroup>
 
 </Project>

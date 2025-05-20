@@ -11,14 +11,24 @@
     <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
     
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-glyphicons.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
+
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <partial name="_Nav" />
-   
-    <div class="container body-container">
-        @RenderBody()
+
+    <div class="container-fluid overflow-hidden">
+        <div class="row vh-100 overflow-auto">
+            <partial name="_nav" />
+            <div class="col d-flex flex-column h-sm-100">
+                <main class="row overflow-auto">
+                    <div class="col pt-2">
+                        @RenderBody()
+                    </div>
+                </main>
+                <partial name="_footer" />
+            </div>
+        </div>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.slim.min.js"></script>

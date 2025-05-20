@@ -1,6 +1,13 @@
 @using Duende.IdentityServer.Extensions
 @{
-    #nullable enable
+    var currentPath = Context.Request.Path.Value?.TrimEnd('/') ?? "";
+
+    // Helper to add active class in nav
+    Func<string, string> isActive = href =>
+        string.Equals(href.TrimEnd('/'), currentPath, StringComparison.OrdinalIgnoreCase)
+            ? "active"
+            : "link-body-emphasis";
+
     string? name = null;
     if (!true.Equals(ViewData["signed-out"]))
     {
@@ -8,26 +15,104 @@
     }
 }
 
-<div class="nav-page">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<div class="w-280 d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary">
+    <a href="~/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+        <img src="~/img/duende-logo-full.png" alt="Duende Logo" height="32" class="me-2" />
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li>
+            <a href="/"
+               class="nav-link @isActive("")">
+                <i class="bi bi-speedometer2"></i>
+                Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/diagnostics"
+               class="nav-link @isActive("/diagnostics")">
+                <i class="bi bi-clipboard-data"></i>
+                Diagnostics
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/grants"
+               class="nav-link @isActive("/grants")">
+                <i class="bi bi-key-fill"></i>
+                Grants
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/serversidesessions"
+               class="nav-link @isActive("/serversidesessions")">
+                <i class="bi bi-hdd-stack-fill"></i>
+                Server-Side Sessions
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/ciba/all"
+               class="nav-link @isActive("/ciba/all")">
+                <i class="bi bi-clock-history"></i>
+                Pending CIBA Requests
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/Admin/Clients"
+               class="nav-link @isActive("/Admin/Clients")">
+                <i class="bi bi-people-fill"></i>
+                Clients
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/Admin/IdentityScopes"
+               class="nav-link @isActive("/Admin/IdentityScopes")">
+                <i class="bi bi-person-badge-fill"></i>
+                Identity Scopes
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/Admin/ApiScopes"
+               class="nav-link @isActive("/Admin/ApiScopes")">
+                <i class="bi bi-shield-lock-fill"></i>
+                API Scopes
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/portal" class="nav-link @isActive("/portal")">
+                <i class="bi bi-box-arrow-in-right"></i>
+                Client Portal
+            </a>
+        </li>
+        <li class="border-top my-3"></li>
+        <li class="nav-item">
+            <a href="https://docs.duendesoftware.com/" target="_blank" class="nav-link">
+                <i class="bi bi-box-arrow-up-right"></i>
+                Documentation
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="https://docs.duendesoftware.com/" target="_blank" class="nav-link">
+                <i class="bi bi-box-arrow-up-right"></i>
+                Help
+            </a>
+        </li>
+    </ul>
 
-        <a href="~/" class="navbar-brand">
-            <img src="~/duende-logo.svg" class="icon-banner">
-            Duende IdentityServer
-        </a>
-
-        @if (!string.IsNullOrWhiteSpace(name))
-        {
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">@name <b class="caret"></b></a>
-                    
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" asp-page="/Account/Logout/Index">Logout</a>
-                    </div>
-              </li>
+    @if (!string.IsNullOrWhiteSpace(name))
+    {
+        <hr>
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="~/img/avatar_default.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                <strong>@name</strong>
+            </a>
+            <ul class="dropdown-menu text-small shadow">
+                @* <li><a class="dropdown-item" href="#">New project...</a></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li><hr class="dropdown-divider"></li> *@
+                <li><a class="dropdown-item" href="/Account/Logout/Index">Logout</a></li>
             </ul>
-        }
-    
-    </nav>
+        </div>
+    }
 </div>
