@@ -217,6 +217,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton(new ServiceCollectionAccessor(builder.Services));
         builder.Services.AddSingleton<IDiagnosticEntry, RegisteredImplementationsDiagnosticEntry>();
         builder.Services.AddSingleton<IDiagnosticEntry, IdentityServerOptionsDiagnosticEntry>();
+        builder.Services.AddSingleton<IDiagnosticEntry, DataProtectionDiagnosticEntry>();
         builder.Services.AddSingleton<DiagnosticSummary>();
         builder.Services.AddHostedService<DiagnosticHostedService>();
 
