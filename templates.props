@@ -33,6 +33,17 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
+  <!--Release builds do more work and are stricter. This allows for faster
+      development: devs can be messy/experimental initially and verify their
+      code easily by running a build in Release mode, and we also enforce
+      stricter rules in CI with the Release configuration. We can also move
+      any slow actions to the Release configuration to speed up test runs, etc.
+  -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="../icon.png" Pack="true" Visible="false" PackagePath="" />
     <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
