@@ -68,13 +68,7 @@
         @foreach (var client in Model.Clients)
         {
             <tr>
-                <td>
-                    <a href="javascript:void(0)"
-                       class="client-edit-link"
-                       data-client-id="@client.ClientId">
-                        @client.Name
-                    </a>
-                </td>
+                <td><a asp-page="/Admin/Clients/Edit" asp-route-id="@client.ClientId">@client.ClientId</a></td>
                 <td>@client.Name</td>
                 <td>@client.Flow</td>
             </tr>
@@ -82,22 +76,3 @@
     </tbody>
 
 </table>
-
-<!-- Bootstrap Modal -->
-<div class="modal fade" id="editClientModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Client</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="editClientModalBody">
-                <!-- Partial loads here -->
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script src="~/js/clients/index.js"></script>
-}

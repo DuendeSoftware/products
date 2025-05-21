@@ -1,2 +1,168 @@
 @page
 @model IdentityServerHost.Pages.Admin.Clients.EditModel
+
+@{
+}
+
+<div class="container-fluid mb-4 px-0">
+    <div class="d-flex justify-content-between align-items-center bg-body-tertiary rounded shadow-sm p-2 flex-nowrap">
+
+        <!-- Page title -->
+        <nav aria-label="breadcrumb" class="mb-0 ms-2">
+            <ol class="breadcrumb mb-0 p-0 fs-5">
+                <li class="breadcrumb-item active" aria-current="page">
+                    Edit Client (@Model.InputModel.ClientId)
+                    <small>@Model.InputModel.Flow</small>
+                </li>
+            </ol>
+        </nav>
+
+    </div>
+</div>
+
+@if (Model.Updated)
+{
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>Success!</strong> Client has been updated successfully.
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+    <i class="bi bi-x"></i>
+  </button>
+</div>
+}
+
+<div class="clients-page">
+
+    <partial name="_ValidationSummary" />
+
+    <form method="post">
+        <input type="hidden" asp-for="InputModel.ClientId" />
+        <input type="hidden" asp-for="InputModel.Flow" />
+
+        <div class="row">
+
+            <div class="col-12 col-md-6">
+
+                <h4 class="mb-3">Client Settings</h4>
+
+                <div class="form-group mb-3">
+                    <label asp-for="InputModel.Name"></label>
+                    <input
+                        class="form-control"
+                        asp-for="InputModel.Name"
+                        autofocus />
+                </div>
+
+                @if (Model.InputModel.Flow == IdentityServerHost.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                {
+                    <div class="form-group mb-3">
+                        <label asp-for="InputModel.RedirectUri"></label>
+                        <input
+                            class="form-control"
+                            asp-for="InputModel.RedirectUri" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="InputModel.InitiateLoginUri"></label>
+                        <input
+                            class="form-control"
+                            asp-for="InputModel.InitiateLoginUri" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="InputModel.PostLogoutRedirectUri"></label>
+                        <input
+                            class="form-control"
+                            asp-for="InputModel.PostLogoutRedirectUri" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="InputModel.FrontChannelLogoutUri"></label>
+                        <input
+                            class="form-control"
+                            asp-for="InputModel.FrontChannelLogoutUri" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="InputModel.BackChannelLogoutUri"></label>
+                        <input
+                            class="form-control"
+                            asp-for="InputModel.BackChannelLogoutUri" />
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input
+                            class="form-check-input"
+                            asp-for="InputModel.RequireConsent" />
+                        <label
+                            class="form-check-label"
+                            asp-for="InputModel.RequireConsent">
+                        </label>
+                    </div>
+                }
+            </div>
+
+            <div class="col-12 col-md-6">
+
+                <h4 class="mb-3">Allowed Scopes</h4>
+
+                <div class="row gx-3">
+                    @foreach (var scope in Model.ApiScopes)
+                    {
+                        var isChecked = Model.InputModel.AllowedScopes.Contains(scope.Name) ? "checked" : "";
+                        <div class="col-12 col-md-6 mb-2">
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="InputModel.AllowedScopes"
+                                    id="scope_api_@scope.Name"
+                                    value="@scope.Name"
+                                    @isChecked />
+                                <label
+                                    class="form-check-label"
+                                    for="scope_api_@scope.Name">
+                                    @scope.Name (@scope.DisplayName)
+                                </label>
+                            </div>
+                        </div>
+                    }
+
+                    @foreach (var scope in Model.IdentityScopes)
+                    {
+                        var isChecked = Model.InputModel.AllowedScopes.Contains(scope.Name) ? "checked" : "";
+                        <div class="col-12 col-md-6 mb-2">
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="InputModel.AllowedScopes"
+                                    id="scope_id_@scope.Name"
+                                    value="@scope.Name"
+                                    @isChecked />
+                                <label
+                                    class="form-check-label"
+                                    for="scope_id_@scope.Name">
+                                    @scope.Name (@scope.DisplayName)
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-4">
+            <button
+                class="btn btn-primary"
+                type="submit"
+                name="Button"
+                value="save">
+                Save Changes
+            </button>
+            <a class="btn btn-secondary" asp-page="/Admin/Clients/Index">Cancel</a>
+            <button
+                class="btn btn-danger"
+                type="submit"
+                name="Button"
+                value="delete">
+                Delete
+            </button>
+        </div>
+    </form>
+</div>
