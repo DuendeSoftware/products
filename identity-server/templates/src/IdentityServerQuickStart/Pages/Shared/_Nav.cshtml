@@ -40,27 +40,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="/grants"
-                       class="nav-link @(isActive("/grants"))">
-                        <i class="bi bi-key-fill"></i>
-                        <span class="ms-2 d-none d-sm-inline">Grants</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/serversidesessions"
-                       class="nav-link @(isActive("/serversidesessions"))">
-                        <i class="bi bi-hdd-stack-fill"></i>
-                        <span class="ms-2 d-none d-sm-inline">Server-Side Sessions</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/ciba/all"
-                       class="nav-link @(isActive("/ciba/all"))">
-                        <i class="bi bi-clock-history"></i>
-                        <span class="ms-2 d-none d-sm-inline">Pending CIBA Requests</span>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="/Admin/Clients"
                        class="nav-link @(isActive("/admin/clients"))">
                         <i class="bi bi-people-fill"></i>
@@ -82,9 +61,31 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="/serversidesessions"
+                       class="nav-link @(isActive("/serversidesessions"))">
+                        <i class="bi bi-hdd-stack-fill"></i>
+                        <span class="ms-2 d-none d-sm-inline">Server-Side Sessions</span>
+                    </a>
+                </li>
+                <li class="border-top my-3"></li>
+                <li class="nav-item">
                     <a href="/portal" class="nav-link @(isActive("/portal"))">
                         <i class="bi bi-box-arrow-in-right"></i>
                         <span class="ms-2 d-none d-sm-inline">Client Portal</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/ciba/all"
+                       class="nav-link @(isActive("/ciba/all"))">
+                        <i class="bi bi-clock-history"></i>
+                        <span class="ms-2 d-none d-sm-inline">Pending CIBA Requests</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/grants"
+                       class="nav-link @(isActive("/grants"))">
+                        <i class="bi bi-key-fill"></i>
+                        <span class="ms-2 d-none d-sm-inline">Grants</span>
                     </a>
                 </li>
             }
@@ -126,7 +127,7 @@
         <div class="dropdown">
             <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <img src="~/img/avatar_default.png" alt="" width="32" height="32" class="rounded-circle me-2">
-                <strong>@name</strong>
+                <strong class="d-none d-sm-inline">@name</strong>
             </a>
             <ul class="dropdown-menu text-small shadow">
                 @* <li><a class="dropdown-item" href="#">New project...</a></li>

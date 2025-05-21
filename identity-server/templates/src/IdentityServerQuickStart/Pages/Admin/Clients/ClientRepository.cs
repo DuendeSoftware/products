@@ -18,13 +18,14 @@ public class ClientSummaryModel
 
 public class CreateClientModel : ClientSummaryModel
 {
-    public string Secret { get; set; } = default!;
+    public string? Secret { get; set; }
+    public bool RequireConsent { get; set; } = true;
 }
 
 public class EditClientModel : CreateClientModel, IValidatableObject
 {
     [Required]
-    public string AllowedScopes { get; set; } = default!;
+    public List<string> AllowedScopes { get; set; } = [];
 
     public string? RedirectUri { get; set; }
     public string? InitiateLoginUri { get; set; }
@@ -104,12 +105,19 @@ public class ClientRepository
         {
             ClientId = client.ClientId,
             Name = client.ClientName,
-            Flow = client.AllowedGrantTypes.Select(x => x.GrantType)
-                .Single() == GrantType.ClientCredentials ? Flow.ClientCredentials : Flow.CodeFlowWithPkce,
-            AllowedScopes = client.AllowedScopes.Count != 0 ? client.AllowedScopes.Select(x => x.Scope).Aggregate((a, b) => $"{a} {b}") : string.Empty,
-            RedirectUri = client.RedirectUris.Select(x => x.RedirectUri).SingleOrDefault(),
+            Flow = client.AllowedGrantTypes
+                                       .Select(x => x.GrantType)
+                                       .Single() == GrantType.ClientCredentials
+                                     ? Flow.ClientCredentials
+                                     : Flow.CodeFlowWithPkce,
+            AllowedScopes = [.. client.AllowedScopes.Select(x => x.Scope)],
+            RedirectUri = client.RedirectUris
+                                       .Select(x => x.RedirectUri)
+                                       .SingleOrDefault(),
             InitiateLoginUri = client.InitiateLoginUri,
-            PostLogoutRedirectUri = client.PostLogoutRedirectUris.Select(x => x.PostLogoutRedirectUri).SingleOrDefault(),
+            PostLogoutRedirectUri = client.PostLogoutRedirectUris
+                                       .Select(x => x.PostLogoutRedirectUri)
+                                       .SingleOrDefault(),
             FrontChannelLogoutUri = client.FrontChannelLogoutUri,
             BackChannelLogoutUri = client.BackChannelLogoutUri,
         };
@@ -118,102 +126,100 @@ public class ClientRepository
     public async Task CreateAsync(CreateClientModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        var client = new Duende.IdentityServer.Models.Client();
-        client.ClientId = model.ClientId.Trim();
-        client.ClientName = model.Name?.Trim();
-
-        client.ClientSecrets.Add(new Duende.IdentityServer.Models.Secret(model.Secret.Sha256()));
-
-        if (model.Flow == Flow.ClientCredentials)
+        var client = new Duende.IdentityServer.Models.Client
         {
-            client.AllowedGrantTypes = GrantTypes.ClientCredentials;
+            ClientId = model.ClientId.Trim(),
+            ClientName = model.Name?.Trim(),
+            RequireConsent = model.RequireConsent,
+            AllowRememberConsent = true,
+            AllowedGrantTypes = model.Flow == Flow.ClientCredentials
+                                ? GrantTypes.ClientCredentials
+                                : GrantTypes.Code
+        };
+
+        if (!string.IsNullOrWhiteSpace(model.Secret))
+        {
+            client.ClientSecrets.Add(new Duende.IdentityServer.Models.Secret(model.Secret.Sha256()));
         }
-        else
+
+        if (model.Flow != Flow.ClientCredentials)
         {
-            client.AllowedGrantTypes = GrantTypes.Code;
             client.AllowOfflineAccess = true;
         }
 
-#pragma warning disable CA1849 // Call async methods when in an async method
-        // CA1849 Suppressed because AddAsync is only needed for value generators that
-        // need async database access (e.g., HiLoValueGenerator), and we don't use those
-        // generators
         _context.Clients.Add(client.ToEntity());
-#pragma warning restore CA1849 // Call async methods when in an async method
         await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(EditClientModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
+
         var client = await _context.Clients
             .Include(x => x.AllowedGrantTypes)
             .Include(x => x.AllowedScopes)
             .Include(x => x.RedirectUris)
             .Include(x => x.PostLogoutRedirectUris)
-            .SingleOrDefaultAsync(x => x.ClientId == model.ClientId);
+            .SingleOrDefaultAsync(x => x.ClientId == model.ClientId) ?? throw new ArgumentException("Invalid Client Id");
 
-        if (client == null)
+        // Name / consent...
+        client.ClientName = model.Name?.Trim();
+        client.RequireConsent = model.RequireConsent;
+        client.AllowRememberConsent = true;
+
+        // SCOPES: model.AllowedScopes is now List<string>
+        var desired = model.AllowedScopes;
+        var current = client.AllowedScopes.Select(x => x.Scope).ToList();
+        var toRemove = current.Except(desired).ToList();
+        var toAdd = desired.Except(current).ToList();
+
+        if (toRemove.Any())
         {
-            throw new ArgumentException("Invalid Client Id");
+            client.AllowedScopes.RemoveAll(x => toRemove.Contains(x.Scope));
         }
 
-        if (client.ClientName != model.Name)
+        if (toAdd.Any())
         {
-            client.ClientName = model.Name?.Trim();
+            client.AllowedScopes.AddRange(toAdd.Select(s => new ClientScope { Scope = s }));
         }
 
-        var scopes = model.AllowedScopes.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var currentScopes = (client.AllowedScopes.Select(x => x.Scope) ?? Enumerable.Empty<string>()).ToArray();
-
-        var scopesToAdd = scopes.Except(currentScopes).ToArray();
-        var scopesToRemove = currentScopes.Except(scopes).ToArray();
-
-        if (scopesToRemove.Length != 0)
-        {
-            client.AllowedScopes.RemoveAll(x => scopesToRemove.Contains(x.Scope));
-        }
-        if (scopesToAdd.Length != 0)
-        {
-            client.AllowedScopes.AddRange(scopesToAdd.Select(x => new ClientScope
-            {
-                Scope = x,
-            }));
-        }
-
-        var flow = client.AllowedGrantTypes.Select(x => x.GrantType)
-            .Single() == GrantType.ClientCredentials ? Flow.ClientCredentials : Flow.CodeFlowWithPkce;
+        // REDIRECTS & LOGOUT URIs (unchanged)...
+        var flow = client.AllowedGrantTypes.Select(x => x.GrantType).Single() == GrantType.ClientCredentials
+                   ? Flow.ClientCredentials
+                   : Flow.CodeFlowWithPkce;
 
         if (flow == Flow.CodeFlowWithPkce)
         {
-            if (client.RedirectUris.SingleOrDefault()?.RedirectUri != model.RedirectUri)
+            // RedirectUri
+            var existingRedirect = client.RedirectUris.SingleOrDefault()?.RedirectUri;
+            if (existingRedirect != model.RedirectUri)
             {
                 client.RedirectUris.Clear();
-                if (model.RedirectUri != null)
+                if (!string.IsNullOrWhiteSpace(model.RedirectUri))
                 {
                     client.RedirectUris.Add(new ClientRedirectUri { RedirectUri = model.RedirectUri.Trim() });
                 }
             }
-            if (client.InitiateLoginUri != model.InitiateLoginUri)
-            {
-                client.InitiateLoginUri = model.InitiateLoginUri;
-            }
-            if (client.PostLogoutRedirectUris.SingleOrDefault()?.PostLogoutRedirectUri != model.PostLogoutRedirectUri)
+
+            // InitiateLoginUri
+            client.InitiateLoginUri = model.InitiateLoginUri;
+
+            // PostLogoutRedirectUri
+            var existingPostLogout = client.PostLogoutRedirectUris.SingleOrDefault()?.PostLogoutRedirectUri;
+            if (existingPostLogout != model.PostLogoutRedirectUri)
             {
                 client.PostLogoutRedirectUris.Clear();
-                if (model.PostLogoutRedirectUri != null)
+                if (!string.IsNullOrWhiteSpace(model.PostLogoutRedirectUri))
                 {
                     client.PostLogoutRedirectUris.Add(new ClientPostLogoutRedirectUri { PostLogoutRedirectUri = model.PostLogoutRedirectUri.Trim() });
                 }
             }
-            if (client.FrontChannelLogoutUri != model.FrontChannelLogoutUri)
-            {
-                client.FrontChannelLogoutUri = model.FrontChannelLogoutUri?.Trim();
-            }
-            if (client.BackChannelLogoutUri != model.BackChannelLogoutUri)
-            {
-                client.BackChannelLogoutUri = model.BackChannelLogoutUri?.Trim();
-            }
+
+            // FrontChannelLogoutUri
+            client.FrontChannelLogoutUri = model.FrontChannelLogoutUri?.Trim();
+
+            // BackChannelLogoutUri
+            client.BackChannelLogoutUri = model.BackChannelLogoutUri?.Trim();
         }
 
         await _context.SaveChangesAsync();

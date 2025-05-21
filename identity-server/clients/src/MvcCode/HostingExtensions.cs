@@ -40,7 +40,7 @@ internal static class HostingExtensions
             })
             .AddOpenIdConnect("oidc", options =>
             {
-                options.Authority = authority;
+                options.Authority = authority ?? "https://localhost:5001/";
 
                 options.ClientId = "mvc.code";
                 options.ClientSecret = "secret";
@@ -52,11 +52,11 @@ internal static class HostingExtensions
                 options.Scope.Clear();
                 options.Scope.Add("openid");
                 options.Scope.Add("profile");
-                options.Scope.Add("email");
-                options.Scope.Add("custom.profile");
-                options.Scope.Add("resource1.scope1");
-                options.Scope.Add("resource2.scope1");
-                options.Scope.Add("offline_access");
+                //options.Scope.Add("email");
+                //options.Scope.Add("custom.profile");
+                //options.Scope.Add("resource1.scope1");
+                //options.Scope.Add("resource2.scope1");
+                //options.Scope.Add("offline_access");
 
                 // not mapped by default
                 options.ClaimActions.MapAll();
