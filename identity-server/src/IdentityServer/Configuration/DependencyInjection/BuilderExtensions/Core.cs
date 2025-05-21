@@ -213,6 +213,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<LicenseExpirationChecker>();
 
         builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
+        builder.Services.AddSingleton<IDiagnosticEntry, AuthSchemeInfoDiagnosticEntry>();
         builder.Services.AddSingleton<DiagnosticSummary>();
         builder.Services.AddHostedService<DiagnosticHostedService>();
 
