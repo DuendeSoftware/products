@@ -20,6 +20,16 @@
     </div>
 </div>
 
+@if (Model.Updated)
+{
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>Success!</strong> Client has been updated successfully.
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+    <i class="bi bi-x"></i>
+  </button>
+</div>
+}
+
 <div class="clients-page">
 
     <partial name="_ValidationSummary" />

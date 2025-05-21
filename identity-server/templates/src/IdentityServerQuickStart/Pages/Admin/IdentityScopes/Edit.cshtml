@@ -3,37 +3,54 @@
 @{
 }
 
-<div class="identityscopes-page">
+<div class="container-fluid mb-4 px-0">
+    <div class="d-flex justify-content-between align-items-center bg-body-tertiary rounded shadow-sm p-2 flex-nowrap">
 
-    <h2>
-        Edit Identity Scope: @Model.InputModel.Name
-    </h2>
+        <!-- Page title -->
+        <nav aria-label="breadcrumb" class="mb-0 ms-2">
+            <ol class="breadcrumb mb-0 p-0 fs-5">
+                <li class="breadcrumb-item active" aria-current="page">
+                    Edit Identity Scope (@Model.InputModel.Name)
+                </li>
+            </ol>
+        </nav>
 
-    <partial name="_ValidationSummary" />
-
-    <div class="row">
-        <div class="col-md-6">
-            <form method="post">
-                <input type="hidden" asp-for="@Model.InputModel.Name" />
-
-                <div class="form-group">
-                    <label asp-for="@Model.InputModel.DisplayName"></label>
-                    <input class="form-control" asp-for="@Model.InputModel.DisplayName" autofocus />
-                </div>
-                
-                <div class="form-group">
-                    <label asp-for="@Model.InputModel.UserClaims">User Claims (space delimited)</label>
-                    <input class="form-control" asp-for="@Model.InputModel.UserClaims" />
-                </div>
-
-                <div class="form-group">
-                    <button class="btn btn-primary" type="submit" name="Button" value="save">Save Changes</button>
-                    <a class="btn btn-secondary" asp-page="/Admin/IdentityScopes/Index">Cancel</a>
-                    <button class="btn btn-danger" type="submit" name="Button" value="delete">Delete</button>
-                </div>
-            </form>
-
-        </div>
     </div>
+</div>
 
+@if (Model.Updated)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> Identity Scope has been updated successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+}
+
+<partial name="_ValidationSummary" />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <input type="hidden" asp-for="@Model.InputModel.Name" />
+
+            <div class="form-group mb-3">
+                <label asp-for="@Model.InputModel.DisplayName"></label>
+                <input class="form-control" asp-for="@Model.InputModel.DisplayName" autofocus />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="@Model.InputModel.UserClaims">User Claims (space delimited)</label>
+                <input class="form-control" asp-for="@Model.InputModel.UserClaims" />
+            </div>
+
+            <div class="form-group mb-3">
+                <button class="btn btn-primary" type="submit" name="Button" value="save">Save Changes</button>
+                <a class="btn btn-secondary" asp-page="/Admin/IdentityScopes/Index">Cancel</a>
+                <button class="btn btn-danger" type="submit" name="Button" value="delete">Delete</button>
+            </div>
+        </form>
+
+    </div>
 </div>

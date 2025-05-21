@@ -21,6 +21,7 @@ public class EditModel(
     [BindProperty]
     public EditClientModel InputModel { get; set; } = default!;
 
+    public bool Updated { get; set; } = false;
     public List<ApiScopeSummaryModel> ApiScopes { get; set; } = [];
     public List<IdentityScopeSummaryModel> IdentityScopes { get; set; } = [];
 
@@ -54,8 +55,13 @@ public class EditModel(
         if (ModelState.IsValid)
         {
             await clientRepository.UpdateAsync(InputModel);
+            Updated = true;
+
             return await OnGetAsync(id);
         }
+
+        ApiScopes = [.. (await apiScopeRepository.GetAllAsync())];
+        IdentityScopes = [.. (await identityScopeRepository.GetAllAsync())];
 
         return Page();
     }

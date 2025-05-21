@@ -1,50 +1,69 @@
 @page
 @model IdentityServerHost.Pages.Admin.Clients.NewModel
 
+<div class="container-fluid mb-4 px-0">
+    <div class="d-flex justify-content-between align-items-center bg-body-tertiary rounded shadow-sm p-2 flex-nowrap">
+
+        <!-- Page title -->
+        <nav aria-label="breadcrumb" class="mb-0 ms-2">
+            <ol class="breadcrumb mb-0 p-0 fs-5">
+                <li class="breadcrumb-item active" aria-current="page">New Client</li>
+            </ol>
+        </nav>
+
+    </div>
+</div>
+
 <div class="clients-page">
     @if (Model.Created)
     {
-        <div class="row">
-            <div class="col-md-6">
-                <h2>Client Id <em>@Model.InputModel.ClientId</em> created</h2>
-                <p>The client secret is displayed below. Copy it now, as it won't be shown again.</p>
-                <p class="alert alert-danger">@Model.InputModel.Secret</p>
-                <p>Click here to <a asp-page="/Admin/Clients/Edit" asp-route-id="@Model.InputModel.ClientId">continue</a>.</p>
-            </div>
-        </div>
+      <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Success!</h4>
+        <p>
+          Client Id `<em>@Model.InputModel.ClientId</em>` created!
+          The client secret is displayed below. Copy it now, as it won't be shown again.
+        </p>
+        <hr>
+        <pre class="mb-0">@Model.InputModel.Secret</pre>
+        <hr />
+        <p class="mb-0">Click here to <a asp-page="/Admin/Clients/Edit" asp-route-id="@Model.InputModel.ClientId">continue</a>.</p>
+      </div>
     }
     else
     {
-        <h2>
-            New Client
-        </h2>
-
         <partial name="_ValidationSummary" />
 
         <div class="row">
             <div class="col-md-6">
                 <form method="post">
-                    <div class="form-group">
-                        <label asp-for="@Model.InputModel.ClientId"></label>
-                        <input class="form-control" asp-for="@Model.InputModel.ClientId" autofocus />
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="@Model.InputModel.Secret"></label>
-                        <input class="form-control" asp-for="@Model.InputModel.Secret" />
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="@Model.InputModel.Name"></label>
-                        <input class="form-control" asp-for="@Model.InputModel.Name" />
-                    </div>
-                    <div class="form-group">
+                  <input type="hidden" asp-for="@Model.InputModel.Flow" />
+
+                  <div class="form-group mb-3">
                         <label asp-for="@Model.InputModel.Flow"></label>
-                        <select class="form-control" asp-for="@Model.InputModel.Flow">
+                        <select class="form-control readonly disabled" asp-for="@Model.InputModel.Flow" readonly disabled>
                             <option value="0">Client Credentials</option>
                             <option value="1">Code Flow (with PKCE)</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <button class="btn btn-primary" type="submit">Save Changes</button>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="@Model.InputModel.ClientId"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.ClientId" autofocus />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="@Model.InputModel.Secret"></label>
+                        <input class="form-control" asp-for="@Model.InputModel.Secret" />
+                    </div>
+                    <div class="form-group mb-3">
+                      <label asp-for="InputModel.Name"></label>
+                      <input
+                          class="form-control"
+                          asp-for="InputModel.Name"
+                          autofocus />
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <button class="btn btn-success" type="submit">Create Client</button>
                         <a class="btn btn-secondary" asp-page="/Admin/Clients/Index">Cancel</a>
                     </div>
                 </form>

@@ -17,6 +17,8 @@ public class EditModel : PageModel
     [BindProperty]
     public string? Button { get; set; }
 
+    public bool Updated { get; set; } = false;
+
     public async Task<IActionResult> OnGetAsync(string id)
     {
         var model = await _repository.GetByIdAsync(id);
@@ -42,7 +44,9 @@ public class EditModel : PageModel
         if (ModelState.IsValid)
         {
             await _repository.UpdateAsync(InputModel);
-            return RedirectToPage("/Admin/IdentityScopes/Edit", new { id });
+            Updated = true;
+
+            return await OnGetAsync(id);
         }
 
         return Page();

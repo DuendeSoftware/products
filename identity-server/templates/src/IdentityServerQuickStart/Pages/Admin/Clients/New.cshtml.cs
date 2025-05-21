@@ -7,20 +7,19 @@ namespace IdentityServerHost.Pages.Admin.Clients;
 
 [SecurityHeaders]
 [Authorize]
-public class NewModel : PageModel
+public class NewModel(ClientRepository repository) : PageModel
 {
-    private readonly ClientRepository _repository;
-
-    public NewModel(ClientRepository repository) => _repository = repository;
+    private readonly ClientRepository _repository = repository;
 
     [BindProperty]
     public CreateClientModel InputModel { get; set; } = default!;
 
     public bool Created { get; set; }
 
-    public void OnGet() => InputModel = new CreateClientModel
+    public void OnGet(string type) => InputModel = new CreateClientModel
     {
-        Secret = Convert.ToBase64String(CryptoRandom.CreateRandomKey(16))
+        Secret = Convert.ToBase64String(CryptoRandom.CreateRandomKey(16)),
+        Flow = type == "m2m" ? Flow.ClientCredentials : Flow.CodeFlowWithPkce,
     };
 
     public async Task<IActionResult> OnPostAsync()
