@@ -20,6 +20,8 @@ public class CreateClientModel : ClientSummaryModel
 {
     public string? Secret { get; set; }
     public bool RequireConsent { get; set; } = true;
+
+    public string Button { get; set; } = string.Empty;
 }
 
 public class EditClientModel : CreateClientModel, IValidatableObject

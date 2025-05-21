@@ -25,28 +25,24 @@ public class EditModel(
     public List<ApiScopeSummaryModel> ApiScopes { get; set; } = [];
     public List<IdentityScopeSummaryModel> IdentityScopes { get; set; } = [];
 
-    [BindProperty]
-    public string? Button { get; set; }
-
     public async Task<IActionResult> OnGetAsync(string id)
     {
         var model = await clientRepository.GetByIdAsync(id);
         if (model == null)
         {
-            return RedirectToPage("/Admin/Clients/Index");
+            return NotFound();
         }
-        else
-        {
-            ApiScopes = [.. (await apiScopeRepository.GetAllAsync())];
-            IdentityScopes = [.. (await identityScopeRepository.GetAllAsync())];
-            InputModel = model;
-            return Page();
-        }
+
+        ApiScopes = [.. await apiScopeRepository.GetAllAsync()];
+        IdentityScopes = [.. await identityScopeRepository.GetAllAsync()];
+        InputModel = model;
+
+        return Partial("~/Pages/Admin/Clients/_EditPartial.cshtml", this);
     }
 
     public async Task<IActionResult> OnPostAsync(string id)
     {
-        if (Button == "delete")
+        if (InputModel.Button == "delete")
         {
             await clientRepository.DeleteAsync(id);
             return RedirectToPage("/Admin/Clients/Index");
@@ -56,13 +52,8 @@ public class EditModel(
         {
             await clientRepository.UpdateAsync(InputModel);
             Updated = true;
-
-            return await OnGetAsync(id);
         }
 
-        ApiScopes = [.. (await apiScopeRepository.GetAllAsync())];
-        IdentityScopes = [.. (await identityScopeRepository.GetAllAsync())];
-
-        return Page();
+        return await OnGetAsync(id);
     }
 }
