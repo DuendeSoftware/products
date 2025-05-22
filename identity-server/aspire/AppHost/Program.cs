@@ -43,9 +43,9 @@ if (dbHosts.Any(HostIsEnabled))
 {
     // Adds SQL Server to the builder (requires Docker).
     // Feel free to use your preferred docker management service.
-
     var sqlServer = builder
-        .AddSqlServer(name: "SqlServer", port: 62949);
+        .AddSqlServer(name: "SqlServer", port: 62949)
+        .WithLifetime(ContainerLifetime.Persistent);
 
     var identityServerDb = sqlServer
         .AddDatabase(name: "IdentityServerDb", databaseName: "IdentityServer");
