@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using aspire.orchestrator.AppHost;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -9,12 +12,16 @@ var builder = DistributedApplication.CreateBuilder(args);
 // This will allow us to refer back to the projects when setting up references.
 var projectRegistry = new Dictionary<string, IResourceBuilder<ProjectResource>>();
 
+// Configure options
+var appConfig = builder.Configuration
+    .GetSection("AspireProjectConfiguration")
+    .Get<AppHostConfiguration>();
+
 ConfigureIdentityServerHosts();
 ConfigureApis();
 ConfigureClients();
 
 builder.Build().Run();
-
 
 void ConfigureIdentityServerHosts()
 {
@@ -98,9 +105,8 @@ void ConfigureIdentityServerHosts()
         }
     }
 
-    bool HostIsEnabled(string name) => builder.Configuration
-        .GetSection($"AspireProjectConfiguration:IdentityHost").Value?
-        .Equals(name, StringComparison.OrdinalIgnoreCase) ?? false;
+    bool HostIsEnabled(string name) =>
+        appConfig.IdentityHost?.Equals(name, StringComparison.OrdinalIgnoreCase) ?? false;
 }
 
 void ConfigureApis()
@@ -152,10 +158,13 @@ void ConfigureConsoleClients()
     RegisterClientIfEnabled<Projects.ConsoleResourceIndicators>("console-resource-indicators", explicitStart: true);
 }
 
-bool ClientIsEnabled(string name) => builder.Configuration
-    .GetSection($"AspireProjectConfiguration:UseClients:{name}").Value?
-    .Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+bool ClientIsEnabled(string name)
+{
+    if (appConfig.UseClients == null)
+        return false;
 
+    return appConfig.UseClients.TryGetValue(name, out bool enabled) && enabled;
+}
 
 void RegisterApiIfEnabled<T>(string name) where T : IProjectMetadata, new()
 {
@@ -164,10 +173,14 @@ void RegisterApiIfEnabled<T>(string name) where T : IProjectMetadata, new()
         var api = builder.AddProject<T>(name);
         projectRegistry.Add(name, api);
     }
+}
 
-    bool ApiIsEnabled(string name) => builder.Configuration
-        .GetSection($"AspireProjectConfiguration:UseApis:{name}").Value?
-        .Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+bool ApiIsEnabled(string name)
+{
+    if (appConfig.UseApis == null)
+        return false;
+
+    return appConfig.UseApis.TryGetValue(name, out bool enabled) && enabled;
 }
 
 void RegisterClientIfEnabled<T>(string name, bool explicitStart = false) where T : IProjectMetadata, new()
@@ -181,6 +194,4 @@ void RegisterClientIfEnabled<T>(string name, bool explicitStart = false) where T
             resourceBuilder.WithExplicitStart();
         }
     }
-
-
 }
