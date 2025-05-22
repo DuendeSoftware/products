@@ -105,33 +105,14 @@ void ConfigureIdentityServerHosts()
 
 void ConfigureApis()
 {
-    if (ApiIsEnabled(nameof(Projects.SimpleApi)))
-    {
-        var simpleApi = builder.AddProject<Projects.SimpleApi>(name: "simple-api");
-        projectRegistry.Add("simple-api", simpleApi);
-    }
-
-    if (ApiIsEnabled(nameof(Projects.ResourceBasedApi)))
-    {
-        var resourceBasedApi = builder.AddProject<Projects.ResourceBasedApi>(name: "resource-based-api");
-        projectRegistry.Add("resource-based-api", resourceBasedApi);
-    }
-
-    if (ApiIsEnabled(nameof(Projects.DPoPApi)))
-    {
-        var dpopApi = builder.AddProject<Projects.DPoPApi>(name: "dpop-api");
-        projectRegistry.Add("dpop-api", dpopApi);
-    }
-
-    bool ApiIsEnabled(string name) => builder.Configuration
-        .GetSection($"AspireProjectConfiguration:UseApis:{name}").Value?
-        .Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+    RegisterApiIfEnabled<Projects.SimpleApi>("simple-api");
+    RegisterApiIfEnabled<Projects.ResourceBasedApi>("resource-based-api");
+    RegisterApiIfEnabled<Projects.DPoPApi>("dpop-api");
 }
 
 void ConfigureClients()
 {
     ConfigureWebClients();
-
     ConfigureConsoleClients();
 }
 
@@ -176,6 +157,19 @@ bool ClientIsEnabled(string name) => builder.Configuration
     .Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
 
 
+void RegisterApiIfEnabled<T>(string name) where T : IProjectMetadata, new()
+{
+    if (ApiIsEnabled(typeof(T).Name))
+    {
+        var api = builder.AddProject<T>(name);
+        projectRegistry.Add(name, api);
+    }
+
+    bool ApiIsEnabled(string name) => builder.Configuration
+        .GetSection($"AspireProjectConfiguration:UseApis:{name}").Value?
+        .Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
+}
+
 void RegisterClientIfEnabled<T>(string name, bool explicitStart = false) where T : IProjectMetadata, new()
 {
     if (ClientIsEnabled(typeof(T).Name))
@@ -187,4 +181,6 @@ void RegisterClientIfEnabled<T>(string name, bool explicitStart = false) where T
             resourceBuilder.WithExplicitStart();
         }
     }
+
+
 }
