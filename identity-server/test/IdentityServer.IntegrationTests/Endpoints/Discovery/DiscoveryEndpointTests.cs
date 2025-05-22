@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
-using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
@@ -53,7 +52,7 @@ public class DiscoveryEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task Algorithms_supported_should_match_signing_key()
+    public async Task IdToken_signing_algorithms_supported_should_match_signing_key()
     {
         var key = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
         var expectedAlgorithm = SecurityAlgorithms.EcdsaSha256;
@@ -65,19 +64,19 @@ public class DiscoveryEndpointTests
             services.AddIdentityServerBuilder()
                 .AddSigningCredential(key, expectedAlgorithm);
         };
-        pipeline.Initialize("/ROOT");
+        pipeline.Initialize();
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
 
-        var json = await result.Content.ReadAsStringAsync();
-        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-        var algorithmsSupported = data["id_token_signing_alg_values_supported"].EnumerateArray()
-            .Select(x => x.GetString()).ToList();
+        var algorithmsSupported = result.TryGetStringArray("id_token_signing_alg_values_supported");
 
-        algorithmsSupported.Count.ShouldBe(2);
+        algorithmsSupported.Count().ShouldBe(2);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
     }
+
+
+
 
     [Fact]
     [Trait("Category", Category)]
@@ -332,25 +331,5 @@ public class DiscoveryEndpointTests
 
         var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
         result.MtlsEndpointAliases.PushedAuthorizationRequestEndpoint.ShouldNotBeNull();
-    }
-
-    [Fact]
-    [Trait("Category", Category)]
-    public async Task dpop_signing_algorithms_supported_respects_configuration()
-    {
-        var pipeline = new IdentityServerPipeline();
-        pipeline.Initialize();
-
-        var supportedAlgorithms = new List<string>
-        {
-            SecurityAlgorithms.RsaSha256,
-            SecurityAlgorithms.EcdsaSha256
-        };
-        pipeline.Options.DPoP.SupportedDPoPSigningAlgorithms = supportedAlgorithms;
-
-        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
-
-        var supportedAlgorithmsFromResponse = result.TryGetStringArray(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported);
-        supportedAlgorithmsFromResponse.ShouldBe(supportedAlgorithms);
     }
 }

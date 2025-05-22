@@ -6,6 +6,7 @@
 
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Validation;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.Configuration;
 
@@ -205,27 +206,86 @@ public class IdentityServerOptions
     public PushedAuthorizationOptions PushedAuthorization { get; set; } = new PushedAuthorizationOptions();
 
     /// <summary>
-    /// The allowed clock skew for JWT lifetime validation. Except for DPoP proofs,
-    /// all JWTs that have their lifetime validated use this setting to control the
-    /// clock skew of lifetime validation. This includes JWT access tokens passed
-    /// to the user info, introspection, and local api endpoints, client
-    /// authentication JWTs used in private_key_jwt authentication, JWT secured
-    /// authorization requests (JAR), and custom usage of the
-    /// <see cref="TokenValidator"/>, such as in a token exchange implementation.
+    /// The allowed clock skew for JWT lifetime validation. This setting controls the clock skew of lifetime validation
+    /// for all JWTs except DPoP proofs, including
+    /// <list type="bullet">
+    /// <item>JWT access tokens passed to the user info, introspection, and local api endpoints</item>
+    /// <item>Authentication JWTs used in private_key_jwt authentication</item>
+    /// <item> JWT secured authorization requests (JAR request objects)</item>
+    /// <item> Custom usage of the <see cref="TokenValidator"/>, such as in a token exchange implementation.</item>
+    /// </list>
+    ///
     /// Defaults to five minutes.
     /// </summary>
     public TimeSpan JwtValidationClockSkew { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
-    /// The allowed algorithms for JWT validation. Except for DPoP proofs, all JWTs validated by IdentityServer use this
-    /// setting to control the allowed signing algorithms. This includes JWT
-    /// access tokens passed to the user info, introspection, and local api endpoints,
-    /// client authentication JWTs used in private_key_jwt authentication, JWT secured
-    /// authorization requests (JAR), and custom usage of the <see cref="TokenValidator"/>,
-    /// such as in a token exchange implementation. Defaults to an empty collection which
-    /// allows all algorithms.
+    /// <para>
+    /// Specifies the allowed signature algorithms for JWT secured authorization requests (JAR). The "alg" header of JAR
+    /// request objects is validated against this collection, and the
+    /// request_object_signing_alg_values_supported discovery property is populated with these values.
+    /// </para>
+    /// <para>
+    /// Defaults to [RS256, RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512, HS256, HS384, HS512], which allows
+    /// the RSA, Probabilistic RSA, ECDSA, or HMAC signing algorithms with 256, 384, or 512-bit SHA hashing.
+    /// </para>
+    /// <para>
+    /// If set to an empty collection, all algorithms are allowed, but the request_object_signing_alg_values_supported
+    /// will not be set. Explicitly listing the expected values is recommended.
+    ///</para>
     /// </summary>
-    public ICollection<string> AllowedJwtAlgorithms { get; set; } = [];
+    public ICollection<string> SupportedRequestObjectSigningAlgorithms { get; set; } =
+    [
+        SecurityAlgorithms.RsaSha256,
+        SecurityAlgorithms.RsaSha384,
+        SecurityAlgorithms.RsaSha512,
+
+        SecurityAlgorithms.RsaSsaPssSha256,
+        SecurityAlgorithms.RsaSsaPssSha384,
+        SecurityAlgorithms.RsaSsaPssSha512,
+
+        SecurityAlgorithms.EcdsaSha256,
+        SecurityAlgorithms.EcdsaSha384,
+        SecurityAlgorithms.EcdsaSha512,
+
+        SecurityAlgorithms.HmacSha256,
+        SecurityAlgorithms.HmacSha384,
+        SecurityAlgorithms.HmacSha512
+    ];
+
+    /// <summary>
+    /// <para>
+    /// Specifies the allowed signature algorithms for client authentication using client assertions (the
+    /// private_key_jwt parameter). The "alg" header of client assertions is validated against this collection, and the
+    /// token_endpoint_auth_signing_alg_values_supported discovery property is populated with these values.
+    /// </para>
+    /// <para>
+    /// Defaults to [RS256, RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512, HS256, HS384, HS512], which allows
+    /// the RSA, Probabilistic RSA, ECDSA, or HMAC signing algorithms with 256, 384, or 512-bit SHA hashing.
+    /// </para>
+    /// <para>
+    /// If set to an empty collection, all algorithms are allowed, but the
+    /// token_endpoint_auth_signing_alg_values_supported will not be set. Explicitly listing the expected values is
+    /// recommended.
+    ///</para>
+    /// </summary>
+    public ICollection<string> SupportedClientAssertionSigningAlgorithms { get; set; } = [
+        SecurityAlgorithms.RsaSha256,
+        SecurityAlgorithms.RsaSha384,
+        SecurityAlgorithms.RsaSha512,
+
+        SecurityAlgorithms.RsaSsaPssSha256,
+        SecurityAlgorithms.RsaSsaPssSha384,
+        SecurityAlgorithms.RsaSsaPssSha512,
+
+        SecurityAlgorithms.EcdsaSha256,
+        SecurityAlgorithms.EcdsaSha384,
+        SecurityAlgorithms.EcdsaSha512,
+
+        SecurityAlgorithms.HmacSha256,
+        SecurityAlgorithms.HmacSha384,
+        SecurityAlgorithms.HmacSha512
+    ];
 
     /// <summary>
     /// Gets or sets the options for enabling and configuring preview features in the server.

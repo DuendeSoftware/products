@@ -326,8 +326,14 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 types.Add(OidcConstants.EndpointAuthenticationMethods.TlsClientAuth);
                 types.Add(OidcConstants.EndpointAuthenticationMethods.SelfSignedTlsClientAuth);
             }
-
             entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, types);
+
+            if (types.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt) &&
+                !IEnumerableExtensions.IsNullOrEmpty(Options.SupportedClientAssertionSigningAlgorithms))
+            {
+                entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported,
+                    Options.SupportedClientAssertionSigningAlgorithms);
+            }
         }
 
         var signingCredentials = await Keys.GetAllSigningCredentialsAsync();
@@ -344,24 +350,11 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         {
             entries.Add(OidcConstants.Discovery.RequestParameterSupported, true);
 
-            entries.Add(OidcConstants.Discovery.RequestObjectSigningAlgorithmsSupported, new[]
+            if (!IEnumerableExtensions.IsNullOrEmpty(Options.SupportedRequestObjectSigningAlgorithms))
             {
-                SecurityAlgorithms.RsaSha256,
-                SecurityAlgorithms.RsaSha384,
-                SecurityAlgorithms.RsaSha512,
-
-                SecurityAlgorithms.RsaSsaPssSha256,
-                SecurityAlgorithms.RsaSsaPssSha384,
-                SecurityAlgorithms.RsaSsaPssSha512,
-
-                SecurityAlgorithms.EcdsaSha256,
-                SecurityAlgorithms.EcdsaSha384,
-                SecurityAlgorithms.EcdsaSha512,
-
-                SecurityAlgorithms.HmacSha256,
-                SecurityAlgorithms.HmacSha384,
-                SecurityAlgorithms.HmacSha512
-            });
+                entries.Add(OidcConstants.Discovery.RequestObjectSigningAlgorithmsSupported,
+                    Options.SupportedRequestObjectSigningAlgorithms);
+            }
 
             if (Options.Endpoints.EnableJwtRequestUri)
             {
@@ -388,7 +381,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.BackchannelUserCodeParameterSupported, true);
         }
 
-        if (Options.Endpoints.EnableTokenEndpoint)
+        if (Options.Endpoints.EnableTokenEndpoint &&
+            !IEnumerableExtensions.IsNullOrEmpty(Options.DPoP.SupportedDPoPSigningAlgorithms))
         {
             entries.Add(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported, Options.DPoP.SupportedDPoPSigningAlgorithms);
         }

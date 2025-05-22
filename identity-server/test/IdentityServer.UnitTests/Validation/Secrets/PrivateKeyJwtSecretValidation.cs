@@ -473,7 +473,7 @@ public class PrivateKeyJwtSecretValidation
             Type = IdentityServerConstants.ParsedSecretTypes.JwtBearer
         };
 
-        _options.AllowedJwtAlgorithms = ["Test"];
+        _options.SupportedClientAssertionSigningAlgorithms = ["Test"];
 
         var result = await _validator.ValidateAsync(client.ClientSecrets, secret);
 

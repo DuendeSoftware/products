@@ -27,6 +27,22 @@ public class DPoPOptions
     /// The allowed signing algorithms used in validating DPoP proof tokens. Defaults to:
     /// RSA256, RSA384, RSA512, PS256, PS384, PS512, ES256, ES384, ES512.
     /// </summary>
+    ///
+    /// <summary>
+    /// <para>
+    /// Specifies the allowed signature algorithms for DPoP proof tokens. The "alg" headers of proofs
+    /// are validated against this collection, and the dpop_signing_alg_values_supported discovery property is populated
+    /// with these values.
+    /// </para>
+    /// <para>
+    /// Defaults to [RS256, RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512], which allows the RSA, Probabilistic
+    /// RSA, or ECDSA signing algorithms with 256, 384, or 512-bit SHA hashing.
+    /// </para>
+    /// <para>
+    /// If set to an empty collection, all algorithms (including symmetric algorithms) are allowed, and the
+    /// dpop_signing_alg_values_supported will not be set. Explicitly listing the expected values is recommended.
+    ///</para>
+    /// </summary>
     public ICollection<string> SupportedDPoPSigningAlgorithms { get; set; } =
     [
         SecurityAlgorithms.RsaSha256,

@@ -120,7 +120,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             RequireExpirationTime = true,
 
             ClockSkew = _options.JwtValidationClockSkew,
-            ValidAlgorithms = _options.AllowedJwtAlgorithms
+            ValidAlgorithms = _options.SupportedClientAssertionSigningAlgorithms
         };
 
         var issuer = await _issuerNameService.GetCurrentAsync();
@@ -128,7 +128,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
         if (enforceStrictAud)
         {
             // New strict audience validation requires that the audience be the issuer identifier, disallows multiple
-            // audiences in an array, and even disallows wrapping even a single audience in an array 
+            // audiences in an array, and even disallows wrapping even a single audience in an array
             tokenValidationParameters.AudienceValidator = (audiences, token, parameters) =>
             {
                 // There isn't a particularly nice way to distinguish between a claim that is a single string wrapped in
@@ -205,7 +205,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
         return success;
     }
 
-    // AudiencesMatch and AudiencesMatchIgnoringTrailingSlash are based on code from 
+    // AudiencesMatch and AudiencesMatchIgnoringTrailingSlash are based on code from
     // https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/bef98ca10ae55603ce6d37dfb7cd5af27791527c/src/Microsoft.IdentityModel.Tokens/Validators.cs#L158-L193
     private bool AudiencesMatch(string tokenAudience, string validAudience)
     {
