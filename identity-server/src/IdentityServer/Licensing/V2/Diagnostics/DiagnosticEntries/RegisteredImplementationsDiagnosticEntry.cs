@@ -2,76 +2,54 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
-internal class RegisteredImplementationsDiagnosticEntry(IServiceProvider serviceProvider) : IDiagnosticEntry
+internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly Dictionary<string, IEnumerable<Type>> _typesToInspect;
+
+    public RegisteredImplementationsDiagnosticEntry(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        _typesToInspect = assemblies.SelectMany(assembly => assembly.GetExportedTypes())
+            .Where(type => type.IsInterface && type.IsPublic && !type.IsGenericTypeDefinition && type.Namespace != null && type.Namespace.StartsWith("Duende.IdentityServer"))
+            .GroupBy(type => type.Namespace, type => type)
+            .ToDictionary(group => group.Key, group => group.OrderBy(type => type.Name).AsEnumerable());
+    }
+
     public Task WriteAsync(Utf8JsonWriter writer)
     {
-        using var scope = serviceProvider.CreateScope();
+        using var scope = _serviceProvider.CreateScope();
 
-        writer.WriteStartObject("RegisteredServices");
+        writer.WriteStartObject("RegisteredImplementations");
 
-        writer.WriteStartArray("Services");
+        foreach (var namespaceGroup in _typesToInspect)
+        {
+            writer.WriteStartArray(namespaceGroup.Key);
 
-        //services
-        InspectService<IBackchannelAuthenticationInteractionService>(nameof(IBackchannelAuthenticationInteractionService), writer, scope);
-        InspectService<IBackchannelAuthenticationThrottlingService>(nameof(IBackchannelAuthenticationThrottlingService), writer, scope);
-        InspectService<IBackchannelAuthenticationUserNotificationService>(nameof(IBackchannelAuthenticationUserNotificationService), writer, scope);
-        InspectService<IBackChannelLogoutService>(nameof(IBackChannelLogoutService), writer, scope);
-        InspectService(typeof(ICache<>), "ICache", writer, scope); //TODO: replace with nameof operator when C# 14 is available with support for nameof operator on open generic types
-        InspectService<IClaimsService>(nameof(IClaimsService), writer, scope);
-        InspectService<IConsentService>(nameof(IConsentService), writer, scope);
-        InspectService<IDeviceFlowCodeService>(nameof(IDeviceFlowCodeService), writer, scope);
-        InspectService<IDeviceFlowInteractionService>(nameof(IDeviceFlowCodeService), writer, scope);
-        InspectService<IDeviceFlowThrottlingService>(nameof(IDeviceFlowThrottlingService), writer, scope);
-        InspectService<IEventService>(nameof(IEventService), writer, scope);
-        InspectService<IEventSink>(nameof(IEventSink), writer, scope);
-        InspectService<IHandleGenerationService>(nameof(IHandleGenerationService), writer, scope);
-        InspectService<IIdentityServerInteractionService>(nameof(IIdentityServerInteractionService), writer, scope);
-        InspectService<IIssuerNameService>(nameof(IIssuerNameService), writer, scope);
-        InspectService<IKeyMaterialService>(nameof(IKeyMaterialService), writer, scope);
-        InspectService<ILogoutNotificationService>(nameof(ILogoutNotificationService), writer, scope);
-        InspectService<IPersistedGrantService>(nameof(IPersistedGrantService), writer, scope);
-        InspectService<IProfileService>(nameof(IProfileService), writer, scope);
-        InspectService<IPushedAuthorizationSerializer>(nameof(IPushedAuthorizationSerializer), writer, scope);
-        InspectService<IPushedAuthorizationService>(nameof(IPushedAuthorizationService), writer, scope);
-        InspectService<IRefreshTokenService>(nameof(IRefreshTokenService), writer, scope);
-        InspectService<IReplayCache>(nameof(IReplayCache), writer, scope);
-        InspectService<IReturnUrlParser>(nameof(IReturnUrlParser), writer, scope);
-        InspectService<IServerUrls>(nameof(IServerUrls), writer, scope);
-        InspectService<ISessionCoordinationService>(nameof(ISessionCoordinationService), writer, scope);
-        InspectService<ISessionManagementService>(nameof(ISessionManagementService), writer, scope);
-        InspectService<ITokenCreationService>(nameof(ITokenCreationService), writer, scope);
-        InspectService<ITokenService>(nameof(ITokenService), writer, scope);
-        InspectService<IUserCodeGenerator>(nameof(IUserCodeGenerator), writer, scope);
-        InspectService<IUserCodeService>(nameof(IUserCodeService), writer, scope);
-        InspectService<IUserSession>(nameof(IUserSession), writer, scope);
+            foreach (var type in namespaceGroup.Value)
+            {
+                WriteImplementationDetails(type, type.Name, writer, scope);
+            }
 
-        //stores
-        InspectService<IAuthorizationCodeStore>(nameof(IAuthorizationCodeStore), writer, scope);
-        InspectService<IAuthorizationParametersMessageStore>(nameof(IAuthorizationParametersMessageStore), writer, scope);
-        InspectService<IClientStore>(nameof(IClientStore), writer, scope);
-        InspectService<IConsentMessageStore>(nameof(IConsentMessageStore), writer, scope);
-        InspectService<IDeviceFlowStore>(nameof(IDeviceFlowStore), writer, scope);
-        InspectService<IIdentityProviderStore>(nameof(IIdentityProviderStore), writer, scope);
-        InspectService(typeof(IMessageStore<>), "IMessageStore", writer, scope); //TODO: replace with nameof operator when C# 14 is available with support for nameof operator on open generic types
-        InspectService<IPersistedGrantStore>(nameof(IPersistedGrantStore), writer, scope);
-        InspectService<IPushedAuthorizationRequestStore>(nameof(IPushedAuthorizationRequestStore), writer, scope);
-        InspectService<IReferenceTokenStore>(nameof(IReferenceTokenStore), writer, scope);
-        InspectService<IResourceStore>(nameof(IResourceStore), writer, scope);
-        InspectService<IServerSideSessionsMarker>(nameof(IServerSideSessionsMarker), writer, scope);
-        InspectService<IServerSideSessionStore>(nameof(IServerSideSessionStore), writer, scope);
-        InspectService<IServerSideTicketStore>(nameof(IServerSideTicketStore), writer, scope);
-        InspectService<ISigningCredentialStore>(nameof(ISigningCredentialStore), writer, scope);
-        InspectService<ISigningKeyStore>(nameof(ISigningKeyStore), writer, scope);
-        InspectService<IUserConsentStore>(nameof(IUserConsentStore), writer, scope);
-        InspectService<IValidationKeysStore>(nameof(IValidationKeysStore), writer, scope);
+            writer.WriteEndArray();
+        }
 
+        //INFO: Types which are registered as open generics are intentionally not included in the above loop as
+        //they cannot be resolved from the DI container as an open generic type. Rather than attempting to dynamically
+        //create a closed type, which could be error-prone, we'll explicitly list the open generic types we know about.
+        writer.WriteStartArray("OpenGenericTypes");
+        WriteImplementationDetails<ICache<string>>(nameof(ICache<string>), writer, scope);
+        WriteImplementationDetails<IConcurrencyLock<string>>(nameof(IConcurrencyLock<string>), writer, scope);
+        WriteImplementationDetails<IMessageStore<string>>(nameof(IMessageStore<string>), writer, scope);
         writer.WriteEndArray();
 
         writer.WriteEndObject();
@@ -79,29 +57,36 @@ internal class RegisteredImplementationsDiagnosticEntry(IServiceProvider service
         return Task.CompletedTask;
     }
 
-    private void InspectService<T>(string serviceName, Utf8JsonWriter writer, IServiceScope scope) where T : class => InspectService(typeof(T), serviceName, writer, scope);
+    private void WriteImplementationDetails<T>(string serviceName, Utf8JsonWriter writer, IServiceScope scope) where T : class => WriteImplementationDetails(typeof(T), serviceName, writer, scope);
 
-    private void InspectService(Type targetType, string serviceName, Utf8JsonWriter writer, IServiceScope scope)
+    private void WriteImplementationDetails(Type targetType, string serviceName, Utf8JsonWriter writer, IServiceScope scope)
     {
         writer.WriteStartObject();
+        writer.WriteStartArray(serviceName);
 
-        writer.WriteStartObject(serviceName);
-        var service = scope.ServiceProvider.GetService(targetType);
-        if (service != null)
+        var services = scope.ServiceProvider.GetServices(targetType).Where(service => service != null);
+        if (services.Any())
         {
-            var type = service.GetType();
-            writer.WriteString("TypeName", type.FullName);
-            writer.WriteString("Assembly", type.Assembly.GetName().Name);
-            writer.WriteString("AssemblyVersion", type.Assembly.GetName().Version?.ToString());
+            foreach (var service in services)
+            {
+                var type = service.GetType();
+                writer.WriteStartObject();
+                writer.WriteString("TypeName", type.FullName);
+                writer.WriteString("Assembly", type.Assembly.GetName().Name);
+                writer.WriteString("AssemblyVersion", type.Assembly.GetName().Version?.ToString());
+                writer.WriteEndObject();
+            }
         }
         else
         {
+            writer.WriteStartObject();
             writer.WriteString("TypeName", "Not Registered");
             writer.WriteString("Assembly", "Not Registered");
             writer.WriteString("AssemblyVersion", "Not Registered");
+            writer.WriteEndObject();
         }
 
-        writer.WriteEndObject();
+        writer.WriteEndArray();
         writer.WriteEndObject();
     }
 }
