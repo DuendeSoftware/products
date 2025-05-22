@@ -32,7 +32,7 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     }
 
     /// <summary>
-    /// Stores the authorization code asynchronous.
+    /// Stores the authorization code asynchronously.
     /// </summary>
     /// <param name="code">The code.</param>
     /// <returns></returns>
@@ -44,7 +44,7 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     }
 
     /// <summary>
-    /// Gets the authorization code asynchronous.
+    /// Gets the authorization code asynchronously.
     /// </summary>
     /// <param name="code">The code.</param>
     /// <returns></returns>
@@ -56,7 +56,7 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     }
 
     /// <summary>
-    /// Removes the authorization code asynchronous.
+    /// Removes the authorization code asynchronously.
     /// </summary>
     /// <param name="code">The code.</param>
     /// <returns></returns>

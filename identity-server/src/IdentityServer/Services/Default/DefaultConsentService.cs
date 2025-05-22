@@ -93,7 +93,7 @@ public class DefaultConsentService : IConsentService
         var scopes = parsedScopes.Select(x => x.RawValue).ToArray();
 
         // we always require consent for offline access if
-        // the client has not disabled RequireConsent 
+        // the client has not disabled RequireConsent
         if (scopes.Contains(IdentityServerConstants.StandardScopes.OfflineAccess))
         {
             Logger.LogDebug("Scopes contains offline_access, consent is required");
@@ -138,7 +138,7 @@ public class DefaultConsentService : IConsentService
     }
 
     /// <summary>
-    /// Updates the consent asynchronous.
+    /// Updates the consent asynchronously.
     /// </summary>
     /// <param name="client">The client.</param>
     /// <param name="subject">The subject.</param>

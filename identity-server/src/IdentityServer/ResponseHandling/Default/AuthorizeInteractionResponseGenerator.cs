@@ -341,7 +341,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             // did user provide consent
             if (consent == null)
             {
-                // user was not yet shown conset screen
+                // user was not yet shown consent screen
                 response.IsConsent = true;
                 Logger.LogInformation("Showing consent: User has not yet consented");
             }
