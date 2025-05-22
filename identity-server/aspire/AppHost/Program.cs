@@ -64,42 +64,51 @@ void ConfigureIdentityServerHosts()
 
         if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)))
         {
-            var aspnetMigration = builder.AddProject<Projects.AspNetIdentityDb>(name: "aspnetidentitydb-migrations")
-                .WithReference(identityServerDb, connectionName: "DefaultConnection")
-                .WaitFor(identityServerDb);
-
             var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity>(name: "is-host")
                 .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
-                .WithReference(identityServerDb, connectionName: "DefaultConnection")
-                .WaitForCompletion(aspnetMigration);
+                .WithReference(identityServerDb, connectionName: "DefaultConnection");
+
+            if (appConfig.RunDatabaseMigrations)
+            {
+                var aspnetMigration = builder.AddProject<Projects.AspNetIdentityDb>(name: "aspnetidentitydb-migrations")
+                    .WithReference(identityServerDb, connectionName: "DefaultConnection")
+                    .WaitFor(identityServerDb);
+                hostAspNetIdentity.WaitForCompletion(aspnetMigration);
+            }
 
             projectRegistry.Add("is-host", hostAspNetIdentity);
         }
 
         if (HostIsEnabled(nameof(Projects.Host_EntityFramework)))
         {
-            var idSrvMigration = builder.AddProject<Projects.IdentityServerDb>(name: "identityserverdb-migrations")
-                .WithReference(identityServerDb, connectionName: "DefaultConnection")
-                .WaitFor(identityServerDb);
-
             var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework>(name: "is-host")
                 .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
-                .WithReference(identityServerDb, connectionName: "DefaultConnection")
-                .WaitForCompletion(idSrvMigration);
+                .WithReference(identityServerDb, connectionName: "DefaultConnection");
+
+            if (appConfig.RunDatabaseMigrations)
+            {
+                var idSrvMigration = builder.AddProject<Projects.IdentityServerDb>(name: "identityserverdb-migrations")
+                    .WithReference(identityServerDb, connectionName: "DefaultConnection")
+                    .WaitFor(identityServerDb);
+                hostEntityFramework.WaitForCompletion(idSrvMigration);
+            }
 
             projectRegistry.Add("is-host", hostEntityFramework);
         }
 
         if (HostIsEnabled(nameof(Projects.Host_EntityFramework_dotnet9)))
         {
-            var idSrvMigration = builder.AddProject<Projects.IdentityServerDb>(name: "identityserverdb-migrations")
-                .WithReference(identityServerDb, connectionName: "DefaultConnection")
-                .WaitFor(identityServerDb);
-
             var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework_dotnet9>(name: "is-host")
                 .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
-                .WithReference(identityServerDb, connectionName: "DefaultConnection")
-                .WaitForCompletion(idSrvMigration);
+                .WithReference(identityServerDb, connectionName: "DefaultConnection");
+
+            if (appConfig.RunDatabaseMigrations)
+            {
+                var idSrvMigration = builder.AddProject<Projects.IdentityServerDb>(name: "identityserverdb-migrations")
+                    .WithReference(identityServerDb, connectionName: "DefaultConnection")
+                    .WaitFor(identityServerDb);
+                hostEntityFramework.WaitForCompletion(idSrvMigration);
+            }
 
             projectRegistry.Add("is-host", hostEntityFramework);
         }
