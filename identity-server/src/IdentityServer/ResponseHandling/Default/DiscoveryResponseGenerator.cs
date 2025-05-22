@@ -328,7 +328,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             }
             entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, types);
 
-            if (types.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt))
+            if (types.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt) &&
+                !IEnumerableExtensions.IsNullOrEmpty(Options.SupportedClientAssertionSigningAlgorithms))
             {
                 entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported,
                     Options.SupportedClientAssertionSigningAlgorithms);
@@ -349,7 +350,11 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         {
             entries.Add(OidcConstants.Discovery.RequestParameterSupported, true);
 
-            entries.Add(OidcConstants.Discovery.RequestObjectSigningAlgorithmsSupported, Options.SupportedRequestObjectSigningAlgorithms);
+            if (!IEnumerableExtensions.IsNullOrEmpty(Options.SupportedRequestObjectSigningAlgorithms))
+            {
+                entries.Add(OidcConstants.Discovery.RequestObjectSigningAlgorithmsSupported,
+                    Options.SupportedRequestObjectSigningAlgorithms);
+            }
 
             if (Options.Endpoints.EnableJwtRequestUri)
             {
@@ -376,7 +381,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.BackchannelUserCodeParameterSupported, true);
         }
 
-        if (Options.Endpoints.EnableTokenEndpoint)
+        if (Options.Endpoints.EnableTokenEndpoint &&
+            !IEnumerableExtensions.IsNullOrEmpty(Options.DPoP.SupportedDPoPSigningAlgorithms))
         {
             entries.Add(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported, Options.DPoP.SupportedDPoPSigningAlgorithms);
         }
