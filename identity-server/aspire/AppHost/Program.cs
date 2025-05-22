@@ -3,8 +3,6 @@
 
 using aspire.orchestrator.AppHost;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -16,6 +14,10 @@ var projectRegistry = new Dictionary<string, IResourceBuilder<ProjectResource>>(
 var appConfig = builder.Configuration
     .GetSection("AspireProjectConfiguration")
     .Get<AppHostConfiguration>();
+if (appConfig is null)
+{
+    throw new InvalidOperationException("AspireProjectConfiguration not found in appsettings.json");
+}
 
 ConfigureIdentityServerHosts();
 ConfigureApis();
@@ -170,9 +172,11 @@ void ConfigureConsoleClients()
 bool ClientIsEnabled(string name)
 {
     if (appConfig.UseClients == null)
+    {
         return false;
+    }
 
-    return appConfig.UseClients.TryGetValue(name, out bool enabled) && enabled;
+    return appConfig.UseClients.TryGetValue(name, out var enabled) && enabled;
 }
 
 void RegisterApiIfEnabled<T>(string name) where T : IProjectMetadata, new()
@@ -187,9 +191,11 @@ void RegisterApiIfEnabled<T>(string name) where T : IProjectMetadata, new()
 bool ApiIsEnabled(string name)
 {
     if (appConfig.UseApis == null)
+    {
         return false;
+    }
 
-    return appConfig.UseApis.TryGetValue(name, out bool enabled) && enabled;
+    return appConfig.UseApis.TryGetValue(name, out var enabled) && enabled;
 }
 
 void RegisterClientIfEnabled<T>(string name, bool explicitStart = false) where T : IProjectMetadata, new()
