@@ -31,7 +31,7 @@ public interface IUserSession
     Task<string?> GetSessionIdAsync();
 
     /// <summary>
-    /// Ensures the session identifier cookie asynchronous.
+    /// Ensures the session identifier cookie asynchronously.
     /// </summary>
     /// <returns></returns>
     Task EnsureSessionIdCookieAsync();

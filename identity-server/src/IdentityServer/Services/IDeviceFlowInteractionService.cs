@@ -14,14 +14,14 @@ namespace Duende.IdentityServer.Services;
 public interface IDeviceFlowInteractionService
 {
     /// <summary>
-    /// Gets the authorization context asynchronous.
+    /// Gets the authorization context asynchronously.
     /// </summary>
     /// <param name="userCode">The user code.</param>
     /// <returns></returns>
     Task<DeviceFlowAuthorizationRequest?> GetAuthorizationContextAsync(string userCode);
 
     /// <summary>
-    /// Handles the request asynchronous.
+    /// Handles the request asynchronously.
     /// </summary>
     /// <param name="userCode">The user code.</param>
     /// <param name="consent">The consent.</param>

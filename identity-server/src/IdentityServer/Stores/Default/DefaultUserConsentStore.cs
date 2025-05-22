@@ -43,7 +43,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     }
 
     /// <summary>
-    /// Stores the user consent asynchronous.
+    /// Stores the user consent asynchronously.
     /// </summary>
     /// <param name="consent">The consent.</param>
     /// <returns></returns>
@@ -56,7 +56,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     }
 
     /// <summary>
-    /// Gets the user consent asynchronous.
+    /// Gets the user consent asynchronously.
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
@@ -82,7 +82,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     }
 
     /// <summary>
-    /// Removes the user consent asynchronous.
+    /// Removes the user consent asynchronously.
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier.</param>
