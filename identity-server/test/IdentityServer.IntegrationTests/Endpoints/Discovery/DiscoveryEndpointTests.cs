@@ -80,6 +80,28 @@ public class DiscoveryEndpointTests
     }
 
     [Fact]
+    public async Task Token_endpoint_authentication_algorithms_supported_should_match_configuration()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.AllowedJwtAlgorithms =
+        [
+            SecurityAlgorithms.RsaSsaPssSha256,
+            SecurityAlgorithms.EcdsaSha256
+        ];
+
+        var disco = await pipeline.BackChannelClient
+            .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        disco.IsError.ShouldBeFalse();
+
+        var algorithmsSupported = disco.TokenEndpointAuthenticationSigningAlgorithmsSupported;
+
+        algorithmsSupported.Count().ShouldBe(2);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+    }
+
+    [Fact]
     [Trait("Category", Category)]
     public async Task Jwks_entries_should_countain_crv()
     {
