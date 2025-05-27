@@ -105,6 +105,24 @@ public class TokenIssueCountDiagnosticEntryTests
     }
 
     [Fact]
+    public async Task Should_Handle_No_Token_Issued()
+    {
+        IssueToken("authorization_code", false, null, false, ProofType.None, false);
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
+
+        var tokenIssueCounts = result.RootElement.GetProperty("TokenIssueCounts");
+        tokenIssueCounts.GetProperty("Jwt").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("Reference").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("JwtPoPDPoP").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("JwtPoPmTLS").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("ReferencePoPDPoP").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("ReferencePoPmTLS").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("Refresh").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("Id").GetInt64().ShouldBe(0);
+    }
+
+    [Fact]
     public async Task Should_Handle_Initial_Grant_Type_Count()
     {
         IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.None, false);
@@ -157,7 +175,7 @@ public class TokenIssueCountDiagnosticEntryTests
         tokenIssueCounts.GetProperty("Refresh").GetInt64().ShouldBe(0);
     }
 
-    private void IssueToken(string grantType, bool accessTokenIssued, AccessTokenType accessTokenType, bool refreshTokenIssued,
+    private void IssueToken(string grantType, bool accessTokenIssued, AccessTokenType? accessTokenType, bool refreshTokenIssued,
         ProofType proofType, bool idTokenIssued) =>
         Duende.IdentityServer.Telemetry.Metrics.TokenIssued("ClientId", grantType, null, accessTokenIssued, accessTokenType, refreshTokenIssued, proofType, idTokenIssued);
 }
