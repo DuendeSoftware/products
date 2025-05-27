@@ -442,6 +442,23 @@ public static class Telemetry
         public static readonly Counter<long> TokenIssuedCounter =
             Meter.CreateCounter<long>(Counters.TokenIssued);
 
+
+        /// <summary>
+        /// Helper method to increase <see cref="TokenIssuedCounter"/>
+        /// </summary>
+        /// <param name="clientId">Client Id</param>
+        /// <param name="grantType">Grant Type</param>
+        /// <param name="requestType">Type of authorization request</param>
+        [Obsolete("This overload will be removed in a future version. Use the overload with accessTokenIssued, accessTokenType, refreshTokenIssued, proofType, and idTokenIssued parameters instead.")]
+        public static void TokenIssued(string clientId, string grantType, AuthorizeRequestType? requestType)
+        {
+            Success(clientId);
+            TokenIssuedCounter.Add(1,
+                new(Tags.Client, clientId),
+                new(Tags.GrantType, grantType),
+                new(Tags.AuthorizeRequestType, requestType));
+        }
+
         /// <summary>
         /// Helper method to increase <see cref="TokenIssuedCounter"/>
         /// </summary>
@@ -449,9 +466,9 @@ public static class Telemetry
         /// <param name="grantType">Grant Type</param>
         /// <param name="requestType">Type of authorization request</param>
         /// <param name="accessTokenIssued">Whether an access token was issued</param>
-        /// <param name="accessTokenType">The type of access token issued</param>
+        /// <param name="accessTokenType">The type of access token issued (JWT or Reference)</param>
         /// <param name="refreshTokenIssued">Whether a refresh token was issued</param>
-        /// <param name="proofType">The proof type used</param>
+        /// <param name="proofType">The proof type used (None, ClientCertificate, or DPoP)</param>
         /// <param name="idTokenIssued">Whether an id token was issued</param>
         public static void TokenIssued(string clientId, string grantType, AuthorizeRequestType? requestType,
             bool accessTokenIssued, AccessTokenType accessTokenType, bool refreshTokenIssued, ProofType proofType, bool idTokenIssued)

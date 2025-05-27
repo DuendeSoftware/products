@@ -22,6 +22,7 @@ public static class IClientStoreExtensions
         var client = await store.FindClientByIdAsync(clientId);
         if (client != null && client.Enabled)
         {
+            //Telemetry.Metrics.ClientLoaded(client);
             return client;
         }
 
