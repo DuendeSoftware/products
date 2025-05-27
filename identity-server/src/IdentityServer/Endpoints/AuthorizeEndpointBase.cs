@@ -241,7 +241,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
                 response.Request.GrantType,
                 response.Request.AuthorizeRequestType,
                 response.AccessToken.IsPresent(),
-                response.Request.AccessTokenType,
+                response.AccessToken.IsPresent() ? response.Request.AccessTokenType : null,
                 false,
                 ProofType.None,
                 response.IdentityToken.IsPresent());
