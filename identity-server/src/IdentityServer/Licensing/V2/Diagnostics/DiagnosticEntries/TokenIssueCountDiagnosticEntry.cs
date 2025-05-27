@@ -68,6 +68,7 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
         var refreshTokenIssued = false;
         var proofType = ProofType.None;
         var identityTokenIssued = false;
+        var grantType = string.Empty;
 
         foreach (var tag in tags)
         {
@@ -93,6 +94,9 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
                     break;
                 case Telemetry.Metrics.Tags.IdTokenIssued:
                     bool.TryParse(tag.Value?.ToString(), out identityTokenIssued);
+                    break;
+                case Telemetry.Metrics.Tags.GrantType:
+                    grantType = tag.Value?.ToString();
                     break;
             }
         }
@@ -130,6 +134,16 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
         if (identityTokenIssued)
         {
             _tokenCounts["Id"].Increment();
+        }
+
+        var tokenWasIssued = accessTokenIssued || refreshTokenIssued || identityTokenIssued;
+        if (tokenWasIssued && !string.IsNullOrEmpty(grantType))
+        {
+            _tokenCounts.AddOrUpdate(grantType, new AtomicCounter(1), (_, counter) =>
+            {
+                counter.Increment();
+                return counter;
+            });
         }
     }
 }
