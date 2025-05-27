@@ -13,7 +13,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_JwtAccessToken()
     {
-        IssueToken(true, AccessTokenType.Jwt, false, ProofType.None, false);
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.None, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -23,7 +23,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_JwtReferenceToken()
     {
-        IssueToken(true, AccessTokenType.Reference, false, ProofType.None, false);
+        IssueToken("authorization_code", true, AccessTokenType.Reference, false, ProofType.None, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -33,7 +33,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_JwtDPoPToken()
     {
-        IssueToken(true, AccessTokenType.Jwt, false, ProofType.DPoP, false);
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.DPoP, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -43,7 +43,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_ReferenceDPoPToken()
     {
-        IssueToken(true, AccessTokenType.Reference, false, ProofType.DPoP, false);
+        IssueToken("authorization_code", true, AccessTokenType.Reference, false, ProofType.DPoP, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -53,7 +53,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_JwtMTlsToken()
     {
-        IssueToken(true, AccessTokenType.Jwt, false, ProofType.ClientCertificate, false);
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.ClientCertificate, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -63,7 +63,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_ReferenceMTlsToken()
     {
-        IssueToken(true, AccessTokenType.Reference, false, ProofType.ClientCertificate, false);
+        IssueToken("authorization_code", true, AccessTokenType.Reference, false, ProofType.ClientCertificate, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -73,7 +73,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_RefreshToken()
     {
-        IssueToken(false, AccessTokenType.Jwt, true, ProofType.None, false);
+        IssueToken("refresh_token", false, AccessTokenType.Jwt, true, ProofType.None, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -83,7 +83,7 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Count_IdToken()
     {
-        IssueToken(false, AccessTokenType.Jwt, false, ProofType.None, true);
+        IssueToken("authorization_code", false, AccessTokenType.Jwt, false, ProofType.None, true);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -93,8 +93,8 @@ public class TokenIssueCountDiagnosticEntryTests
     [Fact]
     public async Task Should_Handle_Multiple_Token_Types()
     {
-        IssueToken(true, AccessTokenType.Jwt, true, ProofType.None, false);
-        IssueToken(true, AccessTokenType.Jwt, false, ProofType.DPoP, false);
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, true, ProofType.None, false);
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.DPoP, false);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
@@ -102,6 +102,42 @@ public class TokenIssueCountDiagnosticEntryTests
         tokenIssueCounts.GetProperty("Jwt").GetInt64().ShouldBe(1);
         tokenIssueCounts.GetProperty("JwtPoPDPoP").GetInt64().ShouldBe(1);
         tokenIssueCounts.GetProperty("Refresh").GetInt64().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Should_Handle_Initial_Grant_Type_Count()
+    {
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.None, false);
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
+
+        var tokenIssueCounts = result.RootElement.GetProperty("TokenIssueCounts");
+        tokenIssueCounts.GetProperty("authorization_code").GetInt64().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Should_Handle_Multiple_Grant_Type_Counts()
+    {
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.None, false);
+        IssueToken("client_credentials", true, AccessTokenType.Jwt, false, ProofType.None, false);
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
+
+        var tokenIssueCounts = result.RootElement.GetProperty("TokenIssueCounts");
+        tokenIssueCounts.GetProperty("authorization_code").GetInt64().ShouldBe(1);
+        tokenIssueCounts.GetProperty("client_credentials").GetInt64().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Should_Handle_Multiple_Grant_Type_Counts_With_Grant_Type()
+    {
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.None, false);
+        IssueToken("authorization_code", true, AccessTokenType.Jwt, false, ProofType.None, false);
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
+
+        var tokenIssueCounts = result.RootElement.GetProperty("TokenIssueCounts");
+        tokenIssueCounts.GetProperty("authorization_code").GetInt64().ShouldBe(2);
     }
 
     [Fact]
@@ -121,7 +157,7 @@ public class TokenIssueCountDiagnosticEntryTests
         tokenIssueCounts.GetProperty("Refresh").GetInt64().ShouldBe(0);
     }
 
-    private void IssueToken(bool accessTokenIssued, AccessTokenType accessTokenType, bool refreshTokenIssued,
+    private void IssueToken(string grantType, bool accessTokenIssued, AccessTokenType accessTokenType, bool refreshTokenIssued,
         ProofType proofType, bool idTokenIssued) =>
-        Duende.IdentityServer.Telemetry.Metrics.TokenIssued("ClientId", "GrantType", null, accessTokenIssued, accessTokenType, refreshTokenIssued, proofType, idTokenIssued);
+        Duende.IdentityServer.Telemetry.Metrics.TokenIssued("ClientId", grantType, null, accessTokenIssued, accessTokenType, refreshTokenIssued, proofType, idTokenIssued);
 }

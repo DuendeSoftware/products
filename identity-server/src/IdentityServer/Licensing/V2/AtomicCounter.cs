@@ -3,9 +3,11 @@
 
 namespace Duende.IdentityServer.Licensing.V2;
 
-internal class AtomicCounter
+internal class AtomicCounter(int initialCount = 0)
 {
-    private long _count;
+    private long _count = initialCount;
+
     public void Increment() => Interlocked.Increment(ref _count);
+
     public long Count => _count;
 }
