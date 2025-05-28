@@ -4,17 +4,21 @@
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class IdentityServerOptionsDiagnosticEntry(IOptions<IdentityServerOptions> options) : IDiagnosticEntry
 {
+    private static readonly RemovePropertyModifier<IdentityServerOptions> RemoveLicenseKeyModifier = new([
+        nameof(IdentityServerOptions.LicenseKey)
+    ]);
     private readonly JsonSerializerOptions _serializerOptions = new()
     {
         TypeInfoResolver = new DefaultJsonTypeInfoResolver
         {
-            Modifiers = { RemoveLicenseKeyModifier }
+            Modifiers = { RemoveLicenseKeyModifier.ModifyTypeInfo }
         },
         WriteIndented = false
     };
@@ -26,23 +30,5 @@ internal class IdentityServerOptionsDiagnosticEntry(IOptions<IdentityServerOptio
         JsonSerializer.Serialize(writer, options.Value, _serializerOptions);
 
         return Task.CompletedTask;
-    }
-
-    private static void RemoveLicenseKeyModifier(JsonTypeInfo typeInfo)
-    {
-        if (typeInfo.Type != typeof(IdentityServerOptions))
-        {
-            return;
-        }
-
-        var propsToKeep = typeInfo.Properties
-            .Where(prop => prop.Name != nameof(IdentityServerOptions.LicenseKey))
-            .ToArray();
-
-        typeInfo.Properties.Clear();
-        foreach (var prop in propsToKeep)
-        {
-            typeInfo.Properties.Add(prop);
-        }
     }
 }
