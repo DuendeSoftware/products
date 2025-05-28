@@ -37,6 +37,7 @@ public static class Telemetry
             public const string ApiSecretValidation = "tokenservice.api.secret_validation";
             public const string BackchannelAuthentication = "tokenservice.backchannel_authentication";
             public const string ClientConfigValidation = "tokenservice.client.config_validation";
+            public const string ClientLoaded = "tokenservice.client.loaded";
             public const string ClientSecretValidation = "tokenservice.client.secret_validation";
             public const string DeviceAuthentication = "tokenservice.device_authentication";
             public const string DynamicIdentityProviderValidation = "tokenservice.dynamic_identityprovider.validation";
@@ -231,6 +232,22 @@ public static class Telemetry
         {
             Success(clientId);
             ClientValidationCounter.Add(1, tag: new(Tags.Client, clientId));
+        }
+
+        /// <summary>
+        /// Client loaded counter
+        /// </summary>
+        public static Counter<long> ClientLoadedCounter =
+            Meter.CreateCounter<long>(Counters.ClientLoaded);
+
+        /// <summary>
+        /// Helper method to increase <see cref="ClientLoadedCounter"/>
+        /// </summary>
+        /// <param name="clientId">Id of the client which was successfully loaded</param>
+        public static void ClientLoaded(string clientId)
+        {
+            Success(clientId);
+            ClientLoadedCounter.Add(1, tag: new(Tags.Client, clientId));
         }
 
         /// <summary>
