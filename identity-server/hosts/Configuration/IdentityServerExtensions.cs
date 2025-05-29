@@ -1,11 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.RequestProcessing;
 using IdentityServerHost.Configuration;
 using IdentityServerHost.Extensions;
+using Microsoft.AspNetCore.Authentication.Certificate;
 
 namespace IdentityServerHost;
 
@@ -26,6 +28,8 @@ internal static class IdentityServerExtensions
                 options.ServerSideSessions.UserDisplayNameClaimType = JwtClaimTypes.Name;
 
                 options.UserInteraction.CreateAccountUrl = "/Account/Create";
+
+                options.MutualTls.Enabled = true;
             })
             //.AddServerSideSessions()
             .AddInMemoryClients([])
@@ -53,6 +57,13 @@ internal static class IdentityServerExtensions
                     Scope = "openid profile"
                 }
             ]);
+
+        builder.Services.AddAuthentication().AddCertificate(certificateOptions =>
+        {
+            // We must allow self-signed certificates for the "ephemeral" case
+            certificateOptions.AllowedCertificateTypes = CertificateTypes.Chained | CertificateTypes.SelfSigned;
+            certificateOptions.RevocationMode = X509RevocationMode.NoCheck;
+        });
 
         builder.Services.AddIdentityServerConfiguration(opt =>
         {

@@ -1,7 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using DPoPApi;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
+using MtlsApi;
 using Serilog;
 using Serilog.Events;
 
@@ -21,7 +23,6 @@ builder.Host.UseSerilog();
 builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
-builder.Services.AddCors();
 
 // this API will accept any access token from the authority
 builder.Services.AddAuthentication("token")
@@ -31,27 +32,25 @@ builder.Services.AddAuthentication("token")
         options.TokenValidationParameters.ValidateAudience = false;
         options.MapInboundClaims = false;
 
-        options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+        options.TokenValidationParameters.ValidTypes = ["at+jwt"];
     });
 
-builder.Services.ConfigureDPoPTokensForScheme("token", options =>
+builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Mode = DPoPMode.DPoPAndBearer;
+    options.ConfigureHttpsDefaults(https =>
+    {
+        https.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+        https.AllowAnyClientCertificate(); // Needed for the "ephemeral" mtls client
+    });
 });
 
 var app = builder.Build();
 
-app.UseCors(policy =>
-{
-    policy.WithOrigins("https://localhost:44300");
-    policy.AllowAnyHeader();
-    policy.AllowAnyMethod();
-    policy.WithExposedHeaders("WWW-Authenticate");
-});
-
 app.UseRouting();
 app.UseAuthentication();
+app.UseConfirmationValidation();
 app.UseAuthorization();
+
 app.MapControllers().RequireAuthorization();
 
 app.Run();

@@ -27,7 +27,7 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddAuthentication("token")
     .AddJwtBearer("token", options =>
     {
-        options.Authority = Clients.Constants.Authority;
+        options.Authority = builder.Configuration["is-host"];
         options.TokenValidationParameters.ValidateAudience = false;
         options.MapInboundClaims = false;
 

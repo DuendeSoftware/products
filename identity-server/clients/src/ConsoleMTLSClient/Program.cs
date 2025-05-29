@@ -4,6 +4,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -11,8 +12,15 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var authority = Constants.AuthorityMtls;
-var simpleApi = Constants.SampleApiMtls;
+// Register a named HttpClient with service discovery support.
+// The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+builder.Services.AddHttpClient("MtlsApi", client =>
+{
+    client.BaseAddress = new Uri("https://mtls-api");
+})
+.ConfigurePrimaryHttpMessageHandler(CreateClientCertificateHandler)
+.AddServiceDiscovery();
+var host = builder.Build();
 
 var response = await RequestTokenAsync();
 response.Show();
@@ -24,8 +32,8 @@ Environment.Exit(0);
 
 async Task<TokenResponse> RequestTokenAsync()
 {
-    var client = new HttpClient(GetHandler());
-
+    var client = new HttpClient(CreateClientCertificateHandler());
+    var authority = builder.Configuration["is-host"];
     var disco = await client.GetDiscoveryDocumentAsync(authority);
     if (disco.IsError)
     {
@@ -50,23 +58,21 @@ async Task<TokenResponse> RequestTokenAsync()
 
 async Task CallServiceAsync(string token)
 {
-    var client = new HttpClient(GetHandler())
-    {
-        BaseAddress = new Uri(simpleApi)
-    };
-
+    var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
+    var client = httpClientFactory.CreateClient("MtlsApi");
     client.SetBearerToken(token);
+
     var response = await client.GetStringAsync("identity");
 
     "\nService claims:".ConsoleGreen();
     Console.WriteLine(response.PrettyPrintJson());
 }
 
-static SocketsHttpHandler GetHandler()
+static SocketsHttpHandler CreateClientCertificateHandler()
 {
     var handler = new SocketsHttpHandler();
 
-    var cert = X509CertificateLoader.LoadPkcs12FromFile(path: "client.p12", password: "changeit");
+    var cert = X509CertificateLoader.LoadPkcs12FromFile(path: "localhost-client.p12", password: "changeit");
     handler.SslOptions.ClientCertificates = new X509CertificateCollection { cert };
 
     return handler;

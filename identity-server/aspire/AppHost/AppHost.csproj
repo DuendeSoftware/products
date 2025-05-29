@@ -30,9 +30,10 @@
     <ProjectReference Include="..\..\hosts\main\Host.Main.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
 
     <!-- API Projects -->
-    <ProjectReference Include="..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
-    <ProjectReference Include="..\..\clients\src\APIs\ResourceBasedApi\ResourceBasedApi.csproj" />
     <ProjectReference Include="..\..\clients\src\APIs\SimpleApi\SimpleApi.csproj" />
+    <ProjectReference Include="..\..\clients\src\APIs\ResourceBasedApi\ResourceBasedApi.csproj" />
+    <ProjectReference Include="..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
+    <ProjectReference Include="..\..\clients\src\APIs\MtlsApi\MtlsApi.csproj" />
 
     <!-- Clients (Console) -->
     <ProjectReference Include="..\..\clients\src\ConsoleCibaClient\ConsoleCibaClient.csproj" />

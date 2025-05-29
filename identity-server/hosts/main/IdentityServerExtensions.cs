@@ -7,6 +7,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using IdentityServerHost.Configuration;
 using IdentityServerHost.Extensions;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
@@ -37,6 +38,8 @@ internal static class IdentityServerExtensions
                     Name = "RS256",
                     UseX509Certificate = true
                 });
+
+                options.MutualTls.Enabled = true;
             })
             .AddServerSideSessions()
             .AddInMemoryClients([.. TestClients.Get()])
@@ -68,10 +71,12 @@ internal static class IdentityServerExtensions
 
         builder.Services.AddDistributedMemoryCache();
 
-        // builder.Services.AddIdentityServerConfiguration(opt =>
-        // {
-        //     // opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
-        // }).AddInMemoryClientConfigurationStore();
+        builder.Services.AddAuthentication().AddCertificate(certificateOptions =>
+        {
+            // We must allow self-signed certificates for the "ephemeral" case
+            certificateOptions.AllowedCertificateTypes = CertificateTypes.Chained | CertificateTypes.SelfSigned;
+            certificateOptions.RevocationMode = X509RevocationMode.NoCheck;
+        });
 
         return builder;
     }
