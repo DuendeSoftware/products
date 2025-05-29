@@ -6,17 +6,20 @@ using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<RegisteredImplementationsDiagnosticEntry> _logger;
     private readonly Dictionary<string, IEnumerable<Type>> _typesToInspect;
 
-    public RegisteredImplementationsDiagnosticEntry(IServiceProvider serviceProvider)
+    public RegisteredImplementationsDiagnosticEntry(IServiceProvider serviceProvider, ILogger<RegisteredImplementationsDiagnosticEntry> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         _typesToInspect = assemblies.SelectMany(assembly => assembly.GetExportedTypes())
@@ -64,27 +67,40 @@ internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
         writer.WriteStartObject();
         writer.WriteStartArray(serviceName);
 
-        var services = scope.ServiceProvider.GetServices(targetType).Where(service => service != null);
-        if (services.Any())
+        try
         {
-            foreach (var service in services)
+            var services = scope.ServiceProvider.GetServices(targetType).Where(service => service != null);
+            if (services.Any())
             {
-                var type = service.GetType();
+                foreach (var service in services)
+                {
+                    var type = service.GetType();
+                    writer.WriteStartObject();
+                    writer.WriteString("TypeName", type.FullName);
+                    writer.WriteString("Assembly", type.Assembly.GetName().Name);
+                    writer.WriteString("AssemblyVersion", type.Assembly.GetName().Version?.ToString());
+                    writer.WriteEndObject();
+                }
+            }
+            else
+            {
                 writer.WriteStartObject();
-                writer.WriteString("TypeName", type.FullName);
-                writer.WriteString("Assembly", type.Assembly.GetName().Name);
-                writer.WriteString("AssemblyVersion", type.Assembly.GetName().Version?.ToString());
+                writer.WriteString("TypeName", "Not Registered");
+                writer.WriteString("Assembly", "Not Registered");
+                writer.WriteString("AssemblyVersion", "Not Registered");
                 writer.WriteEndObject();
             }
         }
-        else
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error while inspecting registered implementations for {ServiceName}", serviceName);
             writer.WriteStartObject();
-            writer.WriteString("TypeName", "Not Registered");
-            writer.WriteString("Assembly", "Not Registered");
-            writer.WriteString("AssemblyVersion", "Not Registered");
+            writer.WriteString("TypeName", "Error resolving service");
+            writer.WriteString("Assembly", "Error resolving service");
+            writer.WriteString("AssemblyVersion", "Error resolving service");
             writer.WriteEndObject();
         }
+
 
         writer.WriteEndArray();
         writer.WriteEndObject();
