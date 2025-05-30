@@ -8,6 +8,7 @@
       "identity-server\\clients\\src\\APIs\\SimpleApi\\SimpleApi.csproj",
       "identity-server\\clients\\src\\APIs\\ResourceBasedApi\\ResourceBasedApi.csproj",
       "identity-server\\clients\\src\\APIs\\DPoPApi\\DPoPApi.csproj",
+      "identity-server\\clients\\src\\APIs\\MtlsApi\\MtlsApi.csproj",
       "identity-server\\clients\\src\\MvcCode\\MvcCode.csproj",
       "identity-server\\clients\\src\\MvcDPoP\\MvcDPoP.csproj",
       "identity-server\\clients\\src\\JsOidc\\JsOidc.csproj",

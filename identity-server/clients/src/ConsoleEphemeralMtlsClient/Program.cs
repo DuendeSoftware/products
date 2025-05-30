@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Clients;
 using Duende.IdentityModel.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -12,10 +13,17 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-var authority = Constants.AuthorityMtls;
-var simpleApi = Constants.SampleApiMtls;
-
 var ClientCertificate = CreateClientCertificate("client");
+
+// Register a named HttpClient with service discovery support.
+// The AddServiceDiscovery extension enables Aspire to resolve the actual endpoint at runtime.
+builder.Services.AddHttpClient("MtlsApi", client =>
+    {
+        client.BaseAddress = new Uri("https://mtls-api");
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => CreateClientCertificateHandler(ClientCertificate))
+    .AddServiceDiscovery();
+var host = builder.Build();
 
 var response = await RequestTokenAsync();
 response.Show();
@@ -27,8 +35,8 @@ Environment.Exit(0);
 
 async Task<TokenResponse> RequestTokenAsync()
 {
-    var client = new HttpClient(GetHandler(ClientCertificate));
-
+    var client = new HttpClient(CreateClientCertificateHandler(ClientCertificate));
+    var authority = builder.Configuration["is-host"];
     var disco = await client.GetDiscoveryDocumentAsync(authority);
     if (disco.IsError)
     {
@@ -38,7 +46,6 @@ async Task<TokenResponse> RequestTokenAsync()
     var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
     {
         Address = disco.MtlsEndpointAliases.TokenEndpoint,
-
         ClientId = "client",
         ClientSecret = "secret",
         Scope = "resource1.scope1"
@@ -54,12 +61,10 @@ async Task<TokenResponse> RequestTokenAsync()
 
 async Task CallServiceAsync(string token)
 {
-    var client = new HttpClient(GetHandler(ClientCertificate))
-    {
-        BaseAddress = new Uri(simpleApi)
-    };
-
+    var httpClientFactory = host.Services.GetRequiredService<IHttpClientFactory>();
+    var client = httpClientFactory.CreateClient("MtlsApi");
     client.SetBearerToken(token);
+
     var response = await client.GetStringAsync("identity");
 
     "\nService claims:".ConsoleGreen();
@@ -85,14 +90,11 @@ static X509Certificate2 CreateClientCertificate(string name)
     }
 }
 
-static SocketsHttpHandler GetHandler(X509Certificate2 certificate)
+static SocketsHttpHandler CreateClientCertificateHandler(X509Certificate2 certificate)
 {
     var handler = new SocketsHttpHandler
     {
-        SslOptions =
-            {
-                ClientCertificates = new X509CertificateCollection {certificate}
-            }
+        SslOptions = { ClientCertificates = new X509CertificateCollection { certificate } }
     };
 
     return handler;

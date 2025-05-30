@@ -125,6 +125,7 @@ void ConfigureApis()
     RegisterApiIfEnabled<Projects.SimpleApi>("simple-api");
     RegisterApiIfEnabled<Projects.ResourceBasedApi>("resource-based-api");
     RegisterApiIfEnabled<Projects.DPoPApi>("dpop-api");
+    RegisterApiIfEnabled<Projects.MtlsApi>("mtls-api");
 }
 
 void ConfigureClients()
@@ -183,7 +184,11 @@ void RegisterApiIfEnabled<T>(string name) where T : IProjectMetadata, new()
 {
     if (ApiIsEnabled(typeof(T).Name))
     {
-        var api = builder.AddProject<T>(name);
+        var api = builder.AddProject<T>(name)
+            .WithEnvironment(
+                name: "is-host",
+                endpointReference: projectRegistry["is-host"].GetEndpoint(name: "https")
+            );
         projectRegistry.Add(name, api);
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 
@@ -47,7 +48,7 @@ public static class ClientsConsole
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
                 AllowedScopes = { "transaction" }
             },
-                
+
             ///////////////////////////////////////////
             // Console Resources and Scopes Sample
             //////////////////////////////////////////
@@ -89,7 +90,7 @@ public static class ClientsConsole
                     // {
                     //     Type = SecretTypes.X509CertificateName
                     // },
-                    new Secret("5D9E9B6B333CD42C99D1DE6175CC0F3EF99DDF68", "mtls.test")
+                    new Secret(GetMtlsClientThumbprint(), "mtls.test")
                     {
                         Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint
                     },
@@ -219,7 +220,7 @@ public static class ClientsConsole
                     "resource2.scope1"
                 }
             },
-                
+
             ///////////////////////////////////////////
             // Console Resource Indicators Sample
             //////////////////////////////////////////
@@ -255,7 +256,7 @@ public static class ClientsConsole
                     "scope4",
                 }
             },
-                
+
             ///////////////////////////////////////////
             // WinConsole with PKCE Sample
             //////////////////////////////////////////
@@ -351,4 +352,20 @@ public static class ClientsConsole
                 }
             },
         };
+
+    private static string GetMtlsClientThumbprint()
+    {
+        // For ease during development, we just go get the thumbprint off the certificate on the filesystem.
+        // In a deployed application, you would want to either rely on PKI or have some other mechanism for
+        // getting the thumbprint into your configuration.
+        if (!File.Exists("../../clients/src/ConsoleMTLSClient/localhost-client.p12"))
+        {
+            return string.Empty;
+        }
+#pragma warning disable SYSLIB0057
+        // Only obsolete in .NET 9, keeping while we support .NET 8.
+        var cert = new X509Certificate2("../../clients/src/ConsoleMTLSClient/localhost-client.p12", "changeit");
+#pragma warning restore SYSLIB0057
+        return cert.Thumbprint;
+    }
 }

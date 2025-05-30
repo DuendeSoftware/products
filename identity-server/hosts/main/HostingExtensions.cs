@@ -5,6 +5,8 @@ using System.Security.Claims;
 using Duende.IdentityServer;
 using IdentityServerHost.Extensions;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -58,6 +60,15 @@ internal static class HostingExtensions
         //    .AddSource(IdentityServerConstants.Tracing.Validation)
         //    .AddAspNetCoreInstrumentation()
         //    .AddConsoleExporter());
+
+        builder.Services.Configure<KestrelServerOptions>(kestrelOptions =>
+        {
+            kestrelOptions.ConfigureHttpsDefaults(https =>
+            {
+                https.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+                https.AllowAnyClientCertificate(); // Needed for the "ephemeral" mtls client
+            });
+        });
 
         return builder.Build();
     }

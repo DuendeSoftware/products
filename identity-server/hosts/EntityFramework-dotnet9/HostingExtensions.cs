@@ -8,6 +8,8 @@ using IdentityServerHost.Extensions;
 using IdentityServerHost.Pages.Admin.ApiScopes;
 using IdentityServerHost.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
@@ -62,6 +64,15 @@ internal static class HostingExtensions
         //             option.Headers = $"x-honeycomb-team={apiKey},x-honeycomb-dataset={dataset}";
         //         });
         // });
+
+        builder.Services.Configure<KestrelServerOptions>(kestrelOptions =>
+        {
+            kestrelOptions.ConfigureHttpsDefaults(https =>
+            {
+                https.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+                https.AllowAnyClientCertificate(); // Needed for the "ephemeral" mtls client
+            });
+        });
 
         return builder.Build();
     }

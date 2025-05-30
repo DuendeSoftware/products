@@ -9,6 +9,7 @@ using Duende.IdentityServer.Configuration.EntityFramework;
 using Duende.IdentityServer.Configuration.RequestProcessing;
 using IdentityServerHost.Configuration;
 using IdentityServerHost.Extensions;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -48,6 +49,7 @@ internal static class IdentityServerExtensions
                 UseX509Certificate = true
             });
 
+            options.MutualTls.Enabled = true;
         })
             .AddTestUsers(TestUsers.Users)
             // this adds the config data from DB (clients, resources, CORS)
@@ -104,6 +106,13 @@ internal static class IdentityServerExtensions
             .AddClientConfigurationStore();
 
         builder.Services.AddTransient<IDynamicClientRegistrationRequestProcessor, CustomClientRegistrationProcessor>();
+
+        builder.Services.AddAuthentication().AddCertificate(certificateOptions =>
+        {
+            // We must allow self-signed certificates for the "ephemeral" case
+            certificateOptions.AllowedCertificateTypes = CertificateTypes.Chained | CertificateTypes.SelfSigned;
+            certificateOptions.RevocationMode = X509RevocationMode.NoCheck;
+        });
 
         return builder;
     }

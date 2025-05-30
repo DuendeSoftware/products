@@ -8,7 +8,7 @@ internal static class ResourceBuilderExtensions
     public static IResourceBuilder<ProjectResource> AddIdentityAndApiReferences(this IResourceBuilder<ProjectResource> builder,
         IDictionary<string, IResourceBuilder<ProjectResource>> registry)
     {
-        string[] referenceNames = ["is-host", "simple-api", "resource-based-api", "dpop-api"];
+        string[] referenceNames = ["is-host", "simple-api", "resource-based-api", "dpop-api", "mtls-api"];
 
         foreach (var referenceName in referenceNames)
         {
