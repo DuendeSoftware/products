@@ -5,20 +5,19 @@ using System.Text.Json;
 using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ServiceCollectionAccessor _serviceCollectionAccessor;
     private readonly ILogger<RegisteredImplementationsDiagnosticEntry> _logger;
     private readonly Dictionary<string, IEnumerable<Type>> _typesToInspect;
 
-    public RegisteredImplementationsDiagnosticEntry(IServiceProvider serviceProvider, ILogger<RegisteredImplementationsDiagnosticEntry> logger)
+    public RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccessor serviceCollectionAccessor, ILogger<RegisteredImplementationsDiagnosticEntry> logger)
     {
-        _serviceProvider = serviceProvider;
+        _serviceCollectionAccessor = serviceCollectionAccessor;
         _logger = logger;
 
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -30,8 +29,6 @@ internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
 
     public Task WriteAsync(Utf8JsonWriter writer)
     {
-        using var scope = _serviceProvider.CreateScope();
-
         writer.WriteStartObject("RegisteredImplementations");
 
         foreach (var namespaceGroup in _typesToInspect)
@@ -40,7 +37,7 @@ internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
 
             foreach (var type in namespaceGroup.Value)
             {
-                WriteImplementationDetails(type, type.Name, writer, scope);
+                WriteImplementationDetails(type, type.Name, writer);
             }
 
             writer.WriteEndArray();
@@ -50,9 +47,9 @@ internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
         //they cannot be resolved from the DI container as an open generic type. Rather than attempting to dynamically
         //create a closed type, which could be error-prone, we'll explicitly list the open generic types we know about.
         writer.WriteStartArray("OpenGenericTypes");
-        WriteImplementationDetails<ICache<string>>(nameof(ICache<string>), writer, scope);
-        WriteImplementationDetails<IConcurrencyLock<string>>(nameof(IConcurrencyLock<string>), writer, scope);
-        WriteImplementationDetails<IMessageStore<string>>(nameof(IMessageStore<string>), writer, scope);
+        WriteImplementationDetails<ICache<string>>(nameof(ICache<string>), writer);
+        WriteImplementationDetails<IConcurrencyLock<string>>(nameof(IConcurrencyLock<string>), writer);
+        WriteImplementationDetails<IMessageStore<string>>(nameof(IMessageStore<string>), writer);
         writer.WriteEndArray();
 
         writer.WriteEndObject();
@@ -60,21 +57,22 @@ internal class RegisteredImplementationsDiagnosticEntry : IDiagnosticEntry
         return Task.CompletedTask;
     }
 
-    private void WriteImplementationDetails<T>(string serviceName, Utf8JsonWriter writer, IServiceScope scope) where T : class => WriteImplementationDetails(typeof(T), serviceName, writer, scope);
+    private void WriteImplementationDetails<T>(string serviceName, Utf8JsonWriter writer) where T : class => WriteImplementationDetails(typeof(T), serviceName, writer);
 
-    private void WriteImplementationDetails(Type targetType, string serviceName, Utf8JsonWriter writer, IServiceScope scope)
+    private void WriteImplementationDetails(Type targetType, string serviceName, Utf8JsonWriter writer)
     {
         writer.WriteStartObject();
         writer.WriteStartArray(serviceName);
 
         try
         {
-            var services = scope.ServiceProvider.GetServices(targetType).Where(service => service != null);
+            var services = _serviceCollectionAccessor.ServiceCollection.Where(descriptor => descriptor.ServiceType == targetType &&
+                descriptor.ImplementationType != null);
             if (services.Any())
             {
                 foreach (var service in services)
                 {
-                    var type = service.GetType();
+                    var type = service.ImplementationType!;
                     writer.WriteStartObject();
                     writer.WriteString("TypeName", type.FullName);
                     writer.WriteString("Assembly", type.Assembly.GetName().Name);
