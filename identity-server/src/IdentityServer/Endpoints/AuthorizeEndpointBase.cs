@@ -239,7 +239,12 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
             Telemetry.Metrics.TokenIssued(
                 response.Request.ClientId,
                 response.Request.GrantType,
-                response.Request.AuthorizeRequestType);
+                response.Request.AuthorizeRequestType,
+                response.AccessToken.IsPresent(),
+                response.AccessToken.IsPresent() ? response.Request.AccessTokenType : null,
+                false,
+                ProofType.None,
+                response.IdentityToken.IsPresent());
             return _events.RaiseAsync(new TokenIssuedSuccessEvent(response));
         }
 

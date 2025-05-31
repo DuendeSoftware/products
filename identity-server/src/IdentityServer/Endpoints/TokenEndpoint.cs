@@ -139,7 +139,10 @@ internal class TokenEndpoint : IEndpointHandler
         var response = await _responseGenerator.ProcessAsync(requestResult);
 
         await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
-        Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null);
+
+        Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null,
+            response.AccessToken.IsPresent(), response.AccessTokenType.IsPresent() ? requestResult.ValidatedRequest.AccessTokenType : null, response.RefreshToken.IsPresent(),
+            requestResult.ValidatedRequest.ProofType, response.IdentityToken.IsPresent());
         LogTokens(response, requestResult);
 
         // return result
