@@ -79,7 +79,7 @@ internal static class HostingExtensions
             builder.Services.AddTransient<ApiScopeRepository>();
         }
 
-        // if you want to use server-side sessions: https://blog.duendesoftware.com/posts/20220406_session_management/
+        // if you want to use server-side sessions: https://docs.duendesoftware.com/identityserver/ui/server-side-sessions/
         // then enable it
         //isBuilder.AddServerSideSessions();
         //
