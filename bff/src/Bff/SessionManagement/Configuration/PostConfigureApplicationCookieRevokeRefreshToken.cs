@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Configuration;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
@@ -35,8 +36,10 @@ internal class PostConfigureApplicationCookieRevokeRefreshToken(
     {
         async Task Callback(CookieSigningOutContext ctx)
         {
+            // Todo: Ev: logging with sourcegens
+            // todo: ev: should we have userparameters here?
             logger.LogDebug("Revoking user's refresh tokens in OnSigningOut for subject id: {subjectId}", ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
-            await ctx.HttpContext.RevokeRefreshTokenAsync();
+            await ctx.HttpContext.RevokeRefreshTokenAsync(ct: ctx.HttpContext.RequestAborted);
 
             await inner.Invoke(ctx);
         }

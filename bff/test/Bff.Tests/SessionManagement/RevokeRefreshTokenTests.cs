@@ -13,10 +13,10 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
     [Fact]
     public async Task logout_should_revoke_refreshtoken()
     {
-        await BffHost.BffLoginAsync("alice", "sid");
+        await Bff.BffLoginAsync("alice", "sid");
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"
@@ -25,10 +25,10 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
             rt.ShouldNotBeNull();
         }
 
-        await BffHost.BffLogoutAsync("sid");
+        await Bff.BffLogoutAsync("sid");
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"
@@ -40,19 +40,19 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
     [Fact]
     public async Task when_setting_disabled_logout_should_not_revoke_refreshtoken()
     {
-        BffHost.OnConfigureServices += svcs =>
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.Configure<BffOptions>(options =>
             {
                 options.RevokeRefreshTokenOnLogout = false;
             });
         };
-        await BffHost.InitializeAsync();
+        await Bff.InitializeAsync();
 
-        await BffHost.BffLoginAsync("alice", "sid");
+        await Bff.BffLoginAsync("alice", "sid");
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"
@@ -61,10 +61,10 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
             rt.ShouldNotBeNull();
         }
 
-        await BffHost.BffLogoutAsync("sid");
+        await Bff.BffLogoutAsync("sid");
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"
@@ -77,10 +77,10 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
     [Fact]
     public async Task backchannel_logout_endpoint_should_revoke_refreshtoken()
     {
-        await BffHost.BffLoginAsync("alice", "sid123");
+        await Bff.BffLoginAsync("alice", "sid123");
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"
@@ -89,10 +89,10 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
             rt.ShouldNotBeNull();
         }
 
-        await IdentityServerHost.RevokeSessionCookieAsync();
+        await IdentityServer.RevokeSessionCookieAsync();
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"
@@ -104,19 +104,19 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
     [Fact]
     public async Task when_setting_disabled_backchannel_logout_endpoint_should_not_revoke_refreshtoken()
     {
-        BffHost.OnConfigureServices += svcs =>
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.Configure<BffOptions>(options =>
             {
                 options.RevokeRefreshTokenOnLogout = false;
             });
         };
-        await BffHost.InitializeAsync();
+        await Bff.InitializeAsync();
 
-        await BffHost.BffLoginAsync("alice", "sid123");
+        await Bff.BffLoginAsync("alice", "sid123");
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"
@@ -125,10 +125,10 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationT
             rt.ShouldNotBeNull();
         }
 
-        await IdentityServerHost.RevokeSessionCookieAsync();
+        await IdentityServer.RevokeSessionCookieAsync();
 
         {
-            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
+            var store = IdentityServer.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
                 SubjectId = "alice"

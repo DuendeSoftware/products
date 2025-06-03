@@ -9,17 +9,12 @@ namespace Duende.Bff.Configuration;
 /// <summary>
 /// Endpoint metadata for a remote BFF API endpoint
 /// </summary>
-public class BffRemoteApiEndpointMetadata : IBffApiMetadata
+public sealed class BffRemoteApiEndpointMetadata : IBffApiMetadata
 {
     /// <summary>
     /// Required token type (if any)
     /// </summary>
-    public TokenType? RequiredTokenType;
-
-    /// <summary>
-    /// Optionally send a user token if present
-    /// </summary>
-    public bool OptionalUserToken { get; set; }
+    public RequiredTokenType? TokenType;
 
     /// <summary>
     /// Maps to UserAccessTokenParameters and included if set

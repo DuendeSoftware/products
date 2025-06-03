@@ -7,6 +7,4 @@ namespace Duende.Bff.Endpoints;
 /// <summary>
 /// Indicates that the BFF middleware will not override the HTTP response status code.
 /// </summary>
-public interface IBffApiSkipResponseHandling
-{
-}
+public interface IBffApiSkipResponseHandling;

@@ -8,7 +8,20 @@ namespace Duende.Bff;
 /// </summary>
 public static class Constants
 {
-    internal const string BffMiddlewareMarker = "Duende.Bff.BffMiddlewareMarker";
+    internal static class Middleware
+    {
+        internal const string AntiForgeryMarker = "Duende.Bff.AntiForgery";
+    }
+
+    internal static class AspnetCorePipeline
+    {
+        public const string AntiForgeryAdded = "Duende.Bff.AntiForgery.AddedToMiddleware";
+        public const string FrontendSelectionAdded = "Duende.Bff.FrontendSelection.AddedToMiddleware";
+        public const string PathMappingAdded = "Duende.Bff.PathMapping.AddedToMiddleware";
+        public const string OpenIdCallbacksAdded = "Duende.Bff.OpenIdCallbacks.AddedToMiddleware";
+        public const string RemoteRoutesAdded = "Duende.Bff.RemoteRoutes.AddedToMiddleware";
+        public const string BffIndexPagesAdded = "Duende.Bff.BffIndexPages.AddedToMiddleware";
+    }
 
     /// <summary>
     /// Constants used for YARP
@@ -24,11 +37,13 @@ public static class Constants
         /// Name of Anti-forgery check metadata
         /// </summary>
         public const string AntiforgeryCheckMetadata = "Duende.Bff.Yarp.AntiforgeryCheck";
+    }
 
-        /// <summary>
-        /// Name of optional user token metadata
-        /// </summary>
-        public const string OptionalUserTokenMetadata = "Duende.Bff.Yarp.OptionalUserToken";
+    public static class Cookies
+    {
+        public const string HostPrefix = "__Host";
+        public const string SecurePrefix = "__Secure";
+        public const string DefaultCookieName = HostPrefix + "-bff-auth";
     }
 
     /// <summary>
@@ -92,6 +107,8 @@ public static class Constants
         /// Diagnostics path
         /// </summary>
         public const string Diagnostics = "/diagnostics";
+
+        public const string SigninUrl = "/bff-signin";
     }
 
     /// <summary>
@@ -123,4 +140,11 @@ public static class Constants
     {
         public const string Prompt = "bff-prompt";
     }
+
+    public class HttpClientNames
+    {
+        public const string IndexHtmlHttpClient = "Duende.Bff.IndexHtmlClient";
+
+    }
+
 }

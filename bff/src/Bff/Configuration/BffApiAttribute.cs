@@ -10,6 +10,4 @@ namespace Duende.Bff.Configuration;
 /// By default, this provides anti-forgery protection and response handling.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class BffApiAttribute : Attribute, IBffApiMetadata
-{
-}
+public sealed class BffApiAttribute : Attribute, IBffApiMetadata;

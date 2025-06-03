@@ -9,10 +9,10 @@ namespace Duende.Bff.SessionManagement.Revocation;
 /// <summary>
 /// Nop implementation of the user session store
 /// </summary>
-public class NopSessionRevocationService(ILogger<NopSessionRevocationService> logger) : ISessionRevocationService
+internal class NopSessionRevocationService(ILogger<NopSessionRevocationService> logger) : ISessionRevocationService
 {
     /// <inheritdoc />
-    public Task RevokeSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
+    public Task RevokeSessionsAsync(UserSessionsFilter filter, CT ct = default)
     {
         logger.LogDebug("Nop implementation of session revocation for sub: {sub}, and sid: {sid}. Implement ISessionRevocationService to provide your own implementation.", filter.SubjectId, filter.SessionId);
         return Task.CompletedTask;

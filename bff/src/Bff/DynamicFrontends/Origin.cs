@@ -1,0 +1,49 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Microsoft.AspNetCore.Http;
+
+namespace Duende.Bff.DynamicFrontends;
+
+/// <summary>
+/// Describes the origin of a request. 
+/// </summary>
+public sealed record Origin : IEquatable<HttpRequest>
+{
+    public static Origin Parse(string origin)
+    {
+        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+        {
+            throw new UriFormatException($"Can't create origin from '{origin}'");
+        }
+
+        return Parse(uri);
+    }
+
+    public static Origin Parse(Uri uri) => new()
+    {
+        Scheme = uri.Scheme,
+        Host = uri.Host,
+        Port = uri.Port
+    };
+
+    public required string Scheme { get; init; }
+
+    public required string Host { get; init; }
+
+    public int Port { get; init; } = 443;
+
+    public bool Equals(HttpRequest? request)
+    {
+        if (request == null)
+        {
+            return false;
+        }
+
+        return string.Equals(request.Host.Host, Host, StringComparison.OrdinalIgnoreCase)
+               && (request.Host.Port == null || request.Host.Port == Port)
+               && string.Equals(request.Scheme, Scheme, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override string ToString() => $"{Scheme}://{Host}:{Port}";
+}

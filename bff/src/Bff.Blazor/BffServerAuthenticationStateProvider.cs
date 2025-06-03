@@ -131,9 +131,9 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
     /// Validates the current authentication state by checking if the user session exists in the session store.
     /// </summary>
     /// <param name="authenticationState">The current authentication state.</param>
-    /// <param name="cancellationToken">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns>A boolean indicating whether the authentication state is valid.</returns>
-    protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, CancellationToken cancellationToken)
+    protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, CT ct)
     {
         var sid = authenticationState.User.FindFirstValue(JwtClaimTypes.SessionId);
         var sub = authenticationState.User.FindFirstValue(JwtClaimTypes.Subject);
@@ -143,7 +143,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
             SessionId = sid,
             SubjectId = sub
         },
-        cancellationToken);
+        ct);
         return sessions.Count != 0;
     }
 }

@@ -5,7 +5,10 @@ using System.Diagnostics;
 
 namespace Duende.Bff.Tests.TestFramework;
 
-public class TestLoggerProvider(WriteTestOutput writeOutput, string name) : ILoggerProvider
+
+#pragma warning disable CS9113 // Parameter is unread but needed for ncrunch.
+public class TestLoggerProvider(WriteTestOutput writeOutput, string name, bool forceToWriteOutput = false) : ILoggerProvider
+#pragma warning restore CS9113 // Parameter is unread but needed for ncrunch.
 {
     private readonly WriteTestOutput _writeOutput = writeOutput ?? throw new ArgumentNullException(nameof(writeOutput));
     private readonly string _name = name ?? throw new ArgumentNullException(nameof(name));
@@ -45,6 +48,10 @@ public class TestLoggerProvider(WriteTestOutput writeOutput, string name) : ILog
         {
             var message = _watch.Elapsed.TotalMilliseconds.ToString("0000") + "ms - " + _name + msg;
 #if NCRUNCH
+            if (forceToWriteOutput)
+            {
+                _writeOutput?.Invoke(message);
+            }
             Console.WriteLine(message);
 #else
             _writeOutput?.Invoke(message);

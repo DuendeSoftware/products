@@ -29,7 +29,7 @@ public class IdentityServerHost : GenericHost
             new IdentityResources.Email(),
         };
 
-    public List<ApiScope> ApiScopes { get; set; } = new();
+    public List<ApiScope> ApiScopes { get; set; } = [];
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -122,6 +122,9 @@ public class IdentityServerHost : GenericHost
     {
         var response = await BrowserClient.GetAsync(Url("__token"));
         var accessToken = await response.Content.ReadAsStringAsync();
-        return new BearerTokenResult(accessToken);
+        return new BearerTokenResult
+        {
+            AccessToken = AccessToken.Parse(accessToken)
+        };
     }
 }

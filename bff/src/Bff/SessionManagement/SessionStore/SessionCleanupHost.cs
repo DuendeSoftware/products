@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Configuration;
-using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,7 +28,7 @@ internal class SessionCleanupHost(
     /// <summary>
     /// Starts the token cleanup polling.
     /// </summary>
-    public Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CT ct)
     {
         if (_options.EnableSessionCleanup)
         {
@@ -41,7 +41,7 @@ internal class SessionCleanupHost(
             {
                 logger.LogDebug("Starting BFF session cleanup");
 
-                _source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                _source = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
                 Task.Factory.StartNew(() => StartInternalAsync(_source.Token));
             }
@@ -57,7 +57,7 @@ internal class SessionCleanupHost(
     /// <summary>
     /// Stops the token cleanup polling.
     /// </summary>
-    public Task StopAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CT ct)
     {
         if (_options.EnableSessionCleanup && _source != null)
         {
@@ -70,11 +70,11 @@ internal class SessionCleanupHost(
         return Task.CompletedTask;
     }
 
-    private async Task StartInternalAsync(CancellationToken cancellationToken)
+    private async Task StartInternalAsync(CT ct)
     {
         while (true)
         {
-            if (cancellationToken.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
             {
                 logger.LogDebug("CancellationRequested. Exiting.");
                 break;
@@ -82,7 +82,7 @@ internal class SessionCleanupHost(
 
             try
             {
-                await Task.Delay(CleanupInterval, cancellationToken);
+                await Task.Delay(CleanupInterval, ct);
             }
             catch (TaskCanceledException)
             {
@@ -95,23 +95,23 @@ internal class SessionCleanupHost(
                 break;
             }
 
-            if (cancellationToken.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
             {
                 logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
-            await RunAsync(cancellationToken);
+            await RunAsync(ct);
         }
     }
 
-    private async Task RunAsync(CancellationToken cancellationToken = default)
+    private async Task RunAsync(CT ct = default)
     {
         try
         {
             using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
             var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<IUserSessionStoreCleanup>();
-            var removed = await tokenCleanupService.DeleteExpiredSessionsAsync(cancellationToken);
+            var removed = await tokenCleanupService.DeleteExpiredSessionsAsync(ct);
             metrics.SessionsEnded(removed);
         }
         catch (Exception ex)

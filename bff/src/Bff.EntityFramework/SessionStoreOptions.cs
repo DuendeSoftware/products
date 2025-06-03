@@ -6,7 +6,7 @@ namespace Duende.Bff.EntityFramework;
 /// <summary>
 /// Options for configuring the session context.
 /// </summary>
-public class SessionStoreOptions
+public sealed record SessionStoreOptions
 {
     /// <summary>
     /// Gets or sets the default schema.

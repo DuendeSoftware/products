@@ -3,6 +3,7 @@
 
 using System.Security.Cryptography;
 using System.Text.Json;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Yarp;
@@ -31,7 +32,7 @@ internal static class Extensions
                         {
                             Path = "/yarp/user-token/{**catch-all}"
                         }
-                    }.WithAccessToken(TokenType.User).WithAntiforgeryCheck(),
+                    }.WithAccessToken(RequiredTokenType.User).WithAntiforgeryCheck(),
                     new RouteConfig()
                     {
                         RouteId = "client-token",
@@ -41,7 +42,7 @@ internal static class Extensions
                         {
                             Path = "/yarp/client-token/{**catch-all}"
                         }
-                    }.WithAccessToken(TokenType.Client).WithAntiforgeryCheck(),
+                    }.WithAccessToken(RequiredTokenType.Client).WithAntiforgeryCheck(),
                     new RouteConfig()
                     {
                         RouteId = "user-or-client-token",
@@ -51,7 +52,7 @@ internal static class Extensions
                         {
                             Path = "/yarp/user-or-client-token/{**catch-all}"
                         }
-                    }.WithAccessToken(TokenType.UserOrClient).WithAntiforgeryCheck(),
+                    }.WithAccessToken(RequiredTokenType.UserOrClient).WithAntiforgeryCheck(),
                     new RouteConfig()
                     {
                         RouteId = "anonymous",
@@ -61,7 +62,8 @@ internal static class Extensions
                         {
                             Path = "/yarp/anonymous/{**catch-all}"
                         }
-                    }.WithAntiforgeryCheck()
+                    }
+                        .WithAntiforgeryCheck()
             },
             new[]
             {
@@ -83,7 +85,7 @@ internal static class Extensions
                 var jwkKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
                 jwkKey.Alg = "PS256";
                 var jwk = JsonSerializer.Serialize(jwkKey);
-                options.DPoPJsonWebKey = jwk;
+                options.DPoPJsonWebKey = DPoPProofKey.Parse(jwk);
             })
             .AddRemoteApis()
             .AddServerSideSessions();
@@ -183,21 +185,21 @@ internal static class Extensions
     {
         // On this path, we use a client credentials token
         app.MapRemoteBffApiEndpoint("/api/client-token", "https://localhost:5011")
-            .RequireAccessToken(TokenType.Client);
+            .WithAccessToken(RequiredTokenType.Client);
 
         // On this path, we use a user token if logged in, and fall back to a client credentials token if not
         app.MapRemoteBffApiEndpoint("/api/user-or-client-token", "https://localhost:5011")
-            .RequireAccessToken(TokenType.UserOrClient);
+            .WithAccessToken(RequiredTokenType.UserOrClient);
 
         // On this path, we make anonymous requests
         app.MapRemoteBffApiEndpoint("/api/anonymous", "https://localhost:5011");
 
         // On this path, we use the client token only if the user is logged in
         app.MapRemoteBffApiEndpoint("/api/optional-user-token", "https://localhost:5011")
-            .WithOptionalUserAccessToken();
+            .WithAccessToken(RequiredTokenType.UserOrNone);
 
         // On this path, we require the user token
         app.MapRemoteBffApiEndpoint("/api/user-token", "https://localhost:5011")
-            .RequireAccessToken();
+            .WithAccessToken();
     }
 }

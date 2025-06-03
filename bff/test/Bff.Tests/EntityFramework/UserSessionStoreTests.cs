@@ -2,7 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.SessionManagement.SessionStore;
+using Duende.Bff.Tests.TestInfra;
 using Microsoft.EntityFrameworkCore;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.EntityFramework.Tests;
 
@@ -11,10 +13,12 @@ public class UserSessionStoreTests
     private readonly IUserSessionStore _subject;
     private readonly SessionDbContext _database;
 
-    public UserSessionStoreTests()
+    public UserSessionStoreTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
-        services.AddBff()
+        services
+            .AddLogging(l => l.AddProvider(new TestLoggerProvider(output.WriteLine, "db")))
+            .AddBff()
             .AddEntityFrameworkServerSideSessions(options => options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
         var provider = services.BuildServiceProvider();
 

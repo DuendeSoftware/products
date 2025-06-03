@@ -1,0 +1,85 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
+using Duende.Bff.Configuration;
+using Duende.Bff.DynamicFrontends;
+using Duende.Bff.DynamicFrontends.Internal;
+using Yarp.ReverseProxy.Forwarder;
+
+namespace Duende.Bff.Tests.TestInfra;
+
+public class BffTestHost(TestHostContext context) : TestHost(context, new Uri("https://bff"))
+{
+    public readonly string DefaultRootResponse = "Default response from root";
+    private BffHttpClient _browserClient = null!;
+
+    /// <summary>
+    /// Should a default response for "/" be mapped?
+    /// When logging in, you'll return to '/'. This should return just an 'ok' response. 
+    /// </summary>
+    public bool MapGetForRoot { get; set; } = true;
+
+    public bool EnableBackChannelHandler { get; set; } = true;
+    public event Action<BffOptions> SetBffOptions = _ => { };
+    public event Action<BffBuilder> OnConfigureBff = _ => { };
+
+    public override void Initialize()
+    {
+        BrowserClient = Internet.BuildHttpClient<BffHttpClient>(Url());
+        OnConfigureServices += services =>
+        {
+            if (EnableBackChannelHandler)
+            {
+                SetBffOptions += options =>
+                {
+                    options.BackchannelMessageHandler = Internet;
+                };
+            }
+
+            services.AddSingleton<IForwarderHttpClientFactory>(
+                new CallbackForwarderHttpClientFactory(
+                    context => new HttpMessageInvoker(Internet)));
+
+
+            var builder = services.AddBff(SetBffOptions);
+
+            OnConfigureBff(builder);
+        };
+
+        OnConfigure += app =>
+        {
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseBff();
+        };
+        OnConfigureEndpoints += endpoints =>
+        {
+            if (MapGetForRoot)
+            {
+                endpoints.MapGet("/", () => DefaultRootResponse);
+            }
+
+            endpoints.MapBffManagementEndpoints();
+
+        };
+    }
+
+    public BffHttpClient BrowserClient
+    {
+        get => _browserClient ?? throw new InvalidOperationException("Not yet initialized");
+        private set => _browserClient = value;
+    }
+
+    public void AddOrUpdateFrontend(BffFrontend frontend) => Resolve<LocalFrontendStore>().AddOrUpdate(frontend);
+}
+
+public class CallbackForwarderHttpClientFactory(Func<ForwarderHttpClientContext, HttpMessageInvoker> callback)
+    : IForwarderHttpClientFactory
+{
+    public Func<ForwarderHttpClientContext, HttpMessageInvoker> CreateInvoker { get; set; } = callback;
+
+    public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => CreateInvoker.Invoke(context);
+}

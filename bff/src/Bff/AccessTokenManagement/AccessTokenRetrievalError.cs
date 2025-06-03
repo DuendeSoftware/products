@@ -7,14 +7,9 @@ namespace Duende.Bff.AccessTokenManagement;
 /// <summary>
 /// Represents an error that occurred during the retrieval of an access token.
 /// </summary>
-public class AccessTokenRetrievalError(string error) : AccessTokenResult
+public record AccessTokenRetrievalError : AccessTokenResult
 {
-    /// <summary>
-    /// Gets or sets the error message.
-    /// </summary>
-    public string Error => error;
-}
+    public required string Error { get; init; }
 
-public class NoAccessTokenReturnedError(string error) : AccessTokenRetrievalError(error);
-public class MissingDPopTokenError(string error) : AccessTokenRetrievalError(error);
-public class UnexpectedAccessTokenError(string error) : AccessTokenRetrievalError(error);
+    public string? ErrorDescription { get; init; }
+}

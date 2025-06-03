@@ -5,11 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.Yarp;
 
-internal static class EventIds
-{
-    public static readonly EventId ProxyError = new(5, "ProxyError");
-}
-
 internal static class Log
 {
     private static readonly Action<ILogger, string, string, Exception?> ProxyResponseErrorMessage = LoggerMessage.Define<string, string>(

@@ -1,4 +1,4 @@
-﻿namespace Duende.Bff.EntityFramework
+namespace Duende.Bff.EntityFramework
 {
     public static class BffBuilderExtensions
     {
@@ -15,7 +15,7 @@
     public interface ISessionDbContext
     {
         Microsoft.EntityFrameworkCore.DbSet<Duende.Bff.EntityFramework.UserSessionEntity> UserSessions { get; set; }
-        System.Threading.Tasks.Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<int> SaveChangesAsync(System.Threading.CancellationToken ct = default);
     }
     public static class ModelBuilderExtensions
     {
@@ -34,13 +34,13 @@
         protected virtual void ConfigureSchema(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder) { }
         protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder) { }
     }
-    public class SessionStoreOptions
+    public sealed class SessionStoreOptions : System.IEquatable<Duende.Bff.EntityFramework.SessionStoreOptions>
     {
         public SessionStoreOptions() { }
         public string? DefaultSchema { get; set; }
         public Duende.Bff.EntityFramework.TableConfiguration UserSessions { get; set; }
     }
-    public class TableConfiguration
+    public sealed class TableConfiguration : System.IEquatable<Duende.Bff.EntityFramework.TableConfiguration>
     {
         public TableConfiguration(string name) { }
         public TableConfiguration(string name, string schema) { }

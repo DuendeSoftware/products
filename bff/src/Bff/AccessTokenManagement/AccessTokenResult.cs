@@ -7,6 +7,6 @@ namespace Duende.Bff.AccessTokenManagement;
 /// <summary>
 /// Represents the result of attempting to obtain an access token.
 /// </summary>
-public abstract class AccessTokenResult
+public abstract record AccessTokenResult
 {
 }

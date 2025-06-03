@@ -29,12 +29,12 @@ public static class BffRemoteApiEndpointExtensions
     /// <param name="type"></param>
     /// <typeparam name="TBuilder"></typeparam>
     /// <returns></returns>
-    public static TBuilder RequireAccessToken<TBuilder>(this TBuilder builder, TokenType type = TokenType.User) where TBuilder : IEndpointConventionBuilder
+    public static TBuilder WithAccessToken<TBuilder>(this TBuilder builder, RequiredTokenType type = RequiredTokenType.User) where TBuilder : IEndpointConventionBuilder
     {
         builder.Add(endpointBuilder =>
         {
             var metadata = endpointBuilder.GetBffRemoteApiEndpointMetadata();
-            metadata.RequiredTokenType = type;
+            metadata.TokenType = type;
         });
         return builder;
     }
@@ -63,14 +63,14 @@ public static class BffRemoteApiEndpointExtensions
     /// <param name="builder"></param>
     /// <typeparam name="TBuilder"></typeparam>
     /// <returns></returns>
+    [Obsolete("Use TokenType.UserOptional")]
     public static TBuilder WithOptionalUserAccessToken<TBuilder>(this TBuilder builder) where TBuilder : IEndpointConventionBuilder
     {
         builder.Add(endpointBuilder =>
         {
             var metadata = endpointBuilder.GetBffRemoteApiEndpointMetadata();
-            metadata.OptionalUserToken = true;
+            metadata.TokenType = RequiredTokenType.UserOrNone;
         });
-
         return builder;
     }
 

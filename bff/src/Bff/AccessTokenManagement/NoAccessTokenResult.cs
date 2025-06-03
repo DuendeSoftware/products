@@ -8,4 +8,4 @@ namespace Duende.Bff.AccessTokenManagement;
 /// Represents that no access token exists. This type should be used when the
 /// access token is optional and the absence of a token is not an error.
 /// </summary>
-public class NoAccessTokenResult : AccessTokenResult { }
+public sealed record NoAccessTokenResult : AccessTokenResult { }

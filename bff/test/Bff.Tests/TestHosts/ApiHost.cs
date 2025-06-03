@@ -86,8 +86,8 @@ public class ApiHost : GenericHost
                     requestHeaders.Add(header.Key, values);
                 }
 
-                var response = new ApiResponse(
-                    Method: context.Request.Method,
+                var response = new ApiCallDetails(
+                    Method: HttpMethod.Parse(context.Request.Method),
                     Path: context.Request.Path.Value ?? "/",
                     Sub: context.User.FindFirst("sub")?.Value,
                     ClientId: context.User.FindFirst("client_id")?.Value,

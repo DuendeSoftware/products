@@ -7,5 +7,9 @@ namespace Duende.Bff.Tests.TestHosts;
 
 public class FailureAccessTokenRetriever : IAccessTokenRetriever
 {
-    public Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context) => Task.FromResult<AccessTokenResult>(new NoAccessTokenReturnedError("Test"));
+    public Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CT ct = default) =>
+        Task.FromResult<AccessTokenResult>(new AccessTokenRetrievalError
+        {
+            Error = "no access token"
+        });
 }

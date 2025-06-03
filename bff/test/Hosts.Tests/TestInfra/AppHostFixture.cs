@@ -257,7 +257,8 @@ public class AppHostFixture : IAsyncLifetime
             {
                 AppHostServices.Bff => "https://localhost:5002",
                 AppHostServices.BffBlazorPerComponent => "https://localhost:5105",
-                AppHostServices.BffBlazorWebassembly => "https://localhost:5005",
+                AppHostServices.BffMultiFrontend => "https://localhost:5005",
+                AppHostServices.BffBlazorWebassembly => "https://localhost:5006",
                 AppHostServices.TemplateBffBlazor => "https://localhost:7035",
                 _ => throw new InvalidOperationException("client not configured")
             };

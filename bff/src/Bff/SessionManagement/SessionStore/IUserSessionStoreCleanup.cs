@@ -12,5 +12,5 @@ public interface IUserSessionStoreCleanup
     /// <summary>
     /// Deletes expired sessions
     /// </summary>
-    Task<int> DeleteExpiredSessionsAsync(CancellationToken cancellationToken = default);
+    Task<int> DeleteExpiredSessionsAsync(CT ct = default);
 }

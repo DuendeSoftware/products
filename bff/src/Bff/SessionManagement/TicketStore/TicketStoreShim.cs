@@ -15,7 +15,7 @@ namespace Duende.Bff;
 /// of the cookie options and coordinated with PostConfigureApplicationCookie. #lame
 /// https://github.com/aspnet/AspNetCore/issues/6946 
 /// </summary>
-internal class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicketStore
+internal sealed class TicketStoreShim(IHttpContextAccessor httpContextAccessor) : ITicketStore
 {
     private IServerTicketStore Inner => httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IServerTicketStore>();
 

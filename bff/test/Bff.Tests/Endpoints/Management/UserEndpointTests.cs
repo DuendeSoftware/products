@@ -14,12 +14,12 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     [Fact]
     public async Task user_endpoint_for_authenticated_user_should_return_claims()
     {
-        await BffHost.IssueSessionCookieAsync(
+        await Bff.IssueSessionCookieAsync(
             new Claim("sub", "alice"),
             new Claim("foo", "foo1"),
             new Claim("foo", "foo2"));
 
-        var data = await BffHost.CallUserEndpointAsync();
+        var data = await Bff.CallUserEndpointAsync();
 
         data.Count.ShouldBe(5);
         data.First(d => d.Type == "sub").Value.GetString().ShouldBe("alice");
@@ -36,11 +36,11 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     [Fact]
     public async Task user_endpoint_for_authenticated_user_with_sid_should_return_claims_including_logout()
     {
-        await BffHost.IssueSessionCookieAsync(
+        await Bff.IssueSessionCookieAsync(
             new Claim("sub", "alice"),
             new Claim("sid", "123"));
 
-        var data = await BffHost.CallUserEndpointAsync();
+        var data = await Bff.CallUserEndpointAsync();
 
         data.Count.ShouldBe(4);
         data.First(d => d.Type == "sub").Value.GetString().ShouldBe("alice");
@@ -52,10 +52,10 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     [Fact]
     public async Task user_endpoint_for_authenticated_user_without_csrf_header_should_fail()
     {
-        await BffHost.IssueSessionCookieAsync(new Claim("sub", "alice"), new Claim("foo", "foo1"), new Claim("foo", "foo2"));
+        await Bff.IssueSessionCookieAsync(new Claim("sub", "alice"), new Claim("foo", "foo1"), new Claim("foo", "foo2"));
 
-        var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/bff/user"));
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/bff/user"));
+        var response = await Bff.BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -63,9 +63,9 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     [Fact]
     public async Task user_endpoint_for_unauthenticated_user_should_fail()
     {
-        var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/bff/user"));
+        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/bff/user"));
         req.Headers.Add("x-csrf", "1");
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var response = await Bff.BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -73,9 +73,9 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     [Fact]
     public async Task when_configured_user_endpoint_for_unauthenticated_user_should_return_200_and_empty()
     {
-        BffHost.BffOptions.AnonymousSessionResponse = AnonymousSessionResponse.Response200;
+        Bff.BffOptions.AnonymousSessionResponse = AnonymousSessionResponse.Response200;
 
-        var data = await BffHost.CallUserEndpointAsync();
+        var data = await Bff.CallUserEndpointAsync();
         data.ShouldBeEmpty();
     }
 }

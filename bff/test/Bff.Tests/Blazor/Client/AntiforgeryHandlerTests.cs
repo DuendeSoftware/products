@@ -6,30 +6,30 @@ using Duende.Bff.Blazor.Client.Internals;
 
 namespace Duende.Bff.Blazor.Client.UnitTests;
 
-public class AntiforgeryHandlerTests
+public class AntiForgeryHandlerTests
 {
     [Fact]
     public async Task Adds_expected_header()
     {
-        var sut = new TestAntiforgeryHandler()
+        var sut = new AntiForgeryHandler()
         {
             InnerHandler = new NoOpHttpMessageHandler()
         };
 
-        var request = new HttpRequestMessage();
+        var request = new HttpRequestMessage()
+        {
+            RequestUri = new Uri("https://won-t")
+        };
 
-        await sut.SendAsync(request, CancellationToken.None);
+        var client = new HttpClient(sut);
+
+        await client.SendAsync(request, CancellationToken.None);
 
         request.Headers.ShouldContain(h => h.Key == "X-CSRF" && h.Value.Contains("1"));
     }
 }
 
-internal class TestAntiforgeryHandler : AntiforgeryHandler
-{
-    public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => base.SendAsync(request, cancellationToken);
-}
-
 public class NoOpHttpMessageHandler : HttpMessageHandler
 {
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
 }

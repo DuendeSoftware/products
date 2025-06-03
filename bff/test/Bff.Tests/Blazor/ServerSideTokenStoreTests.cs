@@ -3,17 +3,16 @@
 
 using System.Diagnostics.Metrics;
 using System.Security.Claims;
+using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Blazor;
-using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Bff.Tests.Blazor;
@@ -30,9 +29,12 @@ public class ServerSideTokenStoreTests
     {
         var user = CreatePrincipal("sub", "sid");
         var props = new AuthenticationProperties();
-        var expectedToken = new UserToken()
+        var expectedToken = new UserToken
         {
-            AccessToken = "expected-access-token"
+            AccessToken = AccessToken.Parse("expected-access-token"),
+            Expiration = DateTime.Now.AddHours(1),
+            AccessTokenType = AccessTokenType.Parse("Bearer"),
+            ClientId = ClientId.Parse("some_client"),
         };
 
         // Create shared dependencies
@@ -48,7 +50,10 @@ public class ServerSideTokenStoreTests
             "test"
         ));
 
-        var tokensInProps = MockStoreTokensInAuthProps();
+        var tokensInProps = new MockStoreTokensInAuthProps()
+        {
+            RefreshToken = new UserRefreshToken(RefreshToken.Parse("some-refresh-token"), null)
+        };
 
         var sut = new ServerSideTokenStore(
             tokensInProps,
@@ -59,35 +64,56 @@ public class ServerSideTokenStoreTests
 
 
         await sut.StoreTokenAsync(user, expectedToken);
-        var actualToken = await sut.GetTokenAsync(user);
+        var tokenForParameters = await sut.GetTokenAsync(user).GetToken();
+        var actualToken = tokenForParameters.TokenForSpecifiedParameters;
 
-        actualToken.ShouldNotBe(null);
+        actualToken.ShouldNotBeNull();
         actualToken.AccessToken.ShouldBe(expectedToken.AccessToken);
 
         await sut.ClearTokenAsync(user);
 
-        var resultAfterClearing = await sut.GetTokenAsync(user);
-        resultAfterClearing.AccessToken.ShouldBeNull();
+        var resultAfterClearing = await sut.GetTokenAsync(user)
+            .GetToken();
+        resultAfterClearing.TokenForSpecifiedParameters.ShouldBeNull();
     }
 
-    private static StoreTokensInAuthenticationProperties MockStoreTokensInAuthProps()
+    private class MockStoreTokensInAuthProps : IStoreTokensInAuthenticationProperties
     {
-        var tokenManagementOptionsMonitor = Substitute.For<IOptionsMonitor<UserTokenManagementOptions>>();
-        var tokenManagementOptions = new UserTokenManagementOptions { UseChallengeSchemeScopedTokens = false };
-        tokenManagementOptionsMonitor.CurrentValue.Returns(tokenManagementOptions);
+        public UserToken? Stored;
+        public UserRefreshToken? RefreshToken;
 
-        var cookieOptionsMonitor = Substitute.For<IOptionsMonitor<CookieAuthenticationOptions>>();
-        var cookieAuthenticationOptions = new CookieAuthenticationOptions();
-        cookieOptionsMonitor.CurrentValue.Returns(cookieAuthenticationOptions);
+        public TokenResult<TokenForParameters> GetUserToken(AuthenticationProperties authenticationProperties,
+            UserTokenRequestParameters? parameters = null)
+        {
+            // Return a successful TokenResult<TokenForParameters> if a token is stored, otherwise unsuccessful
+            if (Stored != null)
+            {
+                return new TokenForParameters(Stored, null);
 
-        var schemeProvider = Substitute.For<IAuthenticationSchemeProvider>();
-        schemeProvider.GetDefaultSignInSchemeAsync().Returns(new AuthenticationScheme("TestScheme", null, typeof(IAuthenticationHandler)));
+            }
 
-        return new StoreTokensInAuthenticationProperties(
-            tokenManagementOptionsMonitor,
-            cookieOptionsMonitor,
-            schemeProvider,
-            Substitute.For<ILogger<StoreTokensInAuthenticationProperties>>());
+            if (RefreshToken != null)
+            {
+                return new TokenForParameters(RefreshToken);
+            }
+
+            return TokenResult.Failure("No token stored");
+        }
+
+
+        public Task SetUserTokenAsync(UserToken token, AuthenticationProperties authenticationProperties,
+            UserTokenRequestParameters? parameters = null, CancellationToken ct = new CancellationToken())
+        {
+            Stored = token;
+            return Task.CompletedTask;
+        }
+
+        public void RemoveUserToken(AuthenticationProperties authenticationProperties,
+            UserTokenRequestParameters? parameters = null) => Stored = null;
+
+        public Task<Scheme> GetSchemeAsync(UserTokenRequestParameters? parameters = null,
+            CancellationToken ct = new CancellationToken()) =>
+            Task.FromResult(Scheme.Bearer);
     }
 
     private class DummyMeterFactory : IMeterFactory
@@ -99,4 +125,28 @@ public class ServerSideTokenStoreTests
         public Meter Create(MeterOptions options) => new Meter(options);
     }
 
+}
+public static class TokenResultExtensions
+{
+    /// <summary>
+    /// Convenience method to extract the token from an asynchronous TokenResult.
+    /// You can now do: GetTokenAsync(ct).GetToken().
+    /// Note, this method will throw an InvalidOperationException with the token failure
+    /// if the token result was not successful.
+    /// </summary>
+    /// <typeparam name="T">Token</typeparam>
+    /// <param name="task">The task that retrieved the token. </param>
+    /// <returns>Token if successful</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the token was not retrieved successfully. </exception>
+    public static async Task<T> GetToken<T>(this Task<TokenResult<T>> task) where T : class
+    {
+        var result = await task;
+
+        if (!result.WasSuccessful(out var token, out var failure))
+        {
+            throw new InvalidOperationException($"Failed to get token: {failure}");
+        }
+
+        return token;
+    }
 }

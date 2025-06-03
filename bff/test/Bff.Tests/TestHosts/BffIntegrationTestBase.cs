@@ -11,19 +11,19 @@ namespace Duende.Bff.Tests.TestHosts;
 
 public class BffIntegrationTestBase : OutputWritingTestBase
 {
-    protected readonly IdentityServerHost IdentityServerHost;
-    protected ApiHost ApiHost;
-    protected BffHost BffHost;
+    protected readonly IdentityServerHost IdentityServer;
+    protected ApiHost Api;
+    protected BffHost Bff;
     protected BffHostUsingResourceNamedTokens BffHostWithNamedTokens;
 
     public BffIntegrationTestBase(ITestOutputHelper output) : base(output)
     {
-        IdentityServerHost = new IdentityServerHost(WriteLine);
-        ApiHost = new ApiHost(WriteLine, IdentityServerHost, "scope1");
-        BffHost = new BffHost(WriteLine, IdentityServerHost, ApiHost, "spa");
-        BffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(WriteLine, IdentityServerHost, ApiHost, "spa");
+        IdentityServer = new IdentityServerHost(WriteLine);
+        Api = new ApiHost(WriteLine, IdentityServer, "scope1");
+        Bff = new BffHost(WriteLine, IdentityServer, Api, "spa");
+        BffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(WriteLine, IdentityServer, Api, "spa");
 
-        IdentityServerHost.Clients.Add(new Client
+        IdentityServer.Clients.Add(new Client
         {
             ClientId = "spa",
             ClientSecrets = { new Secret("secret".Sha256()) },
@@ -36,11 +36,11 @@ public class BffIntegrationTestBase : OutputWritingTestBase
         });
 
 
-        IdentityServerHost.OnConfigureServices += services =>
+        IdentityServer.OnConfigureServices += services =>
         {
             services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
                 new DefaultBackChannelLogoutHttpClient(
-                    BffHost!.HttpClient,
+                    Bff!.HttpClient,
                     provider.GetRequiredService<ILoggerFactory>(),
                     provider.GetRequiredService<ICancellationTokenProvider>()));
 
@@ -48,23 +48,23 @@ public class BffIntegrationTestBase : OutputWritingTestBase
         };
     }
 
-    public async Task Login(string sub) => await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
+    public async Task Login(string sub) => await IdentityServer.IssueSessionCookieAsync(new Claim("sub", sub));
 
     public override async Task InitializeAsync()
     {
-        await IdentityServerHost.InitializeAsync();
-        await ApiHost.InitializeAsync();
-        await BffHost.InitializeAsync();
+        await IdentityServer.InitializeAsync();
+        await Api.InitializeAsync();
+        await Bff.InitializeAsync();
         await BffHostWithNamedTokens.InitializeAsync();
         await base.InitializeAsync();
     }
 
     public override async Task DisposeAsync()
     {
-        await ApiHost.DisposeAsync();
-        await BffHost.DisposeAsync();
+        await Api.DisposeAsync();
+        await Bff.DisposeAsync();
         await BffHostWithNamedTokens.DisposeAsync();
-        await IdentityServerHost.DisposeAsync();
+        await IdentityServer.DisposeAsync();
         await base.DisposeAsync();
     }
 }

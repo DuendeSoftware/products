@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Blazor;
@@ -98,7 +99,7 @@ app.UseAntiforgery();
 app.MapBffManagementEndpoints();
 
 app.MapRemoteBffApiEndpoint("/remote-apis/user-token", "https://localhost:5010")
-    .RequireAccessToken(TokenType.User);
+    .WithAccessToken(RequiredTokenType.User);
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

@@ -7,6 +7,4 @@ namespace Duende.Bff.Endpoints;
 /// <summary>
 /// Indicates that the BFF middleware will ignore the antiforgery header checks.
 /// </summary>
-public interface IBffApiSkipAntiforgery
-{
-}
+public interface IBffApiSkipAntiForgery;

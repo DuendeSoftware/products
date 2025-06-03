@@ -1,0 +1,6 @@
+@Hosts.Bff.MultiFrontend_HostAddress = http://localhost:5222
+
+GET {{Hosts.Bff.MultiFrontend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
