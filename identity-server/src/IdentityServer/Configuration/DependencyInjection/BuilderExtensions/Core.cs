@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using System.Net;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
@@ -220,6 +221,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<IDiagnosticEntry, DataProtectionDiagnosticEntry>();
         builder.Services.AddSingleton<IDiagnosticEntry, TokenIssueCountDiagnosticEntry>();
         builder.Services.AddSingleton<IDiagnosticEntry, LicenseUsageDiagnosticEntry>();
+        builder.Services.AddSingleton<IDiagnosticEntry>(new BasicServerInfoDiagnosticEntry(Dns.GetHostName));
         builder.Services.AddSingleton<DiagnosticSummary>();
         builder.Services.AddHostedService<DiagnosticHostedService>();
 
