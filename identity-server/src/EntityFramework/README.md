@@ -7,7 +7,7 @@ Duende.IdentityServer.EntityFramework combines the Duende IdentityServer engine 
 [IdentityServer](https://www.nuget.org/packages/Duende.IdentityServer) is a highly extensible, standards-compliant framework for implementing the OpenID Connect and OAuth 2.x protocols in ASP.NET Core. 
 
 ## Getting Started
-Check out our [Quickstart Tutorial Series](https://docs.duendesoftware.com/quickstarts) for step-by-step guidance.  In particular, [QuickStart 4](https://docs.duendesoftware.com/quickstarts4_ef/) shows how to use the persistence stores from this package.
+Check out our [Quickstart Tutorial Series](https://docs.duendesoftware.com/identityserver/quickstarts/0-overview/) for step-by-step guidance.  In particular, [QuickStart 4](https://docs.duendesoftware.com/identityserver/quickstarts/4-entity-framework/) shows how to use the persistence stores from this package.
 
 ## Licensing
 Duende IdentityServer is source-available, but requires a paid [license](https://duendesoftware.com/products/identityserver) for production use.
