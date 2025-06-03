@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
-using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
 using System.Text.Json;
 using Duende.IdentityServer.Models;
@@ -11,21 +10,27 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
 {
-    private readonly ConcurrentDictionary<string, AtomicCounter> _tokenCounts;
+    private long _jwtTokenIssued;
+    private long _referenceTokenIssued;
+    private long _refreshTokenIssued;
+    private long _jwtPoPDPoPTokenIssued;
+    private long _referencePoPDPoPTokenIssued;
+    private long _jwtPoPmTLSTokenIssued;
+    private long _referencePoPmTLSTokenIssued;
+    private long _idTokenIssued;
+
+    private long _implicitGrantTypeFlows;
+    private long _hybridGrantTypeFlows;
+    private long _authorizationCodeGrantTypeFlows;
+    private long _clientCredentialsGrantTypeFlows;
+    private long _resourceOwnerPasswordGrantTypeFlows;
+    private long _deviceFlowGrantTypeFlows;
+    private long _otherGrantTypeFlows;
+
     private readonly MeterListener _meterListener;
 
     public TokenIssueCountDiagnosticEntry()
     {
-        _tokenCounts = new ConcurrentDictionary<string, AtomicCounter>([
-            new("Jwt", new AtomicCounter()),
-            new ("Reference", new AtomicCounter()),
-            new ("Refresh", new AtomicCounter()),
-            new("JwtPoPDPoP", new AtomicCounter()),
-            new("ReferencePoPDPoP", new AtomicCounter()),
-            new("JwtPoPmTLS", new AtomicCounter()),
-            new("ReferencePoPmTLS", new AtomicCounter()),
-            new("Id", new AtomicCounter())
-        ]);
         _meterListener = new MeterListener();
 
         _meterListener.InstrumentPublished += (instrument, listener) =>
@@ -46,10 +51,21 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
         writer.WritePropertyName("TokenIssueCounts");
         writer.WriteStartObject();
 
-        foreach (var (tokenType, counter) in _tokenCounts)
-        {
-            writer.WriteNumber(tokenType, counter.Count);
-        }
+        writer.WriteNumber("Jwt", _jwtTokenIssued);
+        writer.WriteNumber("Reference", _referenceTokenIssued);
+        writer.WriteNumber("JwtPoPDPoP", _jwtPoPDPoPTokenIssued);
+        writer.WriteNumber("ReferencePoPDPoP", _referencePoPDPoPTokenIssued);
+        writer.WriteNumber("JwtPoPmTLS", _jwtPoPmTLSTokenIssued);
+        writer.WriteNumber("ReferencePoPmTLS", _referencePoPmTLSTokenIssued);
+        writer.WriteNumber("Refresh", _refreshTokenIssued);
+        writer.WriteNumber("Id", _idTokenIssued);
+        writer.WriteNumber(GrantType.Implicit, _implicitGrantTypeFlows);
+        writer.WriteNumber(GrantType.Hybrid, _hybridGrantTypeFlows);
+        writer.WriteNumber(GrantType.AuthorizationCode, _authorizationCodeGrantTypeFlows);
+        writer.WriteNumber(GrantType.ClientCredentials, _clientCredentialsGrantTypeFlows);
+        writer.WriteNumber(GrantType.ResourceOwnerPassword, _resourceOwnerPasswordGrantTypeFlows);
+        writer.WriteNumber(GrantType.DeviceFlow, _deviceFlowGrantTypeFlows);
+        writer.WriteNumber("Other", _otherGrantTypeFlows);
 
         writer.WriteEndObject();
 
@@ -106,44 +122,65 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
             switch (proofType)
             {
                 case ProofType.None when accessTokenType == AccessTokenType.Jwt:
-                    _tokenCounts["Jwt"].Increment();
+                    Interlocked.Increment(ref _jwtTokenIssued);
                     break;
                 case ProofType.None when accessTokenType == AccessTokenType.Reference:
-                    _tokenCounts["Reference"].Increment();
+                    Interlocked.Increment(ref _referenceTokenIssued);
                     break;
                 case ProofType.DPoP when accessTokenType == AccessTokenType.Jwt:
-                    _tokenCounts["JwtPoPDPoP"].Increment();
+                    Interlocked.Increment(ref _jwtPoPDPoPTokenIssued);
                     break;
                 case ProofType.DPoP when accessTokenType == AccessTokenType.Reference:
-                    _tokenCounts["ReferencePoPDPoP"].Increment();
+                    Interlocked.Increment(ref _referencePoPDPoPTokenIssued);
                     break;
                 case ProofType.ClientCertificate when accessTokenType == AccessTokenType.Jwt:
-                    _tokenCounts["JwtPoPmTLS"].Increment();
+                    Interlocked.Increment(ref _jwtPoPmTLSTokenIssued);
                     break;
                 case ProofType.ClientCertificate when accessTokenType == AccessTokenType.Reference:
-                    _tokenCounts["ReferencePoPmTLS"].Increment();
+                    Interlocked.Increment(ref _referencePoPmTLSTokenIssued);
                     break;
             }
         }
 
         if (refreshTokenIssued)
         {
-            _tokenCounts["Refresh"].Increment();
+            Interlocked.Increment(ref _refreshTokenIssued);
         }
 
         if (identityTokenIssued)
         {
-            _tokenCounts["Id"].Increment();
+            Interlocked.Increment(ref _idTokenIssued);
         }
 
         var tokenWasIssued = accessTokenIssued || refreshTokenIssued || identityTokenIssued;
-        if (tokenWasIssued && !string.IsNullOrEmpty(grantType))
+        if (!tokenWasIssued || string.IsNullOrEmpty(grantType))
         {
-            _tokenCounts.AddOrUpdate(grantType, new AtomicCounter(1), (_, counter) =>
-            {
-                counter.Increment();
-                return counter;
-            });
+            return;
+        }
+
+        switch (grantType)
+        {
+            case GrantType.Implicit:
+                Interlocked.Increment(ref _implicitGrantTypeFlows);
+                break;
+            case GrantType.Hybrid:
+                Interlocked.Increment(ref _hybridGrantTypeFlows);
+                break;
+            case GrantType.AuthorizationCode:
+                Interlocked.Increment(ref _authorizationCodeGrantTypeFlows);
+                break;
+            case GrantType.ClientCredentials:
+                Interlocked.Increment(ref _clientCredentialsGrantTypeFlows);
+                break;
+            case GrantType.ResourceOwnerPassword:
+                Interlocked.Increment(ref _resourceOwnerPasswordGrantTypeFlows);
+                break;
+            case GrantType.DeviceFlow:
+                Interlocked.Increment(ref _deviceFlowGrantTypeFlows);
+                break;
+            default:
+                Interlocked.Increment(ref _otherGrantTypeFlows);
+                break;
         }
     }
 }
