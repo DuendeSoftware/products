@@ -73,7 +73,8 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     /// <summary>
     /// The persisted grants that are token types.
     /// </summary>
-    protected static readonly string[] PersistedGrantTokenTypes = new[] {
+    protected static readonly string[] PersistedGrantTokenTypes = new[]
+    {
         IdentityServerConstants.PersistedGrantTypes.RefreshToken,
         IdentityServerConstants.PersistedGrantTypes.ReferenceToken,
         IdentityServerConstants.PersistedGrantTypes.AuthorizationCode,
@@ -88,12 +89,16 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
             var clientsToCoordinate = new List<string>();
             foreach (var clientId in session.ClientIds)
             {
-                var client = await ClientStore.FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
+                var client =
+                    await ClientStore
+                        .FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
+
                 if (client != null)
                 {
                     var shouldCoordinate =
                         client.CoordinateLifetimeWithUserSession == true ||
-                        (Options.Authentication.CoordinateClientLifetimesWithUserSession && client.CoordinateLifetimeWithUserSession != false);
+                        (Options.Authentication.CoordinateClientLifetimesWithUserSession &&
+                         client.CoordinateLifetimeWithUserSession != false);
 
                     if (shouldCoordinate)
                     {
@@ -104,7 +109,9 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
 
             if (clientsToCoordinate.Count > 0)
             {
-                Logger.LogDebug("Due to user logout, removing tokens for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
+                Logger.LogDebug(
+                    "Due to user logout, removing tokens for subject id {subjectId} and session id {sessionId}",
+                    session.SubjectId, session.SessionId);
 
                 await PersistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
                 {
@@ -115,7 +122,9 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 });
             }
 
-            Logger.LogDebug("Due to user logout, invoking backchannel logout for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
+            Logger.LogDebug(
+                "Due to user logout, invoking backchannel logout for subject id {subjectId} and session id {sessionId}",
+                session.SubjectId, session.SessionId);
 
             // this uses all the clientIds since that's how logout worked before session coordination existed
             // IOW, we know we're not using the clientsToCoordinate list here, also because it's active logout
@@ -138,22 +147,30 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
 
         foreach (var clientId in session.ClientIds)
         {
-            var client = await ClientStore.FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
+            var client =
+                await ClientStore
+                    .FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
 
-            var shouldCoordinate =
-                client.CoordinateLifetimeWithUserSession == true ||
-                (Options.Authentication.CoordinateClientLifetimesWithUserSession && client.CoordinateLifetimeWithUserSession != false);
-
-            if (shouldCoordinate)
+            if (client != null)
             {
-                // this implies they should also be contacted for backchannel logout below
-                clientsToCoordinate.Add(clientId);
+                var shouldCoordinate =
+                    client.CoordinateLifetimeWithUserSession == true ||
+                    (Options.Authentication.CoordinateClientLifetimesWithUserSession &&
+                     client.CoordinateLifetimeWithUserSession != false);
+
+                if (shouldCoordinate)
+                {
+                    // this implies they should also be contacted for backchannel logout below
+                    clientsToCoordinate.Add(clientId);
+                }
             }
         }
 
         if (clientsToCoordinate.Count > 0)
         {
-            Logger.LogDebug("Due to expired session, removing tokens for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
+            Logger.LogDebug(
+                "Due to expired session, removing tokens for subject id {subjectId} and session id {sessionId}",
+                session.SubjectId, session.SessionId);
 
             await PersistedGrantStore.RemoveAllAsync(new PersistedGrantFilter
             {
@@ -175,7 +192,9 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
 
             if (clientsToContact.Count > 0)
             {
-                Logger.LogDebug("Due to expired session, invoking backchannel logout for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
+                Logger.LogDebug(
+                    "Due to expired session, invoking backchannel logout for subject id {subjectId} and session id {sessionId}",
+                    session.SubjectId, session.SessionId);
 
                 await BackChannelLogoutService.SendLogoutNotificationsAsync(new LogoutNotificationContext
                 {
@@ -197,7 +216,8 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         {
             var shouldCoordinate =
                 request.Client.CoordinateLifetimeWithUserSession == true ||
-                (Options.Authentication.CoordinateClientLifetimesWithUserSession && request.Client.CoordinateLifetimeWithUserSession != false);
+                (Options.Authentication.CoordinateClientLifetimesWithUserSession &&
+                 request.Client.CoordinateLifetimeWithUserSession != false);
 
             if (shouldCoordinate)
             {
@@ -208,22 +228,26 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 });
 
                 var valid = sessions.Count > 0 &&
-                    sessions.Any(x => x.Expires == null || DateTime.UtcNow < x.Expires.Value);
+                            sessions.Any(x => x.Expires == null || DateTime.UtcNow < x.Expires.Value);
 
                 if (!valid)
                 {
-                    Logger.LogDebug("Due to missing/expired server-side session, failing token validation for subject id {subjectId} and session id {sessionId}", request.SubjectId, request.SessionId);
+                    Logger.LogDebug(
+                        "Due to missing/expired server-side session, failing token validation for subject id {subjectId} and session id {sessionId}",
+                        request.SubjectId, request.SessionId);
                     return false;
                 }
 
-                Logger.LogDebug("Due to client token use, extending server-side session for subject id {subjectId} and session id {sessionId}", request.SubjectId, request.SessionId);
+                Logger.LogDebug(
+                    "Due to client token use, extending server-side session for subject id {subjectId} and session id {sessionId}",
+                    request.SubjectId, request.SessionId);
 
                 foreach (var session in sessions)
                 {
                     if (session.Expires.HasValue)
                     {
                         // setting the Expires flag on the entity (and not in the AuthenticationTicket)
-                        // since we know that when loading from the DB that column will overwrite the 
+                        // since we know that when loading from the DB that column will overwrite the
                         // expires in the AuthenticationTicket.
                         var diff = session.Expires.Value.Subtract(session.Renewed);
                         session.Renewed = DateTime.UtcNow;
