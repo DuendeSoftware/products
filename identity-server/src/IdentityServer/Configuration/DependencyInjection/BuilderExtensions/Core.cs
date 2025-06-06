@@ -222,6 +222,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<IDiagnosticEntry, TokenIssueCountDiagnosticEntry>();
         builder.Services.AddSingleton<IDiagnosticEntry, LicenseUsageDiagnosticEntry>();
         builder.Services.AddSingleton<IDiagnosticEntry>(new BasicServerInfoDiagnosticEntry(Dns.GetHostName));
+        builder.Services.AddSingleton<IDiagnosticEntry, EndpointUsageDiagnosticEntry>();
         builder.Services.AddSingleton<DiagnosticSummary>();
         builder.Services.AddHostedService<DiagnosticHostedService>();
 
