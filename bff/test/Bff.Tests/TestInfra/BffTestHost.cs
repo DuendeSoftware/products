@@ -73,7 +73,7 @@ public class BffTestHost(TestHostContext context) : TestHost(context, new Uri("h
         private set => _browserClient = value;
     }
 
-    public void AddOrUpdateFrontend(BffFrontend frontend) => Resolve<LocalFrontendStore>().AddOrUpdate(frontend);
+    public void AddOrUpdateFrontend(BffFrontend frontend) => Resolve<FrontendCollection>().AddOrUpdate(frontend);
 }
 
 public class CallbackForwarderHttpClientFactory(Func<ForwarderHttpClientContext, HttpMessageInvoker> callback)

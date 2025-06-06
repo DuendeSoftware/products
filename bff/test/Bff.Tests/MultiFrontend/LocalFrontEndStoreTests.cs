@@ -34,10 +34,10 @@ public class LocalFrontEndStoreTests
         result.ShouldBeEquivalentTo(_frontendsConfiguredDuringStartup.AsReadOnly());
     }
 
-    private LocalFrontendStore BuildCache()
+    private FrontendCollection BuildCache()
     {
         // No longer inject OptionsCache
-        var cache = new LocalFrontendStore(_bffConfigurationOptionsMonitor, _frontendsConfiguredDuringStartup);
+        var cache = new FrontendCollection(_bffConfigurationOptionsMonitor, _frontendsConfiguredDuringStartup);
         return cache;
     }
 

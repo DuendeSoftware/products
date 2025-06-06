@@ -49,7 +49,11 @@ public sealed class BffBuilder(IServiceCollection services)
         Services.AddHybridCache();
 
         Services.AddTransient<IStartupFilter, ConfigureBffStartupFilter>();
-        Services.AddSingleton<LocalFrontendStore>();
+
+        // Register the frontend collection, which will be used to store and retrieve frontends
+        Services.AddSingleton<FrontendCollection>();
+        // Add a public accessible interface to the frontend collection, so our users can access it
+        Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
 
         Services.AddTransient<SelectedFrontend>();
         Services.AddTransient<FrontendSelector>();

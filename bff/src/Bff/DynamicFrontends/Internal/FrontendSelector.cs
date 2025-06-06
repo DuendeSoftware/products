@@ -8,12 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class FrontendSelector(LocalFrontendStore frontendStore, ILogger<FrontendSelector> logger)
+internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<FrontendSelector> logger)
 {
     public bool TrySelectFrontend(HttpRequest request, [NotNullWhen(true)] out BffFrontend? selectedFrontend)
     {
         selectedFrontend = null;
-        var frontends = frontendStore.GetAll();
+        var frontends = frontendCollection.GetAll();
 
         if (frontends.Count == 0)
         {

@@ -23,7 +23,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         IHttpClientFactory clientFactory,
         SelectedFrontend selectedFrontend,
         HybridCache cache,
-        LocalFrontendStore frontendStore,
+        FrontendCollection frontendCollection,
         ILogger<IndexHtmlHttpClient> logger,
         IIndexHtmlTransformer? transformer = null)
     {
@@ -33,7 +33,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         _cache = cache;
         _transformer = transformer;
 
-        frontendStore.OnFrontendChanged += async changedFrontend =>
+        frontendCollection.OnFrontendChanged += async changedFrontend =>
         {
             try
             {
