@@ -12,7 +12,7 @@ namespace Duende.Bff.Tests.MultiFrontend;
 
 public class FrontendSelectorTests
 {
-    private readonly LocalFrontendStore _frontendStore =
+    private readonly FrontendCollection _frontendCollection =
         new(bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration()));
 
     private readonly FrontendSelector _selector;
@@ -27,8 +27,8 @@ public class FrontendSelectorTests
         var loggerFactory = new LoggerFactory([testLoggerProvider]);
 
 
-        _frontendStore.AddOrUpdate(NeverMatchingFrontEnd());
-        _selector = new FrontendSelector(_frontendStore, loggerFactory.CreateLogger<FrontendSelector>());
+        _frontendCollection.AddOrUpdate(NeverMatchingFrontEnd());
+        _selector = new FrontendSelector(_frontendCollection, loggerFactory.CreateLogger<FrontendSelector>());
     }
 
     private BffFrontend NeverMatchingFrontEnd() => new BffFrontend
@@ -56,8 +56,8 @@ public class FrontendSelectorTests
     public void TryMapFrontend_Will_return_first()
     {
         // Arrange
-        _frontendStore.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("test-frontend1")));
-        _frontendStore.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("test-frontend2")));
+        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("test-frontend1")));
+        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("test-frontend2")));
 
         // Act
         var result = _selector.TrySelectFrontend(CreateHttpRequest("https://test.com"), out var selectedFrontend);
@@ -74,7 +74,7 @@ public class FrontendSelectorTests
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
             origin: Origin.Parse("https://test.com"));
-        _frontendStore.AddOrUpdate(frontend);
+        _frontendCollection.AddOrUpdate(frontend);
 
         // Act
         var result = _selector.TrySelectFrontend(CreateHttpRequest("https://test.com"), out var selectedFrontend);
@@ -91,7 +91,7 @@ public class FrontendSelectorTests
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
             path: "/path1");
-        _frontendStore.AddOrUpdate(frontend);
+        _frontendCollection.AddOrUpdate(frontend);
 
         // Act
         var request = CreateHttpRequest("https://test.com/path1/subpath");
@@ -109,7 +109,7 @@ public class FrontendSelectorTests
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
             path: "/lower_case_path");
-        _frontendStore.AddOrUpdate(frontend);
+        _frontendCollection.AddOrUpdate(frontend);
 
         // Act
         var request = CreateHttpRequest("https://test.com/LOWER_CASE_PATH/subpath");
@@ -130,7 +130,7 @@ public class FrontendSelectorTests
         var frontend = CreateFrontend(The.FrontendName,
             origin: Origin.Parse("https://test.com"),
             path: "/path1");
-        _frontendStore.AddOrUpdate(frontend);
+        _frontendCollection.AddOrUpdate(frontend);
 
         // Act
         var request = CreateHttpRequest("https://test.com/path1/subpath");
@@ -148,7 +148,7 @@ public class FrontendSelectorTests
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
             path: "/path1");
-        _frontendStore.AddOrUpdate(frontend);
+        _frontendCollection.AddOrUpdate(frontend);
 
         // Act
         var request = CreateHttpRequest("https://any-domain.com/path1/subpath");
@@ -171,8 +171,8 @@ public class FrontendSelectorTests
             origin: Origin.Parse("https://test.com"),
             path: "/path1");
 
-        _frontendStore.AddOrUpdate(frontendGeneral);
-        _frontendStore.AddOrUpdate(frontendSpecific);
+        _frontendCollection.AddOrUpdate(frontendGeneral);
+        _frontendCollection.AddOrUpdate(frontendSpecific);
 
         // Act
         var request = CreateHttpRequest("https://test.com/path1/subpath");
@@ -194,8 +194,8 @@ public class FrontendSelectorTests
         var frontendSpecific = CreateFrontend(BffFrontendName.Parse("specific-frontend"),
             path: "/path/subpath");
 
-        _frontendStore.AddOrUpdate(frontendGeneral);
-        _frontendStore.AddOrUpdate(frontendSpecific);
+        _frontendCollection.AddOrUpdate(frontendGeneral);
+        _frontendCollection.AddOrUpdate(frontendSpecific);
 
         // Act
         var request = CreateHttpRequest("https://test.com/path/subpath/detail");
@@ -215,7 +215,7 @@ public class FrontendSelectorTests
             origin: Origin.Parse("https://test.com"),
             path: "/path1");
 
-        _frontendStore.AddOrUpdate(frontend);
+        _frontendCollection.AddOrUpdate(frontend);
 
         // Act
         var request = CreateHttpRequest("https://different.com/different-path");
@@ -235,8 +235,8 @@ public class FrontendSelectorTests
 
         var defaultFrontend = CreateFrontend(BffFrontendName.Parse("default-frontend"));
 
-        _frontendStore.AddOrUpdate(specificFrontend);
-        _frontendStore.AddOrUpdate(defaultFrontend);
+        _frontendCollection.AddOrUpdate(specificFrontend);
+        _frontendCollection.AddOrUpdate(defaultFrontend);
 
         // Act
         var request = CreateHttpRequest("https://different.com");

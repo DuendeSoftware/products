@@ -440,6 +440,12 @@ namespace Duende.Bff.DynamicFrontends
         public Duende.Bff.DynamicFrontends.Origin? MatchingOrigin { get; init; }
         public string? MatchingPath { get; init; }
     }
+    public interface IFrontendCollection
+    {
+        void AddOrUpdate(Duende.Bff.DynamicFrontends.BffFrontend frontend);
+        System.Collections.Generic.IReadOnlyList<Duende.Bff.DynamicFrontends.BffFrontend> GetAll();
+        void Remove(Duende.Bff.DynamicFrontends.BffFrontendName frontendName);
+    }
     public interface IIndexHtmlClient
     {
         System.Threading.Tasks.Task<string?> GetIndexHtmlAsync(System.Threading.CancellationToken ct = default);

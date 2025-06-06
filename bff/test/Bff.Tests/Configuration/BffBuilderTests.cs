@@ -29,7 +29,7 @@ public class BffBuilderTests
             .AddFrontends(frontend1, frontend2);
 
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(2);
         frontends.ShouldContain(frontend1);
         frontends.ShouldContain(frontend2);
@@ -49,7 +49,7 @@ public class BffBuilderTests
             .AddFrontends(frontend2);
 
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(2);
         frontends.ShouldContain(frontend1);
         frontends.ShouldContain(frontend2);
@@ -71,7 +71,7 @@ public class BffBuilderTests
         var services = new ServiceCollection();
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -120,7 +120,7 @@ public class BffBuilderTests
         var services = new ServiceCollection();
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -161,7 +161,7 @@ public class BffBuilderTests
         services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -210,7 +210,7 @@ public class BffBuilderTests
         services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -266,7 +266,7 @@ public class BffBuilderTests
         var services = new ServiceCollection();
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -300,7 +300,7 @@ public class BffBuilderTests
         var services = new ServiceCollection();
         services.AddBff().LoadConfiguration(configFile.Configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(2);
 
         configFile.Save(new BffConfiguration()
@@ -312,7 +312,7 @@ public class BffBuilderTests
             }
         });
 
-        frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(2);
 
         var found = frontends.ToArray();
@@ -351,7 +351,7 @@ public class BffBuilderTests
         optionsCache.TryAdd("to_be_removed", new OpenIdConnectOptions());
         optionsCache.TryAdd("to_be_updated", new OpenIdConnectOptions());
 
-        var frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
 
         configFile.Save(new BffConfiguration()
         {
@@ -362,7 +362,7 @@ public class BffBuilderTests
             }
         });
 
-        frontends = provider.GetRequiredService<LocalFrontendStore>().GetAll();
+        frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(2);
 
         optionsCache.TryRemove("to_be_removed")

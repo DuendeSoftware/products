@@ -38,7 +38,7 @@ internal class ConfigureBffStartupFilter : IStartupFilter
 
     private static void ConfigureOpenIdConfigurationCacheExpiration(IApplicationBuilder app)
     {
-        var frontendStore = app.ApplicationServices.GetRequiredService<LocalFrontendStore>();
+        var frontendStore = app.ApplicationServices.GetRequiredService<FrontendCollection>();
         var optionsMonitor = app.ApplicationServices.GetRequiredService<IOptionsMonitorCache<OpenIdConnectOptions>>();
 
         frontendStore.OnFrontendChanged +=

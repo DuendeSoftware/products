@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class LocalFrontendStore : IDisposable
+internal class FrontendCollection : IDisposable, IFrontendCollection
 {
     private readonly object _syncRoot = new();
 
@@ -22,7 +22,7 @@ internal class LocalFrontendStore : IDisposable
 
     public event Action<BffFrontend> OnFrontendChanged = (_) => { };
 
-    public LocalFrontendStore(
+    public FrontendCollection(
         IOptionsMonitor<BffConfiguration> bffConfiguration,
         IEnumerable<BffFrontend>? frontendsConfiguredDuringStartup = null)
     {
