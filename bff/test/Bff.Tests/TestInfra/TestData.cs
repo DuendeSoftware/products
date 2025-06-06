@@ -7,6 +7,7 @@ using System.Text.Json;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
@@ -41,6 +42,11 @@ public class TestData
     public TimeSpan? MaxAge = TimeSpan.FromDays(10);
     public RequiredTokenType RequiredTokenType = RequiredTokenType.UserOrClient;
     public Uri CallbackPath => new Uri("/" + PropertyName(), UriKind.Relative);
+
+    public FakeTimeProvider Clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
+
+    public DateTimeOffset CurrentTime => Clock.GetUtcNow();
+
     public Type TokenRetrieverType = typeof(TestTokenRetriever);
 
     public Resource Resource = Resource.Parse(PropertyName());
