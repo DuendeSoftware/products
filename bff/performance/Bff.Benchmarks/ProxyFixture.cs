@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Bff.Benchmarks.Hosts;
@@ -12,6 +12,7 @@ public class ProxyFixture : IAsyncDisposable
     public ApiHost Api;
     public IdentityServerHost IdentityServer;
     public BffHost Bff;
+    public BffHost BffWithManyFrontends;
     public PlainYarpProxy YarpProxy;
 
     public ProxyFixture()
@@ -25,7 +26,16 @@ public class ProxyFixture : IAsyncDisposable
 
         Bff = new BffHost(IdentityServer.Url, Api.Url);
         Bff.Initialize();
+        BffWithManyFrontends = new BffHost(IdentityServer.Url, Api.Url);
+        BffWithManyFrontends.Initialize();
 
+        for (var i = 0; i < 1000; i++)
+        {
+            BffWithManyFrontends.AddFrontend(new Uri($"https://frontend{i}.example.com/"));
+        }
+        BffWithManyFrontends.AddFrontend(Bff.Url);
+
+        var bffUrls = new[] { Bff.Url, BffWithManyFrontends.Url };
         IdentityServer.Clients.Add(new Client()
         {
             ClientId = "bff",
@@ -38,9 +48,8 @@ public class ProxyFixture : IAsyncDisposable
                 OidcConstants.GrantTypes.TokenExchange
             },
 
-            RedirectUris = { $"{Bff.Url}signin-oidc" },
-            FrontChannelLogoutUri = $"{Bff.Url}signout-oidc",
-            PostLogoutRedirectUris = { $"{Bff.Url}signout-callback-oidc" },
+            RedirectUris = bffUrls.Select(x => $"{x}signin-oidc").ToArray(),
+            PostLogoutRedirectUris = bffUrls.Select(x => $"{x}signout-callback-oidc").ToArray(),
 
             AllowOfflineAccess = true,
             AllowedScopes = { "openid", "profile", "api" },

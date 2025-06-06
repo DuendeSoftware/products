@@ -32,6 +32,8 @@ public abstract class Host : IAsyncDisposable
         _builder.Services.AddRouting();
     }
 
+    public T GetService<T>() where T : notnull => _app.Services.GetRequiredService<T>();
+
     public void Initialize()
     {
         OnConfigureServices(_builder.Services);

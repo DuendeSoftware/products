@@ -3,6 +3,7 @@
 
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Builder;
 
@@ -58,4 +59,6 @@ public class BffHost : Host
                 .WithAccessToken(RequiredTokenType.User);
         };
     }
+
+    public void AddFrontend(Uri uri) => GetService<IFrontendCollection>().AddOrUpdate(new BffFrontend().MappedToOrigin(Origin.Parse(uri)));
 }
