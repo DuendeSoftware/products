@@ -3,7 +3,7 @@
 
 namespace Duende.Bff.Configuration;
 
-public sealed record BffFrontendConfiguration
+internal sealed record BffFrontendConfiguration
 {
     public Uri? IndexHtmlUrl { get; init; }
 
@@ -14,6 +14,4 @@ public sealed record BffFrontendConfiguration
     public OidcConfiguration? Oidc { get; init; }
 
     public CookieConfiguration? Cookies { get; init; }
-
-    public RemoteApiConfig[] RemoteApis { get; init; } = [];
 }

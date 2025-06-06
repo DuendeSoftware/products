@@ -3,7 +3,6 @@
 
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
-using Duende.Bff.DynamicFrontends.Internal;
 using Microsoft.AspNetCore.Http;
 using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Forwarder;
@@ -16,7 +15,7 @@ internal class RemoteRouteHandler(
     ITransformBuilder transformBuilder,
     IForwarderHttpClientFactory? forwarderHttpClientFactory = null,
     BffYarpTransformBuilder? customBffYarpTransformBuilder = null
-    ) : IRemoteRouteHandler
+    )
 {
     private IForwarderHttpClientFactory _forwarderHttpClientFactory = forwarderHttpClientFactory ?? new ForwarderHttpClientFactory();
 
@@ -44,7 +43,7 @@ internal class RemoteRouteHandler(
         var bffTransformBuilder = customBffYarpTransformBuilder ??
              DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken;
 
-        foreach (var route in frontend.Proxy.RemoteApis)
+        foreach (var route in frontend.GetRemoteApis())
         {
 
             if (context.Request.Path.StartsWithSegments(route.LocalPath.ToString()))

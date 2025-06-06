@@ -91,28 +91,28 @@ bffBuilder
             .MappedToPath(LocalPath.Parse("/with-path")),
 
         new BffFrontend(BffFrontendName.Parse("with-domain"))
-            .WithOpenIdConnectOptions(opt =>
-            {
-                opt.ClientId = "bff.multi-frontend.with-domain";
-                opt.ClientSecret = "secret";
-            })
-            .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-            .MappedToOrigin(Origin.Parse("https://app1.localhost:5005"))
-            .WithRemoteApis(
-                new RemoteApi(LocalPath.Parse("/api/user-token"), new Uri("https://localhost:5010")),
-                new RemoteApi(LocalPath.Parse("/api/client-token"), new Uri("https://localhost:5010"))
-                    .WithAccessToken(RequiredTokenType.Client),
-                new RemoteApi(LocalPath.Parse("/api/user-or-client-token"), new Uri("https://localhost:5010"))
-                    .WithAccessToken(RequiredTokenType.UserOrClient),
-                new RemoteApi(LocalPath.Parse("/api/anonymous"), new Uri("https://localhost:5010"))
-                    .WithAccessToken(RequiredTokenType.None),
-                new RemoteApi(LocalPath.Parse("/api/optional-user-token"), new Uri("https://localhost:5010"))
-                    .WithAccessToken(RequiredTokenType.UserOrNone),
-                new RemoteApi(LocalPath.Parse("/api/impersonation"), new Uri("https://localhost:5010"))
-                    .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>(),
-                new RemoteApi(LocalPath.Parse("/api/audience-constrained"), new Uri("https://localhost:5010"))
-                    .WithUserAccessTokenParameters(new BffUserAccessTokenParameters { Resource = Resource.Parse("urn:isolated-api") }))
-    )
+                .WithOpenIdConnectOptions(opt =>
+                {
+                    opt.ClientId = "bff.multi-frontend.with-domain";
+                    opt.ClientSecret = "secret";
+                })
+                .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
+                .MappedToOrigin(Origin.Parse("https://app1.localhost:5005"))
+                .WithRemoteApis(
+                    new RemoteApi(LocalPath.Parse("/api/user-token"), new Uri("https://localhost:5010")),
+                    new RemoteApi(LocalPath.Parse("/api/client-token"), new Uri("https://localhost:5010"))
+                        .WithAccessToken(RequiredTokenType.Client),
+                    new RemoteApi(LocalPath.Parse("/api/user-or-client-token"), new Uri("https://localhost:5010"))
+                        .WithAccessToken(RequiredTokenType.UserOrClient),
+                    new RemoteApi(LocalPath.Parse("/api/anonymous"), new Uri("https://localhost:5010"))
+                        .WithAccessToken(RequiredTokenType.None),
+                    new RemoteApi(LocalPath.Parse("/api/optional-user-token"), new Uri("https://localhost:5010"))
+                        .WithAccessToken(RequiredTokenType.UserOrNone),
+                    new RemoteApi(LocalPath.Parse("/api/impersonation"), new Uri("https://localhost:5010"))
+                        .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>(),
+                    new RemoteApi(LocalPath.Parse("/api/audience-constrained"), new Uri("https://localhost:5010"))
+                        .WithUserAccessTokenParameters(new BffUserAccessTokenParameters { Resource = Resource.Parse("urn:isolated-api") }))
+        )
     .AddYarpConfig(BuildYarpRoutes(), [
         new ClusterConfig()
         {

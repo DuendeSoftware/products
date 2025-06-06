@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Configuration;
 
-namespace Duende.Bff.Configuration;
+namespace Duende.Bff.Yarp.Internal;
 
-public sealed record RemoteApiConfig
+internal sealed record RemoteApiConfiguration
 {
     /// <summary>
     /// The local path that will be used to access the remote API.

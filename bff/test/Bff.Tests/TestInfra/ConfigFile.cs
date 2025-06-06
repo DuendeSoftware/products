@@ -6,7 +6,7 @@ using Duende.Bff.Configuration;
 
 namespace Duende.Bff.Tests.TestInfra;
 
-public class ConfigFile : IDisposable
+internal class ConfigFile : IDisposable
 {
     private IConfiguration? _configuration { get; set; }
 

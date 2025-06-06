@@ -1,7 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends.Internal;
+using Duende.Bff.Yarp.Internal;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Configuration;
@@ -20,8 +23,21 @@ public static class BffBuilderExtensions
     /// <returns></returns>
     public static BffBuilder AddRemoteApis(this BffBuilder builder)
     {
+        builder.RegisterConfigurationLoader((services, config) =>
+        {
+            services.Configure<ProxyConfiguration>(config);
+        });
+
+        builder.Services.Configure<BffOptions>(opt =>
+        {
+            opt.MiddlewareTypes = opt.MiddlewareTypes
+                .Append(typeof(MapRemoteRoutesMiddleware))
+                .ToArray();
+        });
         builder.Services.AddHttpForwarder();
-        builder.Services.AddSingleton<IRemoteRouteHandler, RemoteRouteHandler>();
+        builder.Services.AddSingleton<RemoteRouteHandler>();
+
+        builder.Services.AddSingleton<IDataExtensionLoader, ProxyDataExtensionLoader>();
 
         return builder;
     }
@@ -46,4 +62,7 @@ public static class BffBuilderExtensions
 
         return yarpBuilder;
     }
+
+    public static IApplicationBuilder UseBffRemoteRoutes(this IApplicationBuilder app) => app.UseMiddleware<MapRemoteRoutesMiddleware>();
+
 }

@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 
-namespace Duende.Bff.DynamicFrontends;
+namespace Duende.Bff.Yarp;
 
 public sealed record RemoteApi
 {

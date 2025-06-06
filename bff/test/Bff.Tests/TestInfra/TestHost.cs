@@ -11,7 +11,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     {
     }
 
-    public TestDataBuilder Some => context.Some;
+    internal TestDataBuilder Some => context.Some;
     public TestData The => context.The;
 
     protected SimulatedInternet Internet => context.Internet;

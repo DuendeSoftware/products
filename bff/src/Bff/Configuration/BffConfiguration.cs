@@ -3,7 +3,7 @@
 
 namespace Duende.Bff.Configuration;
 
-public sealed record BffConfiguration
+internal sealed record BffConfiguration
 {
     public OidcConfiguration? DefaultOidcSettings { get; init; }
 

@@ -1,7 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Configuration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
@@ -13,6 +15,7 @@ public sealed record BffFrontend
     {
     }
 
+    [SetsRequiredMembers]
     public BffFrontend(BffFrontendName name) => Name = name;
 
     public bool Equals(BffFrontend? other)
@@ -27,12 +30,12 @@ public sealed record BffFrontend
             return true;
         }
 
-        return Name.Equals(other.Name) && SelectionCriteria.Equals(other.SelectionCriteria) && Equals(IndexHtmlUrl, other.IndexHtmlUrl) && Proxy.Equals(other.Proxy);
+        return Name.Equals(other.Name) && SelectionCriteria.Equals(other.SelectionCriteria) && Equals(IndexHtmlUrl, other.IndexHtmlUrl) & DataExtensions.SequenceEqual(other.DataExtensions);
     }
 
-    public override int GetHashCode() => HashCode.Combine(Name, SelectionCriteria, IndexHtmlUrl, Proxy);
+    public override int GetHashCode() => HashCode.Combine(Name, SelectionCriteria, IndexHtmlUrl, DataExtensions);
 
-    public BffFrontendName Name { get; init; }
+    public required BffFrontendName Name { get; init; }
 
     public Scheme CookieSchemeName => Scheme.Parse("cookie_" + Name);
     public Scheme OidcSchemeName => Scheme.Parse("oidc_" + Name);
@@ -45,5 +48,6 @@ public sealed record BffFrontend
 
     public Uri? IndexHtmlUrl { get; init; }
 
-    public BffProxy Proxy { get; init; } = new();
+    internal IBffDataExtension[] DataExtensions { get; init; } = [];
+
 }

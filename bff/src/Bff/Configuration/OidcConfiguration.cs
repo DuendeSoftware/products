@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Duende.Bff.Configuration;
 
-public sealed record OidcConfiguration
+internal sealed record OidcConfiguration
 {
     /// <summary>
     /// The client ID of the OpenID Connect client.

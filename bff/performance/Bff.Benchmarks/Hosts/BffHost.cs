@@ -60,5 +60,5 @@ public class BffHost : Host
         };
     }
 
-    public void AddFrontend(Uri uri) => GetService<IFrontendCollection>().AddOrUpdate(new BffFrontend().MappedToOrigin(Origin.Parse(uri)));
+    public void AddFrontend(Uri uri) => GetService<IFrontendCollection>().AddOrUpdate(new BffFrontend(BffFrontendName.Parse(uri.ToString())).MappedToOrigin(Origin.Parse(uri)));
 }

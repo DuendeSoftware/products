@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.Configuration;
 
-public sealed record CookieConfiguration
+internal sealed record CookieConfiguration
 {
     /// <summary>
     /// Indicates whether a cookie is inaccessible by client-side script. 
