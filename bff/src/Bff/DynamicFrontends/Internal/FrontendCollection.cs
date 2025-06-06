@@ -20,7 +20,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
 
     private readonly IDisposable? _stopSubscription;
 
-    public event Action<BffFrontend> OnFrontendChanged = (_) => { };
+    internal event Action<BffFrontend> OnFrontendChanged = (_) => { };
 
     public FrontendCollection(
         IOptionsMonitor<BffConfiguration> bffConfiguration,
@@ -193,5 +193,5 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
     // The _frontends array is completely replaced on add/update, so we don't need to lock here.
     public IReadOnlyList<BffFrontend> GetAll() => _frontends.AsReadOnly();
 
-    public void Dispose() => _stopSubscription?.Dispose();
+    void IDisposable.Dispose() => _stopSubscription?.Dispose();
 }
