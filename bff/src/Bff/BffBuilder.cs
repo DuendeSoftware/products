@@ -97,7 +97,6 @@ public sealed class BffBuilder(IServiceCollection services)
         // .AddRemoteApis() from BFF.Yarp
         Services.TryAddSingleton<IRemoteRouteHandler, RemoteRouteHandlingDisabled>();
 
-
         return this;
     }
 

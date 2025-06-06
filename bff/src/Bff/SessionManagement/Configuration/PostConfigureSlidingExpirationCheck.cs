@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Configuration;
+using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ namespace Duende.Bff.SessionManagement.Configuration;
 /// Cookie configuration to suppress sliding the cookie on the ~/bff/user endpoint if requested.
 /// </summary>
 internal class PostConfigureSlidingExpirationCheck(
+    SelectedFrontend selectedFrontend,
     IOptions<BffOptions> bffOptions,
     IOptions<AuthenticationOptions> authOptions,
     ILogger<PostConfigureSlidingExpirationCheck> logger)
@@ -24,7 +26,11 @@ internal class PostConfigureSlidingExpirationCheck(
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
     {
-        if (name == _scheme)
+
+        var isDefaultScheme = name == _scheme;
+        var isForBffFrontend = selectedFrontend.TryGet(out var frontend) && name == frontend.CookieSchemeName;
+
+        if (isDefaultScheme || isForBffFrontend)
         {
             options.Events.OnCheckSlidingExpiration = CreateCallback(options.Events.OnCheckSlidingExpiration);
         }

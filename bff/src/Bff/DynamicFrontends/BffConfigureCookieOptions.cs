@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Duende.Bff.DynamicFrontends;
 
 internal class BffConfigureCookieOptions(
+    TimeProvider timeProvider,
     IOptions<BffConfiguration> bffConfiguration,
     IOptions<BffOptions> bffOptions,
     SelectedFrontend selectedFrontend
@@ -20,6 +21,9 @@ internal class BffConfigureCookieOptions(
 
     public void Configure(string? name, CookieAuthenticationOptions options)
     {
+        // Normally, this is added by AuthenticationBuilder.PostConfigureAuthenticationSchemeOptions
+        // but this is private API, so we need to do it ourselves.
+        options.TimeProvider = timeProvider;
         if (selectedFrontend.TryGet(out var frontEnd))
         {
 

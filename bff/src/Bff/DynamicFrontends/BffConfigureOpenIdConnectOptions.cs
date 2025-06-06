@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Duende.Bff.DynamicFrontends;
 
 internal class BffConfigureOpenIdConnectOptions(
+    TimeProvider timeProvider,
     SelectedFrontend selectedFrontend,
     IOptions<BffConfiguration> bffConfiguration,
     IOptions<BffOptions> bffOptions
@@ -17,6 +18,9 @@ internal class BffConfigureOpenIdConnectOptions(
 
     public void Configure(string? name, OpenIdConnectOptions options)
     {
+        // Normally, this is added by AuthenticationBuilder.PostConfigureAuthenticationSchemeOptions
+        // but this is private API, so we need to do it ourselves.
+        options.TimeProvider = timeProvider;
         var defaultOptionsValue = bffOptions.Value;
         var bffConfigurationValue = bffConfiguration.Value;
 

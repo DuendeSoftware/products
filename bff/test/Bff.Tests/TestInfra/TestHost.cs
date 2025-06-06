@@ -75,6 +75,8 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
     protected virtual void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<TimeProvider>(The.Clock);
+
         services.AddAuthentication();
         services.AddAuthorization();
         services.AddRouting();

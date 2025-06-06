@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,7 @@ namespace Duende.Bff.SessionManagement.Configuration;
 /// Cookie configuration for the user session plumbing
 /// </summary>
 internal class PostConfigureApplicationCookieTicketStore(
+    SelectedFrontend selectedFrontend,
     IHttpContextAccessor httpContextAccessor,
     IOptions<AuthenticationOptions> options)
     : IPostConfigureOptions<CookieAuthenticationOptions>
@@ -22,7 +24,9 @@ internal class PostConfigureApplicationCookieTicketStore(
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
     {
-        if (name == _scheme)
+        var isDefaultScheme = name == _scheme;
+        var isForBffFrontend = selectedFrontend.TryGet(out var frontend) && name == frontend.CookieSchemeName;
+        if (isDefaultScheme || isForBffFrontend)
         {
             options.SessionStore = new TicketStoreShim(httpContextAccessor);
         }
