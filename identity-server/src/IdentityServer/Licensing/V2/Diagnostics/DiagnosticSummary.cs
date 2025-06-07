@@ -4,11 +4,12 @@
 using System.Buffers;
 using System.Text;
 using System.Text.Json;
+using Duende.IdentityServer.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics;
 
-internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, ILogger<DiagnosticSummary> logger)
+internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, IdentityServerOptions options, ILogger<DiagnosticSummary> logger)
 {
     public async Task PrintSummary()
     {
@@ -26,6 +27,23 @@ internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, ILogger<
 
         await writer.FlushAsync();
 
-        logger.LogInformation("{Message}", Encoding.UTF8.GetString(bufferWriter.WrittenSpan));
+        var span = bufferWriter.WrittenSpan;
+
+        var chunkSize = options.Diagnostics.ChunkSize;
+        if (span.Length > chunkSize)
+        {
+            var totalChunks = (span.Length + options.Diagnostics.ChunkSize - 1) / chunkSize;
+            for (var i = 0; i < totalChunks; i++)
+            {
+                var offset = i * chunkSize;
+                var length = Math.Min(chunkSize, span.Length - offset);
+                var chunk = span.Slice(offset, length);
+                logger.LogInformation("Diagnostic data ({current} of {totalChunks}): {diagnosticData}", i + 1, totalChunks, Encoding.UTF8.GetString(chunk));
+            }
+        }
+        else
+        {
+            logger.LogInformation("Diagnostic data: {diagnosticData}", Encoding.UTF8.GetString(bufferWriter.WrittenSpan));
+        }
     }
 }
