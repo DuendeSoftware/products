@@ -42,7 +42,7 @@ public class IdentityServerOptionsDiagnosticEntryTests
             JwtValidationClockSkew = TimeSpan.FromMinutes(1),
             SupportedClientAssertionSigningAlgorithms = ["RS256", "ES256"],
             SupportedRequestObjectSigningAlgorithms = ["SHA256", "SHA512"],
-            DiagnosticSummaryLogFrequency = TimeSpan.FromMinutes(30)
+            Diagnostics = new DiagnosticOptions { LogFrequency = TimeSpan.FromMinutes(30) }
         };
         var subject = new IdentityServerOptionsDiagnosticEntry(Options.Create(options));
 
@@ -76,12 +76,13 @@ public class IdentityServerOptionsDiagnosticEntryTests
         identityServerOptions.TryGetProperty("KeyManagement", out _).ShouldBeTrue();
         identityServerOptions.TryGetProperty("PersistentGrants", out _).ShouldBeTrue();
         identityServerOptions.TryGetProperty("DPoP", out _).ShouldBeTrue();
+        identityServerOptions.TryGetProperty("Diagnostics", out _).ShouldBeTrue();
+
         identityServerOptions.GetProperty("JwtValidationClockSkew").GetString().ShouldBe(TimeSpan.FromMinutes(1).ToString());
         var supportedClientAssertionSigningAlgorithms = identityServerOptions.TryGetStringArray("SupportedClientAssertionSigningAlgorithms");
         supportedClientAssertionSigningAlgorithms.ShouldBe(["RS256", "ES256"]);
         var supportedRequestObjectSigningAlgorithms = identityServerOptions.TryGetStringArray("SupportedRequestObjectSigningAlgorithms");
         supportedRequestObjectSigningAlgorithms.ShouldBe(["SHA256", "SHA512"]);
         identityServerOptions.TryGetProperty("Preview", out _).ShouldBeTrue();
-        identityServerOptions.GetProperty("DiagnosticSummaryLogFrequency").GetString().ShouldBe(TimeSpan.FromMinutes(30).ToString());
     }
 }
