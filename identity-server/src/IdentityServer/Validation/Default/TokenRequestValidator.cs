@@ -213,7 +213,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
     private async Task<TokenRequestValidationResult> ValidateProofToken(TokenRequestValidationContext context)
     {
-        // can't allow both both at once
+        // can't allow both at once
         if (context.ClientCertificate != null && context.DPoPProofToken.IsPresent())
         {
             LogError("Only one confirmation mechanism is allowed at a time.");
