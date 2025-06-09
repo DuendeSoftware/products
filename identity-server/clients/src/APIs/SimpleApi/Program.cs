@@ -2,52 +2,57 @@
 // See LICENSE in the project root for license information.
 
 using Serilog;
-using Serilog.Events;
 
-var builder = WebApplication.CreateBuilder(args);
+SerilogDefaults.Bootstrap();
 
-// Configure Serilog early
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("SampleApi", LogEventLevel.Debug)
-    .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
-    .CreateLogger();
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog();
+    Console.Title = builder.Environment.ApplicationName;
+    Log.Information("{EnvironmentApplicationName} Starting up", builder.Environment.ApplicationName);
 
-// Include the service defaults from Aspire
-builder.AddServiceDefaults();
+    builder.ConfigureSerilogDefaults();
+    builder.AddServiceDefaults();
 
-builder.Services.AddControllers();
-builder.Services.AddCors();
-builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddControllers();
+    builder.Services.AddCors();
 
-// this API will accept any access token from the authority
-builder.Services.AddAuthentication("token")
-    .AddJwtBearer("token", options =>
+    // this API will accept any access token from the authority
+    builder.Services.AddAuthentication("token")
+        .AddJwtBearer("token", options =>
+        {
+            options.Authority = builder.Configuration["is-host"];
+            options.TokenValidationParameters.ValidateAudience = false;
+            options.MapInboundClaims = false;
+            options.TokenValidationParameters.ValidTypes = ["at+jwt"];
+        });
+
+    var app = builder.Build();
+
+    app.UseSerilogRequestLogging();
+
+    app.UseCors(policy =>
     {
-        options.Authority = builder.Configuration["is-host"];
-        options.TokenValidationParameters.ValidateAudience = false;
-        options.MapInboundClaims = false;
-
-        options.TokenValidationParameters.ValidTypes = ["at+jwt"];
+        policy.WithOrigins("https://localhost:44300");
+        policy.AllowAnyHeader();
+        policy.AllowAnyMethod();
+        policy.WithExposedHeaders("WWW-Authenticate");
     });
 
-var app = builder.Build();
+    app.UseRouting();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-app.UseCors(policy =>
+    app.MapControllers().RequireAuthorization();
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    policy.WithOrigins("https://localhost:44300");
-    policy.AllowAnyHeader();
-    policy.AllowAnyMethod();
-    policy.WithExposedHeaders("WWW-Authenticate");
-});
-
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers().RequireAuthorization();
-
-app.Run();
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
