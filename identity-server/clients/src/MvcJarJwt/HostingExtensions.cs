@@ -83,27 +83,6 @@ internal static class HostingExtensions
             client.BaseAddress = new Uri("https://simple-api");
         }).AddServiceDiscovery();
 
-        // var apiKey = _configuration["HoneyCombApiKey"];
-        // var dataset = "IdentityServerDev";
-        //
-        // services.AddOpenTelemetryTracing(builder =>
-        // {
-        //     builder
-        //         //.AddConsoleExporter()
-        //         .SetResourceBuilder(
-        //             ResourceBuilder.CreateDefault()
-        //                 .AddService("MVC JAR JWT"))
-        //         //.SetSampler(new AlwaysOnSampler())
-        //         .AddHttpClientInstrumentation()
-        //         .AddAspNetCoreInstrumentation()
-        //         .AddSqlClientInstrumentation()
-        //         .AddOtlpExporter(option =>
-        //         {
-        //             option.Endpoint = new Uri("https://api.honeycomb.io");
-        //             option.Headers = $"x-honeycomb-team={apiKey},x-honeycomb-dataset={dataset}";
-        //         });
-        // });
-
         return builder.Build();
     }
 
