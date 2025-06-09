@@ -21,25 +21,11 @@
     // Hosts
     //-------
     {
-      "label": "build-host-main-8",
-      "type": "process",
-      "command": "dotnet",
-      "args": [
-          "build",
-          "--framework=net8.0",
-          "${workspaceFolder}/hosts/main/Host.Main.csproj",
-          "/property:GenerateFullPaths=true",
-          "/consoleloggerparameters:NoSummary"
-      ],
-      "problemMatcher": "$msCompile"
-    },
-    {
       "label": "build-host-main",
       "type": "process",
       "command": "dotnet",
       "args": [
           "build",
-          "--framework=net9.0",
           "${workspaceFolder}/hosts/main/Host.Main.csproj",
           "/property:GenerateFullPaths=true",
           "/consoleloggerparameters:NoSummary"
@@ -52,7 +38,6 @@
       "command": "dotnet",
       "args": [
           "build",
-          "--framework=net8.0",
           "${workspaceFolder}/hosts/EntityFramework/Host.EntityFramework.csproj",
           "/property:GenerateFullPaths=true",
           "/consoleloggerparameters:NoSummary"
@@ -60,26 +45,12 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "build-host-entityframework",
+      "label": "build-host-entityframework-9",
       "type": "process",
       "command": "dotnet",
       "args": [
           "build",
-          "--framework=net9.0",
-          "${workspaceFolder}/hosts/EntityFramework/Host.EntityFramework.csproj",
-          "/property:GenerateFullPaths=true",
-          "/consoleloggerparameters:NoSummary"
-      ],
-      "problemMatcher": "$msCompile"
-    },
-    {
-      "label": "build-host-aspnetidentity-8",
-      "type": "process",
-      "command": "dotnet",
-      "args": [
-          "build",
-          "--framework=net8.0",
-          "${workspaceFolder}/hosts/AspNetIdentity/Host.AspNetIdentity.csproj",
+          "${workspaceFolder}/hosts/EntityFramework-dotnet9/Host.EntityFramework.dotnet9.csproj",
           "/property:GenerateFullPaths=true",
           "/consoleloggerparameters:NoSummary"
       ],
@@ -91,21 +62,7 @@
       "command": "dotnet",
       "args": [
           "build",
-          "--framework=net9.0",
           "${workspaceFolder}/hosts/AspNetIdentity/Host.AspNetIdentity.csproj",
-          "/property:GenerateFullPaths=true",
-          "/consoleloggerparameters:NoSummary"
-      ],
-      "problemMatcher": "$msCompile"
-    },
-    {
-      "label": "build-host-configuration-8",
-      "type": "process",
-      "command": "dotnet",
-      "args": [
-          "build",
-          "--framework=net8.0",
-          "${workspaceFolder}/hosts/Configuration/Host.Configuration.csproj",
           "/property:GenerateFullPaths=true",
           "/consoleloggerparameters:NoSummary"
       ],
@@ -117,7 +74,6 @@
       "command": "dotnet",
       "args": [
           "build",
-          "--framework=net9.0",
           "${workspaceFolder}/hosts/Configuration/Host.Configuration.csproj",
           "/property:GenerateFullPaths=true",
           "/consoleloggerparameters:NoSummary"
@@ -151,7 +107,7 @@
       ],
       "problemMatcher": "$msCompile"
     },
-    
+
     //---------
     // Clients
     //---------
@@ -538,6 +494,18 @@
         "args": [
             "build",
             "${workspaceFolder}/clients/src/APIs/ResourceBasedApi/ResourceBasedApi.csproj",
+            "/property:GenerateFullPaths=true",
+            "/consoleloggerparameters:NoSummary"
+        ],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "build-api-mtls",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+            "build",
+            "${workspaceFolder}/clients/src/APIs/MtlsApi/MtlsApi.csproj",
             "/property:GenerateFullPaths=true",
             "/consoleloggerparameters:NoSummary"
         ],
