@@ -26,7 +26,6 @@ internal static class IdentityServerExtensions
             options.Authentication.CoordinateClientLifetimesWithUserSession = true;
             options.ServerSideSessions.UserDisplayNameClaimType = JwtClaimTypes.Name;
             options.ServerSideSessions.RemoveExpiredSessions = true;
-            options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromSeconds(10);
             options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout = true;
             options.Endpoints.EnablePushedAuthorizationEndpoint = true;
 
@@ -65,7 +64,6 @@ internal static class IdentityServerExtensions
                 // this enables automatic token cleanup. this is optional.
                 options.EnableTokenCleanup = true;
                 options.RemoveConsumedTokens = true;
-                options.TokenCleanupInterval = 10; // interval in seconds
             })
             .AddAppAuthRedirectUriValidator()
             .AddServerSideSessions()
