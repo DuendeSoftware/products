@@ -145,8 +145,7 @@ internal static class HostingExtensions
 
     internal static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging(
-            options => options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Debug);
+        app.UseSerilogRequestLogging();
 
         app.UseCookiePolicy();
 
