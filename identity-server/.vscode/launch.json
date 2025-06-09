@@ -25,17 +25,17 @@
       // Hosts
       //-------
       {
-        "name": "host: main (dotnet 8)",
+        "name": "host: main",
         "type": "coreclr",
         "request": "launch",
-        "preLaunchTask": "build-host-main-8",
+        "preLaunchTask": "build-host-main",
         "program": "${workspaceFolder}/hosts/main/bin/Debug/net8.0/Host.Main.dll",
         "args": [],
         "cwd": "${workspaceFolder}/hosts/main",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "10-hosts",
@@ -43,53 +43,17 @@
         }
       },
       {
-        "name": "host: main (dotnet 9)",
+        "name": "host: AspNetIdentity",
         "type": "coreclr",
         "request": "launch",
-        "preLaunchTask": "build-host-main",
-        "program": "${workspaceFolder}/hosts/main/bin/Debug/net9.0/Host.Main.dll",
-        "args": [],
-        "cwd": "${workspaceFolder}/hosts/main",
-        "env": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "console": "externalTerminal",
-        "presentation": {
-          "hidden": false,
-          "group": "10-hosts",
-          "order": 10
-        }
-      },
-      {
-        "name": "host: AspNetIdentity (dotnet 8)",
-        "type": "coreclr",
-        "request": "launch",
-        "preLaunchTask": "build-host-aspnetidentity-8",
+        "preLaunchTask": "build-host-aspnetidentity",
         "program": "${workspaceFolder}/hosts/AspNetIdentity/bin/Debug/net8.0/Host.AspNetIdentity.dll",
         "args": [],
         "cwd": "${workspaceFolder}/hosts/AspNetIdentity",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
-        "presentation": {
-          "hidden": false,
-          "group": "10-hosts",
-          "order": 30
-        }
-      },
-      {
-        "name": "host: AspNetIdentity (dotnet 9)",
-        "type": "coreclr",
-        "request": "launch",
-        "preLaunchTask": "build-host-aspnetidentity",
-        "program": "${workspaceFolder}/hosts/AspNetIdentity/bin/Debug/net9.0/Host.AspNetIdentity.dll",
-        "args": [],
-        "cwd": "${workspaceFolder}/hosts/AspNetIdentity",
-        "env": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "10-hosts",
@@ -107,7 +71,7 @@
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "10-hosts",
@@ -118,14 +82,14 @@
         "name": "host: EntityFramework (dotnet 9)",
         "type": "coreclr",
         "request": "launch",
-        "preLaunchTask": "build-host-entityframework",
-        "program": "${workspaceFolder}/hosts/EntityFramework/bin/Debug/net9.0/Host.EntityFramework.dll",
+        "preLaunchTask": "build-host-entityframework-9",
+        "program": "${workspaceFolder}/hosts/EntityFramework-dotnet9/bin/Debug/net9.0/Host.EntityFramework.dotnet9.dll",
         "args": [],
-        "cwd": "${workspaceFolder}/hosts/EntityFramework",
+        "cwd": "${workspaceFolder}/hosts/EntityFramework-dotnet9",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "10-hosts",
@@ -133,35 +97,17 @@
         }
       },
       {
-        "name": "host: Configuration (dotnet 8)",
+        "name": "host: Configuration",
         "type": "coreclr",
         "request": "launch",
-        "preLaunchTask": "build-host-configuration-8",
+        "preLaunchTask": "build-host-configuration",
         "program": "${workspaceFolder}/hosts/Configuration/bin/Debug/net8.0/Host.Configuration.dll",
         "args": [],
         "cwd": "${workspaceFolder}/hosts/Configuration",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
-        "presentation": {
-          "hidden": false,
-          "group": "10-hosts",
-          "order": 50
-        }
-      },
-      {
-        "name": "host: Configuration (dotnet 9)",
-        "type": "coreclr",
-        "request": "launch",
-        "preLaunchTask": "build-host-configuration",
-        "program": "${workspaceFolder}/hosts/Configuration/bin/Debug/net9.0/Host.Configuration.dll",
-        "args": [],
-        "cwd": "${workspaceFolder}/hosts/Configuration",
-        "env": {
-            "ASPNETCORE_ENVIRONMENT": "Development"
-        },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "10-hosts",
@@ -182,7 +128,7 @@
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "migrations",
@@ -200,7 +146,7 @@
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "migrations",
@@ -218,7 +164,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleCibaClient/bin/Debug/net8.0/ConsoleCibaClient.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleCibaClient",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -232,7 +178,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlow/bin/Debug/net8.0/ConsoleClientCredentialsFlow.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlow",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -246,7 +192,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowCallingIdentityServerApi/bin/Debug/net8.0/ConsoleClientCredentialsFlowCallingIdentityServerApi.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowCallingIdentityServerApi",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -260,7 +206,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowDPoP/bin/Debug/net8.0/ConsoleClientCredentialsFlowDPoP.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowDPoP",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -274,7 +220,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowPostBody/bin/Debug/net8.0/ConsoleClientCredentialsFlowPostBody.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleClientCredentialsFlowPostBody",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -288,7 +234,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleCode/bin/Debug/net8.0/ConsoleCode.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleCode",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -302,7 +248,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleCustomGrant/bin/Debug/net8.0/ConsoleExtensionGrant.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleCustomGrant",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -316,7 +262,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleDcrClient/bin/Debug/net8.0/ConsoleDcrClient.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleDcrClient",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -330,7 +276,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleDeviceFlow/bin/Debug/net8.0/ConsoleDeviceFlow.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleDeviceFlow",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -344,7 +290,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleEphemeralMtlsClient/bin/Debug/net8.0/ConsoleEphemeralMtlsClient.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleEphemeralMtlsClient",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -358,7 +304,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleIntrospectionClient/bin/Debug/net8.0/ConsoleIntrospectionClient.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleIntrospectionClient",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -372,7 +318,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleMTLSClient/bin/Debug/net8.0/ConsoleMTLSClient.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleMTLSClient",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -386,7 +332,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleParameterizedScopeClient/bin/Debug/net8.0/ConsoleParameterizedScopeClient.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleParameterizedScopeClient",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -400,7 +346,7 @@
         "program": "${workspaceFolder}/clients/src/ConsolePrivateKeyJwtClient/bin/Debug/net8.0/ConsolePrivateKeyJwtClient.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsolePrivateKeyJwtClient",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -414,7 +360,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleResourceIndicators/bin/Debug/net8.0/ConsoleResourceIndicators.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleResourceIndicators",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -428,7 +374,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlow/bin/Debug/net8.0/ConsoleResourceOwnerFlow.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlow",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -442,7 +388,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowPublic/bin/Debug/net8.0/ConsoleResourceOwnerFlowPublic.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowPublic",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -456,7 +402,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowReference/bin/Debug/net8.0/ConsoleResourceOwnerFlowReference.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowReference",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -470,7 +416,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowRefreshToken/bin/Debug/net8.0/ConsoleResourceOwnerFlowRefreshToken.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowRefreshToken",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -484,7 +430,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowUserInfo/bin/Debug/net8.0/ConsoleResourceOwnerFlowUserInfo.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleResourceOwnerFlowUserInfo",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -498,7 +444,7 @@
         "program": "${workspaceFolder}/clients/src/ConsoleScopesResources/bin/Debug/net8.0/ConsoleScopesResources.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/ConsoleScopesResources",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -535,7 +481,7 @@
           "hidden": false,
           "group": "20-clients",
         },
-        "console": "externalTerminal"
+        "console": "integratedTerminal"
       },
       {
         "name": "client: MvcCode",
@@ -552,7 +498,7 @@
           "hidden": false,
           "group": "20-clients",
         },
-        "console": "externalTerminal"
+        "console": "integratedTerminal"
       },
       {
         "name": "client: MvcDPoP",
@@ -565,7 +511,7 @@
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -579,7 +525,7 @@
         "program": "${workspaceFolder}/clients/src/MvcHybridBackChannel/bin/Debug/net9.0/MvcHybridBackChannel.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/MvcHybridBackChannel",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
@@ -596,7 +542,7 @@
         "program": "${workspaceFolder}/clients/src/MvcJarJwt/bin/Debug/net9.0/MvcJarJwt.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/MvcJarJwt",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
@@ -616,7 +562,7 @@
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -630,7 +576,7 @@
         "program": "${workspaceFolder}/clients/src/WindowsConsoleSystemBrowser/bin/Debug/net472/WindowsConsoleSystemBrowser.exe",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/WindowsConsoleSystemBrowser",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "presentation": {
           "hidden": false,
           "group": "20-clients",
@@ -645,10 +591,10 @@
         "type": "coreclr",
         "request": "launch",
         "preLaunchTask": "build-api-simple",
-        "program": "${workspaceFolder}/clients/src/APIs/SimpleApi/bin/Debug/net8.0/SimpleApi.dll",
+        "program": "${workspaceFolder}/clients/src/APIs/SimpleApi/bin/Debug/net9.0/SimpleApi.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/APIs/SimpleApi",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
@@ -662,10 +608,10 @@
         "type": "coreclr",
         "request": "launch",
         "preLaunchTask": "build-api-dpop",
-        "program": "${workspaceFolder}/clients/src/APIs/DPoPApi/bin/Debug/net8.0/DPoPApi.dll",
+        "program": "${workspaceFolder}/clients/src/APIs/DPoPApi/bin/Debug/net9.0/DPoPApi.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/APIs/DPoPApi",
-        "console": "externalTerminal",
+        "console": "integratedTerminal",
         "env": {
             "ASPNETCORE_ENVIRONMENT": "Development"
         },
@@ -679,7 +625,7 @@
         "type": "coreclr",
         "request": "launch",
         "preLaunchTask": "build-api-resourceBased",
-        "program": "${workspaceFolder}/clients/src/APIs/ResourceBasedApi/bin/Debug/net8.0/ResourceBasedApi.dll",
+        "program": "${workspaceFolder}/clients/src/APIs/ResourceBasedApi/bin/Debug/net9.0/ResourceBasedApi.dll",
         "args": [],
         "cwd": "${workspaceFolder}/clients/src/APIs/ResourceBasedApi",
         "env": {
@@ -689,7 +635,24 @@
           "hidden": false,
           "group": "15-apis",
         },
-        "console": "externalTerminal"
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "api: mTLS",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build-api-mtls",
+        "program": "${workspaceFolder}/clients/src/APIs/MtlsApi/bin/Debug/net9.0/MtlsApi.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/clients/src/APIs/MtlsApi",
+        "env": {
+            "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "presentation": {
+          "hidden": false,
+          "group": "15-apis",
+        },
+        "console": "integratedTerminal"
       },
     ],
 }
