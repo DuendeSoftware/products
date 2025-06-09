@@ -56,6 +56,7 @@ public class Authorize_ProtocolValidation_Resources
             Factory.CreateRequestObjectValidator(),
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
             new ClientLoadedTracker(),
+            new ResourceLoadedTracker(),
             new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
 
     [Fact]

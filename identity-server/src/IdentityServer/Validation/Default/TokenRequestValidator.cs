@@ -39,6 +39,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly IClock _clock;
     private readonly LicenseUsageTracker _licenseUsage;
     private readonly ClientLoadedTracker _clientLoadedTracker;
+    private readonly ResourceLoadedTracker _resourceLoadedTracker;
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
@@ -62,6 +63,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         IClock clock,
         LicenseUsageTracker licenseUsage,
         ClientLoadedTracker clientLoadedTracker,
+        ResourceLoadedTracker resourceLoadedTracker,
         ILogger<TokenRequestValidator> logger)
     {
         _logger = logger;
@@ -83,6 +85,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _dPoPProofValidator = dPoPProofValidator;
         _events = events;
         _clientLoadedTracker = clientLoadedTracker;
+        _resourceLoadedTracker = resourceLoadedTracker;
     }
 
     // only here for legacy unit tests
@@ -311,6 +314,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _licenseUsage.ClientUsed(clientId);
         _clientLoadedTracker.TrackClientLoaded(customValidationContext.Result.ValidatedRequest.Client);
         IdentityServerLicenseValidator.Instance.ValidateClient(clientId);
+        _resourceLoadedTracker.TrackResources(customValidationContext.Result.ValidatedRequest.ValidatedResources.Resources);
 
         return customValidationContext.Result;
     }

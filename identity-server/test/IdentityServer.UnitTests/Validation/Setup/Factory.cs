@@ -139,6 +139,7 @@ internal static class Factory
             new StubClock(),
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
             new ClientLoadedTracker(),
+            new ResourceLoadedTracker(),
             TestLogger.Create<TokenRequestValidator>());
     }
 
@@ -268,6 +269,7 @@ internal static class Factory
             requestObjectValidator,
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
             new ClientLoadedTracker(),
+            new ResourceLoadedTracker(),
             new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));
     }
 

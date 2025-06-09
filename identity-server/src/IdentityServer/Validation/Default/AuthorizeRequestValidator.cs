@@ -30,6 +30,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly IRequestObjectValidator _requestObjectValidator;
     private readonly LicenseUsageTracker _licenseUsage;
     private readonly ClientLoadedTracker _clientLoadedTracker;
+    private readonly ResourceLoadedTracker _resourceLoadedTracker;
     private readonly SanitizedLogger<AuthorizeRequestValidator> _sanitizedLogger;
 
     private readonly ResponseTypeEqualityComparer
@@ -47,6 +48,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         IRequestObjectValidator requestObjectValidator,
         LicenseUsageTracker licenseUsage,
         ClientLoadedTracker clientLoadedTracker,
+        ResourceLoadedTracker resourceLoadedTracker,
         SanitizedLogger<AuthorizeRequestValidator> sanitizedLogger)
     {
         _options = options;
@@ -59,6 +61,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _userSession = userSession;
         _licenseUsage = licenseUsage;
         _clientLoadedTracker = clientLoadedTracker;
+        _resourceLoadedTracker = resourceLoadedTracker;
         _sanitizedLogger = sanitizedLogger;
     }
 
@@ -150,6 +153,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _licenseUsage.ClientUsed(request.ClientId);
         _clientLoadedTracker.TrackClientLoaded(request.Client);
         IdentityServerLicenseValidator.Instance.ValidateClient(request.ClientId);
+        _resourceLoadedTracker.TrackResources(request.ValidatedResources.Resources);
 
         return Valid(request);
     }
