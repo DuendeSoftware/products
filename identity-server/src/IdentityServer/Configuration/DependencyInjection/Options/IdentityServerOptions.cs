@@ -297,5 +297,8 @@ public class IdentityServerOptions
     /// </value>
     public PreviewFeatureOptions Preview { get; set; } = new PreviewFeatureOptions();
 
+    /// <summary>
+    /// Options that control the diagnostic data that is logged by IdentityServer.
+    /// </summary>
     public DiagnosticOptions Diagnostics { get; set; } = new DiagnosticOptions();
 }
