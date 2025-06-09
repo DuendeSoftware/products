@@ -47,7 +47,6 @@ try
         {
             var usage = app.Services.GetRequiredService<LicenseUsageSummary>();
             Console.Write(Summary(usage));
-            Console.ReadKey();
         });
     }
 
