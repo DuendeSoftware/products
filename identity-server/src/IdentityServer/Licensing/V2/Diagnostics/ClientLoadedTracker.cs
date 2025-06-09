@@ -12,6 +12,7 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics;
 
 internal class ClientLoadedTracker : IDisposable
 {
+    private const int MaxClientsTrackedCount = 100;
     private const int ArrayMaxSize = 10;
 
     private int _clientCount;
@@ -29,7 +30,7 @@ internal class ClientLoadedTracker : IDisposable
 
     public void TrackClientLoaded(Client client)
     {
-        if (_clientCount >= 100)
+        if (_clientCount >= MaxClientsTrackedCount)
         {
             return;
         }
