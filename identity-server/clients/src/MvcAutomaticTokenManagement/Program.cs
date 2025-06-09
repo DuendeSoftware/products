@@ -29,7 +29,7 @@ try
         .ConfigurePipeline()
         .Run();
 }
-catch (Exception ex) when (ex.GetType().Name is not "HostAbortedException")
+catch (Exception ex)
 {
     Log.Fatal(ex, messageTemplate: "Unhandled exception");
 }
