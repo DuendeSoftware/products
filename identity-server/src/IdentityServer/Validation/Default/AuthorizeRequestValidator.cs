@@ -8,6 +8,7 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Licensing.V2.Diagnostics;
 using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
@@ -28,6 +29,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly IUserSession _userSession;
     private readonly IRequestObjectValidator _requestObjectValidator;
     private readonly LicenseUsageTracker _licenseUsage;
+    private readonly ClientLoadedTracker _clientLoadedTracker;
     private readonly SanitizedLogger<AuthorizeRequestValidator> _sanitizedLogger;
 
     private readonly ResponseTypeEqualityComparer
@@ -44,6 +46,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         IUserSession userSession,
         IRequestObjectValidator requestObjectValidator,
         LicenseUsageTracker licenseUsage,
+        ClientLoadedTracker clientLoadedTracker,
         SanitizedLogger<AuthorizeRequestValidator> sanitizedLogger)
     {
         _options = options;
@@ -55,6 +58,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _requestObjectValidator = requestObjectValidator;
         _userSession = userSession;
         _licenseUsage = licenseUsage;
+        _clientLoadedTracker = clientLoadedTracker;
         _sanitizedLogger = sanitizedLogger;
     }
 
@@ -144,6 +148,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _sanitizedLogger.LogTrace("Authorize request protocol validation successful");
 
         _licenseUsage.ClientUsed(request.ClientId);
+        _clientLoadedTracker.TrackClientLoaded(request.Client);
         IdentityServerLicenseValidator.Instance.ValidateClient(request.ClientId);
 
         return Valid(request);

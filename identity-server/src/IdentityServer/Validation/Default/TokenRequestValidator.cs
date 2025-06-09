@@ -9,6 +9,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
+using Duende.IdentityServer.Licensing.V2.Diagnostics;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -37,6 +38,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly IBackchannelAuthenticationRequestIdValidator _backchannelAuthenticationRequestIdValidator;
     private readonly IClock _clock;
     private readonly LicenseUsageTracker _licenseUsage;
+    private readonly ClientLoadedTracker _clientLoadedTracker;
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
@@ -59,6 +61,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         IEventService events,
         IClock clock,
         LicenseUsageTracker licenseUsage,
+        ClientLoadedTracker clientLoadedTracker,
         ILogger<TokenRequestValidator> logger)
     {
         _logger = logger;
@@ -79,6 +82,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _refreshTokenService = refreshTokenService;
         _dPoPProofValidator = dPoPProofValidator;
         _events = events;
+        _clientLoadedTracker = clientLoadedTracker;
     }
 
     // only here for legacy unit tests
@@ -305,6 +309,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         var clientId = customValidationContext.Result.ValidatedRequest.ClientId;
         _licenseUsage.ClientUsed(clientId);
+        _clientLoadedTracker.TrackClientLoaded(customValidationContext.Result.ValidatedRequest.Client);
         IdentityServerLicenseValidator.Instance.ValidateClient(clientId);
 
         return customValidationContext.Result;
@@ -443,7 +448,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         //////////////////////////////////////////////////////////
-        // resource and scope validation 
+        // resource and scope validation
         //////////////////////////////////////////////////////////
         var validatedResources = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest
         {
@@ -791,7 +796,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         //////////////////////////////////////////////////////////
-        // resource and scope validation 
+        // resource and scope validation
         //////////////////////////////////////////////////////////
         var validatedResources = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest
         {
@@ -873,7 +878,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         //////////////////////////////////////////////////////////
-        // scope validation 
+        // scope validation
         //////////////////////////////////////////////////////////
         var validatedResources = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest
         {
@@ -962,7 +967,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         }
 
         //////////////////////////////////////////////////////////
-        // resource and scope validation 
+        // resource and scope validation
         //////////////////////////////////////////////////////////
         var validatedResources = await _resourceValidator.ValidateRequestedResourcesAsync(new ResourceValidationRequest
         {
