@@ -298,8 +298,7 @@ public class IdentityServerOptions
     public PreviewFeatureOptions Preview { get; set; } = new PreviewFeatureOptions();
 
     /// <summary>
-    /// Frequency at which the diagnostic summary is logged.
-    /// The default value is 1 hour.
+    /// Options that control the diagnostic data that is logged by IdentityServer.
     /// </summary>
-    public TimeSpan DiagnosticSummaryLogFrequency { get; set; } = TimeSpan.FromHours(1);
+    public DiagnosticOptions Diagnostics { get; set; } = new DiagnosticOptions();
 }

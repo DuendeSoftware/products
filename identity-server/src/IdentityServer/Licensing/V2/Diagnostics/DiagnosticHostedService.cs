@@ -12,7 +12,7 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(options.Value.DiagnosticSummaryLogFrequency);
+        using var timer = new PeriodicTimer(options.Value.Diagnostics.LogFrequency);
         while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
         {
             try
