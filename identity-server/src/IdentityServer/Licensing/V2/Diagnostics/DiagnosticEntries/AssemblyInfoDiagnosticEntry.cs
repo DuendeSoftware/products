@@ -9,6 +9,27 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
 {
+    private readonly IReadOnlyList<Predicate<string>> _defaultInclusions =
+    [
+        x => x.StartsWith("Duende."),
+        x => x == "Microsoft.AspNetCore",
+        x => x.StartsWith("Microsoft.AspNetCore.Authentication."),
+        x => x.StartsWith("Microsoft.IdentityModel."),
+        x => x.StartsWith("System.IdentityModel."),
+        x => x.StartsWith("System.IdentityModel"),
+        x => x.StartsWith("Microsoft.EntityFrameworkCore"),
+        x => x.StartsWith("Rsk"),
+        x => x.StartsWith("Skoruba.IdentityServer"),
+        x => x.StartsWith("Skoruba.Duende"),
+        x => x.StartsWith("Npgsql"),
+        x => x.StartsWith("Azure"),
+        x => x.StartsWith("Microsoft.Azure")
+    ];
+
+    private readonly IReadOnlyList<Predicate<string>> _inclusions;
+
+    public AssemblyInfoDiagnosticEntry(IReadOnlyList<Predicate<string>> inclusions = null) => _inclusions = inclusions ?? _defaultInclusions;
+
     public Task WriteAsync(Utf8JsonWriter writer)
     {
         var assemblies = GetAssemblyInfo();
@@ -16,7 +37,7 @@ internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
         writer.WriteNumber("AssemblyCount", assemblies.Count);
 
         writer.WriteStartArray("Assemblies");
-        foreach (var assembly in assemblies)
+        foreach (var assembly in assemblies.Where(assembly => _inclusions.Any(predicate => predicate(assembly.FullName))))
         {
             writer.WriteStartObject();
             writer.WriteString("Name", assembly.GetName().Name);

@@ -9,7 +9,7 @@ namespace IdentityServer.UnitTests.Licensing.V2.DiagnosticEntries;
 public class AssemblyInfoDiagnosticEntryTests
 {
     [Fact]
-    public async Task WriteAsync_ShouldWriteAssemblyInfo()
+    public async Task Should_Write_Assembly_Info()
     {
         var subject = new AssemblyInfoDiagnosticEntry();
 
@@ -22,5 +22,17 @@ public class AssemblyInfoDiagnosticEntryTests
         var firstEntry = assemblies.EnumerateArray().First();
         firstEntry.GetProperty("Name").ValueKind.ShouldBe(JsonValueKind.String);
         firstEntry.GetProperty("Version").ValueKind.ShouldBe(JsonValueKind.String);
+    }
+
+    [Fact]
+    public async Task Should_Honor_Assembly_Filter()
+    {
+        var subject = new AssemblyInfoDiagnosticEntry([x => x.StartsWith("Duende.")]);
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+
+        var assemblyInfo = result.RootElement.GetProperty("AssemblyInfo");
+        var assemblies = assemblyInfo.GetProperty("Assemblies").EnumerateArray();
+        assemblies.ShouldAllBe(x => x.GetProperty("Name").GetString().StartsWith("Duende."));
     }
 }
