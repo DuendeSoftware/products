@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
@@ -34,5 +35,16 @@ public class AssemblyInfoDiagnosticEntryTests
         var assemblyInfo = result.RootElement.GetProperty("AssemblyInfo");
         var assemblies = assemblyInfo.GetProperty("Assemblies").EnumerateArray();
         assemblies.ShouldAllBe(x => x.GetProperty("Name").GetString().StartsWith("Duende."));
+    }
+
+    [Fact]
+    public async Task Should_Include_Dotnet_Version()
+    {
+        var subject = new AssemblyInfoDiagnosticEntry();
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+
+        var assemblyInfo = result.RootElement.GetProperty("AssemblyInfo");
+        assemblyInfo.GetProperty("DotnetVersion").GetString().ShouldBe(RuntimeInformation.FrameworkDescription);
     }
 }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Text.Json;
 
@@ -34,6 +35,7 @@ internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
     {
         var assemblies = GetAssemblyInfo();
         writer.WriteStartObject("AssemblyInfo");
+        writer.WriteString("DotnetVersion", RuntimeInformation.FrameworkDescription);
         writer.WriteNumber("AssemblyCount", assemblies.Count);
 
         writer.WriteStartArray("Assemblies");
