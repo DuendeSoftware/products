@@ -4,6 +4,7 @@
 using System.Security.Claims;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.SessionManagement.SessionStore;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Yarp.ReverseProxy.Configuration;
@@ -168,4 +169,6 @@ public class TestDataBuilder(TestData the)
             SameSite = SameSiteMode.Strict
         },
     };
+
+    public UserSessionsFilter UserSessionsFilter() => new() { SubjectId = The.Sub };
 }
