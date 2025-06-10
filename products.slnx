@@ -41,6 +41,9 @@
   <Folder Name="/bff/migrations/">
     <Project Path="bff/migrations/UserSessionDb/UserSessionDb.csproj" />
   </Folder>
+  <Folder Name="/bff/performance/">
+    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
+  </Folder>
   <Folder Name="/bff/src/">
     <Project Path="bff/src/Bff.Blazor.Client/Bff.Blazor.Client.csproj" />
     <Project Path="bff/src/Bff.Blazor/Bff.Blazor.csproj" />
