@@ -7,24 +7,18 @@ using Duende.IdentityServer.Licensing;
 using IdentityServerHost;
 using Serilog;
 
-Console.Title = "IdentityServer (EntityFramework)";
-
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
-    .CreateBootstrapLogger();
-
-Log.Information("Host.EntityFramework Starting up");
+SerilogDefaults.Bootstrap();
 
 try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((ctx, lc) => lc
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}", formatProvider: CultureInfo.InvariantCulture)
-        .Enrich.FromLogContext()
-        .ReadFrom.Configuration(ctx.Configuration));
+    Console.Title = builder.Environment.ApplicationName;
+    Log.Information("{EnvironmentApplicationName} Starting up", builder.Environment.ApplicationName);
 
-    builder.AddServiceDefaults();
+    builder.ConfigureSerilogDefaults();
+    builder.AddServiceDefaults()
+        .AddOpenTelemetryMeters(IdentityServerHost.Pages.Telemetry.ServiceName);
 
     var app = builder
         .ConfigureServices()

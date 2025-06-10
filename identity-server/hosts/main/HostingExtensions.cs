@@ -8,10 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.IdentityModel.Tokens;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using Serilog;
-using Serilog.Events;
 
 namespace IdentityServerHost;
 
@@ -41,25 +38,6 @@ internal static class HostingExtensions
 
             return Task.FromResult(principal);
         });
-
-        var openTelemetry = builder.Services.AddOpenTelemetry();
-
-        openTelemetry.ConfigureResource(r => r
-            .AddService(builder.Environment.ApplicationName));
-
-        openTelemetry.WithMetrics(m => m
-            .AddMeter(Telemetry.ServiceName)
-            .AddMeter(Pages.Telemetry.ServiceName)
-            .AddPrometheusExporter());
-
-        //openTelemetry.WithTracing(t => t
-        //    .AddSource(IdentityServerConstants.Tracing.Basic)
-        //    .AddSource(IdentityServerConstants.Tracing.Cache)
-        //    .AddSource(IdentityServerConstants.Tracing.Services)
-        //    .AddSource(IdentityServerConstants.Tracing.Stores)
-        //    .AddSource(IdentityServerConstants.Tracing.Validation)
-        //    .AddAspNetCoreInstrumentation()
-        //    .AddConsoleExporter());
 
         builder.Services.Configure<KestrelServerOptions>(kestrelOptions =>
         {
@@ -166,9 +144,6 @@ internal static class HostingExtensions
         // UI
         app.MapRazorPages()
             .RequireAuthorization();
-
-        // Map /metrics that displays Otel data in human readable form.
-        app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
         return app;
     }

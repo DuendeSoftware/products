@@ -9,6 +9,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Microsoft.Extensions.Hosting;
@@ -118,5 +119,23 @@ public static class Extensions
         }
 
         return app;
+    }
+
+    public static IHostApplicationBuilder AddOpenTelemetryMeters(this IHostApplicationBuilder builder, params string[] meterNames)
+    {
+        if (meterNames == null || meterNames.Length == 0)
+        {
+            return builder;
+        }
+
+        builder.Services.ConfigureOpenTelemetryMeterProvider(provider =>
+        {
+            foreach (var meterName in meterNames)
+            {
+                provider.AddMeter(meterName);
+            }
+        });
+
+        return builder;
     }
 }

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Serilog.Events;
 
 namespace IdentityServerHost;
 
@@ -102,6 +101,9 @@ internal static class HostingExtensions
         app.UseRouting();
         app.UseIdentityServer();
         app.UseAuthorization();
+
+        // health checks
+        app.MapHealthChecks("/health");
 
         // UI
         app.MapRazorPages()

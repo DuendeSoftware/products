@@ -6,36 +6,19 @@ using System.Text;
 using Duende.IdentityServer.Licensing;
 using IdentityServerHost;
 using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 
-Console.Title = "IdentityServer (Configuration)";
-
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
-    .CreateBootstrapLogger();
-
-Log.Information("Host.Main Starting up");
+SerilogDefaults.Bootstrap();
 
 try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((ctx, lc) => lc
-        .WriteTo.Console(
-            outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
-            theme: AnsiConsoleTheme.Code,
-            formatProvider: CultureInfo.InvariantCulture)
-        .MinimumLevel.Debug()
-        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-        .MinimumLevel.Override("System", LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
-        .Enrich.FromLogContext());
+    Console.Title = builder.Environment.ApplicationName;
+    Log.Information("{EnvironmentApplicationName} Starting up", builder.Environment.ApplicationName);
 
-    // Add ServiceDefaults from Aspire
-    builder.AddServiceDefaults();
+    builder.ConfigureSerilogDefaults();
+    builder.AddServiceDefaults()
+        .AddOpenTelemetryMeters(IdentityServerHost.Pages.Telemetry.ServiceName);
 
     var app = builder
         .ConfigureServices()
