@@ -5,6 +5,7 @@ using System.Reflection;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
@@ -17,7 +18,8 @@ public class RegisteredImplementationsDiagnosticEntryTests
     public async Task Should_Not_Write_NonDefault_Implementations()
     {
         var serviceCollection = new ServiceCollection()
-            .AddSingleton<IProfileService, DefaultProfileService>();
+            .AddSingleton<ISecretParser, BasicAuthenticationSecretParser>() // Default
+            .AddSingleton<ISecretParser, PostBodySecretParser>(); // Default
         var subject = new RegisteredImplementationsDiagnosticEntry(new ServiceCollectionAccessor(serviceCollection));
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
@@ -25,13 +27,14 @@ public class RegisteredImplementationsDiagnosticEntryTests
         var registeredImplementations = result.RootElement.GetProperty("RegisteredImplementations");
         registeredImplementations.TryGetProperty("Services", out _).ShouldBeTrue();
         var services = registeredImplementations.GetProperty("Services");
-        services.EnumerateArray().Any(entry => entry.TryGetProperty(nameof(IProfileService), out _)).ShouldBeFalse();
+        services.EnumerateArray().Any(entry => entry.TryGetProperty(nameof(ISecretParser), out _)).ShouldBeFalse();
     }
 
     [Fact]
     public async Task Should_Write_Type_Information_For_Non_Default_Implementation()
     {
         var serviceCollection = new ServiceCollection()
+            .AddSingleton<IProfileService, DefaultProfileService>()
             .AddSingleton<IProfileService, MockProfileService>();
         var subject = new RegisteredImplementationsDiagnosticEntry(new ServiceCollectionAccessor(serviceCollection));
 
@@ -39,7 +42,7 @@ public class RegisteredImplementationsDiagnosticEntryTests
 
         var registeredImplementations = result.RootElement.GetProperty("RegisteredImplementations");
         var services = registeredImplementations.GetProperty("Services");
-        var profileServiceEntry = services.EnumerateArray().ToList().SingleOrDefault(entry => entry.TryGetProperty(nameof(IProfileService), out _));
+        var profileServiceEntry = services.EnumerateArray().SingleOrDefault(entry => entry.TryGetProperty(nameof(IProfileService), out _));
         var assemblyInfo = profileServiceEntry.GetProperty(nameof(IProfileService)).EnumerateArray().First();
         var expectedTypeInfo = typeof(MockProfileService);
         assemblyInfo.GetProperty("TypeName").GetString().ShouldBe(expectedTypeInfo.FullName);
@@ -76,7 +79,7 @@ public class RegisteredImplementationsDiagnosticEntryTests
 
         var registeredImplementations = result.RootElement.GetProperty("RegisteredImplementations");
         var services = registeredImplementations.GetProperty("Services");
-        var profileServiceEntry = services.EnumerateArray().ToList().SingleOrDefault(entry => entry.TryGetProperty(nameof(IProfileService), out _));
+        var profileServiceEntry = services.EnumerateArray().SingleOrDefault(entry => entry.TryGetProperty(nameof(IProfileService), out _));
         var firstAssemblyInfo = profileServiceEntry.GetProperty(nameof(IProfileService)).EnumerateArray().First();
         var firstExpectedTypeInfo = typeof(TestProfileService);
         firstAssemblyInfo.GetProperty("TypeName").GetString().ShouldBe(firstExpectedTypeInfo.FullName);

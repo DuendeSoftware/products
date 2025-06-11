@@ -108,8 +108,8 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IIdentityProviderStore), [typeof(NopIdentityProviderStore)]),
                 new(typeof(IMessageStore<>), [typeof(ProtectedDataMessageStore<>)]),
                 new(typeof(IPersistentGrantSerializer), [typeof(PersistentGrantSerializer)]),
-                new(typeof(IPersistedGrantStore), []),
-                new(typeof(IPushedAuthorizationRequestStore), []),
+                new(typeof(IPersistedGrantStore), [typeof(InMemoryPersistedGrantStore)]),
+                new(typeof(IPushedAuthorizationRequestStore), [typeof(InMemoryPushedAuthorizationRequestStore)]),
                 new(typeof(IReferenceTokenStore), [typeof(DefaultReferenceTokenStore)]),
                 new(typeof(IRefreshTokenStore), [typeof(DefaultRefreshTokenStore)]),
                 new(typeof(IResourceStore), [typeof(EmptyResourceStore)]),
@@ -185,8 +185,10 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
     {
         var services = serviceCollectionAccessor.ServiceCollection.Where(descriptor =>
             descriptor.ServiceType == registeredImplementationDetails.TInterface &&
-            descriptor.ImplementationType != null);
-        if (!services.Any(service => registeredImplementationDetails.TDefaultImplementations.All(impl => impl != service.ImplementationType)))
+            descriptor.ImplementationType != null &&
+            !registeredImplementationDetails.TDefaultImplementations.Contains(descriptor.ImplementationType));
+
+        if (!services.Any())
         {
             return;
         }
