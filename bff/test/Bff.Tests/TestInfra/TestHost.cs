@@ -7,14 +7,13 @@ namespace Duende.Bff.Tests.TestInfra;
 
 public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposable
 {
-    public TestHost(TestHostContext context) : this(context, new("https://server"))
-    {
-    }
 
     internal TestDataBuilder Some => context.Some;
     public TestData The => context.The;
 
     protected SimulatedInternet Internet => context.Internet;
+
+    protected void WriteOutput(string output) => context.WriteOutput(output);
 
     IServiceProvider? _appServices = null!;
 

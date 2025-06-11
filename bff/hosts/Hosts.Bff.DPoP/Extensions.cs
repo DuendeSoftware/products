@@ -184,22 +184,22 @@ internal static class Extensions
     private static void MapRemoteUrls(IEndpointRouteBuilder app)
     {
         // On this path, we use a client credentials token
-        app.MapRemoteBffApiEndpoint("/api/client-token", "https://localhost:5011")
+        app.MapRemoteBffApiEndpoint("/api/client-token", new Uri("https://localhost:5011"))
             .WithAccessToken(RequiredTokenType.Client);
 
         // On this path, we use a user token if logged in, and fall back to a client credentials token if not
-        app.MapRemoteBffApiEndpoint("/api/user-or-client-token", "https://localhost:5011")
+        app.MapRemoteBffApiEndpoint("/api/user-or-client-token", new Uri("https://localhost:5011"))
             .WithAccessToken(RequiredTokenType.UserOrClient);
 
         // On this path, we make anonymous requests
-        app.MapRemoteBffApiEndpoint("/api/anonymous", "https://localhost:5011");
+        app.MapRemoteBffApiEndpoint("/api/anonymous", new Uri("https://localhost:5011"));
 
         // On this path, we use the client token only if the user is logged in
-        app.MapRemoteBffApiEndpoint("/api/optional-user-token", "https://localhost:5011")
+        app.MapRemoteBffApiEndpoint("/api/optional-user-token", new Uri("https://localhost:5011"))
             .WithAccessToken(RequiredTokenType.UserOrNone);
 
         // On this path, we require the user token
-        app.MapRemoteBffApiEndpoint("/api/user-token", "https://localhost:5011")
+        app.MapRemoteBffApiEndpoint("/api/user-token", new Uri("https://localhost:5011"))
             .WithAccessToken();
     }
 }

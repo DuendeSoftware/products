@@ -3,7 +3,6 @@
 
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Internal;
-using Duende.Bff.Tests.TestHosts;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.Extensions.Logging.Abstractions;

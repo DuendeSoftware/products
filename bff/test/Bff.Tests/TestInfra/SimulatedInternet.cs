@@ -33,11 +33,11 @@ public class SimulatedInternet : DelegatingHandler
 
     public T BuildHttpClient<T>(Uri baseUrl) where T : HttpClient, IHttpClient<T>
     {
-        var handler = new RedirectHandler(_outputWriter);
+        var recirectHandler = new RedirectHandler(_outputWriter);
         var cookieContainer = new CookieContainer();
-        handler.InnerHandler = new CookieHandler(this, cookieContainer);
+        recirectHandler.InnerHandler = new CookieHandler(this, cookieContainer);
 
-        var client = T.Build(handler, cookieContainer);
+        var client = T.Build(recirectHandler, cookieContainer);
         client.BaseAddress = baseUrl;
         return client;
 

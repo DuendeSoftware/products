@@ -20,7 +20,7 @@ public static class CookieContainerExtensions
     }
 }
 
-public class BffHttpClient(RedirectHandler handler, CookieContainer cookies) : HttpClient(handler), IHttpClient<BffHttpClient>
+public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, IdentityServerTestHost identityServer) : HttpClient(handler)
 {
     public CookieContainer Cookies { get; } = cookies;
 
@@ -30,8 +30,20 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies) : H
         .CheckHttpStatusCode(expectedStatusCode);
 
 
-    public static BffHttpClient Build(RedirectHandler handler, CookieContainer cookies) => new(handler, cookies);
 
+    public async Task<List<JsonRecord>> CallUserEndpointAsync()
+    {
+        var req = new HttpRequestMessage(HttpMethod.Get, "/bff/user");
+        req.Headers.Add("x-csrf", "1");
+
+        var response = await SendAsync(req);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
+
+        var json = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<List<JsonRecord>>(json, TestSerializerOptions.Default) ?? [];
+    }
 
     internal Task<TestBrowserClient.BffHostResponse> CallBffHostApi(
         PathString path,
@@ -115,21 +127,21 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies) : H
             host.PropsToSignIn.Items.Add("session_id", sid);
         }
 
-        await IssueSessionCookieAsync(host, new Claim("sub", sub));
+        await IssueSessionCookieAsync(new Claim("sub", sub));
     }
 
-    public async Task IssueSessionCookieAsync(IdentityServerTestHost host, params Claim[] claims)
+    public async Task IssueSessionCookieAsync(params Claim[] claims)
     {
-        var previousUser = host.UserToSignIn;
+        var previousUser = identityServer.UserToSignIn;
         try
         {
-            host.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
-            var response = await GetAsync(host.Url("__signin"));
+            identityServer.UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity(claims, "test", "name", "role"));
+            var response = await GetAsync(identityServer.Url("__signin"));
             response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         }
         finally
         {
-            host.UserToSignIn = previousUser;
+            identityServer.UserToSignIn = previousUser;
         }
 
     }

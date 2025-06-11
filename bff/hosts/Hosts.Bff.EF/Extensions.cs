@@ -107,7 +107,7 @@ internal static class Extensions
         // all calls to /api/* will be forwarded to the remote API
         // user or client access token will be attached in API call
         // user access token will be managed automatically using the refresh token
-        app.MapRemoteBffApiEndpoint("/api", "https://localhost:5010")
+        app.MapRemoteBffApiEndpoint("/api", new Uri("https://localhost:5010"))
             .WithAccessToken(RequiredTokenType.UserOrClient);
 
         return app;

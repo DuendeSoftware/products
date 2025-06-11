@@ -39,7 +39,7 @@ public abstract class BffTestBase : IAsyncDisposable
 
 
         Api = new ApiHost(Context, IdentityServer);
-        Bff = new BffTestHost(Context);
+        Bff = new BffTestHost(Context, IdentityServer);
         Cdn = new CdnHost(Context);
         IdentityServer.AddClient(DefaultOidcClient.ClientId, Bff.Url());
         Some = Context.Some;
