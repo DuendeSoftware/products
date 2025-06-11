@@ -27,7 +27,7 @@ public class ApiUseForwardedHeaders : BffTestBase
 
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url().ToString());
+            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url());
         };
     }
 

@@ -46,15 +46,6 @@ public class BffTestHost(TestHostContext context) : TestHost(context, new Uri("h
             OnConfigureBff(builder);
         };
 
-        OnConfigure += app =>
-        {
-            app.UseRouting();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseBff();
-        };
         OnConfigureEndpoints += endpoints =>
         {
             if (MapGetForRoot)
@@ -65,6 +56,17 @@ public class BffTestHost(TestHostContext context) : TestHost(context, new Uri("h
             endpoints.MapBffManagementEndpoints();
 
         };
+    }
+
+    protected override void ConfigureApp(IApplicationBuilder app)
+    {
+        app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseBff();
+        base.ConfigureApp(app);
     }
 
     public BffHttpClient BrowserClient

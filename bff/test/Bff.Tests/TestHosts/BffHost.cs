@@ -407,45 +407,45 @@ public class BffHost : GenericHost
                 .RequireAuthorization("AlwaysFail");
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_user", _apiHost.Url())
+                    "/api_user", new Uri(_apiHost.Url()))
                 .WithAccessToken();
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_user_no_csrf", _apiHost.Url())
+                    "/api_user_no_csrf", new Uri(_apiHost.Url()))
                 .SkipAntiforgery()
                 .WithAccessToken();
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_client", _apiHost.Url())
+                    "/api_client", new Uri(_apiHost.Url()))
                 .WithAccessToken(RequiredTokenType.Client);
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_user_or_client", _apiHost.Url())
+                    "/api_user_or_client", new Uri(_apiHost.Url()))
                 .WithAccessToken(RequiredTokenType.UserOrClient);
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_unauthenticated", _apiHost.Url() + "return_unauthenticated")
+                    "/api_unauthenticated", new Uri(_apiHost.Url() + "return_unauthenticated"))
                 .WithAccessToken(RequiredTokenType.UserOrClient);
 
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_forbidden", _apiHost.Url() + "return_forbidden")
+                    "/api_forbidden", new Uri(_apiHost.Url() + "return_forbidden"))
                 .WithAccessToken(RequiredTokenType.UserOrClient);
 
 
 #pragma warning disable CS0618 // Type or member is obsolete
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_user_or_anon", _apiHost.Url())
+                    "/api_user_or_anon", new Uri(_apiHost.Url()))
                 .WithOptionalUserAccessToken();
 #pragma warning restore CS0618 // Type or member is obsolete
 
             endpoints.MapRemoteBffApiEndpoint(
-                "/api_anon_only", _apiHost.Url());
+                "/api_anon_only", new Uri(_apiHost.Url()));
 
             // Add a custom transform. This transform just copies the request headers
             // which allows the tests to see if this custom transform works
             endpoints.MapRemoteBffApiEndpoint(
-                "/api_custom_transform", _apiHost.Url(),
+                "/api_custom_transform", new Uri(_apiHost.Url()),
                 c =>
                 {
                     c.CopyRequestHeaders = true;
@@ -453,12 +453,12 @@ public class BffHost : GenericHost
                 });
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_with_access_token_retriever", _apiHost.Url())
+                    "/api_with_access_token_retriever", new Uri(_apiHost.Url()))
                 .WithAccessToken(RequiredTokenType.UserOrClient)
                 .WithAccessTokenRetriever<TestAccessTokenRetriever>();
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_with_access_token_retrieval_that_fails", _apiHost.Url())
+                    "/api_with_access_token_retrieval_that_fails", new Uri(_apiHost.Url()))
                 .WithAccessToken(RequiredTokenType.UserOrClient)
                 .WithAccessTokenRetriever<FailureAccessTokenRetriever>();
         });

@@ -26,7 +26,7 @@ public static class RouteBuilderExtensions
     public static IEndpointConventionBuilder MapRemoteBffApiEndpoint(
         this IEndpointRouteBuilder endpoints,
         PathString localPath,
-        string apiAddress,
+        Uri apiAddress,
         Action<TransformBuilderContext>? yarpTransformBuilder = null)
     {
         endpoints.CheckLicense();
@@ -45,11 +45,12 @@ public static class RouteBuilderExtensions
 
         return endpoints.MapForwarder(
                 pattern: localPath.Add("/{**catch-all}").Value!,
-                destinationPrefix: apiAddress,
+                destinationPrefix: apiAddress.ToString(),
                 configureTransform: context =>
                 {
                     yarpTransformBuilder(context);
                 })
             .WithMetadata(new BffRemoteApiEndpointMetadata());
     }
+
 }

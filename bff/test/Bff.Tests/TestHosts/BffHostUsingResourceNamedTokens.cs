@@ -142,7 +142,7 @@ public class BffHostUsingResourceNamedTokens : GenericHost
             endpoints.MapBffManagementEndpoints();
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_user_with_useraccesstokenparameters_having_stored_named_token", _apiHost.Url())
+                    "/api_user_with_useraccesstokenparameters_having_stored_named_token", new Uri(_apiHost.Url()))
                 .WithUserAccessTokenParameter(new BffUserAccessTokenParameters
                 {
                     SignInScheme = Scheme.Parse("cookie"),
@@ -152,7 +152,7 @@ public class BffHostUsingResourceNamedTokens : GenericHost
                 .WithAccessToken();
 
             endpoints.MapRemoteBffApiEndpoint(
-                    "/api_user_with_useraccesstokenparameters_having_not_stored_named_token", _apiHost.Url())
+                    "/api_user_with_useraccesstokenparameters_having_not_stored_named_token", new Uri(_apiHost.Url()))
                 .WithUserAccessTokenParameter(new BffUserAccessTokenParameters
                 {
                     SignInScheme = Scheme.Parse("cookie"),
