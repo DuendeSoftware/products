@@ -26,15 +26,44 @@ public class AssemblyInfoDiagnosticEntryTests
     }
 
     [Fact]
-    public async Task Should_Honor_Assembly_Filter()
+    public async Task Should_Honor_Assembly_Exact_Matches()
     {
-        var subject = new AssemblyInfoDiagnosticEntry([x => x.StartsWith("Duende.")]);
+        var subject = new AssemblyInfoDiagnosticEntry(["Duende.IdentityServer"], []);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
 
         var assemblyInfo = result.RootElement.GetProperty("AssemblyInfo");
         var assemblies = assemblyInfo.GetProperty("Assemblies").EnumerateArray();
-        assemblies.ShouldAllBe(x => x.GetProperty("Name").GetString().StartsWith("Duende."));
+        assemblies.ShouldHaveSingleItem();
+        var firstEntry = assemblies.First();
+        firstEntry.GetProperty("Name").GetString().ShouldBe("Duende.IdentityServer");
+    }
+
+    [Fact]
+    public async Task Should_Honor_Assembly_StartsWith_Matches()
+    {
+        var subject = new AssemblyInfoDiagnosticEntry([], ["Duende."]);
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+
+        var assemblyInfo = result.RootElement.GetProperty("AssemblyInfo");
+        var assemblies = assemblyInfo.GetProperty("Assemblies").EnumerateArray();
+        assemblies.ShouldAllBe(assembly =>
+            assembly.GetProperty("Name").GetString().StartsWith("Duende."));
+    }
+
+    [Fact]
+    public async Task Should_Include_Only_Matching_Assemblies()
+    {
+        var subject = new AssemblyInfoDiagnosticEntry(["Microsoft.AspnetCore"], ["Duende."]);
+
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+
+        var assemblyInfo = result.RootElement.GetProperty("AssemblyInfo");
+        var assemblies = assemblyInfo.GetProperty("Assemblies").EnumerateArray();
+        assemblies.ShouldAllBe(assembly =>
+            assembly.GetProperty("Name").GetString() == "Microsoft.AspnetCore" ||
+            assembly.GetProperty("Name").GetString().StartsWith("Duende."));
     }
 
     [Fact]

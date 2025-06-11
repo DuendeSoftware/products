@@ -10,26 +10,34 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
 {
-    private readonly IReadOnlyList<Predicate<string>> _defaultInclusions =
+    private readonly IReadOnlyList<string> _defaultExactMatches =
     [
-        x => x.StartsWith("Duende."),
-        x => x == "Microsoft.AspNetCore",
-        x => x.StartsWith("Microsoft.AspNetCore.Authentication."),
-        x => x.StartsWith("Microsoft.IdentityModel."),
-        x => x.StartsWith("System.IdentityModel."),
-        x => x.StartsWith("System.IdentityModel"),
-        x => x.StartsWith("Microsoft.EntityFrameworkCore"),
-        x => x.StartsWith("Rsk"),
-        x => x.StartsWith("Skoruba.IdentityServer"),
-        x => x.StartsWith("Skoruba.Duende"),
-        x => x.StartsWith("Npgsql"),
-        x => x.StartsWith("Azure"),
-        x => x.StartsWith("Microsoft.Azure")
+        "Microsoft.AspNetCore"
+    ];
+    private readonly IReadOnlyList<string> _defaultStartsWithMatches =
+    [
+        "Duende.",
+        "Microsoft.AspNetCore.Authentication.",
+        "Microsoft.IdentityModel.",
+        "System.IdentityModel.",
+        "System.IdentityModel",
+        "Microsoft.EntityFrameworkCore",
+        "Rsk",
+        "Skoruba.IdentityServer",
+        "Skoruba.Duende",
+        "Npgsql",
+        "Azure",
+        "Microsoft.Azure"
     ];
 
-    private readonly IReadOnlyList<Predicate<string>> _inclusions;
+    private readonly IReadOnlyList<string> _exactMatches;
+    private readonly IReadOnlyList<string> _startsWithMatches;
 
-    public AssemblyInfoDiagnosticEntry(IReadOnlyList<Predicate<string>> inclusions = null) => _inclusions = inclusions ?? _defaultInclusions;
+    public AssemblyInfoDiagnosticEntry(IReadOnlyList<string> exactMatches = null, IReadOnlyList<string> startsWithMatches = null)
+    {
+        _exactMatches = exactMatches ?? _defaultExactMatches;
+        _startsWithMatches = startsWithMatches ?? _defaultStartsWithMatches;
+    }
 
     public Task WriteAsync(Utf8JsonWriter writer)
     {
@@ -39,7 +47,9 @@ internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
         writer.WriteNumber("AssemblyCount", assemblies.Count);
 
         writer.WriteStartArray("Assemblies");
-        foreach (var assembly in assemblies.Where(assembly => _inclusions.Any(predicate => predicate(assembly.FullName))))
+        foreach (var assembly in assemblies.Where(assembly => assembly.GetName().Name != null &&
+            (_exactMatches.Contains(assembly.GetName().Name) ||
+             _startsWithMatches.Any(prefix => assembly.GetName().Name!.StartsWith(prefix)))))
         {
             writer.WriteStartObject();
             writer.WriteString("Name", assembly.GetName().Name);
