@@ -225,6 +225,8 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<IDiagnosticEntry, EndpointUsageDiagnosticEntry>();
         builder.Services.AddSingleton<ClientLoadedTracker>();
         builder.Services.AddSingleton<IDiagnosticEntry, ClientInfoDiagnosticEntry>();
+        builder.Services.AddSingleton<ResourceLoadedTracker>();
+        builder.Services.AddSingleton<IDiagnosticEntry, ResourceInfoDiagnosticEntry>();
         builder.Services.AddSingleton<DiagnosticSummary>();
         builder.Services.AddHostedService<DiagnosticHostedService>();
 
