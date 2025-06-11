@@ -67,7 +67,6 @@ internal static class IdentityServerExtensions
             })
             .AddAppAuthRedirectUriValidator()
             .AddServerSideSessions()
-            .AddScopeParser<ParameterizedScopeParser>()
 
             // this is something you will want in production to reduce load on and requests to the DB
             //.AddConfigurationStoreCache()
@@ -81,18 +80,6 @@ internal static class IdentityServerExtensions
             .AddCustomTokenRequestValidator<ParameterizedScopeTokenRequestValidator>()
             .AddScopeParser<ParameterizedScopeParser>()
             .AddMutualTlsSecretValidators()
-            .AddInMemoryOidcProviders(
-            [
-                new Duende.IdentityServer.Models.OidcProvider
-                {
-                    Scheme = "dynamicprovider-idsvr",
-                    DisplayName = "IdentityServer (via Dynamic Providers)",
-                    Authority = "https://demo.duendesoftware.com",
-                    ClientId = "login",
-                    ResponseType = "id_token",
-                    Scope = "openid profile"
-                }
-            ])
             .AddLicenseSummary();
 
         builder.Services.AddDistributedMemoryCache();

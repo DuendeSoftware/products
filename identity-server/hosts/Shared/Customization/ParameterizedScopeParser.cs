@@ -36,7 +36,7 @@ public class ParameterizedScopeParser(ILogger<DefaultScopeParser> logger) : Defa
         }
         else
         {
-            // we get in here with a scope exactly "transaction", which is to say we're ignoring it 
+            // we get in here with a scope exactly "transaction", which is to say we're ignoring it
             // and not including it in the results
             scopeContext.SetIgnore();
         }
