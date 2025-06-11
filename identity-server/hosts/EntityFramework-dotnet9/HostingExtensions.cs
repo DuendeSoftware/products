@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Serilog.Events;
 
 namespace IdentityServerHost;
 
@@ -42,28 +41,6 @@ internal static class HostingExtensions
 
             return Task.FromResult(principal);
         });
-
-        // var apiKey = builder.Configuration["HoneyCombApiKey"];
-        // var dataset = "IdentityServerDev";
-        //
-        // builder.Services.AddOpenTelemetryTracing(builder =>
-        // {
-        //     builder
-        //         //.AddConsoleExporter()
-        //         .AddSource(IdentityServerConstants.Tracing.ServiceName)
-        //         .SetResourceBuilder(
-        //             ResourceBuilder.CreateDefault()
-        //                 .AddService("IdentityServerHost.EF"))
-        //         //.SetSampler(new AlwaysOnSampler())
-        //         .AddHttpClientInstrumentation()
-        //         .AddAspNetCoreInstrumentation()
-        //         .AddSqlClientInstrumentation()
-        //         .AddOtlpExporter(option =>
-        //         {
-        //             option.Endpoint = new Uri("https://api.honeycomb.io");
-        //             option.Headers = $"x-honeycomb-team={apiKey},x-honeycomb-dataset={dataset}";
-        //         });
-        // });
 
         builder.Services.Configure<KestrelServerOptions>(kestrelOptions =>
         {
@@ -154,8 +131,7 @@ internal static class HostingExtensions
 
     internal static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging(
-            options => options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Debug);
+        app.UseSerilogRequestLogging();
 
         app.UseCookiePolicy();
 

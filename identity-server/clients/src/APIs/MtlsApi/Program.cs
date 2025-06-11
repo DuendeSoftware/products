@@ -5,52 +5,67 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using MtlsApi;
 using Serilog;
-using Serilog.Events;
 
-var builder = WebApplication.CreateBuilder(args);
+SerilogDefaults.Bootstrap();
 
-// Configure Serilog early
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("SampleApi", LogEventLevel.Debug)
-    .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
-    .CreateLogger();
-
-builder.Host.UseSerilog();
-
-// Include the service defaults from Aspire
-builder.AddServiceDefaults();
-
-builder.Services.AddControllers();
-
-// this API will accept any access token from the authority
-builder.Services.AddAuthentication("token")
-    .AddJwtBearer("token", options =>
-    {
-        options.Authority = builder.Configuration["is-host"];
-        options.TokenValidationParameters.ValidateAudience = false;
-        options.MapInboundClaims = false;
-
-        options.TokenValidationParameters.ValidTypes = ["at+jwt"];
-    });
-
-builder.Services.Configure<KestrelServerOptions>(options =>
+try
 {
-    options.ConfigureHttpsDefaults(https =>
+    var builder = WebApplication.CreateBuilder(args);
+
+    Console.Title = builder.Environment.ApplicationName;
+    Log.Information("{EnvironmentApplicationName} Starting up", builder.Environment.ApplicationName);
+
+    builder.ConfigureSerilogDefaults();
+    builder.AddServiceDefaults();
+
+    builder.Services.AddControllers();
+    builder.Services.AddCors();
+
+    // this API will accept any access token from the authority
+    builder.Services.AddAuthentication("token")
+        .AddJwtBearer("token", options =>
+        {
+            options.Authority = builder.Configuration["is-host"];
+            options.TokenValidationParameters.ValidateAudience = false;
+            options.MapInboundClaims = false;
+            options.TokenValidationParameters.ValidTypes = ["at+jwt"];
+        });
+
+    builder.Services.Configure<KestrelServerOptions>(options =>
     {
-        https.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-        https.AllowAnyClientCertificate(); // Needed for the "ephemeral" mtls client
+        options.ConfigureHttpsDefaults(https =>
+        {
+            https.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+            https.AllowAnyClientCertificate(); // Needed for the "ephemeral" mtls client
+        });
     });
-});
 
-var app = builder.Build();
+    var app = builder.Build();
 
-app.UseRouting();
-app.UseAuthentication();
-app.UseConfirmationValidation();
-app.UseAuthorization();
+    app.UseSerilogRequestLogging();
 
-app.MapControllers().RequireAuthorization();
+    app.UseCors(policy =>
+    {
+        policy.WithOrigins("https://localhost:44300");
+        policy.AllowAnyHeader();
+        policy.AllowAnyMethod();
+        policy.WithExposedHeaders("WWW-Authenticate");
+    });
 
-app.Run();
+    app.UseRouting();
+    app.UseAuthentication();
+    app.UseConfirmationValidation();
+    app.UseAuthorization();
+
+    app.MapControllers().RequireAuthorization();
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

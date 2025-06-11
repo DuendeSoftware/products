@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Serilog.Events;
 
 namespace IdentityServerHost;
 
@@ -28,28 +27,6 @@ internal static class HostingExtensions
 
         builder.ConfigureIdentityServer();
         builder.AddExternalIdentityProviders();
-
-        // var apiKey = builder.Configuration["HoneyCombApiKey"];
-        // var dataset = "IdentityServerDev";
-        //
-        // builder.Services.AddOpenTelemetryTracing(builder =>
-        // {
-        //     builder
-        //         //.AddConsoleExporter()
-        //         .AddSource(IdentityServerConstants.Tracing.ServiceName)
-        //         .SetResourceBuilder(
-        //             ResourceBuilder.CreateDefault()
-        //                 .AddService("IdentityServerHost.AspId"))
-        //         //.SetSampler(new AlwaysOnSampler())
-        //         .AddHttpClientInstrumentation()
-        //         .AddAspNetCoreInstrumentation()
-        //         .AddSqlClientInstrumentation()
-        //         .AddOtlpExporter(option =>
-        //         {
-        //             option.Endpoint = new Uri("https://api.honeycomb.io");
-        //             option.Headers = $"x-honeycomb-team={apiKey},x-honeycomb-dataset={dataset}";
-        //         });
-        // });
 
         return builder.Build();
     }
@@ -116,8 +93,7 @@ internal static class HostingExtensions
 
     internal static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging(
-            options => options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Debug);
+        app.UseSerilogRequestLogging();
 
         app.UseDeveloperExceptionPage();
         app.UseStaticFiles();
@@ -125,6 +101,9 @@ internal static class HostingExtensions
         app.UseRouting();
         app.UseIdentityServer();
         app.UseAuthorization();
+
+        // health checks
+        app.MapHealthChecks("/health");
 
         // UI
         app.MapRazorPages()

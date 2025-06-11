@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
@@ -51,7 +49,8 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    .AddMeter(Duende.IdentityServer.Telemetry.ServiceName);
             })
             .WithTracing(tracing =>
             {
@@ -62,8 +61,6 @@ public static class Extensions
                     .AddSource(IdentityServerConstants.Tracing.Stores)
                     .AddSource(IdentityServerConstants.Tracing.Validation)
                     .AddAspNetCoreInstrumentation()
-                    // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
-                    //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
             });
 
@@ -100,22 +97,21 @@ public static class Extensions
         return builder;
     }
 
-    public static WebApplication MapDefaultEndpoints(this WebApplication app)
+    public static IHostApplicationBuilder AddOpenTelemetryMeters(this IHostApplicationBuilder builder, params string[] meterNames)
     {
-        // Adding health checks endpoints to applications in non-development environments has security implications.
-        // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
-        if (app.Environment.IsDevelopment())
+        if (meterNames == null || meterNames.Length == 0)
         {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
-            app.MapHealthChecks("/health");
-
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks("/alive", new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            });
+            return builder;
         }
 
-        return app;
+        builder.Services.ConfigureOpenTelemetryMeterProvider(provider =>
+        {
+            foreach (var meterName in meterNames)
+            {
+                provider.AddMeter(meterName);
+            }
+        });
+
+        return builder;
     }
 }
