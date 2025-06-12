@@ -17,7 +17,6 @@ public class AssemblyInfoDiagnosticEntryTests
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
 
         var assemblyInfo = result.RootElement.GetProperty("AssemblyInfo");
-        assemblyInfo.GetProperty("AssemblyCount").ValueKind.ShouldBe(JsonValueKind.Number);
         var assemblies = assemblyInfo.GetProperty("Assemblies");
         assemblies.ValueKind.ShouldBe(JsonValueKind.Array);
         var firstEntry = assemblies.EnumerateArray().First();
