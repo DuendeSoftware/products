@@ -15,9 +15,6 @@
     <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
   </Folder>
   <Folder Name="/bff/" />
-  <Folder Name="/bff/benchmarks/">
-    <Project Path="../../duende/products/bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
-  </Folder>
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
@@ -44,9 +41,7 @@
   <Folder Name="/bff/migrations/">
     <Project Path="bff/migrations/UserSessionDb/UserSessionDb.csproj" />
   </Folder>
-  <Folder Name="/bff/performance/">
-    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
-  </Folder>
+  <Folder Name="/bff/performance/" />
   <Folder Name="/bff/src/">
     <Project Path="bff/src/Bff.Blazor.Client/Bff.Blazor.Client.csproj" />
     <Project Path="bff/src/Bff.Blazor/Bff.Blazor.csproj" />
