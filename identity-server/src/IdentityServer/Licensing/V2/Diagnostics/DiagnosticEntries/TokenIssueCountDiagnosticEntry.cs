@@ -13,10 +13,10 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
     private long _jwtTokenIssued;
     private long _referenceTokenIssued;
     private long _refreshTokenIssued;
-    private long _jwtPoPDPoPTokenIssued;
-    private long _referencePoPDPoPTokenIssued;
-    private long _jwtPoPmTLSTokenIssued;
-    private long _referencePoPmTLSTokenIssued;
+    private long _jwtDPoPTokenIssued;
+    private long _referenceDPoPTokenIssued;
+    private long _jwtMTLSTokenIssued;
+    private long _referenceMTLSTokenIssued;
     private long _idTokenIssued;
 
     private long _implicitGrantTypeFlows;
@@ -53,10 +53,10 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
 
         writer.WriteNumber("Jwt", _jwtTokenIssued);
         writer.WriteNumber("Reference", _referenceTokenIssued);
-        writer.WriteNumber("JwtPoPDPoP", _jwtPoPDPoPTokenIssued);
-        writer.WriteNumber("ReferencePoPDPoP", _referencePoPDPoPTokenIssued);
-        writer.WriteNumber("JwtPoPmTLS", _jwtPoPmTLSTokenIssued);
-        writer.WriteNumber("ReferencePoPmTLS", _referencePoPmTLSTokenIssued);
+        writer.WriteNumber("JwtDPoP", _jwtDPoPTokenIssued);
+        writer.WriteNumber("ReferenceDPoP", _referenceDPoPTokenIssued);
+        writer.WriteNumber("JwtMTLS", _jwtMTLSTokenIssued);
+        writer.WriteNumber("ReferenceMTLS", _referenceMTLSTokenIssued);
         writer.WriteNumber("Refresh", _refreshTokenIssued);
         writer.WriteNumber("Id", _idTokenIssued);
         writer.WriteNumber(GrantType.Implicit, _implicitGrantTypeFlows);
@@ -128,16 +128,16 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
                     Interlocked.Increment(ref _referenceTokenIssued);
                     break;
                 case ProofType.DPoP when accessTokenType == AccessTokenType.Jwt:
-                    Interlocked.Increment(ref _jwtPoPDPoPTokenIssued);
+                    Interlocked.Increment(ref _jwtDPoPTokenIssued);
                     break;
                 case ProofType.DPoP when accessTokenType == AccessTokenType.Reference:
-                    Interlocked.Increment(ref _referencePoPDPoPTokenIssued);
+                    Interlocked.Increment(ref _referenceDPoPTokenIssued);
                     break;
                 case ProofType.ClientCertificate when accessTokenType == AccessTokenType.Jwt:
-                    Interlocked.Increment(ref _jwtPoPmTLSTokenIssued);
+                    Interlocked.Increment(ref _jwtMTLSTokenIssued);
                     break;
                 case ProofType.ClientCertificate when accessTokenType == AccessTokenType.Reference:
-                    Interlocked.Increment(ref _referencePoPmTLSTokenIssued);
+                    Interlocked.Increment(ref _referenceMTLSTokenIssued);
                     break;
             }
         }
