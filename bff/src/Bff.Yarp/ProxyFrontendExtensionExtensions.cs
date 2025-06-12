@@ -12,9 +12,9 @@ public static class ProxyFrontendExtensionExtensions
     {
         // Remove existing ProxyFrontendExtension if present
         var newExtensions = frontend.DataExtensions
-            .Where(e => e is not ProxyBffDataExtension)
+            .Where(e => e is not ProxyBffPlugin)
             // Add new ProxyFrontendExtension with replaced routes
-            .Append(new ProxyBffDataExtension { RemoteApis = config.ToArray() })
+            .Append(new ProxyBffPlugin { RemoteApis = config.ToArray() })
             .ToArray();
 
         // Clone frontend with new extensions
@@ -30,7 +30,7 @@ public static class ProxyFrontendExtensionExtensions
     /// <param name="frontend"></param>
     /// <returns></returns>
     public static RemoteApi[] GetRemoteApis(this BffFrontend frontend) => frontend.DataExtensions
-        .OfType<ProxyBffDataExtension>()
+        .OfType<ProxyBffPlugin>()
         .SelectMany(e => e.RemoteApis)
         .ToArray();
 }

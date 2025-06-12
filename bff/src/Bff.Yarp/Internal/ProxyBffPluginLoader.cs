@@ -8,18 +8,18 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.Yarp.Internal;
 
-internal sealed class ProxyDataExtensionLoader(IOptionsMonitor<ProxyConfiguration> proxyConfigMonitor) : IDataExtensionLoader
+internal sealed class ProxyBffPluginLoader(IOptionsMonitor<ProxyConfiguration> proxyConfigMonitor) : IBffPluginLoader
 {
     internal ProxyConfiguration Current => proxyConfigMonitor.CurrentValue;
 
-    public IBffDataExtension? LoadExtension(BffFrontendName name)
+    public IBffPlugin? LoadExtension(BffFrontendName name)
     {
         if (!Current.Frontends.TryGetValue(name, out var config))
         {
             return null;
         }
 
-        return new ProxyBffDataExtension()
+        return new ProxyBffPlugin()
         {
             RemoteApis = config.RemoteApis.Select(MapFrom).ToArray()
         };

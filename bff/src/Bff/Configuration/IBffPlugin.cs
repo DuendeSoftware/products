@@ -9,7 +9,7 @@ namespace Duende.Bff.Configuration;
 ///
 /// An example of this extension data is ProxyBffDataExtension, which contains the remote APIs for a frontend.
 /// </summary>
-internal interface IBffDataExtension
+internal interface IBffPlugin
 {
 
 }

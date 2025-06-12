@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Configuration;
-using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Yarp.Internal;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -38,7 +37,7 @@ public static class BffBuilderExtensions
         builder.Services.AddHttpForwarder();
         builder.Services.AddSingleton<RemoteRouteHandler>();
 
-        builder.Services.AddSingleton<IDataExtensionLoader, ProxyDataExtensionLoader>();
+        builder.Services.AddSingleton<IBffPluginLoader, ProxyBffPluginLoader>();
 
         return builder;
     }

@@ -8,7 +8,7 @@ namespace Duende.Bff.DynamicFrontends.Internal;
 
 internal class FrontendCollection : IDisposable, IFrontendCollection
 {
-    private readonly IDataExtensionLoader[] _plugins;
+    private readonly IBffPluginLoader[] _plugins;
     private readonly object _syncRoot = new();
 
     /// <summary>
@@ -24,7 +24,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
 
     public FrontendCollection(
         IOptionsMonitor<BffConfiguration> bffConfiguration,
-        IEnumerable<IDataExtensionLoader> plugins,
+        IEnumerable<IBffPluginLoader> plugins,
         IEnumerable<BffFrontend>? frontendsConfiguredDuringStartup = null
         )
     {
@@ -75,7 +75,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
             var frontend = x.Value;
 
             var frontendName = BffFrontendName.Parse(x.Key);
-            var extensions = _plugins.Select(p => p.LoadExtension(frontendName)).OfType<IBffDataExtension>().ToArray();
+            var extensions = _plugins.Select(p => p.LoadExtension(frontendName)).OfType<IBffPlugin>().ToArray();
 
             return new BffFrontend
             {

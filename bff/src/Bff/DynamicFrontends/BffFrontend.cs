@@ -48,6 +48,6 @@ public sealed record BffFrontend
 
     public Uri? IndexHtmlUrl { get; init; }
 
-    internal IBffDataExtension[] DataExtensions { get; init; } = [];
+    internal IBffPlugin[] DataExtensions { get; init; } = [];
 
 }

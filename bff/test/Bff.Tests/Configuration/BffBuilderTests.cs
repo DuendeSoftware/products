@@ -129,8 +129,8 @@ public class BffBuilderTests
 
         var found = frontends.First(x => x.Name == The.FrontendName);
 
-        found.DataExtensions.OfType<ProxyBffDataExtension>().Count().ShouldBe(1);
-        var proxyBffDataExtensions = found.DataExtensions.OfType<ProxyBffDataExtension>().First();
+        found.DataExtensions.OfType<ProxyBffPlugin>().Count().ShouldBe(1);
+        var proxyBffDataExtensions = found.DataExtensions.OfType<ProxyBffPlugin>().First();
 
         proxyBffDataExtensions.RemoteApis[0].ShouldBe(Some.RemoteApi());
     }
@@ -325,7 +325,7 @@ public class BffBuilderTests
         openIdConnectOptions.ShouldBeEquivalentTo(The.OpenIdConnectOptions);
 
         expected.DataExtensions.Length.ShouldBe(1);
-        var proxyConfig = (ProxyBffDataExtension)expected.DataExtensions[0];
+        var proxyConfig = (ProxyBffPlugin)expected.DataExtensions[0];
         proxyConfig.RemoteApis.Length.ShouldBe(1);
         proxyConfig.RemoteApis[0].ShouldBe(Some.RemoteApi());
     }

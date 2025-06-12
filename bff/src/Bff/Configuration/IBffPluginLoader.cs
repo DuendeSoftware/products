@@ -12,10 +12,10 @@ namespace Duende.Bff.Configuration;
 /// This plugin mechanism allows the BFF to load these extensions at runtime, so that the BFF can be used with different plugins.
 /// 
 /// </summary>
-internal interface IDataExtensionLoader
+internal interface IBffPluginLoader
 {
     /// <summary>
     /// Loads a data extension for a specific frontend.
     /// </summary>
-    IBffDataExtension? LoadExtension(BffFrontendName name);
+    IBffPlugin? LoadExtension(BffFrontendName name);
 }

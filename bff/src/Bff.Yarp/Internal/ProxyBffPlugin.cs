@@ -5,7 +5,7 @@ using Duende.Bff.Configuration;
 
 namespace Duende.Bff.Yarp.Internal;
 
-internal record ProxyBffDataExtension : IBffDataExtension
+internal record ProxyBffPlugin : IBffPlugin
 {
     internal RemoteApi[] RemoteApis { get; init; } = [];
 }

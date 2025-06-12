@@ -33,9 +33,9 @@ public class TestDataBuilder(TestData the)
             SelectionCriteria = FrontendSelectionCriteria()
         };
 
-    internal ProxyBffDataExtension ProxyDataExtension() =>
+    internal ProxyBffPlugin ProxyDataExtension() =>
 
-        new ProxyBffDataExtension()
+        new ProxyBffPlugin()
         {
             RemoteApis = [RemoteApi()]
         };

@@ -162,5 +162,5 @@ public sealed class BffOptions
     /// </summary>
     public bool AutomaticallyRegisterBffMiddleware { get; set; } = true;
 
-    internal List<LoadExtensionMiddlewares> MiddlewareLoaders { get; set; } = [];
+    internal List<LoadPluginMiddlewares> MiddlewareLoaders { get; set; } = [];
 }
