@@ -10,7 +10,7 @@ namespace Duende.Bff.Yarp.Internal;
 
 internal sealed class ProxyBffPluginLoader(IOptionsMonitor<ProxyConfiguration> proxyConfigMonitor) : IBffPluginLoader
 {
-    internal ProxyConfiguration Current => proxyConfigMonitor.CurrentValue;
+    private ProxyConfiguration Current => proxyConfigMonitor.CurrentValue;
 
     public IBffPlugin? LoadExtension(BffFrontendName name)
     {
