@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,3 +16,5 @@ namespace Duende.Bff.Configuration;
 /// <param name="services"></param>
 /// <param name="configuration"></param>
 internal delegate void LoadPluginConfiguration(IServiceCollection services, IConfiguration configuration);
+
+internal delegate void LoadExtensionMiddlewares(IApplicationBuilder appBuilder);

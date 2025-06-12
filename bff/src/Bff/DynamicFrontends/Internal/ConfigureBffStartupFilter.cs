@@ -27,9 +27,9 @@ internal class ConfigureBffStartupFilter : IStartupFilter
 
             next(app);
 
-            foreach (var type in bffOptions.MiddlewareTypes)
+            foreach (var loader in bffOptions.MiddlewareLoaders)
             {
-                app.UseMiddleware(type);
+                loader(app);
             }
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {

@@ -30,9 +30,10 @@ public static class BffBuilderExtensions
 
         builder.Services.Configure<BffOptions>(opt =>
         {
-            opt.MiddlewareTypes = opt.MiddlewareTypes
-                .Append(typeof(MapRemoteRoutesMiddleware))
-                .ToArray();
+            opt.MiddlewareLoaders.Add(app =>
+            {
+                app.UseBffRemoteRoutes();
+            });
         });
         builder.Services.AddHttpForwarder();
         builder.Services.AddSingleton<RemoteRouteHandler>();
