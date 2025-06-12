@@ -9,8 +9,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics;
 
-internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, IdentityServerOptions options, ILogger<DiagnosticSummary> logger)
+internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, IdentityServerOptions options, ILoggerFactory loggerFactory)
 {
+    private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.Diagnostics.Summary");
     public async Task PrintSummary()
     {
         var bufferWriter = new ArrayBufferWriter<byte>();
@@ -39,12 +40,12 @@ internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, Identity
                 var offset = i * chunkSize;
                 var length = Math.Min(chunkSize, span.Length - offset);
                 var chunk = span.Slice(offset, length);
-                logger.DiagnosticSummaryLogged(i + 1, totalChunks, Encoding.UTF8.GetString(chunk));
+                _logger.DiagnosticSummaryLogged(i + 1, totalChunks, Encoding.UTF8.GetString(chunk));
             }
         }
         else
         {
-            logger.DiagnosticSummaryLogged(1, 1, Encoding.UTF8.GetString(bufferWriter.WrittenSpan));
+            _logger.DiagnosticSummaryLogged(1, 1, Encoding.UTF8.GetString(bufferWriter.WrittenSpan));
         }
     }
 }
