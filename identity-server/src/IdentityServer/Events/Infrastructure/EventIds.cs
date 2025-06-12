@@ -69,4 +69,11 @@ public static class EventIds
 
     public const int BackchannelAuthenticationSuccess = BackchannelAuthenticationEventsStart + 0;
     public const int BackchannelAuthenticationFailure = BackchannelAuthenticationEventsStart + 1;
+
+    //////////////////////////////////////////////////////
+    /// Diagnostics related events
+    //////////////////////////////////////////////////////
+    private const int DiagnosticEventsStart = 7000;
+
+    public const int DiagnosticSummaryLogged = DiagnosticEventsStart + 0;
 }

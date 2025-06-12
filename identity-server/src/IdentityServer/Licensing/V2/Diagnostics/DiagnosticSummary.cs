@@ -29,6 +29,7 @@ internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, Identity
 
         var span = bufferWriter.WrittenSpan;
 
+        using var diagnosticActivity = Tracing.DiagnosticsActivitySource.StartActivity("DiagnosticSummary");
         var chunkSize = options.Diagnostics.ChunkSize;
         if (span.Length > chunkSize)
         {
@@ -38,12 +39,12 @@ internal class DiagnosticSummary(IEnumerable<IDiagnosticEntry> entries, Identity
                 var offset = i * chunkSize;
                 var length = Math.Min(chunkSize, span.Length - offset);
                 var chunk = span.Slice(offset, length);
-                logger.LogInformation("Diagnostic data ({current} of {totalChunks}): {diagnosticData}", i + 1, totalChunks, Encoding.UTF8.GetString(chunk));
+                logger.DiagnosticSummaryLogged(i + 1, totalChunks, Encoding.UTF8.GetString(chunk));
             }
         }
         else
         {
-            logger.LogInformation("Diagnostic data: {diagnosticData}", Encoding.UTF8.GetString(bufferWriter.WrittenSpan));
+            logger.DiagnosticSummaryLogged(1, 1, Encoding.UTF8.GetString(bufferWriter.WrittenSpan));
         }
     }
 }

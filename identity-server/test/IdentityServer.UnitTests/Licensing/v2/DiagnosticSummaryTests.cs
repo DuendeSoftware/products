@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
@@ -84,6 +85,20 @@ public class DiagnosticSummaryTests
         }
     }
 
+    [Fact]
+    public async Task PrintSummary_ShouldIncludeLogEventId()
+    {
+        var options = new IdentityServerOptions();
+        var logger = new FakeLogger<DiagnosticSummary>();
+        var diagnosticEntry = new LongDiagnosticEntry { OutputLength = 100000 };
+        var summary = new DiagnosticSummary([diagnosticEntry], options, logger);
+
+        await summary.PrintSummary();
+
+        var logSnapshot = logger.Collector.GetSnapshot();
+        logSnapshot.Count.ShouldBeGreaterThan(0);
+        logSnapshot[0].Id.Id.ShouldBe(EventIds.DiagnosticSummaryLogged);
+    }
 
     private class TestDiagnosticEntry : IDiagnosticEntry
     {
