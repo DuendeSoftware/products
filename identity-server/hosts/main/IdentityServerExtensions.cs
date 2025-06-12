@@ -40,10 +40,14 @@ internal static class IdentityServerExtensions
                 });
 
                 options.MutualTls.Enabled = true;
+
+                options.Diagnostics.ChunkSize = 1024 * 1000 - 32; // 1 MB minus some formatting space;
             })
             .AddServerSideSessions()
             .AddInMemoryClients([.. TestClients.Get()])
             .AddInMemoryIdentityResources(TestResources.IdentityResources)
+            .AddInMemoryApiResources(TestResources.ApiResources)
+            .AddInMemoryApiScopes(TestResources.ApiScopes)
             //.AddStaticSigningCredential()
             .AddExtensionGrantValidator<ExtensionGrantValidator>()
             .AddExtensionGrantValidator<NoSubjectExtensionGrantValidator>()
