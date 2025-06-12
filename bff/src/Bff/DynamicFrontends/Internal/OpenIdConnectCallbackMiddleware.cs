@@ -32,6 +32,15 @@ internal class OpenIdConnectCallbackMiddleware(RequestDelegate next,
                 return;
             }
         }
+        if (context.Request.Path.StartsWithSegments(options.SignedOutCallbackPath))
+        {
+            var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
+            if (await handlers.GetHandlerAsync(context, frontend.OidcSchemeName) is IAuthenticationRequestHandler handler)
+            {
+                await handler.HandleRequestAsync();
+                return;
+            }
+        }
 
         await next(context);
     }

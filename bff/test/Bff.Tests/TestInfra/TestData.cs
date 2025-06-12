@@ -88,6 +88,7 @@ public class TestData
             opt.Scope.Add("openid");
             opt.Scope.Add("profile");
             opt.Scope.Add(Scope);
+            opt.SignedOutRedirectUri = "/";
         };
 
         DefaultOpenIdConnectConfiguration(OpenIdConnectOptions);

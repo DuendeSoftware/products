@@ -146,4 +146,25 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
 
     }
     public async Task RevokeIdentityServerSession(Uri url) => await GetAsync(new Uri(url, "__signout")).CheckHttpStatusCode(HttpStatusCode.NoContent);
+
+    public async Task<HttpResponseMessage> Logout(string? sid = null, Uri? returnUrl = null)
+    {
+        sid ??= await GetSid();
+
+        var returnParams = returnUrl == null ? null : $"&returnUrl={Uri.EscapeDataString(returnUrl.ToString())}";
+
+        var req = new HttpRequestMessage(HttpMethod.Get, "/bff/logout?sid=" + sid + returnParams);
+        req.Headers.Add("x-csrf", "1");
+        return await SendAsync(req);
+    }
+
+    public async Task<string> GetSid()
+    {
+        var claims = await CallUserEndpointAsync();
+
+        var sidClaim = claims.FirstOrDefault(c => c.Type == "sid")?.Value;
+        sidClaim.ShouldNotBeNull();
+        var sid = sidClaim.Value.ToString();
+        return sid;
+    }
 }

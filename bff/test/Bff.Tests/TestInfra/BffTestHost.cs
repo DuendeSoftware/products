@@ -5,6 +5,7 @@ using System.Net;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
+using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Forwarder;
 
 namespace Duende.Bff.Tests.TestInfra;
@@ -13,6 +14,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 {
     public readonly string DefaultRootResponse = "Default response from root";
     private BffHttpClient _browserClient = null!;
+    public BffOptions BffOptions => Resolve<IOptions<BffOptions>>().Value;
 
     /// <summary>
     /// Should a default response for "/" be mapped?
