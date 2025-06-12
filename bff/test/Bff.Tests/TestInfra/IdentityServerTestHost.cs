@@ -134,11 +134,6 @@ public class IdentityServerTestHost : TestHost
         var clientSecret = options.ClientSecret ?? The.ClientSecret;
         callbackPath ??= options.CallbackPath;
 
-        if (callbackPath == "/signin-oidc")
-        {
-            callbackPath = Constants.ManagementEndpoints.SigninUrl;
-        }
-
         var redirectUri = new Uri(baseUri, (frontend.SelectionCriteria.MatchingPath ?? string.Empty) + callbackPath);
 
         var client = new Client()

@@ -219,7 +219,6 @@ namespace Duende.Bff
             public const string Diagnostics = "/diagnostics";
             public const string Login = "/login";
             public const string Logout = "/logout";
-            public const string SigninUrl = "/bff-signin";
             [System.Obsolete("use /login?prompt=create")]
             public const string SilentLogin = "/silent-login";
             public const string SilentLoginCallback = "/silent-login-callback";

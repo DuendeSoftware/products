@@ -107,8 +107,6 @@ public static class Constants
         /// Diagnostics path
         /// </summary>
         public const string Diagnostics = "/diagnostics";
-
-        public const string SigninUrl = "/bff-signin";
     }
 
     /// <summary>
