@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.Bff.Yarp;
+namespace Duende.Bff.Yarp.Internal;
 
 /// <summary>
 /// Middleware for YARP to check the antiforgery header

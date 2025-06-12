@@ -1,15 +1,4 @@
-﻿namespace Duende.Bff.Configuration
-{
-    public sealed class UserAccessTokenParameters : System.IEquatable<Duende.Bff.Configuration.UserAccessTokenParameters>
-    {
-        public UserAccessTokenParameters() { }
-        public Duende.Bff.AccessTokenManagement.Scheme? ChallengeScheme { get; init; }
-        public bool ForceRenewal { get; init; }
-        public Duende.Bff.AccessTokenManagement.Resource? Resource { get; init; }
-        public Duende.Bff.AccessTokenManagement.Scheme? SignInScheme { get; init; }
-    }
-}
-namespace Duende.Bff.Yarp
+﻿namespace Duende.Bff.Yarp
 {
     public static class BffBuilderExtensions
     {
@@ -77,6 +66,14 @@ namespace Duende.Bff.Yarp
     public static class RouteBuilderExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapRemoteBffApiEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, Microsoft.AspNetCore.Http.PathString localPath, string apiAddress, System.Action<Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext>? yarpTransformBuilder = null) { }
+    }
+    public sealed class UserAccessTokenParameters : System.IEquatable<Duende.Bff.Yarp.UserAccessTokenParameters>
+    {
+        public UserAccessTokenParameters() { }
+        public Duende.Bff.AccessTokenManagement.Scheme? ChallengeScheme { get; init; }
+        public bool ForceRenewal { get; init; }
+        public Duende.Bff.AccessTokenManagement.Resource? Resource { get; init; }
+        public Duende.Bff.AccessTokenManagement.Scheme? SignInScheme { get; init; }
     }
     public static class YarpTransformExtensions
     {

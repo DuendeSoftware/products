@@ -6,6 +6,7 @@ using Duende.Bff.Blazor;
 using Duende.Bff.Blazor.Client.Internals;
 using Duende.Bff.EntityFramework;
 using Duende.Bff.Yarp;
+using Duende.Bff.Yarp.Internal;
 using PublicApiGenerator;
 
 namespace Bff.Tests;

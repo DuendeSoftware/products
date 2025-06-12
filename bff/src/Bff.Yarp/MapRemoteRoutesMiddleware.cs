@@ -1,11 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Yarp;
+using Duende.Bff.DynamicFrontends;
+using Duende.Bff.Yarp.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Duende.Bff.DynamicFrontends.Internal;
+namespace Duende.Bff.Yarp;
 
 internal class MapRemoteRoutesMiddleware(RequestDelegate next, RemoteRouteHandler remoteRouteHandler)
 {

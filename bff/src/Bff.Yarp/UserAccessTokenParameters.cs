@@ -3,7 +3,7 @@
 
 using Duende.Bff.AccessTokenManagement;
 
-namespace Duende.Bff.Configuration;
+namespace Duende.Bff.Yarp;
 
 public sealed record UserAccessTokenParameters
 {

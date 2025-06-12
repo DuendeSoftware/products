@@ -3,6 +3,7 @@
 
 using Duende.AccessTokenManagement.DPoP;
 using Duende.Bff.Configuration;
+using Duende.Bff.Yarp.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
