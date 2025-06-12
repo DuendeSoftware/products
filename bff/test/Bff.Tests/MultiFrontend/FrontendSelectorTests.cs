@@ -12,7 +12,7 @@ namespace Duende.Bff.Tests.MultiFrontend;
 
 public class FrontendSelectorTests
 {
-    private readonly DynamicFrontends.Internal.FrontendCollection _frontendCollection =
+    private readonly FrontendCollection _frontendCollection =
         new(plugins: [],
             bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration()));
 

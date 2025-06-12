@@ -30,7 +30,6 @@ public sealed record RemoteApi
 
     public override int GetHashCode() => HashCode.Combine(LocalPath, TargetUri, (int)RequiredTokenType, AccessTokenRetrieverType, Parameters);
 
-
     [SetsRequiredMembers]
     public RemoteApi(LocalPath localPath, Uri targetUri)
     {
@@ -40,6 +39,7 @@ public sealed record RemoteApi
     }
 
     public required LocalPath LocalPath { get; init; }
+
     public required Uri TargetUri { get; init; }
 
     public required RequiredTokenType RequiredTokenType { get; init; }
