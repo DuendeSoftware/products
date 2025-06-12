@@ -39,12 +39,6 @@ internal class BffConfigureOpenIdConnectOptions(
             return;
         }
 
-        // Make sure we have a default for the callback path. 
-        if (options.CallbackPath == defaultCallbackPath)
-        {
-            options.CallbackPath = Constants.ManagementEndpoints.SigninUrl;
-        }
-
         options.SignInScheme = frontEnd.CookieSchemeName;
         options.SignOutScheme = frontEnd.CookieSchemeName;
 
