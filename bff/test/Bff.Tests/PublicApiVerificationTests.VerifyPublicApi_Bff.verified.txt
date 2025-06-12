@@ -152,7 +152,6 @@ namespace Duende.Bff
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffIndexPages(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffOpenIdCallbacks(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPathMapping(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffRemoteRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
     public sealed class BffBuilder
     {
@@ -280,23 +279,6 @@ namespace Duende.Bff.Configuration
     {
         public BffApiSkipResponseHandlingAttribute() { }
     }
-    public sealed class BffConfiguration : System.IEquatable<Duende.Bff.Configuration.BffConfiguration>
-    {
-        public BffConfiguration() { }
-        public Duende.Bff.Configuration.CookieConfiguration? DefaultCookieSettings { get; init; }
-        public Duende.Bff.Configuration.OidcConfiguration? DefaultOidcSettings { get; init; }
-        public System.Collections.Generic.Dictionary<string, Duende.Bff.Configuration.BffFrontendConfiguration> Frontends { get; init; }
-    }
-    public sealed class BffFrontendConfiguration : System.IEquatable<Duende.Bff.Configuration.BffFrontendConfiguration>
-    {
-        public BffFrontendConfiguration() { }
-        public Duende.Bff.Configuration.CookieConfiguration? Cookies { get; init; }
-        public System.Uri? IndexHtmlUrl { get; init; }
-        public string? MatchingOrigin { get; init; }
-        public string? MatchingPath { get; init; }
-        public Duende.Bff.Configuration.OidcConfiguration? Oidc { get; init; }
-        public Duende.Bff.Configuration.RemoteApiConfig[] RemoteApis { get; init; }
-    }
     public sealed class BffOptions
     {
         public BffOptions() { }
@@ -343,49 +325,7 @@ namespace Duende.Bff.Configuration
         public Duende.Bff.AccessTokenManagement.Resource? Resource { get; init; }
         public Duende.Bff.AccessTokenManagement.Scheme? SignInScheme { get; init; }
     }
-    public sealed class CookieConfiguration : System.IEquatable<Duende.Bff.Configuration.CookieConfiguration>
-    {
-        public CookieConfiguration() { }
-        public string? Domain { get; init; }
-        public bool? HttpOnly { get; init; }
-        public System.TimeSpan? MaxAge { get; init; }
-        public string? Name { get; init; }
-        public string? Path { get; init; }
-        public Microsoft.AspNetCore.Http.SameSiteMode? SameSite { get; init; }
-        public Microsoft.AspNetCore.Http.CookieSecurePolicy? SecurePolicy { get; init; }
-    }
     public delegate bool DisableAntiForgeryCheck(Microsoft.AspNetCore.Http.HttpContext context);
-    public sealed class OidcConfiguration : System.IEquatable<Duende.Bff.Configuration.OidcConfiguration>
-    {
-        public OidcConfiguration() { }
-        public System.Uri? Authority { get; init; }
-        public System.Uri? CallbackPath { get; init; }
-        public string? ClientId { get; init; }
-        public string? ClientSecret { get; init; }
-        public bool? GetClaimsFromUserInfoEndpoint { get; init; }
-        public bool? MapInboundClaims { get; init; }
-        public string? ResponseMode { get; init; }
-        public string? ResponseType { get; init; }
-        public bool? SaveTokens { get; init; }
-        public System.Collections.Generic.IEnumerable<string>? Scope { get; init; }
-    }
-    public sealed class RemoteApiConfig : System.IEquatable<Duende.Bff.Configuration.RemoteApiConfig>
-    {
-        public RemoteApiConfig() { }
-        public Duende.Bff.LocalPath? LocalPath { get; init; }
-        public Duende.Bff.AccessTokenManagement.RequiredTokenType RequiredTokenType { get; init; }
-        public System.Uri? TargetUri { get; init; }
-        public string? TokenRetrieverTypeName { get; init; }
-        public Duende.Bff.Configuration.UserAccessTokenParameters? UserAccessTokenParameters { get; init; }
-    }
-    public sealed class UserAccessTokenParameters : System.IEquatable<Duende.Bff.Configuration.UserAccessTokenParameters>
-    {
-        public UserAccessTokenParameters() { }
-        public Duende.Bff.AccessTokenManagement.Scheme? ChallengeScheme { get; init; }
-        public bool ForceRenewal { get; init; }
-        public Duende.Bff.AccessTokenManagement.Resource? Resource { get; init; }
-        public Duende.Bff.AccessTokenManagement.Scheme? SignInScheme { get; init; }
-    }
 }
 namespace Duende.Bff.DynamicFrontends
 {
@@ -394,17 +334,22 @@ namespace Duende.Bff.DynamicFrontends
         public static readonly Duende.Bff.AccessTokenManagement.Scheme BffDefault;
         public static readonly Duende.Bff.AccessTokenManagement.Scheme BffOpenIdConnect;
     }
+    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class BffFrontend : System.IEquatable<Duende.Bff.DynamicFrontends.BffFrontend>
     {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public BffFrontend() { }
+        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         public BffFrontend(Duende.Bff.DynamicFrontends.BffFrontendName name) { }
         public Duende.Bff.AccessTokenManagement.Scheme CookieSchemeName { get; }
         public Duende.Bff.AccessTokenManagement.Scheme OidcSchemeName { get; }
         public System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>? ConfigureCookieOptions { get; init; }
         public System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions>? ConfigureOpenIdConnectOptions { get; init; }
         public System.Uri? IndexHtmlUrl { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
         public Duende.Bff.DynamicFrontends.BffFrontendName Name { get; init; }
-        public Duende.Bff.DynamicFrontends.BffProxy Proxy { get; init; }
         public Duende.Bff.DynamicFrontends.FrontendSelectionCriteria SelectionCriteria { get; init; }
         public bool Equals(Duende.Bff.DynamicFrontends.BffFrontend? other) { }
         public override int GetHashCode() { }
@@ -425,13 +370,6 @@ namespace Duende.Bff.DynamicFrontends
         public static Duende.Bff.DynamicFrontends.BffFrontendName Parse(string value) { }
         public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.DynamicFrontends.BffFrontendName? parsed, out string[] errors) { }
         public static string op_Implicit(Duende.Bff.DynamicFrontends.BffFrontendName value) { }
-    }
-    public sealed class BffProxy : System.IEquatable<Duende.Bff.DynamicFrontends.BffProxy>
-    {
-        public BffProxy() { }
-        public Duende.Bff.DynamicFrontends.RemoteApi[] RemoteApis { get; init; }
-        public bool Equals(Duende.Bff.DynamicFrontends.BffProxy? other) { }
-        public override int GetHashCode() { }
     }
     public sealed class FrontendSelectionCriteria : System.IEquatable<Duende.Bff.DynamicFrontends.FrontendSelectionCriteria>
     {
@@ -469,30 +407,6 @@ namespace Duende.Bff.DynamicFrontends
         public override string ToString() { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(string origin) { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(System.Uri uri) { }
-    }
-    [System.Runtime.CompilerServices.RequiredMember]
-    public sealed class RemoteApi : System.IEquatable<Duende.Bff.DynamicFrontends.RemoteApi>
-    {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
-        public RemoteApi() { }
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        public RemoteApi(Duende.Bff.LocalPath localPath, System.Uri targetUri) { }
-        public System.Type? AccessTokenRetrieverType { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.LocalPath LocalPath { get; init; }
-        public Duende.Bff.Configuration.BffUserAccessTokenParameters? Parameters { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.AccessTokenManagement.RequiredTokenType RequiredTokenType { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public System.Uri TargetUri { get; init; }
-        public bool Equals(Duende.Bff.DynamicFrontends.RemoteApi? other) { }
-        public override int GetHashCode() { }
-        public Duende.Bff.DynamicFrontends.RemoteApi WithAccessToken(Duende.Bff.AccessTokenManagement.RequiredTokenType type) { }
-        public Duende.Bff.DynamicFrontends.RemoteApi WithAccessTokenRetriever<TRetriever>()
-            where TRetriever : Duende.Bff.AccessTokenManagement.IAccessTokenRetriever { }
-        public Duende.Bff.DynamicFrontends.RemoteApi WithUserAccessTokenParameters(Duende.Bff.Configuration.BffUserAccessTokenParameters parameters) { }
     }
     public sealed class SelectedFrontend
     {

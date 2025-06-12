@@ -2,6 +2,7 @@
   "solution": {
     "path": "..\\products.slnx",
     "projects": [
+      "bff\\performance\\Bff.Benchmarks\\Bff.Benchmarks.csproj",
       ".github\\workflow-gen\\workflow-gen.csproj",
       "bff\\hosts\\Blazor\\PerComponent\\Hosts.Bff.Blazor.PerComponent.Client\\Hosts.Bff.Blazor.PerComponent.Client.csproj",
       "bff\\hosts\\Blazor\\PerComponent\\Hosts.Bff.Blazor.PerComponent\\Hosts.Bff.Blazor.PerComponent.csproj",

@@ -13,16 +13,6 @@ public static class Constants
         internal const string AntiForgeryMarker = "Duende.Bff.AntiForgery";
     }
 
-    internal static class AspnetCorePipeline
-    {
-        public const string AntiForgeryAdded = "Duende.Bff.AntiForgery.AddedToMiddleware";
-        public const string FrontendSelectionAdded = "Duende.Bff.FrontendSelection.AddedToMiddleware";
-        public const string PathMappingAdded = "Duende.Bff.PathMapping.AddedToMiddleware";
-        public const string OpenIdCallbacksAdded = "Duende.Bff.OpenIdCallbacks.AddedToMiddleware";
-        public const string RemoteRoutesAdded = "Duende.Bff.RemoteRoutes.AddedToMiddleware";
-        public const string BffIndexPagesAdded = "Duende.Bff.BffIndexPages.AddedToMiddleware";
-    }
-
     /// <summary>
     /// Constants used for YARP
     /// </summary>

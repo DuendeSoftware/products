@@ -22,14 +22,17 @@ internal class ConfigureBffStartupFilter : IStartupFilter
             {
                 app.UseBffFrontendSelection();
                 app.UseBffPathMapping();
-                app.UseMiddleware<OpenIdConnectCallbackMiddleware>();
+                app.UseBffOpenIdCallbacks();
             }
 
             next(app);
 
+            foreach (var loader in bffOptions.MiddlewareLoaders)
+            {
+                loader(app);
+            }
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {
-                app.UseBffRemoteRoutes();
                 app.UseBffIndexPages();
             }
 

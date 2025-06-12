@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;
 
-namespace Duende.Bff.Yarp;
+namespace Duende.Bff.Yarp.Internal;
 
 /// <summary>
 /// Transform provider to attach an access token to forwarded calls

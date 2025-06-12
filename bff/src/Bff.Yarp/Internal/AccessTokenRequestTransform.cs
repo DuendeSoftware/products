@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Model;
 using Yarp.ReverseProxy.Transforms;
 
-namespace Duende.Bff.Yarp;
+namespace Duende.Bff.Yarp.Internal;
 
 /// <summary>
 /// Adds an access token to outgoing requests

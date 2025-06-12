@@ -5,6 +5,8 @@ using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Tests.TestInfra;
+using Duende.Bff.Yarp;
+using Duende.Bff.Yarp.Internal;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
@@ -14,7 +16,7 @@ namespace Duende.Bff.Tests.Configuration;
 public class BffBuilderTests
 {
     public TestData The = new TestData();
-    public TestDataBuilder Some => new TestDataBuilder(The);
+    internal TestDataBuilder Some => new TestDataBuilder(The);
 
     [Fact]
     public void Can_add_multiple_frontends()
@@ -69,7 +71,8 @@ public class BffBuilderTests
             .Build();
 
         var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configuration);
+        services.AddBff()
+            .LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(1);
@@ -84,7 +87,6 @@ public class BffBuilderTests
                 MatchingOrigin = The.Origin,
                 MatchingPath = The.Path,
             },
-            Proxy = Some.BffProxy(),
         };
         found.ShouldBe(expected);
 
@@ -102,6 +104,37 @@ public class BffBuilderTests
 
         ValidateCookieOptions(cookieOptions);
     }
+
+
+    [Fact]
+    public void Can_load_frontend_with_proxy_config()
+    {
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddJson(new ProxyConfiguration()
+            {
+                Frontends = new()
+                {
+                    [The.FrontendName] = Some.FrontendProxyConfiguration()
+                }
+            })
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddBff()
+            .AddRemoteApis()
+            .LoadConfiguration(configuration);
+        var provider = services.BuildServiceProvider();
+        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        frontends.Count.ShouldBe(1);
+
+        var found = frontends.First(x => x.Name == The.FrontendName);
+
+        found.DataExtensions.OfType<ProxyBffPlugin>().Count().ShouldBe(1);
+        var proxyBffDataExtensions = found.DataExtensions.OfType<ProxyBffPlugin>().First();
+
+        proxyBffDataExtensions.RemoteApis[0].ShouldBe(Some.RemoteApi());
+    }
+
 
     [Fact]
     public void Can_load_frontend_with_minimal_values_from_configuration()
@@ -235,8 +268,7 @@ public class BffBuilderTests
         options.ClientSecret.ShouldBe(The.ClientSecret);
         options.ResponseType.ShouldBe(The.ResponseType);
         options.CallbackPath.ShouldBe(callbackPath);
-        //options.ClientId.ShouldBe(The.ClientId);
-        //options.ClientId.ShouldBe(The.ClientId);
+        options.ClientId.ShouldBe(The.ClientId);
     }
 
     [Fact]
@@ -259,12 +291,21 @@ public class BffBuilderTests
                 ["frontends:_FrontendName_:Oidc:callbackPath"] = "", // ev: todo
                 ["frontends:_FrontendName_:Oidc:authority"] = The.Authority.ToString(),
                 ["frontends:_FrontendName_:Oidc:mapInboundClaims"] = "False",
-
+                ["frontends:_FrontendName_:RemoteApis:0:localPath"] = The.Path,
+                ["frontends:_FrontendName_:RemoteApis:0:targetUri"] = The.Url.ToString(),
+                ["frontends:_FrontendName_:RemoteApis:0:requiredTokenType"] = The.RequiredTokenType.ToString(),
+                ["frontends:_FrontendName_:RemoteApis:0:tokenRetrieverTypeName"] = The.TokenRetrieverType.AssemblyQualifiedName,
+                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:signinScheme"] = The.Scheme,
+                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:challengeScheme"] = The.Scheme,
+                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:forceRenewal"] = true.ToString(),
+                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:resource"] = The.Resource,
             })
             .Build();
 
         var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configuration);
+        services.AddBff()
+            .LoadConfiguration(configuration)
+            .AddRemoteApis();
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
         frontends.Count.ShouldBe(1);
@@ -274,13 +315,19 @@ public class BffBuilderTests
         {
             Name = The.FrontendName,
             IndexHtmlUrl = The.Url,
-            SelectionCriteria = Some.FrontendSelectionCriteria()
+            SelectionCriteria = Some.FrontendSelectionCriteria(),
+            DataExtensions = found.DataExtensions
         };
         found.ShouldBe(expected);
 
         var openIdConnectOptions = new OpenIdConnectOptions();
         found.ConfigureOpenIdConnectOptions!(openIdConnectOptions);
         openIdConnectOptions.ShouldBeEquivalentTo(The.OpenIdConnectOptions);
+
+        expected.DataExtensions.Length.ShouldBe(1);
+        var proxyConfig = (ProxyBffPlugin)expected.DataExtensions[0];
+        proxyConfig.RemoteApis.Length.ShouldBe(1);
+        proxyConfig.RemoteApis[0].ShouldBe(Some.RemoteApi());
     }
 
     [Fact]

@@ -161,4 +161,6 @@ public sealed class BffOptions
     /// Indicates if we should automatically register the BFF middleware in the pipeline.
     /// </summary>
     public bool AutomaticallyRegisterBffMiddleware { get; set; } = true;
+
+    internal List<LoadPluginMiddlewares> MiddlewareLoaders { get; set; } = [];
 }

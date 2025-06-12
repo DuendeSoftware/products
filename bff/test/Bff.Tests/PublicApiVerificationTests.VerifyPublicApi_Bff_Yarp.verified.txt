@@ -5,10 +5,7 @@
         public static Duende.Bff.BffBuilder AddRemoteApis(this Duende.Bff.BffBuilder builder) { }
         public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddYarpConfig(this Duende.Bff.BffBuilder builder, Microsoft.Extensions.Configuration.IConfiguration config) { }
         public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddYarpConfig(this Duende.Bff.BffBuilder builder, Yarp.ReverseProxy.Configuration.RouteConfig[] routes, Yarp.ReverseProxy.Configuration.ClusterConfig[] clusters) { }
-    }
-    public static class BffFrontendExtensions
-    {
-        public static Duende.Bff.DynamicFrontends.BffFrontend WithRemoteApis(this Duende.Bff.DynamicFrontends.BffFrontend frontend, params Duende.Bff.DynamicFrontends.RemoteApi[] remoteApis) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffRemoteRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
     public delegate void BffYarpTransformBuilder(string localPath, Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context);
     public static class DefaultBffYarpTransformerBuilders
@@ -27,6 +24,35 @@
         [System.Obsolete("Use TokenRequirement.OptionalUserOrNone")]
         public static Yarp.ReverseProxy.Configuration.RouteConfig WithOptionalUserAccessToken(this Yarp.ReverseProxy.Configuration.RouteConfig config) { }
     }
+    public static class ProxyFrontendExtensionExtensions
+    {
+        public static Duende.Bff.Yarp.RemoteApi[] GetRemoteApis(this Duende.Bff.DynamicFrontends.BffFrontend frontend) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithRemoteApis(this Duende.Bff.DynamicFrontends.BffFrontend frontend, params Duende.Bff.Yarp.RemoteApi[] config) { }
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public sealed class RemoteApi : System.IEquatable<Duende.Bff.Yarp.RemoteApi>
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public RemoteApi() { }
+        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+        public RemoteApi(Duende.Bff.LocalPath localPath, System.Uri targetUri) { }
+        public System.Type? AccessTokenRetrieverType { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.LocalPath LocalPath { get; init; }
+        public Duende.Bff.Configuration.BffUserAccessTokenParameters? Parameters { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.AccessTokenManagement.RequiredTokenType RequiredTokenType { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public System.Uri TargetUri { get; init; }
+        public bool Equals(Duende.Bff.Yarp.RemoteApi? other) { }
+        public override int GetHashCode() { }
+        public Duende.Bff.Yarp.RemoteApi WithAccessToken(Duende.Bff.AccessTokenManagement.RequiredTokenType type) { }
+        public Duende.Bff.Yarp.RemoteApi WithAccessTokenRetriever<TRetriever>()
+            where TRetriever : Duende.Bff.AccessTokenManagement.IAccessTokenRetriever { }
+        public Duende.Bff.Yarp.RemoteApi WithUserAccessTokenParameters(Duende.Bff.Configuration.BffUserAccessTokenParameters parameters) { }
+    }
     public static class ReverseProxyBuilderExtensions
     {
         public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddBffExtensions(this Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder builder) { }
@@ -40,6 +66,14 @@
     public static class RouteBuilderExtensions
     {
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapRemoteBffApiEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, Microsoft.AspNetCore.Http.PathString localPath, string apiAddress, System.Action<Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext>? yarpTransformBuilder = null) { }
+    }
+    public sealed class UserAccessTokenParameters : System.IEquatable<Duende.Bff.Yarp.UserAccessTokenParameters>
+    {
+        public UserAccessTokenParameters() { }
+        public Duende.Bff.AccessTokenManagement.Scheme? ChallengeScheme { get; init; }
+        public bool ForceRenewal { get; init; }
+        public Duende.Bff.AccessTokenManagement.Resource? Resource { get; init; }
+        public Duende.Bff.AccessTokenManagement.Scheme? SignInScheme { get; init; }
     }
     public static class YarpTransformExtensions
     {
