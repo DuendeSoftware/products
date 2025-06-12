@@ -38,7 +38,7 @@ public class TokenIssueCountDiagnosticEntryTests
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
-        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("JwtPoPDPoP").GetInt64().ShouldBe(1);
+        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("JwtDPoP").GetInt64().ShouldBe(1);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class TokenIssueCountDiagnosticEntryTests
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
-        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("ReferencePoPDPoP").GetInt64().ShouldBe(1);
+        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("ReferenceDPoP").GetInt64().ShouldBe(1);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class TokenIssueCountDiagnosticEntryTests
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
-        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("JwtPoPmTLS").GetInt64().ShouldBe(1);
+        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("JwtMTLS").GetInt64().ShouldBe(1);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class TokenIssueCountDiagnosticEntryTests
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(_subject);
 
-        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("ReferencePoPmTLS").GetInt64().ShouldBe(1);
+        result.RootElement.GetProperty("TokenIssueCounts").GetProperty("ReferenceMTLS").GetInt64().ShouldBe(1);
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public class TokenIssueCountDiagnosticEntryTests
 
         var tokenIssueCounts = result.RootElement.GetProperty("TokenIssueCounts");
         tokenIssueCounts.GetProperty("Jwt").GetInt64().ShouldBe(1);
-        tokenIssueCounts.GetProperty("JwtPoPDPoP").GetInt64().ShouldBe(1);
+        tokenIssueCounts.GetProperty("JwtDPoP").GetInt64().ShouldBe(1);
         tokenIssueCounts.GetProperty("Refresh").GetInt64().ShouldBe(1);
     }
 
@@ -115,10 +115,10 @@ public class TokenIssueCountDiagnosticEntryTests
         var tokenIssueCounts = result.RootElement.GetProperty("TokenIssueCounts");
         tokenIssueCounts.GetProperty("Jwt").GetInt64().ShouldBe(0);
         tokenIssueCounts.GetProperty("Reference").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("JwtPoPDPoP").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("JwtPoPmTLS").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("ReferencePoPDPoP").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("ReferencePoPmTLS").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("JwtDPoP").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("JwtMTLS").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("ReferenceDPoP").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("ReferenceMTLS").GetInt64().ShouldBe(0);
         tokenIssueCounts.GetProperty("Refresh").GetInt64().ShouldBe(0);
         tokenIssueCounts.GetProperty("Id").GetInt64().ShouldBe(0);
     }
@@ -190,10 +190,10 @@ public class TokenIssueCountDiagnosticEntryTests
         var tokenIssueCounts = result.RootElement.GetProperty("TokenIssueCounts");
         tokenIssueCounts.GetProperty("Jwt").GetInt64().ShouldBe(0);
         tokenIssueCounts.GetProperty("Reference").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("JwtPoPDPoP").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("JwtPoPmTLS").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("ReferencePoPDPoP").GetInt64().ShouldBe(0);
-        tokenIssueCounts.GetProperty("ReferencePoPmTLS").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("JwtDPoP").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("JwtMTLS").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("ReferenceDPoP").GetInt64().ShouldBe(0);
+        tokenIssueCounts.GetProperty("ReferenceMTLS").GetInt64().ShouldBe(0);
         tokenIssueCounts.GetProperty("Refresh").GetInt64().ShouldBe(0);
     }
 
