@@ -17,22 +17,7 @@ public class UserEndpointTests : BffTestBase, IAsyncLifetime
 
     public UserEndpointTests(ITestOutputHelper output) : base(output)
     {
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
-
-        Bff.OnConfigureBff += bff => bff
-            .WithDefaultOpenIdConnectOptions(opt =>
-            {
-                opt.Events.OnTokenValidated = context =>
-                {
-                    var identity = (ClaimsIdentity)context.Principal!.Identity!;
-                    foreach (var claim in ClaimsToAdd)
-                    {
-                        identity.AddClaim(claim);
-                    }
-
-                    return Task.CompletedTask;
-                }; The.DefaultOpenIdConnectConfiguration(opt);
-            });
+        SetupDefaultBffAuthentication(ClaimsToAdd);
 
         Bff.OnConfigureEndpoints += endpoints =>
         {

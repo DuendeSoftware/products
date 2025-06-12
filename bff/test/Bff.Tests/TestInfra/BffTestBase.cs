@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
 using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -188,5 +189,28 @@ public abstract class BffTestBase : IAsyncDisposable
         yield return [BffSetupType.ManuallyConfiguredBff];
     }
 
+    protected void SetupDefaultBffAuthentication(IEnumerable<Claim>? claimsToAdd = null)
+    {
+        Bff.OnConfigureBff += bff => bff
+            .WithDefaultOpenIdConnectOptions(opt =>
+            {
+                if (claimsToAdd != null)
+                {
+                    opt.Events.OnTokenValidated = context =>
+                    {
+                        // Add custom claims to the identity
+                        var identity = (ClaimsIdentity)context.Principal!.Identity!;
+                        foreach (var claim in claimsToAdd)
+                        {
+                            identity.AddClaim(claim);
+                        }
+
+                        return Task.CompletedTask;
+                    }; The.DefaultOpenIdConnectConfiguration(opt);
+                }
+            });
+
+        AddOrUpdateFrontend(Some.BffFrontend());
+    }
 }
 
