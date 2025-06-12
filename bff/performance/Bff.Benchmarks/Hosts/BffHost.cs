@@ -51,11 +51,11 @@ public class BffHost : Host
 
             app.MapBffManagementEndpoints();
 
-            app.MapRemoteBffApiEndpoint("/allow_anon", apiUri.ToString());
-            app.MapRemoteBffApiEndpoint("/client_token", apiUri.ToString())
+            app.MapRemoteBffApiEndpoint("/allow_anon", apiUri);
+            app.MapRemoteBffApiEndpoint("/client_token", apiUri)
                 .WithAccessToken(RequiredTokenType.Client);
 
-            app.MapRemoteBffApiEndpoint("/user_token", apiUri.ToString())
+            app.MapRemoteBffApiEndpoint("/user_token", apiUri)
                 .WithAccessToken(RequiredTokenType.User);
         };
     }

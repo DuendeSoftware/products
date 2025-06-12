@@ -4,25 +4,47 @@
 using System.Net;
 using System.Security.Claims;
 using Duende.Bff.Configuration;
-using Duende.Bff.Tests.TestHosts;
+using Duende.Bff.Tests.TestInfra;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 
-public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBase(output)
+public class UserEndpointTests : BffTestBase, IAsyncLifetime
 {
+    private List<Claim> ClaimsToAdd = [];
+
+    public UserEndpointTests(ITestOutputHelper output) : base(output)
+    {
+        SetupDefaultBffAuthentication(ClaimsToAdd);
+
+        Bff.OnConfigureEndpoints += endpoints =>
+        {
+            // Setup a login endpoint that allows you to simulate signing in as a specific
+            // user in the BFF. 
+            endpoints.MapGet("/__signin", async ctx =>
+            {
+                var props = new AuthenticationProperties();
+                await ctx.SignInAsync(UserToSignIn!, props);
+
+                ctx.Response.StatusCode = 204;
+            });
+        };
+    }
+
+    public ClaimsPrincipal? UserToSignIn { get; set; }
+
     [Fact]
     public async Task user_endpoint_for_authenticated_user_should_return_claims()
     {
-        await Bff.IssueSessionCookieAsync(
-            new Claim("sub", "alice"),
-            new Claim("foo", "foo1"),
-            new Claim("foo", "foo2"));
+        ClaimsToAdd.Add(new Claim("foo", "foo1"));
+        ClaimsToAdd.Add(new Claim("foo", "foo2"));
+        await Bff.BrowserClient.Login();
 
-        var data = await Bff.CallUserEndpointAsync();
+        var data = await Bff.BrowserClient.CallUserEndpointAsync();
 
-        data.Count.ShouldBe(5);
-        data.First(d => d.Type == "sub").Value.GetString().ShouldBe("alice");
+        data.First(d => d.Type == "sub").Value.GetString().ShouldBe(The.Sub);
 
         var foos = data.Where(d => d.Type == "foo");
         foos.Count().ShouldBe(2);
@@ -30,17 +52,20 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
         foos.Skip(1).First().Value.GetString().ShouldBe("foo2");
 
         data.First(d => d.Type == Constants.ClaimTypes.SessionExpiresIn).Value.GetInt32().ShouldBePositive();
-        data.First(d => d.Type == Constants.ClaimTypes.LogoutUrl).Value.GetString().ShouldBe("/bff/logout");
+        data.First(d => d.Type == Constants.ClaimTypes.LogoutUrl).Value.GetString().ShouldStartWith("/bff/logout?sid=");
     }
 
     [Fact]
     public async Task user_endpoint_for_authenticated_user_with_sid_should_return_claims_including_logout()
     {
-        await Bff.IssueSessionCookieAsync(
+        UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity([
             new Claim("sub", "alice"),
-            new Claim("sid", "123"));
+            new Claim("sid", "123"),
+        ], "test", "name", "role"));
 
-        var data = await Bff.CallUserEndpointAsync();
+        await Bff.BrowserClient.GetAsync("/__signin");
+
+        var data = await Bff.BrowserClient.CallUserEndpointAsync();
 
         data.Count.ShouldBe(4);
         data.First(d => d.Type == "sub").Value.GetString().ShouldBe("alice");
@@ -52,7 +77,7 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     [Fact]
     public async Task user_endpoint_for_authenticated_user_without_csrf_header_should_fail()
     {
-        await Bff.IssueSessionCookieAsync(new Claim("sub", "alice"), new Claim("foo", "foo1"), new Claim("foo", "foo2"));
+        await Bff.BrowserClient.IssueSessionCookieAsync(new Claim("sub", "alice"), new Claim("foo", "foo1"), new Claim("foo", "foo2"));
 
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/bff/user"));
         var response = await Bff.BrowserClient.SendAsync(req);
@@ -73,9 +98,12 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     [Fact]
     public async Task when_configured_user_endpoint_for_unauthenticated_user_should_return_200_and_empty()
     {
-        Bff.BffOptions.AnonymousSessionResponse = AnonymousSessionResponse.Response200;
 
-        var data = await Bff.CallUserEndpointAsync();
+        var options = Bff.Resolve<IOptions<BffOptions>>();
+
+        options.Value.AnonymousSessionResponse = AnonymousSessionResponse.Response200;
+
+        var data = await Bff.BrowserClient.CallUserEndpointAsync();
         data.ShouldBeEmpty();
     }
 }

@@ -142,8 +142,7 @@ public class IdentityServerTestHost : TestHost
             ClientSecrets = { new Secret(clientSecret.Sha256()) },
             AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
             RedirectUris = [redirectUri.ToString()],
-            PostLogoutRedirectUris = ["/"], // not implemented
-            BackChannelLogoutUri = "/", // not implemented
+            PostLogoutRedirectUris = [new Uri(baseUri, "signout-callback-oidc").ToString()],
             AllowOfflineAccess = true,
             AllowedScopes = options.Scope.Any()
                 ? options.Scope

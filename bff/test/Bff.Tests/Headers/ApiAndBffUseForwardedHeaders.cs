@@ -37,7 +37,7 @@ public class ApiAndBffUseForwardedHeaders : BffTestBase, IAsyncLifetime
 
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url().ToString());
+            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url());
         };
 
     }
