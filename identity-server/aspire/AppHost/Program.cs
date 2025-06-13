@@ -32,7 +32,7 @@ void ConfigureIdentityServerHosts()
     {
         var hostMain = builder
             .AddProject<Projects.Host_Main>("is-host")
-            .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
+            .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
 
         projectRegistry.Add("is-host", hostMain);
     }
@@ -40,7 +40,7 @@ void ConfigureIdentityServerHosts()
     {
         var hostConfiguration = builder
             .AddProject<Projects.Host_Configuration>("is-host")
-            .WithHttpsHealthCheck(path: "/.well-known/openid-configuration");
+            .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
 
         projectRegistry.Add("is-host", hostConfiguration);
     }
@@ -67,7 +67,7 @@ void ConfigureIdentityServerHosts()
         if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)))
         {
             var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity>(name: "is-host")
-                .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
+                .WithHttpHealthCheck(path: "/.well-known/openid-configuration")
                 .WithReference(identityServerDb, connectionName: "DefaultConnection");
 
             if (appConfig.RunDatabaseMigrations)
@@ -84,7 +84,7 @@ void ConfigureIdentityServerHosts()
         if (HostIsEnabled(nameof(Projects.Host_EntityFramework)))
         {
             var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework>(name: "is-host")
-                .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
+                .WithHttpHealthCheck(path: "/.well-known/openid-configuration")
                 .WithReference(identityServerDb, connectionName: "DefaultConnection");
 
             if (appConfig.RunDatabaseMigrations)
@@ -101,7 +101,7 @@ void ConfigureIdentityServerHosts()
         if (HostIsEnabled(nameof(Projects.Host_EntityFramework_dotnet9)))
         {
             var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework_dotnet9>(name: "is-host")
-                .WithHttpsHealthCheck(path: "/.well-known/openid-configuration")
+                .WithHttpHealthCheck(path: "/.well-known/openid-configuration")
                 .WithReference(identityServerDb, connectionName: "DefaultConnection");
 
             if (appConfig.RunDatabaseMigrations)
