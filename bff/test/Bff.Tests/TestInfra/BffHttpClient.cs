@@ -76,7 +76,10 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
 
         expectedStatusCode ??= HttpStatusCode.OK;
 
-        req.Headers.Add("x-csrf", "1");
+        if (headers == null)
+        {
+            req.Headers.Add("x-csrf", "1");
+        }
 
         foreach (var header in headers ?? [])
         {

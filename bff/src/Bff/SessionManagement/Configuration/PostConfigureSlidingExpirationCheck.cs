@@ -29,8 +29,9 @@ internal class PostConfigureSlidingExpirationCheck(
 
         var isDefaultScheme = name == _scheme;
         var isForBffFrontend = selectedFrontend.TryGet(out var frontend) && name == frontend.CookieSchemeName;
+        var isForImplicitConfig = BffAuthenticationSchemes.BffCookie == name;
 
-        if (isDefaultScheme || isForBffFrontend)
+        if (isDefaultScheme || isForBffFrontend || isForImplicitConfig)
         {
             options.Events.OnCheckSlidingExpiration = CreateCallback(options.Events.OnCheckSlidingExpiration);
         }

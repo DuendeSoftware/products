@@ -38,9 +38,9 @@ internal class BffAuthenticationSchemeProvider(
     {
         selectedFrontend.TryGet(out var frontend);
 
-        if (name == frontend?.CookieSchemeName || name == BffAuthenticationSchemes.BffDefault)
+        if (name == frontend?.CookieSchemeName || name == BffAuthenticationSchemes.BffCookie)
         {
-            return new BffAuthenticationScheme(frontend?.CookieSchemeName ?? BffAuthenticationSchemes.BffDefault, "Duende Bff Cookie", typeof(CookieAuthenticationHandler));
+            return new BffAuthenticationScheme(frontend?.CookieSchemeName ?? BffAuthenticationSchemes.BffCookie, "Duende Bff Cookie", typeof(CookieAuthenticationHandler));
         }
 
         if (name == frontend?.OidcSchemeName || name == BffAuthenticationSchemes.BffOpenIdConnect)

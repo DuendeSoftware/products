@@ -51,6 +51,18 @@ public abstract class BffTestBase : IAsyncDisposable
         Action<OpenIdConnectOptions>? configureOpenIdConnect = null
         )
     {
+        // This method is used to configure the BFF in different ways depending on the setup type.
+        Action<OpenIdConnectOptions> openIdConfiguration = opt =>
+        {
+            (configureOpenIdConnect ?? The.DefaultOpenIdConnectConfiguration).Invoke(opt);
+
+            if (_customUserClaims.Any())
+            {
+                AddCustomUserClaims(opt);
+            }
+        };
+
+
         if (setup == BffSetupType.BffWithFrontend)
         {
             // We're using a frontend to configure the BFF
@@ -61,8 +73,20 @@ public abstract class BffTestBase : IAsyncDisposable
                 {
                     configureCookies?.Invoke(options);
                 },
-                ConfigureOpenIdConnectOptions = configureOpenIdConnect ?? The.DefaultOpenIdConnectConfiguration
+                ConfigureOpenIdConnectOptions = openIdConfiguration
             });
+        }
+        else if (setup == BffSetupType.V4Bff)
+        {
+            IdentityServer.AddClient(The.ClientId, Bff.Url());
+            Bff.OnConfigureBff += bff =>
+            {
+                bff.WithDefaultOpenIdConnectOptions(openIdConfiguration);
+                bff.WithDefaultCookieOptions(options =>
+                {
+                    configureCookies?.Invoke(options);
+                });
+            };
         }
         else if (setup == BffSetupType.ManuallyConfiguredBff)
         {
@@ -81,8 +105,7 @@ public abstract class BffTestBase : IAsyncDisposable
                     {
                         configureCookies?.Invoke(options);
                     })
-                    .AddOpenIdConnect("oidc", configureOpenIdConnect
-                                              ?? The.DefaultOpenIdConnectConfiguration);
+                    .AddOpenIdConnect("oidc", openIdConfiguration);
             };
         }
         else
@@ -176,7 +199,12 @@ public abstract class BffTestBase : IAsyncDisposable
         /// <summary>
         /// The BFF is configured using a frontend (V4 style).
         /// </summary>
-        BffWithFrontend
+        BffWithFrontend,
+
+        /// <summary>
+        /// The BFF is configured using v4 style setup
+        /// </summary>
+        V4Bff
     }
 
     /// <summary>
@@ -187,30 +215,24 @@ public abstract class BffTestBase : IAsyncDisposable
     {
         yield return [BffSetupType.BffWithFrontend];
         yield return [BffSetupType.ManuallyConfiguredBff];
+        yield return [BffSetupType.V4Bff];
     }
 
-    protected void SetupDefaultBffAuthentication(IEnumerable<Claim>? claimsToAdd = null)
-    {
-        Bff.OnConfigureBff += bff => bff
-            .WithDefaultOpenIdConnectOptions(opt =>
+    private List<Claim> _customUserClaims = [];
+
+    protected void AddCustomUserClaims(params Claim[] claims) => _customUserClaims.AddRange(claims);
+
+    private void AddCustomUserClaims(OpenIdConnectOptions opt) =>
+        opt.Events.OnTokenValidated = context =>
+        {
+            // Add custom claims to the identity
+            var identity = (ClaimsIdentity)context.Principal!.Identity!;
+            foreach (var claim in _customUserClaims)
             {
-                if (claimsToAdd != null)
-                {
-                    opt.Events.OnTokenValidated = context =>
-                    {
-                        // Add custom claims to the identity
-                        var identity = (ClaimsIdentity)context.Principal!.Identity!;
-                        foreach (var claim in claimsToAdd)
-                        {
-                            identity.AddClaim(claim);
-                        }
+                identity.AddClaim(claim);
+            }
 
-                        return Task.CompletedTask;
-                    }; The.DefaultOpenIdConnectConfiguration(opt);
-                }
-            });
-
-        AddOrUpdateFrontend(Some.BffFrontend());
-    }
+            return Task.CompletedTask;
+        };
 }
 

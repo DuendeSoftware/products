@@ -11,35 +11,32 @@ using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 
-public class UserEndpointTests : BffTestBase, IAsyncLifetime
+public class UserEndpointTests : BffTestBase
 {
-    private List<Claim> ClaimsToAdd = [];
 
-    public UserEndpointTests(ITestOutputHelper output) : base(output)
-    {
-        SetupDefaultBffAuthentication(ClaimsToAdd);
+    public UserEndpointTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureEndpoints += endpoints =>
+                                                                              {
+                                                                                  // Setup a login endpoint that allows you to simulate signing in as a specific
+                                                                                  // user in the BFF. 
+                                                                                  endpoints.MapGet("/__signin", async ctx =>
+                                                                                  {
+                                                                                      var props = new AuthenticationProperties();
+                                                                                      await ctx.SignInAsync(UserToSignIn!, props);
 
-        Bff.OnConfigureEndpoints += endpoints =>
-        {
-            // Setup a login endpoint that allows you to simulate signing in as a specific
-            // user in the BFF. 
-            endpoints.MapGet("/__signin", async ctx =>
-            {
-                var props = new AuthenticationProperties();
-                await ctx.SignInAsync(UserToSignIn!, props);
-
-                ctx.Response.StatusCode = 204;
-            });
-        };
-    }
+                                                                                      ctx.Response.StatusCode = 204;
+                                                                                  });
+                                                                              };
 
     public ClaimsPrincipal? UserToSignIn { get; set; }
 
-    [Fact]
-    public async Task user_endpoint_for_authenticated_user_should_return_claims()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task user_endpoint_for_authenticated_user_should_return_claims(BffSetupType setup)
     {
-        ClaimsToAdd.Add(new Claim("foo", "foo1"));
-        ClaimsToAdd.Add(new Claim("foo", "foo2"));
+        ConfigureBff(setup);
+        await InitializeAsync();
+
+        AddCustomUserClaims(new Claim("foo", "foo1"), new Claim("foo", "foo2"));
         await Bff.BrowserClient.Login();
 
         var data = await Bff.BrowserClient.CallUserEndpointAsync();
@@ -55,9 +52,12 @@ public class UserEndpointTests : BffTestBase, IAsyncLifetime
         data.First(d => d.Type == Constants.ClaimTypes.LogoutUrl).Value.GetString().ShouldStartWith("/bff/logout?sid=");
     }
 
-    [Fact]
-    public async Task user_endpoint_for_authenticated_user_with_sid_should_return_claims_including_logout()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task user_endpoint_for_authenticated_user_with_sid_should_return_claims_including_logout(BffSetupType setup)
     {
+        ConfigureBff(setup);
+        await InitializeAsync();
         UserToSignIn = new ClaimsPrincipal(new ClaimsIdentity([
             new Claim("sub", "alice"),
             new Claim("sid", "123"),
@@ -74,9 +74,12 @@ public class UserEndpointTests : BffTestBase, IAsyncLifetime
         data.First(d => d.Type == Constants.ClaimTypes.SessionExpiresIn).Value.GetInt32().ShouldBePositive();
     }
 
-    [Fact]
-    public async Task user_endpoint_for_authenticated_user_without_csrf_header_should_fail()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task user_endpoint_for_authenticated_user_without_csrf_header_should_fail(BffSetupType setup)
     {
+        ConfigureBff(setup);
+        await InitializeAsync();
         await Bff.BrowserClient.IssueSessionCookieAsync(new Claim("sub", "alice"), new Claim("foo", "foo1"), new Claim("foo", "foo2"));
 
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/bff/user"));
@@ -85,9 +88,12 @@ public class UserEndpointTests : BffTestBase, IAsyncLifetime
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
-    public async Task user_endpoint_for_unauthenticated_user_should_fail()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task user_endpoint_for_unauthenticated_user_should_fail(BffSetupType setup)
     {
+        ConfigureBff(setup);
+        await InitializeAsync();
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/bff/user"));
         req.Headers.Add("x-csrf", "1");
         var response = await Bff.BrowserClient.SendAsync(req);
@@ -95,10 +101,12 @@ public class UserEndpointTests : BffTestBase, IAsyncLifetime
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
-    [Fact]
-    public async Task when_configured_user_endpoint_for_unauthenticated_user_should_return_200_and_empty()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task when_configured_user_endpoint_for_unauthenticated_user_should_return_200_and_empty(BffSetupType setup)
     {
-
+        ConfigureBff(setup);
+        await InitializeAsync();
         var options = Bff.Resolve<IOptions<BffOptions>>();
 
         options.Value.AnonymousSessionResponse = AnonymousSessionResponse.Response200;

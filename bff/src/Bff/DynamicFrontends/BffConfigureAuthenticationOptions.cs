@@ -10,10 +10,21 @@ internal class BffConfigureAuthenticationOptions : IPostConfigureOptions<Authent
 {
     public void PostConfigure(string? name, AuthenticationOptions options)
     {
-        if (options.DefaultScheme == null && options.DefaultAuthenticateScheme == null && options.DefaultAuthenticateScheme == null)
+        if (options.DefaultScheme == null
+            && options.DefaultAuthenticateScheme == null
+            && options.DefaultSignOutScheme == null
+            )
         {
-            options.DefaultScheme = BffAuthenticationSchemes.BffDefault;
+            options.DefaultScheme = BffAuthenticationSchemes.BffCookie;
             options.DefaultChallengeScheme = BffAuthenticationSchemes.BffOpenIdConnect;
+            options.DefaultSignOutScheme = BffAuthenticationSchemes.BffOpenIdConnect;
+
+            // If we don't set this forbid scheme, when calling forbid, it can trigger a stackoverflow exception
+            // when calling HttpContext.Forbid(). 
+            if (options.DefaultForbidScheme == null)
+            {
+                options.DefaultForbidScheme = BffAuthenticationSchemes.BffCookie;
+            }
         }
     }
 }

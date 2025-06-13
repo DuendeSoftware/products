@@ -459,7 +459,7 @@ public class BffBuilderTests
         var provider = services.BuildServiceProvider();
 
         var factory = provider.GetRequiredService<IOptionsFactory<CookieAuthenticationOptions>>();
-        var options = factory.Create(BffAuthenticationSchemes.BffDefault);
+        var options = factory.Create(BffAuthenticationSchemes.BffCookie);
 
         ValidateCookieOptions(options);
     }

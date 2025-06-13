@@ -58,6 +58,7 @@ public class ApiAndBffUseForwardedHeaders : BffTestBase, IAsyncLifetime
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(The.SubPath,
             headers: new()
             {
+                ["x-csrf"] = "1",
                 ["X-Forwarded-Host"] = "external"
             });
 
