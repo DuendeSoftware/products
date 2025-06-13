@@ -14,25 +14,15 @@ namespace Duende.Bff.Tests.Endpoints;
 
 public class YarpTests : BffTestBase
 {
-    public YarpTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureEndpoints += endpoints =>
-                                                                      {
-                                                                          endpoints.MapReverseProxy(proxyApp => { proxyApp.UseAntiforgeryCheck(); });
-                                                                      };
-
-
-    [Fact]
-    public async Task anonymous_call_with_no_csrf_header_to_no_token_requirement_no_csrf_route_should_succeed()
+    public YarpTests(ITestOutputHelper output) : base(output)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig());
-
-        await InitializeAsync();
-
-        await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
-            expectedStatusCode: HttpStatusCode.OK
-        );
+        Bff.OnConfigureEndpoints += endpoints =>
+        {
+            endpoints.MapReverseProxy(proxyApp =>
+            {
+                proxyApp.UseAntiforgeryCheck();
+            });
+        };
     }
 
     private void ConfigureYarp(RouteConfig routeConfig) =>
@@ -41,49 +31,11 @@ public class YarpTests : BffTestBase
             bff.AddYarpConfig([routeConfig], [Some.ClusterConfig(Api)]);
         };
 
-
-    [Fact]
-    public async Task anonymous_call_with_no_csrf_header_to_csrf_route_should_fail()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task anonymous_call_with_no_csrf_header_to_no_token_requirement_no_csrf_route_should_succeed(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAntiforgeryCheck());
-
-        await InitializeAsync();
-
-        var req = new HttpRequestMessage(HttpMethod.Get, The.SubPath);
-        var response = await Bff.BrowserClient.SendAsync(req);
-
-        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
-    }
-
-    [Fact]
-    public async Task can_disable_anti_forgery_check()
-    {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        Bff.SetBffOptions += options =>
-        {
-            options.DisableAntiForgeryCheck = (c) => true;
-        };
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAntiforgeryCheck());
-
-        await InitializeAsync();
-
-        var req = new HttpRequestMessage(HttpMethod.Get, The.SubPath);
-        var response = await Bff.BrowserClient.SendAsync(req);
-
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-    }
-
-    [Fact]
-    public async Task anonymous_call_to_no_token_requirement_route_should_succeed()
-    {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
+        ConfigureBff(setup);
         ConfigureYarp(Some.RouteConfig());
         await InitializeAsync();
 
@@ -93,14 +45,60 @@ public class YarpTests : BffTestBase
         );
     }
 
-    [Fact]
-    public async Task anonymous_call_to_user_token_requirement_route_should_fail()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task anonymous_call_with_no_csrf_header_to_csrf_route_should_fail(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAntiforgeryCheck());
+        await InitializeAsync();
 
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(RequiredTokenType.User));
+        var req = new HttpRequestMessage(HttpMethod.Get, The.SubPath);
+        var response = await Bff.BrowserClient.SendAsync(req);
 
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task can_disable_anti_forgery_check(BffSetupType setup)
+    {
+        ConfigureBff(setup);
+
+        Bff.SetBffOptions += options =>
+        {
+            options.DisableAntiForgeryCheck = (c) => true;
+        };
+
+        ConfigureYarp(Some.RouteConfig().WithAntiforgeryCheck());
+        await InitializeAsync();
+
+        var req = new HttpRequestMessage(HttpMethod.Get, The.SubPath);
+        var response = await Bff.BrowserClient.SendAsync(req);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task anonymous_call_to_no_token_requirement_route_should_succeed(BffSetupType setup)
+    {
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig());
+        await InitializeAsync();
+
+        await Bff.BrowserClient.CallBffHostApi(
+            path: The.SubPath,
+            expectedStatusCode: HttpStatusCode.OK
+        );
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task anonymous_call_to_user_token_requirement_route_should_fail(BffSetupType setup)
+    {
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
         await InitializeAsync();
 
         await Bff.BrowserClient.CallBffHostApi(
@@ -109,14 +107,12 @@ public class YarpTests : BffTestBase
         );
     }
 
-    [Fact]
-    public async Task anonymous_call_to_optional_user_token_route_should_succeed()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task anonymous_call_to_optional_user_token_route_should_succeed(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(RequiredTokenType.UserOrNone));
-
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.UserOrNone));
         await InitializeAsync();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
@@ -130,14 +126,14 @@ public class YarpTests : BffTestBase
         apiResult.ClientId.ShouldBeNull();
     }
 
-    [Fact]
-    public async Task old_anonymous_call_to_optional_user_token_route_should_succeed()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task old_anonymous_call_to_optional_user_token_route_should_succeed(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
+        ConfigureBff(setup);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-        ConfigureYarp(Some.RouteConfig()
-            .WithOptionalUserAccessToken());
+        ConfigureYarp(Some.RouteConfig().WithOptionalUserAccessToken());
 #pragma warning restore CS0618 // Type or member is obsolete
 
         await InitializeAsync();
@@ -154,16 +150,11 @@ public class YarpTests : BffTestBase
     }
 
     [Theory]
-    [InlineData(RequiredTokenType.User)]
-    [InlineData(RequiredTokenType.UserOrNone)]
-    public async Task authenticated_GET_should_forward_user_to_api(RequiredTokenType requiredTokenType)
+    [MemberData(nameof(AllSetups))]
+    public async Task authenticated_GET_should_forward_user_to_api_for_user(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(requiredTokenType)
-        );
-
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
         await InitializeAsync();
         await Bff.BrowserClient.Login();
 
@@ -178,45 +169,40 @@ public class YarpTests : BffTestBase
     }
 
     [Theory]
-    [InlineData(RequiredTokenType.User)]
-    [InlineData(RequiredTokenType.UserOrNone)]
-    public async Task authenticated_PUT_should_forward_user_to_api(RequiredTokenType requiredTokenType)
+    [MemberData(nameof(AllSetups))]
+    public async Task authenticated_PUT_should_forward_user_to_api_for_UserOrNone(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
+        ConfigureBff(setup);
 
         ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(requiredTokenType)
+            .WithAccessToken(RequiredTokenType.UserOrNone)
         );
         await InitializeAsync();
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath
-            , method: HttpMethod.Put
+            path: The.SubPath,
+            method: HttpMethod.Put
         );
 
-        apiResult.Method.ShouldBe(HttpMethod.Put); ;
+        apiResult.Method.ShouldBe(HttpMethod.Put);
         apiResult.Path.ShouldBe(The.SubPath);
         apiResult.Sub.ShouldBe(The.Sub);
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
 
     [Theory]
-    [InlineData(RequiredTokenType.User)]
-    [InlineData(RequiredTokenType.UserOrNone)]
-    public async Task authenticated_Post_should_forward_user_to_api(RequiredTokenType requiredTokenType)
+    [MemberData(nameof(AllSetups))]
+    public async Task authenticated_Post_should_forward_user_to_api_for_User(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(requiredTokenType)
-        );
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
         await InitializeAsync();
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath
-            , method: HttpMethod.Post
+            path: The.SubPath,
+            method: HttpMethod.Post
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Post);
@@ -225,14 +211,32 @@ public class YarpTests : BffTestBase
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
 
-    [Fact]
-    public async Task call_to_client_token_route_should_forward_client_token_to_api()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task authenticated_Post_should_forward_user_to_api_for_UserOrNone(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.UserOrNone));
+        await InitializeAsync();
+        await Bff.BrowserClient.Login();
 
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(RequiredTokenType.Client));
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            path: The.SubPath,
+            method: HttpMethod.Post
+        );
 
+        apiResult.Method.ShouldBe(HttpMethod.Post);
+        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Sub.ShouldBe(The.Sub);
+        apiResult.ClientId.ShouldBe(The.ClientId);
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task call_to_client_token_route_should_forward_client_token_to_api(BffSetupType setup)
+    {
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.Client));
         await InitializeAsync();
         await Bff.BrowserClient.Login();
 
@@ -246,16 +250,15 @@ public class YarpTests : BffTestBase
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
 
-    [Fact]
-    public async Task call_to_user_or_client_token_route_should_forward_user_or_client_token_to_api()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task call_to_user_or_client_token_route_should_forward_user_or_client_token_to_api(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(RequiredTokenType.UserOrClient));
-
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.UserOrClient));
         await InitializeAsync();
         await Bff.BrowserClient.Login();
+
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             path: The.SubPath
         );
@@ -266,12 +269,12 @@ public class YarpTests : BffTestBase
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
 
+    // Note, path based routing is only available for multi-frontend mode, becuase
+    // it relies on the path property on the frontend. 
     [Fact]
     public async Task yarp_works_with_path_based_routing()
     {
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(RequiredTokenType.UserOrClient));
-
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.UserOrClient));
         await InitializeAsync();
 
         var frontEnd = (Some.BffFrontend() with
@@ -281,10 +284,10 @@ public class YarpTests : BffTestBase
             {
                 MatchingPath = "/somepath"
             },
+            ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration
         });
 
-        IdentityServer.AddClientFor(frontEnd, Bff.Url());
-        Bff.AddOrUpdateFrontend(frontEnd);
+        AddOrUpdateFrontend(frontEnd);
 
         await Bff.BrowserClient.Login("/somepath");
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
@@ -297,17 +300,13 @@ public class YarpTests : BffTestBase
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
 
-
-    [Fact]
-    public async Task response_status_401_from_remote_endpoint_should_return_401_from_bff()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task response_status_401_from_remote_endpoint_should_return_401_from_bff(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(RequiredTokenType.User));
-
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
         Api.ApiStatusCodeToReturn = HttpStatusCode.Unauthorized;
-
         await InitializeAsync();
         await Bff.BrowserClient.Login();
 
@@ -317,16 +316,13 @@ public class YarpTests : BffTestBase
         );
     }
 
-    [Fact]
-    public async Task response_status_403_from_remote_endpoint_should_return_403_from_bff()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task response_status_403_from_remote_endpoint_should_return_403_from_bff(BffSetupType setup)
     {
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        ConfigureYarp(Some.RouteConfig()
-            .WithAccessToken(RequiredTokenType.User));
-
+        ConfigureBff(setup);
+        ConfigureYarp(Some.RouteConfig().WithAccessToken(RequiredTokenType.User));
         Api.ApiStatusCodeToReturn = HttpStatusCode.Forbidden;
-
         await InitializeAsync();
         await Bff.BrowserClient.Login();
 
@@ -335,5 +331,4 @@ public class YarpTests : BffTestBase
             expectedStatusCode: HttpStatusCode.Forbidden
         );
     }
-
 }

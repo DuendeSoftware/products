@@ -19,6 +19,8 @@ internal class BffConfigureAuthenticationOptions : IPostConfigureOptions<Authent
             options.DefaultChallengeScheme = BffAuthenticationSchemes.BffOpenIdConnect;
             options.DefaultSignOutScheme = BffAuthenticationSchemes.BffOpenIdConnect;
 
+            // If we don't set this forbid scheme, when calling forbid, it can trigger a stackoverflow exception
+            // when calling HttpContext.Forbid(). 
             if (options.DefaultForbidScheme == null)
             {
                 options.DefaultForbidScheme = BffAuthenticationSchemes.BffCookie;
