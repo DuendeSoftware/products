@@ -20,7 +20,7 @@ public class ManagementBasePathTests(ITestOutputHelper output) : BffTestBase(out
     [InlineData(Constants.ManagementEndpoints.User, HttpStatusCode.Unauthorized)]
     public async Task custom_ManagementBasePath_should_affect_basepath(string path, HttpStatusCode expectedStatusCode)
     {
-        SetupDefaultBffAuthentication();
+        ConfigureBff(BffSetupType.V4Bff);
         Bff.OnConfigureServices += svcs =>
         {
             svcs.Configure<BffOptions>(options =>

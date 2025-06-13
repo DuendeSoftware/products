@@ -51,6 +51,18 @@ public abstract class BffTestBase : IAsyncDisposable
         Action<OpenIdConnectOptions>? configureOpenIdConnect = null
         )
     {
+        // This method is used to configure the BFF in different ways depending on the setup type.
+        Action<OpenIdConnectOptions> openIdConfiguration = opt =>
+        {
+            (configureOpenIdConnect ?? The.DefaultOpenIdConnectConfiguration).Invoke(opt);
+
+            if (_customUserClaims.Any())
+            {
+                AddCustomUserClaims(opt);
+            }
+        };
+
+
         if (setup == BffSetupType.BffWithFrontend)
         {
             // We're using a frontend to configure the BFF
@@ -61,7 +73,7 @@ public abstract class BffTestBase : IAsyncDisposable
                 {
                     configureCookies?.Invoke(options);
                 },
-                ConfigureOpenIdConnectOptions = configureOpenIdConnect ?? The.DefaultOpenIdConnectConfiguration
+                ConfigureOpenIdConnectOptions = openIdConfiguration
             });
         }
         else if (setup == BffSetupType.V4Bff)
@@ -69,7 +81,7 @@ public abstract class BffTestBase : IAsyncDisposable
             IdentityServer.AddClient(The.ClientId, Bff.Url());
             Bff.OnConfigureBff += bff =>
             {
-                bff.WithDefaultOpenIdConnectOptions(configureOpenIdConnect ?? The.DefaultOpenIdConnectConfiguration);
+                bff.WithDefaultOpenIdConnectOptions(openIdConfiguration);
                 bff.WithDefaultCookieOptions(options =>
                 {
                     configureCookies?.Invoke(options);
@@ -93,8 +105,7 @@ public abstract class BffTestBase : IAsyncDisposable
                     {
                         configureCookies?.Invoke(options);
                     })
-                    .AddOpenIdConnect("oidc", configureOpenIdConnect
-                                              ?? The.DefaultOpenIdConnectConfiguration);
+                    .AddOpenIdConnect("oidc", openIdConfiguration);
             };
         }
         else
@@ -207,28 +218,24 @@ public abstract class BffTestBase : IAsyncDisposable
         yield return [BffSetupType.V4Bff];
     }
 
-    protected void SetupDefaultBffAuthentication(IEnumerable<Claim>? claimsToAdd = null)
+    private List<Claim> _customUserClaims = [];
+
+    protected void AddCustomUserClaims(params Claim[] claims)
     {
-        Bff.OnConfigureBff += bff => bff
-            .WithDefaultOpenIdConnectOptions(opt =>
-            {
-                if (claimsToAdd != null)
-                {
-                    opt.Events.OnTokenValidated = context =>
-                    {
-                        // Add custom claims to the identity
-                        var identity = (ClaimsIdentity)context.Principal!.Identity!;
-                        foreach (var claim in claimsToAdd)
-                        {
-                            identity.AddClaim(claim);
-                        }
-
-                        return Task.CompletedTask;
-                    }; The.DefaultOpenIdConnectConfiguration(opt);
-                }
-            });
-
-        AddOrUpdateFrontend(Some.BffFrontend());
+        _customUserClaims.AddRange(claims);
     }
+
+    private void AddCustomUserClaims(OpenIdConnectOptions opt) =>
+        opt.Events.OnTokenValidated = context =>
+        {
+            // Add custom claims to the identity
+            var identity = (ClaimsIdentity)context.Principal!.Identity!;
+            foreach (var claim in _customUserClaims)
+            {
+                identity.AddClaim(claim);
+            }
+
+            return Task.CompletedTask;
+        };
 }
 
