@@ -331,7 +331,7 @@ namespace Duende.Bff.DynamicFrontends
 {
     public static class BffAuthenticationSchemes
     {
-        public static readonly Duende.Bff.AccessTokenManagement.Scheme BffDefault;
+        public static readonly Duende.Bff.AccessTokenManagement.Scheme BffCookie;
         public static readonly Duende.Bff.AccessTokenManagement.Scheme BffOpenIdConnect;
     }
     [System.Runtime.CompilerServices.RequiredMember]
