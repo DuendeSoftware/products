@@ -26,10 +26,6 @@ internal class BffConfigureCookieOptions(
         options.TimeProvider = timeProvider;
         if (selectedFrontend.TryGet(out var frontEnd))
         {
-
-            //TODO: EV: check if this is needed
-            //options.ForwardChallenge = frontEnd.OidcSchemeName;
-
             if (frontEnd.SelectionCriteria.MatchingPath != null)
             {
                 options.Cookie.Name = Constants.Cookies.SecurePrefix + "_" + frontEnd.Name;
@@ -44,12 +40,10 @@ internal class BffConfigureCookieOptions(
 
             frontEnd.ConfigureCookieOptions?.Invoke(options);
         }
-        else if (name == BffAuthenticationSchemes.BffDefault.ToString())
+        else if (name == BffAuthenticationSchemes.BffCookie.ToString())
         {
             options.Cookie.Name = Constants.Cookies.DefaultCookieName;
 
-            // Todo: EV: check if this is needed
-            //options.ForwardChallenge = ;
             ConfigureDefaults(options);
         }
     }

@@ -12,8 +12,9 @@ internal class BffConfigureAuthenticationOptions : IPostConfigureOptions<Authent
     {
         if (options.DefaultScheme == null && options.DefaultAuthenticateScheme == null && options.DefaultAuthenticateScheme == null)
         {
-            options.DefaultScheme = BffAuthenticationSchemes.BffDefault;
+            options.DefaultScheme = BffAuthenticationSchemes.BffCookie;
             options.DefaultChallengeScheme = BffAuthenticationSchemes.BffOpenIdConnect;
+            options.DefaultSignOutScheme = BffAuthenticationSchemes.BffOpenIdConnect;
         }
     }
 }

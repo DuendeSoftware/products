@@ -26,7 +26,8 @@ internal class PostConfigureApplicationCookieTicketStore(
     {
         var isDefaultScheme = name == _scheme;
         var isForBffFrontend = selectedFrontend.TryGet(out var frontend) && name == frontend.CookieSchemeName;
-        if (isDefaultScheme || isForBffFrontend)
+        var isForImplicitConfig = BffAuthenticationSchemes.BffCookie == name;
+        if (isDefaultScheme || isForBffFrontend || isForImplicitConfig)
         {
             options.SessionStore = new TicketStoreShim(httpContextAccessor);
         }

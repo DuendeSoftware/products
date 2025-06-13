@@ -64,6 +64,18 @@ public abstract class BffTestBase : IAsyncDisposable
                 ConfigureOpenIdConnectOptions = configureOpenIdConnect ?? The.DefaultOpenIdConnectConfiguration
             });
         }
+        else if (setup == BffSetupType.V4Bff)
+        {
+            IdentityServer.AddClient(The.ClientId, Bff.Url());
+            Bff.OnConfigureBff += bff =>
+            {
+                bff.WithDefaultOpenIdConnectOptions(configureOpenIdConnect ?? The.DefaultOpenIdConnectConfiguration);
+                bff.WithDefaultCookieOptions(options =>
+                {
+                    configureCookies?.Invoke(options);
+                });
+            };
+        }
         else if (setup == BffSetupType.ManuallyConfiguredBff)
         {
             // Old style setup. Explicitly configuring the authentication including cookie, and openid connect
@@ -176,7 +188,12 @@ public abstract class BffTestBase : IAsyncDisposable
         /// <summary>
         /// The BFF is configured using a frontend (V4 style).
         /// </summary>
-        BffWithFrontend
+        BffWithFrontend,
+
+        /// <summary>
+        /// The BFF is configured using v4 style setup
+        /// </summary>
+        V4Bff
     }
 
     /// <summary>
@@ -187,6 +204,7 @@ public abstract class BffTestBase : IAsyncDisposable
     {
         yield return [BffSetupType.BffWithFrontend];
         yield return [BffSetupType.ManuallyConfiguredBff];
+        yield return [BffSetupType.V4Bff];
     }
 
     protected void SetupDefaultBffAuthentication(IEnumerable<Claim>? claimsToAdd = null)
