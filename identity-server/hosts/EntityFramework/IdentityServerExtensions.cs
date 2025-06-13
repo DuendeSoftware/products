@@ -49,6 +49,8 @@ internal static class IdentityServerExtensions
             });
 
             options.MutualTls.Enabled = true;
+
+            options.Diagnostics.ChunkSize = 1024 * 1000 - 32; // 1 MB minus some formatting space;
         })
             .AddTestUsers(TestUsers.Users)
             // this adds the config data from DB (clients, resources, CORS)

@@ -30,6 +30,8 @@ internal static class IdentityServerExtensions
                 options.UserInteraction.CreateAccountUrl = "/Account/Create";
 
                 options.MutualTls.Enabled = true;
+
+                options.Diagnostics.ChunkSize = 1024 * 1000 - 32; // 1 MB minus some formatting space;
             })
             //.AddServerSideSessions()
             .AddInMemoryClients([])
