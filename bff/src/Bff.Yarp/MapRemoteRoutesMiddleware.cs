@@ -16,7 +16,7 @@ internal class MapRemoteRoutesMiddleware(RequestDelegate next, RemoteRouteHandle
         {
             if (await remoteRouteHandler.HandleAsync(context, context.RequestAborted))
             {
-                return;
+               return;
             }
         }
         await next(context);
