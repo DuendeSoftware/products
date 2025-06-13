@@ -25,4 +25,11 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
             }
         }
     }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await diagnosticSummary.PrintSummary();
+
+        await base.StopAsync(cancellationToken);
+    }
 }
