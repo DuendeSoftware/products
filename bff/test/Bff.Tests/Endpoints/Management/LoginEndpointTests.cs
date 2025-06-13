@@ -10,16 +10,13 @@ namespace Duende.Bff.Tests.Endpoints.Management;
 
 public class LoginEndpointTests : BffTestBase
 {
-    public LoginEndpointTests(ITestOutputHelper output) : base(output)
-    {
-        Bff.SetBffOptions += options =>
-        {
-            options.ConfigureOpenIdConnectDefaults = opt =>
-            {
-                The.DefaultOpenIdConnectConfiguration(opt);
-            };
-        };
-    }
+    public LoginEndpointTests(ITestOutputHelper output) : base(output) => Bff.SetBffOptions += options =>
+                                                                               {
+                                                                                   options.ConfigureOpenIdConnectDefaults = opt =>
+                                                                                   {
+                                                                                       The.DefaultOpenIdConnectConfiguration(opt);
+                                                                                   };
+                                                                               };
 
     [Theory]
     [MemberData(nameof(AllSetups))]

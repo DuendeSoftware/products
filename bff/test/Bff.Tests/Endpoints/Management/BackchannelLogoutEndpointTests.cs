@@ -4,7 +4,6 @@
 using System.Net;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestInfra;
-using Duende.IdentityServer.Models;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;

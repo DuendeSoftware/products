@@ -220,10 +220,7 @@ public abstract class BffTestBase : IAsyncDisposable
 
     private List<Claim> _customUserClaims = [];
 
-    protected void AddCustomUserClaims(params Claim[] claims)
-    {
-        _customUserClaims.AddRange(claims);
-    }
+    protected void AddCustomUserClaims(params Claim[] claims) => _customUserClaims.AddRange(claims);
 
     private void AddCustomUserClaims(OpenIdConnectOptions opt) =>
         opt.Events.OnTokenValidated = context =>
