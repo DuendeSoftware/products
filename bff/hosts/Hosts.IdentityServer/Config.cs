@@ -118,7 +118,7 @@ public static class Config
                         GrantType.ClientCredentials,
                         OidcConstants.GrantTypes.TokenExchange
                     },
-                    RedirectUris = { $"{bffMultiFrontendUrl}with-path/bff-signin" },
+                    RedirectUris = { $"{bffMultiFrontendUrl}with-path/signin-oidc" },
                     FrontChannelLogoutUri = $"{bffMultiFrontendUrl}signout-oidc",
                     PostLogoutRedirectUris = { $"{bffMultiFrontendUrl}signout-callback-oidc" },
 
@@ -140,7 +140,7 @@ public static class Config
                         GrantType.ClientCredentials,
                         OidcConstants.GrantTypes.TokenExchange
                     },
-                    RedirectUris = { $"https://app1.localhost:5005/bff-signin" },
+                    RedirectUris = { $"https://app1.localhost:5005/signin-oidc" },
                     FrontChannelLogoutUri = $"https://app1.localhost:5005/signout-oidc",
                     PostLogoutRedirectUris = { $"https://app1.localhost:5005/signout-callback-oidc" },
 
