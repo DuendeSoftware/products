@@ -10,23 +10,37 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace IntegrationTests.Endpoints.Discovery;
 
-public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_supported
+public class DiscoveryEndpointTests_token_endpoint_auth
 {
-    private const string Category = "Discovery endpoint - token_endpoint_auth_signing_alg_values_supported";
+    private const string Category = "Discovery endpoint - token_endpoint_auth";
 
-    [Fact]
+    [Theory]
     [Trait("Category", Category)]
-    public async Task token_endpoint_auth_signing_alg_values_supported_should_match_configuration()
+    [InlineData(true, true, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.HmacSha256)]
+    [InlineData(true, true, SecurityAlgorithms.RsaSsaPssSha384, SecurityAlgorithms.HmacSha384)]
+    [InlineData(true, true, SecurityAlgorithms.EcdsaSha512, SecurityAlgorithms.HmacSha512)]
+    [InlineData(false, true, SecurityAlgorithms.HmacSha256)]
+    [InlineData(false, true, SecurityAlgorithms.HmacSha384)]
+    [InlineData(false, true, SecurityAlgorithms.HmacSha512)]
+    [InlineData(true, false, SecurityAlgorithms.RsaSha256)]
+    [InlineData(true, false, SecurityAlgorithms.RsaSha384)]
+    [InlineData(true, false, SecurityAlgorithms.RsaSha512)]
+    [InlineData(true, false, SecurityAlgorithms.RsaSsaPssSha256)]
+    [InlineData(true, false, SecurityAlgorithms.RsaSsaPssSha384)]
+    [InlineData(true, false, SecurityAlgorithms.RsaSsaPssSha512)]
+    [InlineData(true, false, SecurityAlgorithms.EcdsaSha256)]
+    [InlineData(true, false, SecurityAlgorithms.EcdsaSha384)]
+    [InlineData(true, false, SecurityAlgorithms.EcdsaSha512)]
+
+    public async Task token_endpoint_auth_should_match_configuration(bool privateKeyJwtExpected, bool clientSecretJwtExpected, params string[] algorithms)
     {
+        // This test verifies that the algorithms supported match the configured algorithms, and that
+        // the supported auth methods are appropriate for the algorithms
         var pipeline = new IdentityServerPipeline();
         pipeline.OnPostConfigureServices += svcs =>
             svcs.AddIdentityServerBuilder().AddJwtBearerClientAuthentication();
         pipeline.Initialize();
-        pipeline.Options.SupportedClientAssertionSigningAlgorithms =
-        [
-            SecurityAlgorithms.RsaSsaPssSha256,
-            SecurityAlgorithms.EcdsaSha256
-        ];
+        pipeline.Options.SupportedClientAssertionSigningAlgorithms = algorithms;
 
         var disco = await pipeline.BackChannelClient
             .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
@@ -34,9 +48,15 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
 
         var algorithmsSupported = disco.TokenEndpointAuthenticationSigningAlgorithmsSupported;
 
-        algorithmsSupported.Count().ShouldBe(2);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+        algorithmsSupported.Count().ShouldBe(algorithms.Length);
+        foreach (var algorithm in algorithms)
+        {
+            algorithmsSupported.ShouldContain(algorithm);
+        }
+
+        var authMethods = disco.TokenEndpointAuthenticationMethodsSupported;
+        authMethods.Contains("private_key_jwt").ShouldBe(privateKeyJwtExpected);
+        authMethods.Contains("client_secret_jwt").ShouldBe(clientSecretJwtExpected);
     }
 
     [Fact]
@@ -68,6 +88,10 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
         algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha256);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha384);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha512);
+
+        var authMethods = result.TokenEndpointAuthenticationMethodsSupported;
+        authMethods.ShouldContain("private_key_jwt");
+        authMethods.ShouldContain("client_secret_jwt");
     }
 
     [Fact]
@@ -84,7 +108,6 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
         // Verify assumptions
         disco.IsError.ShouldBeFalse();
         disco.TokenEndpointAuthenticationMethodsSupported.ShouldNotContain("private_key_jwt");
-        // we don't even support client_secret_jwt, but per spec, if you DO, you must include the algs supported
         disco.TokenEndpointAuthenticationMethodsSupported.ShouldNotContain("client_secret_jwt");
 
         // Assert that we got no signing algs.
