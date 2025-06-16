@@ -49,10 +49,7 @@ public class DiscoveryEndpointTests_token_endpoint_auth
         var algorithmsSupported = disco.TokenEndpointAuthenticationSigningAlgorithmsSupported;
 
         algorithmsSupported.Count().ShouldBe(algorithms.Length);
-        foreach (var algorithm in algorithms)
-        {
-            algorithmsSupported.ShouldContain(algorithm);
-        }
+        algorithmsSupported.ShouldBe(algorithms, ignoreOrder: true);
 
         var authMethods = disco.TokenEndpointAuthenticationMethodsSupported;
         authMethods.Contains("private_key_jwt").ShouldBe(privateKeyJwtExpected);
