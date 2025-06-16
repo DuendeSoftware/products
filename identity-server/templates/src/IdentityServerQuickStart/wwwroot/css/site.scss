@@ -1,0 +1,139 @@
+:root {
+  --brand-color: #6e45af;
+}
+
+.text-brand {
+  color: var(--brand-color) !important;
+}
+
+.text-bg-brand {
+  background-color: var(--brand-color) !important;
+  color: #FFF !important;
+}
+
+.sidebar .nav-link.active {
+  background-color: var(--brand-color) !important;
+}
+
+.btn-brand {
+  background-color: var(--brand-color) !important;
+  color: #FFF !important;
+}
+
+.welcome-page {
+  .logo {
+    width: 64px;
+  }
+}
+
+.dashboard {
+  a i.bi {
+    --bs-btn-color: var(--brand-color);
+    color: var(--brand-color) !important;
+  }
+}
+
+textarea.disco-doc,
+code.language-csharp {
+  /* cross-platform monospace stack */
+  font-family: Consolas, /* Windows */
+  "Liberation Mono", /* Linux */
+  Menlo, /* macOS */
+  "Courier New", /* fallback */
+  Courier, /* older */
+  monospace; /* ultimate fallback */
+
+  font-size: 0.9rem;
+  line-height: 1.4;
+  padding: 0.5rem;
+  overflow-x: auto;
+  white-space: pre;
+  word-wrap: normal;
+  font-size: small;
+}
+
+code.language-csharp {
+  font-size: smaller;
+}
+
+@media (max-width: 576px) {
+  .sidebar {
+    max-width: 80px !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .sidebar .nav-link {
+    justify-content: center;
+  }
+}
+
+@media (min-width: 577px) {
+  .sidebar {
+    max-width: 280px !important;
+  }
+}
+
+
+.icon-banner {
+  width: 32px;
+}
+
+.body-container {
+  margin-top: 60px;
+  padding-bottom: 40px;
+}
+
+.welcome-page {
+  li {
+    list-style: none;
+    padding: 4px;
+  }
+}
+
+.logged-out-page {
+  iframe {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+.grants-page {
+  .card {
+    margin-top: 20px;
+    border-bottom: 1px solid lightgray;
+
+    .card-title {
+      img {
+        width: 100px;
+        height: 100px;
+      }
+
+      font-size: 120%;
+      font-weight: bold;
+    }
+
+    label {
+      font-weight: bold;
+    }
+  }
+}
+
+.page-consent {
+    div.client-logo > img {
+        max-height: 48px;
+    }
+}
+
+.discovery-document {
+  height: 700px;
+  pre {
+    max-height: fit-content;
+    code {
+      font-size: .9em;
+      padding:0;
+      margin:0;
+    }
+  }
+}

@@ -1,0 +1,109 @@
+@page
+@model IdentityServerQuickStart.Pages.Consent.Index
+@{
+    Layout = "_LayoutLogin";
+}
+
+<div class="page-consent">
+
+    <div class="lead text-center">
+        @if (Model.View.ClientLogoUrl != null)
+        {
+            <div class="client-logo"><img src="@Model.View.ClientLogoUrl"></div>
+        }
+
+        <h1 class="text-brand mb-0">@Model.View.ClientName</h1>
+        <p>This app is requesting your permission</p>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <partial name="_ValidationSummary" />
+        </div>
+    </div>
+
+    <form asp-page="/Consent/Index">
+        <input type="hidden" asp-for="Input.ReturnUrl" />
+        <div class="row">
+            <div class="col-12 col-lg-6 mb-3 mb-lg-0 mx-auto">
+                @if (Model.View.IdentityScopes.Any())
+                {
+                    <div class="form-group mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="glyphicon glyphicon-user"></span>
+                                Personal Information
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var scope in Model.View.IdentityScopes)
+                                {
+                                    <partial name="_ScopeListItem" model="@scope" />
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.View.ApiScopes.Any())
+                {
+                    <div class="form-group mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="glyphicon glyphicon-tasks"></span>
+                                Application Access
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var scope in Model.View.ApiScopes)
+                                {
+                                    <partial name="_ScopeListItem" model="scope" />
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+                <div class="form-group mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                            Description
+                        </div>
+                        <div class="card-body">
+                            <input class="form-control" placeholder="Description or name of device" asp-for="Input.Description" autofocus>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.View.AllowRememberConsent)
+                {
+                    <div class="form-group mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="Input.RememberConsent">
+                            <label class="form-check-label" asp-for="Input.RememberConsent">
+                                <strong>Remember My Decision</strong>
+                            </label>
+                        </div>
+                    </div>
+                }
+
+                <div class="row">
+                    <div class="col-12">
+                        <button name="Input.button" value="yes" class="btn btn-primary" autofocus>Yes, Allow</button>
+                        <button name="Input.button" value="no" class="btn btn-secondary">No, Do Not Allow</button>
+                    </div>
+                    <div class="col-sm-4 col-lg-auto">
+                        @if (Model.View.ClientUrl != null)
+                        {
+                            <a class="btn btn-outline-info" href="@Model.View.ClientUrl">
+                                <span class="glyphicon glyphicon-info-sign"></span>
+                                <strong>@Model.View.ClientName</strong>
+                            </a>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+</div>

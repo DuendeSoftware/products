@@ -1,0 +1,59 @@
+@using Duende.IdentityServer.Licensing
+@model LicenseUsageSummary
+
+<div class="card h-100 text-bg-light">
+    <h5 class="card-header">
+        <i class="bi bi-award me-2"></i>
+        License Usage Summary
+    </h5>
+    <div class="card-body">
+
+        <small class="d-block bg-white rounded border p-1 px-2 mb-3">
+            Usage is based on how you use Identity Server while it's running.<br />
+            Features, Clients and Issuers will update automatically as they are used.
+        </small>
+
+        <label class="fw-medium">Features Used</label>
+        <small>
+            <ul class="list-group list-group-flush mb-4">
+                @foreach (var feature in Model.FeaturesUsed)
+                {
+                    <li class="list-group-item">@feature</li>
+                }
+                @if (!Model.FeaturesUsed.Any())
+                {
+                    <li class="list-group-item">No Features Used</li>
+                }
+            </ul>
+        </small>
+        
+        <label class="fw-medium">Issuers Used</label>
+        <small>
+            <ul class="list-group list-group-flush mb-4">
+                @foreach (var issuer in Model.IssuersUsed)
+                {
+                    <li class="list-group-item">@issuer</li>
+                }
+                @if (!Model.IssuersUsed.Any())
+                {
+                    <li class="list-group-item">No Issuers Used</li>
+                }
+            </ul>
+        </small>
+        
+        <label class="fw-medium">Clients Used</label>
+        <small>
+            <ul class="list-group list-group-flush mb-4">
+                @foreach (var issuer in Model.ClientsUsed)
+                {
+                    <li class="list-group-item">@issuer</li>
+                }
+                @if (!Model.ClientsUsed.Any())
+                {
+                    <li class="list-group-item">No Clients Used</li>
+                }
+            </ul>
+        </small>
+        
+    </div>
+</div>

@@ -1,0 +1,46 @@
+@page
+@model IdentityServerQuickStart.Pages.Portal.Index
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-window-stack text-brand"></i>
+            Client Portal
+        </h1>
+        <span class="text-muted">
+            This portal contains links to client applications that are configured with an InitiateLoginUri, which enables
+            <a href="https://docs.duendesoftware.com/identityserver/ui/portal/">third-party initiated login</a>.
+        </span>
+    </header>
+</div>
+
+@if (!Model.Clients.Any())
+{
+    <div class="row">
+        <div class="col">
+            <div class="alert alert-light text-center">
+                You do not have any clients configured with an InitiateLoginUri.
+            </div>
+        </div>
+    </div>
+}
+
+@foreach (var client in Model.Clients)
+{
+    <a href="@client.InitiateLoginUri" target="_blank" class="text-decoration-none">
+        <div class="d-flex align-items-center border rounded p-2 mb-2">
+
+            @if (!String.IsNullOrWhiteSpace(client.LogoUri))
+            {
+                <div class="flex-shrink-0">
+                    <img src="@client.LogoUri" alt="@client.LinkText" height="32" width="32">
+                </div>
+            }
+
+            <div class="flex-grow-1 ms-3">
+                @client.LinkText
+            </div>
+
+        </div>
+    </a>
+}

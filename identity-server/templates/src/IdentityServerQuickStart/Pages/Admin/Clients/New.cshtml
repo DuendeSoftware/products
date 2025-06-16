@@ -1,0 +1,108 @@
+@page
+@model IdentityServerQuickStart.Pages.Admin.Clients.NewModel
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-laptop text-brand"></i>
+            Create New Client
+        </h1>
+        <span class="text-muted">
+            Setup the configuration for a new client
+        </span>
+    </header>
+</div>
+
+<div class="clients-page">
+    @if (Model.Created)
+    {
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Success!</h4>
+            <p>
+                Client Id `<code>@Model.InputModel.ClientId</code>` created!
+            </p>
+            <hr />
+            <p class="mb-0">Click here to <a asp-page="/Admin/Clients/Edit" asp-route-id="@Model.InputModel.ClientId">continue</a>.</p>
+        </div>
+    }
+    else
+    {
+        <partial name="_ValidationSummary" />
+        <form method="post">
+            <input type="hidden" asp-for="@Model.InputModel.Flow" />
+
+            <div class="form-group mb-3 text-start">
+
+                <a class="btn btn-sm btn-outline-secondary" asp-page="/Admin/Clients/Index">
+                    <i class="bi bi-chevron-double-left"></i>
+                    Go Back
+                </a>
+
+                <button class="btn btn-sm btn-success" type="submit">
+                    <i class="bi bi-floppy"></i>
+                    Create Client
+                </button>
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-md-6">
+
+                    <div class="card text-bg-light">
+                        <h5 class="card-header">
+                            <i class="bi bi-gear"></i>
+                            Client Settings
+                        </h5>
+                        <div class="card-body pt-2">
+
+                            <small class="mb-2 text-body-secondary d-block fst-italic">
+                                Defines the core parameters that identify your application to the identity provider—such as its name, client ID, secret and the allowed redirect/callback URLs for authentication flows.
+                            </small>
+                            <div class="form-group mb-3">
+                                <label asp-for="InputModel.Name" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.Name"
+                                       autofocus />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="@Model.InputModel.Flow" class="form-label"></label>
+                                <select class="form-control form-control-sm readonly disabled" asp-for="@Model.InputModel.Flow" readonly disabled>
+                                    <option value="0">Client Credentials</option>
+                                    <option value="1">Code Flow (with PKCE)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="@Model.InputModel.ClientId" class="form-label"></label>
+                                <input class="form-control form-control-sm" asp-for="@Model.InputModel.ClientId" autofocus />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="@Model.InputModel.Secret" class="form-label"></label>
+                                <input class="form-control form-control-sm" asp-for="@Model.InputModel.Secret" autofocus />
+                            </div>
+
+                            @if (Model.InputModel.Flow == IdentityServerQuickStart.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                            {
+                                <div class="form-group mb-3">
+                                    <label asp-for="@Model.InputModel.BaseUrl" class="form-label"></label>
+                                    <input class="form-control form-control-sm" asp-for="@Model.InputModel.BaseUrl" autofocus />
+                                </div>
+
+                                <small class="d-block bg-white rounded border p-1 px-2">
+                                    <span class="fw-medium">Note:</span>
+                                    On creation, the base URL (if set) will be used to automatically determine the default interaction URL paths.<br />
+                                    For example, the default Redirect URI will be set to <code>&lt;base-url&gt;/signin-oidc</code>.
+                                </small>
+
+                            }
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+    }
+</div>

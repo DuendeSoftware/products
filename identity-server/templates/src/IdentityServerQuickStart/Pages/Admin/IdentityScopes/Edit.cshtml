@@ -1,0 +1,122 @@
+@page
+@model IdentityServerQuickStart.Pages.Admin.IdentityScopes.EditModel
+
+@using System.Text.Json
+
+@{
+    var cfg = new
+    {
+        items = Model.InputModel.ClaimsSuggestions.Select(c => new { value = c, label = c }),
+        selected = Model.InputModel.UserClaims,
+        separator = "| |",
+        allowNew = true,
+        allowClear = true,
+        showDropIcon = false,
+        suggestionsThreshold = 1
+    };
+
+    var jsonCfg = JsonSerializer.Serialize(cfg);
+}
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-person-badge text-brand"></i>
+            Edit Identity Scope (@Model.InputModel.Name)
+        </h1>
+        <span class="text-muted">
+            Update the configuration for an existing Identity Scope
+        </span>
+    </header>
+</div>
+
+@if (Model.Updated)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> Identity Scope has been updated successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
+    </div>
+}
+
+<partial name="_ValidationSummary" />
+
+<form method="post">
+    <input type="hidden" asp-for="@Model.InputModel.Name" />
+
+    <div class="form-group mb-3 text-start">
+
+        <a class="btn btn-sm btn-outline-secondary"
+           data-unsaved="You have unsaved changes. Are you sure you want to leave?"
+           asp-page="/Admin/IdentityScopes/Index">
+            <i class="bi bi-chevron-double-left"></i>
+            Go Back
+        </a>
+
+        <button class="btn btn-sm btn-success"
+                type="submit"
+                name="Button"
+                value="save">
+            <i class="bi bi-floppy"></i>
+            Save Changes
+        </button>
+
+        <button class="btn btn-sm btn-danger"
+                type="submit"
+                name="Button"
+                value="delete"
+                data-confirm="Are you sure you want to delete this Identity Scope?">
+            <i class="bi bi-trash"></i>
+            Delete
+        </button>
+
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+
+            <div class="card text-bg-light">
+                <h5 class="card-header">
+                    <i class="bi bi-gear"></i>
+                    Identity Scope Details
+                </h5>
+                <div class="card-body pt-2">
+
+                    <small class="mb-2 text-body-secondary d-block fst-italic">
+                        Defines each named scope alongside the specific user claims (for example name, email, role) that it bundles
+                        together, so clients know exactly which pieces of the user’s identity they can request.
+                    </small>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="@Model.InputModel.DisplayName" class="form-label"></label>
+                        <input class="form-control form-control-sm" asp-for="@Model.InputModel.DisplayName" autofocus />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="@Model.InputModel.UserClaims" class="form-label">User Claims (space delimited)</label>
+
+                        <select id="@Html.IdFor(m => m.InputModel.UserClaims)"
+                                name="@Html.NameFor(m => m.InputModel.UserClaims)"
+                                class="form-select"
+                                multiple="multiple"
+                                data-config='@jsonCfg'
+                                data-allow-new="true"
+                                data-allow-clear="true"
+                                data-show-drop-icon="false"
+                                data-separator="| |">
+
+                            <option disabled hidden value="">Type a claim...</option>
+                            @foreach (var i in Model.InputModel.UserClaims)
+                            {
+                                <option selected="selected" value="@i">@i</option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</form>
