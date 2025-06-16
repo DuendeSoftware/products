@@ -117,6 +117,7 @@ namespace Duende.Bff.AccessTokenManagement
         public Scheme() { }
         public override string ToString() { }
         public static Duende.Bff.AccessTokenManagement.Scheme Parse(string value) { }
+        public static Duende.Bff.AccessTokenManagement.Scheme? ParseOrDefault(string? value) { }
         public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.AccessTokenManagement.Scheme? parsed, out string[] errors) { }
         public static string op_Implicit(Duende.Bff.AccessTokenManagement.Scheme value) { }
         public static Duende.AccessTokenManagement.Scheme op_Implicit(Duende.Bff.AccessTokenManagement.Scheme value) { }

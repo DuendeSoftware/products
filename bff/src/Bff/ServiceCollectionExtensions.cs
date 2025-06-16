@@ -68,6 +68,8 @@ public static class ServiceCollectionExtensions
         // cookie configuration
         services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
         services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieRevokeRefreshToken>();
+        services.AddSingleton<ActiveCookieAuthenticationScheme>();
+        services.AddSingleton<ActiveOpenIdConnectAuthenticationScheme>();
 
         services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
 

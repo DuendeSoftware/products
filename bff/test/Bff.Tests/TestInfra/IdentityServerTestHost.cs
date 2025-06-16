@@ -119,7 +119,7 @@ public class IdentityServerTestHost : TestHost
             RedirectUris = [new Uri(uri, "signin-oidc").ToString()],
             PostLogoutRedirectUris = [new Uri(uri, "signout-callback-oidc").ToString()],
             AllowOfflineAccess = true,
-            AllowedScopes = { "openid", "profile", The.Scope },
+            AllowedScopes = { "openid", "profile", The.Scope, "offline_access" },
         };
         Clients.Add(client);
         return client;
@@ -131,6 +131,13 @@ public class IdentityServerTestHost : TestHost
         frontend.ConfigureOpenIdConnectOptions?.Invoke(options);
 
         var clientId = options.ClientId ?? frontend.Name;
+
+        var existing = Clients.FirstOrDefault(c => c.ClientId == clientId);
+        if (existing != null)
+        {
+            Clients.Remove(existing);
+        }
+
         var clientSecret = options.ClientSecret ?? The.ClientSecret;
         callbackPath ??= options.CallbackPath;
 

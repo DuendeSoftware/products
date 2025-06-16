@@ -3,7 +3,7 @@
 
 using Duende.Bff.AccessTokenManagement;
 
-namespace Duende.Bff.Tests.TestHosts;
+namespace Duende.Bff.Tests.TestFramework;
 
 public class FailureAccessTokenRetriever : IAccessTokenRetriever
 {

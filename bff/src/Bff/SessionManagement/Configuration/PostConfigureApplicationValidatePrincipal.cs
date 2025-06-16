@@ -1,8 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
-using Microsoft.AspNetCore.Authentication;
+using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,17 +14,16 @@ namespace Duende.Bff.SessionManagement.Configuration;
 /// Cookie configuration to suppress sliding the cookie on the ~/bff/user endpoint if requested.
 /// </summary>
 internal class PostConfigureApplicationValidatePrincipal(
+    ActiveCookieAuthenticationScheme activeCookieScheme,
     IOptions<BffOptions> bffOptions,
-    IOptions<AuthenticationOptions> authOptions,
     ILogger<PostConfigureApplicationValidatePrincipal> logger) : IPostConfigureOptions<CookieAuthenticationOptions>
 {
     private readonly BffOptions _options = bffOptions.Value;
-    private readonly string? _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
     {
-        if (name == _scheme)
+        if (activeCookieScheme.ShouldConfigureScheme(Scheme.ParseOrDefault(name)))
         {
             options.Events.OnValidatePrincipal = CreateCallback(options.Events.OnValidatePrincipal);
         }

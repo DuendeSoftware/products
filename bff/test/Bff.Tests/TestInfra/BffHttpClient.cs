@@ -148,7 +148,7 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
         }
 
     }
-    public async Task RevokeIdentityServerSession(Uri url) => await GetAsync(new Uri(url, "__signout")).CheckHttpStatusCode(HttpStatusCode.NoContent);
+    public async Task RevokeIdentityServerSession() => await GetAsync(identityServer.Url("__signout")).CheckHttpStatusCode(HttpStatusCode.NoContent);
 
     public async Task<HttpResponseMessage> Logout(string? sid = null, Uri? returnUrl = null)
     {

@@ -87,5 +87,6 @@ public readonly record struct Scheme : IStronglyTypedValue<Scheme>
     /// Parses a value to a <see cref="Scheme"/>. This will throw an exception if the string is not valid.
     /// </summary>
     public static Scheme Parse(string value) => StringParsers<Scheme>.Parse(value);
+    public static Scheme? ParseOrDefault(string? value) => StringParsers<Scheme>.ParseOrDefault(value);
 
 }

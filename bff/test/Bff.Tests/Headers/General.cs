@@ -2,18 +2,29 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Tests.TestFramework;
-using Duende.Bff.Tests.TestHosts;
+using Duende.Bff.Tests.TestInfra;
+using Duende.Bff.Yarp;
 using Xunit.Abstractions;
+using ApiHost = Duende.Bff.Tests.TestInfra.ApiHost;
 
 namespace Duende.Bff.Tests.Headers;
 
-public class General(ITestOutputHelper output) : BffIntegrationTestBase(output)
+public class General(ITestOutputHelper output) : BffTestBase(output)
 {
-    [Fact]
-    public async Task local_endpoint_should_receive_standard_headers()
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task local_endpoint_should_receive_standard_headers(BffSetupType setup)
     {
-        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/local_anon"));
+        Bff.OnConfigureEndpoints += endpoints =>
+        {
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c))
+                .RequireAuthorization();
+        };
+        ConfigureBff(setup);
+        await InitializeAsync();
+
+        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         req.Headers.Add("x-csrf", "1");
         var response = await Bff.BrowserClient.SendAsync(req);
 
@@ -21,17 +32,25 @@ public class General(ITestOutputHelper output) : BffIntegrationTestBase(output)
         var json = await response.Content.ReadAsStringAsync();
         var apiResult = JsonSerializer.Deserialize<ApiCallDetails>(json).ShouldNotBeNull();
 
-        apiResult.RequestHeaders.Count.ShouldBe(2);
-        apiResult.RequestHeaders["Host"].Single().ShouldBe("app");
+        apiResult.RequestHeaders.Count.ShouldBe(3);
+        apiResult.RequestHeaders["Host"].Single().ShouldBe(Bff.Url().Host);
         apiResult.RequestHeaders["x-csrf"].Single().ShouldBe("1");
     }
 
-    [Fact]
-    public async Task custom_header_should_be_forwarded()
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task custom_header_should_be_forwarded(BffSetupType setup)
     {
-        await Bff.InitializeAsync();
+        Bff.OnConfigureBff += bff => bff.AddRemoteApis();
+        Bff.OnConfigureEndpoints += endpoints =>
+        {
+            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+                .WithAccessToken(RequiredTokenType.None);
 
-        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/api_anon_only/test"));
+        };
+        ConfigureBff(setup);
+        await InitializeAsync();
+
+        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         req.Headers.Add("x-csrf", "1");
         req.Headers.Add("x-custom", "custom");
         var response = await Bff.BrowserClient.SendAsync(req);
@@ -44,12 +63,20 @@ public class General(ITestOutputHelper output) : BffIntegrationTestBase(output)
         apiResult.RequestHeaders["x-custom"].Single().ShouldBe("custom");
     }
 
-    [Fact]
-    public async Task custom_header_should_be_forwarded_and_xforwarded_headers_should_be_created()
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task custom_header_should_be_forwarded_and_xforwarded_headers_should_be_created(BffSetupType setup)
     {
-        await Bff.InitializeAsync();
+        Bff.OnConfigureBff += bff => bff.AddRemoteApis();
+        Bff.OnConfigureEndpoints += endpoints =>
+        {
+            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+                .WithAccessToken(RequiredTokenType.None);
 
-        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url("/api_anon_only/test"));
+        };
+        ConfigureBff(setup);
+        await InitializeAsync();
+
+        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         req.Headers.Add("x-csrf", "1");
         req.Headers.Add("x-custom", "custom");
         var response = await Bff.BrowserClient.SendAsync(req);
@@ -58,7 +85,7 @@ public class General(ITestOutputHelper output) : BffIntegrationTestBase(output)
         var json = await response.Content.ReadAsStringAsync();
         var apiResult = JsonSerializer.Deserialize<ApiCallDetails>(json).ShouldNotBeNull();
 
-        apiResult.RequestHeaders["X-Forwarded-Host"].Single().ShouldBe("app");
+        apiResult.RequestHeaders["X-Forwarded-Host"].Single().ShouldBe(Bff.Url().Host);
         apiResult.RequestHeaders["X-Forwarded-Proto"].Single().ShouldBe("https");
         apiResult.RequestHeaders["Host"].Single().ShouldBe("api");
         apiResult.RequestHeaders["x-custom"].Single().ShouldBe("custom");
