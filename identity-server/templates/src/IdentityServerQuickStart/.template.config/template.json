@@ -1,0 +1,35 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "IdentityServer"
+  ],
+  "name": "Duende IdentityServer QuickStart with Entity Framework Stores",
+  "identity": "Duende.IdentityServer.QuickStart",
+  "groupIdentity": "Duende.IdentityServer.QuickStart",
+  "shortName": [
+    "duende-is"
+  ],
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "IdentityServerQuickStart",
+  "preferNameDirectory": true,
+  "primaryOutputs": [
+    {
+      "path": "IdentityServerQuickStart.csproj"
+    }
+  ],
+  "symbols": {
+    "RenameCommonNamespace": {
+      "datatype": "string",
+      "displayName": "Fix common host namespace.",
+      "replaces": "IdentityServerQuickStart",
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "safe_namespace"
+    }
+  }
+}

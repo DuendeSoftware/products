@@ -1,0 +1,96 @@
+@page
+@model IdentityServerQuickStart.Pages.Home.Index
+
+<div class="px-4 pt-5 text-center">
+    <img class="d-block mx-auto mb-4 w-25" src="~/img/duende-logo-full.svg" alt="Duende Logo">
+    <h1 class="display-5 fw-bold text-brand">Welcome To Duende IdentityServer</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            Meet Duende IdentityServer. A secure, flexible, and standards-compliant framework for OpenID Connect and OAuth
+            2.0.<br />
+            Use it as-is, or with full control of your UI, UX, business logic, and data. You decide.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a type="button" class="btn btn-brand btn-lg px-4 gap-3" href="https://duendesoftware.com/" target="_blank">
+                <i class="bi bi-award"></i>
+                Get a License
+            </a>
+            <a class="btn btn-outline-secondary btn-lg px-4" href="https://docs.duendesoftware.com/" target="_blank">
+                <i class="bi bi-book"></i>
+                Learn More
+            </a>
+        </div>
+    </div>
+    <div class="py-4 my-2 text-start">
+        <hr />
+
+        <div class="row">
+            <div class="col-lg-6 mx-auto">
+                <h2 class="h4 pt-2">
+                    <i class="bi bi-lightbulb-fill" style="color: var(--brand-color)"></i>
+                    Next Steps
+                </h2>
+                <p>
+                    Some common next steps for configuring your instance of IdentityServer may include
+                    <a href="https://duende.link/t/clients" target="_blank"
+                       rel="noopener noreferrer">adding clients,</a>
+                    <a href="https://duende.link/t/users" target="_blank"
+                       rel="noopener noreferrer">adding a user store,</a>
+                    <a href="https://duende.link/t/data-protection" target="_blank" rel="noopener noreferrer">
+                        configure data
+                        protection,
+                    </a>
+                    <a href="https://duende.link/t/best-practices" target="_blank" rel="noopener noreferrer">
+                        learn about our security
+                        best
+                        practices,
+                    </a> and <a href="https://duende.link/t/quick-starts">watch our quickstart guides.</a>
+                </p>
+
+                <h2 class="h4 pt-2">
+                    <i class="bi bi-star-fill" style="color: var(--brand-color)"></i>
+                    Included in this Template
+                </h2>
+                <ul>
+                    <li><span class="fw-medium">Admin Dashboard</span> – View a high-level overview of your IdentityServer instance.</li>
+                    <li><span class="fw-medium">Clients</span> – Configure and manage interactive and machine-to-machine clients.</li>
+                    <li><span class="fw-medium">Identity Scopes</span> – Configure and manage identity-resource scopes and their claims.</li>
+                    <li><span class="fw-medium">API Scopes</span> – Configure and manage API scopes and their claims.</li>
+                    <li><span class="fw-medium">Server-Side Sessions</span> – View and revoke active sessions managed by IdentityServer.</li>
+                </ul>
+            </div>
+
+            <div class="col-lg-6 mx-auto">
+                <h2 class="h4 pt-2">
+                    <i class="bi bi-brush-fill" style="color: var(--brand-color)"></i>
+                    Customize and extend IdentityServer
+                </h2>
+                <div>
+                    <p>
+                        This template is a starting point for building and implementing IdentityServer.
+                    </p>
+                    <p>
+                        Use, modify and implement this code in your projects as you see fit.
+                        It is up to you to maintain the IdentityServer user interface.
+                    </p>
+                    <p>
+                        Check out our <a href="https://docs.duendesoftware.com">docs</a> and
+                        <a href="https://duende.link/community">developer community</a> if you need assistance.
+                    </p>
+                </div>
+
+                <h2 class="h4 pt-2">
+                    <i class="bi bi-person-fill" style="color: var(--brand-color)"></i>
+                    User Store Customization
+                </h2>
+                <div>
+                    <p>
+                        An in-memory test user store is included for demonstration purposes. It must be replaced before you go to production.
+                        See our <a href="https://duende.link/t/users" target="_blank" rel="noopener noreferrer">user-store guidance</a> for supported implementations backed by a database.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

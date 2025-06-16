@@ -1,0 +1,64 @@
+@page
+@model IdentityServerQuickStart.Pages.Admin.Index
+
+<link href="~/lib/prism/prism.css" rel="stylesheet" />
+<script src="~/lib/prism/prism.js"></script>
+
+<div class="container-fluid pb-4 px-0 dashboard">
+
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-speedometer2 text-brand"></i>
+            Admin Dashboard
+        </h1>
+        <span class="text-muted">
+            Get a high-level overview of your Duende IdentityServer instance.
+            Click <a href="/.well-known/openid-configuration" target="_blank">here</a> to access the Discovery Document.
+        </span>
+    </header>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <h2 class="my-3">System Information</h2>
+            <div class="row g-4">
+                <!-- Clients -->
+                <div class="col-md-4">
+                    <vc:clients></vc:clients>
+                </div>
+                <!-- API Scopes -->
+                <div class="col-md-4">
+                    <vc:api-scopes></vc:api-scopes>
+                </div>
+                <!-- Identity Scopes -->
+                <div class="col-md-4">
+                    <vc:identity-scopes></vc:identity-scopes>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <!-- Database Info -->
+                <div class="col-md-6">
+                    <vc:database></vc:database>
+                </div>
+                <!-- License -->
+                <div class="col-md-6">
+                    <vc:license></vc:license>
+                </div>
+            </div>
+
+            <h2 class="my-3">Operational Information</h2>
+            <div class="row g-4">
+                <!-- Serverside Sessions -->
+                <div class="col-md-6">
+                    <vc:server-side-sessions></vc:server-side-sessions>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+
+            <h2 class="my-3">License Usage</h2>
+            <vc:license-summary></vc:license-summary>
+
+        </div>
+    </div>
+</div>

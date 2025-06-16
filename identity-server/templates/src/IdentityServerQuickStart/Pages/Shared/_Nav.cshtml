@@ -1,0 +1,135 @@
+@using Duende.IdentityServer.Extensions
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService authorizationService
+
+@{
+    var isAdmin = (await authorizationService.AuthorizeAsync(User, "admin")).Succeeded;
+
+    var currentPath = Context.Request.Path.Value?.TrimEnd('/') ?? "";
+
+    // Helper to add active class in nav
+    Func<string, string> isActive = href =>
+        string.Equals(href.TrimEnd('/'), currentPath, StringComparison.OrdinalIgnoreCase)
+            ? "active"
+            : "link-body-emphasis";
+
+    string? name = null;
+    string? avatar = null;
+
+    if (!true.Equals(ViewData["signed-out"]))
+    {
+        name = Context.User?.GetDisplayName();
+    }
+
+    if (Context.User?.Identity?.IsAuthenticated == true)
+    {
+        avatar = Context.User.FindFirst("picture")?.Value;
+    }
+}
+
+<div class="sidebar h-100 d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary border-end">
+    <a href="~/" class="d-flex align-items-center mb-0 mb-sm-0 me-md-auto link-dark text-decoration-none">
+        <img src="~/img/duende-logo-full.svg" alt="Duende Logo" class="w-100 d-none d-sm-block" />
+        <img src="~/img/duende-logo.svg" alt="Duende Logo" class="w-100 d-block d-sm-none" />
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="/"
+               class="nav-link @(isActive("/"))">
+                <i class="bi bi-house"></i>
+                <span class="ms-2 d-none d-sm-inline">Home</span>
+            </a>
+        </li>
+
+        @{
+            if (Context.User?.Identity?.IsAuthenticated == true)
+            {
+                if (isAdmin)
+                {
+                    <li class="nav-item">
+                        <a href="/admin"
+                            class="nav-link @(isActive("/admin"))">
+                            <i class="bi bi-speedometer2"></i>
+                            <span class="ms-2 d-none d-sm-inline">Admin Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/clients"
+                            class="nav-link @(isActive("/admin/clients"))">
+                            <i class="bi bi-laptop"></i>
+                            <span class="ms-2 d-none d-sm-inline">Clients</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/identityscopes"
+                            class="nav-link @(isActive("/admin/identityscopes"))">
+                            <i class="bi bi-person-badge"></i>
+                            <span class="ms-2 d-none d-sm-inline">Identity Scopes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/apiscopes"
+                            class="nav-link @(isActive("/admin/apiscopes"))">
+                            <i class="bi bi-shield-lock"></i>
+                            <span class="ms-2 d-none d-sm-inline">API Scopes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/serversidesessions"
+                            class="nav-link @(isActive("/serversidesessions"))">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span class="ms-2 d-none d-sm-inline">Server-Side Sessions</span>
+                        </a>
+                    </li>
+                    <li class="border-top my-3"></li>
+                }
+
+                <li class="nav-item">
+                    <a href="/portal" class="nav-link @(isActive("/portal"))">
+                        <i class="bi bi-window-stack"></i>
+                        <span class="ms-2 d-none d-sm-inline">Client Portal</span>
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item">
+                    <a href="/account/login" class="nav-link @(isActive("/account/login"))">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span class="ms-2 d-none d-sm-inline">Login</span>
+                    </a>
+                </li>
+            }
+        }
+
+    </ul>
+
+    @if (!string.IsNullOrWhiteSpace(name))
+    {
+        <hr>
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+
+                @if (!string.IsNullOrWhiteSpace(avatar))
+                {
+                    <img src="@avatar" alt="" width="32" height="32" class="rounded-circle me-2">
+                }
+                else
+                {
+                    <img src="~/img/avatar_default.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                }
+
+                <strong class="d-none d-sm-inline">@name</strong>
+            </a>
+            <ul class="dropdown-menu text-small shadow">
+                <li><a class="dropdown-item" href="/diagnostics">Current Session Info</a></li>
+                <li><a class="dropdown-item" href="/grants">Grants</a></li>
+                <li><a class="dropdown-item" href="/ciba/all">Pending CIBA Requests</a></li>
+                <li><a class="dropdown-item" href="/device">Enter Device Code</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/Account/Logout/Index">Logout</a></li>
+            </ul>
+        </div>
+    }
+</div>
