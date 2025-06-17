@@ -93,13 +93,11 @@ public enum Flow
 
 public class ClientRepository(ConfigurationDbContext context)
 {
-    private readonly ConfigurationDbContext _context = context;
-
     public async Task<IEnumerable<ClientSummaryModel>> GetAllAsync(string? filter = null)
     {
         var grants = new[] { GrantType.AuthorizationCode, GrantType.ClientCredentials };
 
-        var query = _context.Clients
+        var query = context.Clients
             .Include(x => x.AllowedGrantTypes)
             .Where(x => x.AllowedGrantTypes.Count == 1 && x.AllowedGrantTypes.Any(grant => grants.Contains(grant.GrantType)));
 
@@ -120,7 +118,7 @@ public class ClientRepository(ConfigurationDbContext context)
 
     public async Task<EditClientModel?> GetByIdAsync(string id)
     {
-        var client = await _context.Clients
+        var client = await context.Clients
             .Include(x => x.AllowedGrantTypes)
             .Include(x => x.AllowedScopes)
             .Include(x => x.RedirectUris)
@@ -166,26 +164,26 @@ public class ClientRepository(ConfigurationDbContext context)
         ArgumentNullException.ThrowIfNull(clientId);
         ArgumentNullException.ThrowIfNull(secret);
 
-        var client = await _context.Clients
+        var client = await context.Clients
             .Include(x => x.ClientSecrets)
             .SingleOrDefaultAsync(x => x.ClientId == clientId) ?? throw new ArgumentException("Invalid Client Id");
 
         client.ClientSecrets.Clear();
         client.ClientSecrets.Add(new ClientSecret { Value = secret.Sha256(), Description = description });
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
     public async Task ClearClientSecret(string clientId)
     {
         ArgumentNullException.ThrowIfNull(clientId);
 
-        var client = await _context.Clients
+        var client = await context.Clients
             .Include(x => x.ClientSecrets)
             .SingleOrDefaultAsync(x => x.ClientId == clientId) ?? throw new ArgumentException("Invalid Client Id");
 
         client.ClientSecrets.Clear();
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
     public async Task CreateAsync(CreateClientModel model)
@@ -228,15 +226,15 @@ public class ClientRepository(ConfigurationDbContext context)
             frontChannelLogoutPath: "signout-oidc"
         );
 
-        _context.Clients.Add(client.ToEntity());
-        await _context.SaveChangesAsync();
+        context.Clients.Add(client.ToEntity());
+        await context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(EditClientModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        var client = await _context.Clients
+        var client = await context.Clients
             .Include(x => x.AllowedGrantTypes)
             .Include(x => x.AllowedScopes)
             .Include(x => x.RedirectUris)
@@ -308,16 +306,16 @@ public class ClientRepository(ConfigurationDbContext context)
             client.BackChannelLogoutUri = model.BackChannelLogoutUri?.Trim();
         }
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string clientId)
     {
-        var client = await _context.Clients.SingleOrDefaultAsync(x => x.ClientId == clientId)
+        var client = await context.Clients.SingleOrDefaultAsync(x => x.ClientId == clientId)
             ?? throw new ArgumentException("Invalid Client Id");
 
-        _context.Clients.Remove(client);
-        await _context.SaveChangesAsync();
+        context.Clients.Remove(client);
+        await context.SaveChangesAsync();
     }
 
 }

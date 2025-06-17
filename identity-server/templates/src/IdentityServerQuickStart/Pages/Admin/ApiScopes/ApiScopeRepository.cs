@@ -59,12 +59,6 @@ public class ApiScopeRepository(ConfigurationDbContext context)
             return null;
         }
 
-        // Get the list of user claims that are already used by other scopes
-        var usedClaims = _context.ApiScopes
-            .SelectMany(x => x.UserClaims.Select(uc => uc.Type))
-            .Distinct()
-            .ToArray();
-
         // Define a list of well-known user claims
         string[] wellknownClaims = [
             "role",
@@ -88,7 +82,7 @@ public class ApiScopeRepository(ConfigurationDbContext context)
             .Distinct()
             .ToArray();
 
-        // Retun the model
+        // Return the model
         return new ApiScopeModel
         {
             Name = scope.Name,

@@ -7,7 +7,6 @@ $(function() {
 
   $('form :input').on('change', function () {
     $(this).closest('form').attr('data-changed', 'true');
-    console.log('changed')
   });
 
   $('[data-unsaved]').on('click', function () {
