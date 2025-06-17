@@ -4,6 +4,7 @@
 namespace Hosts.ServiceDefaults;
 public static class AppHostServices
 {
+    public const string BffPerf = "bff-perf";
     public const string IdentityServer = "identity-server";
     public const string Api = "api";
     public const string IsolatedApi = "api-isolated";
@@ -24,6 +25,7 @@ public static class AppHostServices
         Api,
         IsolatedApi,
         Bff,
+        BffPerf,
         BffEf,
         BffBlazorWebassembly,
         BffBlazorPerComponent,
@@ -39,13 +41,12 @@ public static class AppHostServices
 
 public static class ServiceDiscovery
 {
-    public static Uri ResolveService(string serviceName)
+    public static Uri ResolveService(string serviceName, string appName = "https")
     {
-        var scheme = "https";
         var host = serviceName;
 
         // Compose the environment variable key
-        var envVarKey = $"services__{host}__{scheme}__0";
+        var envVarKey = $"services__{host}__{appName}__0";
 
         // Try to get the value from environment variables
         var value = Environment.GetEnvironmentVariable(envVarKey);
