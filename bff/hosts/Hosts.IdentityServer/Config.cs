@@ -36,203 +36,86 @@ public static class Config
     private static Uri bffDPopUrl = ServiceDiscovery.ResolveService(AppHostServices.BffDpop);
     private static Uri bffEfUrl = ServiceDiscovery.ResolveService(AppHostServices.BffEf);
     private static Uri bffBlazorPerComponentUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorPerComponent);
-    private static Uri bffBlazorWebAssemblyUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorWebassembly);
-
-    public static IEnumerable<Client> Clients =>
+    private static Uri bffBlazorWebAssemblyUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorWebassembly); public static IEnumerable<Client> Clients =>
     [
-                new Client
-                {
-                    ClientId = "bff",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
+        BuildClient("bff.perf",
+            ServiceDiscovery.ResolveService(AppHostServices.BffPerf, "single"),
+            ServiceDiscovery.ResolveService(AppHostServices.BffPerf, "multi"),
+            new Uri("https://app1.localhost:6002")
+        ),
 
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
+        BuildClient("bff", client =>
+        {
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, bffUrl),
 
-                    RedirectUris = { $"{bffUrl}signin-oidc" },
-                    FrontChannelLogoutUri = $"{bffUrl}signout-oidc",
-                    PostLogoutRedirectUris = { $"{bffUrl}signout-callback-oidc" },
+        BuildClient("bff.multi-frontend.default", client =>
+        {
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, bffMultiFrontendUrl),
 
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
+        BuildClient("bff.multi-frontend.config", client =>
+        {
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, new Uri(bffMultiFrontendUrl, "from-config")),
 
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60,
-                    AccessTokenLifetime = 15 // Force refresh
-                },
-                new Client
-                {
-                    ClientId = "bff.multi-frontend.default",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
+        BuildClient("bff.multi-frontend.with-path", client =>
+        {
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, new Uri(bffMultiFrontendUrl, "with-path")),
 
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
-                    RedirectUris = { $"{bffMultiFrontendUrl}signin-oidc" },
-                    FrontChannelLogoutUri = $"{bffMultiFrontendUrl}signout-oidc",
-                    PostLogoutRedirectUris = { $"{bffMultiFrontendUrl}signout-callback-oidc" },
+        BuildClient("bff.multi-frontend.with-domain", client =>
+        {
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, new Uri("https://app1.localhost:5005")),
 
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
+        BuildClient("bff.dpop", client =>
+        {
+            client.RequireDPoP = true;
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, bffDPopUrl),
 
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60,
-                    AccessTokenLifetime = 15 // Force refresh
-                },
-                new Client
-                {
-                    ClientId = "bff.multi-frontend.config",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
+        BuildClient("bff.ef", client =>
+        {
+            client.BackChannelLogoutUri = $"{bffEfUrl}bff/backchannel";
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, bffEfUrl),
 
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
-                    RedirectUris = { $"{bffMultiFrontendUrl}from-config/signin-oidc" },
-                    FrontChannelLogoutUri = $"{bffMultiFrontendUrl}from-config/signout-oidc",
-                    PostLogoutRedirectUris = { $"{bffMultiFrontendUrl}from-config/signout-callback-oidc" },
+        BuildClient("blazor", client =>
+        {
+            client.AllowedScopes.Add("scope-for-isolated-api");
+        }, bffBlazorWebAssemblyUrl, bffBlazorPerComponentUrl, new Uri("https://localhost:7035"))
+    ];
 
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
 
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60,
-                    AccessTokenLifetime = 15 // Force refresh
-                },
-                new Client
-                {
-                    ClientId = "bff.multi-frontend.with-path",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
+    private static Client BuildClient(string clientId, Action<Client> postConfigure, params Uri[] uris)
+    {
+        var client = BuildClient(clientId, uris);
+        postConfigure(client);
+        return client;
+    }
 
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
-                    RedirectUris = { $"{bffMultiFrontendUrl}with-path/signin-oidc" },
-                    FrontChannelLogoutUri = $"{bffMultiFrontendUrl}signout-oidc",
-                    PostLogoutRedirectUris = { $"{bffMultiFrontendUrl}signout-callback-oidc" },
+    private static Client BuildClient(string clientId, params Uri[] uris) => new Client
+    {
+        ClientId = clientId,
+        ClientSecrets = { new Secret("secret".Sha256()) },
 
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
+        AllowedGrantTypes =
+            {
+                GrantType.AuthorizationCode,
+                GrantType.ClientCredentials,
+                OidcConstants.GrantTypes.TokenExchange
+            },
+        RedirectUris = uris.Select(u => u + "signin-oidc").ToList(),
+        FrontChannelLogoutUri = uris.First() + "signout-oidc",
+        PostLogoutRedirectUris = uris.Select(u => u + "signout-callback-oidc").ToList(),
 
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60,
-                    AccessTokenLifetime = 15 // Force refresh
-                },
-                new Client
-                {
-                    ClientId = "bff.multi-frontend.with-domain",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
+        AllowOfflineAccess = true,
+        AllowedScopes = { "openid", "profile", "api" },
 
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
-                    RedirectUris = { $"https://app1.localhost:5005/signin-oidc" },
-                    FrontChannelLogoutUri = $"https://app1.localhost:5005/signout-oidc",
-                    PostLogoutRedirectUris = { $"https://app1.localhost:5005/signout-callback-oidc" },
-
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
-
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60,
-                    AccessTokenLifetime = 15 // Force refresh
-                },
-                new Client
-                {
-                    ClientId = "bff.dpop",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-                    RequireDPoP = true,
-
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
-
-                    RedirectUris = { $"{bffDPopUrl}signin-oidc" },
-                    FrontChannelLogoutUri = $"{bffDPopUrl}signout-oidc",
-                    PostLogoutRedirectUris = { $"{bffDPopUrl}signout-callback-oidc" },
-
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
-
-                    // Intentionally set lifetime short to see what happens when access and refresh tokens expire
-                    AccessTokenLifetime = 15,
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60
-                },
-                new Client
-                {
-                    ClientId = "bff.ef",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
-                    RedirectUris = { $"{bffEfUrl}signin-oidc" },
-                    FrontChannelLogoutUri = $"{bffEfUrl}signout-oidc",
-                    BackChannelLogoutUri = $"{bffEfUrl}bff/backchannel",
-                    PostLogoutRedirectUris = { $"{bffEfUrl}signout-callback-oidc" },
-
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
-
-                    // Intentionally set lifetime short to see what happens when access and refresh tokens expire
-                    AccessTokenLifetime = 15,
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60
-                },
-
-                new Client
-                {
-                    ClientId = "blazor",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-
-                    AllowedGrantTypes =
-                    {
-                        GrantType.AuthorizationCode,
-                        GrantType.ClientCredentials,
-                        OidcConstants.GrantTypes.TokenExchange
-                    },
-
-                    RedirectUris =
-                    {
-                        $"{bffBlazorWebAssemblyUrl}signin-oidc",
-                        $"{bffBlazorPerComponentUrl}signin-oidc",
-                        "https://localhost:7035/signin-oidc"
-                    },
-                    PostLogoutRedirectUris =
-                    {
-                        $"{bffBlazorWebAssemblyUrl}signout-callback-oidc", $"{bffBlazorPerComponentUrl}signout-callback-oidc"
-                    },
-
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "api", "scope-for-isolated-api" },
-
-                    // Intentionally set lifetime short to see what happens when access and refresh tokens expire
-                    AccessTokenLifetime = 15,
-                    RefreshTokenExpiration = TokenExpiration.Absolute,
-                    AbsoluteRefreshTokenLifetime = 60
-                }
-            ];
-
+        RefreshTokenExpiration = TokenExpiration.Absolute,
+        AbsoluteRefreshTokenLifetime = 60,
+        AccessTokenLifetime = 15 // Force refresh
+    };
 
 }

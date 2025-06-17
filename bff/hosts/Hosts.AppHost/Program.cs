@@ -18,6 +18,18 @@ var bff = builder.AddProject<Projects.Hosts_Bff_InMemory>(AppHostServices.Bff)
     .WithAwaitedReference(api)
     ;
 
+var perf = builder.AddProject<Projects.Hosts_Bff_Performance>(AppHostServices.BffPerf)
+    .WithExternalHttpEndpoints()
+    .WithAwaitedReference(idServer)
+    .WithAwaitedReference(isolatedApi)
+    .WithAwaitedReference(api)
+    .WithEndpoint(6001, isProxied: false, scheme: "https", name: "single")
+    .WithEndpoint(6002, isProxied: false, scheme: "https", name: "multi")
+    //.WithUrl("https://app1.localhost:6002", "https://app1.localhost:6002")
+    //.WithUrl("https://localhost:6002", "https://localhost:6002")
+    //.WithUrl("https://localhost:6002", "https://localhost:6002")
+    ;
+
 var bffMulti = builder.AddProject<Projects.Hosts_Bff_MultiFrontend>(AppHostServices.BffMultiFrontend)
     .WithExternalHttpEndpoints()
     .WithUrl("https://app1.localhost:5005", "https://app1.localhost:5005")
@@ -58,6 +70,7 @@ builder.AddProject<Projects.UserSessionDb>(AppHostServices.Migrations);
 
 idServer
     .WithReference(bff)
+    .WithReference(perf)
     .WithReference(bffMulti)
     .WithReference(bffEf)
     .WithReference(bffBlazorPerComponent)
@@ -73,8 +86,6 @@ builder.AddProject<BffRemoteApi>(AppHostServices.TemplateBffRemote, launchProfil
     .WithHttpsEndpoint(5310, name: "bff-remote");
 
 builder.AddProject<BffBlazorAutoRenderMode>(AppHostServices.TemplateBffBlazor);
-
-
 
 builder.Build().Run();
 
