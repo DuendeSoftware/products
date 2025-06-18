@@ -30,7 +30,8 @@ public class TestData
     public Origin Origin = Origin.Parse($"https://{PropertyName()}:1234");
     public int Port = 1234;
     public PathString Path = new PathString($"/{PropertyName()}");
-    public PathString SubPath = new PathString($"/{PropertyName(nameof(Path))}/{PropertyName()}");
+    public PathString SubPath = new PathString($"/{PropertyName()}");
+    public PathString PathAndSubPath = new PathString($"/{PropertyName(nameof(Path))}/{PropertyName(nameof(SubPath))}");
     public string Scope = PropertyName();
     public string RouteId = PropertyName();
     public string ClusterId = PropertyName();

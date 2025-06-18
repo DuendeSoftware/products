@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Duende.Bff.Yarp;
@@ -18,11 +19,6 @@ public static class RouteBuilderExtensions
     /// <summary>
     /// Adds a remote BFF API endpoint
     /// </summary>
-    /// <param name="endpoints"></param>
-    /// <param name="localPath"></param>
-    /// <param name="apiAddress"></param>
-    /// <param name="yarpTransformBuilder"></param>
-    /// <returns></returns>
     public static IEndpointConventionBuilder MapRemoteBffApiEndpoint(
         this IEndpointRouteBuilder endpoints,
         PathString localPath,
@@ -45,7 +41,8 @@ public static class RouteBuilderExtensions
 
         // Try to resolve the ITransformBuilder from DI. If it is not registered,
         // throw a clearer exception. Otherwise, the call below fails with a less clear exception.
-        var _ = endpoints.ServiceProvider.GetService<ITransformBuilder>() ?? throw new InvalidOperationException("No ITransformBuilder has been registered. Have you called BffBuilder.AddRemoteApis()");
+        _ = endpoints.ServiceProvider.GetService<ITransformBuilder>()
+            ?? throw new InvalidOperationException("No ITransformBuilder has been registered. Have you called BffBuilder.AddRemoteApis()");
 
         return endpoints.MapForwarder(
                 pattern: localPath.Add("/{**catch-all}").Value!,

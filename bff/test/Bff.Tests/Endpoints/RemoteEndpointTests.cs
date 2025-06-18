@@ -611,6 +611,51 @@ public class RemoteEndpointTests : BffTestBase
     }
 
     [Theory, MemberData(nameof(AllSetups))]
+    public async Task can_register_custom_transform(BffSetupType setup)
+    {
+        Bff.OnConfigureEndpoints += app =>
+        {
+            app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path), c =>
+                {
+                    DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken(The.Path, c);
+
+                    // Direct test 
+
+                    c.AddRequestHeader("custom", "with value");
+                    // Add a transform that adds the catchall route value to a header
+                    c.AddRequestTransform(async context =>
+                    {
+                        // One of our customers asked how to access the catch-all route value in subsequent transforms
+                        if (context.HttpContext.Request.RouteValues.TryGetValue("catch-all", out var value) && value is string s)
+                        {
+                            context.ProxyRequest.Headers.Add("catch-all", "/" + s);
+                        }
+                        await Task.CompletedTask;
+                    });
+                })
+                .WithAccessToken();
+        };
+        ConfigureBff(setup);
+
+        await InitializeAsync();
+        await Bff.BrowserClient.Login();
+
+        ApiCallDetails result = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.PathAndSubPath)
+        );
+
+        result.RequestHeaders.Keys.ShouldNotContain("added-by-custom-default-transform");
+        result.RequestHeaders.TryGetValue("custom", out var customValue).ShouldBeTrue();
+        customValue.ShouldBe(["with value"],
+            "The custom header should be added by the custom transform registered in the test.");
+
+        result.RequestHeaders.TryGetValue("catch-all", out var catchAll).ShouldBeTrue();
+        catchAll.ShouldBe([The.SubPath],
+            "The catch-all route value should be added to the request headers by the custom transform registered in the test.");
+    }
+
+
+    [Theory, MemberData(nameof(AllSetups))]
     public async Task endpoint_can_be_configured_with_custom_transform(BffSetupType setup)
     {
         Bff.OnConfigureEndpoints += app =>
