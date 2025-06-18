@@ -66,8 +66,6 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
                 endpoints.MapGet("/", () => DefaultRootResponse);
             }
 
-            endpoints.MapBffManagementEndpoints();
-
         };
     }
 

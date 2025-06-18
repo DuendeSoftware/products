@@ -76,9 +76,6 @@ app.MapControllers()
     .RequireAuthorization()
     .AsBffApiEndpoint();
 
-// login, logout, user, backchannel logout...
-app.MapBffManagementEndpoints();
-
 //////////////////////////////////////
 // proxy app for cross-site APIs
 //////////////////////////////////////

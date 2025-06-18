@@ -96,8 +96,6 @@ app.UseBff();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapBffManagementEndpoints();
-
 app.MapRemoteBffApiEndpoint("/remote-apis/user-token", new Uri("https://localhost:5010"))
     .WithAccessToken(RequiredTokenType.User);
 
