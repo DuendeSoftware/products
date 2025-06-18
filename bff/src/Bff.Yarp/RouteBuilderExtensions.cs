@@ -19,13 +19,30 @@ public static class RouteBuilderExtensions
     /// <summary>
     /// Adds a remote BFF API endpoint
     /// </summary>
+    /// <param name="endpoints">The endpoint route builder to add the endpoint to.</param>
+    /// <param name="localPath">The local path pattern for the BFF API endpoint.</param>
+    /// <param name="apiAddress">The remote API address to which requests will be forwarded.</param>
+    /// <param name="yarpTransformBuilder">
+    /// Optional. An action to configure YARP transforms for this proxy request. 
+    /// If not provided, a default transform builder is used.
+    /// </param>
+    /// <param name="requestConfig">
+    /// Optional. Additional configuration for the forwarded request, such as timeouts or activity propagation.
+    /// If not specified, the default yarp configuration is used.
+    /// </param>
+    /// <returns>An <see cref="IEndpointConventionBuilder"/> for further configuration of the endpoint.</returns>
     public static IEndpointConventionBuilder MapRemoteBffApiEndpoint(
         this IEndpointRouteBuilder endpoints,
         PathString localPath,
         Uri apiAddress,
-        Action<TransformBuilderContext>? yarpTransformBuilder = null)
+        Action<TransformBuilderContext>? yarpTransformBuilder = null,
+        ForwarderRequestConfig? requestConfig = null
+        )
     {
         endpoints.CheckLicense();
+
+        // See if a default request config is registered in DI, otherwise use an empty one
+        requestConfig ??= endpoints.ServiceProvider.GetService<ForwarderRequestConfig>() ?? ForwarderRequestConfig.Empty;
 
         // Configure the yarp transform pipeline. Either use the one provided or the default
         yarpTransformBuilder ??= context =>
@@ -50,7 +67,8 @@ public static class RouteBuilderExtensions
                 configureTransform: context =>
                 {
                     yarpTransformBuilder(context);
-                })
+                },
+                requestConfig: requestConfig)
             .WithMetadata(new BffRemoteApiEndpointMetadata());
     }
 
