@@ -106,9 +106,9 @@ public static class Config
                 GrantType.ClientCredentials,
                 OidcConstants.GrantTypes.TokenExchange
             },
-        RedirectUris = uris.Select(u => u + "signin-oidc").ToList(),
-        FrontChannelLogoutUri = uris.First() + "signout-oidc",
-        PostLogoutRedirectUris = uris.Select(u => u + "signout-callback-oidc").ToList(),
+        RedirectUris = uris.Select(u => new Uri(u, "signin-oidc").ToString()).ToList(),
+        FrontChannelLogoutUri = new Uri(uris.First(), "signout-oidc").ToString(),
+        PostLogoutRedirectUris = uris.Select(u => new Uri(u, "signout-callback-oidc").ToString()).ToList(),
 
         AllowOfflineAccess = true,
         AllowedScopes = { "openid", "profile", "api" },
