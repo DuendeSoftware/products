@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.SessionManagement.SessionStore;
-using Duende.Bff.Tests.TestHosts;
+using Duende.Bff.Tests.TestInfra;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.SessionManagement;
 
-public class ServerSideTicketStoreTests : BffIntegrationTestBase
+public class ServerSideTicketStoreTests : BffTestBase
 {
     private readonly InMemoryUserSessionStore _sessionStore = new();
 
@@ -16,16 +16,19 @@ public class ServerSideTicketStoreTests : BffIntegrationTestBase
                                                                                            services.AddSingleton<IUserSessionStore>(_sessionStore);
                                                                                        };
 
-    [Fact]
-    public async Task StoreAsync_should_remove_conflicting_entries_prior_to_creating_new_entry()
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task StoreAsync_should_remove_conflicting_entries_prior_to_creating_new_entry(BffSetupType setup)
     {
-        await Bff.BffLoginAsync("alice");
+        Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
+        ConfigureBff(setup);
+        await InitializeAsync();
+        await Bff.BrowserClient.Login();
 
-        Bff.BrowserClient.RemoveCookie("bff");
-        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);
+        Bff.BrowserClient.Cookies.Clear(Bff.Url());
+        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub })).Count().ShouldBe(1);
 
-        await Bff.BffOidcLoginAsync();
+        await Bff.BrowserClient.Login();
 
-        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);
+        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub })).Count().ShouldBe(1);
     }
 }

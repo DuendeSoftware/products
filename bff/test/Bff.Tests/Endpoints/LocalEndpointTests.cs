@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
-using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication;
@@ -14,56 +13,13 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 {
     public HttpStatusCode LocalApiResponseStatus { get; set; } = HttpStatusCode.OK;
 
-    private async Task ReturnApiCallDetails(HttpContext context)
-    {
-        var sub = context.User.FindFirst("sub")?.Value;
-        var body = default(string);
-        if (context.Request.HasJsonContentType())
-        {
-            using (var sr = new StreamReader(context.Request.Body))
-            {
-                body = await sr.ReadToEndAsync();
-            }
-        }
-
-        var response = new ApiCallDetails(
-            HttpMethod.Parse(context.Request.Method),
-            context.Request.Path.Value ?? "/",
-            sub,
-            context.User.FindFirst("client_id")?.Value,
-            context.User.Claims.Select(x => new TestClaimRecord(x.Type, x.Value)).ToArray())
-        {
-            Body = body
-        };
-
-        if (LocalApiResponseStatus == HttpStatusCode.OK)
-        {
-            context.Response.StatusCode = 200;
-
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-        }
-        else if (LocalApiResponseStatus == HttpStatusCode.Unauthorized)
-        {
-            await context.ChallengeAsync();
-        }
-        else if (LocalApiResponseStatus == HttpStatusCode.Forbidden)
-        {
-            await context.ForbidAsync();
-        }
-        else
-        {
-            throw new Exception("Invalid LocalApiResponseStatus");
-        }
-    }
-
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task calls_to_authorized_local_endpoint_should_succeed(BffSetupType setup)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.Map(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -88,7 +44,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.Map(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
@@ -114,7 +70,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.Map(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -136,7 +92,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.Map(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
 
@@ -157,7 +113,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.Map(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
         };
@@ -180,7 +136,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.Map(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
         ConfigureBff(setup);
@@ -201,7 +157,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.MapPut(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
         ConfigureBff(setup);
@@ -230,7 +186,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.MapGet(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization();
         };
         ConfigureBff(setup);
@@ -256,7 +212,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.MapGet(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -278,7 +234,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints =>
         {
-            endpoints.MapGet(The.Path, ReturnApiCallDetails)
+            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };

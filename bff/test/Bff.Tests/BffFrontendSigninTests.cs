@@ -203,7 +203,7 @@ public class BffFrontendSigninTests : BffTestBase
     }
 
     [Fact]
-    public async Task When_updating_frontend_then_subsequent_login_uses_new_settings()
+    public async Task When_updating_frontend_then_subsequent_login_uses_new_openid_connect_settings()
     {
         await InitializeAsync();
 
@@ -228,7 +228,35 @@ public class BffFrontendSigninTests : BffTestBase
             .ShouldThrowAsync<InvalidOperationException>();
     }
 
+    [Fact]
+    public async Task When_updating_frontend_then_subsequent_login_uses_new_cookiesettings()
+    {
+        await InitializeAsync();
 
+        var bffFrontend = Some.BffFrontend();
+        AddOrUpdateFrontend(bffFrontend);
+
+        await Bff.BrowserClient.Login()
+            .CheckResponseContent(Bff.DefaultRootResponse);
+
+        Bff.BrowserClient.Cookies.Clear(Bff.Url());
+
+        // Bit weird, but the easiest way to see if the new settings are used is to update
+        // it to a wrong value and see if it throws. 
+        AddOrUpdateFrontend(bffFrontend with
+        {
+            ConfigureCookieOptions = opt =>
+            {
+                opt.Cookie.Name = "my_custom_cookie_name";
+            }
+        });
+
+        await Bff.BrowserClient.Login();
+
+        Bff.BrowserClient.Cookies.GetCookies(Bff.Url())
+            .ShouldContain(c => c.Name == "my_custom_cookie_name" && c.HttpOnly && c.Secure && c.Path == "/");
+
+    }
     [Fact]
     public async Task Default_settings_augment_frontend_settings()
     {

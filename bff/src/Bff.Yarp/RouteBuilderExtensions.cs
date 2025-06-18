@@ -43,6 +43,10 @@ public static class RouteBuilderExtensions
             defaultYarpTransformBuilder(localPath, context);
         };
 
+        // Try to resolve the ITransformBuilder from DI. If it is not registered,
+        // throw a clearer exception. Otherwise, the call below fails with a less clear exception.
+        var _ = endpoints.ServiceProvider.GetService<ITransformBuilder>() ?? throw new InvalidOperationException("No ITransformBuilder has been registered. Have you called BffBuilder.AddRemoteApis()");
+
         return endpoints.MapForwarder(
                 pattern: localPath.Add("/{**catch-all}").Value!,
                 destinationPrefix: apiAddress.ToString(),

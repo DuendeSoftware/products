@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Configuration;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,9 +43,17 @@ internal class ConfigureBffStartupFilter : IStartupFilter
     private static void ConfigureOpenIdConfigurationCacheExpiration(IApplicationBuilder app)
     {
         var frontendStore = app.ApplicationServices.GetRequiredService<FrontendCollection>();
-        var optionsMonitor = app.ApplicationServices.GetRequiredService<IOptionsMonitorCache<OpenIdConnectOptions>>();
+        var oidcOptionsMonitor = app.ApplicationServices.GetRequiredService<IOptionsMonitorCache<OpenIdConnectOptions>>();
+        var cookieOptionsMonitor = app.ApplicationServices.GetRequiredService<IOptionsMonitorCache<CookieAuthenticationOptions>>();
 
         frontendStore.OnFrontendChanged +=
-            changedFrontend => optionsMonitor.TryRemove(changedFrontend.OidcSchemeName);
+            changedFrontend =>
+            {
+                // When the frontend changes, we need to clear the cached options
+                // This make sure the (potentially) new OpenID Connect configuration
+                // and cookie config is loaded
+                cookieOptionsMonitor.TryRemove(changedFrontend.CookieSchemeName);
+                oidcOptionsMonitor.TryRemove(changedFrontend.OidcSchemeName);
+            };
     }
 }

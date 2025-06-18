@@ -1,9 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
-using Duende.Bff.DynamicFrontends;
-using Microsoft.AspNetCore.Authentication;
+using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,17 +14,16 @@ namespace Duende.Bff.Endpoints.Internal;
 /// OIDC configuration to add silent login support
 /// </summary>
 internal class PostConfigureOidcOptionsForSilentLogin(
-    SelectedFrontend selectedFrontend,
+    ActiveOpenIdConnectAuthenticationScheme activeOpenIdConnectScheme,
     IOptions<BffOptions> bffOptions,
-    IOptions<AuthenticationOptions> options, ILoggerFactory logger) : IPostConfigureOptions<OpenIdConnectOptions>
+    ILoggerFactory logger) : IPostConfigureOptions<OpenIdConnectOptions>
 {
-    private readonly string? _defaultChallengeScheme = options.Value.DefaultChallengeScheme;
     private readonly BffOpenIdConnectEvents _events = new(bffOptions, logger.CreateLogger<BffOpenIdConnectEvents>());
 
     /// <inheritdoc />
     public void PostConfigure(string? scheme, OpenIdConnectOptions options)
     {
-        if (_defaultChallengeScheme != scheme && (!selectedFrontend.TryGet(out var frontend) || scheme != frontend.OidcSchemeName))
+        if (!activeOpenIdConnectScheme.ShouldConfigureScheme(Scheme.ParseOrDefault(scheme)))
         {
             return;
         }
