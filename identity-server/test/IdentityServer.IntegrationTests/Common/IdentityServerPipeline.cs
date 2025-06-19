@@ -456,16 +456,13 @@ public class IdentityServerPipeline
         string redirectUri = "https://client2/callback",
         string nonce = "123_nonce",
         string state = "123_state",
-        DateTimeOffset? expires = null,
+        DateTime? expires = null,
         Dictionary<string, string> extraJwt = null,
         Dictionary<string, string> extraForm = null
     )
     {
         var jwtPayload = new Dictionary<string, string>
         {
-            { "iss", clientId },
-            { "aud", BaseUrl },
-            { "exp", (expires ?? DateTimeOffset.UtcNow.AddMinutes(10)).ToUnixTimeSeconds().ToString() },
             { "response_type", responseType },
             { "client_id", clientId },
             { "redirect_uri", redirectUri },
@@ -487,9 +484,13 @@ public class IdentityServerPipeline
             throw new InvalidOperationException("Client key not found");
         }
 
+        expires ??= DateTime.UtcNow.AddMinutes(10);
         var jwt = new JwtSecurityToken(
             new JwtHeader(new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256)),
-            new JwtPayload(jwtPayload.Select(x => new Claim(x.Key, x.Value))));
+            new JwtPayload(clientId, BaseUrl,
+                jwtPayload.Select(x => new Claim(x.Key, x.Value)),
+                notBefore: null,
+                expires: expires));
 
         var jwtHandler = new JwtSecurityTokenHandler();
         var jar = jwtHandler.WriteToken(jwt);

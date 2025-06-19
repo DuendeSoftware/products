@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using IntegrationTests.Common;
@@ -274,7 +275,7 @@ public class PushedAuthorizationTests
     [Theory]
     [InlineData("response_type", "id_token")]
     [InlineData("redirect_uri", "https://client1/callback")]
-    [InlineData("scope","openid profile")]
+    [InlineData("scope", "openid profile")]
     public async Task pushed_authorization_with_authorization_request_parameters_duplicated_in_form_and_request_object_fails(string name, string value)
     {
         var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestUsingJarAsync(
@@ -328,9 +329,7 @@ public class PushedAuthorizationTests
 
     private void ConfigureClientKeys()
     {
-        using var rsa = RSA.Create(2048);
-        var rsaParameters = rsa.ExportParameters(true);
-        var rsaKey = new RsaSecurityKey(rsaParameters);
+        var rsaKey = CryptoHelper.CreateRsaSecurityKey();
         _privateKey = JsonWebKeyConverter.ConvertFromRSASecurityKey(rsaKey);
 
         _publicKey = new JsonWebKey
