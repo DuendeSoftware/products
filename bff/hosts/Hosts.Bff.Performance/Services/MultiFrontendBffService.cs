@@ -3,23 +3,22 @@
 
 using Duende.Bff;
 using Duende.Bff.DynamicFrontends;
+using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
 
-public class MultiFrontendBffService() : BffService(new BffServiceSettings()
-{
-    Uri = "https://*:6002"
-})
+public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings> settings) : BffService(["BffUrl2", "BffUrl3"], config, settings)
 {
     public override void ConfigureServices(IServiceCollection services)
     {
     }
 
-    public override void ConfigureBff(BffBuilder bff) => bff.WithDefaultOpenIdConnectOptions(DefaultOpenIdConfiguration.Apply)
+    public override void ConfigureBff(BffBuilder bff) => bff.WithDefaultOpenIdConnectOptions(o => DefaultOpenIdConfiguration.Apply(o, Settings))
         .AddFrontends(new BffFrontend(BffFrontendName.Parse("default")))
 
         // Note, in order for this to work, we'll need to inject this as config
-        .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(Origin.Parse("https://app1.localhost:6002")));
+        .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(config.GetValue<Origin>("BffUrl3")));
 
     public override void ConfigureApp(WebApplication app) => app.MapGet("/", (SelectedFrontend selectedFrontend) => "multi - " + selectedFrontend.Get().Name);
 }
+

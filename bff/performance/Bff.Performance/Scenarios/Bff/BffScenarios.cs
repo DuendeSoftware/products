@@ -5,11 +5,17 @@ using NBomber.Contracts;
 
 namespace Bff.Performance.Scenarios.Bff;
 
-public class BffScenarios(Uri baseUri)
+public class BffScenarios
 {
-    public ScenarioProps[] Scenarios =
-    [
-        new CallAnonymousLocalApi(baseUri),
-        new CallAuthorizedLocalApi(baseUri)
-    ];
+    public ScenarioProps[] Scenarios;
+
+    public BffScenarios(Uri[] baseUris)
+    {
+        Scenarios = baseUris.SelectMany(x => new ScenarioProps[]
+        {
+            new CallAnonymousLocalApi(x),
+            new CallAuthorizedLocalApi(x)
+        })
+            .ToArray();
+    }
 }

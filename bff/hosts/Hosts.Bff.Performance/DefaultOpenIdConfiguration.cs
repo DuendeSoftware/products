@@ -1,15 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Hosts.Bff.Performance.Services;
 using Hosts.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 public static class DefaultOpenIdConfiguration
 {
-    public static void Apply(OpenIdConnectOptions options)
+    public static void Apply(OpenIdConnectOptions options, BffSettings settings)
     {
-        var authority = ServiceDiscovery.ResolveService(AppHostServices.IdentityServer);
-        options.Authority = authority.ToString();
+        options.Authority = settings.IdentityServerUrl.ToString();
 
         // confidential client using code flow + PKCE
         options.ClientId = "bff.perf";

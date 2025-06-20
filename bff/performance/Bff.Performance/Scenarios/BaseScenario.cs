@@ -9,10 +9,10 @@ using NBomber.CSharp;
 
 namespace Bff.Performance.Scenarios;
 
-public abstract class BaseScenario
+public abstract class BaseScenario(string name)
 {
     public virtual Task Init(IScenarioInitContext c) => Task.CompletedTask;
-    public string Name => GetType().Name;
+    public string Name => GetType().Name + "_" + name;
 
     public HttpStatusCode SuccessStatusCode { get; set; } = HttpStatusCode.OK;
 

@@ -5,7 +5,7 @@ using NBomber.Contracts;
 
 namespace Bff.Performance.Scenarios.Bff;
 
-public class CallAnonymousLocalApi(Uri baseUri) : BaseScenario
+public class CallAnonymousLocalApi(Uri baseUri) : BaseScenario(baseUri.ToString())
 {
     public override Task Init(IScenarioInitContext c)
     {
@@ -16,7 +16,7 @@ public class CallAnonymousLocalApi(Uri baseUri) : BaseScenario
     public override async Task<HttpResponseMessage> RunScenario(IScenarioContext context) => await Client.GetAsync("/local_anon");
 }
 
-public class CallAuthorizedLocalApi(Uri baseUri) : BaseScenario
+public class CallAuthorizedLocalApi(Uri baseUri) : BaseScenario(baseUri.ToString())
 {
     public override async Task Init(IScenarioInitContext c)
     {

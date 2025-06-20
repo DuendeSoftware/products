@@ -5,8 +5,12 @@ using Hosts.Bff.Performance.Services;
 
 var builder = Host.CreateApplicationBuilder();
 
-builder.AddServiceDefaults();
+builder.Services.Configure<ApiSettings>(builder.Configuration);
+builder.Services.Configure<BffSettings>(builder.Configuration);
+builder.Services.Configure<IdentityServerSettings>(builder.Configuration);
 
+builder.Services.AddHostedService<ApiHostedService>();
+builder.Services.AddHostedService<IdentityServerService>();
 builder.Services.AddHostedService<SingleFrontendBffService>();
 builder.Services.AddHostedService<MultiFrontendBffService>();
 // Add services to the container.

@@ -9,5 +9,5 @@ public class BffServiceSettings
 {
     public required string Uri { get; set; }
 
-    public Uri ApiUrl { get; } = ServiceDiscovery.ResolveService(AppHostServices.Api);
+    public Uri ApiUrl { get; } = new Uri("https://localhost:5999");
 }
