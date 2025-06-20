@@ -3,7 +3,6 @@
 
 using System.Net;
 using System.Security.Claims;
-using System.Text.Json;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
@@ -16,6 +15,7 @@ using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit.Abstractions;
+using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;
 using Resource = Duende.Bff.AccessTokenManagement.Resource;
@@ -611,57 +611,146 @@ public class RemoteEndpointTests : BffTestBase
     }
 
     [Theory, MemberData(nameof(AllSetups))]
-    public async Task endpoint_can_be_configured_with_custom_transform(BffSetupType setup)
+    public async Task MapRemoteBffApiEndpoint_can_override_default_transform(BffSetupType setup)
     {
         Bff.OnConfigureEndpoints += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path),
-                    c =>
+            app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path), c =>
+                {
+                    DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken(The.Path, c);
+                    c.AddRequestHeader("custom", "with value");
+                    // Add a transform that adds the catchall route value to a header
+                    c.AddRequestTransform(async context =>
                     {
-                        c.CopyRequestHeaders = true;
-                        DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken(The.Path, c);
-                    })
-                .WithAccessToken(RequiredTokenType.UserOrClient)
-                .SkipAntiforgery();
+                        // One of our customers asked how to access the catch-all route value in subsequent transforms
+                        if (context.HttpContext.Request.RouteValues.TryGetValue("catch-all", out var value) && value is string s)
+                        {
+                            context.ProxyRequest.Headers.Add("catch-all", "/" + s);
+                        }
+                        await Task.CompletedTask;
+                    });
+                })
+                .WithAccessToken();
         };
         ConfigureBff(setup);
 
         await InitializeAsync();
         await Bff.BrowserClient.Login();
 
-        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
-        req.Headers.Add("x-csrf", "1");
-        req.Headers.Add("my-header-to-be-copied-by-yarp", "copied-value");
-        var response = await Bff.BrowserClient.SendAsync(req);
+        ApiCallDetails result = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.PathAndSubPath)
+        );
 
-        response.IsSuccessStatusCode.ShouldBeTrue();
-        response.Content.Headers.ContentType!.MediaType.ShouldBe("application/json");
-        var json = await response.Content.ReadAsStringAsync();
-        var apiResult = JsonSerializer.Deserialize<ApiCallDetails>(json).ShouldNotBeNull();
-        apiResult.RequestHeaders["my-header-to-be-copied-by-yarp"].First().ShouldBe("copied-value");
+        result.RequestHeaders.Keys.ShouldNotContain("added-by-custom-default-transform");
+        result.RequestHeaders.TryGetValue("custom", out var customValue).ShouldBeTrue();
+        customValue.ShouldBe(["with value"],
+            "The custom header should be added by the custom transform registered in the test.");
 
-        response.Content.Headers.Select(x => x.Key).ShouldNotContain("added-by-custom-default-transform",
-            "a custom transform doesn't run the defaults");
+        result.RequestHeaders.TryGetValue("catch-all", out var catchAll).ShouldBeTrue();
+        catchAll.ShouldBe([The.SubPath],
+            "The catch-all route value should be added to the request headers by the custom transform registered in the test.");
     }
 
+    // now I don't like timeouts in tests, but I don't know of a better way to create http timeouts. 
     [Theory, MemberData(nameof(AllSetups))]
-    public async Task can_disable_anti_forgery_check(BffSetupType setup)
+    public async Task Can_register_default_forwarder_config_for_MapRemoteBffApiEndpoint(BffSetupType setup)
     {
+        var shouldDelay = false;
+
+        Api.OnConfigure += app =>
+        {
+            app.Use(async (c, n) =>
+            {
+                if (shouldDelay)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                }
+                await n();
+            });
+        };
+
+        Bff.OnConfigureServices += services =>
+        {
+            // Add a default ForwarderRequestConfig that has a 100 ms timeout
+            services.AddSingleton(new ForwarderRequestConfig()
+            {
+                ActivityTimeout = TimeSpan.FromMilliseconds(100)
+            });
+        };
 
         Bff.OnConfigureEndpoints += app =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
-                .WithAccessToken(RequiredTokenType.None);
+            app.MapRemoteBffApiEndpoint(
+                    localPath: The.Path,
+                    apiAddress: Api.Url(The.Path))
+                .WithAccessToken();
         };
+
         ConfigureBff(setup);
-
         await InitializeAsync();
+        await Bff.BrowserClient.Login();
 
-        Bff.BffOptions.DisableAntiForgeryCheck = (c) => true;
+        // first, ensure that the 'normal' process works, becuase delay's are turned off. 
+        await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.PathAndSubPath)
+        );
 
-        var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
-        var response = await Bff.BrowserClient.SendAsync(req);
+        // turn on delays. Now the timeout of 100 ms should kick in. 
+        shouldDelay = true;
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.PathAndSubPath),
+            expectedStatusCode: HttpStatusCode.BadGateway
+        );
+    }
+
+    // now I don't like timeouts in tests, but I don't know of a better way to create http timeouts. 
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task MapRemoteBffApiEndpoint_can_override_config_to_configure_a_timeout(BffSetupType setup)
+    {
+        var shouldDelay = false;
+
+        Api.OnConfigure += app =>
+        {
+            app.Use(async (c, n) =>
+            {
+                if (shouldDelay)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                }
+                await n();
+            });
+        };
+
+        Bff.OnConfigureEndpoints += app =>
+        {
+            app.MapRemoteBffApiEndpoint(
+                    localPath: The.Path,
+                    apiAddress: Api.Url(The.Path),
+                    requestConfig: new ForwarderRequestConfig()
+                    {
+                        // 100 ms timeout, which is not too short that the normal process might fail,
+                        // but not too long that the test will take forever
+                        ActivityTimeout = TimeSpan.FromMilliseconds(100)
+                    })
+                .WithAccessToken();
+        };
+
+        ConfigureBff(setup);
+        await InitializeAsync();
+        await Bff.BrowserClient.Login();
+
+        // first, ensure that the 'normal' process works, becuase delay's are turned off. 
+        await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.PathAndSubPath)
+        );
+
+        // turn on delays. Now the timeout of 100 ms should kick in. 
+        shouldDelay = true;
+
+        await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.PathAndSubPath),
+            expectedStatusCode: HttpStatusCode.BadGateway
+        );
     }
 }
