@@ -11,6 +11,25 @@ namespace Duende.Bff.Otel;
 internal static partial class LogMessages
 {
     [LoggerMessage(
+        message:
+        $"Deserializing AuthenticationTicket envelope failed or found incorrect version for key {{{OTelParameters.Key}}}")]
+    public static partial void AuthenticationTicketEnvelopeVersionInvalid(this ILogger logger, LogLevel logLevel,
+        string key);
+
+    [LoggerMessage(
+        message:
+        $"Failed to unprotect AuthenticationTicket payload for key {{{OTelParameters.Key}}}")]
+    public static partial void AuthenticationTicketPayloadInvalid(this ILogger logger, Exception? ex, LogLevel logLevel,
+        string key);
+
+    [LoggerMessage(
+        message:
+        $"Failed to deserialize AuthenticationTicket payload for key {{{OTelParameters.Key}}}")]
+    public static partial void AuthenticationTicketFailedToDeserialize(this ILogger logger, Exception? ex,
+        LogLevel logLevel,
+        string key);
+
+    [LoggerMessage(
         Message = "FrontendSelection: No frontends registered in the store.")]
     public static partial void NoFrontendsRegistered(this ILogger logger, LogLevel logLevel);
 
@@ -233,6 +252,12 @@ internal static partial class LogMessages
         $"Frontend selected via path mapping '{{{OTelParameters.PathMapping}}}', but request path '{{{OTelParameters.LocalPath}}}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.")]
     public static partial void FrontendSelectedWithPathCasingIssue(this ILogger logger, LogLevel level,
         string pathMapping, LocalPath localPath);
+
+    [LoggerMessage(
+        level: LogLevel.Warning,
+        message:
+        $"Already mapped {{{OTelParameters.Name}}} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()")]
+    public static partial void AlreadyMappedManagementEndpoint(this ILogger logger, LogLevel logLevel, string name);
 
     public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 

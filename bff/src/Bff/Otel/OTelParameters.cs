@@ -23,4 +23,5 @@ internal class OTelParameters
     public const string Scheme = "Scheme";
     public const string Prompt = "Prompt";
     public const string PathMapping = "PathMapping";
+    public const string Name = "Name";
 }
