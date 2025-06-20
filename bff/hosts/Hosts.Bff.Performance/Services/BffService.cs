@@ -4,19 +4,22 @@
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Yarp;
+using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
 
-public abstract class BffService(BffServiceSettings settings) : BackgroundService
+public abstract class BffService(string[] urlConfigKeys, IConfiguration config, IOptions<BffSettings> bffSettings) : BackgroundService
 {
-    public BffServiceSettings Settings { get; } = settings;
+    public BffSettings Settings { get; } = bffSettings.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var builder = WebApplication.CreateBuilder();
+        var urls = urlConfigKeys.Select(x => config[x]).ToArray();
 
+        var builder = WebApplication.CreateBuilder();
+        builder.AddServiceDefaults();
         // Configure Kestrel to listen on the specified Uri
-        builder.WebHost.UseUrls(Settings.Uri);
+        builder.WebHost.UseUrls(urls);
 
         builder.Services.AddAuthorization();
         ConfigureServices(builder.Services);

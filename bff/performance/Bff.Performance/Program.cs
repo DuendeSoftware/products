@@ -26,15 +26,29 @@
 // with distributed cache + short lifecycle
 
 using Bff.Performance.Scenarios.Bff;
+using MessagePack.Resolvers;
+using Microsoft.Extensions.Configuration;
 using NBomber.Contracts.Stats;
 using NBomber.CSharp;
 using NBomber.Http;
 
+var config = new ConfigurationBuilder()
+    .AddEnvironmentVariables()
+    .AddCommandLine(args)
+    .AddJsonFile("appsettings.json", optional: true)
+    .Build();
+
+var urls = config.GetSection("BffUrls").Get<Uri[]>();
+
+if (urls == null || urls.Length == 0)
+{
+    throw new InvalidOperationException("BffUrls configuration is missing or empty.");
+}
 NBomberRunner
-    .RegisterScenarios(new BffScenarios(new Uri("https://localhost:6001")).Scenarios)
+    .RegisterScenarios(new BffScenarios(urls).Scenarios)
     .WithWorkerPlugins(new HttpMetricsPlugin())
     .WithReportingInterval(TimeSpan.FromSeconds(5))
     .WithReportFormats(
         ReportFormat.Csv, ReportFormat.Html
     )
-    .Run();
+    .Run(args);
