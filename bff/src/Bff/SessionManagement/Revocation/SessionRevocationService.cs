@@ -32,7 +32,7 @@ internal class SessionRevocationService(
             filter.SessionId = null;
         }
 
-        logger.LogDebug("Revoking sessions for sub {sub} and sid {sid}", filter.SubjectId, filter.SessionId);
+        logger.LogDebug("Revoking sessions for sub {Sub} and sid {Sid}", filter.SubjectId, filter.SessionId);
 
         if (_options.RevokeRefreshTokenOnLogout)
         {
@@ -46,7 +46,7 @@ internal class SessionRevocationService(
                         new UserRefreshToken(RefreshToken.Parse(refreshToken),
                         options.Value.DPoPJsonWebKey), new UserTokenRequestParameters(), ct);
 
-                    logger.LogDebug("Refresh token revoked for sub {sub} and sid {sid}", ticket.GetSubjectId(), ticket.GetSessionId());
+                    logger.LogDebug("Refresh token revoked for sub {Sub} and sid {Sid}", ticket.GetSubjectId(), ticket.GetSessionId());
                 }
             }
         }

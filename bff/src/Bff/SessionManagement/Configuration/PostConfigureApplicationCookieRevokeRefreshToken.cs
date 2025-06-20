@@ -43,7 +43,7 @@ internal class PostConfigureApplicationCookieRevokeRefreshToken(
         {
             // Todo: Ev: logging with sourcegens
             // todo: ev: should we have userparameters here?
-            logger.LogDebug("Revoking user's refresh tokens in OnSigningOut for subject id: {subjectId}", ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
+            logger.LogDebug("Revoking user's refresh tokens in OnSigningOut for subject id: {Sub}", ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
             await ctx.HttpContext.RevokeRefreshTokenAsync(ct: ctx.HttpContext.RequestAborted);
 
             await inner.Invoke(ctx);

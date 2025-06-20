@@ -80,7 +80,7 @@ internal class ServerSideTicketStore(
         var ticket = session.Deserialize(_protector, logger);
         if (ticket != null)
         {
-            logger.LogDebug("Ticket loaded for key: {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+            logger.LogDebug("Ticket loaded for key: {Key}, with expiration: {Expiration}", key, ticket.GetExpiration());
             return ticket;
         }
 

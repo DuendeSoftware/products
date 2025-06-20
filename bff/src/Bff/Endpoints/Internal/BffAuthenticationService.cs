@@ -33,7 +33,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
             }
 
             // Todo: EV: not sure.
-            logger.LogWarning("Authentiating scheme: {scheme}", scheme);
+            logger.LogWarning("Authentiating scheme: {Scheme}", scheme);
             await _inner.SignOutAsync(context, frontend.OidcSchemeName, properties);
             return;
         }
@@ -53,7 +53,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
             // Todo: EV: not sure.
             // It looks like all schemes are authentiated, even if we only want the frontend scheme to be triggered.
             // Force the cookie scheme to be authentiated. LIkely this means it happens twice
-            logger.LogWarning("Authentiating scheme: {scheme}", scheme);
+            logger.LogWarning("Authentiating scheme: {Scheme}", scheme);
             return await _inner.AuthenticateAsync(context, frontend.CookieSchemeName);
         }
 

@@ -76,7 +76,6 @@ internal class SessionCleanupHost(
         {
             if (ct.IsCancellationRequested)
             {
-                logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
@@ -86,7 +85,6 @@ internal class SessionCleanupHost(
             }
             catch (TaskCanceledException)
             {
-                logger.LogDebug("TaskCanceledException. Exiting.");
                 break;
             }
 
@@ -95,13 +93,12 @@ internal class SessionCleanupHost(
             catch (Exception ex)
 #pragma warning restore CA1031
             {
-                logger.LogError("Task.Delay exception: {Message}. Exiting.", ex.Message);
+                logger.LogError(ex, "Failed to cleanup session");
                 break;
             }
 
             if (ct.IsCancellationRequested)
             {
-                logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
@@ -123,7 +120,7 @@ internal class SessionCleanupHost(
         catch (Exception ex)
 #pragma warning restore CA1031
         {
-            logger.LogError("Exception deleting expired sessions: {exception}", ex.Message);
+            logger.LogError(ex, "Failed to cleanup expired sessions");
         }
     }
 

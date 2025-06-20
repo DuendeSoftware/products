@@ -14,7 +14,7 @@ internal class NopSessionRevocationService(ILogger<NopSessionRevocationService> 
     /// <inheritdoc />
     public Task RevokeSessionsAsync(UserSessionsFilter filter, CT ct = default)
     {
-        logger.LogDebug("Nop implementation of session revocation for sub: {sub}, and sid: {sid}. Implement ISessionRevocationService to provide your own implementation.", filter.SubjectId, filter.SessionId);
+        logger.LogDebug("Nop implementation of session revocation for sub: {Sub}, and sid: {Sid}. Implement ISessionRevocationService to provide your own implementation.", filter.SubjectId, filter.SessionId);
         return Task.CompletedTask;
     }
 }
