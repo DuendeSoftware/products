@@ -38,7 +38,6 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
             try
             {
                 await cache.RemoveAsync(BuildCacheKey(changedFrontend), _stopping.Token);
-
             }
             catch (OperationCanceledException)
             {
@@ -50,12 +49,10 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
                 throw;
             }
         };
-
     }
 
     public async Task<string?> GetIndexHtmlAsync(CT ct = default)
     {
-
         if (!_selectedFrontend.TryGet(out var frontend))
         {
             // Todo: log
@@ -67,50 +64,45 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         try
         {
             return await _cache.GetOrCreateAsync(cacheKey, async (ct1) =>
-            {
-                var client = _clientFactory.CreateClient(_options.Value.IndexHtmlClientName ?? Constants.HttpClientNames.IndexHtmlHttpClient);
-
-                var response = await client.GetAsync(frontend.IndexHtmlUrl, ct1);
-                if (response.StatusCode != HttpStatusCode.OK)
                 {
+                    var client = _clientFactory.CreateClient(_options.Value.IndexHtmlClientName ??
+                                                             Constants.HttpClientNames.IndexHtmlHttpClient);
+
+                    var response = await client.GetAsync(frontend.IndexHtmlUrl, ct1);
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        // Todo: log
+                        throw new PreventCacheException();
+                    }
+
                     // Todo: log
-                    throw new PreventCacheException();
-                }
 
-                // Todo: log
+                    var html = await response.Content.ReadAsStringAsync(ct1);
 
-                var html = await response.Content.ReadAsStringAsync(ct1);
+                    if (_transformer == null)
+                    {
+                        return html;
+                    }
 
-                if (_transformer == null)
-                {
-                    return html;
-                }
-
-                var transformed = await _transformer.Transform(html, ct1);
-                return transformed;
-
-            },
+                    var transformed = await _transformer.Transform(html, ct1);
+                    return transformed;
+                },
                 options: new HybridCacheEntryOptions()
                 {
                     Expiration = TimeSpan.FromMinutes(5)
                 },
                 cancellationToken: ct);
-
         }
         catch (PreventCacheException)
         {
             return null;
         }
-
     }
 
     private static string BuildCacheKey(BffFrontend frontend) => "Duende.Bff.IndexHtml:" + frontend.Name;
 
     public class PreventCacheException : Exception
     {
-        public PreventCacheException(string message) : base(message)
-        {
-        }
     }
 
     public async ValueTask DisposeAsync()
@@ -119,4 +111,3 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         _stopping.Dispose();
     }
 }
-

@@ -114,7 +114,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
             Claims = claims.ToArray()
         };
 
-        _logger.LogDebug("Persisting Authentication State");
+        _logger.PersistingAuthenticationState(LogLevel.Debug);
 
         _state.PersistAsJson(nameof(ClaimsPrincipalRecord), principal);
     }
@@ -139,11 +139,11 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         var sub = authenticationState.User.FindFirstValue(JwtClaimTypes.Subject);
 
         var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter
-        {
-            SessionId = sid,
-            SubjectId = sub
-        },
-        ct);
+            {
+                SessionId = sid,
+                SubjectId = sub
+            },
+            ct);
         return sessions.Count != 0;
     }
 }
