@@ -55,7 +55,7 @@ public class BffFrontendSigninTests : BffTestBase
     [Fact]
     public async Task Can_add_frontends_using_AddFrontends_ExtensionMethod()
     {
-        IdentityServer.AddClientFor(Some.BffFrontend(), Bff.Url());
+        IdentityServer.AddClientFor(Some.BffFrontend(), [Bff.Url()]);
         Bff.OnConfigureBff += bff => bff.AddFrontends(Some.BffFrontend());
 
         await InitializeAsync();
@@ -81,7 +81,7 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, Bff.Url());
+        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
 
@@ -113,7 +113,7 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, Bff.Url());
+        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
 
@@ -139,7 +139,7 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, Bff.Url());
+        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
         await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
@@ -163,7 +163,7 @@ public class BffFrontendSigninTests : BffTestBase
             },
         });
 
-        IdentityServer.AddClientFor(frontEnd, Bff.Url());
+        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
 
         Bff.AddOrUpdateFrontend(frontEnd);
 

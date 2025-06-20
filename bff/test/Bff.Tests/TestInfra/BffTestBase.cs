@@ -67,14 +67,15 @@ public abstract class BffTestBase : IAsyncDisposable
         {
             // We're using a frontend to configure the BFF
             // This automatically adds the middleware needed to configure BFF
-            AddOrUpdateFrontend(Some.BffFrontend() with
+            CurrentFrontend = Some.BffFrontend() with
             {
                 ConfigureCookieOptions = options =>
                 {
                     configureCookie?.Invoke(options);
                 },
                 ConfigureOpenIdConnectOptions = openIdConfiguration
-            });
+            };
+            AddOrUpdateFrontend(CurrentFrontend);
         }
         else if (setup == BffSetupType.V4Bff)
         {
@@ -187,7 +188,12 @@ public abstract class BffTestBase : IAsyncDisposable
         }
 
         Bff.AddOrUpdateFrontend(frontend);
-        IdentityServer.AddClientFor(frontend, Bff.Url());
+        List<Uri> baseUris = [Bff.Url()];
+        if (frontend.SelectionCriteria.MatchingOrigin != null)
+        {
+            baseUris.Add(frontend.SelectionCriteria.MatchingOrigin.ToUri());
+        }
+        IdentityServer.AddClientFor(frontend, baseUris);
     }
 
 
@@ -221,6 +227,7 @@ public abstract class BffTestBase : IAsyncDisposable
     }
 
     private List<Claim> _customUserClaims = [];
+    public BffFrontend? CurrentFrontend;
 
     protected void AddCustomUserClaims(params Claim[] claims) => _customUserClaims.AddRange(claims);
 
@@ -236,5 +243,7 @@ public abstract class BffTestBase : IAsyncDisposable
 
             return Task.CompletedTask;
         };
+
+    protected void AdvanceClock(TimeSpan by) => The.Clock.SetUtcNow(The.Clock.GetUtcNow().Add(by));
 }
 
