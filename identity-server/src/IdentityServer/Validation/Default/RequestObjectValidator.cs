@@ -118,7 +118,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
 
     public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request)
     {
-        // Check that the endpoint is still enabled at the time of validation, in case an existing PAR record 
+        // Check that the endpoint is still enabled at the time of validation, in case an existing PAR record
         // is used after PAR is disabled.
         if (!_options.Endpoints.EnablePushedAuthorizationEndpoint)
         {
@@ -139,7 +139,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         // Record the reference value, so we can know that PAR did happen
         request.PushedAuthorizationReferenceValue = GetReferenceValue(request);
         // Copy the PAR into the raw request so that validation will use the pushed parameters
-        // But keep the query parameters we add that indicate that we have processed 
+        // But keep the query parameters we add that indicate that we have processed
         // prompt and max_age, as those are not pushed
         var processedPrompt = request.Raw[Constants.ProcessedPrompt];
         var processedMaxAge = request.Raw[Constants.ProcessedMaxAge];
@@ -284,13 +284,30 @@ internal class RequestObjectValidator : IRequestObjectValidator
                 JwtClaimTypes.Audience
             };
 
+            var clientAuthenticationParameters = new[]
+            {
+                OidcConstants.TokenRequest.ClientId,
+                OidcConstants.TokenRequest.ClientSecret,
+                OidcConstants.TokenRequest.ClientAssertion,
+                OidcConstants.TokenRequest.ClientAssertionType
+            };
+
             // merge jwt payload values into original request parameters
             // 1. clear the keys in the raw collection for every key found in the request object
+            // if this is called during PAR, we return an error when finding a payload value present in the request parameters,
+            // unless the duplicate parameter is allowed to be duplicated (only if they're used for client authentication)
             foreach (var claimType in jwtRequestValidationResult.Payload.Select(c => c.Type).Distinct())
             {
                 var qsValue = request.Raw.Get(claimType);
                 if (qsValue != null)
                 {
+                    if (request.AuthorizeRequestType == AuthorizeRequestType.PushedAuthorization &&
+                        !clientAuthenticationParameters.Contains(claimType))
+                    {
+                        LogError("duplicate parameter type found in the request object and request parameters", claimType, request);
+                        return Invalid(request, error: OidcConstants.AuthorizeErrors.InvalidRequest, description: "Invalid request");
+                    }
+
                     request.Raw.Remove(claimType);
                 }
             }
