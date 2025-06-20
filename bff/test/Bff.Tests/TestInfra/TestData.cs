@@ -46,6 +46,7 @@ public class TestData
     public FakeTimeProvider Clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
 
     public DateTimeOffset CurrentTime => Clock.GetUtcNow();
+    public string UserSessionKey = PropertyName();
 
     public Type TokenRetrieverType = typeof(TestTokenRetriever);
 

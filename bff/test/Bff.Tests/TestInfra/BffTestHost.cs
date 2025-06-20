@@ -28,16 +28,8 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
     public override void Initialize()
     {
-        var cookieContainer = new CookieContainer();
-        var cookieHandler = new CookieHandler(Internet, cookieContainer);
-        var redirectHandler = new RedirectHandler(WriteOutput)
-        {
-            InnerHandler = cookieHandler
-        };
-        BrowserClient = new BffHttpClient(redirectHandler, cookieContainer, identityServer)
-        {
-            BaseAddress = Url()
-        };
+        var baseAddress = Url();
+        BrowserClient = BuildBrowserClient(baseAddress);
 
         OnConfigureServices += services =>
         {
@@ -68,6 +60,21 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
             endpoints.MapBffManagementEndpoints();
 
+        };
+    }
+
+    public BffHttpClient BuildBrowserClient(Uri baseAddress, CookieContainer? cookieContainer = null)
+    {
+        cookieContainer ??= new CookieContainer();
+        var cookieHandler = new CookieHandler(Internet, cookieContainer);
+        var redirectHandler = new RedirectHandler(WriteOutput)
+        {
+            InnerHandler = cookieHandler
+        };
+
+        return new BffHttpClient(redirectHandler, cookieContainer, identityServer)
+        {
+            BaseAddress = baseAddress
         };
     }
 

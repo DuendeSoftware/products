@@ -52,7 +52,7 @@ public class TestDataBuilder(TestData the)
     public BffFrontend NeverMatchingFrontEnd() =>
         new()
         {
-            Name = BffFrontendName.Parse("should not be found"),
+            Name = BffFrontendName.Parse("should_not_be_found"),
             SelectionCriteria = new FrontendSelectionCriteria()
             {
                 MatchingOrigin = Origin.Parse("https://will-not-be-found"),
@@ -177,5 +177,16 @@ public class TestDataBuilder(TestData the)
     internal FrontendProxyConfiguration FrontendProxyConfiguration() => new()
     {
         RemoteApis = [RemoteApiConfiguration()],
+    };
+
+    public UserSession UserSession() => new()
+    {
+        Key = The.UserSessionKey,
+        SessionId = "sid",
+        SubjectId = "sub",
+        Created = new DateTime(2020, 3, 1, 9, 12, 33, DateTimeKind.Utc),
+        Renewed = new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc),
+        Expires = new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc),
+        Ticket = "ticket"
     };
 }

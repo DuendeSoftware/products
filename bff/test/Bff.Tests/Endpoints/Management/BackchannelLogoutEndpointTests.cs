@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.DynamicFrontends;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestInfra;
 using Xunit.Abstractions;
@@ -11,9 +12,9 @@ namespace Duende.Bff.Tests.Endpoints.Management;
 public class BackchannelLogoutEndpointTests : BffTestBase
 {
     public BackchannelLogoutEndpointTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureBff += bff =>
-                                                                                           {
-                                                                                               bff.AddServerSideSessions();
-                                                                                           };
+    {
+        bff.AddServerSideSessions();
+    };
 
     public override async Task InitializeAsync()
     {
@@ -100,13 +101,11 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
     [Theory]
     [MemberData(nameof(AllSetups))]
-    public async Task when_BackchannelLogoutAllUserSessions_is_false_backchannel_logout_should_only_logout_one_session(BffSetupType setup)
+    public async Task when_BackchannelLogoutAllUserSessions_is_false_backchannel_logout_should_only_logout_one_session(
+        BffSetupType setup)
     {
         ConfigureBff(setup);
-        Bff.SetBffOptions += options =>
-        {
-            options.BackchannelLogoutAllUserSessions = false;
-        };
+        Bff.SetBffOptions += options => { options.BackchannelLogoutAllUserSessions = false; };
 
         await InitializeAsync();
 
@@ -121,31 +120,38 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
-            sessions.Count().ShouldBe(2);
-        }
+        (await GetUserSessions()).Count.ShouldBe(2);
 
         await Bff.BrowserClient.RevokeIdentityServerSession();
 
         {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
+            var sessions = await GetUserSessions();
             var session = sessions.Single();
             session.SessionId.ShouldBe(The.Sid);
         }
     }
 
+    /// <summary>
+    /// Get the user sessions for the provided frontend. If not provided, then the current frontend (if any) is used.
+    /// </summary>
+    /// <param name="forFrontend"></param>
+    /// <returns></returns>
+    private async Task<IReadOnlyCollection<UserSession>> GetUserSessions(BffFrontend? forFrontend = null)
+    {
+        using (var scope = Bff.ResolveForFrontend(forFrontend ?? CurrentFrontend))
+        {
+            var sessionStore = scope.Resolve<IUserSessionStore>();
+            return await sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
+        }
+    }
+
     [Theory]
     [MemberData(nameof(AllSetups))]
-    public async Task when_BackchannelLogoutAllUserSessions_is_false_backchannel_logout_should_logout_all_sessions(BffSetupType setup)
+    public async Task when_BackchannelLogoutAllUserSessions_is_false_backchannel_logout_should_logout_all_sessions(
+        BffSetupType setup)
     {
         ConfigureBff(setup);
-        Bff.SetBffOptions += options =>
-        {
-            options.BackchannelLogoutAllUserSessions = true;
-        };
+        Bff.SetBffOptions += options => { options.BackchannelLogoutAllUserSessions = true; };
 
         await InitializeAsync();
 
@@ -160,19 +166,10 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
-            sessions.Count().ShouldBe(2);
-        }
+        (await GetUserSessions()).Count.ShouldBe(2);
 
         await Bff.BrowserClient.RevokeIdentityServerSession();
 
-        {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
-            sessions.ShouldBeEmpty();
-        }
+        (await GetUserSessions()).ShouldBeEmpty();
     }
 }
-
