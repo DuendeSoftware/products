@@ -406,6 +406,7 @@ namespace Duende.Bff.DynamicFrontends
         public string Scheme { get; init; }
         public bool Equals(Microsoft.AspNetCore.Http.HttpRequest? request) { }
         public override string ToString() { }
+        public System.Uri ToUri() { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(string origin) { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(System.Uri uri) { }
     }
@@ -458,6 +459,10 @@ namespace Duende.Bff.SessionManagement.Revocation
 }
 namespace Duende.Bff.SessionManagement.SessionStore
 {
+    public interface IUserSessionPartitionKeyBuilder
+    {
+        string? BuildPartitionKey();
+    }
     public interface IUserSessionStore
     {
         System.Threading.Tasks.Task CreateUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSession session, System.Threading.CancellationToken ct = default);

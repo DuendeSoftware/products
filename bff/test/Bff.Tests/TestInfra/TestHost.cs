@@ -1,13 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.TestHost;
 
 namespace Duende.Bff.Tests.TestInfra;
 
 public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposable
 {
-
     internal TestDataBuilder Some => context.Some;
     public TestData The => context.The;
 
@@ -19,7 +19,41 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
     public TestServer Server { get; private set; } = null!;
 
-    private TestLoggerProvider Logger { get; } = new(context.WriteOutput, baseAddress + " - ");
+    private TestLoggerProvider Logger { get; } = new(context.WriteOutput, baseAddress.Host + " - ");
+
+    /// <summary>
+    /// Allows you to resolve a service directly from the container AS IF it's requested for a specific frontend
+    /// Normally, this can only happen if the request is made in a HTTP context, but this method allows you to simulate that.
+    ///
+    /// This is needed because the SelectedFrontend is set in the HttpContext, and some services depend on that.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public ScopedServiceProvider ResolveForFrontend(BffFrontend? selectedFrontend)
+    {
+        if (_appServices == null)
+        {
+            throw new InvalidOperationException("Not yet initialized");
+        }
+
+        // not calling dispose on scope on purpose
+        var serviceScope = _appServices.GetRequiredService<IServiceScopeFactory>()
+            .CreateScope();
+
+        // Simulate the fact that we're running in a http context. 
+        var accessor = serviceScope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+        accessor.HttpContext = new DefaultHttpContext();
+        if (selectedFrontend != null)
+        {
+            // Set the frontend in the HttpContext. 
+            serviceScope.ServiceProvider.GetRequiredService<SelectedFrontend>()
+                .Set(selectedFrontend);
+        }
+
+        // return a ScopedServiceProvider that will reset the HttpContext when disposed
+        // This allows callers to control how long this http context is valid
+        return new ScopedServiceProvider(serviceScope, () => accessor.HttpContext = null);
+    }
 
     public T Resolve<T>() where T : notnull
     {
@@ -27,9 +61,16 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
         {
             throw new InvalidOperationException("Not yet initialized");
         }
+
         // not calling dispose on scope on purpose
-        return _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
+        var serviceScope = _appServices.GetRequiredService<IServiceScopeFactory>()
+            .CreateScope();
+
+        return serviceScope
+            .ServiceProvider
+            .GetRequiredService<T>();
     }
+
 
     public Uri Url(string? path = null)
     {
@@ -44,7 +85,6 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
     public virtual void Initialize()
     {
-
     }
 
     public async Task InitializeAsync()
@@ -92,16 +132,10 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     protected virtual void ConfigureApp(IApplicationBuilder app)
     {
         _appServices = app.ApplicationServices;
-        app.Use(async (c, n) =>
-        {
-            await n();
-        });
+        app.Use(async (c, n) => { await n(); });
         OnConfigure(app);
 
-        app.UseEndpoints(endpoints =>
-        {
-            OnConfigureEndpoints(endpoints);
-        });
+        app.UseEndpoints(endpoints => { OnConfigureEndpoints(endpoints); });
     }
 
     public async ValueTask DisposeAsync()
@@ -121,6 +155,17 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
             {
                 resource.Dispose();
             }
+        }
+    }
+
+    public class ScopedServiceProvider(IServiceScope scope, Action onDispose) : IDisposable
+    {
+        public T Resolve<T>() where T : notnull => scope.ServiceProvider.GetRequiredService<T>();
+
+        public void Dispose()
+        {
+            onDispose();
+            scope.Dispose();
         }
     }
 }

@@ -4,6 +4,7 @@
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
 using Duende.Bff.Tests.TestInfra;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Xunit.Abstractions;
 
@@ -18,8 +19,6 @@ public class CookieSlidingTests : BffTestBase
         Bff.OnConfigureBff += bff =>
             bff.AddServerSideSessions();
 
-    private void AdvanceClock(TimeSpan by) => The.Clock.SetUtcNow(The.Clock.GetUtcNow().Add(by));
-
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task user_endpoint_cookie_should_slide(BffSetupType setup)
@@ -28,19 +27,18 @@ public class CookieSlidingTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
+        var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
-        var ticketStore = Bff.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await GetTicket(session.Key);
         firstTicket.ShouldNotBeNull();
 
         AdvanceClock(TimeSpan.FromMinutes(8));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync()).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await GetTicket(session.Key);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
@@ -56,19 +54,18 @@ public class CookieSlidingTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
+        var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
-        var ticketStore = Bff.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await GetTicket(session.Key);
         firstTicket.ShouldNotBeNull();
 
         AdvanceClock(TimeSpan.FromMinutes(8));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await GetTicket(session.Key);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
@@ -97,20 +94,19 @@ public class CookieSlidingTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
+        var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
-        var ticketStore = Bff.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await GetTicket(session.Key);
         firstTicket.ShouldNotBeNull();
 
         shouldRenew = true;
         AdvanceClock(TimeSpan.FromSeconds(1));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync()).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await GetTicket(session.Key);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
@@ -139,20 +135,19 @@ public class CookieSlidingTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
+        var sessions = await GetUserSessions();
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
-        var ticketStore = Bff.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await GetTicket(session.Key);
         firstTicket.ShouldNotBeNull();
 
         shouldRenew = true;
         AdvanceClock(TimeSpan.FromSeconds(1));
         (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await GetTicket(session.Key);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
@@ -164,4 +159,22 @@ public class CookieSlidingTests : BffTestBase
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
     }
+
+    private async Task<IReadOnlyCollection<UserSession>> GetUserSessions()
+    {
+        using (var scope = Bff.ResolveForFrontend(CurrentFrontend))
+        {
+            var sessionStore = scope.Resolve<IUserSessionStore>();
+            return await sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
+        }
+    }
+    private async Task<AuthenticationTicket?> GetTicket(string key)
+    {
+        using (var scope = Bff.ResolveForFrontend(CurrentFrontend))
+        {
+            var sessionStore = scope.Resolve<IServerTicketStore>();
+            return await sessionStore.RetrieveAsync(key);
+        }
+    }
+
 }

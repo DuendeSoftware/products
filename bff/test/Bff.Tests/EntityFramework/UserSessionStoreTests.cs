@@ -1,29 +1,49 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.DynamicFrontends;
 using Duende.Bff.SessionManagement.SessionStore;
+using Duende.Bff.Tests.SessionManagement;
 using Duende.Bff.Tests.TestInfra;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using UserSessionDb;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.EntityFramework.Tests;
 
-public class UserSessionStoreTests
+public class UserSessionStoreTests : IAsyncLifetime
 {
     private readonly IUserSessionStore _subject;
     private readonly SessionDbContext _database;
+    private FakeHttpContextAccessor _fakeHttpContextAccessor;
+    private ServiceProvider _provider;
+
+    public TestData The = new TestData();
+    public TestDataBuilder Some => new TestDataBuilder(The);
+    private readonly string _dbFilePath;
 
     public UserSessionStoreTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
+        _fakeHttpContextAccessor = new FakeHttpContextAccessor();
+        _dbFilePath = Path.Combine(Path.GetTempPath(), $"test-{Guid.NewGuid():N}.sqlite");
+        var connectionString = $"Data Source={_dbFilePath}";
+
         services
+            .AddSingleton<SelectedFrontend>()
+            .AddSingleton<IHttpContextAccessor>(_fakeHttpContextAccessor)
             .AddLogging(l => l.AddProvider(new TestLoggerProvider(output.WriteLine, "db")))
             .AddBff()
-            .AddEntityFrameworkServerSideSessions(options => options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
-        var provider = services.BuildServiceProvider();
+            .AddEntityFrameworkServerSideSessions(options => options.UseSqlite(connectionString, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName)));
 
-        _subject = provider.GetRequiredService<IUserSessionStore>();
-        _database = provider.GetRequiredService<SessionDbContext>();
+        services.AddDataProtection(s => s.ApplicationDiscriminator = "bob");
+
+        _provider = services.BuildServiceProvider();
+
+        _subject = _provider.GetRequiredService<IUserSessionStore>();
+        _database = _provider.GetRequiredService<SessionDbContext>();
+
     }
 
     [Fact]
@@ -31,45 +51,66 @@ public class UserSessionStoreTests
     {
         _database.UserSessions.Count().ShouldBe(0);
 
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = "key123",
-            SessionId = "sid",
-            SubjectId = "sub",
-            Created = new DateTime(2020, 3, 1, 9, 12, 33, DateTimeKind.Utc),
-            Renewed = new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc),
-            Expires = new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc),
-            Ticket = "ticket"
-        });
+        await _subject.CreateUserSessionAsync(Some.UserSession());
 
         _database.UserSessions.Count().ShouldBe(1);
     }
 
     [Fact]
+    public async Task CreateUserSessions_sessions_are_unique_per_frontend()
+    {
+        await _subject.CreateUserSessionAsync(Some.UserSession());
+        await _subject.CreateUserSessionAsync(Some.UserSession());
+
+        _database.UserSessions.Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task CreateUserSessions_are_partitioned_per_frontend()
+    {
+        await _subject.CreateUserSessionAsync(Some.UserSession());
+
+        using var session = UseFrontend(Some.BffFrontend());
+        {
+            await _subject.CreateUserSessionAsync(Some.UserSession());
+        }
+
+        _database.UserSessions.Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task GetUserSessionAsync_should_work_for_multi_frontends()
+    {
+        // Create a session (without frontend)
+        await _subject.CreateUserSessionAsync(Some.UserSession());
+
+        var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
+
+        // Now create a session (same sid, different ticket) in a different frontend
+        using var session = UseFrontend(Some.BffFrontend());
+        {
+            await _subject.CreateUserSessionAsync(Some.UserSession().With(x => x.Ticket = "different"));
+            var item2 = await _subject.GetUserSessionAsync(The.UserSessionKey);
+
+            // The session in the different frontend should not be the same as the one we created first
+            item2.ShouldBeEquivalentTo(Some.UserSession().With(x => x.Ticket = "different"));
+        }
+
+        item.ShouldBeEquivalentTo(Some.UserSession());
+
+    }
+
+    [Fact]
     public async Task GetUserSessionAsync_for_valid_key_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = "key123",
-            SessionId = "sid",
-            SubjectId = "sub",
-            Created = new DateTime(2020, 3, 1, 9, 12, 33, DateTimeKind.Utc),
-            Renewed = new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc),
-            Expires = new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc),
-            Ticket = "ticket"
-        });
+        // Create a session (without frontend)
+        await _subject.CreateUserSessionAsync(Some.UserSession());
 
-        var item = await _subject.GetUserSessionAsync("key123");
-
-        item.ShouldNotBeNull();
-        item.Key.ShouldBe("key123");
-        item.SubjectId.ShouldBe("sub");
-        item.SessionId.ShouldBe("sid");
-        item.Ticket.ShouldBe("ticket");
-        item.Created.ShouldBe(new DateTime(2020, 3, 1, 9, 12, 33, DateTimeKind.Utc));
-        item.Renewed.ShouldBe(new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc));
-        item.Expires.ShouldBe(new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc));
+        var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
+        item.ShouldBeEquivalentTo(Some.UserSession());
     }
+
+
 
     [Fact]
     public async Task GetUserSessionAsync_for_invalid_key_should_return_null()
@@ -82,19 +123,10 @@ public class UserSessionStoreTests
     [Fact]
     public async Task UpdateUserSessionAsync_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = "key123",
-            SessionId = "sid",
-            SubjectId = "sub",
-            Created = new DateTime(2020, 3, 1, 9, 12, 33, DateTimeKind.Utc),
-            Renewed = new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc),
-            Expires = new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc),
-            Ticket = "ticket"
-        });
+        await _subject.CreateUserSessionAsync(Some.UserSession());
 
         {
-            await _subject.UpdateUserSessionAsync("key123", new UserSessionUpdate
+            await _subject.UpdateUserSessionAsync(The.UserSessionKey, new UserSessionUpdate
             {
                 Ticket = "ticket2",
                 SessionId = "sid",
@@ -104,9 +136,9 @@ public class UserSessionStoreTests
                 Expires = new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc)
             });
 
-            var item = await _subject.GetUserSessionAsync("key123");
+            var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
             item.ShouldNotBeNull();
-            item.Key.ShouldBe("key123");
+            item.Key.ShouldBe(The.UserSessionKey);
             item.SubjectId.ShouldBe("sub");
             item.SessionId.ShouldBe("sid");
             item.Ticket.ShouldBe("ticket2");
@@ -115,7 +147,7 @@ public class UserSessionStoreTests
             item.Expires.ShouldBe(new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc));
         }
         {
-            await _subject.UpdateUserSessionAsync("key123", new UserSessionUpdate
+            await _subject.UpdateUserSessionAsync(The.UserSessionKey, new UserSessionUpdate
             {
                 Ticket = "ticket3",
                 SessionId = "sid2",
@@ -125,9 +157,9 @@ public class UserSessionStoreTests
                 Expires = new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc)
             });
 
-            var item = await _subject.GetUserSessionAsync("key123");
+            var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
             item.ShouldNotBeNull();
-            item.Key.ShouldBe("key123");
+            item.Key.ShouldBe(The.UserSessionKey);
             item.SubjectId.ShouldBe("sub2");
             item.SessionId.ShouldBe("sid2");
             item.Ticket.ShouldBe("ticket3");
@@ -154,18 +186,35 @@ public class UserSessionStoreTests
     [Fact]
     public async Task DeleteUserSessionAsync_for_valid_key_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = "key123",
-            SubjectId = "sub",
-            SessionId = "session",
-            Ticket = "ticket",
-        });
+        await _subject.CreateUserSessionAsync(Some.UserSession());
         _database.UserSessions.Count().ShouldBe(1);
 
-        await _subject.DeleteUserSessionAsync("key123");
+        await _subject.DeleteUserSessionAsync(The.UserSessionKey);
 
         _database.UserSessions.Count().ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task DeleteUserSessionAsync_respects_multi_frontends()
+    {
+        await _subject.CreateUserSessionAsync(Some.UserSession());
+        using (UseFrontend(Some.BffFrontend()))
+        {
+            await _subject.CreateUserSessionAsync(Some.UserSession());
+        }
+        _database.UserSessions.Count().ShouldBe(2);
+
+
+        await _subject.DeleteUserSessionAsync(The.UserSessionKey);
+
+        _database.UserSessions.Count().ShouldBe(1);
+
+        using (UseFrontend(Some.BffFrontend()))
+        {
+            await _subject.DeleteUserSessionAsync(The.UserSessionKey);
+        }
+        _database.UserSessions.Count().ShouldBe(0);
+
     }
 
     [Fact]
@@ -875,5 +924,41 @@ public class UserSessionStoreTests
 
         // calling again to not throw
         await ctx2.SaveChangesAsync();
+    }
+
+    public IDisposable UseFrontend(BffFrontend frontent)
+    {
+        _provider.GetRequiredService<SelectedFrontend>().Set(frontent);
+
+        return new DelegateDisposable(() =>
+        {
+            _provider.GetRequiredService<SelectedFrontend>().Set(null!);
+        });
+    }
+
+    public async Task InitializeAsync() =>
+        // Ensure the database is created and migrations are applied
+        await _database.Database.MigrateAsync();
+
+
+    public async Task DisposeAsync()
+    {
+        // Close all open SQLite connections used by EF
+        var dbConn = _database.Database.GetDbConnection();
+        if (dbConn is SqliteConnection sqliteConn)
+        {
+            // Ensure connection is closed
+            sqliteConn.Close();
+            // Also call CloseConnection if available (for pooled connections)
+            SqliteConnection.ClearPool(sqliteConn);
+        }
+
+        await _database.DisposeAsync();
+        await _provider.DisposeAsync();
+
+        if (File.Exists(_dbFilePath))
+        {
+            File.Delete(_dbFilePath);
+        }
     }
 }

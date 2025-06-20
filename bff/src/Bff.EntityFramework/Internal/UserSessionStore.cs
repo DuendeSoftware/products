@@ -3,10 +3,8 @@
 
 using Duende.Bff.Otel;
 using Duende.Bff.SessionManagement.SessionStore;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.EntityFramework;
 
@@ -14,10 +12,13 @@ namespace Duende.Bff.EntityFramework;
 /// Entity framework core implementation of IUserSessionStore
 /// </summary>
 #pragma warning disable CA1812 // internal class never instantiated? It is, but via DI
-internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, ISessionDbContext sessionDbContext, ILogger<UserSessionStore> logger) : IUserSessionStore, IUserSessionStoreCleanup
+internal class UserSessionStore(
+    IUserSessionPartitionKeyBuilder partitionKeyBuilder,
+    ISessionDbContext sessionDbContext,
+    ILogger<UserSessionStore> logger) : IUserSessionStore, IUserSessionStoreCleanup
 #pragma warning restore CA1812 
 {
-    private readonly string? _applicationDiscriminator = options.Value.ApplicationDiscriminator;
+    private string? partitionKey => partitionKeyBuilder.BuildPartitionKey();
 
     /// <inheritdoc/>
     public async Task CreateUserSessionAsync(UserSession session, CT ct)
@@ -26,7 +27,7 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
 
         var item = new UserSessionEntity()
         {
-            ApplicationName = _applicationDiscriminator
+            ApplicationName = partitionKey
         };
         session.CopyTo(item);
         sessionDbContext.UserSessions.Add(item);
@@ -48,7 +49,9 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
             // SQL Server would send:  ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'Session.UserSessions' with unique index 'IX_UserSessions_ApplicationName_SessionId'. The duplicate key value is (<AppName>, <SessionIdValue>).
             // Postgres would send:  ---> Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "IX_UserSessions_ApplicationName_SessionId"
             // MySQL would send:    ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Duplicate entry '<AppName>-<SessionIdValue>' for key 'IX_UserSessions_ApplicationName_SessionId'
-            if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) || exception.Contains("IX_UserSessions_ApplicationName_SessionId", StringComparison.OrdinalIgnoreCase))
+
+            if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
+                exception.Contains("IX_UserSessions_ApplicationName_SessionId"))
             {
                 logger.DuplicateSessionInsertDetected(LogLevel.Debug, ex);
             }
@@ -62,8 +65,9 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
     /// <inheritdoc/>
     public async Task DeleteUserSessionAsync(string key, CT ct)
     {
-        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.ApplicationName == _applicationDiscriminator).ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == _applicationDiscriminator);
+        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.ApplicationName == partitionKey)
+            .ToArrayAsync(ct);
+        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == partitionKey);
 
         if (item == null)
         {
@@ -97,7 +101,7 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
     {
         filter.Validate();
 
-        var query = sessionDbContext.UserSessions.Where(x => x.ApplicationName == _applicationDiscriminator).AsQueryable();
+        var query = sessionDbContext.UserSessions.Where(x => x.ApplicationName == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
@@ -108,7 +112,7 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
 
-        var items = await query.Where(x => x.ApplicationName == _applicationDiscriminator).ToArrayAsync(ct);
+        var items = await query.Where(x => x.ApplicationName == partitionKey).ToArrayAsync(ct);
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             items = items.Where(x => x.SubjectId == filter.SubjectId).ToArray();
@@ -144,8 +148,9 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
     /// <inheritdoc/>
     public async Task<UserSession?> GetUserSessionAsync(string key, CT ct)
     {
-        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.ApplicationName == _applicationDiscriminator).ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == _applicationDiscriminator);
+        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.ApplicationName == partitionKey)
+            .ToArrayAsync(ct);
+        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == partitionKey);
 
         UserSession? result = null;
         if (item == null)
@@ -167,7 +172,7 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
     {
         filter.Validate();
 
-        var query = sessionDbContext.UserSessions.Where(x => x.ApplicationName == _applicationDiscriminator).AsQueryable();
+        var query = sessionDbContext.UserSessions.Where(x => x.ApplicationName == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
@@ -178,7 +183,7 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
 
-        var items = await query.Where(x => x.ApplicationName == _applicationDiscriminator).ToArrayAsync(ct);
+        var items = await query.Where(x => x.ApplicationName == partitionKey).ToArrayAsync(ct);
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             items = items.Where(x => x.SubjectId == filter.SubjectId).ToArray();
@@ -204,8 +209,9 @@ internal sealed class UserSessionStore(IOptions<DataProtectionOptions> options, 
     /// <inheritdoc/>
     public async Task UpdateUserSessionAsync(string key, UserSessionUpdate session, CT ct)
     {
-        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.ApplicationName == _applicationDiscriminator).ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == _applicationDiscriminator);
+        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.ApplicationName == partitionKey)
+            .ToArrayAsync(ct);
+        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == partitionKey);
         if (item == null)
         {
             logger.NoRecordFoundForKey(LogLevel.Debug, key);

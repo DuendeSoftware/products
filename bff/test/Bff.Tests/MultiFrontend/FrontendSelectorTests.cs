@@ -34,7 +34,7 @@ public class FrontendSelectorTests
 
     private BffFrontend NeverMatchingFrontEnd() => new BffFrontend
     {
-        Name = BffFrontendName.Parse("should not be found"),
+        Name = BffFrontendName.Parse("should_not_be_found"),
         SelectionCriteria = new FrontendSelectionCriteria()
         {
             MatchingOrigin = Origin.Parse("https://will-not-be-found"),
