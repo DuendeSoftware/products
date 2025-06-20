@@ -46,10 +46,10 @@ public abstract class BffTestBase : IAsyncDisposable
         Some = Context.Some;
     }
 
-    protected void ConfigureBff(BffSetupType setup,
-        Action<CookieAuthenticationOptions>? configureCookies = null,
-        Action<OpenIdConnectOptions>? configureOpenIdConnect = null
-        )
+    protected virtual async Task ConfigureBff(
+        BffSetupType setup,
+        Action<CookieAuthenticationOptions>? configureCookie = null,
+        Action<OpenIdConnectOptions>? configureOpenIdConnect = null)
     {
         // This method is used to configure the BFF in different ways depending on the setup type.
         Action<OpenIdConnectOptions> openIdConfiguration = opt =>
@@ -71,7 +71,7 @@ public abstract class BffTestBase : IAsyncDisposable
             {
                 ConfigureCookieOptions = options =>
                 {
-                    configureCookies?.Invoke(options);
+                    configureCookie?.Invoke(options);
                 },
                 ConfigureOpenIdConnectOptions = openIdConfiguration
             });
@@ -84,7 +84,7 @@ public abstract class BffTestBase : IAsyncDisposable
                 bff.WithDefaultOpenIdConnectOptions(openIdConfiguration);
                 bff.WithDefaultCookieOptions(options =>
                 {
-                    configureCookies?.Invoke(options);
+                    configureCookie?.Invoke(options);
                 });
             };
         }
@@ -103,7 +103,7 @@ public abstract class BffTestBase : IAsyncDisposable
                     })
                     .AddCookie("cookie", options =>
                     {
-                        configureCookies?.Invoke(options);
+                        configureCookie?.Invoke(options);
                     })
                     .AddOpenIdConnect("oidc", openIdConfiguration);
             };
@@ -113,6 +113,8 @@ public abstract class BffTestBase : IAsyncDisposable
             throw new ArgumentOutOfRangeException(nameof(setup), setup, null);
 
         }
+
+        await InitializeAsync();
     }
 
     protected virtual void Initialize()

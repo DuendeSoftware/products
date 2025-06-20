@@ -61,7 +61,7 @@ internal sealed record OidcConfiguration
     {
         if (Authority != null)
         {
-            options.Authority = Authority?.ToString();
+            options.Authority = Authority.ToString();
         }
 
         if (ClientId != null)

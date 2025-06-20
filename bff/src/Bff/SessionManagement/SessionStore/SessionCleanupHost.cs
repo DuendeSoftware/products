@@ -39,7 +39,7 @@ internal class SessionCleanupHost(
 
             if (IsIUserSessionStoreCleanupRegistered())
             {
-                logger.LogDebug("Starting BFF session cleanup");
+                logger.StartingBffSessionCleanup(LogLevel.Debug);
 
                 _source = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
@@ -47,7 +47,7 @@ internal class SessionCleanupHost(
             }
             else
             {
-                logger.LogWarning("BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.");
+                logger.SessionCleanupNotRegistered(LogLevel.Warning);
             }
         }
 
@@ -61,7 +61,7 @@ internal class SessionCleanupHost(
     {
         if (_options.EnableSessionCleanup && _source != null)
         {
-            logger.LogDebug("Stopping BFF session cleanup");
+            logger.StoppingBffSessionCleanup(LogLevel.Debug);
 
             _source.Cancel();
             _source = null;
@@ -76,7 +76,6 @@ internal class SessionCleanupHost(
         {
             if (ct.IsCancellationRequested)
             {
-                logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
@@ -86,18 +85,20 @@ internal class SessionCleanupHost(
             }
             catch (TaskCanceledException)
             {
-                logger.LogDebug("TaskCanceledException. Exiting.");
                 break;
             }
+
+#pragma warning disable CA1031// Do not catch general exception types
+            // Catching general exceptions here to prevent the host from crashing if an exception occurs during the delay.
             catch (Exception ex)
+#pragma warning restore CA1031
             {
-                logger.LogError("Task.Delay exception: {0}. Exiting.", ex.Message);
+                logger.FailedToCleanupSession(LogLevel.Error, ex);
                 break;
             }
 
             if (ct.IsCancellationRequested)
             {
-                logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
@@ -114,9 +115,12 @@ internal class SessionCleanupHost(
             var removed = await tokenCleanupService.DeleteExpiredSessionsAsync(ct);
             metrics.SessionsEnded(removed);
         }
+#pragma warning disable CA1031// Do not catch general exception types
+        // Catching general exceptions here to prevent the host from crashing if an exception occurs during the cleanup.
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            logger.LogError("Exception deleting expired sessions: {exception}", ex.Message);
+            logger.FailedToCleanupExpiredSessions(LogLevel.Error, ex);
         }
     }
 

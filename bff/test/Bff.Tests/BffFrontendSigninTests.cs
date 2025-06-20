@@ -14,18 +14,18 @@ public class BffFrontendSigninTests : BffTestBase
 {
     public BffFrontendSigninTests(ITestOutputHelper output) : base(output) =>
         Bff.OnConfigureEndpoints += endpoints =>
+        {
+            endpoints.MapGet("/secret", (HttpContext c) =>
             {
-                endpoints.MapGet("/secret", (HttpContext c) =>
+                if (!c.User.IsAuthenticated())
                 {
-                    if (!c.User.IsAuthenticated())
-                    {
-                        c.Response.StatusCode = 401;
-                        return "";
-                    }
-
+                    c.Response.StatusCode = 401;
                     return "";
-                });
-            };
+                }
+
+                return "";
+            });
+        };
 
 
     [Fact]
@@ -121,14 +121,12 @@ public class BffFrontendSigninTests : BffTestBase
     }
 
     [Fact]
-    public async Task given_path_based_frontend_login_endpoint_should_challenge_and_redirect_to_root_with_custom_prefix()
+    public async Task
+        given_path_based_frontend_login_endpoint_should_challenge_and_redirect_to_root_with_custom_prefix()
     {
         Bff.OnConfigureServices += svcs =>
         {
-            svcs.Configure<BffOptions>(options =>
-            {
-                options.ManagementBasePath = "/custom/bff";
-            });
+            svcs.Configure<BffOptions>(options => { options.ManagementBasePath = "/custom/bff"; });
         };
         await InitializeAsync();
 
@@ -149,7 +147,6 @@ public class BffFrontendSigninTests : BffTestBase
 
         var response = await Bff.BrowserClient.Login("/somepath/custom");
         response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/somepath"));
-
     }
 
     [Fact]
@@ -245,18 +242,15 @@ public class BffFrontendSigninTests : BffTestBase
         // it to a wrong value and see if it throws. 
         AddOrUpdateFrontend(bffFrontend with
         {
-            ConfigureCookieOptions = opt =>
-            {
-                opt.Cookie.Name = "my_custom_cookie_name";
-            }
+            ConfigureCookieOptions = opt => { opt.Cookie.Name = "my_custom_cookie_name"; }
         });
 
         await Bff.BrowserClient.Login();
 
         Bff.BrowserClient.Cookies.GetCookies(Bff.Url())
             .ShouldContain(c => c.Name == "my_custom_cookie_name" && c.HttpOnly && c.Secure && c.Path == "/");
-
     }
+
     [Fact]
     public async Task Default_settings_augment_frontend_settings()
     {
@@ -299,30 +293,28 @@ public class BffFrontendSigninTests : BffTestBase
         var onTokenValidatedInvoked = false;
 
         Bff.EnableBackChannelHandler = false;
-        Bff.SetBffOptions += options =>
-        {
-            options.ConfigureOpenIdConnectDefaults = (oidc =>
-            {
-                oidc.Authority = IdentityServer.Url().ToString();
-
-                oidc.ClientId = "some_frontend";
-                oidc.ClientSecret = DefaultOidcClient.ClientSecret;
-                oidc.ResponseType = DefaultOidcClient.ResponseType;
-                oidc.ResponseMode = DefaultOidcClient.ResponseMode;
-
-                oidc.MapInboundClaims = false;
-                oidc.GetClaimsFromUserInfoEndpoint = true;
-                oidc.SaveTokens = true;
-                oidc.BackchannelHttpHandler = Internet;
-                oidc.Events.OnTokenValidated += c =>
-                {
-                    onTokenValidatedInvoked = true;
-                    return Task.CompletedTask;
-                };
-            });
-        };
 
         await InitializeAsync();
+
+        Bff.BffOptions.ConfigureOpenIdConnectDefaults = (oidc =>
+        {
+            oidc.Authority = IdentityServer.Url().ToString();
+
+            oidc.ClientId = "some_frontend";
+            oidc.ClientSecret = DefaultOidcClient.ClientSecret;
+            oidc.ResponseType = DefaultOidcClient.ResponseType;
+            oidc.ResponseMode = DefaultOidcClient.ResponseMode;
+
+            oidc.MapInboundClaims = false;
+            oidc.GetClaimsFromUserInfoEndpoint = true;
+            oidc.SaveTokens = true;
+            oidc.BackchannelHttpHandler = Internet;
+            oidc.Events.OnTokenValidated += c =>
+            {
+                onTokenValidatedInvoked = true;
+                return Task.CompletedTask;
+            };
+        });
 
         AddOrUpdateFrontend(new BffFrontend()
         {
@@ -392,16 +384,9 @@ public class BffFrontendSigninTests : BffTestBase
         AddOrUpdateFrontend(new BffFrontend()
         {
             Name = BffFrontendName.Parse("some_frontend"),
-            ConfigureOpenIdConnectOptions = opt =>
-            {
-
-                The.DefaultOpenIdConnectConfiguration(opt);
-            }
+            ConfigureOpenIdConnectOptions = opt => { The.DefaultOpenIdConnectConfiguration(opt); }
         });
 
         onTokenValidatedInvoked.ShouldBeFalse();
     }
-
 }
-
-

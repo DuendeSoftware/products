@@ -5,6 +5,7 @@ using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
@@ -43,7 +44,7 @@ internal class PostConfigureApplicationCookieRevokeRefreshToken(
         {
             // Todo: Ev: logging with sourcegens
             // todo: ev: should we have userparameters here?
-            logger.LogDebug("Revoking user's refresh tokens in OnSigningOut for subject id: {subjectId}", ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
+            logger.RevokingUserRefreshTokensOnSigningOut(LogLevel.Debug, ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
             await ctx.HttpContext.RevokeRefreshTokenAsync(ct: ctx.HttpContext.RequestAborted);
 
             await inner.Invoke(ctx);

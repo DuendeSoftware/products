@@ -24,7 +24,7 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing logout request");
+        logger.ProcessingLogoutRequest(LogLevel.Debug);
 
         context.CheckForBffMiddleware(options.Value);
 
@@ -79,7 +79,7 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
             RedirectUri = returnUrl
         };
 
-        logger.LogDebug("Logout endpoint triggering SignOut with returnUrl {returnUrl}", returnUrl.Sanitize());
+        logger.LogoutEndpointTriggeringSignOut(LogLevel.Debug, returnUrl.Sanitize());
 
         // trigger idp logout
         await context.SignOutAsync(props);

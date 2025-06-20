@@ -21,8 +21,7 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
             endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c))
                 .RequireAuthorization();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         req.Headers.Add("x-csrf", "1");
@@ -45,10 +44,8 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
         {
             endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.None);
-
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         req.Headers.Add("x-csrf", "1");
@@ -71,10 +68,8 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
         {
             endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.None);
-
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         req.Headers.Add("x-csrf", "1");
@@ -94,8 +89,7 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
     [Theory, MemberData(nameof(AllSetups))]
     public async Task Will_auto_register_login_endpoints(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         Context.LogMessages.ToString().ShouldNotContain("Already mapped Login endpoint");
 
@@ -107,14 +101,11 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
     public async Task If_management_endpoints_are_mapped_manually_then_warning_is_written(BffSetupType setup)
     {
         Bff.OnConfigureEndpoints += endpoints => endpoints.MapBffManagementEndpoints();
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         // And we can log in, which means the login endpoint was registered
         await Bff.BrowserClient.Login();
 
         Context.LogMessages.ToString().ShouldContain("Already mapped Login endpoint");
     }
-
-
 }

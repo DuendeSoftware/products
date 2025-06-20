@@ -24,23 +24,21 @@ public class BffWithoutExplicitFrontendTests(ITestOutputHelper output) : BffTest
                 return "";
             });
         };
-        Bff.SetBffOptions += options =>
-        {
-            options.ConfigureOpenIdConnectDefaults = oidc =>
-            {
-                oidc.Authority = IdentityServer.Url().ToString();
-                oidc.ClientId = DefaultOidcClient.ClientId;
-                oidc.ClientSecret = DefaultOidcClient.ClientSecret;
-                oidc.ResponseType = DefaultOidcClient.ResponseType;
-                oidc.ResponseMode = DefaultOidcClient.ResponseMode;
-                oidc.MapInboundClaims = false;
-                oidc.GetClaimsFromUserInfoEndpoint = true;
-                oidc.SaveTokens = true;
-                oidc.BackchannelHttpHandler = Internet;
-            };
-        };
 
         await base.InitializeAsync();
+
+        Bff.BffOptions.ConfigureOpenIdConnectDefaults = oidc =>
+        {
+            oidc.Authority = IdentityServer.Url().ToString();
+            oidc.ClientId = DefaultOidcClient.ClientId;
+            oidc.ClientSecret = DefaultOidcClient.ClientSecret;
+            oidc.ResponseType = DefaultOidcClient.ResponseType;
+            oidc.ResponseMode = DefaultOidcClient.ResponseMode;
+            oidc.MapInboundClaims = false;
+            oidc.GetClaimsFromUserInfoEndpoint = true;
+            oidc.SaveTokens = true;
+            oidc.BackchannelHttpHandler = Internet;
+        };
     }
 
     [Fact]

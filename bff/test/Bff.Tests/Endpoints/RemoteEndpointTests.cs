@@ -30,7 +30,6 @@ public class RemoteEndpointTests : BffTestBase
         {
             // Add a custom default transform that adds a header to the request
             services.AddSingleton<BffYarpTransformBuilder>(CustomDefaultBffTransformBuilder);
-
         };
 
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
@@ -51,8 +50,7 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -69,9 +67,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
         };
-        ConfigureBff(setup);
+        await ConfigureBff(setup);
 
-        await InitializeAsync();
         await Bff.BrowserClient.Login();
 
         var (response, apiResult) = await Bff.BrowserClient.CallBffHostApi(
@@ -111,7 +108,7 @@ public class RemoteEndpointTests : BffTestBase
                 .WithAccessToken();
         };
 
-        ConfigureBff(setup, configureOpenIdConnect: options =>
+        await ConfigureBff(setup, configureOpenIdConnect: options =>
         {
             options.Events.OnUserInformationReceived = context =>
             {
@@ -130,7 +127,6 @@ public class RemoteEndpointTests : BffTestBase
             };
             The.DefaultOpenIdConnectConfiguration(options);
         });
-        await InitializeAsync();
         await Bff.BrowserClient.Login();
 
         var (response, apiResult) = await Bff.BrowserClient.CallBffHostApi(
@@ -167,7 +163,7 @@ public class RemoteEndpointTests : BffTestBase
                 .WithAccessToken();
         };
 
-        ConfigureBff(setup, configureOpenIdConnect: options =>
+        await ConfigureBff(setup, configureOpenIdConnect: options =>
         {
             options.Events.OnUserInformationReceived = context =>
             {
@@ -186,7 +182,6 @@ public class RemoteEndpointTests : BffTestBase
             };
             The.DefaultOpenIdConnectConfiguration(options);
         });
-        await InitializeAsync();
         await Bff.BrowserClient.Login();
 
         var (response, apiResult) = await Bff.BrowserClient.CallBffHostApi(
@@ -203,9 +198,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
         };
-        ConfigureBff(setup);
+        await ConfigureBff(setup);
 
-        await InitializeAsync();
         await Bff.BrowserClient.Login();
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -227,9 +221,9 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
+
         await Bff.BrowserClient.Login();
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -251,9 +245,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.UserOrNone);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         {
             ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
                 url: Bff.Url(The.Path)
@@ -288,9 +281,9 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.Client);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
+
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path)
         );
@@ -317,9 +310,9 @@ public class RemoteEndpointTests : BffTestBase
                 .WithAccessTokenRetriever<FailureAccessTokenRetriever>()
                 .WithAccessToken(RequiredTokenType.UserOrClient);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
+
         await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Unauthorized
@@ -339,8 +332,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+
+        await ConfigureBff(setup);
 
         await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -357,8 +350,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+
+        await ConfigureBff(setup);
 
         await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path),
@@ -382,8 +375,8 @@ public class RemoteEndpointTests : BffTestBase
                 .WithAccessTokenRetriever<TestAccessTokenRetriever>()
                 .WithAccessToken();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+
+        await ConfigureBff(setup);
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.Path)
@@ -428,9 +421,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.UserOrClient);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         {
             ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
                 url: Bff.Url(The.Path)
@@ -465,9 +457,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         {
             ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
                 url: Bff.Url(The.Path)
@@ -506,9 +497,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint("/none", Api.Url())
                 .WithAccessToken(RequiredTokenType.None);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         foreach (var client in IdentityServer.Clients)
         {
             client.Enabled = false;
@@ -537,9 +527,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         Api.ApiStatusCodeToReturn = HttpStatusCode.Unauthorized;
@@ -558,9 +547,8 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         Api.ApiStatusCodeToReturn = HttpStatusCode.Forbidden;
@@ -579,15 +567,13 @@ public class RemoteEndpointTests : BffTestBase
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         var response = await Bff.BrowserClient.SendAsync(req);
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized,
             "The endpoint requires CSRF protection, so it should return 403 Forbidden when no CSRF header is present.");
-
     }
 
     [Theory, MemberData(nameof(AllSetups))]
@@ -599,15 +585,13 @@ public class RemoteEndpointTests : BffTestBase
                 .WithAccessToken(RequiredTokenType.UserOrClient)
                 .SkipAntiforgery();
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         var req = new HttpRequestMessage(HttpMethod.Get, Bff.Url(The.Path));
         var response = await Bff.BrowserClient.SendAsync(req);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
     }
 
     [Theory, MemberData(nameof(AllSetups))]
@@ -623,18 +607,19 @@ public class RemoteEndpointTests : BffTestBase
                     c.AddRequestTransform(async context =>
                     {
                         // One of our customers asked how to access the catch-all route value in subsequent transforms
-                        if (context.HttpContext.Request.RouteValues.TryGetValue("catch-all", out var value) && value is string s)
+                        if (context.HttpContext.Request.RouteValues.TryGetValue("catch-all", out var value) &&
+                            value is string s)
                         {
                             context.ProxyRequest.Headers.Add("catch-all", "/" + s);
                         }
+
                         await Task.CompletedTask;
                     });
                 })
                 .WithAccessToken();
         };
-        ConfigureBff(setup);
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         ApiCallDetails result = await Bff.BrowserClient.CallBffHostApi(
@@ -665,6 +650,7 @@ public class RemoteEndpointTests : BffTestBase
                 {
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
+
                 await n();
             });
         };
@@ -686,8 +672,8 @@ public class RemoteEndpointTests : BffTestBase
                 .WithAccessToken();
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         // first, ensure that the 'normal' process works, becuase delay's are turned off. 
@@ -718,6 +704,7 @@ public class RemoteEndpointTests : BffTestBase
                 {
                     await Task.Delay(TimeSpan.FromSeconds(5));
                 }
+
                 await n();
             });
         };
@@ -736,8 +723,8 @@ public class RemoteEndpointTests : BffTestBase
                 .WithAccessToken();
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         // first, ensure that the 'normal' process works, becuase delay's are turned off. 

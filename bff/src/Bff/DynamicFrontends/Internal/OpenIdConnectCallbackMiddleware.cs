@@ -23,7 +23,7 @@ internal class OpenIdConnectCallbackMiddleware(RequestDelegate next,
         var oidcOptionsFactory = context.RequestServices.GetRequiredService<IOptionsFactory<OpenIdConnectOptions>>();
         var options = oidcOptionsFactory.Create(frontend.OidcSchemeName);
 
-        if (context.Request.Path.StartsWithSegments(options.CallbackPath))
+        if (context.Request.Path.StartsWithSegments(options.CallbackPath, StringComparison.OrdinalIgnoreCase))
         {
             var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
             if (await handlers.GetHandlerAsync(context, frontend.OidcSchemeName) is IAuthenticationRequestHandler handler)
@@ -32,7 +32,7 @@ internal class OpenIdConnectCallbackMiddleware(RequestDelegate next,
                 return;
             }
         }
-        if (context.Request.Path.StartsWithSegments(options.SignedOutCallbackPath))
+        if (context.Request.Path.StartsWithSegments(options.SignedOutCallbackPath, StringComparison.OrdinalIgnoreCase))
         {
             var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
             if (await handlers.GetHandlerAsync(context, frontend.OidcSchemeName) is IAuthenticationRequestHandler handler)

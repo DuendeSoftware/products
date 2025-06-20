@@ -14,7 +14,7 @@ public sealed class BffRemoteApiEndpointMetadata : IBffApiMetadata
     /// <summary>
     /// Required token type (if any)
     /// </summary>
-    public RequiredTokenType? TokenType;
+    public RequiredTokenType? TokenType { get; set; }
 
     /// <summary>
     /// Maps to UserAccessTokenParameters and included if set
@@ -31,13 +31,15 @@ public sealed class BffRemoteApiEndpointMetadata : IBffApiMetadata
         get => _accessTokenRetriever;
         set
         {
+            ArgumentNullException.ThrowIfNull(value);
             if (value.IsAssignableTo(typeof(IAccessTokenRetriever)))
             {
                 _accessTokenRetriever = value;
             }
             else
             {
-                throw new Exception("Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
+                throw new InvalidOperationException(
+                    "Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
             }
         }
     }

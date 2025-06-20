@@ -22,6 +22,7 @@ public static class YarpTransformExtensions
     /// </summary>
     public static TransformBuilderContext AddBffAccessToken(this TransformBuilderContext context, PathString localPath)
     {
+        ArgumentNullException.ThrowIfNull(context);
         var proofService = context.Services.GetRequiredService<IDPoPProofService>();
 
         var logger = context.Services.GetRequiredService<ILogger<AccessTokenRequestTransform>>();

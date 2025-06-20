@@ -129,7 +129,7 @@ public static class Constants
         public const string Prompt = "bff-prompt";
     }
 
-    public class HttpClientNames
+    public static class HttpClientNames
     {
         public const string IndexHtmlHttpClient = "Duende.Bff.IndexHtmlClient";
 
