@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using Hosts.Bff.Performance.Services;
-using Hosts.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+
+namespace Hosts.Bff.Performance;
 
 public static class DefaultOpenIdConfiguration
 {

@@ -1,6 +1,9 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 namespace Hosts.Bff.Performance.Services;
 
 public class IdentityServerSettings
 {
-    public string IdentityServerUrl { get; set; }
+    public string IdentityServerUrl { get; set; } = null!;
 }

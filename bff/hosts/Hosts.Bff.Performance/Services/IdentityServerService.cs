@@ -35,20 +35,22 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
 
                     options.EmitStaticAudienceClaim = true;
                 })
-                .AddTestUsers([new TestUser()
-                {
-                    SubjectId = "bob",
-                    Username = "bob",
-                    Password = "bob",
-                    Claims = [
-                        new Claim(JwtClaimTypes.Name, "Bob Smith"),
-                        new Claim(JwtClaimTypes.GivenName, "Bob"),
-                        new Claim(JwtClaimTypes.FamilyName, "Smith"),
-                        new Claim(JwtClaimTypes.Email, "bob@duende.com")
-                    ],
-                    IsActive = true
-
-                }])
+                .AddTestUsers([
+                    new TestUser()
+                    {
+                        SubjectId = "bob",
+                        Username = "bob",
+                        Password = "bob",
+                        Claims =
+                        [
+                            new Claim(JwtClaimTypes.Name, "Bob Smith"),
+                            new Claim(JwtClaimTypes.GivenName, "Bob"),
+                            new Claim(JwtClaimTypes.FamilyName, "Smith"),
+                            new Claim(JwtClaimTypes.Email, "bob@duende.com")
+                        ],
+                        IsActive = true
+                    }
+                ])
             ;
 
         // in-memory, code config
@@ -58,25 +60,26 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
         var bffUrls = config.AsEnumerable().Where(x => x.Key.StartsWith("BffUrl"))
             .Select(x => x.Value);
 
-        isBuilder.AddInMemoryClients([new Client
-        {
-            ClientId = "bff.perf",
-            ClientSecrets = [new Secret("secret".Sha256())],
-            RedirectUris = bffUrls .Select(x => x.TrimEnd('/') + "/signin-oidc").ToArray(),
-            AllowOfflineAccess = true,
-            AllowedScopes = { "openid", "profile", "api" },
-            AllowedGrantTypes =
+        isBuilder.AddInMemoryClients([
+            new Client
             {
-                GrantType.AuthorizationCode,
-                GrantType.ClientCredentials,
-                OidcConstants.GrantTypes.TokenExchange
-            },
+                ClientId = "bff.perf",
+                ClientSecrets = [new Secret("secret".Sha256())],
+                RedirectUris = bffUrls.Select(x => x!.TrimEnd('/') + "/signin-oidc").ToArray(),
+                AllowOfflineAccess = true,
+                AllowedScopes = { "openid", "profile", "api" },
+                AllowedGrantTypes =
+                {
+                    GrantType.AuthorizationCode,
+                    GrantType.ClientCredentials,
+                    OidcConstants.GrantTypes.TokenExchange
+                },
 
-            RefreshTokenExpiration = TokenExpiration.Absolute,
-            AbsoluteRefreshTokenLifetime = 60,
-            AccessTokenLifetime = 15 // Force refresh
-
-        }]);
+                RefreshTokenExpiration = TokenExpiration.Absolute,
+                AbsoluteRefreshTokenLifetime = 60,
+                AccessTokenLifetime = 15 // Force refresh
+            }
+        ]);
         isBuilder.AddInMemoryApiResources(Config.ApiResources);
 
         var app = builder.Build();
@@ -117,5 +120,4 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
 
         return app.RunAsync(stoppingToken);
     }
-
 }

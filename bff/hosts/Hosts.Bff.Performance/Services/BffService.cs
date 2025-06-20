@@ -19,7 +19,7 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
         var builder = WebApplication.CreateBuilder();
         builder.AddServiceDefaults();
         // Configure Kestrel to listen on the specified Uri
-        builder.WebHost.UseUrls(urls);
+        builder.WebHost.UseUrls(urls!);
 
         builder.Services.AddAuthorization();
         ConfigureServices(builder.Services);

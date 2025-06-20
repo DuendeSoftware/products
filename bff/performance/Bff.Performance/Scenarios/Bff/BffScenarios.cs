@@ -12,10 +12,10 @@ public class BffScenarios
     public BffScenarios(Uri[] baseUris)
     {
         Scenarios = baseUris.SelectMany(x => new ScenarioProps[]
-        {
-            new CallAnonymousLocalApi(x),
-            new CallAuthorizedLocalApi(x)
-        })
+            {
+                new CallAnonymousLocalApi(x),
+                new CallAuthorizedLocalApi(x)
+            })
             .ToArray();
     }
 }

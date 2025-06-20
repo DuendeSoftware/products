@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
@@ -11,6 +14,7 @@ public class ApiHostedService(IOptions<ApiSettings> apiSettings) : BackgroundSer
         var builder = WebApplication.CreateBuilder();
         builder.AddServiceDefaults();
 
+        Console.WriteLine($"API URL : {Settings.ApiUrl}");
         // Configure Kestrel to listen on the specified Uri
         builder.WebHost.UseUrls(Settings.ApiUrl.ToString());
         var app = builder.Build();
@@ -20,6 +24,5 @@ public class ApiHostedService(IOptions<ApiSettings> apiSettings) : BackgroundSer
 
         app.MapGet("/", () => "ok");
         return app.RunAsync(stoppingToken);
-
     }
 }
