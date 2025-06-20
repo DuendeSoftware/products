@@ -22,7 +22,6 @@ internal class PostConfigureSlidingExpirationCheck(
     : IPostConfigureOptions<CookieAuthenticationOptions>
 {
     private readonly BffOptions _options = bffOptions.Value;
-    private readonly string? _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)

@@ -96,4 +96,8 @@ public readonly record struct DPoPProofKey : IStronglyTypedValue<DPoPProofKey>
     /// </summary>
     public static DPoPProofKey? ParseOrDefault(string? value) => StringParsers<DPoPProofKey>.ParseOrDefault(value);
 
+    public AtmDPoPProofKey ToDPoPProofKey()
+    {
+        throw new NotImplementedException();
+    }
 }

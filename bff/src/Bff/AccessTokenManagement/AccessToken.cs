@@ -53,4 +53,9 @@ public readonly record struct AccessToken : IStronglyTypedValue<AccessToken>
     /// Parses a value to a <see cref="AccessToken"/>. This will throw an exception if the string is not valid.
     /// </summary>
     public static AccessToken Parse(string value) => StringParsers<AccessToken>.Parse(value);
+
+    public AtmAccessToken ToAccessToken()
+    {
+        throw new NotImplementedException();
+    }
 }

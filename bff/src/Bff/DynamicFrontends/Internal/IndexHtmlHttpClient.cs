@@ -106,7 +106,12 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
 
     private static string BuildCacheKey(BffFrontend frontend) => "Duende.Bff.IndexHtml:" + frontend.Name;
 
-    private class PreventCacheException : Exception;
+    public class PreventCacheException : Exception
+    {
+        public PreventCacheException(string message) : base(message)
+        {
+        }
+    }
 
     public async ValueTask DisposeAsync()
     {

@@ -8,6 +8,6 @@ namespace Duende.Bff.Endpoints.Internal;
 /// This implies that it is not intended for Ajax requests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-internal class BffUiEndpointAttribute : Attribute, IBffUIApiEndpoint
+internal sealed class BffUiEndpointAttribute : Attribute, IBffUIApiEndpoint
 {
 }

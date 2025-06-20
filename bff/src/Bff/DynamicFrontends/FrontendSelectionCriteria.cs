@@ -18,7 +18,7 @@ public sealed record FrontendSelectionCriteria
         get => _matchingPath;
         init
         {
-            if (value == string.Empty)
+            if (string.IsNullOrEmpty(value))
             {
                 _matchingPath = null;
             }

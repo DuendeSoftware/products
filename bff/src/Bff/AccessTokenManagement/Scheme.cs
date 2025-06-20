@@ -89,4 +89,8 @@ public readonly record struct Scheme : IStronglyTypedValue<Scheme>
     public static Scheme Parse(string value) => StringParsers<Scheme>.Parse(value);
     public static Scheme? ParseOrDefault(string? value) => StringParsers<Scheme>.ParseOrDefault(value);
 
+    public AtmScheme ToScheme()
+    {
+        throw new NotImplementedException();
+    }
 }

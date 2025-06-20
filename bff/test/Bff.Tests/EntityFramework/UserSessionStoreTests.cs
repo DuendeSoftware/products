@@ -169,7 +169,8 @@ public class UserSessionStoreTests
     }
 
     [Fact]
-    public async Task DeleteUserSessionAsync_for_invalid_key_should_succeed() => await _subject.DeleteUserSessionAsync("invalid");
+    public async Task DeleteUserSessionAsync_for_invalid_key_should_succeed() =>
+        await _subject.DeleteUserSessionAsync("invalid");
 
     [Fact]
     public async Task GetUserSessionsAsync_for_valid_sub_should_succeed()
@@ -421,7 +422,8 @@ public class UserSessionStoreTests
             SessionId = "sid3_1",
         });
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" });
+        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+        { SubjectId = "sub2", SessionId = "sid2_2" });
         items.Count().ShouldBe(1);
         items.Select(x => x.SubjectId).ToArray().ShouldBeEquivalentTo(new[] { "sub2" });
         items.Select(x => x.SessionId).ToArray().ShouldBeEquivalentTo(new[] { "sid2_2" });
@@ -474,15 +476,18 @@ public class UserSessionStoreTests
         });
 
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "invalid" });
+            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+            { SubjectId = "invalid", SessionId = "invalid" });
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub1", SessionId = "invalid" });
+            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+            { SubjectId = "sub1", SessionId = "invalid" });
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "sid1_1" });
+            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+            { SubjectId = "invalid", SessionId = "sid1_1" });
             items.Count().ShouldBe(0);
         }
     }
@@ -795,15 +800,18 @@ public class UserSessionStoreTests
         });
 
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "invalid" });
+            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+            { SubjectId = "invalid", SessionId = "invalid" });
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub1", SessionId = "invalid" });
+            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+            { SubjectId = "sub1", SessionId = "invalid" });
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "sid1_1" });
+            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+            { SubjectId = "invalid", SessionId = "sid1_1" });
             _database.UserSessions.Count().ShouldBe(6);
         }
     }

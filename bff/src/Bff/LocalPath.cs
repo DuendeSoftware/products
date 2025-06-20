@@ -56,5 +56,10 @@ public readonly record struct LocalPath : IStronglyTypedValue<LocalPath>
     public static LocalPath Parse(string value) => StringParsers<LocalPath>.Parse(value);
 
     static LocalPath IStronglyTypedValue<LocalPath>.Create(string result) => new(result);
+
+    public LocalPath ToLocalPath()
+    {
+        throw new NotImplementedException();
+    }
 }
 
