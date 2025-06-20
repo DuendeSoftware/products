@@ -5,11 +5,11 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "environmentVariables": {
-        "ApiUrl": "https://localhost:6100",
-        "IdentityServerUrl": "https://localhost:6001",
-        "BffUrl1": "https://localhost:6002",
-        "BffUrl2": "https://localhost:6003",
-        "BffUrl3": "https://app1.localhost:6003"
+        "APIURL": "https://localhost:6100",
+        "IDENTITYSERVERURL": "https://localhost:6001",
+        "BFFURL1": "https://localhost:6002",
+        "BFFURL2": "https://localhost:6003",
+        "BFFURL3": "https://app1.localhost:6003"
       },
       "applicationUrl": "https://localhost:6100;https://localhost:6001;https://localhost:6002;https://localhost:6003;https://app1.localhost:6003"
     }

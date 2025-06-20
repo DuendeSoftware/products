@@ -8,6 +8,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
 using IdentityServer;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
@@ -25,6 +26,12 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
 
         builder.Services.AddAuthorization();
         builder.Services.AddHttpLogging();
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.All;
+            options.KnownProxies.Clear();
+            options.KnownNetworks.Clear();
+        });
 
         var isBuilder = builder.Services.AddIdentityServer(options =>
                 {
@@ -34,6 +41,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
                     options.Events.RaiseSuccessEvents = true;
 
                     options.EmitStaticAudienceClaim = true;
+                    options.KeyManagement.KeyPath = Path.GetTempPath();
                 })
                 .AddTestUsers([
                     new TestUser()
@@ -57,8 +65,9 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
         isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
         isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
 
-        var bffUrls = config.AsEnumerable().Where(x => x.Key.StartsWith("BffUrl"))
-            .Select(x => x.Value);
+        var bffUrls = config.AsEnumerable().Where(x => x.Key.StartsWith("BFFURL"))
+            .Select(x => x.Value)
+            .ToArray();
 
         isBuilder.AddInMemoryClients([
             new Client
@@ -84,6 +93,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
 
         var app = builder.Build();
 
+        app.UseForwardedHeaders();
         app.UseHttpLogging();
         app.UseDeveloperExceptionPage();
         app.UseStaticFiles();
