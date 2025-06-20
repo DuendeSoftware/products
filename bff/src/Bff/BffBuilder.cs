@@ -98,8 +98,6 @@ public sealed class BffBuilder(IServiceCollection services)
         Services.TryAddEnumerable(ServiceDescriptor
             .Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
 
-        Services.AddTransient<PathMapper>();
-
         Services.TryAddSingleton<IIndexHtmlClient, IndexHtmlHttpClient>();
 
         var indexHtmlClientBuilder = Services.AddHttpClient(Constants.HttpClientNames.IndexHtmlHttpClient);

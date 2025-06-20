@@ -24,6 +24,8 @@ public static class ModelBuilderExtensions
     /// <param name="storeOptions">The store options.</param>
     public static void ConfigureSessionContext(this ModelBuilder modelBuilder, SessionStoreOptions storeOptions)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
+        ArgumentNullException.ThrowIfNull(storeOptions);
         if (!string.IsNullOrWhiteSpace(storeOptions.DefaultSchema))
         {
             modelBuilder.HasDefaultSchema(storeOptions.DefaultSchema);

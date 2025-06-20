@@ -89,9 +89,13 @@ internal class SessionCleanupHost(
                 logger.LogDebug("TaskCanceledException. Exiting.");
                 break;
             }
+
+#pragma warning disable CA1031// Do not catch general exception types
+            // Catching general exceptions here to prevent the host from crashing if an exception occurs during the delay.
             catch (Exception ex)
+#pragma warning restore CA1031
             {
-                logger.LogError("Task.Delay exception: {0}. Exiting.", ex.Message);
+                logger.LogError("Task.Delay exception: {Message}. Exiting.", ex.Message);
                 break;
             }
 
@@ -114,7 +118,10 @@ internal class SessionCleanupHost(
             var removed = await tokenCleanupService.DeleteExpiredSessionsAsync(ct);
             metrics.SessionsEnded(removed);
         }
+#pragma warning disable CA1031// Do not catch general exception types
+        // Catching general exceptions here to prevent the host from crashing if an exception occurs during the cleanup.
         catch (Exception ex)
+#pragma warning restore CA1031
         {
             logger.LogError("Exception deleting expired sessions: {exception}", ex.Message);
         }

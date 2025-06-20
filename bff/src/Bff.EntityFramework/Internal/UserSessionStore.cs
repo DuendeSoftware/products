@@ -46,7 +46,7 @@ internal class UserSessionStore(IOptions<DataProtectionOptions> options, ISessio
             // SQL Server would send:  ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Cannot insert duplicate key row in object 'Session.UserSessions' with unique index 'IX_UserSessions_ApplicationName_SessionId'. The duplicate key value is (<AppName>, <SessionIdValue>).
             // Postgres would send:  ---> Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "IX_UserSessions_ApplicationName_SessionId"
             // MySQL would send:    ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Duplicate entry '<AppName>-<SessionIdValue>' for key 'IX_UserSessions_ApplicationName_SessionId'
-            if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) || exception.Contains("IX_UserSessions_ApplicationName_SessionId"))
+            if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) || exception.Contains("IX_UserSessions_ApplicationName_SessionId", StringComparison.OrdinalIgnoreCase))
             {
                 LogMessages.DuplicateSessionInsertDetected(logger, ex);
             }

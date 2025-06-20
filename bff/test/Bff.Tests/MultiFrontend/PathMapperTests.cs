@@ -8,7 +8,6 @@ namespace Duende.Bff.Tests.MultiFrontend;
 
 public class PathMapperTests
 {
-    private readonly PathMapper _mapper = new();
 
     [Fact]
     public void MapPath_WithNoMatchingPaths_DoesNotModifyPathBaseOrPath()
@@ -18,7 +17,7 @@ public class PathMapperTests
         var frontend = CreateFrontendWithPath();
 
         // Act
-        _mapper.MapPath(context, frontend);
+        PathMapper.MapPath(context, frontend);
 
         // Assert
         context.Request.PathBase.Value.ShouldBe("/app");
@@ -33,7 +32,7 @@ public class PathMapperTests
         var frontend = CreateFrontendWithPath("/api");
 
         // Act
-        _mapper.MapPath(context, frontend);
+        PathMapper.MapPath(context, frontend);
 
         // Assert
         context.Request.PathBase.Value.ShouldBe("/app/api");
@@ -48,7 +47,7 @@ public class PathMapperTests
         var frontend = CreateFrontendWithPath("/api");
 
         // Act
-        _mapper.MapPath(context, frontend);
+        PathMapper.MapPath(context, frontend);
 
         // Assert
         context.Request.PathBase.Value.ShouldBe("/app/api");
@@ -63,7 +62,7 @@ public class PathMapperTests
         var frontend = CreateFrontendWithPath("/api");
 
         // Act
-        _mapper.MapPath(context, frontend);
+        PathMapper.MapPath(context, frontend);
 
         // Assert
         context.Response.StatusCode.ShouldBe(404);
@@ -77,7 +76,7 @@ public class PathMapperTests
         var frontend = CreateFrontendWithPath("/api");
 
         // Act
-        _mapper.MapPath(context, frontend);
+        PathMapper.MapPath(context, frontend);
 
         // Assert
         context.Request.PathBase.Value.ShouldBe("/api");
@@ -92,7 +91,7 @@ public class PathMapperTests
         var frontend = CreateFrontendWithPath("/api");
 
         // Act
-        _mapper.MapPath(context, frontend);
+        PathMapper.MapPath(context, frontend);
 
         // Assert
         context.Request.PathBase.Value.ShouldBe("/app/api");

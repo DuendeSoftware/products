@@ -101,7 +101,11 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
 
     private static string BuildCacheKey(BffFrontend frontend) => "Duende.Bff.IndexHtml:" + frontend.Name;
 
-    public class PreventCacheException : Exception
+#pragma warning disable CA1032 // Do not use a custom message for this exception, as it is used to prevent caching
+#pragma warning disable CA1064 // do not make this exception public as it's purely internal
+    private class PreventCacheException : Exception
+#pragma warning restore CA1064
+#pragma warning restore CA1032
     {
     }
 

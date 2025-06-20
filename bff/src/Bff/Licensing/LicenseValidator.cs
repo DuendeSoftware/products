@@ -68,7 +68,7 @@ internal partial class LicenseValidator
     {
         if (Logger == null)
         {
-            throw new Exception("LicenseValidator.Initalize has not yet been called.");
+            throw new InvalidOperationException("LicenseValidator.Initalize has not yet been called.");
         }
 
         var errors = new List<string>();
@@ -149,7 +149,11 @@ internal partial class LicenseValidator
                 ValidIssuer = "https://duendesoftware.com",
                 ValidAudience = "IdentityServer",
                 IssuerSigningKey = key,
+// CA5404: Do not set ValidateLifetime to false in production code
+// this is OK for the license key validation, as we do not want to enforce expiration on the license key itself
+#pragma warning disable CA5404
                 ValidateLifetime = false
+#pragma warning restore CA5404
             };
             var validateResult = handler.ValidateTokenAsync(licenseKey, parms).Result;
             if (validateResult.IsValid)

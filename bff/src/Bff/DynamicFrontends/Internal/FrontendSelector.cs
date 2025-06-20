@@ -14,7 +14,7 @@ internal class FrontendSelector(FrontendCollection frontends, ILogger<FrontendSe
     {
         selectedFrontend = null;
 
-        if (!frontends.Any())
+        if (frontends.Count == 0)
         {
             logger.NoFrontendSelected(LogLevel.Debug);
             return false;
@@ -59,9 +59,9 @@ internal class FrontendSelector(FrontendCollection frontends, ILogger<FrontendSe
         return selectedFrontend != null;
     }
 
-    private bool PathMatches(HttpRequest request, PathString path) =>
+    private static bool PathMatches(HttpRequest request, PathString path) =>
         request.Path.StartsWithSegments(path, StringComparison.OrdinalIgnoreCase);
 
-    private int PathOrder(PathString? path) =>
+    private static int PathOrder(PathString? path) =>
         path?.Value?.Length ?? 0;
 }

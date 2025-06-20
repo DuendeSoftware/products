@@ -46,7 +46,7 @@ internal class RemoteRouteHandler(
         foreach (var route in frontend.GetRemoteApis())
         {
 
-            if (context.Request.Path.StartsWithSegments(route.LocalPath.ToString()))
+            if (context.Request.Path.StartsWithSegments(route.LocalPath.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 var bffRemoteApiEndpointMetadata = new BffRemoteApiEndpointMetadata()
                 {

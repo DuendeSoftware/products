@@ -31,13 +31,14 @@ public sealed class BffRemoteApiEndpointMetadata : IBffApiMetadata
         get => _accessTokenRetriever;
         set
         {
+            ArgumentNullException.ThrowIfNull(value);
             if (value.IsAssignableTo(typeof(IAccessTokenRetriever)))
             {
                 _accessTokenRetriever = value;
             }
             else
             {
-                throw new Exception(
+                throw new InvalidOperationException(
                     "Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
             }
         }

@@ -246,7 +246,6 @@ namespace Duende.Bff
     public readonly struct LocalPath : System.IEquatable<Duende.Bff.LocalPath>
     {
         public LocalPath() { }
-        public Duende.Bff.LocalPath ToLocalPath() { }
         public override string ToString() { }
         public static Duende.Bff.LocalPath Parse(string value) { }
         public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.LocalPath? parsed, out string[] errors) { }
@@ -291,7 +290,7 @@ namespace Duende.Bff.Configuration
         public bool BackchannelLogoutAllUserSessions { get; set; }
         public System.Net.Http.HttpMessageHandler? BackchannelMessageHandler { get; set; }
         public Duende.Bff.AccessTokenManagement.DPoPProofKey? DPoPJsonWebKey { get; set; }
-        public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; set; }
+        public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; }
         public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
         public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
         public bool EnableSessionCleanup { get; set; }

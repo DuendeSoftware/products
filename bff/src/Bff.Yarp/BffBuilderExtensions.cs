@@ -22,6 +22,8 @@ public static class BffBuilderExtensions
     /// <returns></returns>
     public static BffBuilder AddRemoteApis(this BffBuilder builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.RegisterConfigurationLoader((services, config) =>
         {
             services.Configure<ProxyConfiguration>(config);
@@ -45,6 +47,8 @@ public static class BffBuilderExtensions
     public static IReverseProxyBuilder AddYarpConfig(this BffBuilder builder, RouteConfig[] routes,
         ClusterConfig[] clusters)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         var yarpBuilder = builder.Services.AddReverseProxy()
             .AddBffExtensions();
 
@@ -55,6 +59,8 @@ public static class BffBuilderExtensions
 
     public static IReverseProxyBuilder AddYarpConfig(this BffBuilder builder, IConfiguration config)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         var yarpBuilder = builder.Services.AddReverseProxy()
             .AddBffExtensions();
 

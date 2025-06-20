@@ -32,6 +32,7 @@ public class UserSession : UserSessionUpdate
     /// <returns></returns>
     public void CopyTo(UserSession other)
     {
+        ArgumentNullException.ThrowIfNull(other);
         other.Key = Key;
         base.CopyTo(other);
     }

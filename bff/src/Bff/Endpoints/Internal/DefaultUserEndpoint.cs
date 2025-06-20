@@ -69,7 +69,7 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
     /// Collect user-centric claims
     /// </summary>
     /// <returns></returns>
-    private Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult, CT ct = default) =>
+    private static Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult, CT ct = default) =>
         Task.FromResult(authenticateResult.Principal?.Claims.Select(x => new ClaimRecord(x.Type, x.Value)) ?? Enumerable.Empty<ClaimRecord>());
 
     /// <summary>

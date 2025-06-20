@@ -142,7 +142,7 @@ internal class AccessTokenRequestTransform(
             tokenError.Error);
     }
 
-    private void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token) => context.ProxyRequest.Headers.Authorization =
+    private static void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token) => context.ProxyRequest.Headers.Authorization =
             new AuthenticationHeaderValue(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer, token.AccessToken.ToString());
 
     private async Task ApplyDPoPToken(RequestTransformContext context, DPoPTokenResult token)

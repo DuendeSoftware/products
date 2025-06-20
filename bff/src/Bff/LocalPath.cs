@@ -20,7 +20,9 @@ public readonly record struct LocalPath : IStronglyTypedValue<LocalPath>
     /// over the conversion process, please use <see cref="TryParse"/> or <see cref="Parse"/>.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
+#pragma warning disable CA2225
     public static implicit operator LocalPath(PathString value) => Parse(value);
+#pragma warning restore CA2225
 
     /// <summary>
     /// Convenience method for converting a <see cref="LocalPath"/> into a string.
@@ -57,9 +59,5 @@ public readonly record struct LocalPath : IStronglyTypedValue<LocalPath>
 
     static LocalPath IStronglyTypedValue<LocalPath>.Create(string result) => new(result);
 
-    public LocalPath ToLocalPath()
-    {
-        throw new NotImplementedException();
-    }
 }
 
