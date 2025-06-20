@@ -24,8 +24,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .AsBffApiEndpoint();
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         await Bff.BrowserClient.Login();
 
@@ -49,8 +48,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         await Bff.BrowserClient.Login();
 
@@ -74,8 +72,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
 
 
@@ -96,8 +93,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .AsBffApiEndpoint();
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
@@ -117,8 +113,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
 
 
@@ -139,8 +134,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
             endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
 
 
@@ -160,8 +154,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
             endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
 
 
@@ -189,8 +182,8 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
             endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
+
 
 
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false; // we want to see the redirect
@@ -216,8 +209,8 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
+
 
 
         LocalApiResponseStatus = HttpStatusCode.Unauthorized;
@@ -239,9 +232,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .AsBffApiEndpoint();
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
-
+        await ConfigureBff(setup);
         LocalApiResponseStatus = HttpStatusCode.Forbidden;
 
         await Bff.BrowserClient.Login();
@@ -263,8 +254,8 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .AsBffApiEndpoint();
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
+
 
 
         await Bff.BrowserClient.Login();
@@ -287,8 +278,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                 .SkipResponseHandling();
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
+
+
 
         await Bff.BrowserClient.Login();
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
@@ -313,8 +305,7 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
                         .Build();
             });
         };
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/not-found"));

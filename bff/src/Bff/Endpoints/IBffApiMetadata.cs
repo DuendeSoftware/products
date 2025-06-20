@@ -7,4 +7,6 @@ namespace Duende.Bff.Endpoints;
 /// Marks an endpoint as BFF API endpoint.
 /// By default, this provides anti-forgery protection and response handling.
 /// </summary>
+#pragma warning disable CA1040
 public interface IBffApiMetadata;
+#pragma warning restore CA1040

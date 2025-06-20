@@ -58,13 +58,13 @@ internal interface IStronglyTypedValue<TSelf> : IParsableType<TSelf>
             }
         }
 
-        if (!errors.Any())
+        if (errors.Count == 0)
         {
             parsed = TSelf.Create(value);
         }
         foundErrors = errors.ToArray();
 
-        return !foundErrors.Any();
+        return foundErrors.Length == 0;
     }
 }
 
@@ -118,13 +118,13 @@ internal interface IStronglyTypedValue<TType, TSelf> : IParsableType<TSelf>
             }
         }
 
-        if (!errors.Any())
+        if (errors.Count == 0)
         {
             parsed = TSelf.Create(converted);
         }
 
         foundErrors = errors.ToArray();
-        return !foundErrors.Any();
+        return foundErrors.Length == 0;
     }
 }
 

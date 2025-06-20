@@ -4,6 +4,7 @@
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -44,7 +45,7 @@ internal class PostConfigureApplicationValidatePrincipal(
                 var slide = ctx.Request.Query[Constants.RequestParameters.SlideCookie];
                 if (slide == "false")
                 {
-                    logger.LogDebug("Explicitly setting ShouldRenew=false in OnValidatePrincipal due to query param suppressing slide behavior.");
+                    logger.SuppressingSlideBehaviorOnValidatePrincipal(LogLevel.Debug);
                     ctx.ShouldRenew = false;
                 }
             }

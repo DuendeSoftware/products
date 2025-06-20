@@ -10,7 +10,8 @@ using Yarp.ReverseProxy.Forwarder;
 
 namespace Duende.Bff.Tests.TestInfra;
 
-public class BffTestHost(TestHostContext context, IdentityServerTestHost identityServer) : TestHost(context, new Uri("https://bff"))
+public class BffTestHost(TestHostContext context, IdentityServerTestHost identityServer)
+    : TestHost(context, new Uri("https://bff"))
 {
     public readonly string DefaultRootResponse = "Default response from root";
     private BffHttpClient _browserClient = null!;
@@ -23,7 +24,6 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     public bool MapGetForRoot { get; set; } = true;
 
     public bool EnableBackChannelHandler { get; set; } = true;
-    public event Action<BffOptions> SetBffOptions = _ => { };
     public event Action<BffBuilder> OnConfigureBff = _ => { };
 
     public override void Initialize()
@@ -41,20 +41,16 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
         OnConfigureServices += services =>
         {
-            if (EnableBackChannelHandler)
+            services.AddSingleton<IForwarderHttpClientFactory>(
+                new CallbackForwarderHttpClientFactory(context => new HttpMessageInvoker(Internet)));
+
+            var builder = services.AddBff(options =>
             {
-                SetBffOptions += options =>
+                if (EnableBackChannelHandler)
                 {
                     options.BackchannelMessageHandler = Internet;
-                };
-            }
-
-            services.AddSingleton<IForwarderHttpClientFactory>(
-                new CallbackForwarderHttpClientFactory(
-                    context => new HttpMessageInvoker(Internet)));
-
-
-            var builder = services.AddBff(SetBffOptions);
+                }
+            });
 
             OnConfigureBff(builder);
         };
@@ -65,7 +61,6 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
             {
                 endpoints.MapGet("/", () => DefaultRootResponse);
             }
-
         };
     }
 

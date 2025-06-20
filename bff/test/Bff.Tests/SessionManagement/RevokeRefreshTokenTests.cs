@@ -12,12 +12,12 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffTestBase(out
     [Theory, MemberData(nameof(AllSetups))]
     public async Task logout_should_revoke_refreshtoken(BffSetupType setup)
     {
-        ConfigureBff(setup, configureOpenIdConnect: options =>
+        await ConfigureBff(setup, configureOpenIdConnect: options =>
         {
             The.DefaultOpenIdConnectConfiguration(options);
             options.Scope.Add("offline_access");
         });
-        await InitializeAsync();
+
         await Bff.BrowserClient.Login();
 
         {
@@ -45,13 +45,12 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffTestBase(out
     [Theory, MemberData(nameof(AllSetups))]
     public async Task when_setting_disabled_logout_should_not_revoke_refreshtoken(BffSetupType setup)
     {
-
-        ConfigureBff(setup, configureOpenIdConnect: options =>
+        await ConfigureBff(setup, configureOpenIdConnect: options =>
         {
             The.DefaultOpenIdConnectConfiguration(options);
             options.Scope.Add("offline_access");
         });
-        await InitializeAsync();
+
         Bff.BffOptions.RevokeRefreshTokenOnLogout = false;
 
         await Bff.BrowserClient.Login();
@@ -82,15 +81,13 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffTestBase(out
     [Theory, MemberData(nameof(AllSetups))]
     public async Task backchannel_logout_endpoint_should_revoke_refreshtoken(BffSetupType setup)
     {
-        ConfigureBff(setup, configureOpenIdConnect: options =>
+        Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
+
+        await ConfigureBff(setup, configureOpenIdConnect: options =>
         {
             The.DefaultOpenIdConnectConfiguration(options);
             options.Scope.Add("offline_access");
         });
-
-        Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
-
-        await InitializeAsync();
 
         foreach (var client in IdentityServer.Clients)
         {
@@ -123,9 +120,10 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffTestBase(out
     }
 
     [Theory, MemberData(nameof(AllSetups))]
-    public async Task when_setting_disabled_backchannel_logout_endpoint_should_not_revoke_refreshtoken(BffSetupType setup)
+    public async Task when_setting_disabled_backchannel_logout_endpoint_should_not_revoke_refreshtoken(
+        BffSetupType setup)
     {
-        ConfigureBff(setup, configureOpenIdConnect: options =>
+        await ConfigureBff(setup, configureOpenIdConnect: options =>
         {
             The.DefaultOpenIdConnectConfiguration(options);
             options.Scope.Add("offline_access");
@@ -133,7 +131,7 @@ public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffTestBase(out
 
         Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
 
-        await InitializeAsync();
+
         Bff.BffOptions.RevokeRefreshTokenOnLogout = false;
 
         foreach (var client in IdentityServer.Clients)

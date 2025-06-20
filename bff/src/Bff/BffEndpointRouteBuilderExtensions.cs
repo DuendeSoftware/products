@@ -4,6 +4,7 @@
 using Duende.Bff.Configuration;
 using Duende.Bff.Endpoints;
 using Duende.Bff.Endpoints.Internal;
+using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -35,6 +36,7 @@ public static class BffEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     public static void MapBffManagementEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
         if (endpoints.AlreadyMappedManagementEndpoint(options.LoginPath, "Login"))
         {
@@ -57,6 +59,7 @@ public static class BffEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     public static void MapBffManagementLoginEndpoint(this IEndpointRouteBuilder endpoints)
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
@@ -66,12 +69,16 @@ public static class BffEndpointRouteBuilderExtensions
             .AllowAnonymous();
     }
 
-    internal static bool AlreadyMappedManagementEndpoint(this IEndpointRouteBuilder endpoints, PathString route, string name)
+    internal static bool AlreadyMappedManagementEndpoint(
+        this IEndpointRouteBuilder endpoints,
+        PathString route,
+        string name)
     {
         if (endpoints.DataSources.Any(x =>
                 x.Endpoints.OfType<RouteEndpoint>().Any(x => x.RoutePattern.RawText == route.ToString())))
         {
-            endpoints.ServiceProvider.GetRequiredService<ILogger<BffBuilder>>().LogWarning("Already mapped {name} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()", name);
+            var logger = endpoints.ServiceProvider.GetRequiredService<ILogger<BffBuilder>>();
+            logger.AlreadyMappedManagementEndpoint(LogLevel.Warning, name);
             return true;
         }
 
@@ -82,9 +89,11 @@ public static class BffEndpointRouteBuilderExtensions
     /// Adds the silent login BFF management endpoints
     /// </summary>
     /// <param name="endpoints"></param>
-    [Obsolete("The silent login endpoint will be removed in a future version. Silent login is now handled by passing the prompt=none parameter to the login endpoint.")]
+    [Obsolete(
+        "The silent login endpoint will be removed in a future version. Silent login is now handled by passing the prompt=none parameter to the login endpoint.")]
     public static void MapBffManagementSilentLoginEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
@@ -105,6 +114,7 @@ public static class BffEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     public static void MapBffManagementLogoutEndpoint(this IEndpointRouteBuilder endpoints)
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
@@ -121,6 +131,7 @@ public static class BffEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     public static void MapBffManagementUserEndpoint(this IEndpointRouteBuilder endpoints)
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
@@ -136,6 +147,7 @@ public static class BffEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     public static void MapBffManagementBackchannelEndpoint(this IEndpointRouteBuilder endpoints)
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
@@ -150,6 +162,7 @@ public static class BffEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     public static void MapBffDiagnosticsEndpoint(this IEndpointRouteBuilder endpoints)
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;

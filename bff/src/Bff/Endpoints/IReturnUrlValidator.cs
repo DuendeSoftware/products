@@ -14,5 +14,5 @@ public interface IReturnUrlValidator
     /// </summary>
     /// <param name="returnUrl"></param>
     /// <returns></returns>
-    public bool IsValidAsync(string returnUrl);
+    public bool IsValidAsync(Uri returnUrl);
 }
