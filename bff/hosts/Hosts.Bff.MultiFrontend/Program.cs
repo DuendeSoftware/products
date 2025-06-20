@@ -182,8 +182,6 @@ app.MapGet("/local/invokes-external-api", async (SelectedFrontend frontend, IHtt
     return data;
 });
 
-app.MapBffManagementEndpoints();
-
 app.Run();
 
 RouteConfig[] BuildYarpRoutes()

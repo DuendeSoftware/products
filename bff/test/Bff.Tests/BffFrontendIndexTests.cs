@@ -52,7 +52,7 @@ public class BffFrontendIndexTests : BffTestBase
         await Bff.BrowserClient.Login()
             .CheckResponseContent(Cdn.IndexHtml);
 
-        var result = await Bff.BrowserClient.CallBffHostApi(The.SubPath);
+        var result = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
     }
     [Fact]
     public async Task Given_index_can_call_local_api()

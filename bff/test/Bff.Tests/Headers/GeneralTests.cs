@@ -11,7 +11,7 @@ using ApiHost = Duende.Bff.Tests.TestInfra.ApiHost;
 
 namespace Duende.Bff.Tests.Headers;
 
-public class General(ITestOutputHelper output) : BffTestBase(output)
+public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
 {
     [Theory, MemberData(nameof(AllSetups))]
     public async Task local_endpoint_should_receive_standard_headers(BffSetupType setup)
@@ -90,4 +90,31 @@ public class General(ITestOutputHelper output) : BffTestBase(output)
         apiResult.RequestHeaders["Host"].Single().ShouldBe("api");
         apiResult.RequestHeaders["x-custom"].Single().ShouldBe("custom");
     }
+
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task Will_auto_register_login_endpoints(BffSetupType setup)
+    {
+        ConfigureBff(setup);
+        await InitializeAsync();
+
+        Context.LogMessages.ToString().ShouldNotContain("Already mapped Login endpoint");
+
+        // And we can log in, which means the login endpoint was registered
+        await Bff.BrowserClient.Login();
+    }
+
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task If_management_endpoints_are_mapped_manually_then_warning_is_written(BffSetupType setup)
+    {
+        Bff.OnConfigureEndpoints += endpoints => endpoints.MapBffManagementEndpoints();
+        ConfigureBff(setup);
+        await InitializeAsync();
+
+        // And we can log in, which means the login endpoint was registered
+        await Bff.BrowserClient.Login();
+
+        Context.LogMessages.ToString().ShouldContain("Already mapped Login endpoint");
+    }
+
+
 }

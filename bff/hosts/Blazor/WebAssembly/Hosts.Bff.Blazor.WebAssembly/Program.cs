@@ -83,7 +83,6 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Hosts.Bff.Blazor.WebAssembly.Client._Imports).Assembly);
 
-app.MapBffManagementEndpoints();
 WeatherEndpoints.Map(app);
 
 app.Run();

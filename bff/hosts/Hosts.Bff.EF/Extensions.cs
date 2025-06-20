@@ -100,9 +100,6 @@ internal static class Extensions
             .RequireAuthorization()
             .AsBffApiEndpoint();
 
-        // login, logout, user, backchannel logout...
-        app.MapBffManagementEndpoints();
-
         // proxy endpoint for cross-site APIs
         // all calls to /api/* will be forwarded to the remote API
         // user or client access token will be attached in API call

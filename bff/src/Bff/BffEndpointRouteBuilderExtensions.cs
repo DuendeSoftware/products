@@ -35,6 +35,12 @@ public static class BffEndpointRouteBuilderExtensions
     /// <param name="endpoints"></param>
     public static void MapBffManagementEndpoints(this IEndpointRouteBuilder endpoints)
     {
+        var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
+        if (endpoints.AlreadyMappedManagementEndpoint(options.LoginPath, "Login"))
+        {
+            return;
+        }
+
         endpoints.MapBffManagementLoginEndpoint();
 #pragma warning disable CS0618 // Type or member is obsolete
         endpoints.MapBffManagementSilentLoginEndpoints();
@@ -60,6 +66,18 @@ public static class BffEndpointRouteBuilderExtensions
             .AllowAnonymous();
     }
 
+    internal static bool AlreadyMappedManagementEndpoint(this IEndpointRouteBuilder endpoints, PathString route, string name)
+    {
+        if (endpoints.DataSources.Any(x =>
+                x.Endpoints.OfType<RouteEndpoint>().Any(x => x.RoutePattern.RawText == route.ToString())))
+        {
+            endpoints.ServiceProvider.GetRequiredService<ILogger<BffBuilder>>().LogWarning("Already mapped {name} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()", name);
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Adds the silent login BFF management endpoints
     /// </summary>
@@ -72,6 +90,7 @@ public static class BffEndpointRouteBuilderExtensions
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
         endpoints.MapGet(options.SilentLoginPath.Value!, ProcessWith<ISilentLoginEndpoint>)
+            .WithName("SilentLogin")
             .WithMetadata(new BffUiEndpointAttribute())
             .AllowAnonymous();
 
@@ -91,6 +110,7 @@ public static class BffEndpointRouteBuilderExtensions
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
         endpoints.MapGet(options.LogoutPath.Value!, ProcessWith<ILogoutEndpoint>)
+            .WithName("Logout")
             .WithMetadata(new BffUiEndpointAttribute())
             .AllowAnonymous();
     }

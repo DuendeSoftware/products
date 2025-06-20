@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Duende.Bff.Yarp;
@@ -18,18 +19,30 @@ public static class RouteBuilderExtensions
     /// <summary>
     /// Adds a remote BFF API endpoint
     /// </summary>
-    /// <param name="endpoints"></param>
-    /// <param name="localPath"></param>
-    /// <param name="apiAddress"></param>
-    /// <param name="yarpTransformBuilder"></param>
-    /// <returns></returns>
+    /// <param name="endpoints">The endpoint route builder to add the endpoint to.</param>
+    /// <param name="localPath">The local path pattern for the BFF API endpoint.</param>
+    /// <param name="apiAddress">The remote API address to which requests will be forwarded.</param>
+    /// <param name="yarpTransformBuilder">
+    /// Optional. An action to configure YARP transforms for this proxy request. 
+    /// If not provided, a default transform builder is used.
+    /// </param>
+    /// <param name="requestConfig">
+    /// Optional. Additional configuration for the forwarded request, such as timeouts or activity propagation.
+    /// If not specified, the default yarp configuration is used.
+    /// </param>
+    /// <returns>An <see cref="IEndpointConventionBuilder"/> for further configuration of the endpoint.</returns>
     public static IEndpointConventionBuilder MapRemoteBffApiEndpoint(
         this IEndpointRouteBuilder endpoints,
         PathString localPath,
         Uri apiAddress,
-        Action<TransformBuilderContext>? yarpTransformBuilder = null)
+        Action<TransformBuilderContext>? yarpTransformBuilder = null,
+        ForwarderRequestConfig? requestConfig = null
+        )
     {
         endpoints.CheckLicense();
+
+        // See if a default request config is registered in DI, otherwise use an empty one
+        requestConfig ??= endpoints.ServiceProvider.GetService<ForwarderRequestConfig>() ?? ForwarderRequestConfig.Empty;
 
         // Configure the yarp transform pipeline. Either use the one provided or the default
         yarpTransformBuilder ??= context =>
@@ -45,7 +58,8 @@ public static class RouteBuilderExtensions
 
         // Try to resolve the ITransformBuilder from DI. If it is not registered,
         // throw a clearer exception. Otherwise, the call below fails with a less clear exception.
-        var _ = endpoints.ServiceProvider.GetService<ITransformBuilder>() ?? throw new InvalidOperationException("No ITransformBuilder has been registered. Have you called BffBuilder.AddRemoteApis()");
+        _ = endpoints.ServiceProvider.GetService<ITransformBuilder>()
+            ?? throw new InvalidOperationException("No ITransformBuilder has been registered. Have you called BffBuilder.AddRemoteApis()");
 
         return endpoints.MapForwarder(
                 pattern: localPath.Add("/{**catch-all}").Value!,
@@ -53,7 +67,8 @@ public static class RouteBuilderExtensions
                 configureTransform: context =>
                 {
                     yarpTransformBuilder(context);
-                })
+                },
+                requestConfig: requestConfig)
             .WithMetadata(new BffRemoteApiEndpointMetadata());
     }
 

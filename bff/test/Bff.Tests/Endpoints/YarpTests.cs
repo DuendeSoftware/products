@@ -37,7 +37,7 @@ public class YarpTests : BffTestBase
         await InitializeAsync();
 
         await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.OK
         );
     }
@@ -50,7 +50,7 @@ public class YarpTests : BffTestBase
         ConfigureYarp(Some.RouteConfig().WithAntiforgeryCheck());
         await InitializeAsync();
 
-        var req = new HttpRequestMessage(HttpMethod.Get, The.SubPath);
+        var req = new HttpRequestMessage(HttpMethod.Get, The.PathAndSubPath);
         var response = await Bff.BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -70,7 +70,7 @@ public class YarpTests : BffTestBase
         ConfigureYarp(Some.RouteConfig().WithAntiforgeryCheck());
         await InitializeAsync();
 
-        var req = new HttpRequestMessage(HttpMethod.Get, The.SubPath);
+        var req = new HttpRequestMessage(HttpMethod.Get, The.PathAndSubPath);
         var response = await Bff.BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -85,7 +85,7 @@ public class YarpTests : BffTestBase
         await InitializeAsync();
 
         await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.OK
         );
     }
@@ -99,7 +99,7 @@ public class YarpTests : BffTestBase
         await InitializeAsync();
 
         await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
     }
@@ -113,12 +113,12 @@ public class YarpTests : BffTestBase
         await InitializeAsync();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.OK
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Get);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBeNull();
         apiResult.ClientId.ShouldBeNull();
     }
@@ -136,12 +136,12 @@ public class YarpTests : BffTestBase
         await InitializeAsync();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.OK
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Get);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBeNull();
         apiResult.ClientId.ShouldBeNull();
     }
@@ -156,11 +156,11 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath
+            path: The.PathAndSubPath
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Get);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBe(The.Sub);
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
@@ -178,12 +178,12 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             method: HttpMethod.Put
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Put);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBe(The.Sub);
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
@@ -198,12 +198,12 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             method: HttpMethod.Post
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Post);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBe(The.Sub);
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
@@ -218,12 +218,12 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             method: HttpMethod.Post
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Post);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBe(The.Sub);
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
@@ -238,11 +238,11 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath
+            path: The.PathAndSubPath
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Get);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBeNull();
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
@@ -257,11 +257,11 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath
+            path: The.PathAndSubPath
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Get);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBe(The.Sub);
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
@@ -288,11 +288,11 @@ public class YarpTests : BffTestBase
 
         await Bff.BrowserClient.Login("/somepath");
         ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
-            path: "/somepath" + The.SubPath
+            path: "/somepath" + The.PathAndSubPath
         );
 
         apiResult.Method.ShouldBe(HttpMethod.Get);
-        apiResult.Path.ShouldBe(The.SubPath);
+        apiResult.Path.ShouldBe(The.PathAndSubPath);
         apiResult.Sub.ShouldBe(The.Sub);
         apiResult.ClientId.ShouldBe(The.ClientId);
     }
@@ -308,7 +308,7 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
     }
@@ -324,7 +324,7 @@ public class YarpTests : BffTestBase
         await Bff.BrowserClient.Login();
 
         await Bff.BrowserClient.CallBffHostApi(
-            path: The.SubPath,
+            path: The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Forbidden
         );
     }

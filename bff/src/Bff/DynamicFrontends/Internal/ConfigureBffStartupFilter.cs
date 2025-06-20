@@ -34,7 +34,15 @@ internal class ConfigureBffStartupFilter : IStartupFilter
             }
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {
+                app.UseEndpoints(endpoints =>
+                {
+                    if (!endpoints.AlreadyMappedManagementEndpoint(bffOptions.LoginPath, "Login"))
+                    {
+                        endpoints.MapBffManagementEndpoints();
+                    }
+                });
                 app.UseBffIndexPages();
+
             }
 
             ConfigureOpenIdConfigurationCacheExpiration(app);
