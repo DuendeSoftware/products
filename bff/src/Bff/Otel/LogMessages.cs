@@ -259,6 +259,130 @@ internal static partial class LogMessages
         $"Already mapped {{{OTelParameters.Name}}} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()")]
     public static partial void AlreadyMappedManagementEndpoint(this ILogger logger, LogLevel logLevel, string name);
 
+    [LoggerMessage(
+        message: "Authenticating scheme: {Scheme}")]
+    public static partial void AuthenticatingScheme(this ILogger logger, LogLevel logLevel, string? scheme);
+
+    [LoggerMessage(
+        message: "Setting OIDC ProtocolMessage.Prompt to 'none' for BFF silent login")]
+    public static partial void SettingOidcPromptNoneForSilentLogin(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Setting OIDC ProtocolMessage.Prompt to {Prompt} for BFF silent login")]
+    public static partial void SettingOidcPromptForSilentLogin(this ILogger logger, LogLevel logLevel, string prompt);
+
+    [LoggerMessage(
+        message: "Handling error response from OIDC provider for BFF silent login.")]
+    public static partial void HandlingErrorResponseFromOidcProviderForSilentLogin(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Handling failed response from OIDC provider for BFF silent login.")]
+    public static partial void HandlingFailedResponseFromOidcProviderForSilentLogin(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Processing back-channel logout request")]
+    public static partial void ProcessingBackChannelLogoutRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "No claims in back-channel JWT")]
+    public static partial void NoClaimsInBackChannelJwt(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Claims found in back-channel JWT {Claims}")]
+    public static partial void ClaimsFoundInBackChannelJwt(this ILogger logger, LogLevel logLevel, object claims);
+
+    [LoggerMessage(
+        message: "Back-channel JWT validation successful")]
+    public static partial void BackChannelJwtValidationSuccessful(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Processing login request")]
+    public static partial void ProcessingLoginRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Login endpoint triggering Challenge with returnUrl {ReturnUrl}")]
+    public static partial void LoginEndpointTriggeringChallenge(this ILogger logger, LogLevel logLevel, string returnUrl);
+
+    [LoggerMessage(
+        message: "Processing logout request")]
+    public static partial void ProcessingLogoutRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Logout endpoint triggering SignOut with returnUrl {ReturnUrl}")]
+    public static partial void LogoutEndpointTriggeringSignOut(this ILogger logger, LogLevel logLevel, string returnUrl);
+
+    [LoggerMessage(
+        message: "Processing silent login callback request")]
+    public static partial void ProcessingSilentLoginCallbackRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Silent login endpoint rendering HTML with JS postMessage to origin {Origin} with isLoggedIn {IsLoggedIn}")]
+    public static partial void SilentLoginEndpointRenderingHtml(this ILogger logger, LogLevel logLevel, string origin, string isLoggedIn);
+
+    [LoggerMessage(
+        message: "Processing silent login request")]
+    public static partial void ProcessingSilentLoginRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Using deprecated silentlogin endpoint. This endpoint will be removed in future versions. Consider calling the BFF Login endpoint with prompt=none.")]
+    public static partial void UsingDeprecatedSilentLoginEndpoint(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Processing user request")]
+    public static partial void ProcessingUserRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "User endpoint indicates the user is not logged in, using status code {StatusCode}")]
+    public static partial void UserEndpointNotLoggedIn(this ILogger logger, LogLevel logLevel, int statusCode);
+
+    [LoggerMessage(
+        message: "User endpoint indicates the user is logged in with claims {Claims}")]
+    public static partial void UserEndpointLoggedInWithClaims(this ILogger logger, LogLevel logLevel, object claims);
+
+    [LoggerMessage(
+        message: "Nop implementation of session revocation for sub: {Sub}, and sid: {Sid}. Implement ISessionRevocationService to provide your own implementation.")]
+    public static partial void NopSessionRevocation(this ILogger logger, LogLevel logLevel, string sub, string sid);
+
+    [LoggerMessage(
+        message: "Revoking sessions for sub {Sub} and sid {Sid}")]
+    public static partial void RevokingSessions(this ILogger logger, LogLevel logLevel, string sub, string sid);
+
+    [LoggerMessage(
+        message: "Refresh token revoked for sub {Sub} and sid {Sid}")]
+    public static partial void RefreshTokenRevoked(this ILogger logger, LogLevel logLevel, string sub, string sid);
+
+    [LoggerMessage(
+        message: "Starting BFF session cleanup")]
+    public static partial void StartingBffSessionCleanup(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.")]
+    public static partial void SessionCleanupNotRegistered(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Stopping BFF session cleanup")]
+    public static partial void StoppingBffSessionCleanup(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Failed to cleanup session")]
+    public static partial void FailedToCleanupSession(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: "Failed to cleanup expired sessions")]
+    public static partial void FailedToCleanupExpiredSessions(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: "Revoking user's refresh tokens in OnSigningOut for subject id: {Sub}")]
+    public static partial void RevokingUserRefreshTokensOnSigningOut(this ILogger logger, LogLevel logLevel, string sub);
+
+    [LoggerMessage(
+        message: "Explicitly setting ShouldRenew=false in OnValidatePrincipal due to query param suppressing slide behavior.")]
+    public static partial void SuppressingSlideBehaviorOnValidatePrincipal(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.")]
+    public static partial void SuppressingSlideBehaviorOnCheckSlidingExpiration(this ILogger logger, LogLevel logLevel);
+
     public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 
     public static string Sanitize(this PathString toSanitize) => toSanitize.ToString().ReplaceLineEndings(string.Empty);

@@ -29,7 +29,7 @@ internal class DefaultBackchannelLogoutEndpoint(
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing back-channel logout request");
+        logger.ProcessingBackChannelLogoutRequest(LogLevel.Debug);
 
         context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
         context.Response.Headers.Append("Pragma", "no-cache");
@@ -85,12 +85,12 @@ internal class DefaultBackchannelLogoutEndpoint(
         var claims = await ValidateJwt(logoutToken);
         if (claims == null)
         {
-            logger.LogDebug("No claims in back-channel JWT");
+            logger.NoClaimsInBackChannelJwt(LogLevel.Debug);
             return null;
         }
         else
         {
-            logger.LogTrace("Claims found in back-channel JWT {claims}", claims.Claims);
+            logger.ClaimsFoundInBackChannelJwt(LogLevel.Trace, claims.Claims);
         }
 
         if (claims.FindFirst("sub") == null && claims.FindFirst("sid") == null)
@@ -144,7 +144,7 @@ internal class DefaultBackchannelLogoutEndpoint(
         var result = await handler.ValidateTokenAsync(jwt, parameters);
         if (result.IsValid)
         {
-            logger.LogDebug("Back-channel JWT validation successful");
+            logger.BackChannelJwtValidationSuccessful(LogLevel.Debug);
             return result.ClaimsIdentity;
         }
 

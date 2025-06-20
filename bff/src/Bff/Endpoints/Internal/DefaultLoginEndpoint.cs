@@ -29,7 +29,7 @@ internal class DefaultLoginEndpoint(
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing login request");
+        logger.ProcessingLoginRequest(LogLevel.Debug);
 
         context.CheckForBffMiddleware(bffOptions.Value);
 
@@ -79,7 +79,7 @@ internal class DefaultLoginEndpoint(
             props.Items.Add(Constants.BffFlags.Prompt, prompt);
         }
 
-        logger.LogDebug("Login endpoint triggering Challenge with returnUrl {returnUrl}", returnUrl.Sanitize());
+        logger.LoginEndpointTriggeringChallenge(LogLevel.Debug, returnUrl.Sanitize());
 
         await context.ChallengeAsync(props);
     }
