@@ -46,4 +46,11 @@ public sealed record Origin : IEquatable<HttpRequest>
     }
 
     public override string ToString() => $"{Scheme}://{Host}:{Port}";
+
+    public Uri ToUri() => new UriBuilder
+    {
+        Scheme = Scheme,
+        Host = Host,
+        Port = Port
+    }.Uri;
 }

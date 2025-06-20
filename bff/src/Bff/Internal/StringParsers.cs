@@ -13,7 +13,7 @@ internal static class StringParsers<TSelf> where TSelf : struct, IStronglyTypedV
         }
 
         throw new InvalidOperationException(
-            $"Received an invalid {typeof(TSelf).Name}. Errors: {string.Join("", errors.Select(x => $"{Environment.NewLine}\t - {x}"))}");
+            $"Received an invalid {typeof(TSelf).Name}: '{value}'. Errors: {string.Join("", errors.Select(x => $"{Environment.NewLine}\t - {x}"))}");
     }
 
     internal static TSelf? ParseOrDefault(string? value)

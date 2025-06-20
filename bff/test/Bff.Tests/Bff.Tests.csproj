@@ -14,15 +14,14 @@
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
-
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="PublicApiGenerator" />
     <PackageReference Include="Verify.Xunit" />
-
     <PackageReference Include="RichardSzalay.MockHttp" />
-
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
     <ProjectReference Include="..\..\performance\Bff.Benchmarks\Bff.Benchmarks.csproj" />
     <ProjectReference Include="..\..\src\Bff.Blazor\Bff.Blazor.csproj" />
     <ProjectReference Include="..\..\src\Bff.EntityFramework\Bff.EntityFramework.csproj" />
