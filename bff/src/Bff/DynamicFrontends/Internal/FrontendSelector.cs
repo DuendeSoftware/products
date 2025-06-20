@@ -8,14 +8,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<FrontendSelector> logger)
+internal class FrontendSelector(FrontendCollection frontends, ILogger<FrontendSelector> logger)
 {
     public bool TrySelectFrontend(HttpRequest request, [NotNullWhen(true)] out BffFrontend? selectedFrontend)
     {
         selectedFrontend = null;
-        var frontends = frontendCollection.GetAll();
 
-        if (frontends.Count == 0)
+        if (!frontends.Any())
         {
             logger.NoFrontendSelected(LogLevel.Debug);
             return false;
@@ -23,12 +22,14 @@ internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<F
 
         // Find frontends that match the request by origin (if specified)
         var matchingByOrigin = frontends
-            .Where(x => x.SelectionCriteria.MatchingOrigin == null || x.SelectionCriteria.MatchingOrigin.Equals(request))
+            .Where(x => x.SelectionCriteria.MatchingOrigin == null ||
+                        x.SelectionCriteria.MatchingOrigin.Equals(request))
             .ToList();
 
         // First, look for a match by origin and path (if specified)
         selectedFrontend = matchingByOrigin
-            .OrderByDescending(x => x.SelectionCriteria.MatchingOrigin != null) // Prefer frontends with a specific origin
+            .OrderByDescending(x =>
+                x.SelectionCriteria.MatchingOrigin != null) // Prefer frontends with a specific origin
             .ThenByDescending(x => PathOrder(x.SelectionCriteria.MatchingPath))
             .FirstOrDefault(x =>
                 x.SelectionCriteria.MatchingPath == null ||
@@ -42,7 +43,8 @@ internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<F
                     StringComparison.Ordinal))
             {
                 // There is a case difference in the path
-                logger.FrontendSelectedWithPathCasingIssue(LogLevel.Warning, selectedFrontend.SelectionCriteria.MatchingPath, request.Path);
+                logger.FrontendSelectedWithPathCasingIssue(LogLevel.Warning,
+                    selectedFrontend.SelectionCriteria.MatchingPath, request.Path);
             }
 
             return true;

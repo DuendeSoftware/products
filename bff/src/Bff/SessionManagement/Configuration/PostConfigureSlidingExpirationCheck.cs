@@ -17,7 +17,6 @@ namespace Duende.Bff.SessionManagement.Configuration;
 internal class PostConfigureSlidingExpirationCheck(
     ActiveCookieAuthenticationScheme activeCookieScheme,
     IOptions<BffOptions> bffOptions,
-    IOptions<AuthenticationOptions> authOptions,
     ILogger<PostConfigureSlidingExpirationCheck> logger)
     : IPostConfigureOptions<CookieAuthenticationOptions>
 {
@@ -46,7 +45,8 @@ internal class PostConfigureSlidingExpirationCheck(
                 var slide = ctx.Request.Query[Constants.RequestParameters.SlideCookie];
                 if (slide == "false")
                 {
-                    logger.LogDebug("Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.");
+                    logger.LogDebug(
+                        "Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.");
                     ctx.ShouldRenew = false;
                 }
             }
