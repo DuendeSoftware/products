@@ -26,7 +26,6 @@
 // with distributed cache + short lifecycle
 
 using Bff.Performance.Scenarios.Bff;
-using MessagePack.Resolvers;
 using Microsoft.Extensions.Configuration;
 using NBomber.Contracts.Stats;
 using NBomber.CSharp;

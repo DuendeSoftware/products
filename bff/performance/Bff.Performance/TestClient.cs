@@ -81,10 +81,7 @@ public class TestClient(Uri baseAddress, CookieHandler cookies, HttpMessageHandl
     }
 
 
-    public async Task<HttpResponseMessage> TriggerLogin(string userName = "alice", string password = "alice", CancellationToken ct = default)
-    {
-        return await GetAsync("/bff/login");
-    }
+    public async Task<HttpResponseMessage> TriggerLogin(string userName = "alice", string password = "alice", CancellationToken ct = default) => await GetAsync("/bff/login");
 
     public async Task<HttpResponseMessage> TriggerLogout()
     {
