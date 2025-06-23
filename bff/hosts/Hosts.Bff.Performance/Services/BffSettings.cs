@@ -5,6 +5,6 @@ namespace Hosts.Bff.Performance.Services;
 
 public class BffSettings
 {
-    public Uri IdentityServerUrl { get; set; }
-    public Uri ApiUrl { get; set; }
+    public required Uri IdentityServerUrl { get; set; }
+    public required Uri ApiUrl { get; set; }
 }

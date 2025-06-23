@@ -55,14 +55,16 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
         isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
         isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
 
-        var bffUrls = config.AsEnumerable().Where(x => x.Key.StartsWith("BffUrl"))
-            .Select(x => x.Value);
+        var bffUrls = config.AsEnumerable()
+            .Where(x => x.Key.StartsWith("BffUrl"))
+            .Select(x => x.Value)
+            .OfType<string>();
 
         isBuilder.AddInMemoryClients([new Client
         {
             ClientId = "bff.perf",
             ClientSecrets = [new Secret("secret".Sha256())],
-            RedirectUris = bffUrls .Select(x => x.TrimEnd('/') + "/signin-oidc").ToArray(),
+            RedirectUris = bffUrls.Select(x => x.TrimEnd('/') + "/signin-oidc").ToArray(),
             AllowOfflineAccess = true,
             AllowedScopes = { "openid", "profile", "api" },
             AllowedGrantTypes =

@@ -10,11 +10,15 @@ namespace Hosts.Bff.Performance.Services;
 
 public abstract class BffService(string[] urlConfigKeys, IConfiguration config, IOptions<BffSettings> bffSettings) : BackgroundService
 {
+    public IConfiguration Config { get; } = config;
     public BffSettings Settings { get; } = bffSettings.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var urls = urlConfigKeys.Select(x => config[x]).ToArray();
+        var urls = urlConfigKeys
+            .Select(x => Config[x])
+            .OfType<string>()
+            .ToArray();
 
         var builder = WebApplication.CreateBuilder();
         builder.AddServiceDefaults();
