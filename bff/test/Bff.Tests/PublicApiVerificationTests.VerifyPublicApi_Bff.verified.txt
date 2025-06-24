@@ -162,16 +162,22 @@ namespace Duende.Bff
         public System.Threading.Tasks.Task StartAsync(System.Threading.CancellationToken ct = default) { }
         public System.Threading.Tasks.Task StopAsync(System.Threading.CancellationToken ct = default) { }
         public Microsoft.AspNetCore.Builder.IApplicationBuilder Use(System.Func<Microsoft.AspNetCore.Http.RequestDelegate, Microsoft.AspNetCore.Http.RequestDelegate> middleware) { }
+        public static Duende.Bff.BffApplicationBuilder CreateBuilder(Microsoft.AspNetCore.Builder.WebApplicationOptions opt, System.Action<Duende.Bff.Configuration.BffOptions>? options = null) { }
+        public static Duende.Bff.BffApplicationBuilder CreateBuilder(string[]? args = null, System.Action<Duende.Bff.Configuration.BffOptions>? options = null) { }
     }
-    public sealed class BffApplicationBuilder : Duende.Bff.IBffBuilder
+    public sealed class BffApplicationBuilder : Duende.Bff.IBffBuilder, Microsoft.Extensions.Hosting.IHostApplicationBuilder
     {
         public Microsoft.Extensions.Configuration.ConfigurationManager Configuration { get; }
+        public Microsoft.Extensions.Hosting.IHostEnvironment Environment { get; }
+        public Microsoft.Extensions.Logging.ILoggingBuilder Logging { get; }
+        public Microsoft.Extensions.Diagnostics.Metrics.IMetricsBuilder Metrics { get; }
+        public System.Collections.Generic.IDictionary<object, object> Properties { get; }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
         public Microsoft.AspNetCore.Hosting.IWebHostBuilder WebHost { get; }
         public Duende.Bff.BffApplication Build() { }
+        public void ConfigureContainer<TContainerBuilder>(Microsoft.Extensions.DependencyInjection.IServiceProviderFactory<TContainerBuilder> factory, System.Action<TContainerBuilder>? configure = null)
+            where TContainerBuilder :  notnull { }
         public Duende.Bff.IBffBuilder LoadConfiguration(Microsoft.Extensions.Configuration.IConfiguration section) { }
-        public static Duende.Bff.BffApplicationBuilder Create(Microsoft.AspNetCore.Builder.WebApplicationOptions opt, System.Action<Duende.Bff.Configuration.BffOptions>? options = null) { }
-        public static Duende.Bff.BffApplicationBuilder Create(string[]? args = null, System.Action<Duende.Bff.Configuration.BffOptions>? options = null) { }
     }
     public static class BffApplicationBuilderExtensions
     {

@@ -6,16 +6,22 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.Metrics;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff;
-public sealed class BffApplicationBuilder : IBffBuilder
-{
 
+public sealed class BffApplicationBuilder : IBffBuilder, IHostApplicationBuilder
+{
     private WebApplicationBuilder Builder { get; }
     public IWebHostBuilder WebHost => Builder.WebHost;
+    public IDictionary<object, object> Properties => ((IHostApplicationBuilder)Builder).Properties;
+
     public IServiceCollection Services => Builder.Services;
 
     private IConfiguration? _loadedConfiguration;
+
     /// <summary>
     /// Hook for a plugin to register itself for configuration loading.
     /// </summary>
@@ -50,6 +56,7 @@ public sealed class BffApplicationBuilder : IBffBuilder
         {
             configLoader(Services, section);
         }
+
         // We no longer need them. 
         PluginConfigurationLoaders.Clear();
 
@@ -65,12 +72,19 @@ public sealed class BffApplicationBuilder : IBffBuilder
             .AddDynamicFrontends();
     }
 
-    public ConfigurationManager Configuration => Builder.Configuration;
+    public void ConfigureContainer<TContainerBuilder>(IServiceProviderFactory<TContainerBuilder> factory,
+        Action<TContainerBuilder>? configure = null) where TContainerBuilder : notnull =>
+        ((IHostApplicationBuilder)Builder).ConfigureContainer<TContainerBuilder>(factory, configure);
 
-    public static BffApplicationBuilder Create(string[]? args = null, Action<BffOptions>? options = null)
-        => new BffApplicationBuilder(WebApplication.CreateSlimBuilder(args ?? []), options);
-    public static BffApplicationBuilder Create(WebApplicationOptions opt, Action<BffOptions>? options = null)
-        => new BffApplicationBuilder(WebApplication.CreateSlimBuilder(opt), options);
+    IConfigurationManager IHostApplicationBuilder.Configuration => ((IHostApplicationBuilder)Builder).Configuration;
+
+    public IHostEnvironment Environment => ((IHostApplicationBuilder)Builder).Environment;
+
+    public ILoggingBuilder Logging => Builder.Logging;
+
+    public IMetricsBuilder Metrics => Builder.Metrics;
+
+    public ConfigurationManager Configuration => Builder.Configuration;
 
     public BffApplication Build()
     {
@@ -78,6 +92,7 @@ public sealed class BffApplicationBuilder : IBffBuilder
         {
             LoadConfiguration(Configuration);
         }
+
         return new BffApplication(Builder.Build());
     }
 }

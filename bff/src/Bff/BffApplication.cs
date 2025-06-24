@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +26,6 @@ public sealed class BffApplication : IHost, IApplicationBuilder, IEndpointRouteB
             app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
         app.UseHttpsRedirection();
         app.UseRouting();
 
@@ -66,4 +66,10 @@ public sealed class BffApplication : IHost, IApplicationBuilder, IEndpointRouteB
     public ICollection<EndpointDataSource> DataSources => ((IEndpointRouteBuilder)_app).DataSources;
 
     public async ValueTask DisposeAsync() => await _app.DisposeAsync();
+
+    public static BffApplicationBuilder CreateBuilder(string[]? args = null, Action<BffOptions>? options = null) =>
+        new(WebApplication.CreateBuilder(args ?? []), options);
+    public static BffApplicationBuilder CreateBuilder(WebApplicationOptions opt, Action<BffOptions>? options = null) =>
+        new(WebApplication.CreateBuilder(opt), options);
+
 }

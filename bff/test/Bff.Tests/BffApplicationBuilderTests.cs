@@ -25,7 +25,7 @@ public class BffApplicationBuilderTests
     {
         Context = new TestHostContext(output);
         _output = output;
-        _bffBuilder = BffApplicationBuilder.Create(new WebApplicationOptions()
+        _bffBuilder = BffApplication.CreateBuilder(new WebApplicationOptions()
         {
             EnvironmentName = Environments.Development
         });

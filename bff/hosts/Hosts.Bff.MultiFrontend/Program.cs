@@ -13,15 +13,14 @@ using Duende.Bff.Yarp;
 using Hosts.ServiceDefaults;
 using Yarp.ReverseProxy.Configuration;
 
-var bffConfig = new ConfigurationBuilder()
-#if DEBUG
-    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "BffConfig.json"), optional: false, reloadOnChange: true)
-#else
-    .AddJsonFile("BffConfig.json", optional: false, reloadOnChange: true)
-#endif
-    .Build();
+var builder = BffApplication.CreateBuilder(args);
 
-var builder = WebApplication.CreateBuilder(args);
+#if DEBUG
+    builder.Configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "BffConfig.json"),
+        optional: false, reloadOnChange: true);
+#else
+    builder.Configuration.AddJsonFile("BffConfig.json", optional: false, reloadOnChange: true);
+#endif
 
 builder.Services.AddSingleton<IIndexHtmlClient, CustomIndexHtmlClient>();
 
@@ -34,18 +33,31 @@ builder.Services.AddUserAccessTokenHttpClient("api",
 
 builder.AddServiceDefaults();
 
-var bffBuilder = builder.Services
-    .AddBff();
+RemoteApi[] remoteApis = [
 
-bffBuilder
+    new RemoteApi(LocalPath.Parse("/api/user-token"), new Uri("https://localhost:5010")),
+    new RemoteApi(LocalPath.Parse("/api/client-token"), new Uri("https://localhost:5010"))
+        .WithAccessToken(RequiredTokenType.Client),
+    new RemoteApi(LocalPath.Parse("/api/user-or-client-token"), new Uri("https://localhost:5010"))
+        .WithAccessToken(RequiredTokenType.UserOrClient),
+    new RemoteApi(LocalPath.Parse("/api/anonymous"), new Uri("https://localhost:5010"))
+        .WithAccessToken(RequiredTokenType.None),
+    new RemoteApi(LocalPath.Parse("/api/optional-user-token"), new Uri("https://localhost:5010"))
+        .WithAccessToken(RequiredTokenType.UserOrNone),
+    new RemoteApi(LocalPath.Parse("/api/impersonation"), new Uri("https://localhost:5010"))
+        .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>(),
+    new RemoteApi(LocalPath.Parse("/api/audience-constrained"), new Uri("https://localhost:5010"))
+        .WithUserAccessTokenParameters(new BffUserAccessTokenParameters { Resource = Resource.Parse("urn:isolated-api") })];
+
+builder
     .WithDefaultOpenIdConnectOptions(options =>
     {
         var authority = ServiceDiscovery.ResolveService(AppHostServices.IdentityServer);
         options.Authority = authority.ToString();
 
         // confidential client using code flow + PKCE
-        //options.ClientId = "bff.multi-frontend.default";
-        //options.ClientSecret = "secret";
+        options.ClientId = "bff.multi-frontend.default";
+        options.ClientSecret = "secret";
         options.ResponseType = "code";
         options.ResponseMode = "query";
 
@@ -75,12 +87,12 @@ bffBuilder
         //options.LoginPath = "/bff/login";
         //options.LogoutPath = "/bff/logout";
     })
-    .LoadConfiguration(bffConfig)
     .AddRemoteApis()
     .AddFrontends(
         new BffFrontend(BffFrontendName.Parse("default-frontend"))
             .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-,
+            .WithRemoteApis(remoteApis),
+
         new BffFrontend(BffFrontendName.Parse("with-path"))
             .WithOpenIdConnectOptions(opt =>
             {
@@ -88,7 +100,8 @@ bffBuilder
                 opt.ClientSecret = "secret";
             })
             .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-            .MappedToPath(LocalPath.Parse("/with-path")),
+            .MappedToPath(LocalPath.Parse("/with-path"))
+            .WithRemoteApis(remoteApis),
 
         new BffFrontend(BffFrontendName.Parse("with-domain"))
                 .WithOpenIdConnectOptions(opt =>
@@ -98,21 +111,9 @@ bffBuilder
                 })
                 .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
                 .MappedToOrigin(Origin.Parse("https://app1.localhost:5005"))
-                .WithRemoteApis(
-                    new RemoteApi(LocalPath.Parse("/api/user-token"), new Uri("https://localhost:5010")),
-                    new RemoteApi(LocalPath.Parse("/api/client-token"), new Uri("https://localhost:5010"))
-                        .WithAccessToken(RequiredTokenType.Client),
-                    new RemoteApi(LocalPath.Parse("/api/user-or-client-token"), new Uri("https://localhost:5010"))
-                        .WithAccessToken(RequiredTokenType.UserOrClient),
-                    new RemoteApi(LocalPath.Parse("/api/anonymous"), new Uri("https://localhost:5010"))
-                        .WithAccessToken(RequiredTokenType.None),
-                    new RemoteApi(LocalPath.Parse("/api/optional-user-token"), new Uri("https://localhost:5010"))
-                        .WithAccessToken(RequiredTokenType.UserOrNone),
-                    new RemoteApi(LocalPath.Parse("/api/impersonation"), new Uri("https://localhost:5010"))
-                        .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>(),
-                    new RemoteApi(LocalPath.Parse("/api/audience-constrained"), new Uri("https://localhost:5010"))
-                        .WithUserAccessTokenParameters(new BffUserAccessTokenParameters { Resource = Resource.Parse("urn:isolated-api") }))
+                .WithRemoteApis(remoteApis)
         )
+
     .AddYarpConfig(BuildYarpRoutes(), [
         new ClusterConfig()
         {
@@ -129,15 +130,6 @@ bffBuilder
 
 
 var app = builder.Build();
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
-app.UseRouting();
-
-
-app.UseBff();
 
 
 app.Map("/static", staticApp =>
