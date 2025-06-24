@@ -16,7 +16,6 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_should_allow_anonymous(BffSetupType setup)
     {
-        ConfigureBff(setup);
         Bff.OnConfigureServices += svcs =>
         {
             svcs.AddAuthorization(opts =>
@@ -28,7 +27,7 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
             });
         };
 
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/logout"));
         response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
@@ -38,8 +37,7 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_should_signout(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         await Bff.BrowserClient.Login();
 
@@ -54,8 +52,7 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_for_authenticated_should_require_sid(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         var problem = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/logout"))
@@ -68,10 +65,10 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 
     [Theory]
     [MemberData(nameof(AllSetups))]
-    public async Task logout_endpoint_for_authenticated_when_require_option_is_false_should_not_require_sid(BffSetupType setup)
+    public async Task logout_endpoint_for_authenticated_when_require_option_is_false_should_not_require_sid(
+        BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         Bff.BffOptions.RequireLogoutSessionId = false;
@@ -79,28 +76,29 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/logout"));
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
+        response.Headers.Location!.ToString().ToLowerInvariant()
+            .ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
     }
 
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_for_authenticated_user_without_sid_should_succeed(BffSetupType setup)
     {
-
         // Workaround to place a session cookie in the BFF without a session id claim.
         Bff.OnConfigureEndpoints += endpoints =>
         {
             endpoints.MapGet("/__signin", async ctx =>
             {
                 var props = new AuthenticationProperties();
-                await ctx.SignInAsync(new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, The.Sub)], "test", "name", "role")), props);
+                await ctx.SignInAsync(
+                    new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, The.Sub)], "test", "name",
+                        "role")), props);
 
                 ctx.Response.StatusCode = 204;
             });
         };
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.GetAsync("__signin");
 
         // workaround for RevokeUserRefreshTokenAsync throwing when no RT in session
@@ -110,29 +108,29 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/logout"));
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
+        response.Headers.Location!.ToString().ToLowerInvariant()
+            .ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
     }
 
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_for_anonymous_user_without_sid_should_succeed(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/logout"));
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
+        response.Headers.Location!.ToString().ToLowerInvariant()
+            .ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
     }
 
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task can_logout_twice(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         var sid = await Bff.BrowserClient.GetSid();
@@ -143,7 +141,8 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
         var response = await Bff.BrowserClient.Logout(sid);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect); // endsession
-        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
+        response.Headers.Location!.ToString().ToLowerInvariant()
+            .ShouldStartWith(IdentityServer.Url("/connect/endsession").ToString());
 
 
         (await Bff.BrowserClient.GetIsUserLoggedInAsync()).ShouldBeFalse();
@@ -156,23 +155,20 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     {
         Bff.OnConfigureEndpoints += endpoints => endpoints.MapGet("/foo", () => "foo'd you");
 
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         var response = await Bff.BrowserClient.Logout(returnUrl: new Uri("/foo", UriKind.Relative))
             .CheckHttpStatusCode();
 
         response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/foo"));
-
     }
 
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_should_reject_non_local_returnUrl(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         var problem = await Bff.BrowserClient.Logout(returnUrl: new Uri("https://foo"))

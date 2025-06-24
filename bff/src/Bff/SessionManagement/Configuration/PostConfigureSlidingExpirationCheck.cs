@@ -4,7 +4,7 @@
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
-using Microsoft.AspNetCore.Authentication;
+using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,12 +17,10 @@ namespace Duende.Bff.SessionManagement.Configuration;
 internal class PostConfigureSlidingExpirationCheck(
     ActiveCookieAuthenticationScheme activeCookieScheme,
     IOptions<BffOptions> bffOptions,
-    IOptions<AuthenticationOptions> authOptions,
     ILogger<PostConfigureSlidingExpirationCheck> logger)
     : IPostConfigureOptions<CookieAuthenticationOptions>
 {
     private readonly BffOptions _options = bffOptions.Value;
-    private readonly string? _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
@@ -47,7 +45,7 @@ internal class PostConfigureSlidingExpirationCheck(
                 var slide = ctx.Request.Query[Constants.RequestParameters.SlideCookie];
                 if (slide == "false")
                 {
-                    logger.LogDebug("Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.");
+                    logger.SuppressingSlideBehaviorOnCheckSlidingExpiration(LogLevel.Debug);
                     ctx.ShouldRenew = false;
                 }
             }

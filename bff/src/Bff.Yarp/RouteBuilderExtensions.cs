@@ -39,6 +39,8 @@ public static class RouteBuilderExtensions
         ForwarderRequestConfig? requestConfig = null
         )
     {
+        ArgumentNullException.ThrowIfNull(endpoints);
+        ArgumentNullException.ThrowIfNull(apiAddress);
         endpoints.CheckLicense();
 
         // See if a default request config is registered in DI, otherwise use an empty one

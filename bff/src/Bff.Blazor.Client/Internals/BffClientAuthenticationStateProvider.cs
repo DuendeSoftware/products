@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.Blazor.Client.Internals;
 
-internal class BffClientAuthenticationStateProvider : AuthenticationStateProvider
+internal class BffClientAuthenticationStateProvider : AuthenticationStateProvider, IDisposable
 {
     public const string HttpClientName = "Duende.Bff.Blazor.Client:StateProvider";
 
@@ -17,7 +17,7 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
     private ClaimsPrincipal? _user;
     private readonly ILogger<BffClientAuthenticationStateProvider> _logger;
 
-    private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
     /// <summary>
     /// An <see cref="AuthenticationStateProvider"/> intended for use in Blazor
@@ -90,7 +90,9 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
             try
             {
                 await _semaphore.WaitAsync();
+#pragma warning disable CA1508 // this is a false positive. It's a double locking pattern. 
                 if (_user == null)
+#pragma warning restore CA1508
                 {
                     _user = await RefreshUser();
                 }
@@ -102,5 +104,11 @@ internal class BffClientAuthenticationStateProvider : AuthenticationStateProvide
         }
 
         return new AuthenticationState(_user);
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+        _semaphore.Dispose();
     }
 }

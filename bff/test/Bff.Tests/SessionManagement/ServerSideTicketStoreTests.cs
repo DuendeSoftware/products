@@ -12,16 +12,15 @@ public class ServerSideTicketStoreTests : BffTestBase
     private readonly InMemoryUserSessionStore _sessionStore = new();
 
     public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureServices += services =>
-                                                                                       {
-                                                                                           services.AddSingleton<IUserSessionStore>(_sessionStore);
-                                                                                       };
+    {
+        services.AddSingleton<IUserSessionStore>(_sessionStore);
+    };
 
     [Theory, MemberData(nameof(AllSetups))]
     public async Task StoreAsync_should_remove_conflicting_entries_prior_to_creating_new_entry(BffSetupType setup)
     {
         Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         await Bff.BrowserClient.Login();
 
         Bff.BrowserClient.Cookies.Clear(Bff.Url());

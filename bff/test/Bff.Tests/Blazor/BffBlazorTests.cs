@@ -11,7 +11,6 @@ namespace Bff.Tests.Blazor;
 
 public class BffBlazorTests : BffTestBase
 {
-
     public BffBlazorTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
         Bff.MapGetForRoot = false;
@@ -44,8 +43,7 @@ public class BffBlazorTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task Can_get_home(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
         var response = await Bff.BrowserClient.GetAsync("/");
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -53,8 +51,7 @@ public class BffBlazorTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task Cannot_get_secure_without_loggin_in(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
         var response = await Bff.BrowserClient.GetAsync("/secure");
@@ -64,8 +61,7 @@ public class BffBlazorTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task Can_get_secure_when_logged_in(BffSetupType setup)
     {
-        ConfigureBff(setup);
-        await InitializeAsync();
+        await ConfigureBff(setup);
 
         await Bff.BrowserClient.Login();
         Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;

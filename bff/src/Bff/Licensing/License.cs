@@ -34,7 +34,7 @@ internal class License
         var edition = claims.FindFirst("edition")?.Value;
         if (!Enum.TryParse<LicenseEdition>(edition, true, out var editionValue))
         {
-            throw new Exception($"Invalid edition in license: '{edition}'");
+            throw new InvalidOperationException($"Invalid edition in license: '{edition}'");
         }
 
         Edition = editionValue;
@@ -43,12 +43,12 @@ internal class License
 
         if (IsCommunityEdition && RedistributionFeature)
         {
-            throw new Exception("Invalid License: Redistribution is not valid for community edition.");
+            throw new InvalidOperationException("Invalid License: Redistribution is not valid for community edition.");
         }
 
         if (IsBffEdition && RedistributionFeature)
         {
-            throw new Exception("Invalid License: Redistribution is not valid for BFF edition.");
+            throw new InvalidOperationException("Invalid License: Redistribution is not valid for BFF edition.");
         }
 
         if (IsBffEdition)

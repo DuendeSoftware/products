@@ -17,7 +17,11 @@ public static class ProxyConfigExtensions
     /// <param name="config"></param>
     /// <param name="requiredTokenType"></param>
     /// <returns></returns>
-    public static RouteConfig WithAccessToken(this RouteConfig config, RequiredTokenType requiredTokenType) => config.WithMetadata(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
+    public static RouteConfig WithAccessToken(this RouteConfig config, RequiredTokenType requiredTokenType)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        return config.WithMetadata(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
+    }
 
     /// <summary>
     /// Adds BFF access token metadata to a route configuration, indicating that 
@@ -27,17 +31,27 @@ public static class ProxyConfigExtensions
     /// <param name="config"></param>
     /// <returns></returns>
     [Obsolete("Use TokenRequirement.OptionalUserOrNone")]
-    public static RouteConfig WithOptionalUserAccessToken(this RouteConfig config) => WithAccessToken(config, RequiredTokenType.UserOrNone);
+    public static RouteConfig WithOptionalUserAccessToken(this RouteConfig config)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        return WithAccessToken(config, RequiredTokenType.UserOrNone);
+    }
 
     /// <summary>
     /// Adds anti-forgery metadata to a route configuration
     /// </summary>
     /// <param name="config"></param>
     /// <returns></returns>
-    public static RouteConfig WithAntiforgeryCheck(this RouteConfig config) => config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
+    public static RouteConfig WithAntiforgeryCheck(this RouteConfig config)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        return config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
+    }
 
     private static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
     {
+        ArgumentNullException.ThrowIfNull(config);
+
         Dictionary<string, string> metadata;
 
         if (config.Metadata != null)
@@ -63,6 +77,7 @@ public static class ProxyConfigExtensions
     /// <returns></returns>
     public static ClusterConfig WithAccessToken(this ClusterConfig config, RequiredTokenType requiredTokenType)
     {
+        ArgumentNullException.ThrowIfNull(config);
         Dictionary<string, string> metadata;
 
         if (config.Metadata != null)
