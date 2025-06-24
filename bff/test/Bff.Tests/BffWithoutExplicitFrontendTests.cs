@@ -11,9 +11,9 @@ public class BffWithoutExplicitFrontendTests(ITestOutputHelper output) : BffTest
 {
     public override async Task InitializeAsync()
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet("/secret", (HttpContext c, CT ct) =>
+            app.MapGet("/secret", (HttpContext c, CT ct) =>
             {
                 if (!c.User.IsAuthenticated())
                 {

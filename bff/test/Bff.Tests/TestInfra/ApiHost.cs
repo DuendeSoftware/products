@@ -27,23 +27,24 @@ public class ApiHost : TestHost
                 });
         };
 
-        OnConfigure += app =>
+        OnConfigureApp += app =>
         {
-            app.UseRouting();
-
-            app.UseAuthentication();
-            // adds authorization for local and remote API endpoints
-            app.UseAuthorization();
-        };
-
-        OnConfigureEndpoints += endpoints =>
-        {
-            endpoints.Map("/{**catch-all}",
+            app.Map("/{**catch-all}",
                 async context =>
                 {
                     await ReturnApiCallDetails(context, () => ApiStatusCodeToReturn ?? HttpStatusCode.OK);
                 });
         };
+    }
+
+    protected override void ConfigureApp(IApplicationBuilder app)
+    {
+        app.UseRouting();
+
+        app.UseAuthentication();
+        // adds authorization for local and remote API endpoints
+        app.UseAuthorization();
+        base.ConfigureApp(app);
     }
 
     public static async Task ReturnApiCallDetails(HttpContext context, Func<HttpStatusCode>? LocalApiResponseStatus = null)

@@ -13,9 +13,9 @@ namespace Duende.Bff.Tests;
 public class BffFrontendSigninTests : BffTestBase
 {
     public BffFrontendSigninTests(ITestOutputHelper output) : base(output) =>
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet("/secret", (HttpContext c) =>
+            app.MapGet("/secret", (HttpContext c) =>
             {
                 if (!c.User.IsAuthenticated())
                 {
@@ -258,7 +258,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.WithDefaultOpenIdConnectOptions(options =>
+            bff.ConfigureOpenIdConnect(options =>
             {
                 options.Authority = IdentityServer.Url().ToString();
 

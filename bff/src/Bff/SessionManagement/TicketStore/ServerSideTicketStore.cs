@@ -16,6 +16,7 @@ namespace Duende.Bff.SessionManagement.TicketStore;
 /// </summary>
 internal class ServerSideTicketStore(
     BffMetrics metrics,
+    TimeProvider timeProvider,
     IUserSessionStore store,
     IDataProtectionProvider dataProtectionProvider,
     BuildUserSessionPartitionKey partitionKeyBuilder,
@@ -59,8 +60,8 @@ internal class ServerSideTicketStore(
         {
             PartitionKey = partitionKeyBuilder(),
             Key = UserKey.Parse(key),
-            Created = ticket.GetIssued(),
-            Renewed = ticket.GetIssued(),
+            Created = ticket.GetIssued(timeProvider.GetUtcNow()),
+            Renewed = ticket.GetIssued(timeProvider.GetUtcNow()),
             Expires = ticket.GetExpiration(),
             SubjectId = ticket.GetSubjectId(),
             SessionId = ticket.GetSessionId(),
@@ -123,14 +124,14 @@ internal class ServerSideTicketStore(
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
         var isNew = session.SubjectId != sub || session.SessionId != sid;
-        var created = isNew ? ticket.GetIssued() : session.Created;
+        var created = isNew ? ticket.GetIssued(timeProvider.GetUtcNow()) : session.Created;
 
         await store.UpdateUserSessionAsync(userSessionKey, new UserSessionUpdate
         {
             SubjectId = ticket.GetSubjectId(),
             SessionId = ticket.GetSessionId(),
             Created = created,
-            Renewed = ticket.GetIssued(),
+            Renewed = ticket.GetIssued(timeProvider.GetUtcNow()),
             Expires = ticket.GetExpiration(),
             Ticket = ticket.Serialize(_protector)
         }, ct);

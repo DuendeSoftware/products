@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff.Builder;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +12,7 @@ namespace Duende.Bff.Blazor;
 public static class
     BffBuilderExtensions
 {
-    public static BffBuilder AddBlazorServer(this BffBuilder builder,
-        Action<BffBlazorServerOptions>? configureOptions = null)
+    public static T AddBlazorServer<T>(this T builder, Action<BffBlazorServerOptions>? configureOptions = null) where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(builder);
 

@@ -21,7 +21,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
     {
         IdentityServer.AddClient(The.ClientId, Bff.Url());
         Bff.OnConfigureBff += bff => bff
-            .WithDefaultOpenIdConnectOptions(The.DefaultOpenIdConnectConfiguration)
+            .ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration)
             .AddRemoteApis();
 
         Bff.OnConfigureServices += services =>
@@ -33,9 +33,9 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
     [Fact]
     public async Task When_calling_custom_endpoint_then_AccessTokenRetrievalContext_has_api_address_and_localpath()
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapRemoteBffApiEndpoint("/custom", Api.Url("/some/path"))
+            app.MapRemoteBffApiEndpoint("/custom", Api.Url("/some/path"))
                 .WithAccessToken()
                 .WithAccessTokenRetriever<ContextCapturingAccessTokenRetriever>();
         };
@@ -57,7 +57,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
     [Fact]
     public async Task When_calling_sub_custom_endpoint_then_AccessTokenRetrievalContext_has_api_address_and_localpath()
     {
-        Bff.OnConfigure += app =>
+        Bff.OnConfigureApp += app =>
         {
 
             app.Map("/subPath",

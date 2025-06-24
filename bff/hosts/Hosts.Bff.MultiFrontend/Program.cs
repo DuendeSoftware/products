@@ -38,7 +38,7 @@ var bffBuilder = builder.Services
     .AddBff();
 
 bffBuilder
-    .WithDefaultOpenIdConnectOptions(options =>
+    .ConfigureOpenIdConnect(options =>
     {
         var authority = ServiceDiscovery.ResolveService(AppHostServices.IdentityServer);
         options.Authority = authority.ToString();
@@ -65,7 +65,7 @@ bffBuilder
 
 
     })
-    .WithDefaultCookieOptions(options =>
+    .ConfigureCookies(options =>
     {
         //options.Cookie.Name = "bff.multi-frontend.default";
         //options.Cookie.SameSite = SameSiteMode.None;

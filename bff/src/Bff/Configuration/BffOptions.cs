@@ -99,12 +99,6 @@ public sealed class BffOptions
     public PathString DiagnosticsPath => ManagementBasePath.Add(Constants.ManagementEndpoints.Diagnostics);
 
     /// <summary>
-    /// Indicates if expired server side sessions should be cleaned up.
-    /// This requires an implementation of IUserSessionStoreCleanup to be registered in the DI system.
-    /// </summary>
-    public bool EnableSessionCleanup { get; set; }
-
-    /// <summary>
     /// Interval at which expired sessions are cleaned up.
     /// Defaults to 10 minutes.
     /// </summary>
@@ -153,7 +147,7 @@ public sealed class BffOptions
     internal Action<OpenIdConnectOptions>? ConfigureOpenIdConnectDefaults { get; set; }
     internal Action<CookieAuthenticationOptions>? ConfigureCookieDefaults { get; set; }
 
-    public HttpMessageHandler? BackchannelMessageHandler { get; set; }
+    public HttpMessageHandler? BackchannelHttpHandler { get; set; }
 
     public string? IndexHtmlClientName { get; set; }
 
