@@ -44,6 +44,7 @@ internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
         var assemblies = GetAssemblyInfo();
         writer.WriteStartObject("AssemblyInfo");
         writer.WriteString("DotnetVersion", RuntimeInformation.FrameworkDescription);
+        writer.WriteString("IdentityServerVersion", typeof(AssemblyInfoDiagnosticEntry).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion);
 
         writer.WriteStartArray("Assemblies");
         foreach (var assembly in assemblies.Where(assembly => assembly.GetName().Name != null &&
