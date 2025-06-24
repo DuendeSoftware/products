@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff;
 using Duende.Bff.Blazor;
 using Duende.Bff.Tests.Blazor.Components;
 using Duende.Bff.Tests.TestInfra;

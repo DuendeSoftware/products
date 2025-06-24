@@ -20,7 +20,7 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static BffBuilder AddRemoteApis(this BffBuilder builder)
+    public static T AddRemoteApis<T>(this T builder) where T : IBffBuilder
     {
         builder.RegisterConfigurationLoader((services, config) =>
         {
@@ -42,7 +42,7 @@ public static class BffBuilderExtensions
         return builder;
     }
 
-    public static IReverseProxyBuilder AddYarpConfig(this BffBuilder builder, RouteConfig[] routes,
+    public static IReverseProxyBuilder AddYarpConfig(this IBffBuilder builder, RouteConfig[] routes,
         ClusterConfig[] clusters)
     {
         var yarpBuilder = builder.Services.AddReverseProxy()
@@ -53,7 +53,7 @@ public static class BffBuilderExtensions
         return yarpBuilder;
     }
 
-    public static IReverseProxyBuilder AddYarpConfig(this BffBuilder builder, IConfiguration config)
+    public static IReverseProxyBuilder AddYarpConfig(this IBffBuilder builder, IConfiguration config)
     {
         var yarpBuilder = builder.Services.AddReverseProxy()
             .AddBffExtensions();
