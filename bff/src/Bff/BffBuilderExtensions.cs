@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 
@@ -28,9 +29,19 @@ namespace Duende.Bff;
 
 public static class BffBuilderExtensions
 {
+    public static IBffApplicationBuilder AddBffApplication(this IHostApplicationBuilder hostBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(hostBuilder);
+
+        var builder = new BffApplicationBuilder(hostBuilder);
+
+        return builder;
+    }
+
     public static T ConfigureOpenIdConnect<T>(this T builder, Action<OpenIdConnectOptions> oidc)
         where T : IBffBuilder
     {
+        ArgumentNullException.ThrowIfNull(builder);
         builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureOpenIdConnectDefaults += oidc);
         return builder;
     }
@@ -38,7 +49,17 @@ public static class BffBuilderExtensions
     public static T ConfigureCookies<T>(this T builder, Action<CookieAuthenticationOptions> oidc)
         where T : IBffBuilder
     {
+        ArgumentNullException.ThrowIfNull(builder);
         builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureCookieDefaults += oidc);
+        return builder;
+    }
+
+    public static IBffServicesBuilder AddCustomEndpoint<TEndpoint, TImplementation>(this IBffServicesBuilder builder)
+        where TEndpoint : class, IBffEndpoint
+        where TImplementation : class, TEndpoint
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.Services.AddTransient<TEndpoint, TImplementation>();
         return builder;
     }
 
@@ -184,6 +205,18 @@ public static class BffBuilderExtensions
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services.AddTransient<IUserSessionStore, T>();
         return builder.AddServerSideSessions();
+    }
+
+    public static IBffEndpointBuilder AddServerSideSessions(this IBffEndpointBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
+        builder.Services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
+        builder.Services.AddTransient<ISessionRevocationService, SessionRevocationService>();
+
+        builder.Services.TryAddSingleton<IUserSessionStore, InMemoryUserSessionStore>();
+
+        return builder;
     }
 
     public static T AddFrontends<T>(this T builder, params BffFrontend[] frontends)

@@ -3,9 +3,11 @@
 
 using Duende.Bff.Builder;
 using Duende.Bff.EntityFramework.Internal;
+using Duende.Bff.Otel;
 using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace Duende.Bff.EntityFramework;
@@ -102,5 +104,39 @@ public static class BffBuilderExtensions
         return bffBuilder;
     }
 
+    public static IBffSessionBuilder EnableSessionCleanupService(this IBffSessionBuilder sessionBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(sessionBuilder);
+
+        sessionBuilder.InternalServices.AddSingleton<BffMetrics>();
+        sessionBuilder.InternalServices.AddSingleton<SessionCleanupHost>();
+        sessionBuilder.InternalServices.AddSingleton<IHostedService>(sp => sp.GetRequiredService<SessionCleanupHost>());
+
+        return sessionBuilder;
+    }
+
+    public static IBffSessionBuilder UsingEntityFramework<TContext>(this IBffSessionBuilder sessionBuilder, Action<DbContextOptionsBuilder>? action = null)
+        where TContext : DbContext, ISessionDbContext
+    {
+        ArgumentNullException.ThrowIfNull(sessionBuilder);
+        sessionBuilder.InternalServices.AddDbContext<TContext>(action);
+        sessionBuilder.InternalServices.AddTransient<IUserSessionStore, UserSessionStore>();
+        sessionBuilder.InternalServices.AddTransient<IUserSessionStoreCleanup, UserSessionStore>();
+        sessionBuilder.InternalServices.AddTransient<ISessionDbContext>(svcs => svcs.GetRequiredService<TContext>());
+
+        return sessionBuilder;
+
+    }
+
+    /// <summary>
+    /// Adds entity framework core support for user session store.
+    /// </summary>
+    /// <returns></returns>
+    public static IBffSessionBuilder UsingEntityFramework(this IBffSessionBuilder sessionBuilder, Action<DbContextOptionsBuilder>? action = null)
+    {
+        ArgumentNullException.ThrowIfNull(sessionBuilder);
+        sessionBuilder.InternalServices.TryAddSingleton(TimeProvider.System);
+        return sessionBuilder.UsingEntityFramework<SessionDbContext>(action);
+    }
 }
 

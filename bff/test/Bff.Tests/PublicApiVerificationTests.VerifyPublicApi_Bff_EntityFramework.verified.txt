@@ -19,6 +19,10 @@ namespace Duende.Bff.EntityFramework
             where T : Duende.Bff.Builder.IBffServicesBuilder { }
         public static T ConfigureEntityFrameworkSessionStoreOptions<T>(this T bffBuilder, System.Action<Duende.Bff.EntityFramework.SessionStoreOptions> action)
             where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static Duende.Bff.IBffSessionBuilder EnableSessionCleanupService(this Duende.Bff.IBffSessionBuilder sessionBuilder) { }
+        public static Duende.Bff.IBffSessionBuilder UsingEntityFramework(this Duende.Bff.IBffSessionBuilder sessionBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder>? action = null) { }
+        public static Duende.Bff.IBffSessionBuilder UsingEntityFramework<TContext>(this Duende.Bff.IBffSessionBuilder sessionBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder>? action = null)
+            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext { }
     }
     public interface ISessionDbContext
     {

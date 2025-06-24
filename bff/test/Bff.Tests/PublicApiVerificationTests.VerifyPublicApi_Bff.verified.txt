@@ -125,6 +125,15 @@ namespace Duende.Bff.AccessTokenManagement
 }
 namespace Duende.Bff
 {
+    public static class ApplicationBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBff(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffAntiForgery(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffFrontendSelection(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffIndexPages(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffOpenIdCallbacks(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPathMapping(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+    }
     public static class AuthenticationPropertiesExtensions
     {
         public static bool IsSilentLogin(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props) { }
@@ -147,17 +156,17 @@ namespace Duende.Bff
     }
     public static class BffApplicationBuilderExtensions
     {
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBff(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffAntiForgery(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffFrontendSelection(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffIndexPages(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffOpenIdCallbacks(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPathMapping(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Duende.Bff.IBffEndpointBuilder EnableBffEndpoint(this Duende.Bff.IBffApplicationBuilder app) { }
+        public static void EnableManagementApi(this Duende.Bff.IBffApplicationBuilder app) { }
+        public static void EnableManagementUI(this Duende.Bff.IBffApplicationBuilder app) { }
+        public static Duende.Bff.IBffSessionBuilder EnableServerSideSessions(this Duende.Bff.IBffApplicationBuilder app) { }
     }
     public static class BffBuilderExtensions
     {
+        public static Duende.Bff.IBffApplicationBuilder AddBffApplication(this Microsoft.Extensions.Hosting.IHostApplicationBuilder hostBuilder) { }
         public static T AddFrontends<T>(this T builder, params Duende.Bff.DynamicFrontends.BffFrontend[] frontends)
             where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static Duende.Bff.IBffEndpointBuilder AddServerSideSessions(this Duende.Bff.IBffEndpointBuilder builder) { }
         public static Duende.Bff.Builder.IBffBuilder AddServerSideSessions<T>(this Duende.Bff.Builder.IBffServicesBuilder builder)
             where T :  class, Duende.Bff.SessionManagement.SessionStore.IUserSessionStore { }
         public static T AddServerSideSessions<T>(this T builder)
@@ -242,6 +251,22 @@ namespace Duende.Bff
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder SkipAntiforgery(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
         public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder SkipResponseHandling(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
     }
+    public interface IBffApplicationBuilder
+    {
+        Microsoft.Extensions.Hosting.IHostApplicationBuilder HostBuilder { get; }
+        Duende.Bff.IBffApplicationBuilder UsingServiceDefaults(System.Action<Duende.Bff.Builder.BffApplicationPartType, Microsoft.Extensions.Hosting.IHostApplicationBuilder> configure);
+    }
+    public interface IBffEndpointBuilder : Duende.Bff.Builder.IBffBuilder, Duende.Bff.IBffPartBuilder
+    {
+        Duende.Bff.IBffEndpointBuilder ConfigureApp(System.Action<Microsoft.AspNetCore.Builder.WebApplication> configure);
+        Duende.Bff.IBffEndpointBuilder ConfigureOptions(System.Action<Duende.Bff.Configuration.BffOptions> configure);
+        Duende.Bff.IBffEndpointBuilder UseUrls(params string[] urls);
+    }
+    public interface IBffPartBuilder
+    {
+        Duende.Bff.IBffApplicationBuilder BffApplicationBuilder { get; }
+    }
+    public interface IBffSessionBuilder : Duende.Bff.IBffPartBuilder { }
     [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.LocalPath>))]
     [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.LocalPath>))]
     public readonly struct LocalPath : System.IEquatable<Duende.Bff.LocalPath>
@@ -261,6 +286,11 @@ namespace Duende.Bff
 }
 namespace Duende.Bff.Builder
 {
+    public enum BffApplicationPartType
+    {
+        BffEndpoint = 0,
+        SessionCleanupHost = 1,
+    }
     public interface IBffBuilder
     {
         Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }

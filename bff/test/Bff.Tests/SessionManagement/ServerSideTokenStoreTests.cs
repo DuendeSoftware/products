@@ -59,6 +59,7 @@ public class ServerSideTokenStoreTests
                 HttpContext = new DefaultHttpContext()
             },
             logger: new NullLogger<ServerSideTicketStore>());
+
         await sessionService.StoreAsync(new AuthenticationTicket(
             user,
             props,
