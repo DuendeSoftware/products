@@ -10,19 +10,19 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Duende.Bff;
 public sealed class BffApplicationBuilder : IBffBuilder
 {
-    internal WebApplicationBuilder Builder { get; }
+
+    private WebApplicationBuilder Builder { get; }
     public IWebHostBuilder WebHost => Builder.WebHost;
-    private IBffBuilder Bff => this;
     public IServiceCollection Services => Builder.Services;
 
-    IConfiguration? IBffBuilder.LoadedConfiguration { get; set; }
+    private IConfiguration? _loadedConfiguration;
     /// <summary>
     /// Hook for a plugin to register itself for configuration loading.
     /// </summary>
     /// <param name="loadPluginConfiguration"></param>
     void IBffBuilder.RegisterConfigurationLoader(LoadPluginConfiguration loadPluginConfiguration)
     {
-        if (Bff.LoadedConfiguration == null)
+        if (_loadedConfiguration == null)
         {
             // If the configuration is not yet loaded, we store the loader for later execution
             PluginConfigurationLoaders.Add(loadPluginConfiguration);
@@ -30,20 +30,20 @@ public sealed class BffApplicationBuilder : IBffBuilder
         else
         {
             // Configuration is already loaded, so we execute the loader immediately
-            loadPluginConfiguration(Services, Bff.LoadedConfiguration);
+            loadPluginConfiguration(Services, _loadedConfiguration);
         }
     }
 
     public IBffBuilder LoadConfiguration(IConfiguration section)
     {
-        if (Bff.LoadedConfiguration != null)
+        if (_loadedConfiguration != null)
         {
             throw new InvalidOperationException("Already loaded configuration");
         }
 
-        Bff.LoadedConfiguration = section;
+        _loadedConfiguration = section;
 
-        Bff.Services.Configure<BffConfiguration>(section);
+        Services.Configure<BffConfiguration>(section);
 
         // Trigger all configuration loaders from plugins
         foreach (var configLoader in PluginConfigurationLoaders)
@@ -56,19 +56,25 @@ public sealed class BffApplicationBuilder : IBffBuilder
         return this;
     }
 
-    internal BffApplicationBuilder(string[] args, Action<BffOptions>? options) : this(WebApplication.CreateSlimBuilder(args)) => Bff.AddBffServices(options)
-            .AddDynamicFrontends();
     private List<LoadPluginConfiguration> PluginConfigurationLoaders { get; } = [];
 
-    internal BffApplicationBuilder(WebApplicationBuilder builder) => Builder = builder;
+    internal BffApplicationBuilder(WebApplicationBuilder builder, Action<BffOptions>? options)
+    {
+        Builder = builder;
+        this.AddBffServices(options)
+            .AddDynamicFrontends();
+    }
 
     public ConfigurationManager Configuration => Builder.Configuration;
 
-    public static BffApplicationBuilder Create(string[]? args = null, Action<BffOptions>? options = null) => new BffApplicationBuilder(args ?? [], options);
+    public static BffApplicationBuilder Create(string[]? args = null, Action<BffOptions>? options = null)
+        => new BffApplicationBuilder(WebApplication.CreateSlimBuilder(args ?? []), options);
+    public static BffApplicationBuilder Create(WebApplicationOptions opt, Action<BffOptions>? options = null)
+        => new BffApplicationBuilder(WebApplication.CreateSlimBuilder(opt), options);
 
     public BffApplication Build()
     {
-        if (Bff.LoadedConfiguration == null)
+        if (_loadedConfiguration == null)
         {
             LoadConfiguration(Configuration);
         }

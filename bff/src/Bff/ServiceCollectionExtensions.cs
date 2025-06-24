@@ -30,11 +30,9 @@ public static class ServiceCollectionExtensions
         /// </summary>
         internal BffBuilder(IServiceCollection services) => Services = services;
 
-        IConfiguration? IBffBuilder.LoadedConfiguration { get; set; }
+        private IConfiguration? _loadedConfiguration;
 
-        private List<LoadPluginConfiguration> _pluginConfigurationLoaders { get; } = [];
-
-        private IBffBuilder Bff => this;
+        private readonly List<LoadPluginConfiguration> _pluginConfigurationLoaders = [];
 
         /// <summary>
         /// Hook for a plugin to register itself for configuration loading.
@@ -42,7 +40,7 @@ public static class ServiceCollectionExtensions
         /// <param name="loadPluginConfiguration"></param>
         void IBffBuilder.RegisterConfigurationLoader(LoadPluginConfiguration loadPluginConfiguration)
         {
-            if (Bff.LoadedConfiguration == null)
+            if (_loadedConfiguration == null)
             {
                 // If the configuration is not yet loaded, we store the loader for later execution
                 _pluginConfigurationLoaders.Add(loadPluginConfiguration);
@@ -50,7 +48,7 @@ public static class ServiceCollectionExtensions
             else
             {
                 // Configuration is already loaded, so we execute the loader immediately
-                loadPluginConfiguration(Services, Bff.LoadedConfiguration);
+                loadPluginConfiguration(Services, _loadedConfiguration);
             }
         }
 
@@ -61,14 +59,14 @@ public static class ServiceCollectionExtensions
 
         public IBffBuilder LoadConfiguration(IConfiguration section)
         {
-            if (Bff.LoadedConfiguration != null)
+            if (_loadedConfiguration != null)
             {
                 throw new InvalidOperationException("Already loaded configuration");
             }
 
-            Bff.LoadedConfiguration = section;
+            _loadedConfiguration = section;
 
-            Bff.Services.Configure<BffConfiguration>(section);
+            Services.Configure<BffConfiguration>(section);
 
             // Trigger all configuration loaders from plugins
             foreach (var configLoader in _pluginConfigurationLoaders)

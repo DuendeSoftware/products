@@ -4,8 +4,10 @@
 using System.Net;
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Blazor;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.Tests.Blazor.Components;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.TestHost;
@@ -23,14 +25,17 @@ public class BffApplicationBuilderTests
     {
         Context = new TestHostContext(output);
         _output = output;
-        _bffBuilder = BffApplicationBuilder.Create();
+        _bffBuilder = BffApplicationBuilder.Create(new WebApplicationOptions()
+        {
+            EnvironmentName = Environments.Development
+        });
 
         _bffBuilder.WebHost.UseTestServer();
         _bffBuilder.Services.AddSingleton<IForwarderHttpClientFactory>(
             new CallbackForwarderHttpClientFactory(
                 context => new HttpMessageInvoker(Context.Internet)));
 
-        _bffBuilder.Services.AddLogging(l => l.AddProvider(new TestLoggerProvider(_output.WriteLine, "bff-builder")));
+        _bffBuilder.Services.AddLogging(l => l.AddProvider(new TestLoggerProvider(_output.WriteLine, "https://bff-builder")));
 
         IdentityServer = new IdentityServerTestHost(Context);
         Api = new ApiHost(Context, IdentityServer);
@@ -109,7 +114,6 @@ public class BffApplicationBuilderTests
 
         app.MapGet("/", (SelectedFrontend s) => s.Get().Name.ToString());
 
-
         var client = await InitializeAsync(app);
         await client.GetAsync(The.Path)
             .CheckResponseContent(The.FrontendName);
@@ -147,6 +151,46 @@ public class BffApplicationBuilderTests
         var client = await InitializeAsync(app);
         await client.GetAsync(The.Path)
             .CheckResponseContent(The.FrontendName);
+    }
+
+    [Fact]
+    public async Task Can_load_blazor_home()
+    {
+        _bffBuilder.WithDefaultOpenIdConnectOptions(opt =>
+        {
+            The.DefaultOpenIdConnectConfiguration(opt);
+            opt.BackchannelHttpHandler = Context.Internet;
+        });
+
+        _bffBuilder.Services.AddCascadingAuthenticationState();
+        _bffBuilder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents()
+            .AddInteractiveWebAssemblyComponents();
+
+        _bffBuilder.Services.AddAntiforgery();
+
+        _bffBuilder.AddBlazorServer()
+            .AddServerSideSessions();
+
+        var app = _bffBuilder.Build();
+
+        app.UseAuthorization();
+        app.UseAntiforgery();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode()
+                .AddInteractiveWebAssemblyRenderMode();
+
+        });
+
+        var client = await InitializeAsync(app);
+        await client.GetAsync("/")
+            .CheckHttpStatusCode();
+
+        await client.Login();
+        await client.GetAsync("/secure")
+            .CheckHttpStatusCode();
     }
 
     private async Task<BffHttpClient> InitializeAsync(BffApplication app)

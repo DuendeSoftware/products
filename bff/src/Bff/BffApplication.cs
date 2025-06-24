@@ -13,48 +13,57 @@ namespace Duende.Bff;
 
 public sealed class BffApplication : IHost, IApplicationBuilder, IEndpointRouteBuilder, IAsyncDisposable
 {
-    private readonly WebApplication _webApplication;
+    private readonly WebApplication _app;
 
-    internal BffApplication(WebApplication webApplication)
+    internal BffApplication(WebApplication app)
     {
-        _webApplication = webApplication;
-        _webApplication.UseHttpsRedirection();
-        _webApplication.UseRouting();
+        // Configure the HTTP request pipeline.
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Error");
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
+        }
 
-        _webApplication.UseBff();
+        app.UseHttpsRedirection();
+        app.UseHttpsRedirection();
+        app.UseRouting();
+
+        app.UseBff();
+        _app = app;
     }
 
-    public IFrontendCollection Frontends => _webApplication.Services.GetRequiredService<IFrontendCollection>();
+    public IFrontendCollection Frontends => _app.Services.GetRequiredService<IFrontendCollection>();
 
-    public void Dispose() => ((IDisposable)_webApplication).Dispose();
+    public void Dispose() => ((IDisposable)_app).Dispose();
 
-    public async Task StartAsync(CT ct = new CT()) => await _webApplication.StartAsync(ct);
+    public async Task StartAsync(CT ct = default) => await _app.StartAsync(ct);
 
-    public async Task StopAsync(CT ct = new CT()) => await _webApplication.StopAsync(ct);
+    public async Task StopAsync(CT ct = default) => await _app.StopAsync(ct);
 
-    public IServiceProvider Services => _webApplication.Services;
+    public IServiceProvider Services => _app.Services;
 
-    public IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware) => _webApplication.Use(middleware);
+    public IApplicationBuilder Use(Func<RequestDelegate, RequestDelegate> middleware) => _app.Use(middleware);
 
-    public IApplicationBuilder New() => ((IApplicationBuilder)_webApplication).New();
+    public IApplicationBuilder New() => ((IApplicationBuilder)_app).New();
 
-    public RequestDelegate Build() => ((IApplicationBuilder)_webApplication).Build();
+    public RequestDelegate Build() => ((IApplicationBuilder)_app).Build();
 
     public IServiceProvider ApplicationServices
     {
-        get => ((IApplicationBuilder)_webApplication).ApplicationServices;
-        set => ((IApplicationBuilder)_webApplication).ApplicationServices = value;
+        get => ((IApplicationBuilder)_app).ApplicationServices;
+        set => ((IApplicationBuilder)_app).ApplicationServices = value;
     }
 
-    public IFeatureCollection ServerFeatures => ((IApplicationBuilder)_webApplication).ServerFeatures;
+    public IFeatureCollection ServerFeatures => ((IApplicationBuilder)_app).ServerFeatures;
 
-    public IDictionary<string, object?> Properties => ((IApplicationBuilder)_webApplication).Properties;
+    public IDictionary<string, object?> Properties => ((IApplicationBuilder)_app).Properties;
 
-    public IApplicationBuilder CreateApplicationBuilder() => ((IEndpointRouteBuilder)_webApplication).CreateApplicationBuilder();
+    public IApplicationBuilder CreateApplicationBuilder() => ((IEndpointRouteBuilder)_app).CreateApplicationBuilder();
 
-    public IServiceProvider ServiceProvider => ((IEndpointRouteBuilder)_webApplication).ServiceProvider;
+    public IServiceProvider ServiceProvider => ((IEndpointRouteBuilder)_app).ServiceProvider;
 
-    public ICollection<EndpointDataSource> DataSources => ((IEndpointRouteBuilder)_webApplication).DataSources;
+    public ICollection<EndpointDataSource> DataSources => ((IEndpointRouteBuilder)_app).DataSources;
 
-    public async ValueTask DisposeAsync() => await _webApplication.DisposeAsync();
+    public async ValueTask DisposeAsync() => await _app.DisposeAsync();
 }

@@ -31,10 +31,7 @@ public interface IBffBuilder
 {
     IServiceCollection Services { get; }
 
-    internal IConfiguration? LoadedConfiguration { get; set; }
     internal void RegisterConfigurationLoader(LoadPluginConfiguration loadPluginConfiguration);
-
-
     public IBffBuilder LoadConfiguration(IConfiguration section);
 
 }

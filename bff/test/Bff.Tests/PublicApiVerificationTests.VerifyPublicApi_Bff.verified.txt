@@ -170,6 +170,7 @@ namespace Duende.Bff
         public Microsoft.AspNetCore.Hosting.IWebHostBuilder WebHost { get; }
         public Duende.Bff.BffApplication Build() { }
         public Duende.Bff.IBffBuilder LoadConfiguration(Microsoft.Extensions.Configuration.IConfiguration section) { }
+        public static Duende.Bff.BffApplicationBuilder Create(Microsoft.AspNetCore.Builder.WebApplicationOptions opt, System.Action<Duende.Bff.Configuration.BffOptions>? options = null) { }
         public static Duende.Bff.BffApplicationBuilder Create(string[]? args = null, System.Action<Duende.Bff.Configuration.BffOptions>? options = null) { }
     }
     public static class BffApplicationBuilderExtensions
