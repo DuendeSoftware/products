@@ -1,9 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
+using Duende.Bff.Endpoints;
+using Duende.Bff.Endpoints.Internal;
+using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Duende.Bff.SessionManagement.Configuration;
 using Duende.Bff.SessionManagement.Revocation;
 using Duende.Bff.SessionManagement.SessionStore;
@@ -21,89 +27,127 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff;
 
-/// <summary>
-/// Encapsulates DI options for Duende.BFF
-/// </summary>
-public sealed class BffBuilder(IServiceCollection services)
+public interface IBffBuilder
 {
-    internal IConfiguration? Configuration { get; private set; }
+    IServiceCollection Services { get; }
 
-    private List<LoadPluginConfiguration> _pluginConfigurationLoaders { get; } = [];
+    internal IConfiguration? LoadedConfiguration { get; set; }
+    internal void RegisterConfigurationLoader(LoadPluginConfiguration loadPluginConfiguration);
 
-    /// <summary>
-    /// Hook for a plugin to register itself for configuration loading.
-    /// </summary>
-    /// <param name="loadPluginConfiguration"></param>
-    internal void RegisterConfigurationLoader(LoadPluginConfiguration loadPluginConfiguration)
+
+    public IBffBuilder LoadConfiguration(IConfiguration section);
+
+}
+
+public static class BffBuilderExtensions
+{
+
+    public static T WithDefaultOpenIdConnectOptions<T>(this T builder, Action<OpenIdConnectOptions> oidc)
+        where T : IBffBuilder
     {
-        if (Configuration == null)
+        builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureOpenIdConnectDefaults += oidc);
+        return builder;
+    }
+
+    public static T WithDefaultCookieOptions<T>(this T builder, Action<CookieAuthenticationOptions> oidc)
+        where T : IBffBuilder
+    {
+        builder.Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureCookieDefaults += oidc);
+        return builder;
+    }
+
+
+
+    internal static T AddBffServices<T>(this T builder, Action<BffOptions>? configureAction) where T : IBffBuilder
+    {
+        if (configureAction != null)
         {
-            // If the configuration is not yet loaded, we store the loader for later execution
-            _pluginConfigurationLoaders.Add(loadPluginConfiguration);
+            builder.Services.Configure(configureAction);
         }
-        else
-        {
-            // Configuration is already loaded, so we execute the loader immediately
-            loadPluginConfiguration(Services, Configuration);
-        }
+
+        builder.Services.AddDistributedMemoryCache();
+        // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
+        // AddOpenIdConnectAccessTokenManagement because both configure the same options
+        // The AddOpenIdConnectAccessTokenManagement adds OR wraps the BackchannelHttpHandler
+        // to add DPoP support. However, our code can also add a backchannel handler. 
+        builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, BffConfigureOpenIdConnectOptions>();
+        builder.Services.AddOpenIdConnectAccessTokenManagement();
+
+        builder.Services.AddSingleton<IConfigureOptions<UserTokenManagementOptions>, ConfigureUserTokenManagementOptions>();
+
+        builder.Services.AddTransient<IReturnUrlValidator, LocalUrlReturnUrlValidator>();
+        builder.Services.TryAddSingleton<IAccessTokenRetriever, DefaultAccessTokenRetriever>();
+
+        // management endpoints
+        builder.Services.AddTransient<ILoginEndpoint, DefaultLoginEndpoint>();
+#pragma warning disable CS0618 // Type or member is obsolete
+        builder.Services.AddTransient<ISilentLoginEndpoint, DefaultSilentLoginEndpoint>();
+#pragma warning restore CS0618 // Type or member is obsolete
+        builder.Services.AddTransient<ISilentLoginCallbackEndpoint, DefaultSilentLoginCallbackEndpoint>();
+        builder.Services.AddTransient<ILogoutEndpoint, DefaultLogoutEndpoint>();
+        builder.Services.AddTransient<IUserEndpoint, DefaultUserEndpoint>();
+        builder.Services.AddTransient<IBackchannelLogoutEndpoint, DefaultBackchannelLogoutEndpoint>();
+        builder.Services.AddTransient<IDiagnosticsEndpoint, DefaultDiagnosticsEndpoint>();
+
+        // session management
+        builder.Services.TryAddTransient<ISessionRevocationService, NopSessionRevocationService>();
+
+        // cookie configuration
+        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
+        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieRevokeRefreshToken>();
+        builder.Services.AddSingleton<ActiveCookieAuthenticationScheme>();
+        builder.Services.AddSingleton<ActiveOpenIdConnectAuthenticationScheme>();
+
+        builder.Services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
+
+        builder.Services.AddSingleton<BffMetrics>();
+
+        // wrap ASP.NET Core
+        builder.Services.AddAuthentication();
+        builder.Services.AddTransientDecorator<IAuthenticationService, BffAuthenticationService>();
+        return builder;
     }
 
-    /// <summary>
-    /// The service collection
-    /// </summary>
-    public IServiceCollection Services { get; } = services;
 
-    public BffBuilder WithDefaultOpenIdConnectOptions(Action<OpenIdConnectOptions> oidc)
+    internal static T AddDynamicFrontends<T>(this T builder)
+        where T : IBffBuilder
     {
-        Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureOpenIdConnectDefaults += oidc);
-        return this;
-    }
+        builder.Services.AddHybridCache();
 
-    public BffBuilder WithDefaultCookieOptions(Action<CookieAuthenticationOptions> oidc)
-    {
-        Services.Configure<BffOptions>(bffOptions => bffOptions.ConfigureCookieDefaults += oidc);
-        return this;
-    }
-
-
-    internal BffBuilder AddDynamicFrontends()
-    {
-        Services.AddHybridCache();
-
-        Services.AddTransient<IStartupFilter, ConfigureBffStartupFilter>();
+        builder.Services.AddTransient<IStartupFilter, ConfigureBffStartupFilter>();
 
         // Register the frontend collection, which will be used to store and retrieve frontends
-        Services.AddSingleton<FrontendCollection>();
+        builder.Services.AddSingleton<FrontendCollection>();
         // Add a public accessible interface to the frontend collection, so our users can access it
-        Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
+        builder.Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
 
-        Services.AddTransient<SelectedFrontend>();
-        Services.AddTransient<FrontendSelector>();
+        builder.Services.AddTransient<SelectedFrontend>();
+        builder.Services.AddTransient<FrontendSelector>();
 
         // Add a scheme provider that will inject authentication schemes that are needed for the BFF
-        Services.AddTransient<IAuthenticationSchemeProvider, BffAuthenticationSchemeProvider>();
+        builder.Services.AddTransient<IAuthenticationSchemeProvider, BffAuthenticationSchemeProvider>();
 
         // Configure the AspNet Core Authentication settings if no 
         // .AddAuthentication().AddCookie().AddOpenIdConnect() was added
-        Services.AddSingleton<IPostConfigureOptions<AuthenticationOptions>, BffConfigureAuthenticationOptions>();
+        builder.Services.AddSingleton<IPostConfigureOptions<AuthenticationOptions>, BffConfigureAuthenticationOptions>();
 
-        Services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, BffConfigureCookieOptions>();
+        builder.Services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, BffConfigureCookieOptions>();
 
-        Services.AddHttpContextAccessor();
+        builder.Services.AddHttpContextAccessor();
 
         // Add 'default' configure methods that would have been added by
         // .AddAuthentication().AddCookie().AddOpenIdConnect()
-        Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
-        Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
 
-        Services.AddTransient<PathMapper>();
+        builder.Services.AddTransient<PathMapper>();
 
-        Services.TryAddSingleton<IIndexHtmlClient, IndexHtmlHttpClient>();
+        builder.Services.TryAddSingleton<IIndexHtmlClient, IndexHtmlHttpClient>();
 
-        var indexHtmlClientBuilder = Services.AddHttpClient(Constants.HttpClientNames.IndexHtmlHttpClient);
+        var indexHtmlClientBuilder = builder.Services.AddHttpClient(Constants.HttpClientNames.IndexHtmlHttpClient);
 
         // Todo: factor this to an extension method
-        Services.Configure<HttpClientFactoryOptions>(indexHtmlClientBuilder.Name, options =>
+        builder.Services.Configure<HttpClientFactoryOptions>(indexHtmlClientBuilder.Name, options =>
         {
             options.HttpMessageHandlerBuilderActions.Add(httpMessageHandlerBuilder =>
             {
@@ -115,23 +159,23 @@ public sealed class BffBuilder(IServiceCollection services)
             });
         });
 
-        return this;
+        return builder;
     }
 
     /// <summary>
     /// Adds a server-side session store using the in-memory store
     /// </summary>
     /// <returns></returns>
-    public BffBuilder AddServerSideSessions()
+    public static T AddServerSideSessions<T>(this T builder) where T : IBffBuilder
     {
-        Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
-        Services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
-        Services.AddTransient<ISessionRevocationService, SessionRevocationService>();
-        Services.AddSingleton<IHostedService, SessionCleanupHost>();
+        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
+        builder.Services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
+        builder.Services.AddTransient<ISessionRevocationService, SessionRevocationService>();
+        builder.Services.AddSingleton<IHostedService, SessionCleanupHost>();
 
         // only add if not already in DI
-        Services.TryAddSingleton<IUserSessionStore, InMemoryUserSessionStore>();
-        return this;
+        builder.Services.TryAddSingleton<IUserSessionStore, InMemoryUserSessionStore>();
+        return builder;
     }
 
     /// <summary>
@@ -139,36 +183,15 @@ public sealed class BffBuilder(IServiceCollection services)
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public BffBuilder AddServerSideSessions<T>()
+    public static IBffBuilder AddServerSideSessions<T>(this IBffBuilder builder)
         where T : class, IUserSessionStore
     {
-        Services.AddTransient<IUserSessionStore, T>();
-        return AddServerSideSessions();
+        builder.Services.AddTransient<IUserSessionStore, T>();
+        return builder.AddServerSideSessions();
     }
 
-    public BffBuilder LoadConfiguration(IConfiguration section)
-    {
-        if (Configuration != null)
-        {
-            throw new InvalidOperationException("Already loaded configuration");
-        }
-
-        Configuration = section;
-
-        Services.Configure<BffConfiguration>(section);
-
-        // Trigger all configuration loaders from plugins
-        foreach (var configLoader in _pluginConfigurationLoaders)
-        {
-            configLoader(Services, section);
-        }
-        // We no longer need them. 
-        _pluginConfigurationLoaders.Clear();
-
-        return this;
-    }
-
-    public BffBuilder AddFrontends(params BffFrontend[] frontends)
+    public static T AddFrontends<T>(this T builder, params BffFrontend[] frontends)
+        where T : IBffBuilder
     {
         // Check for duplicate frontend names
         var duplicateNames = frontends
@@ -184,9 +207,10 @@ public sealed class BffBuilder(IServiceCollection services)
 
         foreach (var frontend in frontends)
         {
-            Services.Add(new ServiceDescriptor(typeof(BffFrontend), frontend));
+            builder.Services.Add(new ServiceDescriptor(typeof(BffFrontend), frontend));
         }
 
-        return this;
+        return builder;
     }
 }
+

@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 namespace Duende.Bff.Tests;
 public class ConventionTests(ITestOutputHelper output)
 {
-    public static readonly Assembly BffAssembly = typeof(BffBuilder).Assembly;
+    public static readonly Assembly BffAssembly = typeof(IBffBuilder).Assembly;
     public static readonly Assembly BffBlazorAssembly = typeof(BffBlazorServerOptions).Assembly;
     public static readonly Assembly BffBlazorClientAssembly = typeof(BffBlazorClientOptions).Assembly;
     public static readonly Assembly BffEntityFrameworkAssembly = typeof(UserSessionEntity).Assembly;

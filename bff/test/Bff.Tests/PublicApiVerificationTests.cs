@@ -20,7 +20,7 @@ public class PublicApiVerificationTests
         {
             IncludeAssemblyAttributes = false
         };
-        var publicApi = typeof(BffBuilder).Assembly.GeneratePublicApi(apiGeneratorOptions);
+        var publicApi = typeof(IBffBuilder).Assembly.GeneratePublicApi(apiGeneratorOptions);
         var settings = new VerifySettings();
         await Verify(publicApi, settings);
     }

@@ -71,7 +71,7 @@ public static class BffEndpointRouteBuilderExtensions
         if (endpoints.DataSources.Any(x =>
                 x.Endpoints.OfType<RouteEndpoint>().Any(x => x.RoutePattern.RawText == route.ToString())))
         {
-            endpoints.ServiceProvider.GetRequiredService<ILogger<BffBuilder>>().LogWarning("Already mapped {name} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()", name);
+            endpoints.ServiceProvider.GetRequiredService<ILogger<IBffBuilder>>().LogWarning("Already mapped {name} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()", name);
             return true;
         }
 

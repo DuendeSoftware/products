@@ -24,7 +24,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
     public bool EnableBackChannelHandler { get; set; } = true;
     public event Action<BffOptions> SetBffOptions = _ => { };
-    public event Action<BffBuilder> OnConfigureBff = _ => { };
+    public event Action<IBffBuilder> OnConfigureBff = _ => { };
 
     public override void Initialize()
     {
@@ -87,12 +87,4 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     }
 
     public void AddOrUpdateFrontend(BffFrontend frontend) => Resolve<FrontendCollection>().AddOrUpdate(frontend);
-}
-
-public class CallbackForwarderHttpClientFactory(Func<ForwarderHttpClientContext, HttpMessageInvoker> callback)
-    : IForwarderHttpClientFactory
-{
-    public Func<ForwarderHttpClientContext, HttpMessageInvoker> CreateInvoker { get; set; } = callback;
-
-    public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => CreateInvoker.Invoke(context);
 }
