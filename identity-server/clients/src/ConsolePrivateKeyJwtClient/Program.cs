@@ -57,40 +57,27 @@ var ecKey =
         }
         """;
 
-var hmacKey =
-    """
-        {
-            "kty":"oct",
-            "kid":"10909c7f-d6e0-49eb-9af9-fb06076df8e1",
-            "k":"JXhpjmgEVdhO0OzwyUQ2hCFuuSU9mABtclOcqT1kqaQ",
-            "alg":"HS256"
-        }
-    """;
-
 // X.509 cert
 var certificate = X509CertificateLoader.LoadPkcs12FromFile(path: "client.p12", password: "changeit");
 var x509Credential = new X509SigningCredentials(certificate);
 
 var response = await RequestTokenAsync(x509Credential);
 response.Show();
+
 await CallServiceAsync(response.AccessToken);
 
 // RSA JsonWebkey
 var jwk = new JsonWebKey(rsaKey);
 response = await RequestTokenAsync(new SigningCredentials(jwk, "RS256"));
 response.Show();
-await CallServiceAsync(response.AccessToken);
 
-// HMAC JsonWebKey
-jwk = new JsonWebKey(hmacKey);
-response = await RequestTokenAsync(new SigningCredentials(jwk, "HS256"));
-response.Show();
 await CallServiceAsync(response.AccessToken);
 
 // EC JsonWebKey
 jwk = new JsonWebKey(ecKey);
 response = await RequestTokenAsync(new SigningCredentials(jwk, "ES256"));
 response.Show();
+
 await CallServiceAsync(response.AccessToken);
 
 // Graceful shutdown
