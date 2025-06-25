@@ -12,7 +12,7 @@ namespace Duende.Bff.EntityFramework;
 /// Entity framework core implementation of IUserSessionStore
 /// </summary>
 #pragma warning disable CA1812 // internal class never instantiated? It is, but via DI
-internal class UserSessionStore(
+internal sealed class UserSessionStore(
     IUserSessionPartitionKeyBuilder partitionKeyBuilder,
     ISessionDbContext sessionDbContext,
     ILogger<UserSessionStore> logger) : IUserSessionStore, IUserSessionStoreCleanup
@@ -51,7 +51,7 @@ internal class UserSessionStore(
             // MySQL would send:    ---> MySql.Data.MySqlClient.MySqlException (0x80004005): Duplicate entry '<AppName>-<SessionIdValue>' for key 'IX_UserSessions_ApplicationName_SessionId'
 
             if (exception.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
-                exception.Contains("IX_UserSessions_ApplicationName_SessionId"))
+                exception.Contains("IX_UserSessions_ApplicationName_SessionId", StringComparison.OrdinalIgnoreCase))
             {
                 logger.DuplicateSessionInsertDetected(LogLevel.Debug, ex);
             }

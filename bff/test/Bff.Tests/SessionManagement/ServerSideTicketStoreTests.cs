@@ -12,9 +12,9 @@ namespace Duende.Bff.Tests.SessionManagement;
 public class ServerSideTicketStoreTests : BffTestBase
 {
     public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output) =>
-        Bff.OnConfigureBff += bff => 
+        Bff.OnConfigureBff += bff =>
         {
-            bff.AddServerSideSessions(); 
+            bff.AddServerSideSessions();
         };
 
     [Theory, MemberData(nameof(AllSetups))]
@@ -35,8 +35,7 @@ public class ServerSideTicketStoreTests : BffTestBase
     [Fact]
     public async Task Given_multiple_frontends_each_frontend_gets_a_session()
     {
-        ConfigureBff(BffSetupType.BffWithFrontend, UseSlidingCookieExpiration);
-        await InitializeAsync();
+        await ConfigureBff(BffSetupType.BffWithFrontend, UseSlidingCookieExpiration);
 
         Internet.AddCustomHandler(map: The.DomainName, to: Bff);
         var frontendWithOrigin = new BffFrontend(BffFrontendName.Parse("frontend-with-origin"))
@@ -66,8 +65,7 @@ public class ServerSideTicketStoreTests : BffTestBase
     [Fact]
     public async Task Given_multiple_frontends_logout_only_affects_single_frontend()
     {
-        ConfigureBff(BffSetupType.BffWithFrontend, UseSlidingCookieExpiration);
-        await InitializeAsync();
+        await ConfigureBff(BffSetupType.BffWithFrontend, UseSlidingCookieExpiration);
 
         Internet.AddCustomHandler(map: The.DomainName, to: Bff);
         var frontendWithOrigin = new BffFrontend(BffFrontendName.Parse("frontend-with-origin"))
