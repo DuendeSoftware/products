@@ -30,7 +30,7 @@ internal class InMemoryUserSessionStore(
         if (!partition.TryAdd(session.Key, session.Clone()))
         {
             // There is a known race condition when two requests are trying to create a session at the same time.
-            logger.DuplicateSessionInsertDetected();
+            logger.DuplicateSessionInsertDetected(LogLevel.Information);
         }
 
         return Task.CompletedTask;

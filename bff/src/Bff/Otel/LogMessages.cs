@@ -120,7 +120,7 @@ internal static partial class LogMessages
     [LoggerMessage(
         message:
         $"Detected a duplicate insert of the same session. This can happen when multiple browser tabs are open and can safely be ignored.")]
-    public static partial void DuplicateSessionInsertDetected(this ILogger logger, LogLevel logLevel, Exception ex);
+    public static partial void DuplicateSessionInsertDetected(this ILogger logger, LogLevel logLevel, Exception? ex = null);
 
     [LoggerMessage(
         message:
