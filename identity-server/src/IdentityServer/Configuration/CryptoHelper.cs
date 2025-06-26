@@ -32,10 +32,11 @@ public static class CryptoHelper
     /// <param name="curve">The name of the curve as defined in
     /// https://tools.ietf.org/html/rfc7518#section-6.2.1.1.</param>
     /// <returns></returns>
-    public static ECDsaSecurityKey CreateECDsaSecurityKey(string curve = JsonWebKeyECTypes.P256) => new ECDsaSecurityKey(ECDsa.Create(GetCurveFromCrvValue(curve)))
-    {
-        KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)
-    };
+    public static ECDsaSecurityKey CreateECDsaSecurityKey(string curve = JsonWebKeyECTypes.P256) =>
+        new ECDsaSecurityKey(ECDsa.Create(GetCurveFromCrvValue(curve)))
+        {
+            KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)
+        };
 
     /// <summary>
     /// Creates an RSA security key.
@@ -79,20 +80,28 @@ public static class CryptoHelper
     /// <param name="signingAlgorithm"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(string signingAlgorithm)
+    public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(
+        string signingAlgorithm)
     {
-        var hashLength = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
+        if (signingAlgorithm.Length < 3)
+            throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}");
 
-        Func<byte[], byte[]> hashFunction = hashLength switch
+        var algorithm = signingAlgorithm.AsSpan().Trim()[^3..];
+
+        if (int.TryParse(algorithm, out var hashLength))
         {
-            256 => SHA256.HashData,
-            384 => SHA384.HashData,
-            512 => SHA512.HashData,
-            _ => throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}"),
-        };
+            Func<byte[], byte[]> hashFunction = hashLength switch
+            {
+                256 => SHA256.HashData,
+                384 => SHA384.HashData,
+                512 => SHA512.HashData,
+                _ => throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}"),
+            };
 
+            return (hashFunction, hashLength);
+        }
 
-        return (hashFunction, hashLength);
+        throw new InvalidOperationException($"Invalid signing algorithm: {signingAlgorithm}");
     }
 
     /// <summary>
@@ -100,10 +109,11 @@ public static class CryptoHelper
     /// </summary>
     /// <param name="signingAlgorithm">The signing algorithm</param>
     /// <returns></returns>
-    [Obsolete("This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
+    [Obsolete(
+        "This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
     public static HashAlgorithm GetHashAlgorithmForSigningAlgorithm(string signingAlgorithm)
     {
-        var signingAlgorithmBits = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
+        var signingAlgorithmBits = int.Parse(signingAlgorithm.AsSpan()[^3..]);
 
         return signingAlgorithmBits switch
         {
@@ -144,7 +154,8 @@ public static class CryptoHelper
         Constants.CurveOids.P256 => JsonWebKeyECTypes.P256,
         Constants.CurveOids.P384 => JsonWebKeyECTypes.P384,
         Constants.CurveOids.P521 => JsonWebKeyECTypes.P521,
-        _ => throw new InvalidOperationException($"Unsupported curve type of {curve.Oid.Value} - {curve.Oid.FriendlyName}"),
+        _ => throw new InvalidOperationException(
+            $"Unsupported curve type of {curve.Oid.Value} - {curve.Oid.FriendlyName}"),
     };
 
     internal static bool IsValidCurveForAlgorithm(ECDsaSecurityKey key, string algorithm)
@@ -160,29 +171,32 @@ public static class CryptoHelper
 
         return true;
     }
+
     internal static bool IsValidCrvValueForAlgorithm(string crv) => crv == JsonWebKeyECTypes.P256 ||
-               crv == JsonWebKeyECTypes.P384 ||
-               crv == JsonWebKeyECTypes.P521;
+                                                                    crv == JsonWebKeyECTypes.P384 ||
+                                                                    crv == JsonWebKeyECTypes.P521;
 
-    internal static string GetRsaSigningAlgorithmValue(IdentityServerConstants.RsaSigningAlgorithm value) => value switch
-    {
-        IdentityServerConstants.RsaSigningAlgorithm.RS256 => SecurityAlgorithms.RsaSha256,
-        IdentityServerConstants.RsaSigningAlgorithm.RS384 => SecurityAlgorithms.RsaSha384,
-        IdentityServerConstants.RsaSigningAlgorithm.RS512 => SecurityAlgorithms.RsaSha512,
+    internal static string GetRsaSigningAlgorithmValue(IdentityServerConstants.RsaSigningAlgorithm value) =>
+        value switch
+        {
+            IdentityServerConstants.RsaSigningAlgorithm.RS256 => SecurityAlgorithms.RsaSha256,
+            IdentityServerConstants.RsaSigningAlgorithm.RS384 => SecurityAlgorithms.RsaSha384,
+            IdentityServerConstants.RsaSigningAlgorithm.RS512 => SecurityAlgorithms.RsaSha512,
 
-        IdentityServerConstants.RsaSigningAlgorithm.PS256 => SecurityAlgorithms.RsaSsaPssSha256,
-        IdentityServerConstants.RsaSigningAlgorithm.PS384 => SecurityAlgorithms.RsaSsaPssSha384,
-        IdentityServerConstants.RsaSigningAlgorithm.PS512 => SecurityAlgorithms.RsaSsaPssSha512,
-        _ => throw new ArgumentException("Invalid RSA signing algorithm value", nameof(value)),
-    };
+            IdentityServerConstants.RsaSigningAlgorithm.PS256 => SecurityAlgorithms.RsaSsaPssSha256,
+            IdentityServerConstants.RsaSigningAlgorithm.PS384 => SecurityAlgorithms.RsaSsaPssSha384,
+            IdentityServerConstants.RsaSigningAlgorithm.PS512 => SecurityAlgorithms.RsaSsaPssSha512,
+            _ => throw new ArgumentException("Invalid RSA signing algorithm value", nameof(value)),
+        };
 
-    internal static string GetECDsaSigningAlgorithmValue(IdentityServerConstants.ECDsaSigningAlgorithm value) => value switch
-    {
-        IdentityServerConstants.ECDsaSigningAlgorithm.ES256 => SecurityAlgorithms.EcdsaSha256,
-        IdentityServerConstants.ECDsaSigningAlgorithm.ES384 => SecurityAlgorithms.EcdsaSha384,
-        IdentityServerConstants.ECDsaSigningAlgorithm.ES512 => SecurityAlgorithms.EcdsaSha512,
-        _ => throw new ArgumentException("Invalid ECDsa signing algorithm value", nameof(value)),
-    };
+    internal static string GetECDsaSigningAlgorithmValue(IdentityServerConstants.ECDsaSigningAlgorithm value) =>
+        value switch
+        {
+            IdentityServerConstants.ECDsaSigningAlgorithm.ES256 => SecurityAlgorithms.EcdsaSha256,
+            IdentityServerConstants.ECDsaSigningAlgorithm.ES384 => SecurityAlgorithms.EcdsaSha384,
+            IdentityServerConstants.ECDsaSigningAlgorithm.ES512 => SecurityAlgorithms.EcdsaSha512,
+            _ => throw new ArgumentException("Invalid ECDsa signing algorithm value", nameof(value)),
+        };
 
     internal static X509Certificate2? FindCertificate(string name, StoreLocation location, NameType nameType)
     {
@@ -192,7 +206,8 @@ public static class CryptoHelper
         {
             if (nameType == NameType.SubjectDistinguishedName)
             {
-                certificate = X509.LocalMachine.My.SubjectDistinguishedName.Find(name, validOnly: false).FirstOrDefault();
+                certificate = X509.LocalMachine.My.SubjectDistinguishedName.Find(name, validOnly: false)
+                    .FirstOrDefault();
             }
             else if (nameType == NameType.Thumbprint)
             {
@@ -203,7 +218,8 @@ public static class CryptoHelper
         {
             if (nameType == NameType.SubjectDistinguishedName)
             {
-                certificate = X509.CurrentUser.My.SubjectDistinguishedName.Find(name, validOnly: false).FirstOrDefault();
+                certificate = X509.CurrentUser.My.SubjectDistinguishedName.Find(name, validOnly: false)
+                    .FirstOrDefault();
             }
             else if (nameType == NameType.Thumbprint)
             {
