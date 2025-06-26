@@ -40,7 +40,7 @@ internal static class HostingExtensions
             .AddOpenIdConnect("Google", "Google", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-                options.ForwardSignOut = IdentityServerConstants.DefaultCookieAuthenticationScheme;
+                options.ForwardSignOut = IdentityConstants.ApplicationScheme;
 
                 options.Authority = "https://accounts.google.com/";
                 options.ClientId = "708996912208-9m4dkjb5hscn7cjrn5u0r4tbgkbj1fko.apps.googleusercontent.com";
@@ -52,7 +52,7 @@ internal static class HostingExtensions
             .AddOpenIdConnect("demoidsrv", "IdentityServer", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-                options.SignOutScheme = IdentityServerConstants.SignoutScheme;
+                options.SignOutScheme = IdentityConstants.ApplicationScheme;
 
                 options.Authority = "https://demo.duendesoftware.com";
                 options.ClientId = "login";
@@ -72,7 +72,7 @@ internal static class HostingExtensions
             .AddOpenIdConnect("aad", "Azure AD", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-                options.SignOutScheme = IdentityServerConstants.SignoutScheme;
+                options.SignOutScheme = IdentityConstants.ApplicationScheme;
 
                 options.Authority = "https://login.windows.net/4ca9cb4c-5e5f-4be9-b700-c532992a3705";
                 options.ClientId = "96e3c53e-01cb-4244-b658-a42164cb67a9";
