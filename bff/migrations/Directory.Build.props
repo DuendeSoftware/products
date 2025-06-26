@@ -3,7 +3,6 @@
   <PropertyGroup>
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
-    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
   <Import Project="../../samples.props" />
 </Project>

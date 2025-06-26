@@ -125,7 +125,7 @@ public class IdentityServerTestHost : TestHost
         return client;
     }
 
-    public Client AddClientFor(BffFrontend frontend, Uri baseUri, string? callbackPath = null)
+    public Client AddClientFor(BffFrontend frontend, IEnumerable<Uri> baseUris, string? callbackPath = null)
     {
         var options = new OpenIdConnectOptions();
         frontend.ConfigureOpenIdConnectOptions?.Invoke(options);
@@ -141,15 +141,21 @@ public class IdentityServerTestHost : TestHost
         var clientSecret = options.ClientSecret ?? The.ClientSecret;
         callbackPath ??= options.CallbackPath;
 
-        var redirectUri = new Uri(baseUri, (frontend.SelectionCriteria.MatchingPath ?? string.Empty) + callbackPath);
+        var redirectUris = baseUris
+            .Select(baseUri => new Uri(baseUri, (frontend.SelectionCriteria.MatchingPath ?? string.Empty) + callbackPath).ToString())
+            .ToList();
+
+        var postLogoutRedirectUris = baseUris
+            .Select(baseUri => new Uri(baseUri, options.SignedOutCallbackPath).ToString())
+            .ToList();
 
         var client = new Client()
         {
             ClientId = clientId,
             ClientSecrets = { new Secret(clientSecret.Sha256()) },
             AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-            RedirectUris = [redirectUri.ToString()],
-            PostLogoutRedirectUris = [new Uri(baseUri, "signout-callback-oidc").ToString()],
+            RedirectUris = redirectUris,
+            PostLogoutRedirectUris = postLogoutRedirectUris,
             AllowOfflineAccess = true,
             AllowedScopes = options.Scope.Any()
                 ? options.Scope
