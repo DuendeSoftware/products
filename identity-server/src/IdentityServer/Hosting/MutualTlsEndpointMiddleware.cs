@@ -76,8 +76,7 @@ public class MutualTlsEndpointMiddleware
 
                 if (result.Succeeded)
                 {
-                    var path = ProtocolRoutePaths.ConnectPathPrefix +
-                               subPath.ToString().EnsureLeadingSlash();
+                    var path = ProtocolRoutePaths.ConnectPathPrefix + subPath.ToString().EnsureLeadingSlash();
                     path = path.EnsureLeadingSlash();
 
                     _sanitizedLogger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
@@ -96,16 +95,26 @@ public class MutualTlsEndpointMiddleware
 
     private async Task<AuthenticateResult> TriggerCertificateAuthentication(HttpContext context)
     {
-        var x509AuthResult =
-            await context.AuthenticateAsync(_options.MutualTls.ClientCertificateAuthenticationScheme);
+        var x509AuthResult = await context.AuthenticateAsync(_options.MutualTls.ClientCertificateAuthenticationScheme);
 
         if (!x509AuthResult.Succeeded)
         {
-            _sanitizedLogger.LogDebug("MTLS authentication failed, error: {error}.",
-                x509AuthResult.Failure?.Message);
-            await context.ForbidAsync(_options.MutualTls.ClientCertificateAuthenticationScheme);
+            _sanitizedLogger.LogDebug("MTLS authentication failed, error: {error}.", x509AuthResult.Failure?.Message);
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteJsonAsync(new MtlsErrorResponse
+            {
+                error = "invalid_client",
+                error_description = "mTLS authentication failed."
+            });
         }
 
         return x509AuthResult;
     }
+
+    class MtlsErrorResponse
+    {
+        public string error { get; set; }
+        public string error_description { get; set; }
+    }
+
 }
