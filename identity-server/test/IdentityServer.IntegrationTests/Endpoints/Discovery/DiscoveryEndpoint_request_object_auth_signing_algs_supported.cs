@@ -55,7 +55,7 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task request_object_signing_alg_values_supported_should_default_to_rs_ps_es_hmac()
+    public async Task request_object_signing_alg_values_supported_should_default_to_rs_ps_es()
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
@@ -65,19 +65,17 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests
                 "https://server/.well-known/openid-configuration");
         var algorithmsSupported = result.TryGetStringArray("request_object_signing_alg_values_supported");
 
-        algorithmsSupported.Count().ShouldBe(12);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha384);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha512);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha384);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha512);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha384);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha512);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha256);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha384);
-        algorithmsSupported.ShouldContain(SecurityAlgorithms.HmacSha512);
+        algorithmsSupported.ShouldBe([
+            SecurityAlgorithms.RsaSha256,
+            SecurityAlgorithms.RsaSha384,
+            SecurityAlgorithms.RsaSha512,
+            SecurityAlgorithms.RsaSsaPssSha384,
+            SecurityAlgorithms.RsaSsaPssSha512,
+            SecurityAlgorithms.RsaSsaPssSha256,
+            SecurityAlgorithms.EcdsaSha256,
+            SecurityAlgorithms.EcdsaSha384,
+            SecurityAlgorithms.EcdsaSha512,
+        ], ignoreOrder: true);
     }
 
     public static IEnumerable<object[]> NullOrEmptySupportedAlgorithms() =>
