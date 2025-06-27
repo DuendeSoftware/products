@@ -4,6 +4,7 @@
 
 using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,6 +41,7 @@ public class IdentityServerPipeline
     public const string AuthorizeEndpoint = BaseUrl + "/connect/authorize";
     public const string BackchannelAuthenticationEndpoint = BaseUrl + "/connect/ciba";
     public const string TokenEndpoint = BaseUrl + "/connect/token";
+    public const string TokenMtlsEndpoint = BaseUrl + "/connect/mtls/token";
     public const string RevocationEndpoint = BaseUrl + "/connect/revocation";
     public const string UserInfoEndpoint = BaseUrl + "/connect/userinfo";
     public const string IntrospectionEndpoint = BaseUrl + "/connect/introspect";
@@ -46,6 +49,7 @@ public class IdentityServerPipeline
     public const string EndSessionCallbackEndpoint = BaseUrl + "/connect/endsession/callback";
     public const string CheckSessionEndpoint = BaseUrl + "/connect/checksession";
     public const string ParEndpoint = BaseUrl + "/connect/par";
+
 
     public const string FederatedSignOutPath = "/signout-oidc";
     public const string FederatedSignOutUrl = BaseUrl + FederatedSignOutPath;
@@ -62,6 +66,10 @@ public class IdentityServerPipeline
 
     public BrowserClient BrowserClient { get; set; }
     public HttpClient BackChannelClient { get; set; }
+
+    // mTLS support
+    public X509Certificate2 ClientCertificate { get; set; }
+    public HttpClient MtlsBackChannelClient { get; set; }
 
     public MockMessageHandler BackChannelMessageHandler { get; set; } = new MockMessageHandler();
     public MockMessageHandler JwtRequestMessageHandler { get; set; } = new MockMessageHandler();
@@ -107,6 +115,9 @@ public class IdentityServerPipeline
 
         BrowserClient = new BrowserClient(new BrowserHandler(Handler));
         BackChannelClient = new HttpClient(Handler);
+
+        // Initialize mTLS client (will be null until a certificate is set)
+        UpdateMtlsClient();
     }
 
     public void ConfigureServices(IServiceCollection services)
@@ -119,6 +130,11 @@ public class IdentityServerPipeline
             {
                 scheme.DisplayName = "External";
                 scheme.HandlerType = typeof(MockExternalAuthenticationHandler);
+            });
+            opts.AddScheme("Certificate", scheme =>
+            {
+                scheme.DisplayName = "Certificate";
+                scheme.HandlerType = typeof(MockCertificateAuthenticationHandler);
             });
         });
         services.AddTransient<MockExternalAuthenticationHandler>(svcs =>
@@ -143,6 +159,8 @@ public class IdentityServerPipeline
                 };
                 options.KeyManagement.Enabled = false;
 
+                options.MutualTls.Enabled = true;
+
                 Options = options;
             })
             .AddInMemoryClients(Clients)
@@ -150,7 +168,8 @@ public class IdentityServerPipeline
             .AddInMemoryApiResources(ApiResources)
             .AddInMemoryApiScopes(ApiScopes)
             .AddTestUsers(Users)
-            .AddDeveloperSigningCredential(persistKey: false);
+            .AddDeveloperSigningCredential(persistKey: false)
+            .AddMutualTlsSecretValidators();
 
         services.AddHttpClient(IdentityServerConstants.HttpClients.BackChannelLogoutHttpClient)
             .AddHttpMessageHandler(() => BackChannelMessageHandler);
@@ -166,6 +185,9 @@ public class IdentityServerPipeline
         ApplicationServices = app.ApplicationServices;
 
         OnPreConfigure(app);
+
+        // Add mTLS test middleware before IdentityServer middleware
+        app.UseMiddleware<MtlsTestMiddleware>();
 
         app.UseIdentityServer();
 
@@ -463,6 +485,40 @@ public class IdentityServerPipeline
     public T Resolve<T>() =>
         // create throw-away scope
         ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<T>();
+
+    /* mTLS helpers */
+    public void SetClientCertificate(X509Certificate2 certificate)
+    {
+        ClientCertificate = certificate;
+        UpdateMtlsClient();
+    }
+
+    private void UpdateMtlsClient()
+    {
+        MtlsBackChannelClient?.Dispose();
+
+        if (ClientCertificate != null)
+        {
+            var mtlsHandler = new MtlsMessageHandler(Handler, ClientCertificate);
+            MtlsBackChannelClient = new HttpClient(mtlsHandler)
+            {
+                BaseAddress = new Uri(BaseUrl)
+            };
+        }
+        else
+        {
+            MtlsBackChannelClient = null;
+        }
+    }
+
+    public HttpClient GetMtlsClient()
+    {
+        if (MtlsBackChannelClient == null)
+        {
+            throw new InvalidOperationException("No client certificate has been set. Call SetClientCertificate() first.");
+        }
+        return MtlsBackChannelClient;
+    }
 }
 
 public class MockMessageHandler : DelegatingHandler
@@ -521,4 +577,31 @@ public class MockExternalAuthenticationHandler :
     public Task SignInAsync(ClaimsPrincipal user, AuthenticationProperties properties) => Task.CompletedTask;
 
     public Task SignOutAsync(AuthenticationProperties properties) => Task.CompletedTask;
+}
+
+public class MockCertificateAuthenticationHandler : IAuthenticationHandler
+{
+    private HttpContext _context;
+    private string _scheme;
+
+    public Task<AuthenticateResult> AuthenticateAsync()
+    {
+        if (_context?.Features.Get<ITlsConnectionFeature>() is { ClientCertificate: not null })
+        {
+            return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(
+                new ClaimsPrincipal(new ClaimsIdentity([])), _scheme)));
+        }
+        return Task.FromResult(AuthenticateResult.Fail("No client certificate set."));
+    }
+
+    public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)
+    {
+        _scheme = scheme.Name;
+        _context = context;
+        return Task.CompletedTask;
+    }
+
+    public Task ChallengeAsync(AuthenticationProperties properties) => Task.CompletedTask;
+
+    public Task ForbidAsync(AuthenticationProperties properties) => Task.CompletedTask;
 }
