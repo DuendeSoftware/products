@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class PathMapper
+internal static class PathMapper
 {
-    public void MapPath(HttpContext context, BffFrontend frontend)
+    public static void MapPath(HttpContext context, BffFrontend frontend)
     {
         var path = frontend.SelectionCriteria.MatchingPath;
 
@@ -16,7 +16,7 @@ internal class PathMapper
             return;
         }
 
-        if (!context.Request.Path.StartsWithSegments(path))
+        if (!context.Request.Path.StartsWithSegments(path, StringComparison.OrdinalIgnoreCase))
         {
             context.Response.StatusCode = 404;
             return;

@@ -55,7 +55,7 @@ internal class BffAntiForgeryMiddleware(
         var isUiEndpoint = endpoint.Metadata.GetMetadata<IBffUIApiEndpoint>() != null;
         if (isUiEndpoint && context.IsAjaxRequest())
         {
-            logger.ManagementEndpointAccessedViaAjax(context.Request.Path);
+            logger.ManagementEndpointAccessedViaAjax(LogLevel.Debug, context.Request.Path.Sanitize());
         }
 
         await next(context);

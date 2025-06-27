@@ -17,66 +17,29 @@ internal class SessionCleanupHost(
     BffMetrics metrics,
     IServiceProvider serviceProvider,
     IOptions<BffOptions> options,
-    ILogger<SessionCleanupHost> logger) : IHostedService
+    ILogger<SessionCleanupHost> logger) : BackgroundService
 {
     private readonly BffOptions _options = options.Value;
 
     private TimeSpan CleanupInterval => _options.SessionCleanupInterval;
 
-    private CancellationTokenSource? _source;
-
-    /// <summary>
-    /// Starts the token cleanup polling.
-    /// </summary>
-    public Task StartAsync(CT ct)
+    protected override async Task ExecuteAsync(CT ct)
     {
-        if (_options.EnableSessionCleanup)
+        if (!_options.EnableSessionCleanup)
         {
-            if (_source != null)
-            {
-                throw new InvalidOperationException("Already started. Call Stop first.");
-            }
-
-            if (IsIUserSessionStoreCleanupRegistered())
-            {
-                logger.LogDebug("Starting BFF session cleanup");
-
-                _source = CancellationTokenSource.CreateLinkedTokenSource(ct);
-
-                Task.Factory.StartNew(() => StartInternalAsync(_source.Token));
-            }
-            else
-            {
-                logger.LogWarning("BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.");
-            }
+            return;
         }
 
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Stops the token cleanup polling.
-    /// </summary>
-    public Task StopAsync(CT ct)
-    {
-        if (_options.EnableSessionCleanup && _source != null)
+        if (!IsIUserSessionStoreCleanupRegistered())
         {
-            logger.LogDebug("Stopping BFF session cleanup");
-
-            _source.Cancel();
-            _source = null;
+            logger.SessionCleanupNotRegistered(LogLevel.Warning);
+            return;
         }
 
-        return Task.CompletedTask;
-    }
-
-    private async Task StartInternalAsync(CT ct)
-    {
         while (true)
         {
             if (ct.IsCancellationRequested)
             {
-                logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
@@ -86,18 +49,20 @@ internal class SessionCleanupHost(
             }
             catch (TaskCanceledException)
             {
-                logger.LogDebug("TaskCanceledException. Exiting.");
                 break;
             }
+
+#pragma warning disable CA1031// Do not catch general exception types
+            // Catching general exceptions here to prevent the host from crashing if an exception occurs during the delay.
             catch (Exception ex)
+#pragma warning restore CA1031
             {
-                logger.LogError("Task.Delay exception: {0}. Exiting.", ex.Message);
+                logger.FailedToCleanupSession(LogLevel.Error, ex);
                 break;
             }
 
             if (ct.IsCancellationRequested)
             {
-                logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
@@ -114,9 +79,12 @@ internal class SessionCleanupHost(
             var removed = await tokenCleanupService.DeleteExpiredSessionsAsync(ct);
             metrics.SessionsEnded(removed);
         }
+#pragma warning disable CA1031// Do not catch general exception types
+        // Catching general exceptions here to prevent the host from crashing if an exception occurs during the cleanup.
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            logger.LogError("Exception deleting expired sessions: {exception}", ex.Message);
+            logger.FailedToCleanupExpiredSessions(LogLevel.Error, ex);
         }
     }
 

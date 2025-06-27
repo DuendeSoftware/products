@@ -10,7 +10,7 @@
     public delegate void BffYarpTransformBuilder(string localPath, Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context);
     public static class DefaultBffYarpTransformerBuilders
     {
-        public static Duende.Bff.Yarp.BffYarpTransformBuilder DirectProxyWithAccessToken;
+        public static readonly Duende.Bff.Yarp.BffYarpTransformBuilder DirectProxyWithAccessToken;
     }
     public static class ProxyAppBuilderExtensions
     {

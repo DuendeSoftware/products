@@ -48,7 +48,7 @@ internal class ServerSideTicketStore(
 
     private async Task CreateNewSessionAsync(string key, AuthenticationTicket ticket)
     {
-        LogMessages.CreatingAuthenticationTicketEntry(logger, key, ticket.GetExpiration());
+        logger.CreatingAuthenticationTicketEntry(LogLevel.Debug, key, ticket.GetExpiration());
 
         var session = new UserSession
         {
@@ -68,24 +68,24 @@ internal class ServerSideTicketStore(
     /// <inheritdoc />
     public async Task<AuthenticationTicket?> RetrieveAsync(string key)
     {
-        LogMessages.RetrieveAuthenticationTicket(logger, key);
+        logger.RetrieveAuthenticationTicket(LogLevel.Debug, key);
 
         var session = await store.GetUserSessionAsync(key);
         if (session == null)
         {
-            LogMessages.NoAuthenticationTicketFoundForKey(logger, key);
+            logger.NoAuthenticationTicketFoundForKey(LogLevel.Debug, key);
             return null;
         }
 
         var ticket = session.Deserialize(_protector, logger);
         if (ticket != null)
         {
-            logger.LogDebug("Ticket loaded for key: {key}, with expiration: {expiration}", key, ticket.GetExpiration());
+            logger.TicketLoaded(LogLevel.Debug, key, ticket.GetExpiration());
             return ticket;
         }
 
         // if we failed to get a ticket, then remove DB record 
-        LogMessages.FailedToDeserializeAuthenticationTicket(logger, key);
+        logger.FailedToDeserializeAuthenticationTicket(LogLevel.Information, key);
         await RemoveAsync(key);
         return ticket;
     }
@@ -101,7 +101,7 @@ internal class ServerSideTicketStore(
             return;
         }
 
-        LogMessages.RenewingAuthenticationTicket(logger, key, ticket.GetExpiration());
+        logger.RenewingAuthenticationTicket(LogLevel.Debug, key, ticket.GetExpiration());
 
         var sub = ticket.GetSubjectId();
         var sid = ticket.GetSessionId();
@@ -122,7 +122,7 @@ internal class ServerSideTicketStore(
     /// <inheritdoc />
     public Task RemoveAsync(string key)
     {
-        LogMessages.RemovingAuthenticationTicket(logger, key);
+        logger.RemovingAuthenticationTicket(LogLevel.Debug, key);
         metrics.SessionEnded();
 
         return store.DeleteUserSessionAsync(key);
@@ -131,7 +131,7 @@ internal class ServerSideTicketStore(
     /// <inheritdoc />
     public async Task<IReadOnlyCollection<AuthenticationTicket>> GetUserTicketsAsync(UserSessionsFilter filter, CT ct)
     {
-        LogMessages.GettingAuthenticationTickets(logger, filter.SubjectId, filter.SessionId);
+        logger.GettingAuthenticationTickets(LogLevel.Debug, filter.SubjectId, filter.SessionId);
 
         var list = new List<AuthenticationTicket>();
 
@@ -146,7 +146,7 @@ internal class ServerSideTicketStore(
             else
             {
                 // if we failed to get a ticket, then remove DB record 
-                LogMessages.FailedToDeserializeAuthenticationTicket(logger, session.Key);
+                logger.FailedToDeserializeAuthenticationTicket(LogLevel.Debug, session.Key);
                 await RemoveAsync(session.Key);
             }
         }

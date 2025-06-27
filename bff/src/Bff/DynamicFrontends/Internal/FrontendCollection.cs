@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Collections;
 using Duende.Bff.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -26,7 +27,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         IOptionsMonitor<BffConfiguration> bffConfiguration,
         IEnumerable<IBffPluginLoader> plugins,
         IEnumerable<BffFrontend>? frontendsConfiguredDuringStartup = null
-        )
+    )
     {
         _plugins = plugins.ToArray();
         _frontends = ReadFrontends(bffConfiguration.CurrentValue, frontendsConfiguredDuringStartup ?? []);
@@ -83,7 +84,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                 IndexHtmlUrl = frontend.IndexHtmlUrl,
                 ConfigureOpenIdConnectOptions = opt =>
                 {
-                    // Then apply any explicitly configured options for the frontend
                     frontend.Oidc?.ApplyTo(opt);
                 },
                 ConfigureCookieOptions = opt =>
@@ -93,7 +93,9 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                 SelectionCriteria = new FrontendSelectionCriteria()
                 {
                     // todo: parse or default
-                    MatchingOrigin = string.IsNullOrEmpty(frontend.MatchingOrigin) ? null : Origin.Parse(frontend.MatchingOrigin),
+                    MatchingOrigin = string.IsNullOrEmpty(frontend.MatchingOrigin)
+                        ? null
+                        : Origin.Parse(frontend.MatchingOrigin),
                     MatchingPath = string.IsNullOrEmpty(frontend.MatchingPath) ? null : frontend.MatchingPath,
                 },
                 DataExtensions = extensions
@@ -161,7 +163,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                 .Where(x => x.Name != frontend.Name)
                 .Append(frontend)
                 .ToArray());
-
         }
 
         // Notify subscribers that a frontend has changed.
@@ -192,9 +193,10 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         OnFrontendChanged(existing);
     }
 
-    // ReSharper disable once InconsistentlySynchronizedField
-    // The _frontends array is completely replaced on add/update, so we don't need to lock here.
-    public IReadOnlyList<BffFrontend> GetAll() => _frontends.AsReadOnly();
+    public int Count => _frontends.Length;
 
     void IDisposable.Dispose() => _stopSubscription?.Dispose();
+    public IEnumerator<BffFrontend> GetEnumerator() => ((IEnumerable<BffFrontend>)_frontends).GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => _frontends.GetEnumerator();
 }

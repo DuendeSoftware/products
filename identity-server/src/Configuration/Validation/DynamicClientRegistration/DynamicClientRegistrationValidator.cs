@@ -153,7 +153,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
 
         if (context.Request.GrantTypes.Contains(OidcConstants.GrantTypes.RefreshToken))
         {
-            // Note that if we ever support additional grant types that allow refresh tokens, this
+            // Note that if we ever support additional grant types that allow refresh tokens, this 
             // could be refactored.
             if (!context.Client.AllowedGrantTypes.Contains(GrantType.AuthorizationCode))
             {
@@ -302,7 +302,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     }
 
     /// <summary>
-    /// Validates the requested jwks to set the secrets of the client.
+    /// Validates the requested jwks to set the secrets of the client.  
     /// </summary>
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model that will have its secrets set, the DCR
@@ -317,11 +317,9 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
             return StepResult.Failure("The jwks_uri and jwks parameters must not be used together");
         }
 
-        if (context.Request.Jwks is null &&
-            context.Request.TokenEndpointAuthenticationMethod is
-                OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt or "client_secret_jwt")
+        if (context.Request.Jwks is null && context.Request.TokenEndpointAuthenticationMethod == OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt)
         {
-            return StepResult.Failure($"Missing jwks parameter - the {context.Request.TokenEndpointAuthenticationMethod} token_endpoint_auth_method requires the jwks parameter");
+            return StepResult.Failure("Missing jwks parameter - the private_key_jwt token_endpoint_auth_method requires the jwks parameter");
 
         }
         if (context.Request.Jwks is not null)
@@ -573,7 +571,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// Validates details of the request that control the user interface,
     /// including the logo uri, client uri, initiate login uri, enable local
     /// login flag, and identity provider restrictions, and uses them to set the
-    /// corresponding client properties.
+    /// corresponding client properties. 
     /// </summary>
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model that will have miscellaneous properties set,

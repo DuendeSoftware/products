@@ -20,12 +20,16 @@ public sealed record Origin : IEquatable<HttpRequest>
         return Parse(uri);
     }
 
-    public static Origin Parse(Uri uri) => new()
+    public static Origin Parse(Uri uri)
     {
-        Scheme = uri.Scheme,
-        Host = uri.Host,
-        Port = uri.Port
-    };
+        ArgumentNullException.ThrowIfNull(uri);
+        return new()
+        {
+            Scheme = uri.Scheme,
+            Host = uri.Host,
+            Port = uri.Port
+        };
+    }
 
     public required string Scheme { get; init; }
 

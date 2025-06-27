@@ -8,12 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<FrontendSelector> logger)
+internal class FrontendSelector(FrontendCollection frontends, ILogger<FrontendSelector> logger)
 {
     public bool TrySelectFrontend(HttpRequest request, [NotNullWhen(true)] out BffFrontend? selectedFrontend)
     {
         selectedFrontend = null;
-        var frontends = frontendCollection.GetAll();
 
         if (frontends.Count == 0)
         {
@@ -23,12 +22,14 @@ internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<F
 
         // Find frontends that match the request by origin (if specified)
         var matchingByOrigin = frontends
-            .Where(x => x.SelectionCriteria.MatchingOrigin == null || x.SelectionCriteria.MatchingOrigin.Equals(request))
+            .Where(x => x.SelectionCriteria.MatchingOrigin == null ||
+                        x.SelectionCriteria.MatchingOrigin.Equals(request))
             .ToList();
 
         // First, look for a match by origin and path (if specified)
         selectedFrontend = matchingByOrigin
-            .OrderByDescending(x => x.SelectionCriteria.MatchingOrigin != null) // Prefer frontends with a specific origin
+            .OrderByDescending(x =>
+                x.SelectionCriteria.MatchingOrigin != null) // Prefer frontends with a specific origin
             .ThenByDescending(x => PathOrder(x.SelectionCriteria.MatchingPath))
             .FirstOrDefault(x =>
                 x.SelectionCriteria.MatchingPath == null ||
@@ -42,7 +43,8 @@ internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<F
                     StringComparison.Ordinal))
             {
                 // There is a case difference in the path
-                logger.FrontendSelectedWithPathCasingIssue(LogLevel.Warning, selectedFrontend.SelectionCriteria.MatchingPath, request.Path);
+                logger.FrontendSelectedWithPathCasingIssue(LogLevel.Warning,
+                    selectedFrontend.SelectionCriteria.MatchingPath, request.Path);
             }
 
             return true;
@@ -57,9 +59,9 @@ internal class FrontendSelector(FrontendCollection frontendCollection, ILogger<F
         return selectedFrontend != null;
     }
 
-    private bool PathMatches(HttpRequest request, PathString path) =>
+    private static bool PathMatches(HttpRequest request, PathString path) =>
         request.Path.StartsWithSegments(path, StringComparison.OrdinalIgnoreCase);
 
-    private int PathOrder(PathString? path) =>
+    private static int PathOrder(PathString? path) =>
         path?.Value?.Length ?? 0;
 }

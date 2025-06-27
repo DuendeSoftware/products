@@ -93,10 +93,10 @@ public sealed class BffBuilder(IServiceCollection services)
 
         // Add 'default' configure methods that would have been added by
         // .AddAuthentication().AddCookie().AddOpenIdConnect()
-        Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
-        Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
-
-        Services.AddTransient<PathMapper>();
+        Services.TryAddEnumerable(ServiceDescriptor
+            .Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
+        Services.TryAddEnumerable(ServiceDescriptor
+            .Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
 
         Services.TryAddSingleton<IIndexHtmlClient, IndexHtmlHttpClient>();
 
@@ -124,7 +124,9 @@ public sealed class BffBuilder(IServiceCollection services)
     /// <returns></returns>
     public BffBuilder AddServerSideSessions()
     {
-        Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
+        Services
+            .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
+                PostConfigureApplicationCookieTicketStore>();
         Services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
         Services.AddTransient<ISessionRevocationService, SessionRevocationService>();
         Services.AddSingleton<IHostedService, SessionCleanupHost>();
@@ -162,6 +164,7 @@ public sealed class BffBuilder(IServiceCollection services)
         {
             configLoader(Services, section);
         }
+
         // We no longer need them. 
         _pluginConfigurationLoaders.Clear();
 
@@ -170,6 +173,8 @@ public sealed class BffBuilder(IServiceCollection services)
 
     public BffBuilder AddFrontends(params BffFrontend[] frontends)
     {
+        ArgumentNullException.ThrowIfNull(frontends);
+
         // Check for duplicate frontend names
         var duplicateNames = frontends
             .GroupBy(f => f.Name)
@@ -177,9 +182,10 @@ public sealed class BffBuilder(IServiceCollection services)
             .Select(g => g.Key)
             .ToList();
 
-        if (duplicateNames.Any())
+        if (duplicateNames.Count > 0)
         {
-            throw new InvalidOperationException($"Duplicate frontend names detected: {string.Join(", ", duplicateNames.Select(n => n))}");
+            throw new InvalidOperationException(
+                $"Duplicate frontend names detected: {string.Join(", ", duplicateNames.Select(n => n))}");
         }
 
         foreach (var frontend in frontends)

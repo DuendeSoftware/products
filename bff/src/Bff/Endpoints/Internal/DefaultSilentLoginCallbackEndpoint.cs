@@ -23,7 +23,7 @@ internal class DefaultSilentLoginCallbackEndpoint(
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CancellationToken cancellationToken = default)
     {
-        logger.LogDebug("Processing silent login callback request");
+        logger.ProcessingSilentLoginCallbackRequest(LogLevel.Debug);
 
         context.CheckForBffMiddleware(options.Value);
 
@@ -42,7 +42,7 @@ internal class DefaultSilentLoginCallbackEndpoint(
         context.Response.Headers["Cache-Control"] = "no-store, no-cache, max-age=0";
         context.Response.Headers["Pragma"] = "no-cache";
 
-        logger.LogDebug("Silent login endpoint rendering HTML with JS postMessage to origin {origin} with isLoggedIn {isLoggedIn}", origin.Sanitize(), result);
+        logger.SilentLoginEndpointRenderingHtml(LogLevel.Debug, origin.Sanitize(), result);
 
         await context.Response.WriteAsync(html, Encoding.UTF8, cancellationToken);
     }

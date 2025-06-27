@@ -6,9 +6,14 @@
 
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Duende.Bff.Otel;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+
+// Logging APIs used by Duende license validation
+#pragma warning disable CA1848
+#pragma warning disable CA2254
 
 namespace Duende.Bff.Licensing;
 
@@ -68,20 +73,15 @@ internal partial class LicenseValidator
     {
         if (Logger == null)
         {
-            throw new Exception("LicenseValidator.Initalize has not yet been called.");
+            throw new InvalidOperationException("LicenseValidator.Initalize has not yet been called.");
         }
 
         var errors = new List<string>();
 
         if (License == null)
         {
-            var message = "You do not have a valid license key for the Duende software. " +
-                          "This is allowed for development and testing scenarios. " +
-                          "If you are running in production you are required to have a licensed version. " +
-                          "Please start a conversation with us: https://duendesoftware.com/contact";
-
             // we're not using our _warningLog because we always want this emitted regardless of the context
-            Logger.LogWarning(message);
+            Logger.NoValidLicense(LogLevel.Warning);
             LicenseValidator.WarnForProductFeaturesWhenMissingLicense();
             return;
         }
@@ -149,7 +149,11 @@ internal partial class LicenseValidator
                 ValidIssuer = "https://duendesoftware.com",
                 ValidAudience = "IdentityServer",
                 IssuerSigningKey = key,
+                // CA5404: Do not set ValidateLifetime to false in production code
+                // this is OK for the license key validation, as we do not want to enforce expiration on the license key itself
+#pragma warning disable CA5404
                 ValidateLifetime = false
+#pragma warning restore CA5404
             };
             var validateResult = handler.ValidateTokenAsync(licenseKey, parms).Result;
             if (validateResult.IsValid)
@@ -158,12 +162,13 @@ internal partial class LicenseValidator
             }
             else
             {
-                Logger.LogCritical(validateResult.Exception, "Error validating the Duende software license key");
+                Logger.ErrorValidatingLicenseKey(LogLevel.Critical, validateResult.Exception);
             }
         }
 
         return null;
     }
+
 
     private static void LogToTrace(string message, params object[] args)
     {
@@ -204,4 +209,5 @@ internal partial class LicenseValidator
             Logger.LogError(message, args);
         }
     }
+
 }

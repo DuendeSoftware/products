@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Configuration;
+using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -22,7 +23,7 @@ internal class DefaultSilentLoginEndpoint(IOptions<BffOptions> options, ILogger<
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing silent login request");
+        logger.ProcessingSilentLoginRequest(LogLevel.Debug);
 
         context.CheckForBffMiddleware(_options);
 
@@ -34,7 +35,7 @@ internal class DefaultSilentLoginEndpoint(IOptions<BffOptions> options, ILogger<
             },
         };
 
-        logger.LogWarning("Using deprecated silentlogin endpoint. This endpoint will be removed in future versions. Consider calling the BFF Login endpoint with prompt=none.");
+        logger.UsingDeprecatedSilentLoginEndpoint(LogLevel.Warning);
 
         await context.ChallengeAsync(props);
     }

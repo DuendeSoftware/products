@@ -46,6 +46,7 @@ public class UserSessionUpdate
     /// <returns></returns>
     public void CopyTo(UserSessionUpdate other)
     {
+        ArgumentNullException.ThrowIfNull(other);
         other.SubjectId = SubjectId;
         other.SessionId = SessionId;
         other.Created = Created;

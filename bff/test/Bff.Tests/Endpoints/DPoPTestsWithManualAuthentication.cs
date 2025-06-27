@@ -11,19 +11,14 @@ using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 
-public class DPoPTestsWithManualAuthentication : BffTestBase, IAsyncLifetime
+public class DPoPTestsWithManualAuthentication(ITestOutputHelper output) : BffTestBase(output), IAsyncLifetime
 {
-    public DPoPTestsWithManualAuthentication(ITestOutputHelper output) : base(output)
+    public override async Task InitializeAsync()
     {
         Bff.EnableBackChannelHandler = false;
         var idSrvClient = IdentityServer.AddClient(The.ClientId, Bff.Url());
 
         idSrvClient.RequireDPoP = true;
-
-        Bff.SetBffOptions += options =>
-        {
-            options.DPoPJsonWebKey = The.DPoPJsonWebKey;
-        };
 
         Bff.OnConfigureServices += services =>
         {
@@ -49,6 +44,8 @@ public class DPoPTestsWithManualAuthentication : BffTestBase, IAsyncLifetime
                 ;
         };
 
+        await base.InitializeAsync();
+        Bff.BffOptions.DPoPJsonWebKey = The.DPoPJsonWebKey;
     }
 
     [Fact]
@@ -60,7 +57,6 @@ public class DPoPTestsWithManualAuthentication : BffTestBase, IAsyncLifetime
     [Fact]
     public async Task When_calling_api_endpoint_with_dpop_enabled_then_dpop_headers_are_sent()
     {
-
         ApiCallDetails callToApi = await Bff.BrowserClient.CallBffHostApi(
             url: Bff.Url(The.PathAndSubPath)
         );

@@ -11,8 +11,31 @@ namespace Duende.Bff.Otel;
 internal static partial class LogMessages
 {
     [LoggerMessage(
+        Message = $"Proxy response error. local path: '{{{OTelParameters.LocalPath}}}', error: '{{{OTelParameters.Error}}}'")]
+    public static partial void ProxyResponseError(this ILogger logger, LogLevel level, string localPath, string error);
+
+    [LoggerMessage(
+        message:
+        $"Deserializing AuthenticationTicket envelope failed or found incorrect version for key {{{OTelParameters.Key}}}")]
+    public static partial void AuthenticationTicketEnvelopeVersionInvalid(this ILogger logger, LogLevel logLevel,
+        string key);
+
+    [LoggerMessage(
+        message:
+        $"Failed to unprotect AuthenticationTicket payload for key {{{OTelParameters.Key}}}")]
+    public static partial void AuthenticationTicketPayloadInvalid(this ILogger logger, Exception? ex, LogLevel logLevel,
+        string key);
+
+    [LoggerMessage(
+        message:
+        $"Failed to deserialize AuthenticationTicket payload for key {{{OTelParameters.Key}}}")]
+    public static partial void AuthenticationTicketFailedToDeserialize(this ILogger logger, Exception? ex,
+        LogLevel logLevel,
+        string key);
+
+    [LoggerMessage(
         Message = "FrontendSelection: No frontends registered in the store.")]
-    public static partial void NoFrontendsRegistered(ILogger logger, LogLevel logLevel);
+    public static partial void NoFrontendsRegistered(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
         $"Invalid prompt value {{{OTelParameters.Prompt}}}.")]
@@ -29,11 +52,13 @@ internal static partial class LogMessages
 
     [LoggerMessage(
         $"Failed To clear IndexHtmlCache for BFF Frontend {{{OTelParameters.Frontend}}}")]
-    public static partial void FailedToClearIndexHtmlCacheForFrontend(this ILogger logger, LogLevel logLevel, Exception ex, BffFrontendName frontend);
+    public static partial void FailedToClearIndexHtmlCacheForFrontend(this ILogger logger, LogLevel logLevel,
+        Exception ex, BffFrontendName frontend);
 
     [LoggerMessage(
         $"No OpenID Configuration found for scheme {{{OTelParameters.Scheme}}}")]
-    public static partial void NoOpenIdConfigurationFoundForScheme(this ILogger logger, LogLevel logLevel, Scheme scheme);
+    public static partial void NoOpenIdConfigurationFoundForScheme(this ILogger logger, LogLevel logLevel,
+        Scheme scheme);
 
     [LoggerMessage(
         $"No frontend selected.")]
@@ -49,166 +74,325 @@ internal static partial class LogMessages
     public static partial void AntiForgeryValidationFailed(this ILogger logger, string localPath);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Back-channel logout. sub: '{{{OTelParameters.Sub}}}', sid: '{{{OTelParameters.Sid}}}'")]
-    public static partial void BackChannelLogout(this ILogger logger, string sub, string sid);
+    public static partial void BackChannelLogout(this ILogger logger, LogLevel logLevel, string sub, string sid);
+
 
     [LoggerMessage(
-        level: LogLevel.Warning,
-        message: $"Back-channel logout error. error: '{{{OTelParameters.Error}}}'")]
-    public static partial void BackChannelLogoutError(this ILogger logger, string error);
+        message:
+        $"Access token is missing. token type: '{{{OTelParameters.TokenType}}}', local path: '{{{OTelParameters.LocalPath}}}', detail: '{{{OTelParameters.Detail}}}'")]
+    public static partial void AccessTokenMissing(this ILogger logger, LogLevel logLevel, string tokenType,
+        string localPath, string detail);
 
     [LoggerMessage(
-        message: $"Access token is missing. token type: '{{{OTelParameters.TokenType}}}', local path: '{{{OTelParameters.LocalPath}}}', detail: '{{{OTelParameters.Detail}}}'")]
-    public static partial void AccessTokenMissing(this ILogger logger, LogLevel logLevel, string tokenType, string localPath, string detail);
+        message:
+        $"Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{{{OTelParameters.ClusterId}}}', routeId: '{{{OTelParameters.RouteId}}}'")]
+    public static partial void InvalidRouteConfiguration(this ILogger logger, LogLevel logLevel, string? clusterId, string routeId);
 
     [LoggerMessage(
-        level: LogLevel.Warning,
-        message: $"Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{{{OTelParameters.ClusterId}}}', routeId: '{{{OTelParameters.RouteId}}}'")]
-    public static partial void InvalidRouteConfiguration(this ILogger logger, string? clusterId, string routeId);
+        message:
+        $"Failed to request new User Access Token due to: {{{OTelParameters.Error}}}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.")]
+    public static partial void FailedToRequestNewUserAccessToken(this ILogger logger, LogLevel logLevel, string error);
 
     [LoggerMessage(
-        level: LogLevel.Warning,
-        message: $"Failed to request new User Access Token due to: {{{OTelParameters.Error}}}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.")]
-    public static partial void FailedToRequestNewUserAccessToken(this ILogger logger, string error);
+        message:
+        $"Failed to request new User Access Token due to: {{{OTelParameters.Error}}}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.")]
+    public static partial void UserSessionRevoked(this ILogger logger, LogLevel logLevel, string error);
 
     [LoggerMessage(
-        level: LogLevel.Warning,
-        message: $"Failed to request new User Access Token due to: {{{OTelParameters.Error}}}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.")]
-    public static partial void UserSessionRevoked(this ILogger logger, string error);
+        message:
+        $"BFF management endpoint {{endpoint}} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.")]
+    public static partial void ManagementEndpointAccessedViaAjax(this ILogger logger, LogLevel logLevel, string endpoint);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"BFF management endpoint {{endpoint}} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.")]
-    public static partial void ManagementEndpointAccessedViaAjax(this ILogger logger, string endpoint);
-
-    [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Challenge was called for a BFF API endpoint, BFF response handling changing status code to 401.")]
-    public static partial void ChallengeForBffApiEndpoint(this ILogger logger);
+    public static partial void ChallengeForBffApiEndpoint(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Forbid was called for a BFF API endpoint, BFF response handling changing status code to 403.")]
-    public static partial void ForbidForBffApiEndpoint(this ILogger logger);
+    public static partial void ForbidForBffApiEndpoint(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Creating user session record in store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
-    public static partial void CreatingUserSession(this ILogger logger, string sub, string? sid);
+        message:
+        $"Creating user session record in store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
+    public static partial void CreatingUserSession(this ILogger logger, LogLevel logLevel, string sub, string? sid);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Detected a duplicate insert of the same session. This can happen when multiple browser tabs are open and can safely be ignored.")]
-    public static partial void DuplicateSessionInsertDetected(this ILogger logger, Exception ex);
+        message:
+        $"Detected a duplicate insert of the same session. This can happen when multiple browser tabs are open and can safely be ignored.")]
+    public static partial void DuplicateSessionInsertDetected(this ILogger logger, LogLevel logLevel, Exception ex);
 
     [LoggerMessage(
-        level: LogLevel.Warning,
-        message: $"Exception creating new server-side session in database: {{{OTelParameters.Error}}}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.")]
-    public static partial void ExceptionCreatingSession(this ILogger logger, Exception ex, string error);
+        message:
+        $"Exception creating new server-side session in database: {{{OTelParameters.Error}}}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.")]
+    public static partial void ExceptionCreatingSession(this ILogger logger, LogLevel logLevel, Exception ex, string error);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"No record found in user session store when trying to delete user session for key {{{OTelParameters.Key}}}")]
-    public static partial void NoRecordFoundForKey(this ILogger logger, string key);
+        message:
+        $"No record found in user session store when trying to delete user session for key {{{OTelParameters.Key}}}")]
+    public static partial void NoRecordFoundForKey(this ILogger logger, LogLevel logLevel, string key);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Deleting user session record in store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
-    public static partial void DeletingUserSession(this ILogger logger, string sub, string? sid);
+        message:
+        $"Deleting user session record in store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
+    public static partial void DeletingUserSession(this ILogger logger, LogLevel logLevel, string sub, string? sid);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"DbUpdateConcurrencyException: {{{OTelParameters.Error}}}")]
-    public static partial void DbUpdateConcurrencyException(this ILogger logger, string error);
+    public static partial void DbUpdateConcurrencyException(this ILogger logger, LogLevel logLevel, string error);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Getting user session record from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
-    public static partial void GettingUserSession(this ILogger logger, string sub, string? sid);
+        message:
+        $"Getting user session record from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
+    public static partial void GettingUserSession(this ILogger logger, LogLevel logLevel, string sub, string? sid);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Getting {{{OTelParameters.Count}}} user session(s) from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
-    public static partial void GettingUserSessions(this ILogger logger, int count, string? sub, string? sid);
+        message:
+        $"Getting {{{OTelParameters.Count}}} user session(s) from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
+    public static partial void GettingUserSessions(this ILogger logger, LogLevel logLevel, int count, string? sub, string? sid);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Deleting {{{OTelParameters.Count}}} user session(s) from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
-    public static partial void DeletingUserSessions(this ILogger logger, int count, string? sub, string? sid);
+        message:
+        $"Deleting {{{OTelParameters.Count}}} user session(s) from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
+    public static partial void DeletingUserSessions(this ILogger logger, LogLevel logLevel, int count, string? sub, string? sid);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Updating user session record in store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
-    public static partial void UpdatingUserSession(this ILogger logger, string? sub, string? sid);
+        message:
+        $"Updating user session record in store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
+    public static partial void UpdatingUserSession(this ILogger logger, LogLevel logLevel, string? sub, string? sid);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Removing {{{OTelParameters.Count}}} server side sessions")]
-    public static partial void RemovingServerSideSessions(this ILogger logger, int count);
+    public static partial void RemovingServerSideSessions(this ILogger logger, LogLevel logLevel, int count);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Retrieving token for user {{{OTelParameters.User}}}")]
-    public static partial void RetrievingTokenForUser(this ILogger logger, string? user);
+    public static partial void RetrievingTokenForUser(this ILogger logger, LogLevel logLevel, string? user);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Retrieving session {{{OTelParameters.Sid}}} for sub {{{OTelParameters.Sub}}}")]
-    public static partial void RetrievingSession(this ILogger logger, string sid, string sub);
+    public static partial void RetrievingSession(this ILogger logger, LogLevel logLevel, string sid, string sub);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Storing token for user {{{OTelParameters.User}}}")]
-    public static partial void StoringTokenForUser(this ILogger logger, string? user);
+    public static partial void StoringTokenForUser(this ILogger logger, LogLevel logLevel, string? user);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Removing token for user {{{OTelParameters.User}}}")]
-    public static partial void RemovingTokenForUser(this ILogger logger, string? user);
+    public static partial void RemovingTokenForUser(this ILogger logger, LogLevel logLevel, string? user);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Failed to find a session to update, bailing out")]
-    public static partial void FailedToFindSessionToUpdate(this ILogger logger);
+    public static partial void FailedToFindSessionToUpdate(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Creating entry in store for AuthenticationTicket, key {{{OTelParameters.Key}}}, with expiration: {{{OTelParameters.Expiration}}}")]
-    public static partial void CreatingAuthenticationTicketEntry(this ILogger logger, string key, DateTime? expiration);
+        message:
+        $"Creating entry in store for AuthenticationTicket, key {{{OTelParameters.Key}}}, with expiration: {{{OTelParameters.Expiration}}}")]
+    public static partial void CreatingAuthenticationTicketEntry(this ILogger logger, LogLevel logLevel, string key, DateTime? expiration);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Retrieve AuthenticationTicket for key {{{OTelParameters.Key}}}")]
-    public static partial void RetrieveAuthenticationTicket(this ILogger logger, string key);
+    public static partial void RetrieveAuthenticationTicket(this ILogger logger, LogLevel logLevel, string key);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
+        message: $"Ticket loaded for key: {{{OTelParameters.Key}}}, with expiration: {{{OTelParameters.Expiration}}}")]
+    public static partial void TicketLoaded(this ILogger logger, LogLevel logLevel, string key, DateTime? expiration);
+
+    [LoggerMessage(
         message: $"No AuthenticationTicket found in store for {{{OTelParameters.Key}}}")]
-    public static partial void NoAuthenticationTicketFoundForKey(this ILogger logger, string key);
+    public static partial void NoAuthenticationTicketFoundForKey(this ILogger logger, LogLevel logLevel, string key);
 
     [LoggerMessage(
-        level: LogLevel.Warning,
-        message: $"Failed to deserialize authentication ticket from store, deleting record for key {{{OTelParameters.Key}}}")]
-    public static partial void FailedToDeserializeAuthenticationTicket(this ILogger logger, string key);
+        message:
+        $"Failed to deserialize authentication ticket from store, deleting record for key {{{OTelParameters.Key}}}")]
+    public static partial void FailedToDeserializeAuthenticationTicket(this ILogger logger, LogLevel logLevel, string key);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Renewing AuthenticationTicket for key {{{OTelParameters.Key}}}, with expiration: {{{OTelParameters.Expiration}}}")]
-    public static partial void RenewingAuthenticationTicket(this ILogger logger, string key, DateTime? expiration);
+        message:
+        $"Renewing AuthenticationTicket for key {{{OTelParameters.Key}}}, with expiration: {{{OTelParameters.Expiration}}}")]
+    public static partial void RenewingAuthenticationTicket(this ILogger logger, LogLevel logLevel, string key, DateTime? expiration);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
         message: $"Removing AuthenticationTicket from store for key {{{OTelParameters.Key}}}")]
-    public static partial void RemovingAuthenticationTicket(this ILogger logger, string key);
+    public static partial void RemovingAuthenticationTicket(this ILogger logger, LogLevel logLevel, string key);
 
     [LoggerMessage(
-        level: LogLevel.Debug,
-        message: $"Getting AuthenticationTickets from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
-    public static partial void GettingAuthenticationTickets(this ILogger logger, string? sub, string? sid);
+        message:
+        $"Getting AuthenticationTickets from store for sub {{{OTelParameters.Sub}}} sid {{{OTelParameters.Sid}}}")]
+    public static partial void GettingAuthenticationTickets(this ILogger logger, LogLevel logLevel, string? sub, string? sid);
+
     [LoggerMessage(
-        message: $"Frontend selected via path mapping '{{{OTelParameters.PathMapping}}}', but request path '{{{OTelParameters.LocalPath}}}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.")]
-    public static partial void FrontendSelectedWithPathCasingIssue(this ILogger logger, LogLevel level, string pathMapping, LocalPath localPath);
+        message:
+        $"Frontend selected via path mapping '{{{OTelParameters.PathMapping}}}', but request path '{{{OTelParameters.LocalPath}}}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.")]
+    public static partial void FrontendSelectedWithPathCasingIssue(this ILogger logger, LogLevel logLevel,
+        string pathMapping, LocalPath localPath);
+
+    [LoggerMessage(
+        message:
+        $"Already mapped {{{OTelParameters.Name}}} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()")]
+    public static partial void AlreadyMappedManagementEndpoint(this ILogger logger, LogLevel logLevel, string name);
+
+    [LoggerMessage(
+        message: "Authenticating scheme: {Scheme}")]
+    public static partial void AuthenticatingScheme(this ILogger logger, LogLevel logLevel, string? scheme);
+
+    [LoggerMessage(
+        message: "Setting OIDC ProtocolMessage.Prompt to 'none' for BFF silent login")]
+    public static partial void SettingOidcPromptNoneForSilentLogin(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Setting OIDC ProtocolMessage.Prompt to {Prompt} for BFF silent login")]
+    public static partial void SettingOidcPromptForSilentLogin(this ILogger logger, LogLevel logLevel, string prompt);
+
+    [LoggerMessage(
+        message: "Handling error response from OIDC provider for BFF silent login.")]
+    public static partial void HandlingErrorResponseFromOidcProviderForSilentLogin(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Handling failed response from OIDC provider for BFF silent login.")]
+    public static partial void HandlingFailedResponseFromOidcProviderForSilentLogin(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Processing back-channel logout request")]
+    public static partial void ProcessingBackChannelLogoutRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "No claims in back-channel JWT")]
+    public static partial void NoClaimsInBackChannelJwt(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Claims found in back-channel JWT {Claims}")]
+    public static partial void ClaimsFoundInBackChannelJwt(this ILogger logger, LogLevel logLevel, string claims);
+
+    [LoggerMessage(
+        message: "Back-channel JWT validation successful")]
+    public static partial void BackChannelJwtValidationSuccessful(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Processing login request")]
+    public static partial void ProcessingLoginRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Login endpoint triggering Challenge with returnUrl {ReturnUrl}")]
+    public static partial void LoginEndpointTriggeringChallenge(this ILogger logger, LogLevel logLevel, string returnUrl);
+
+    [LoggerMessage(
+        message: "Processing logout request")]
+    public static partial void ProcessingLogoutRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Logout endpoint triggering SignOut with returnUrl {ReturnUrl}")]
+    public static partial void LogoutEndpointTriggeringSignOut(this ILogger logger, LogLevel logLevel, string returnUrl);
+
+    [LoggerMessage(
+        message: "Processing silent login callback request")]
+    public static partial void ProcessingSilentLoginCallbackRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Silent login endpoint rendering HTML with JS postMessage to origin {Origin} with isLoggedIn {IsLoggedIn}")]
+    public static partial void SilentLoginEndpointRenderingHtml(this ILogger logger, LogLevel logLevel, string origin, string isLoggedIn);
+
+    [LoggerMessage(
+        message: "Processing silent login request")]
+    public static partial void ProcessingSilentLoginRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Using deprecated silentlogin endpoint. This endpoint will be removed in future versions. Consider calling the BFF Login endpoint with prompt=none.")]
+    public static partial void UsingDeprecatedSilentLoginEndpoint(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Processing user request")]
+    public static partial void ProcessingUserRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "User endpoint indicates the user is not logged in, using status code {StatusCode}")]
+    public static partial void UserEndpointNotLoggedIn(this ILogger logger, LogLevel logLevel, int statusCode);
+
+    [LoggerMessage(
+        message: "User endpoint indicates the user is logged in with claims {Claims}")]
+    public static partial void UserEndpointLoggedInWithClaims(this ILogger logger, LogLevel logLevel, string claims);
+
+    [LoggerMessage(
+        message: "Nop implementation of session revocation for sub: {Sub}, and sid: {Sid}. Implement ISessionRevocationService to provide your own implementation.")]
+    public static partial void NopSessionRevocation(this ILogger logger, LogLevel logLevel, string? sub, string? sid);
+
+    [LoggerMessage(
+        message: "Revoking sessions for sub {Sub} and sid {Sid}")]
+    public static partial void RevokingSessions(this ILogger logger, LogLevel logLevel, string? sub, string? sid);
+
+    [LoggerMessage(
+        message: "Refresh token revoked for sub {Sub} and sid {Sid}")]
+    public static partial void RefreshTokenRevoked(this ILogger logger, LogLevel logLevel, string sub, string? sid);
+
+    [LoggerMessage(
+        message: "BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.")]
+    public static partial void SessionCleanupNotRegistered(this ILogger logger, LogLevel logLevel);
+
+
+    [LoggerMessage(
+        message: "Failed to cleanup session")]
+    public static partial void FailedToCleanupSession(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: "Failed to cleanup expired sessions")]
+    public static partial void FailedToCleanupExpiredSessions(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: "Revoking user's refresh tokens in OnSigningOut for subject id: {Sub}")]
+    public static partial void RevokingUserRefreshTokensOnSigningOut(this ILogger logger, LogLevel logLevel, string? sub);
+
+    [LoggerMessage(
+        message: "Explicitly setting ShouldRenew=false in OnValidatePrincipal due to query param suppressing slide behavior.")]
+    public static partial void SuppressingSlideBehaviorOnValidatePrincipal(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.")]
+    public static partial void SuppressingSlideBehaviorOnCheckSlidingExpiration(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Failed to process backchannel logout request. 'Logout token is missing'")]
+    public static partial void FailedToProcessBackchannelLogoutRequestMissingToken(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Failed to process backchannel logout request.")]
+    public static partial void FailedToProcessBackchannelLogoutRequest(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Logout token missing sub and sid claims.")]
+    public static partial void LogoutTokenMissingSubAndSidClaims(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Logout token should not contain nonce claim.")]
+    public static partial void LogoutTokenShouldNotContainNonceClaim(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Logout token missing events claim.")]
+    public static partial void LogoutTokenMissingEventsClaim(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Logout token contains missing http://schemas.openid.net/event/backchannel-logout value.")]
+    public static partial void LogoutTokenMissingBackchannelLogoutValue(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Logout token contains invalid JSON in events claim value.")]
+    public static partial void LogoutTokenContainsInvalidJsonInEventsClaim(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: "Error validating logout token.")]
+    public static partial void ErrorValidatingLogoutToken(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: "You do not have a valid license key for the Duende software. " +
+                 "This is allowed for development and testing scenarios. " +
+                 "If you are running in production you are required to have a licensed version. " +
+                 "Please start a conversation with us: https://duendesoftware.com/contact")]
+    public static partial void NoValidLicense(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        message: "Error validating the license key" +
+                 "If you are running in production you are required to have a licensed version. " +
+                 "Please start a conversation with us: https://duendesoftware.com/contact")]
+    public static partial void ErrorValidatingLicenseKey(this ILogger logger, LogLevel logLevel, Exception ex);
 
     public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 

@@ -3,6 +3,7 @@
 
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Duende.Bff.Internal;
 using Microsoft.IdentityModel.Tokens;
@@ -16,13 +17,15 @@ public readonly record struct DPoPProofKey : IStronglyTypedValue<DPoPProofKey>
 {
     public bool Equals(DPoPProofKey other) => Value == other.Value;
 
-    public override int GetHashCode() => Value.GetHashCode();
+    public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCulture);
 
     /// <summary>
     /// Implicitly converts DPOPProofKey to same type from access token management.
     /// </summary>
     /// <param name="value"></param>
+#pragma warning disable CA2225 // (OperatorOverloadsHaveNamedAlternates) Intentionally not using named alternative for this, becuase we don't want to expose the ATM type in the BFF API.
     public static implicit operator AtmDPoPProofKey(DPoPProofKey value) => AtmDPoPProofKey.Parse(value.ToString());
+#pragma warning restore CA2225
 
     /// <summary>
     /// Convenience method for converting a <see cref="DPoPProofKey"/> into a string.
@@ -34,7 +37,8 @@ public readonly record struct DPoPProofKey : IStronglyTypedValue<DPoPProofKey>
 
     public override string ToString() => Value;
 
-    private static readonly ValidationRule<string>[] Validators = [
+    private static readonly ValidationRule<string>[] Validators =
+    [
         // Officially, there's no max length for JWTs, but 32k is a good limit
         ValidationRules.MaxLength(32 * 1024),
         IsValidJsonWebKey()
@@ -49,7 +53,7 @@ public readonly record struct DPoPProofKey : IStronglyTypedValue<DPoPProofKey>
                 JsonWebKey.Create(value);
                 return true;
             }
-            catch (Exception e)
+            catch (JsonException e)
             {
                 message = "String is not a valid json web key: " + e.Message;
                 return false;
@@ -61,6 +65,7 @@ public readonly record struct DPoPProofKey : IStronglyTypedValue<DPoPProofKey>
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public DPoPProofKey() => throw new InvalidOperationException("Can't create null value");
+
     private DPoPProofKey(string value)
     {
         Value = value;
@@ -95,5 +100,4 @@ public readonly record struct DPoPProofKey : IStronglyTypedValue<DPoPProofKey>
     /// contain null or whitespace strings. 
     /// </summary>
     public static DPoPProofKey? ParseOrDefault(string? value) => StringParsers<DPoPProofKey>.ParseOrDefault(value);
-
 }

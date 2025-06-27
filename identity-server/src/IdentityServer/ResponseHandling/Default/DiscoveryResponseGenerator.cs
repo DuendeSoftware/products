@@ -326,22 +326,14 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 types.Add(OidcConstants.EndpointAuthenticationMethods.TlsClientAuth);
                 types.Add(OidcConstants.EndpointAuthenticationMethods.SelfSignedTlsClientAuth);
             }
+            entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, types);
+
             if (types.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt) &&
                 !IEnumerableExtensions.IsNullOrEmpty(Options.SupportedClientAssertionSigningAlgorithms))
             {
                 entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported,
                     Options.SupportedClientAssertionSigningAlgorithms);
-                if (Options.SupportedClientAssertionSigningAlgorithms.Any(alg => alg.StartsWith("HS")))
-                {
-                    types.Add("client_secret_jwt");
-                }
-
-                if (Options.SupportedClientAssertionSigningAlgorithms.All(alg => alg.StartsWith("HS")))
-                {
-                    types.Remove("private_key_jwt");
-                }
             }
-            entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, types);
         }
 
         var signingCredentials = await Keys.GetAllSigningCredentialsAsync();

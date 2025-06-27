@@ -100,11 +100,11 @@ internal class AccessTokenRequestTransform(
         {
             if (!options.Value.RemoveSessionAfterRefreshTokenExpiration)
             {
-                Otel.LogMessages.FailedToRequestNewUserAccessToken(logger, tokenError.Error);
+                logger.FailedToRequestNewUserAccessToken(LogLevel.Warning, tokenError.Error);
                 return false;
             }
 
-            Otel.LogMessages.UserSessionRevoked(logger, tokenError.Error);
+            logger.UserSessionRevoked(LogLevel.Warning, tokenError.Error);
             return true;
         }
 
@@ -142,7 +142,7 @@ internal class AccessTokenRequestTransform(
             tokenError.Error);
     }
 
-    private void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token) => context.ProxyRequest.Headers.Authorization =
+    private static void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token) => context.ProxyRequest.Headers.Authorization =
             new AuthenticationHeaderValue(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer, token.AccessToken.ToString());
 
     private async Task ApplyDPoPToken(RequestTransformContext context, DPoPTokenResult token)

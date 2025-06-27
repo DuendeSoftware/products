@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -24,11 +25,10 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
     /// </summary>
     private readonly BffOptions _options = options.Value;
 
-
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing user request");
+        logger.ProcessingUserRequest(LogLevel.Debug);
 
         context.CheckForBffMiddleware(_options);
 
@@ -47,7 +47,7 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
                 context.Response.StatusCode = 401;
             }
 
-            logger.LogDebug("User endpoint indicates the user is not logged in, using status code {code}", context.Response.StatusCode);
+            logger.UserEndpointNotLoggedIn(LogLevel.Debug, context.Response.StatusCode);
         }
         else
         {
@@ -61,7 +61,7 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(json, Encoding.UTF8, ct);
 
-            logger.LogTrace("User endpoint indicates the user is logged in with claims {claims}", claims);
+            logger.UserEndpointLoggedInWithClaims(LogLevel.Trace, string.Join(',', claims));
         }
     }
 
@@ -69,7 +69,7 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
     /// Collect user-centric claims
     /// </summary>
     /// <returns></returns>
-    private Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult, CT ct = default) =>
+    private static Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult, CT ct = default) =>
         Task.FromResult(authenticateResult.Principal?.Claims.Select(x => new ClaimRecord(x.Type, x.Value)) ?? Enumerable.Empty<ClaimRecord>());
 
     /// <summary>

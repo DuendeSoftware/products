@@ -29,49 +29,42 @@ internal class DefaultBackchannelLogoutEndpoint(
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing back-channel logout request");
+        logger.ProcessingBackChannelLogoutRequest(LogLevel.Debug);
 
         context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
         context.Response.Headers.Append("Pragma", "no-cache");
 
-        try
+        if (context.Request.HasFormContentType)
         {
-            if (context.Request.HasFormContentType)
+            var logoutToken = context.Request.Form[OidcConstants.BackChannelLogoutRequest.LogoutToken].FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(logoutToken))
             {
-                var logoutToken = context.Request.Form[OidcConstants.BackChannelLogoutRequest.LogoutToken].FirstOrDefault();
-
-                if (!string.IsNullOrWhiteSpace(logoutToken))
+                var user = await ValidateLogoutTokenAsync(logoutToken);
+                if (user != null)
                 {
-                    var user = await ValidateLogoutTokenAsync(logoutToken);
-                    if (user != null)
+                    // these are the sub & sid to signout
+                    var sub = user.FindFirst("sub")?.Value;
+                    var sid = user.FindFirst("sid")?.Value;
+
+                    logger.BackChannelLogout(LogLevel.Debug, sub ?? "missing", sid ?? "missing");
+
+                    await userSession.RevokeSessionsAsync(new UserSessionsFilter
                     {
-                        // these are the sub & sid to signout
-                        var sub = user.FindFirst("sub")?.Value;
-                        var sid = user.FindFirst("sid")?.Value;
+                        SubjectId = sub,
+                        SessionId = sid
+                    }, ct);
 
-                        logger.BackChannelLogout(sub ?? "missing", sid ?? "missing");
-
-                        await userSession.RevokeSessionsAsync(new UserSessionsFilter
-                        {
-                            SubjectId = sub,
-                            SessionId = sid
-                        }, ct);
-
-                        return;
-                    }
-                }
-                else
-                {
-                    logger.BackChannelLogoutError($"Failed to process backchannel logout request. 'Logout token is missing'");
+                    return;
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            logger.BackChannelLogoutError($"Failed to process backchannel logout request. '{ex.Message}'");
+            else
+            {
+                logger.FailedToProcessBackchannelLogoutRequestMissingToken(LogLevel.Information);
+            }
         }
 
-        logger.BackChannelLogoutError($"Failed to process backchannel logout request.");
+        logger.FailedToProcessBackchannelLogoutRequest(LogLevel.Information);
         context.Response.StatusCode = 400;
     }
 
@@ -85,31 +78,31 @@ internal class DefaultBackchannelLogoutEndpoint(
         var claims = await ValidateJwt(logoutToken);
         if (claims == null)
         {
-            logger.LogDebug("No claims in back-channel JWT");
+            logger.NoClaimsInBackChannelJwt(LogLevel.Debug);
             return null;
         }
         else
         {
-            logger.LogTrace("Claims found in back-channel JWT {claims}", claims.Claims);
+            logger.ClaimsFoundInBackChannelJwt(LogLevel.Trace, string.Join(',', claims.Claims));
         }
 
         if (claims.FindFirst("sub") == null && claims.FindFirst("sid") == null)
         {
-            logger.BackChannelLogoutError("Logout token missing sub and sid claims.");
+            logger.LogoutTokenMissingSubAndSidClaims(LogLevel.Information);
             return null;
         }
 
         var nonce = claims.FindFirst("nonce")?.Value;
         if (!string.IsNullOrWhiteSpace(nonce))
         {
-            logger.BackChannelLogoutError("Logout token should not contain nonce claim.");
+            logger.LogoutTokenShouldNotContainNonceClaim(LogLevel.Information);
             return null;
         }
 
         var eventsJson = claims.FindFirst("events")?.Value;
         if (string.IsNullOrWhiteSpace(eventsJson))
         {
-            logger.BackChannelLogoutError("Logout token missing events claim.");
+            logger.LogoutTokenMissingEventsClaim(LogLevel.Information);
             return null;
         }
 
@@ -118,13 +111,13 @@ internal class DefaultBackchannelLogoutEndpoint(
             var events = JsonDocument.Parse(eventsJson);
             if (!events.RootElement.TryGetProperty("http://schemas.openid.net/event/backchannel-logout", out _))
             {
-                logger.BackChannelLogoutError("Logout token contains missing http://schemas.openid.net/event/backchannel-logout value.");
+                logger.LogoutTokenMissingBackchannelLogoutValue(LogLevel.Information);
                 return null;
             }
         }
-        catch (Exception ex)
+        catch (JsonException ex)
         {
-            logger.BackChannelLogoutError($"Logout token contains invalid JSON in events claim value. '{ex.Message}'");
+            logger.LogoutTokenContainsInvalidJsonInEventsClaim(LogLevel.Information, ex);
             return null;
         }
 
@@ -144,11 +137,11 @@ internal class DefaultBackchannelLogoutEndpoint(
         var result = await handler.ValidateTokenAsync(jwt, parameters);
         if (result.IsValid)
         {
-            logger.LogDebug("Back-channel JWT validation successful");
+            logger.BackChannelJwtValidationSuccessful(LogLevel.Debug);
             return result.ClaimsIdentity;
         }
 
-        logger.BackChannelLogoutError($"Error validating logout token. '{result.Exception.ToString()}'");
+        logger.ErrorValidatingLogoutToken(LogLevel.Information, result.Exception);
         return null;
     }
 
@@ -162,13 +155,13 @@ internal class DefaultBackchannelLogoutEndpoint(
         var scheme = await authenticationSchemeProvider.GetDefaultChallengeSchemeAsync();
         if (scheme == null)
         {
-            throw new Exception("Failed to obtain default challenge scheme");
+            throw new InvalidOperationException("Failed to obtain default challenge scheme");
         }
 
         var options = optionsMonitor.Get(scheme.Name);
         if (options == null)
         {
-            throw new Exception("Failed to obtain OIDC options for default challenge scheme");
+            throw new InvalidOperationException("Failed to obtain OIDC options for default challenge scheme");
         }
 
         var config = options.Configuration;
@@ -179,7 +172,7 @@ internal class DefaultBackchannelLogoutEndpoint(
 
         if (config == null)
         {
-            throw new Exception("Failed to obtain OIDC configuration");
+            throw new InvalidOperationException("Failed to obtain OIDC configuration");
         }
 
         var parameters = new TokenValidationParameters

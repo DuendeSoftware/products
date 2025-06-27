@@ -24,7 +24,7 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing logout request");
+        logger.ProcessingLogoutRequest(LogLevel.Debug);
 
         context.CheckForBffMiddleware(options.Value);
 
@@ -50,7 +50,8 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
         var returnUrl = context.Request.Query[Constants.RequestParameters.ReturnUrl].FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(returnUrl))
         {
-            if (!returnUrlValidator.IsValidAsync(returnUrl))
+            if (!Uri.TryCreate(returnUrl, UriKind.RelativeOrAbsolute, out var returnUri) ||
+                !returnUrlValidator.IsValidAsync(returnUri))
             {
                 logger.InvalidReturnUrl(LogLevel.Information, returnUrl.Sanitize());
                 context.ReturnHttpProblem("Invalid return url", (Constants.RequestParameters.ReturnUrl, [$"ReturnUrl '{returnUrl}' was invalid"]));
@@ -79,7 +80,7 @@ internal class DefaultLogoutEndpoint(IOptions<BffOptions> options,
             RedirectUri = returnUrl
         };
 
-        logger.LogDebug("Logout endpoint triggering SignOut with returnUrl {returnUrl}", returnUrl.Sanitize());
+        logger.LogoutEndpointTriggeringSignOut(LogLevel.Debug, returnUrl.Sanitize());
 
         // trigger idp logout
         await context.SignOutAsync(props);

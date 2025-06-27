@@ -29,7 +29,7 @@ internal class DefaultLoginEndpoint(
     /// <inheritdoc />
     public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
-        logger.LogDebug("Processing login request");
+        logger.ProcessingLoginRequest(LogLevel.Debug);
 
         context.CheckForBffMiddleware(bffOptions.Value);
 
@@ -54,7 +54,8 @@ internal class DefaultLoginEndpoint(
 
         if (!string.IsNullOrWhiteSpace(returnUrl))
         {
-            if (!returnUrlValidator.IsValidAsync(returnUrl))
+            if (!Uri.TryCreate(returnUrl, UriKind.RelativeOrAbsolute, out var returnUri)
+                || !returnUrlValidator.IsValidAsync(returnUri))
             {
                 logger.InvalidReturnUrl(LogLevel.Information, returnUrl.Sanitize());
                 context.ReturnHttpProblem("Invalid return url", (Constants.RequestParameters.ReturnUrl, [$"ReturnUrl '{returnUrl}' was invalid"]));
@@ -79,7 +80,7 @@ internal class DefaultLoginEndpoint(
             props.Items.Add(Constants.BffFlags.Prompt, prompt);
         }
 
-        logger.LogDebug("Login endpoint triggering Challenge with returnUrl {returnUrl}", returnUrl.Sanitize());
+        logger.LoginEndpointTriggeringChallenge(LogLevel.Debug, returnUrl.Sanitize());
 
         await context.ChallengeAsync(props);
     }
@@ -106,7 +107,7 @@ internal class DefaultLoginEndpoint(
         var openIdConnectOptions = openIdConnectOptionsMonitor.Get(scheme);
         if (openIdConnectOptions == null)
         {
-            throw new Exception("Failed to obtain OIDC options for scheme: " + scheme);
+            throw new InvalidOperationException("Failed to obtain OIDC options for scheme: " + scheme);
         }
 
         var config = openIdConnectOptions.Configuration;

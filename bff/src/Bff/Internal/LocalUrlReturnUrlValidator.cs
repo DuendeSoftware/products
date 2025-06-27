@@ -8,7 +8,9 @@ namespace Duende.Bff.Internal;
 internal class LocalUrlReturnUrlValidator : IReturnUrlValidator
 {
     /// <inheritdoc/>
-    public bool IsValidAsync(string returnUrl) => IsLocalUrl(returnUrl);
+#pragma warning disable CA1822 // Can't be marked as static, because it implements an interface method.
+    public bool IsValidAsync(Uri returnUrl) => IsLocalUrl(returnUrl.ToString());
+#pragma warning restore CA1822
 
     internal static bool IsLocalUrl(string url)
     {

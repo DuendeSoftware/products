@@ -14,7 +14,7 @@ public static class ResponseExtensions
         if (response.StatusCode != statusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Expected {statusCode} but got {response.StatusCode}. Content: {content}");
+            throw new InvalidOperationException($"Expected {statusCode} but got {response.StatusCode}. Content: {content}");
         }
 
         return response;

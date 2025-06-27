@@ -32,8 +32,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
                 return;
             }
 
-            // Todo: EV: not sure.
-            logger.LogWarning("Authentiating scheme: {scheme}", scheme);
+            logger.AuthenticatingScheme(LogLevel.Warning, scheme);
             await _inner.SignOutAsync(context, frontend.OidcSchemeName, properties);
             return;
         }
@@ -50,10 +49,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
                 return await _inner.AuthenticateAsync(context, scheme);
             }
 
-            // Todo: EV: not sure.
-            // It looks like all schemes are authentiated, even if we only want the frontend scheme to be triggered.
-            // Force the cookie scheme to be authentiated. LIkely this means it happens twice
-            logger.LogWarning("Authentiating scheme: {scheme}", scheme);
+            logger.AuthenticatingScheme(LogLevel.Warning, scheme);
             return await _inner.AuthenticateAsync(context, frontend.CookieSchemeName);
         }
 
@@ -80,7 +76,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
         var requireResponseHandling = endpoint?.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
         if (requireResponseHandling)
         {
-            logger.ChallengeForBffApiEndpoint();
+            logger.ChallengeForBffApiEndpoint(LogLevel.Debug);
             context.Response.StatusCode = 401;
             context.Response.Headers.Remove("Location");
             context.Response.Headers.Remove("Set-Cookie");
@@ -107,7 +103,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
         var requireResponseHandling = endpoint?.Metadata.GetMetadata<IBffApiSkipResponseHandling>() == null;
         if (requireResponseHandling)
         {
-            logger.ForbidForBffApiEndpoint();
+            logger.ForbidForBffApiEndpoint(LogLevel.Debug);
             context.Response.StatusCode = 403;
             context.Response.Headers.Remove("Location");
             context.Response.Headers.Remove("Set-Cookie");

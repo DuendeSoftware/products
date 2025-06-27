@@ -4,7 +4,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Duende.Bff.Internal;
-
 using AtmAccessToken = Duende.AccessTokenManagement.AccessToken;
 
 namespace Duende.Bff.AccessTokenManagement;
@@ -20,7 +19,8 @@ public readonly record struct AccessToken : IStronglyTypedValue<AccessToken>
     // Officially, there's no max length for JWTs, but 32k is a good limit
     public const int MaxLength = 32 * 1024; // 32k
 
-    private static readonly ValidationRule<string>[] Validators = [
+    private static readonly ValidationRule<string>[] Validators =
+    [
         ValidationRules.MaxLength(MaxLength)
     ];
 
@@ -29,13 +29,17 @@ public readonly record struct AccessToken : IStronglyTypedValue<AccessToken>
     /// </summary>
     /// <param name="value"></param>
     public static implicit operator string(AccessToken value) => value.ToString();
+
+#pragma warning disable CA2225 // (OperatorOverloadsHaveNamedAlternates) Intentionally not using named alternative for this, becuase we don't want to expose the ATM type in the BFF API.
     public static implicit operator AtmAccessToken(AccessToken value) => AtmAccessToken.Parse(value.ToString());
+#pragma warning restore CA2225
 
     /// <summary>
     /// You can't directly create this type. 
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public AccessToken() => throw new InvalidOperationException("Can't create null value");
+
     private AccessToken(string value) => Value = value;
 
     private string Value { get; }

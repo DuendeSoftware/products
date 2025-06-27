@@ -227,3 +227,5 @@ artifacts
 *.received.txt
 
 *.Artifacts/
+
+reports

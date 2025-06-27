@@ -28,7 +28,7 @@ public class Challenge : PageModel
         if (Url.IsLocalUrl(returnUrl) == false && _interactionService.IsValidReturnUrl(returnUrl) == false)
         {
             // user might have clicked on a malicious link - should be logged
-            throw new Exception("invalid return URL");
+            throw new InvalidOperationException("invalid return URL");
         }
 
         // start challenge and roundtrip the return URL and scheme 

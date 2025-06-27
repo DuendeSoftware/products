@@ -49,6 +49,7 @@ public static class BffRemoteApiEndpointExtensions
     public static IEndpointConventionBuilder WithAccessTokenRetriever<TRetriever>(this IEndpointConventionBuilder builder)
         where TRetriever : IAccessTokenRetriever
     {
+        ArgumentNullException.ThrowIfNull(builder);
         builder.Add(endpointBuilder =>
         {
             var metadata = endpointBuilder.GetBffRemoteApiEndpointMetadata();

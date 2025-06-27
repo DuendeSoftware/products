@@ -177,6 +177,7 @@ public class ConventionTests(ITestOutputHelper output)
             typeof(AddServerManagementClaimsTransform),
             typeof(BffServerAuthenticationStateProvider),
             typeof(BffClientAuthenticationStateProvider),
+            typeof(SessionCleanupHost),
             typeof(SessionDbContext),
             typeof(SessionDbContext<>),
             typeof(ServerSideTokenStore), // This one needs to be removed after move to ATM 4.0
