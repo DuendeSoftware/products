@@ -50,7 +50,9 @@ public class MtlsTestMiddleware
             try
             {
                 var certBytes = Convert.FromBase64String(certHeader.First());
+#pragma warning disable SYSLIB0057 // Type or member is obsolete
                 return new X509Certificate2(certBytes);
+#pragma warning restore SYSLIB0057 // Type or member is obsolete
             }
             catch
             {

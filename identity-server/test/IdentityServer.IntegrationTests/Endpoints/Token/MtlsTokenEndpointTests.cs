@@ -112,7 +112,7 @@ public class MtlsTokenEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task infrastructure_should_reject_mtls_client_request_when_no_certificate_set()
+    public void infrastructure_should_reject_mtls_client_request_when_no_certificate_set()
     {
         // Arrange
         _pipeline.Initialize();
