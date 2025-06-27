@@ -58,7 +58,7 @@ public class MtlsTokenEndpointTests
         };
 
         var form = new FormUrlEncodedContent(formParams);
-        var response = await tokenClient.PostAsync("/connect/mtls/token", form);
+        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenMtlsEndpoint, form);
 
         // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);

@@ -492,7 +492,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         var form = new FormUrlEncodedContent(formParams);
         tokenClient.DefaultRequestHeaders.Add("DPoP", CreateDPoPProofToken());
 
-        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
+        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenMtlsEndpoint, form);
 
         // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);

@@ -41,6 +41,7 @@ public class IdentityServerPipeline
     public const string AuthorizeEndpoint = BaseUrl + "/connect/authorize";
     public const string BackchannelAuthenticationEndpoint = BaseUrl + "/connect/ciba";
     public const string TokenEndpoint = BaseUrl + "/connect/token";
+    public const string TokenMtlsEndpoint = BaseUrl + "/connect/mtls/token";
     public const string RevocationEndpoint = BaseUrl + "/connect/revocation";
     public const string UserInfoEndpoint = BaseUrl + "/connect/userinfo";
     public const string IntrospectionEndpoint = BaseUrl + "/connect/introspect";
@@ -49,7 +50,6 @@ public class IdentityServerPipeline
     public const string CheckSessionEndpoint = BaseUrl + "/connect/checksession";
     public const string ParEndpoint = BaseUrl + "/connect/par";
 
-    // TODO - add mtls aliases
 
     public const string FederatedSignOutPath = "/signout-oidc";
     public const string FederatedSignOutUrl = BaseUrl + FederatedSignOutPath;
