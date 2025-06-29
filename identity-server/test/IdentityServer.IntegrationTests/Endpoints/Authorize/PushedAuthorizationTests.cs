@@ -4,10 +4,16 @@
 
 using System.Net;
 using System.Security.Claims;
+using System.Text.Json;
 using Duende.IdentityModel;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using IntegrationTests.Common;
+using Microsoft.IdentityModel.Tokens;
+using JsonWebKey = Duende.IdentityServer.Models.JsonWebKey;
+using WilsonJsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
 namespace IntegrationTests.Endpoints.Authorize;
 
@@ -15,9 +21,14 @@ public class PushedAuthorizationTests
 {
     private readonly IdentityServerPipeline _mockPipeline = new();
     private Client _client;
+    private Client _client2;
+
+    private WilsonJsonWebKey _privateKey;
+    private JsonWebKey _publicKey;
 
     public PushedAuthorizationTests()
     {
+        ConfigureClientKeys();
         ConfigureClients();
         ConfigureUsers();
         ConfigureScopesAndResources();
@@ -46,6 +57,37 @@ public class PushedAuthorizationTests
         // Authorize using pushed request
         var authorizeUrl = _mockPipeline.CreateAuthorizeUrl(
             clientId: "client1",
+            requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
+        var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.Headers.Location!.AbsoluteUri.ShouldMatch($"{expectedCallback}.*");
+
+        var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
+        authorization.IsError.ShouldBeFalse();
+        authorization.IdentityToken.ShouldNotBeNull();
+        authorization.State.ShouldBe(expectedState);
+    }
+
+    [Fact]
+    public async Task happy_path_using_JAR_request()
+    {
+        // Login
+        await _mockPipeline.LoginAsync("bob");
+        _mockPipeline.BrowserClient.AllowAutoRedirect = false;
+
+        // Push Authorization
+        var expectedCallback = _client2.RedirectUris.First();
+        var expectedState = "123_state";
+        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestUsingJarAsync(
+            redirectUri: expectedCallback,
+            state: expectedState
+        );
+        statusCode.ShouldBe(HttpStatusCode.Created);
+
+        // Authorize using pushed request
+        var authorizeUrl = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client2",
             requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
         var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
@@ -229,6 +271,23 @@ public class PushedAuthorizationTests
         authorizeCallbackResponse.Headers.Location!.ToString().ShouldStartWith(expectedCallback);
     }
 
+    [Theory]
+    [InlineData("response_type", "id_token")]
+    [InlineData("redirect_uri", "https://client1/callback")]
+    [InlineData("scope", "openid profile")]
+    public async Task pushed_authorization_with_authorization_request_parameters_duplicated_in_form_and_request_object_fails(string name, string value)
+    {
+        var (parJson, statusCode) = await _mockPipeline.PushAuthorizationRequestUsingJarAsync(
+            extraForm: new Dictionary<string, string>
+            {
+                { name, value }
+            });
+        statusCode.ShouldBe(HttpStatusCode.BadRequest);
+        parJson.ShouldNotBeNull();
+        parJson.RootElement.GetProperty("error").GetString()
+            .ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
     private void ConfigureScopesAndResources()
     {
         _mockPipeline.IdentityScopes.AddRange(new IdentityResource[] {
@@ -267,6 +326,24 @@ public class PushedAuthorizationTests
                     }
     });
 
+    private void ConfigureClientKeys()
+    {
+        var rsaKey = CryptoHelper.CreateRsaSecurityKey();
+        _privateKey = JsonWebKeyConverter.ConvertFromRSASecurityKey(rsaKey);
+
+        _publicKey = new JsonWebKey
+        {
+            kty = "RSA",
+            use = "sig",
+            kid = rsaKey.KeyId,
+            e = _privateKey.E,
+            n = _privateKey.N,
+            alg = _privateKey.Alg
+        };
+
+        _mockPipeline.ClientKeys.Add("client2", _privateKey);
+    }
+
     private void ConfigureClients() => _mockPipeline.Clients.AddRange(new Client[]
         {
             _client = new Client
@@ -281,6 +358,23 @@ public class PushedAuthorizationTests
                 RequirePkce = false,
                 AllowedScopes = new List<string> { "openid", "profile" },
                 RedirectUris = new List<string> { "https://client1/callback" },
+            },
+            _client2 = new Client
+            {
+                ClientId = "client2",
+                ClientSecrets = new []
+                {
+                    new Secret("secret".Sha256()),
+                    new Secret(JsonSerializer.Serialize(_publicKey))
+                    {
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey
+                    }
+                },
+                AllowedGrantTypes = GrantTypes.Implicit,
+                RequireConsent = false,
+                RequirePkce = false,
+                AllowedScopes = new List<string> { "openid", "profile" },
+                RedirectUris = new List<string> { "https://client2/callback" },
             },
         });
 }
