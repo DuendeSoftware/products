@@ -349,7 +349,7 @@ public class Client
     /// When enabled, the client's token lifetimes (e.g. refresh tokens) will be tied to the user's session lifetime.
     /// This means when the user logs out, any revokable tokens will be removed.
     /// If using server-side sessions, expired sessions will also remove any revokable tokens, and backchannel logout will be triggered.
-    /// This client's setting overrides the global CoordinateTokensWithUserSession configuration setting.
+    /// This client's setting overrides the global CoordinateClientLifetimesWithUserSession configuration setting.
     /// </summary>
     public bool? CoordinateLifetimeWithUserSession { get; set; }
 
