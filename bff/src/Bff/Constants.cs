@@ -29,7 +29,9 @@ public static class Constants
         public const string AntiforgeryCheckMetadata = "Duende.Bff.Yarp.AntiforgeryCheck";
     }
 
+#pragma warning disable CA1724 // CA1724: Type names should not match namespaces
     public static class Cookies
+#pragma warning restore CA1724
     {
         public const string HostPrefix = "__Host";
         public const string SecurePrefix = "__Secure";
@@ -129,7 +131,7 @@ public static class Constants
         public const string Prompt = "bff-prompt";
     }
 
-    public class HttpClientNames
+    public static class HttpClientNames
     {
         public const string IndexHtmlHttpClient = "Duende.Bff.IndexHtmlClient";
 

@@ -14,10 +14,9 @@ public class CookieSlidingTests : BffTestBase
 {
     private InMemoryUserSessionStore _sessionStore => (InMemoryUserSessionStore)Bff.Resolve<IUserSessionStore>();
 
-    public CookieSlidingTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureBff += bff =>
-                                                                          {
-                                                                              bff.AddServerSideSessions();
-                                                                          };
+    public CookieSlidingTests(ITestOutputHelper output) : base(output) =>
+        Bff.OnConfigureBff += bff =>
+            bff.AddServerSideSessions();
 
     private void AdvanceClock(TimeSpan by) => The.Clock.SetUtcNow(The.Clock.GetUtcNow().Add(by));
 
@@ -25,8 +24,8 @@ public class CookieSlidingTests : BffTestBase
     [MemberData(nameof(AllSetups))]
     public async Task user_endpoint_cookie_should_slide(BffSetupType setup)
     {
-        ConfigureBff(setup, UseSlidingCookieExpiration);
-        await InitializeAsync();
+        await ConfigureBff(setup, UseSlidingCookieExpiration);
+
         await Bff.BrowserClient.Login();
 
         var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
@@ -53,8 +52,8 @@ public class CookieSlidingTests : BffTestBase
     [MemberData(nameof(AllSetups))]
     public async Task user_endpoint_when_sliding_flag_is_passed_cookie_should_not_slide(BffSetupType setup)
     {
-        ConfigureBff(setup, UseSlidingCookieExpiration);
-        await InitializeAsync();
+        await ConfigureBff(setup, UseSlidingCookieExpiration);
+
         await Bff.BrowserClient.Login();
 
         var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
@@ -82,7 +81,7 @@ public class CookieSlidingTests : BffTestBase
     {
         var shouldRenew = false;
 
-        ConfigureBff(setup, cookieOptions =>
+        await ConfigureBff(setup, cookieOptions =>
         {
             UseSlidingCookieExpiration(cookieOptions);
 
@@ -95,7 +94,7 @@ public class CookieSlidingTests : BffTestBase
             };
         });
 
-        await InitializeAsync();
+
         await Bff.BrowserClient.Login();
 
         var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
@@ -121,11 +120,12 @@ public class CookieSlidingTests : BffTestBase
 
     [Theory]
     [MemberData(nameof(AllSetups))]
-    public async Task user_endpoint_when_uservalidate_renews_and_sliding_flag_is_passed_cookie_should_not_slide(BffSetupType setup)
+    public async Task user_endpoint_when_uservalidate_renews_and_sliding_flag_is_passed_cookie_should_not_slide(
+        BffSetupType setup)
     {
         var shouldRenew = false;
 
-        ConfigureBff(setup, cookieOptions =>
+        await ConfigureBff(setup, cookieOptions =>
         {
             UseSlidingCookieExpiration(cookieOptions);
 
@@ -136,7 +136,7 @@ public class CookieSlidingTests : BffTestBase
             };
         });
 
-        await InitializeAsync();
+
         await Bff.BrowserClient.Login();
 
         var sessions = await _sessionStore.GetUserSessionsAsync(Some.UserSessionsFilter());
@@ -164,5 +164,4 @@ public class CookieSlidingTests : BffTestBase
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
     }
-
 }

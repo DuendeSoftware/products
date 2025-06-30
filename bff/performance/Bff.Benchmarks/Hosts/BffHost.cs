@@ -49,8 +49,6 @@ public class BffHost : Host
             app.UseBff();
             app.MapGet("/", () => "bff");
 
-            app.MapBffManagementEndpoints();
-
             app.MapRemoteBffApiEndpoint("/allow_anon", apiUri);
             app.MapRemoteBffApiEndpoint("/client_token", apiUri)
                 .WithAccessToken(RequiredTokenType.Client);

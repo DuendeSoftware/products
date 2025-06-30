@@ -31,7 +31,7 @@ public class BffBuilderTests
             .AddFrontends(frontend1, frontend2);
 
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(2);
         frontends.ShouldContain(frontend1);
         frontends.ShouldContain(frontend2);
@@ -51,7 +51,7 @@ public class BffBuilderTests
             .AddFrontends(frontend2);
 
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(2);
         frontends.ShouldContain(frontend1);
         frontends.ShouldContain(frontend2);
@@ -74,7 +74,7 @@ public class BffBuilderTests
         services.AddBff()
             .LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -124,7 +124,7 @@ public class BffBuilderTests
             .AddRemoteApis()
             .LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -145,7 +145,6 @@ public class BffBuilderTests
                 Frontends = new Dictionary<string, BffFrontendConfiguration>()
                 {
                     [The.FrontendName] = new(),
-
                 }
             })
             .Build();
@@ -153,7 +152,7 @@ public class BffBuilderTests
         var services = new ServiceCollection();
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -181,9 +180,7 @@ public class BffBuilderTests
                         Cookies = Some.CookieConfiguration()
                         // ev: todo
                         //CallbackPath = The.Path
-
                     },
-
                 }
             })
             .Build();
@@ -191,10 +188,11 @@ public class BffBuilderTests
 
         // Wire up the BFF
         var services = new ServiceCollection();
-        services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
+        services
+            .AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -232,7 +230,6 @@ public class BffBuilderTests
                     [The.FrontendName] = new()
                     {
                     },
-
                 }
             })
             .Build();
@@ -240,10 +237,11 @@ public class BffBuilderTests
 
         // Wire up the BFF
         var services = new ServiceCollection();
-        services.AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
+        services
+            .AddSingleton<IHttpContextAccessor, FakeHttpContextAccessor>(); // We need the http context to set the scope
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -277,7 +275,6 @@ public class BffBuilderTests
         IConfiguration configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>()
             {
-
                 ["frontends:_FrontendName_:matchingPath"] = The.Path,
                 ["frontends:_FrontendName_:matchingOrigin"] = The.Origin.ToString(),
                 ["frontends:_FrontendName_:indexHtmlUrl"] = The.Url.ToString(),
@@ -294,7 +291,8 @@ public class BffBuilderTests
                 ["frontends:_FrontendName_:RemoteApis:0:localPath"] = The.Path,
                 ["frontends:_FrontendName_:RemoteApis:0:targetUri"] = The.Url.ToString(),
                 ["frontends:_FrontendName_:RemoteApis:0:requiredTokenType"] = The.RequiredTokenType.ToString(),
-                ["frontends:_FrontendName_:RemoteApis:0:tokenRetrieverTypeName"] = The.TokenRetrieverType.AssemblyQualifiedName,
+                ["frontends:_FrontendName_:RemoteApis:0:tokenRetrieverTypeName"] =
+                    The.TokenRetrieverType.AssemblyQualifiedName,
                 ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:signinScheme"] = The.Scheme,
                 ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:challengeScheme"] = The.Scheme,
                 ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:forceRenewal"] = true.ToString(),
@@ -307,7 +305,7 @@ public class BffBuilderTests
             .LoadConfiguration(configuration)
             .AddRemoteApis();
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(1);
 
         var found = frontends.First(x => x.Name == The.FrontendName);
@@ -347,7 +345,7 @@ public class BffBuilderTests
         var services = new ServiceCollection();
         services.AddBff().LoadConfiguration(configFile.Configuration);
         var provider = services.BuildServiceProvider();
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(2);
 
         configFile.Save(new BffConfiguration()
@@ -359,7 +357,7 @@ public class BffBuilderTests
             }
         });
 
-        frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(2);
 
         var found = frontends.ToArray();
@@ -398,7 +396,7 @@ public class BffBuilderTests
         optionsCache.TryAdd("to_be_removed", new OpenIdConnectOptions());
         optionsCache.TryAdd("to_be_updated", new OpenIdConnectOptions());
 
-        var frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        var frontends = provider.GetRequiredService<FrontendCollection>();
 
         configFile.Save(new BffConfiguration()
         {
@@ -409,11 +407,12 @@ public class BffBuilderTests
             }
         });
 
-        frontends = provider.GetRequiredService<FrontendCollection>().GetAll();
+        frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(2);
 
         optionsCache.TryRemove("to_be_removed")
-            .ShouldBeTrue("The frontend 'to_be_removed' is no longer in the config and should be removed from oidc config");
+            .ShouldBeTrue(
+                "The frontend 'to_be_removed' is no longer in the config and should be removed from oidc config");
         optionsCache.TryRemove("to_be_updated")
             .ShouldBeTrue("The frontend 'to_be_updated' is changed. We need to clear it from the oidc cache.");
 
@@ -440,7 +439,6 @@ public class BffBuilderTests
         var options = provider.GetRequiredService<IOptions<OpenIdConnectOptions>>();
 
         ValidateOpenIdConnectOptions(options.Value, The.CallbackPath.ToString());
-
     }
 
     [Fact]
@@ -491,8 +489,7 @@ public class BffBuilderTests
                             ClientId = "not-null",
                             ClientSecret = null
                         }
-                    }
-                    ,
+                    },
                 }
             })
             .Build();
@@ -510,7 +507,7 @@ public class BffBuilderTests
         var services = new ServiceCollection();
 
         Should.Throw<InvalidOperationException>(() => services.AddBff()
-            .AddFrontends(Some.BffFrontend(), Some.BffFrontend()))
+                .AddFrontends(Some.BffFrontend(), Some.BffFrontend()))
             ;
     }
 }

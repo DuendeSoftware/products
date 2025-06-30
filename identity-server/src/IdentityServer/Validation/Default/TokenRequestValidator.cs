@@ -216,15 +216,15 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
     private async Task<TokenRequestValidationResult> ValidateProofToken(TokenRequestValidationContext context)
     {
-        // can't allow both both at once
-        if (context.ClientCertificate != null && context.DPoPProofToken.IsPresent())
-        {
-            LogError("Only one confirmation mechanism is allowed at a time.");
-            return Invalid(OidcConstants.TokenErrors.InvalidRequest, "Only one confirmation mechanism is allowed at a time");
-        }
 
         // mTLS client cert processing
-        if (context.ClientCertificate != null)
+        //
+        // If both a dpop proof and client certificate are present, we use the
+        // proof token for sender-constraining the token. DPoP takes precedence
+        // because that's the only sensible interpretation of the client's
+        // request. DPoP can only be used for sender constraining the token,
+        // but client certificates can also be used as client authentication.
+        if (context.ClientCertificate != null && context.DPoPProofToken.IsMissing())
         {
             if (_options.MutualTls.AlwaysEmitConfirmationClaim && _validatedRequest.Confirmation.IsMissing())
             {

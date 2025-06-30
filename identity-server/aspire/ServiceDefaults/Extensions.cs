@@ -33,6 +33,8 @@ public static class Extensions
             http.AddServiceDiscovery();
         });
 
+        builder.Configuration.Add(new FallbackNonAspireContextConfigurationSource());
+
         return builder;
     }
 

@@ -22,19 +22,20 @@ public class FrontendCollectionTests
     [Fact]
     public void Can_load_frontends_from_constructor()
     {
-        _frontendsConfiguredDuringStartup = [
+        _frontendsConfiguredDuringStartup =
+        [
             Some.BffFrontendWithSelectionCriteria(),
             Some.BffFrontendWithSelectionCriteria() with { Name = BffFrontendName.Parse("different") }
         ];
 
-        var cache = BuildCache();
+        var cache = BuildFrontendCollection();
 
-        var result = cache.GetAll();
+        var result = cache;
         result.Count.ShouldBe(2);
-        result.ShouldBeEquivalentTo(_frontendsConfiguredDuringStartup.AsReadOnly());
+        result.ToArray().ShouldBeEquivalentTo(_frontendsConfiguredDuringStartup);
     }
 
-    private FrontendCollection BuildCache()
+    private FrontendCollection BuildFrontendCollection()
     {
         // No longer inject OptionsCache
         var cache = new FrontendCollection(_bffConfigurationOptionsMonitor, [], _frontendsConfiguredDuringStartup);
@@ -53,8 +54,8 @@ public class FrontendCollectionTests
             }
         };
 
-        var cache = BuildCache();
-        var result = cache.GetAll();
+        var cache = BuildFrontendCollection();
+        var result = cache;
         result.Count.ShouldBe(2);
 
         result.ShouldBe(new[]
@@ -93,14 +94,14 @@ public class FrontendCollectionTests
             }
         };
 
-        var cache = BuildCache();
-        var result = cache.GetAll();
+        var cache = BuildFrontendCollection();
         var openIdConnectOptions = new OpenIdConnectOptions();
-        result.First().ConfigureOpenIdConnectOptions!.Invoke(openIdConnectOptions);
+        cache.First().ConfigureOpenIdConnectOptions!.Invoke(openIdConnectOptions);
         openIdConnectOptions.ClientId.ShouldBe("clientid from programmatic defaults");
         openIdConnectOptions.ClientSecret.ShouldBe("clientsecret from configured defaults");
         openIdConnectOptions.ResponseMode.ShouldBe("responsemode from frontend");
     }
+
     [Fact(Skip = "find other way of testing this")]
     public void Cookie_Config_precedence_is_programmatic_defaults_then_configured_defaults_then_frontend_specific()
     {
@@ -130,10 +131,9 @@ public class FrontendCollectionTests
             }
         };
 
-        var cache = BuildCache();
-        var result = cache.GetAll();
+        var cache = BuildFrontendCollection();
         var cookieOptions = new CookieAuthenticationOptions();
-        result.First().ConfigureCookieOptions!.Invoke(cookieOptions);
+        cache.First().ConfigureCookieOptions!.Invoke(cookieOptions);
         cookieOptions.Cookie.Name.ShouldBe("Name from programmatic defaults");
         cookieOptions.Cookie.Path.ShouldBe("Path from configured defaults");
         cookieOptions.Cookie.Domain.ShouldBe("Domain from frontend");
@@ -143,13 +143,17 @@ public class FrontendCollectionTests
     [Fact]
     public void When_frontend_is_updated_then_event_is_raised()
     {
-        var cache = BuildCache();
+        var cache = BuildFrontendCollection();
         var bffFrontend = Some.BffFrontendWithSelectionCriteria();
 
         // Track event invocations
         BffFrontend? eventArg = null;
         var eventCount = 0;
-        cache.OnFrontendChanged += f => { eventArg = f; eventCount++; };
+        cache.OnFrontendChanged += f =>
+        {
+            eventArg = f;
+            eventCount++;
+        };
 
         // Add a new frontend (should not raise event, as it's an add)
         cache.AddOrUpdate(bffFrontend);
@@ -167,13 +171,17 @@ public class FrontendCollectionTests
     [Fact]
     public void When_frontend_is_removed_then_event_is_raised()
     {
-        var cache = BuildCache();
+        var cache = BuildFrontendCollection();
         var bffFrontend = Some.BffFrontendWithSelectionCriteria();
 
         // Track event invocations
         BffFrontend? eventArg = null;
         var eventCount = 0;
-        cache.OnFrontendChanged += f => { eventArg = f; eventCount++; };
+        cache.OnFrontendChanged += f =>
+        {
+            eventArg = f;
+            eventCount++;
+        };
 
         // Add a new frontend (should not raise event)
         cache.AddOrUpdate(bffFrontend);

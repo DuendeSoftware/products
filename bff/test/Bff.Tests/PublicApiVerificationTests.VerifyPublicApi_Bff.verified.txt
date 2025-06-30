@@ -117,6 +117,7 @@ namespace Duende.Bff.AccessTokenManagement
         public Scheme() { }
         public override string ToString() { }
         public static Duende.Bff.AccessTokenManagement.Scheme Parse(string value) { }
+        public static Duende.Bff.AccessTokenManagement.Scheme? ParseOrDefault(string? value) { }
         public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.AccessTokenManagement.Scheme? parsed, out string[] errors) { }
         public static string op_Implicit(Duende.Bff.AccessTokenManagement.Scheme value) { }
         public static Duende.AccessTokenManagement.Scheme op_Implicit(Duende.Bff.AccessTokenManagement.Scheme value) { }
@@ -191,11 +192,6 @@ namespace Duende.Bff
     }
     public static class Constants
     {
-        public class HttpClientNames
-        {
-            public const string IndexHtmlHttpClient = "Duende.Bff.IndexHtmlClient";
-            public HttpClientNames() { }
-        }
         public static class BffFlags
         {
             public const string Prompt = "bff-prompt";
@@ -211,6 +207,10 @@ namespace Duende.Bff
             public const string DefaultCookieName = "__Host-bff-auth";
             public const string HostPrefix = "__Host";
             public const string SecurePrefix = "__Secure";
+        }
+        public static class HttpClientNames
+        {
+            public const string IndexHtmlHttpClient = "Duende.Bff.IndexHtmlClient";
         }
         public static class ManagementEndpoints
         {
@@ -248,6 +248,7 @@ namespace Duende.Bff
         public LocalPath() { }
         public override string ToString() { }
         public static Duende.Bff.LocalPath Parse(string value) { }
+        public static Duende.Bff.LocalPath ToLocalPath(Microsoft.AspNetCore.Http.PathString pathString) { }
         public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.LocalPath? parsed, out string[] errors) { }
         public static string op_Implicit(Duende.Bff.LocalPath value) { }
         public static Duende.Bff.LocalPath op_Implicit(Microsoft.AspNetCore.Http.PathString value) { }
@@ -290,7 +291,7 @@ namespace Duende.Bff.Configuration
         public bool BackchannelLogoutAllUserSessions { get; set; }
         public System.Net.Http.HttpMessageHandler? BackchannelMessageHandler { get; set; }
         public Duende.Bff.AccessTokenManagement.DPoPProofKey? DPoPJsonWebKey { get; set; }
-        public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; set; }
+        public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; }
         public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
         public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
         public bool EnableSessionCleanup { get; set; }
@@ -312,10 +313,10 @@ namespace Duende.Bff.Configuration
     }
     public sealed class BffRemoteApiEndpointMetadata : Duende.Bff.Endpoints.IBffApiMetadata
     {
-        public Duende.Bff.AccessTokenManagement.RequiredTokenType? TokenType;
         public BffRemoteApiEndpointMetadata() { }
         public System.Type AccessTokenRetriever { get; set; }
         public Duende.Bff.Configuration.BffUserAccessTokenParameters? BffUserAccessTokenParameters { get; set; }
+        public Duende.Bff.AccessTokenManagement.RequiredTokenType? TokenType { get; set; }
     }
     public sealed class BffUserAccessTokenParameters : System.IEquatable<Duende.Bff.Configuration.BffUserAccessTokenParameters>
     {
@@ -377,10 +378,10 @@ namespace Duende.Bff.DynamicFrontends
         public Duende.Bff.DynamicFrontends.Origin? MatchingOrigin { get; init; }
         public string? MatchingPath { get; init; }
     }
-    public interface IFrontendCollection
+    public interface IFrontendCollection : System.Collections.Generic.IEnumerable<Duende.Bff.DynamicFrontends.BffFrontend>, System.Collections.IEnumerable
     {
+        int Count { get; }
         void AddOrUpdate(Duende.Bff.DynamicFrontends.BffFrontend frontend);
-        System.Collections.Generic.IReadOnlyList<Duende.Bff.DynamicFrontends.BffFrontend> GetAll();
         void Remove(Duende.Bff.DynamicFrontends.BffFrontendName frontendName);
     }
     public interface IIndexHtmlClient
@@ -430,7 +431,7 @@ namespace Duende.Bff.Endpoints
     public interface ILogoutEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
     public interface IReturnUrlValidator
     {
-        bool IsValidAsync(string returnUrl);
+        bool IsValidAsync(System.Uri returnUrl);
     }
     public interface ISilentLoginCallbackEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
     public interface ISilentLoginEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
@@ -438,10 +439,11 @@ namespace Duende.Bff.Endpoints
 }
 namespace Duende.Bff.Otel
 {
-    public sealed class BffMetrics
+    public sealed class BffMetrics : System.IDisposable
     {
         public const string MeterName = "Duende.Bff";
         public BffMetrics(System.Diagnostics.Metrics.IMeterFactory meterFactory) { }
+        public void Dispose() { }
         public void SessionEnded() { }
         public void SessionStarted() { }
         public void SessionsEnded(int count) { }

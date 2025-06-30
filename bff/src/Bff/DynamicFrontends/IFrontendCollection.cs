@@ -12,9 +12,10 @@ namespace Duende.Bff.DynamicFrontends;
 ///  - Any changes are not expected to be persisted across application restarts; they are transient and in-memory.
 ///  - This is not an extensibility point and implementors of this library cannot replace it with a different implementation.
 /// </summary>
-public interface IFrontendCollection
+public interface IFrontendCollection : IEnumerable<BffFrontend>
 {
     void AddOrUpdate(BffFrontend frontend);
     void Remove(BffFrontendName frontendName);
-    IReadOnlyList<BffFrontend> GetAll();
+
+    public int Count { get; }
 }

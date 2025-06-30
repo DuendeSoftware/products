@@ -2,86 +2,71 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
-using Duende.Bff.Internal;
-using Duende.Bff.Tests.TestHosts;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
+using Duende.Bff.Blazor;
+using Duende.Bff.Tests.Blazor.Components;
+using Duende.Bff.Tests.TestInfra;
 using Xunit.Abstractions;
 
 namespace Bff.Tests.Blazor;
 
-public class BffBlazorTests : OutputWritingTestBase
+public class BffBlazorTests : BffTestBase
 {
-    protected readonly IdentityServerHost IdentityServerHost;
-    protected ApiHost ApiHost;
-    protected BffBlazorHost BffHost;
-
     public BffBlazorTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        IdentityServerHost = new IdentityServerHost(WriteLine);
-        ApiHost = new ApiHost(WriteLine, IdentityServerHost, "scope1");
-
-        BffHost = new BffBlazorHost(WriteLine, IdentityServerHost, ApiHost, "spa");
-
-        IdentityServerHost.Clients.Add(new Client
+        Bff.MapGetForRoot = false;
+        Bff.OnConfigureServices += services =>
         {
-            ClientId = "spa",
-            ClientSecrets = { new Secret("secret".Sha256()) },
-            AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-            RedirectUris = { "https://app/signin-oidc" },
-            PostLogoutRedirectUris = { "https://app/signout-callback-oidc" },
-            BackChannelLogoutUri = "https://app/bff/backchannel",
-            AllowOfflineAccess = true,
-            AllowedScopes = { "openid", "profile", "scope1" }
-        });
+            services.AddRazorComponents()
+                .AddInteractiveServerComponents()
+                .AddInteractiveWebAssemblyComponents();
 
-        IdentityServerHost.OnConfigureServices += services =>
+            services.AddCascadingAuthenticationState();
+            services.AddAntiforgery();
+        };
+
+        Bff.OnConfigureBff += bff =>
         {
-            services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
-                new DefaultBackChannelLogoutHttpClient(
-                    BffHost!.HttpClient,
-                    provider.GetRequiredService<ILoggerFactory>(),
-                    provider.GetRequiredService<ICancellationTokenProvider>()));
+            bff.AddBlazorServer()
+                .AddServerSideSessions();
+        };
 
-            services.AddSingleton<DefaultAccessTokenRetriever>();
+        Bff.OnConfigure += app => app.UseAntiforgery();
+
+        Bff.OnConfigureEndpoints += endpoints =>
+        {
+            endpoints.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode()
+                .AddInteractiveWebAssemblyRenderMode();
         };
     }
 
-    [Fact]
-    public async Task Can_get_home()
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task Can_get_home(BffSetupType setup)
     {
-        var response = await BffHost.BrowserClient.GetAsync("/");
+        await ConfigureBff(setup);
+        var response = await Bff.BrowserClient.GetAsync("/");
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
-    [Fact]
-    public async Task Cannot_get_secure_without_loggin_in()
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task Cannot_get_secure_without_loggin_in(BffSetupType setup)
     {
-        var response = await BffHost.BrowserClient.GetAsync("/secure");
+        await ConfigureBff(setup);
+
+        Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
+        var response = await Bff.BrowserClient.GetAsync("/secure");
         response.StatusCode.ShouldBe(HttpStatusCode.Found, "this indicates we are redirecting to the login page");
     }
 
-    [Fact]
-    public async Task Can_get_secure_when_logged_in()
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task Can_get_secure_when_logged_in(BffSetupType setup)
     {
-        await BffHost.BffLoginAsync("sub");
-        var response = await BffHost.BrowserClient.GetAsync("/secure");
+        await ConfigureBff(setup);
+
+        await Bff.BrowserClient.Login();
+        Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
+        var response = await Bff.BrowserClient.GetAsync("/secure");
+
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-    }
-
-    public override async Task InitializeAsync()
-    {
-        await IdentityServerHost.InitializeAsync();
-        await ApiHost.InitializeAsync();
-        await BffHost.InitializeAsync();
-        await base.InitializeAsync();
-    }
-
-    public override async Task DisposeAsync()
-    {
-        await ApiHost.DisposeAsync();
-        await BffHost.DisposeAsync();
-        await IdentityServerHost.DisposeAsync();
-        await base.DisposeAsync();
     }
 }

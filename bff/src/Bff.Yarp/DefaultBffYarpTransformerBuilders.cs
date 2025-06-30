@@ -15,7 +15,7 @@ public static class DefaultBffYarpTransformerBuilders
     /// Build a default 'direct proxy' transformer. This removes the 'cookie' header, removes the local path prefix,
     /// and adds an access token to the request. The type of access token is determined by the <see cref="BffRemoteApiEndpointMetadata"/>.
     /// </summary>
-    public static BffYarpTransformBuilder DirectProxyWithAccessToken =
+    public static readonly BffYarpTransformBuilder DirectProxyWithAccessToken =
         (localPath, context) =>
         {
             context.AddRequestHeaderRemove("Cookie");

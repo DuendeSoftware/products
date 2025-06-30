@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
+using Duende.Bff.Internal;
+using Duende.Bff.Otel;
 using Duende.IdentityModel;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,18 +17,22 @@ namespace Duende.Bff.SessionManagement.Configuration;
 /// Cookie configuration to revoke refresh token on logout.
 /// </summary>
 internal class PostConfigureApplicationCookieRevokeRefreshToken(
+    ActiveCookieAuthenticationScheme activeCookieScheme,
     IOptions<BffOptions> bffOptions,
-    IOptions<AuthenticationOptions> authOptions,
     ILogger<PostConfigureApplicationCookieRevokeRefreshToken> logger)
     : IPostConfigureOptions<CookieAuthenticationOptions>
 {
     private readonly BffOptions _options = bffOptions.Value;
-    private readonly string? _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
     {
-        if (_options.RevokeRefreshTokenOnLogout && name == _scheme)
+        if (!activeCookieScheme.ShouldConfigureScheme(Scheme.ParseOrDefault(name)))
+        {
+            return;
+        }
+
+        if (_options.RevokeRefreshTokenOnLogout)
         {
             options.Events.OnSigningOut = CreateCallback(options.Events.OnSigningOut);
         }
@@ -38,7 +44,7 @@ internal class PostConfigureApplicationCookieRevokeRefreshToken(
         {
             // Todo: Ev: logging with sourcegens
             // todo: ev: should we have userparameters here?
-            logger.LogDebug("Revoking user's refresh tokens in OnSigningOut for subject id: {subjectId}", ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
+            logger.RevokingUserRefreshTokensOnSigningOut(LogLevel.Debug, ctx.HttpContext.User.FindFirst(JwtClaimTypes.Subject)?.Value);
             await ctx.HttpContext.RevokeRefreshTokenAsync(ct: ctx.HttpContext.RequestAborted);
 
             await inner.Invoke(ctx);

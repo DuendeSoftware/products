@@ -230,3 +230,4 @@ artifacts
 /identity-server/templates/src/IdentityServerQuickStart/IdentityServer.db
 /identity-server/templates/src/IdentityServerQuickStart/IdentityServer.db-shm
 /identity-server/templates/src/IdentityServerQuickStart/IdentityServer.db-wal
+reports

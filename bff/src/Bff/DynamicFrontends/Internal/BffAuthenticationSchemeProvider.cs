@@ -34,7 +34,7 @@ internal class BffAuthenticationSchemeProvider(
         return scheme ?? GetBffAuthenticationScheme(name);
     }
 
-    private AuthenticationScheme? GetBffAuthenticationScheme(string name)
+    private BffAuthenticationScheme? GetBffAuthenticationScheme(string name)
     {
         selectedFrontend.TryGet(out var frontend);
 

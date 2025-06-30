@@ -73,7 +73,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
     [Trait("Category", Category)]
     public async Task valid_dpop_request_with_unusual_but_valid_proof_token_should_return_bound_access_token()
     {
-        // The point here is to have an array in the payload, to exercise 
+        // The point here is to have an array in the payload, to exercise
         // the json serialization
         Payload.Add("key_ops", new string[] { "sign", "verify" });
         var request = CreateClientCredentialsTokenRequest();
@@ -447,6 +447,59 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         response.TokenType.ShouldBe("DPoP");
         var jkt = GetJKTFromAccessToken(response);
         jkt.ShouldBe(JKT);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task mtls_and_dpop_request_should_succeed()
+    {
+        var clientId = "mtls_dpop_client";
+        var clientCert = TestCert.Load();
+
+        // Add a client that requires mTLS and supports DPoP
+        var client = new Client
+        {
+            ClientId = clientId,
+            ClientSecrets =
+            {
+                new Secret
+                {
+                    Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint,
+                    Value = clientCert.Thumbprint
+                }
+            },
+            AllowedGrantTypes = GrantTypes.ClientCredentials,
+            AllowedScopes = { "scope1" },
+            RequireDPoP = true
+        };
+
+        Pipeline.Clients.Add(client);
+        Pipeline.Initialize();
+
+        // Set the client certificate in the pipeline
+        Pipeline.SetClientCertificate(clientCert);
+
+        // Act - Make a client credentials request using mTLS and DPoP
+        var tokenClient = Pipeline.GetMtlsClient();
+
+        var formParams = new Dictionary<string, string>
+        {
+            { "grant_type", "client_credentials" },
+            { "client_id", clientId },
+            { "scope", "scope1" }
+        };
+
+        var form = new FormUrlEncodedContent(formParams);
+        tokenClient.DefaultRequestHeaders.Add("DPoP", CreateDPoPProofToken());
+
+        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenMtlsEndpoint, form);
+
+        // Assert
+        response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
+
+        var json = await response.Content.ReadAsStringAsync();
+        json.ShouldContain("access_token");
+        json.ShouldContain("\"token_type\":\"DPoP\"");
     }
 }
 

@@ -24,16 +24,19 @@ internal class BffConfigureOpenIdConnectOptions(
         var defaultOptionsValue = bffOptions.Value;
         var bffConfigurationValue = bffConfiguration.Value;
 
-        var defaultCallbackPath = options.CallbackPath;
+        // Apply the programmatic defaults for OpenID Connect options
         defaultOptionsValue.ConfigureOpenIdConnectDefaults?.Invoke(options);
+
+        // Apply the defaults from the BFF configuration
         bffConfigurationValue.DefaultOidcSettings?.ApplyTo(options);
 
-
-        if (defaultOptionsValue.BackchannelMessageHandler != null)
+        if (defaultOptionsValue.BackchannelMessageHandler != null && options.BackchannelHttpHandler == null)
         {
             options.BackchannelHttpHandler = defaultOptionsValue.BackchannelMessageHandler;
         }
 
+        // See if there is a frontend selected
+        // If so, apply the frontend's OpenID Connect options
         if (!selectedFrontend.TryGet(out var frontEnd))
         {
             return;

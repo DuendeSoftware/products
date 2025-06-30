@@ -1,8 +1,9 @@
 <Project>
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.2.1" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="9.2.1" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.3.1" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="9.3.1" />
+    <PackageVersion Include="Aspire.Hosting.SqlServer" Version="9.3.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.0" />
     <PackageVersion Include="BullsEye" Version="5.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
@@ -85,11 +86,15 @@
     <PackageVersion Include="Microsoft.IdentityModel.Logging" Condition="'$(TargetFramework)' == 'net9.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Condition="'$(TargetFramework)' == 'net8.0'" Version="7.1.2" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Condition="'$(TargetFramework)' == 'net9.0'" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Net.Http.Headers" Version="9.0.6" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="Microsoft.NETCore.Jit" Version="2.0.8" />
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="MinVer" Version="6.0.0" />
+    <PackageVersion Include="NBomber" Version="6.0.2" />
+    <PackageVersion Include="NBomber.Http" Version="6.0.2" />
+    <PackageVersion Include="NBomber.Sinks.Timescale" Version="0.8.0" />
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.11.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.0" />

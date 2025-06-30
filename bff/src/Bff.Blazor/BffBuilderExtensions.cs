@@ -11,8 +11,11 @@ namespace Duende.Bff.Blazor;
 public static class
     BffBuilderExtensions
 {
-    public static BffBuilder AddBlazorServer(this BffBuilder builder, Action<BffBlazorServerOptions>? configureOptions = null)
+    public static BffBuilder AddBlazorServer(this BffBuilder builder,
+        Action<BffBlazorServerOptions>? configureOptions = null)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.Services
             .AddOpenIdConnectAccessTokenManagement()
             .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()

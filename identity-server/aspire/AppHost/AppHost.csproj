@@ -9,11 +9,12 @@
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>b86a3528-3d86-4514-b57f-9839f472ef31</UserSecretsId>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.1.0" />
-    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.1.0" />
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" />
   </ItemGroup>
 
   <ItemGroup>

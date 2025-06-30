@@ -10,6 +10,8 @@ public static class ProxyFrontendExtensionExtensions
 {
     public static BffFrontend WithRemoteApis(this BffFrontend frontend, params RemoteApi[] config)
     {
+        ArgumentNullException.ThrowIfNull(frontend);
+
         // Remove existing ProxyFrontendExtension if present
         var newExtensions = frontend.DataExtensions
             .Where(e => e is not ProxyBffPlugin)
@@ -29,8 +31,13 @@ public static class ProxyFrontendExtensionExtensions
     /// </summary>
     /// <param name="frontend"></param>
     /// <returns></returns>
-    public static RemoteApi[] GetRemoteApis(this BffFrontend frontend) => frontend.DataExtensions
-        .OfType<ProxyBffPlugin>()
-        .SelectMany(e => e.RemoteApis)
-        .ToArray();
+    public static RemoteApi[] GetRemoteApis(this BffFrontend frontend)
+    {
+        ArgumentNullException.ThrowIfNull(frontend);
+
+        return frontend.DataExtensions
+            .OfType<ProxyBffPlugin>()
+            .SelectMany(e => e.RemoteApis)
+            .ToArray();
+    }
 }

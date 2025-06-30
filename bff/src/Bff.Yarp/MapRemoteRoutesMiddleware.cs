@@ -22,7 +22,7 @@ internal class MapRemoteRoutesMiddleware(RequestDelegate next, RemoteRouteHandle
         await next(context);
     }
 
-    private bool ShouldMapRemoteRoutes(HttpContext context)
+    private static bool ShouldMapRemoteRoutes(HttpContext context)
     {
         var selectedFrontend = context.RequestServices.GetRequiredService<SelectedFrontend>();
 
@@ -31,6 +31,6 @@ internal class MapRemoteRoutesMiddleware(RequestDelegate next, RemoteRouteHandle
             return false;
         }
 
-        return frontend.GetRemoteApis().Any();
+        return frontend.GetRemoteApis().Length != 0;
     }
 }

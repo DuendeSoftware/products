@@ -10,7 +10,7 @@
     public delegate void BffYarpTransformBuilder(string localPath, Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context);
     public static class DefaultBffYarpTransformerBuilders
     {
-        public static Duende.Bff.Yarp.BffYarpTransformBuilder DirectProxyWithAccessToken;
+        public static readonly Duende.Bff.Yarp.BffYarpTransformBuilder DirectProxyWithAccessToken;
     }
     public static class ProxyAppBuilderExtensions
     {
@@ -65,7 +65,7 @@
     }
     public static class RouteBuilderExtensions
     {
-        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapRemoteBffApiEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, Microsoft.AspNetCore.Http.PathString localPath, System.Uri apiAddress, System.Action<Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext>? yarpTransformBuilder = null) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapRemoteBffApiEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, Microsoft.AspNetCore.Http.PathString localPath, System.Uri apiAddress, System.Action<Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext>? yarpTransformBuilder = null, Yarp.ReverseProxy.Forwarder.ForwarderRequestConfig? requestConfig = null) { }
     }
     public sealed class UserAccessTokenParameters : System.IEquatable<Duende.Bff.Yarp.UserAccessTokenParameters>
     {

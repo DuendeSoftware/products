@@ -2,30 +2,32 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.SessionManagement.SessionStore;
-using Duende.Bff.Tests.TestHosts;
+using Duende.Bff.Tests.TestInfra;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.SessionManagement;
 
-public class ServerSideTicketStoreTests : BffIntegrationTestBase
+public class ServerSideTicketStoreTests : BffTestBase
 {
     private readonly InMemoryUserSessionStore _sessionStore = new();
 
     public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureServices += services =>
-                                                                                       {
-                                                                                           services.AddSingleton<IUserSessionStore>(_sessionStore);
-                                                                                       };
-
-    [Fact]
-    public async Task StoreAsync_should_remove_conflicting_entries_prior_to_creating_new_entry()
     {
-        await Bff.BffLoginAsync("alice");
+        services.AddSingleton<IUserSessionStore>(_sessionStore);
+    };
 
-        Bff.BrowserClient.RemoveCookie("bff");
-        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task StoreAsync_should_remove_conflicting_entries_prior_to_creating_new_entry(BffSetupType setup)
+    {
+        Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
+        await ConfigureBff(setup);
+        await Bff.BrowserClient.Login();
 
-        await Bff.BffOidcLoginAsync();
+        Bff.BrowserClient.Cookies.Clear(Bff.Url());
+        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub })).Count().ShouldBe(1);
 
-        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);
+        await Bff.BrowserClient.Login();
+
+        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub })).Count().ShouldBe(1);
     }
 }

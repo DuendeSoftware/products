@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Duende.Bff.Internal;
 using Duende.IdentityModel;
-
 using AtmScheme = Duende.AccessTokenManagement.Scheme;
 
 namespace Duende.Bff.AccessTokenManagement;
@@ -27,11 +26,15 @@ public readonly record struct Scheme : IStronglyTypedValue<Scheme>
     /// </summary>
     /// <param name="value"></param>
     public static implicit operator string(Scheme value) => value.ToString();
+
+#pragma warning disable CA2225 // (OperatorOverloadsHaveNamedAlternates) Intentionally not using named alternative for this, becuase we don't want to expose the ATM type in the BFF API.
     public static implicit operator AtmScheme(Scheme value) => AtmScheme.Parse(value.ToString());
+#pragma warning restore CA2225
 
     public override string ToString() => Value;
 
-    private static readonly ValidationRule<string>[] Validators = [
+    private static readonly ValidationRule<string>[] Validators =
+    [
         ValidationRules.MaxLength(MaxLength),
     ];
 
@@ -46,7 +49,6 @@ public readonly record struct Scheme : IStronglyTypedValue<Scheme>
 
     private Scheme(string value)
     {
-
         // Some target systems are case-sensitive in their scheme handling. This code normalizes
         // the casing.
 
@@ -56,14 +58,17 @@ public readonly record struct Scheme : IStronglyTypedValue<Scheme>
 
         //IE: if Scheme == BeAReR => "Bearer"
         //IE: if Scheme == DpoP => "DPoP"
-        if (value.Equals(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer, StringComparison.OrdinalIgnoreCase))
+        if (value.Equals(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer,
+                StringComparison.OrdinalIgnoreCase))
         {
             value = OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer;
         }
-        else if (value.Equals(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP, StringComparison.OrdinalIgnoreCase))
+        else if (value.Equals(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP,
+                     StringComparison.OrdinalIgnoreCase))
         {
             value = OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP;
         }
+
         Value = value;
     }
 
@@ -88,4 +93,5 @@ public readonly record struct Scheme : IStronglyTypedValue<Scheme>
     /// </summary>
     public static Scheme Parse(string value) => StringParsers<Scheme>.Parse(value);
 
+    public static Scheme? ParseOrDefault(string? value) => StringParsers<Scheme>.ParseOrDefault(value);
 }
