@@ -85,9 +85,9 @@ public class ServerSideTokenStoreTests
     private class MockPartitioner()
         : UserSessionPartitionKeyBuilder(null!, null!)
     {
-        public string? PartitionKey { get; set; } = "default";
+        public string PartitionKey { get; set; } = "default";
 
-        internal override string? BuildPartitionKey() => PartitionKey;
+        internal override string BuildPartitionKey() => PartitionKey;
     }
 
     private class MockStoreTokensInAuthProps : IStoreTokensInAuthenticationProperties

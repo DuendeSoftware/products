@@ -11,7 +11,7 @@ internal class UserSessionPartitionKeyBuilder(
     IOptions<DataProtectionOptions> options,
     CurrentFrontendAccessor currentFrontendAccessor)
 {
-    internal virtual string? BuildPartitionKey()
+    internal virtual string BuildPartitionKey()
     {
         var applicationDiscriminator = options.Value.ApplicationDiscriminator;
         if (currentFrontendAccessor.TryGet(out var frontend))
@@ -23,7 +23,6 @@ internal class UserSessionPartitionKeyBuilder(
 
         // In v3, a null value for an appname was used. This can cause issues, because
         // a null value is ignored from indexes, which causes unique constraints to be ignored.
-
         return applicationDiscriminator ?? "";
     }
 }

@@ -26,7 +26,7 @@ internal sealed class UserSessionStore(
 
         var item = new UserSessionEntity
         {
-            ApplicationName = partitionKeyBuilder.BuildPartitionKey()
+            PartitionKey = partitionKeyBuilder.BuildPartitionKey()
         };
         session.CopyTo(item);
         sessionDbContext.UserSessions.Add(item);
@@ -66,9 +66,9 @@ internal sealed class UserSessionStore(
     {
         var partitionKey = partitionKeyBuilder.BuildPartitionKey();
         var items = await sessionDbContext.UserSessions
-            .Where(x => x.Key == key && x.ApplicationName == partitionKey)
+            .Where(x => x.Key == key && x.PartitionKey == partitionKey)
             .ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == partitionKey);
+        var item = items.SingleOrDefault(x => x.Key == key && x.PartitionKey == partitionKey);
 
         if (item == null)
         {
@@ -102,7 +102,7 @@ internal sealed class UserSessionStore(
     {
         filter.Validate();
         var partitionKey = partitionKeyBuilder.BuildPartitionKey();
-        var query = sessionDbContext.UserSessions.Where(x => x.ApplicationName == partitionKey).AsQueryable();
+        var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
@@ -113,7 +113,7 @@ internal sealed class UserSessionStore(
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
 
-        var items = await query.Where(x => x.ApplicationName == partitionKey).ToArrayAsync(ct);
+        var items = await query.Where(x => x.PartitionKey == partitionKey).ToArrayAsync(ct);
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             items = items.Where(x => x.SubjectId == filter.SubjectId).ToArray();
@@ -150,9 +150,9 @@ internal sealed class UserSessionStore(
     public async Task<UserSession?> GetUserSessionAsync(string key, CT ct)
     {
         var partitionKey = partitionKeyBuilder.BuildPartitionKey();
-        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.ApplicationName == partitionKey)
+        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.PartitionKey == partitionKey)
             .ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == partitionKey);
+        var item = items.SingleOrDefault(x => x.Key == key && x.PartitionKey == partitionKey);
 
         if (item == null)
         {
@@ -173,7 +173,7 @@ internal sealed class UserSessionStore(
     {
         filter.Validate();
         var partitionKey = partitionKeyBuilder.BuildPartitionKey();
-        var query = sessionDbContext.UserSessions.Where(x => x.ApplicationName == partitionKey).AsQueryable();
+        var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
@@ -184,7 +184,7 @@ internal sealed class UserSessionStore(
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
 
-        var items = await query.Where(x => x.ApplicationName == partitionKey).ToArrayAsync(ct);
+        var items = await query.Where(x => x.PartitionKey == partitionKey).ToArrayAsync(ct);
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             items = items.Where(x => x.SubjectId == filter.SubjectId).ToArray();
@@ -212,9 +212,9 @@ internal sealed class UserSessionStore(
     {
         var partitionKey = partitionKeyBuilder.BuildPartitionKey();
         var items = await sessionDbContext.UserSessions
-            .Where(x => x.Key == key && x.ApplicationName == partitionKey)
+            .Where(x => x.Key == key && x.PartitionKey == partitionKey)
             .ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.ApplicationName == partitionKey);
+        var item = items.SingleOrDefault(x => x.Key == key && x.PartitionKey == partitionKey);
         if (item == null)
         {
             logger.NoRecordFoundForKey(LogLevel.Debug, key);

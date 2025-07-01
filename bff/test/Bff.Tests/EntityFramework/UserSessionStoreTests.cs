@@ -888,7 +888,7 @@ public class UserSessionStoreTests : IAsyncLifetime
         {
             Key = key,
             Ticket = "ticket",
-            ApplicationName = "app",
+            PartitionKey = "app",
             SubjectId = "sub",
             SessionId = "sid",
         });

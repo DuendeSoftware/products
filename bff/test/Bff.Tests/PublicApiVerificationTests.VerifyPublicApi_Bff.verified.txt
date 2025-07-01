@@ -372,6 +372,12 @@ namespace Duende.Bff.DynamicFrontends
         public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.DynamicFrontends.BffFrontendName? parsed, out string[] errors) { }
         public static string op_Implicit(Duende.Bff.DynamicFrontends.BffFrontendName value) { }
     }
+    public sealed class CurrentFrontendAccessor
+    {
+        public CurrentFrontendAccessor(Microsoft.AspNetCore.Http.IHttpContextAccessor contextAccessor) { }
+        public Duende.Bff.DynamicFrontends.BffFrontend Get() { }
+        public bool TryGet([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.DynamicFrontends.BffFrontend? frontend) { }
+    }
     public sealed class FrontendSelectionCriteria : System.IEquatable<Duende.Bff.DynamicFrontends.FrontendSelectionCriteria>
     {
         public FrontendSelectionCriteria() { }
@@ -409,12 +415,6 @@ namespace Duende.Bff.DynamicFrontends
         public System.Uri ToUri() { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(string origin) { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(System.Uri uri) { }
-    }
-    public sealed class SelectedFrontend
-    {
-        public SelectedFrontend(Microsoft.AspNetCore.Http.IHttpContextAccessor contextAccessor) { }
-        public Duende.Bff.DynamicFrontends.BffFrontend Get() { }
-        public bool TryGet([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.DynamicFrontends.BffFrontend? frontend) { }
     }
 }
 namespace Duende.Bff.Endpoints
@@ -459,10 +459,6 @@ namespace Duende.Bff.SessionManagement.Revocation
 }
 namespace Duende.Bff.SessionManagement.SessionStore
 {
-    public interface IUserSessionPartitionKeyBuilder
-    {
-        string? BuildPartitionKey();
-    }
     public interface IUserSessionStore
     {
         System.Threading.Tasks.Task CreateUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSession session, System.Threading.CancellationToken ct = default);
