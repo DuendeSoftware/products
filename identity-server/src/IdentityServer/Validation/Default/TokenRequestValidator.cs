@@ -40,6 +40,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly LicenseUsageTracker _licenseUsage;
     private readonly ClientLoadedTracker _clientLoadedTracker;
     private readonly ResourceLoadedTracker _resourceLoadedTracker;
+    private readonly IMtlsEndpointGenerator _mtlsEndpointGenerator;
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
@@ -64,6 +65,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         LicenseUsageTracker licenseUsage,
         ClientLoadedTracker clientLoadedTracker,
         ResourceLoadedTracker resourceLoadedTracker,
+        IMtlsEndpointGenerator mtlsEndpointGenerator,
         ILogger<TokenRequestValidator> logger)
     {
         _logger = logger;
@@ -86,6 +88,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _events = events;
         _clientLoadedTracker = clientLoadedTracker;
         _resourceLoadedTracker = resourceLoadedTracker;
+        _mtlsEndpointGenerator = mtlsEndpointGenerator;
     }
 
     // only here for legacy unit tests
@@ -248,7 +251,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 return Invalid(OidcConstants.TokenErrors.InvalidDPoPProof);
             }
 
-            var tokenUrl = _serverUrls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.Token;
+            var tokenUrl = context.ClientCertificate == null ? _serverUrls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.Token : _mtlsEndpointGenerator.GetMtlsEndpointPath(ProtocolRoutePaths.Token);
             var dpopContext = new DPoPProofValidatonContext
             {
                 ExpirationValidationMode = _validatedRequest.Client.DPoPValidationMode,

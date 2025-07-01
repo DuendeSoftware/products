@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Net;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
@@ -392,6 +393,50 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         codeResponse.DPoPNonce.ShouldBe(expectedNonce);
     }
 
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task token_request_when_using_mtls_for_client_authentication_should_succeed()
+    {
+        var clientId = "mtls_client";
+        var clientCert = TestCert.Load();
+        var client = new Client
+        {
+            ClientId = clientId,
+            ClientSecrets =
+            {
+                new Secret
+                {
+                    Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint,
+                    Value = clientCert.Thumbprint
+                }
+            },
+            AllowedGrantTypes = GrantTypes.ClientCredentials,
+            AllowedScopes = { "scope1" },
+            RequireDPoP = true
+        };
+
+        Pipeline.Clients.Add(client);
+        Pipeline.Initialize();
+        Pipeline.SetClientCertificate(clientCert);
+
+        var tokenClient = Pipeline.GetMtlsClient();
+        tokenClient.DefaultRequestHeaders.Add("DPoP", CreateDPoPProofToken(htu: IdentityServerPipeline.TokenMtlsEndpoint));
+        var formParams = new Dictionary<string, string>
+        {
+            { "grant_type", "client_credentials" },
+            { "client_id", clientId },
+            { "scope", "scope1" }
+        };
+
+        var form = new FormUrlEncodedContent(formParams);
+        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenMtlsEndpoint, form);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var json = await response.Content.ReadAsStringAsync();
+        json.ShouldContain("access_token");
+        json.ShouldContain("\"token_type\":\"DPoP\"");
+    }
+
     internal class MockDPoPProofValidator : DefaultDPoPProofValidator
     {
         public MockDPoPProofValidator(IdentityServerOptions options, IReplayCache replayCache, IClock clock, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dataProtectionProvider, ILogger<DefaultDPoPProofValidator> logger) : base(options, replayCache, clock, dataProtectionProvider, logger)
@@ -479,22 +524,18 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
         // Set the client certificate in the pipeline
         Pipeline.SetClientCertificate(clientCert);
 
-        // Act - Make a client credentials request using mTLS and DPoP
         var tokenClient = Pipeline.GetMtlsClient();
-
         var formParams = new Dictionary<string, string>
         {
             { "grant_type", "client_credentials" },
             { "client_id", clientId },
             { "scope", "scope1" }
         };
-
         var form = new FormUrlEncodedContent(formParams);
-        tokenClient.DefaultRequestHeaders.Add("DPoP", CreateDPoPProofToken());
+        tokenClient.DefaultRequestHeaders.Add("DPoP", CreateDPoPProofToken(htu: IdentityServerPipeline.TokenMtlsEndpoint));
 
         var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenMtlsEndpoint, form);
 
-        // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
 
         var json = await response.Content.ReadAsStringAsync();
