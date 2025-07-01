@@ -183,6 +183,7 @@ public static class IdentityServerBuilderExtensionsCore
     public static IIdentityServerBuilder AddCoreServices(this IIdentityServerBuilder builder)
     {
         builder.Services.AddTransient<IServerUrls, DefaultServerUrls>();
+        builder.Services.AddTransient<IMtlsEndpointGenerator, DefaultMtlsEndpointGenerator>();
         builder.Services.AddTransient<IIssuerNameService, DefaultIssuerNameService>();
         builder.Services.AddTransient<ISecretsListParser, SecretParser>();
         builder.Services.AddTransient<ISecretsListValidator, SecretValidator>();
