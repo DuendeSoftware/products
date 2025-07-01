@@ -86,6 +86,8 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
             }
 
             validationContext.DPoPProofToken = dpopHeader.First();
+            //Note: if the client authenticated with mTLS, we need to know to properly validate the htu of the DPoP proof token
+            validationContext.ClientCertificate = await context.Connection.GetClientCertificateAsync();
         }
 
         // Perform validations specific to PAR, as well as validation of the pushed parameters

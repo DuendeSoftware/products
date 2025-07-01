@@ -4,8 +4,11 @@
 
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Models;
 using IntegrationTests.Common;
 using IntegrationTests.Endpoints.Token;
+using PushedAuthorizationRequest = Duende.IdentityModel.Client.PushedAuthorizationRequest;
 
 namespace IntegrationTests.Endpoints.PushedAuthorization;
 
@@ -106,5 +109,45 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
 
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
+    }
+
+    [Fact]
+    public async Task push_authorization_with_mtls_client_auth_and_dpop_should_succeed()
+    {
+        var clientId = "mtls_dpop_client";
+        var clientCert = TestCert.Load();
+
+        // Add a client that requires mTLS and supports DPoP
+        var client = new Client
+        {
+            ClientId = clientId,
+            ClientSecrets =
+            {
+                new Secret
+                {
+                    Type = IdentityServerConstants.SecretTypes.X509CertificateThumbprint,
+                    Value = clientCert.Thumbprint
+                }
+            },
+            AllowedGrantTypes = GrantTypes.Code,
+            RedirectUris = { "https://client1/callback" },
+            AllowedScopes = { "scope1" },
+            RequireDPoP = true
+        };
+
+        Pipeline.Clients.Add(client);
+        Pipeline.Initialize();
+
+        // Set the client certificate in the pipeline
+        Pipeline.SetClientCertificate(clientCert);
+
+        var tokenClient = Pipeline.GetMtlsClient();
+        var proofToken = CreateDPoPProofToken(htu: IdentityServerPipeline.ParMtlsEndpoint);
+        tokenClient.DefaultRequestHeaders.Add("DPoP", proofToken);
+        var request = CreatePushedAuthorizationRequest(proofToken);
+
+        var response = await tokenClient.PushAuthorizationAsync(request);
+
+        response.IsError.ShouldBeFalse();
     }
 }
