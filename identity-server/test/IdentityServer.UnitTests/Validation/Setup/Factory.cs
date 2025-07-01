@@ -16,6 +16,7 @@ using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using UnitTests.Common;
 
 namespace UnitTests.Validation.Setup;
@@ -140,6 +141,7 @@ internal static class Factory
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
+            new DefaultMtlsEndpointGenerator(serverUrls, Options.Create(options)),
             TestLogger.Create<TokenRequestValidator>());
     }
 

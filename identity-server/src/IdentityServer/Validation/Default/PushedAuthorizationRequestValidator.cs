@@ -18,11 +18,11 @@ namespace Duende.IdentityServer.Validation;
 /// Default validator for pushed authorization requests. This validator performs
 /// checks that are specific to pushed authorization and also invokes the <see
 /// cref="IAuthorizeRequestValidator"/> to validate the pushed parameters as if
-/// they had been sent to the authorize endpoint directly. 
+/// they had been sent to the authorize endpoint directly.
 /// </summary>
 /// <remarks>
 /// Initializes a new instance of the <see
-/// cref="PushedAuthorizationRequestValidator"/> class. 
+/// cref="PushedAuthorizationRequestValidator"/> class.
 /// </remarks>
 /// <param name="authorizeRequestValidator">The authorize request validator,
 /// used to validate the pushed authorization parameters as if they were
@@ -33,6 +33,7 @@ namespace Duende.IdentityServer.Validation;
 /// <param name="serverUrls">The server urls service</param>
 /// <param name="licenseUsage">The feature manager</param>
 /// <param name="options">The IdentityServer Options</param>
+/// <param name="mtlsEndpointGenerator">The mTLS endpoint generator</param>
 /// <param name="logger">The logger</param>
 internal class PushedAuthorizationRequestValidator(
     IAuthorizeRequestValidator authorizeRequestValidator,
@@ -40,6 +41,7 @@ internal class PushedAuthorizationRequestValidator(
     IServerUrls serverUrls,
     LicenseUsageTracker licenseUsage,
     IdentityServerOptions options,
+    IMtlsEndpointGenerator mtlsEndpointGenerator,
     ILogger<PushedAuthorizationRequestValidator> logger) : IPushedAuthorizationRequestValidator
 {
     public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context)
@@ -57,17 +59,17 @@ internal class PushedAuthorizationRequestValidator(
 
         // -- DPoP Header Validation --
         // The client can send the public key of its DPoP proof key to us. We
-        // then bind its authorization code to the proof key and check for a 
+        // then bind its authorization code to the proof key and check for a
         // proof token signed with the key at the token endpoint.
-        //  
-        // There are two ways for the client to send its DPoP proof key public 
+        //
+        // There are two ways for the client to send its DPoP proof key public
         // key material to us:
         // 1. pass the dpop_jkt parameter with a JWK thumbprint (RFC 7638)
-        // 2. send a DPoP proof (which contains the public key as a JWK) in the 
+        // 2. send a DPoP proof (which contains the public key as a JWK) in the
         //    DPoP http header
         //
-        // If a proof is passed, then we validate it, compute the thumbprint of 
-        // the key within, and treat that as if it were passed as the dpop_jkt 
+        // If a proof is passed, then we validate it, compute the thumbprint of
+        // the key within, and treat that as if it were passed as the dpop_jkt
         // parameter.
         //
         // If a proof and a dpop_jkt are both passed, its an error if they don't
@@ -84,7 +86,7 @@ internal class PushedAuthorizationRequestValidator(
             }
 
             // validate proof token
-            var parUrl = serverUrls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.PushedAuthorization;
+            var parUrl = context.ClientCertificate == null ? serverUrls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.PushedAuthorization : mtlsEndpointGenerator.GetMtlsEndpointPath(ProtocolRoutePaths.PushedAuthorization);
             var dpopContext = new DPoPProofValidatonContext
             {
                 ProofToken = context.DPoPProofToken,

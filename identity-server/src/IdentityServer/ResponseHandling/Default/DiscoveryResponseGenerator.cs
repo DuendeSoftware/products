@@ -194,6 +194,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                     entries.Add(OidcConstants.Discovery.MtlsEndpointAliases, mtlsEndpoints);
                 }
 
+                //Note: This logic is currently duplicated in the DefaultMtlsEndpointGenerator as adding a new
+                //dependency here would be a breaking change in a non-major release.
                 string ConstructMtlsEndpoint(string endpoint)
                 {
                     // path based

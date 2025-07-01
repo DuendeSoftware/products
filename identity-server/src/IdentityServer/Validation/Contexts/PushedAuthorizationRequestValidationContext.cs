@@ -3,6 +3,7 @@
 
 
 using System.Collections.Specialized;
+using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Validation;
@@ -32,6 +33,11 @@ public class PushedAuthorizationRequestValidationContext
     /// The validation result of client authentication
     /// </summary>
     public Client Client { get; set; }
+
+    /// <summary>
+    /// The client certificate used on the mTLS connection.
+    /// </summary>
+    public X509Certificate2 ClientCertificate { get; set; }
 
     /// <summary>
     /// The DPoP proof token sent to the endpoint, if any

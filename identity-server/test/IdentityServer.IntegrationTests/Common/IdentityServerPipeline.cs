@@ -49,6 +49,7 @@ public class IdentityServerPipeline
     public const string EndSessionCallbackEndpoint = BaseUrl + "/connect/endsession/callback";
     public const string CheckSessionEndpoint = BaseUrl + "/connect/checksession";
     public const string ParEndpoint = BaseUrl + "/connect/par";
+    public const string ParMtlsEndpoint = BaseUrl + "/connect/mtls/par";
 
 
     public const string FederatedSignOutPath = "/signout-oidc";
