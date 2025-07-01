@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 namespace Duende.Bff.DynamicFrontends.Internal;
 
 internal class OpenIdConnectCallbackMiddleware(RequestDelegate next,
-    SelectedFrontend selector)
+    CurrentFrontendAccessor selector)
 {
     public async Task InvokeAsync(HttpContext context)
     {

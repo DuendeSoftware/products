@@ -46,7 +46,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
         if (selectedFrontend != null)
         {
             // Set the frontend in the HttpContext. 
-            serviceScope.ServiceProvider.GetRequiredService<SelectedFrontend>()
+            serviceScope.ServiceProvider.GetRequiredService<CurrentFrontendAccessor>()
                 .Set(selectedFrontend);
         }
 

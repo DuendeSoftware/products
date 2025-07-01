@@ -207,7 +207,7 @@ public class BffBuilderTests
         found.ConfigureOpenIdConnectOptions!(openIdConnectOptions);
         ValidateOpenIdConnectOptions(openIdConnectOptions, The.CallbackPath.ToString());
 
-        provider.GetRequiredService<SelectedFrontend>().Set(found);
+        provider.GetRequiredService<CurrentFrontendAccessor>().Set(found);
 
         var factory = provider.GetRequiredService<IOptionsFactory<CookieAuthenticationOptions>>();
         var options = factory.Create(found.CookieSchemeName);
@@ -251,7 +251,7 @@ public class BffBuilderTests
 
         ValidateOpenIdConnectOptions(openIdConnectOptions, The.CallbackPath.ToString());
 
-        provider.GetRequiredService<SelectedFrontend>().Set(found);
+        provider.GetRequiredService<CurrentFrontendAccessor>().Set(found);
 
         var cookieOptionsFactory = provider.GetRequiredService<IOptionsFactory<CookieAuthenticationOptions>>();
         var cookieOptions = cookieOptionsFactory.Create(found.CookieSchemeName);

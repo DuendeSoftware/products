@@ -14,14 +14,14 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
 {
     private readonly IOptions<BffOptions> _options;
     private readonly IHttpClientFactory _clientFactory;
-    private readonly SelectedFrontend _selectedFrontend;
+    private readonly CurrentFrontendAccessor _currentFrontendAccessor;
     private readonly HybridCache _cache;
     private readonly IIndexHtmlTransformer? _transformer;
     private readonly CancellationTokenSource _stopping = new();
 
     public IndexHtmlHttpClient(IOptions<BffOptions> options,
         IHttpClientFactory clientFactory,
-        SelectedFrontend selectedFrontend,
+        CurrentFrontendAccessor currentFrontendAccessor,
         HybridCache cache,
         FrontendCollection frontendCollection,
         ILogger<IndexHtmlHttpClient> logger,
@@ -29,7 +29,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
     {
         _options = options;
         _clientFactory = clientFactory;
-        _selectedFrontend = selectedFrontend;
+        _currentFrontendAccessor = currentFrontendAccessor;
         _cache = cache;
         _transformer = transformer;
 
@@ -53,7 +53,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
 
     public async Task<string?> GetIndexHtmlAsync(CT ct = default)
     {
-        if (!_selectedFrontend.TryGet(out var frontend))
+        if (!_currentFrontendAccessor.TryGet(out var frontend))
         {
             // Todo: log
             return null!;

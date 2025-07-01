@@ -7,24 +7,23 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.SessionManagement.SessionStore;
 
-internal class DefaultUserSessionPartitionKeyBuilder(
+internal class UserSessionPartitionKeyBuilder(
     IOptions<DataProtectionOptions> options,
-    SelectedFrontend selectedFrontend)
-    : IUserSessionPartitionKeyBuilder
+    CurrentFrontendAccessor currentFrontendAccessor)
 {
-    public string? BuildPartitionKey()
+    internal virtual string? BuildPartitionKey()
     {
-        var appName = options.Value.ApplicationDiscriminator;
-        if (selectedFrontend.TryGet(out var frontend))
+        var applicationDiscriminator = options.Value.ApplicationDiscriminator;
+        if (currentFrontendAccessor.TryGet(out var frontend))
         {
-            return appName == null
+            return applicationDiscriminator == null
                 ? frontend.Name.ToString()
-                : appName + "|" + frontend.Name.ToString();
+                : applicationDiscriminator + "|" + frontend.Name;
         }
 
         // In v3, a null value for an appname was used. This can cause issues, because
         // a null value is ignored from indexes, which causes unique constraints to be ignored.
 
-        return appName ?? "";
+        return applicationDiscriminator ?? "";
     }
 }

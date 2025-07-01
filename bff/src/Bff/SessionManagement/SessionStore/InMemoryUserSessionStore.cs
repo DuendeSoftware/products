@@ -11,7 +11,7 @@ namespace Duende.Bff.SessionManagement.SessionStore;
 /// In-memory user session store partitioned by partition key
 /// </summary>
 internal class InMemoryUserSessionStore(
-    IUserSessionPartitionKeyBuilder partitionKeyBuilder,
+    UserSessionPartitionKeyBuilder partitionKeyBuilder,
     ILogger<InMemoryUserSessionStore> logger) : IUserSessionStore
 {
     // A shorthand for the concurrent dictionary of user sessions, keyed by session key.

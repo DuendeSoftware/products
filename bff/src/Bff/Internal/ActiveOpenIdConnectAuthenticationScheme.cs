@@ -11,9 +11,9 @@ namespace Duende.Bff.Internal;
 /// <summary>
 /// Centralizes the logic for determining if the OpenID Connect authentication scheme should be configured based on the currently selected frontend and the default authentication scheme.
 /// </summary>
-/// <param name="selectedFrontend"></param>
+/// <param name="currentFrontendAccessor"></param>
 /// <param name="authOptions"></param>
-internal sealed class ActiveOpenIdConnectAuthenticationScheme(SelectedFrontend selectedFrontend, IOptions<AuthenticationOptions> authOptions)
+internal sealed class ActiveOpenIdConnectAuthenticationScheme(CurrentFrontendAccessor currentFrontendAccessor, IOptions<AuthenticationOptions> authOptions)
 {
     private readonly Scheme? _defaultAuthenticationScheme = Scheme.ParseOrDefault(authOptions.Value.DefaultChallengeScheme ?? authOptions.Value.DefaultScheme);
 
@@ -28,6 +28,6 @@ internal sealed class ActiveOpenIdConnectAuthenticationScheme(SelectedFrontend s
         _defaultAuthenticationScheme == schemeName ||
 
         // Or it's the correct scheme for the currently selected frontend
-        (selectedFrontend.TryGet(out var frontend) && schemeName == frontend.OidcSchemeName);
+        (currentFrontendAccessor.TryGet(out var frontend) && schemeName == frontend.OidcSchemeName);
 
 }

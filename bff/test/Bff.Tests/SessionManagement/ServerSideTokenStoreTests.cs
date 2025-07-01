@@ -22,7 +22,7 @@ public class ServerSideTokenStoreTests
 {
     public TestData The = new TestData();
 
-    private ClaimsPrincipal CreatePrincipal(string sub, string sid) => new ClaimsPrincipal(new ClaimsIdentity([
+    private ClaimsPrincipal CreatePrincipal(string sub, string sid) => new(new ClaimsIdentity([
         new Claim("sub", sub),
         new Claim("sid", sid)
     ], "pwd", "name", "role"));
@@ -82,11 +82,12 @@ public class ServerSideTokenStoreTests
         resultAfterClearing.TokenForSpecifiedParameters.ShouldBeNull();
     }
 
-    private class MockPartitioner : IUserSessionPartitionKeyBuilder
+    private class MockPartitioner()
+        : UserSessionPartitionKeyBuilder(null!, null!)
     {
         public string? PartitionKey { get; set; } = "default";
 
-        public string? BuildPartitionKey() => PartitionKey;
+        internal override string? BuildPartitionKey() => PartitionKey;
     }
 
     private class MockStoreTokensInAuthProps : IStoreTokensInAuthenticationProperties

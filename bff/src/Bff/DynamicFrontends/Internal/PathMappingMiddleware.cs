@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class PathMappingMiddleware(RequestDelegate next, SelectedFrontend selectedFrontend)
+internal class PathMappingMiddleware(RequestDelegate next, CurrentFrontendAccessor currentFrontendAccessor)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        if (selectedFrontend.TryGet(out var frontend))
+        if (currentFrontendAccessor.TryGet(out var frontend))
         {
             PathMapper.MapPath(context, frontend);
         }

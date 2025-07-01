@@ -31,7 +31,7 @@ public class UserSessionStoreTests : IAsyncLifetime
         var connectionString = $"Data Source={_dbFilePath}";
 
         services
-            .AddSingleton<SelectedFrontend>()
+            .AddSingleton<CurrentFrontendAccessor>()
             .AddSingleton<IHttpContextAccessor>(_fakeHttpContextAccessor)
             .AddLogging(l => l.AddProvider(new TestLoggerProvider(output.WriteLine, "db")))
             .AddBff()
@@ -928,11 +928,11 @@ public class UserSessionStoreTests : IAsyncLifetime
 
     public IDisposable UseFrontend(BffFrontend frontent)
     {
-        _provider.GetRequiredService<SelectedFrontend>().Set(frontent);
+        _provider.GetRequiredService<CurrentFrontendAccessor>().Set(frontent);
 
         return new DelegateDisposable(() =>
         {
-            _provider.GetRequiredService<SelectedFrontend>().Set(null!);
+            _provider.GetRequiredService<CurrentFrontendAccessor>().Set(null!);
         });
     }
 

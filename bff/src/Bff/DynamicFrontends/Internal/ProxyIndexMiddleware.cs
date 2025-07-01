@@ -7,7 +7,7 @@ namespace Duende.Bff.DynamicFrontends.Internal;
 
 internal class ProxyIndexMiddleware(RequestDelegate next,
     IIndexHtmlClient indexHtmlClient,
-    SelectedFrontend selectedFrontend)
+    CurrentFrontendAccessor currentFrontendAccessor)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -28,7 +28,7 @@ internal class ProxyIndexMiddleware(RequestDelegate next,
 
     private bool ShouldProxyIndexRoutes()
     {
-        if (!selectedFrontend.TryGet(out var frontend))
+        if (!currentFrontendAccessor.TryGet(out var frontend))
         {
             return false;
         }
