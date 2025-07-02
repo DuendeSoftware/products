@@ -19,6 +19,6 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
         // Note, in order for this to work, we'll need to inject this as config
         .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(Config.GetValue<Origin>("BffUrl3") ?? throw new InvalidOperationException("BFFUrl3 is null")));
 
-    public override void ConfigureApp(WebApplication app) => app.MapGet("/", (SelectedFrontend selectedFrontend) => "multi - " + selectedFrontend.Get().Name);
+    public override void ConfigureApp(WebApplication app) => app.MapGet("/", (CurrentFrontendAccessor currentFrontendAccessor) => "multi - " + currentFrontendAccessor.Get().Name);
 }
 

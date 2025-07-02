@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.DynamicFrontends;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestInfra;
 using Xunit.Abstractions;
@@ -112,19 +113,28 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
-            sessions.Count().ShouldBe(2);
-        }
+        (await GetUserSessions()).Count.ShouldBe(2);
 
         await Bff.BrowserClient.RevokeIdentityServerSession();
 
         {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
+            var sessions = await GetUserSessions();
             var session = sessions.Single();
             session.SessionId.ShouldBe(The.Sid);
+        }
+    }
+
+    /// <summary>
+    /// Get the user sessions for the provided frontend. If not provided, then the current frontend (if any) is used.
+    /// </summary>
+    /// <param name="forFrontend"></param>
+    /// <returns></returns>
+    private async Task<IReadOnlyCollection<UserSession>> GetUserSessions(BffFrontend? forFrontend = null)
+    {
+        using (var scope = Bff.ResolveForFrontend(forFrontend ?? CurrentFrontend))
+        {
+            var sessionStore = scope.Resolve<IUserSessionStore>();
+            return await sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
         }
     }
 
@@ -147,18 +157,10 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         await Bff.BrowserClient.Login();
 
-        {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
-            sessions.Count().ShouldBe(2);
-        }
+        (await GetUserSessions()).Count.ShouldBe(2);
 
         await Bff.BrowserClient.RevokeIdentityServerSession();
 
-        {
-            var store = Bff.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
-            sessions.ShouldBeEmpty();
-        }
+        (await GetUserSessions()).ShouldBeEmpty();
     }
 }

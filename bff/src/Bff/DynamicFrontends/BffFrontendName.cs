@@ -19,7 +19,8 @@ public readonly record struct BffFrontendName : IStronglyTypedValue<BffFrontendN
     public override string ToString() => Value;
 
     private static readonly ValidationRule<string>[] Validators = [
-        ValidationRules.MaxLength(1024)
+        ValidationRules.MaxLength(1024),
+        ValidationRules.AlphaNumericOrSelectSeparators()
     ];
 
     /// <summary>

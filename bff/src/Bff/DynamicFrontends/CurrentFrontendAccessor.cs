@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.DynamicFrontends;
 
-public sealed class SelectedFrontend(IHttpContextAccessor contextAccessor)
+public sealed class CurrentFrontendAccessor(IHttpContextAccessor contextAccessor)
 {
-    private const string HttpItemName = "Duende.Bff.SelectedFrontend";
+    private const string HttpItemName = "Duende.Bff.Frontend";
 
     private HttpContext Context => contextAccessor.HttpContext ?? throw new InvalidOperationException("Not running in a http context");
 
@@ -25,7 +25,7 @@ public sealed class SelectedFrontend(IHttpContextAccessor contextAccessor)
     {
         if (!TryGet(out var frontend))
         {
-            throw new InvalidOperationException("Frontend not found");
+            throw new InvalidOperationException("Frontend not found"); //TODO improve exception message
         }
 
         return frontend;

@@ -14,7 +14,7 @@ namespace Duende.Bff.Endpoints.Internal;
 // this decorates the real authentication service to detect when
 // Challenge of Forbid is being called for a BFF API endpoint
 internal class BffAuthenticationService(Decorator<IAuthenticationService> decorator,
-    SelectedFrontend selectedFrontend,
+    CurrentFrontendAccessor currentFrontendAccessor,
     ILogger<BffAuthenticationService> logger)
     : IAuthenticationService
 {
@@ -24,7 +24,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
 
     public async Task SignOutAsync(HttpContext context, string? scheme, AuthenticationProperties? properties)
     {
-        if (selectedFrontend.TryGet(out var frontend))
+        if (currentFrontendAccessor.TryGet(out var frontend))
         {
             if (scheme == frontend.CookieSchemeName.ToString() || scheme == frontend.OidcSchemeName.ToString())
             {
@@ -42,7 +42,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
 
     public async Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string? scheme)
     {
-        if (selectedFrontend.TryGet(out var frontend))
+        if (currentFrontendAccessor.TryGet(out var frontend))
         {
             if (scheme == frontend.CookieSchemeName.ToString() || scheme == frontend.OidcSchemeName.ToString())
             {

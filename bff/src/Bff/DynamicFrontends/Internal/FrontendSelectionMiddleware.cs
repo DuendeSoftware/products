@@ -15,7 +15,7 @@ internal class FrontendSelectionMiddleware(
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        var selector = context.RequestServices.GetRequiredService<SelectedFrontend>();
+        var selector = context.RequestServices.GetRequiredService<CurrentFrontendAccessor>();
 
         // Find out if there is a frontend registered.
         if (frontendSelector.TrySelectFrontend(context.Request, out var selectedFrontend))

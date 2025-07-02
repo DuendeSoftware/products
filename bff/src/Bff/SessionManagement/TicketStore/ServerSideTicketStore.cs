@@ -20,10 +20,10 @@ internal class ServerSideTicketStore(
     ILogger<ServerSideTicketStore> logger) : IServerTicketStore
 {
     /// <summary>
-    /// The "purpose" string to use when protecting and unprotecting server side
+    /// The "purpose" string to use when protecting and deprotecting server side
     /// tickets.
     /// </summary>
-    public static string DataProtectorPurpose = "Duende.Bff.ServerSideTicketStore";
+    public const string DataProtectorPurpose = "Duende.Bff.ServerSideTicketStore";
 
     private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
 

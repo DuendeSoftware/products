@@ -37,14 +37,14 @@ public static class ModelBuilderExtensions
 
             entity.HasKey(x => x.Id);
 
-            entity.Property(x => x.ApplicationName).HasMaxLength(200);
+            entity.Property(x => x.PartitionKey).HasMaxLength(200);
             entity.Property(x => x.Key).IsRequired().HasMaxLength(200);
             entity.Property(x => x.SubjectId).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Ticket).IsRequired();
 
-            entity.HasIndex(x => new { x.ApplicationName, x.Key }).IsUnique();
-            entity.HasIndex(x => new { x.ApplicationName, x.SubjectId, x.SessionId }).IsUnique();
-            entity.HasIndex(x => new { x.ApplicationName, x.SessionId }).IsUnique();
+            entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.Key }).IsUnique();
+            entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.SubjectId, x.SessionId }).IsUnique();
+            entity.HasIndex(x => new { ApplicationName = x.PartitionKey, x.SessionId }).IsUnique();
             entity.HasIndex(x => x.Expires);
         });
     }

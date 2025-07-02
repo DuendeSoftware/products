@@ -152,12 +152,12 @@ app.Map("/static", staticApp =>
 });
 
 
-app.MapGet("/local/self-contained", (SelectedFrontend frontend, ClaimsPrincipal user) =>
+app.MapGet("/local/self-contained", (CurrentFrontendAccessor currentFrontendAccessor, ClaimsPrincipal user) =>
 {
 
     var data = new
     {
-        FrontendName = frontend.Get().Name.ToString(),
+        FrontendName = currentFrontendAccessor.Get().Name.ToString(),
         Message = "Hello from self-contained local API",
         User = user!.FindFirst("name")?.Value ?? user!.FindFirst("sub")!.Value
     };
@@ -165,7 +165,7 @@ app.MapGet("/local/self-contained", (SelectedFrontend frontend, ClaimsPrincipal 
     return data;
 });
 
-app.MapGet("/local/invokes-external-api", async (SelectedFrontend frontend, IHttpClientFactory httpClientFactory, HttpContext c, CancellationToken ct) =>
+app.MapGet("/local/invokes-external-api", async (CurrentFrontendAccessor currentFrontendAccessor, IHttpClientFactory httpClientFactory, HttpContext c, CancellationToken ct) =>
 {
     var httpClient = httpClientFactory.CreateClient("api");
     var apiResult = await httpClient.GetAsync("/user-token");
@@ -174,7 +174,7 @@ app.MapGet("/local/invokes-external-api", async (SelectedFrontend frontend, IHtt
 
     var data = new
     {
-        FrontendName = frontend.Get().Name.ToString(),
+        FrontendName = currentFrontendAccessor.Get().Name.ToString(),
         Message = "Hello from local API that invokes a remote api",
         RemoteApiResponse = deserialized
     };
@@ -232,11 +232,11 @@ RouteConfig[] BuildYarpRoutes()
 }
 
 
-public class CustomIndexHtmlClient(HttpClient client, SelectedFrontend selectedFrontend) : IIndexHtmlClient
+public class CustomIndexHtmlClient(HttpClient client, CurrentFrontendAccessor currentFrontendAccessor) : IIndexHtmlClient
 {
     public async Task<string?> GetIndexHtmlAsync(CancellationToken ct)
     {
-        if (!selectedFrontend.TryGet(out var frontend))
+        if (!currentFrontendAccessor.TryGet(out var frontend))
         {
             return null;
         }

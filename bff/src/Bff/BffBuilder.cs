@@ -77,7 +77,7 @@ public sealed class BffBuilder(IServiceCollection services)
         // Add a public accessible interface to the frontend collection, so our users can access it
         Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
 
-        Services.AddTransient<SelectedFrontend>();
+        Services.AddTransient<CurrentFrontendAccessor>();
         Services.AddTransient<FrontendSelector>();
 
         // Add a scheme provider that will inject authentication schemes that are needed for the BFF
@@ -124,9 +124,8 @@ public sealed class BffBuilder(IServiceCollection services)
     /// <returns></returns>
     public BffBuilder AddServerSideSessions()
     {
-        Services
-            .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
-                PostConfigureApplicationCookieTicketStore>();
+        Services.AddSingleton<UserSessionPartitionKeyBuilder>();
+        Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
         Services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
         Services.AddTransient<ISessionRevocationService, SessionRevocationService>();
         Services.AddSingleton<IHostedService, SessionCleanupHost>();

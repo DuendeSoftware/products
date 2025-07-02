@@ -9,7 +9,7 @@ namespace Duende.Bff.DynamicFrontends;
 
 internal class BffConfigureOpenIdConnectOptions(
     TimeProvider timeProvider,
-    SelectedFrontend selectedFrontend,
+    CurrentFrontendAccessor currentFrontendAccessor,
     IOptions<BffConfiguration> bffConfiguration,
     IOptions<BffOptions> bffOptions
     ) : IConfigureNamedOptions<OpenIdConnectOptions>
@@ -37,7 +37,7 @@ internal class BffConfigureOpenIdConnectOptions(
 
         // See if there is a frontend selected
         // If so, apply the frontend's OpenID Connect options
-        if (!selectedFrontend.TryGet(out var frontEnd))
+        if (!currentFrontendAccessor.TryGet(out var frontEnd))
         {
             return;
         }

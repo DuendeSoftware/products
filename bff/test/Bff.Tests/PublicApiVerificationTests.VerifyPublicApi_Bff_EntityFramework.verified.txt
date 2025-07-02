@@ -50,7 +50,7 @@ namespace Duende.Bff.EntityFramework
     public class UserSessionEntity : Duende.Bff.SessionManagement.SessionStore.UserSession
     {
         public UserSessionEntity() { }
-        public string? ApplicationName { get; set; }
         public long Id { get; set; }
+        public string? PartitionKey { get; set; }
     }
 }

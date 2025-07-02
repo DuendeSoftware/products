@@ -10,7 +10,7 @@ using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Duende.Bff.Yarp.Internal;
 internal class RemoteRouteHandler(
-    SelectedFrontend selectedFrontend,
+    CurrentFrontendAccessor currentFrontendAccessor,
     IHttpForwarder httpForwarder,
     ITransformBuilder transformBuilder,
     IForwarderHttpClientFactory? forwarderHttpClientFactory = null,
@@ -22,7 +22,7 @@ internal class RemoteRouteHandler(
     public async Task<bool> HandleAsync(HttpContext context, CancellationToken ct)
     {
 
-        if (!selectedFrontend.TryGet(out var frontend))
+        if (!currentFrontendAccessor.TryGet(out var frontend))
         {
             return false;
         }

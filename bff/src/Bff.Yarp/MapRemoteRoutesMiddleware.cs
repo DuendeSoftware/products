@@ -24,7 +24,7 @@ internal class MapRemoteRoutesMiddleware(RequestDelegate next, RemoteRouteHandle
 
     private static bool ShouldMapRemoteRoutes(HttpContext context)
     {
-        var selectedFrontend = context.RequestServices.GetRequiredService<SelectedFrontend>();
+        var selectedFrontend = context.RequestServices.GetRequiredService<CurrentFrontendAccessor>();
 
         if (!selectedFrontend.TryGet(out var frontend))
         {

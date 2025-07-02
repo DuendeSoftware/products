@@ -18,7 +18,7 @@ namespace Duende.Bff.Endpoints.Internal;
 /// Service for handling login requests
 /// </summary>
 internal class DefaultLoginEndpoint(
-    SelectedFrontend selectedFrontend,
+    CurrentFrontendAccessor currentFrontendAccessor,
     IAuthenticationSchemeProvider authenticationSchemeProvider,
     IOptionsMonitor<OpenIdConnectOptions> openIdConnectOptionsMonitor,
     IOptions<BffOptions> bffOptions,
@@ -89,7 +89,7 @@ internal class DefaultLoginEndpoint(
     {
         Scheme scheme;
 
-        if (selectedFrontend.TryGet(out var frontEnd))
+        if (currentFrontendAccessor.TryGet(out var frontEnd))
         {
             scheme = frontEnd.OidcSchemeName;
         }

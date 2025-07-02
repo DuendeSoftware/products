@@ -12,7 +12,7 @@ internal class BffConfigureCookieOptions(
     TimeProvider timeProvider,
     IOptions<BffConfiguration> bffConfiguration,
     IOptions<BffOptions> bffOptions,
-    SelectedFrontend selectedFrontend
+    CurrentFrontendAccessor currentFrontendAccessor
     ) : IConfigureNamedOptions<CookieAuthenticationOptions>
 {
     private readonly BffOptions _bffOptions = bffOptions.Value;
@@ -24,7 +24,7 @@ internal class BffConfigureCookieOptions(
         // Normally, this is added by AuthenticationBuilder.PostConfigureAuthenticationSchemeOptions
         // but this is private API, so we need to do it ourselves.
         options.TimeProvider = timeProvider;
-        if (selectedFrontend.TryGet(out var frontEnd))
+        if (currentFrontendAccessor.TryGet(out var frontEnd))
         {
             if (frontEnd.SelectionCriteria.MatchingPath != null)
             {

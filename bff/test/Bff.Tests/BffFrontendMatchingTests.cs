@@ -19,9 +19,9 @@ public class BffFrontendMatchingTests : BffTestBase
         Bff.OnConfigureEndpoints += endpoints =>
         {
             endpoints.MapGet("/show-front-end",
-                (SelectedFrontend selectedFrontend) =>
+                (CurrentFrontendAccessor currentFrontendAccessor) =>
                 {
-                    if (selectedFrontend.TryGet(out var frontend))
+                    if (currentFrontendAccessor.TryGet(out var frontend))
                     {
                         return frontend.Name.ToString();
                     }

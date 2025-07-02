@@ -9,6 +9,7 @@ using Duende.Bff.Blazor;
 using Duende.Bff.Otel;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
+using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -19,10 +20,12 @@ namespace Bff.Tests.Blazor;
 
 public class ServerSideTokenStoreTests
 {
-    private ClaimsPrincipal CreatePrincipal(string sub, string sid) => new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim("sub", sub),
-            new Claim("sid", sid)
-        ], "pwd", "name", "role"));
+    public TestData The = new TestData();
+
+    private ClaimsPrincipal CreatePrincipal(string sub, string sid) => new(new ClaimsIdentity([
+        new Claim("sub", sub),
+        new Claim("sid", sid)
+    ], "pwd", "name", "role"));
 
     [Fact]
     public async Task Can_add_retrieve_and_remove_tokens()
@@ -38,12 +41,14 @@ public class ServerSideTokenStoreTests
         };
 
         // Create shared dependencies
-        var sessionStore = new InMemoryUserSessionStore();
+        var sessionStore =
+            new InMemoryUserSessionStore(new MockPartitioner(), new NullLogger<InMemoryUserSessionStore>());
         var dataProtection = new EphemeralDataProtectionProvider();
 
         // Use the ticket store to save the user's initial session
         // Note that we don't yet have tokens in the session
-        var sessionService = new ServerSideTicketStore(new BffMetrics(new DummyMeterFactory()), sessionStore, dataProtection, new NullLogger<ServerSideTicketStore>());
+        var sessionService = new ServerSideTicketStore(new BffMetrics(new DummyMeterFactory()), sessionStore,
+            dataProtection, new NullLogger<ServerSideTicketStore>());
         await sessionService.StoreAsync(new AuthenticationTicket(
             user,
             props,
@@ -77,6 +82,14 @@ public class ServerSideTokenStoreTests
         resultAfterClearing.TokenForSpecifiedParameters.ShouldBeNull();
     }
 
+    private class MockPartitioner()
+        : UserSessionPartitionKeyBuilder(null!, null!)
+    {
+        public string PartitionKey { get; set; } = "default";
+
+        internal override string BuildPartitionKey() => PartitionKey;
+    }
+
     private class MockStoreTokensInAuthProps : IStoreTokensInAuthenticationProperties
     {
         public UserToken? Stored;
@@ -89,7 +102,6 @@ public class ServerSideTokenStoreTests
             if (Stored != null)
             {
                 return new TokenForParameters(Stored, null);
-
             }
 
             if (RefreshToken != null)
@@ -124,8 +136,8 @@ public class ServerSideTokenStoreTests
 
         public Meter Create(MeterOptions options) => new Meter(options);
     }
-
 }
+
 public static class TokenResultExtensions
 {
     /// <summary>
