@@ -146,6 +146,20 @@
     <Project Path="identity-server/test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/identity-server/_solution-items/">
+    <File Path="identity-server/README.md" />
+  </Folder>
+  <Folder Name="/identity-server/_solution-items/.github/">
+    <File Path=".github/workflows/identity-server-ci.yml" />
+    <File Path=".github/workflows/identity-server-release.yml" />
+  </Folder>
+  <Folder Name="/identity-server/_solution-items/props/">
+    <File Path="Directory.Packages.props" />
+    <File Path="samples.props" />
+    <File Path="src.props" />
+    <File Path="templates.props" />
+    <File Path="test.props" />
+  </Folder>
   <Folder Name="/shared/">
     <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
   </Folder>
