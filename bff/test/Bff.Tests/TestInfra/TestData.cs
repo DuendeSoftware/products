@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -47,7 +48,11 @@ public class TestData
     public FakeTimeProvider Clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
 
     public DateTimeOffset CurrentTime => Clock.GetUtcNow();
-    public string UserSessionKey = PropertyName();
+
+    public PartitionKey PartitionKey = PartitionKey.Parse(PropertyName());
+
+    public UserKey UserKey = UserKey.Parse(PropertyName());
+    public UserSessionKey UserSessionKey => new UserSessionKey(PartitionKey, UserKey);
 
     public Type TokenRetrieverType = typeof(TestTokenRetriever);
 

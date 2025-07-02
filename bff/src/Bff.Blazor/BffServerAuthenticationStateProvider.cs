@@ -33,6 +33,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
     private readonly IUserSessionStore _sessionStore;
     private readonly PersistentComponentState _state;
     private readonly NavigationManager _navigation;
+    private readonly BuildUserSessionPartitionKey _userSessionPartitionBuilder;
     private readonly BffOptions _bffOptions;
     private readonly ILogger<BffServerAuthenticationStateProvider> _logger;
 
@@ -46,6 +47,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         IUserSessionStore sessionStore,
         PersistentComponentState persistentComponentState,
         NavigationManager navigation,
+        BuildUserSessionPartitionKey userSessionPartitionBuilder,
         IOptions<BffBlazorServerOptions> blazorOptions,
         IOptions<BffOptions> bffOptions,
         ILoggerFactory loggerFactory)
@@ -54,6 +56,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         _sessionStore = sessionStore;
         _state = persistentComponentState;
         _navigation = navigation;
+        _userSessionPartitionBuilder = userSessionPartitionBuilder;
         _bffOptions = bffOptions.Value;
         _logger = loggerFactory.CreateLogger<BffServerAuthenticationStateProvider>();
 
@@ -140,6 +143,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
 
         var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter
         {
+            PartitionKey = _userSessionPartitionBuilder(),
             SessionId = sid,
             SubjectId = sub
         },

@@ -23,6 +23,7 @@ namespace Duende.Bff.Endpoints.Internal;
 internal class DefaultBackchannelLogoutEndpoint(
     IAuthenticationSchemeProvider authenticationSchemeProvider,
     IOptionsMonitor<OpenIdConnectOptions> optionsMonitor,
+    BuildUserSessionPartitionKey partitionKeyBuilder,
     ISessionRevocationService userSession,
     ILogger<DefaultBackchannelLogoutEndpoint> logger) : IBackchannelLogoutEndpoint
 {
@@ -51,6 +52,7 @@ internal class DefaultBackchannelLogoutEndpoint(
 
                     await userSession.RevokeSessionsAsync(new UserSessionsFilter
                     {
+                        PartitionKey = partitionKeyBuilder(),
                         SubjectId = sub,
                         SessionId = sid
                     }, ct);

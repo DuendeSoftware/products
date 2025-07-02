@@ -8,6 +8,8 @@ namespace Duende.Bff.SessionManagement.SessionStore;
 /// </summary>
 public sealed class UserSessionsFilter
 {
+    public required PartitionKey PartitionKey { get; init; }
+
     /// <summary>
     /// The subject ID
     /// </summary>

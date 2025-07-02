@@ -42,13 +42,21 @@ public class ServerSideTokenStoreTests
 
         // Create shared dependencies
         var sessionStore =
-            new InMemoryUserSessionStore(new MockPartitioner(), new NullLogger<InMemoryUserSessionStore>());
+            new InMemoryUserSessionStore(new NullLogger<InMemoryUserSessionStore>());
         var dataProtection = new EphemeralDataProtectionProvider();
 
         // Use the ticket store to save the user's initial session
         // Note that we don't yet have tokens in the session
-        var sessionService = new ServerSideTicketStore(new BffMetrics(new DummyMeterFactory()), sessionStore,
-            dataProtection, new NullLogger<ServerSideTicketStore>());
+        var sessionService = new ServerSideTicketStore(
+            metrics: new BffMetrics(new DummyMeterFactory()),
+            store: sessionStore,
+            dataProtectionProvider: dataProtection,
+            partitionKeyBuilder: () => The.PartitionKey,
+            accessor: new FakeHttpContextAccessor()
+            {
+                HttpContext = new DefaultHttpContext()
+            },
+            logger: new NullLogger<ServerSideTicketStore>());
         await sessionService.StoreAsync(new AuthenticationTicket(
             user,
             props,
@@ -61,11 +69,12 @@ public class ServerSideTokenStoreTests
         };
 
         var sut = new ServerSideTokenStore(
-            tokensInProps,
-            sessionStore,
-            dataProtection,
-            new NullLogger<ServerSideTokenStore>(),
-            Substitute.For<AuthenticationStateProvider, IHostEnvironmentAuthenticationStateProvider>());
+            tokensInAuthProperties: tokensInProps,
+            sessionStore: sessionStore,
+            dataProtectionProvider: dataProtection,
+            userSessionPartitionKeyBuilder: () => The.PartitionKey,
+            logger: new NullLogger<ServerSideTokenStore>(),
+            authenticationStateProvider: Substitute.For<AuthenticationStateProvider, IHostEnvironmentAuthenticationStateProvider>());
 
 
         await sut.StoreTokenAsync(user, expectedToken);
@@ -80,14 +89,6 @@ public class ServerSideTokenStoreTests
         var resultAfterClearing = await sut.GetTokenAsync(user)
             .GetToken();
         resultAfterClearing.TokenForSpecifiedParameters.ShouldBeNull();
-    }
-
-    private class MockPartitioner()
-        : UserSessionPartitionKeyBuilder(null!, null!)
-    {
-        public string PartitionKey { get; set; } = "default";
-
-        internal override string BuildPartitionKey() => PartitionKey;
     }
 
     private class MockStoreTokensInAuthProps : IStoreTokensInAuthenticationProperties

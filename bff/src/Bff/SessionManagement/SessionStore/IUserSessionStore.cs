@@ -15,7 +15,7 @@ public interface IUserSessionStore
     /// <param name="key"></param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task<UserSession?> GetUserSessionAsync(string key, CT ct = default);
+    Task<UserSession?> GetUserSessionAsync(UserSessionKey key, CT ct = default);
 
     /// <summary>
     /// Creates a user session
@@ -32,7 +32,7 @@ public interface IUserSessionStore
     /// <param name="session"></param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task UpdateUserSessionAsync(string key, UserSessionUpdate session, CT ct = default);
+    Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, CT ct = default);
 
     /// <summary>
     /// Deletes a user session
@@ -40,7 +40,7 @@ public interface IUserSessionStore
     /// <param name="key"></param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task DeleteUserSessionAsync(string key, CT ct = default);
+    Task DeleteUserSessionAsync(UserSessionKey key, CT ct = default);
 
     /// <summary>
     /// Queries user sessions based on the filter.

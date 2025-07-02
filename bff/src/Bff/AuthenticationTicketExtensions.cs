@@ -105,7 +105,7 @@ public static class AuthenticationTicketExtensions
             {
                 logger.AuthenticationTicketEnvelopeVersionInvalid(
                     LogLevel.Debug,
-                    session.Key);
+                    session.GetUserSessionKey());
                 return null;
             }
 
@@ -116,14 +116,14 @@ public static class AuthenticationTicketExtensions
             }
             catch (CryptographicException ex)
             {
-                logger.AuthenticationTicketPayloadInvalid(ex, LogLevel.Warning, session.Key);
+                logger.AuthenticationTicketPayloadInvalid(ex, LogLevel.Warning, session.GetUserSessionKey());
                 return null;
             }
 
             var ticket = JsonSerializer.Deserialize<AuthenticationTicketLite>(payload, JsonOptions);
             if (ticket == null)
             {
-                logger.AuthenticationTicketPayloadInvalid(ex: null, LogLevel.Warning, session.Key);
+                logger.AuthenticationTicketPayloadInvalid(ex: null, LogLevel.Warning, session.GetUserSessionKey());
                 return null;
             }
 
@@ -145,7 +145,7 @@ public static class AuthenticationTicketExtensions
         catch (JsonException ex)
         {
             // failed deserialize
-            logger.AuthenticationTicketFailedToDeserialize(ex, LogLevel.Warning, session.Key);
+            logger.AuthenticationTicketFailedToDeserialize(ex, LogLevel.Warning, session.GetUserSessionKey());
         }
 
         return null;
