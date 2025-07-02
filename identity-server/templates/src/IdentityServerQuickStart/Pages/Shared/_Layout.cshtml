@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+    <title>Duende IdentityServer</title>
+
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" asp-append-version="true" />
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <div class="d-flex flex-row flex-nowrap vh-100">
+
+        <!-- Sidebar -->
+        <div class="sidebar flex-shrink-0 h-100 p-0">
+            <partial name="_Nav" />
+        </div>
+
+        <!-- Main + Footer wrapper: now full-height column -->
+        <div class="flex-fill d-flex flex-column h-100">
+
+            <!-- Scrollable main -->
+            <main class="p-3 flex-grow-1 overflow-auto">
+                @RenderBody()
+            </main>
+
+            <!-- Footer locked to bottom, full-width of this column -->
+            <partial name="_footer" />
+
+        </div>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.slim.min.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" type="module" asp-append-version="true"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

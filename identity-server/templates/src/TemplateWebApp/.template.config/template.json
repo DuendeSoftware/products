@@ -1,0 +1,60 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "IdentityServer"
+  ],
+  "name": "Duende IdentityServer Web Client",
+  "identity": "Duende.IdentityServer.WebClient",
+  "groupIdentity": "Duende.IdentityServer.WebClient",
+  "shortName": [
+    "is-webclient"
+  ],
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "TemplateWebApp",
+  "preferNameDirectory": true,
+  "primaryOutputs": [
+    {
+      "path": "TemplateWebApp.csproj"
+    }
+  ],
+  "symbols": {
+    "RenameCommonNamespace": {
+      "datatype": "string",
+      "displayName": "Fix common host namespace.",
+      "replaces": "TemplateWebApp",
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "safe_namespace"
+    },
+
+    "Authority": {
+      "type": "parameter",
+      "datatype": "string",
+      "displayName": "Identity provider authority URL",
+      "defaultValue": "https://demo.duendesoftware.com"
+    },
+    "ClientId": {
+      "type": "parameter",
+      "datatype": "string",
+      "displayName": "Identity provider client ID",
+      "defaultValue": "interactive.confidential"
+    },
+    "ClientSecret": {
+      "type": "parameter",
+      "datatype": "string",
+      "displayName": "Identity provider client secret",
+      "defaultValue": "secret"
+    },
+    "Scopes": {
+      "type": "parameter",
+      "datatype": "string",
+      "displayName": "Identity provider scopes",
+      "defaultValue": "openid profile email"
+    }
+  }
+}

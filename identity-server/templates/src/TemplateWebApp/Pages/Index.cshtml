@@ -1,0 +1,80 @@
+@page
+
+@using Microsoft.AspNetCore.Authentication
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">
+        Welcome
+        @if (Model.IsAuthenticated)
+        {
+            var userName = User.FindFirst("name")?.Value ?? "Anonymous";
+            <span>@userName</span>
+        }
+
+    </h1>
+    <p>
+        This is a basic minimal Web Application, preconfigured using current best practices.
+    </p>
+
+    @if (!Model.IsAuthenticated)
+    {
+        <p>
+            To get started, click <a asp-area="" asp-page="/Login">Login</a> to sign in using the Duende IdentityServer Demo server.
+        </p>
+    }
+</div>
+
+@if (Model.IsAuthenticated)
+{
+    <div class="row">
+        <div class="col">
+
+            <div class="card text-bg-light mb-3">
+                <h5 class="card-header">
+                    <i class="bi bi-bar-chart-steps"></i>
+                    Claims
+                </h5>
+                <div class="card-body pt-2">
+
+
+                    <dl>
+                        @foreach (var claim in User.Claims)
+                        {
+                            <dt>@claim.Type</dt>
+                            <dd>@claim.Value</dd>
+                        }
+                    </dl>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col">
+
+            <div class="card text-bg-light mb-3">
+                <h5 class="card-header">
+                    <i class="bi bi-sliders2"></i>
+                    Properties
+                </h5>
+                <div class="card-body pt-2 text-wrap text-break">
+
+                    <dl>
+                        @foreach (var prop in (await HttpContext.AuthenticateAsync()).Properties!.Items)
+                        {
+                            <dt>@prop.Key</dt>
+                            <dd>@prop.Value</dd>
+                        }
+                    </dl>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
