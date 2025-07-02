@@ -15,19 +15,15 @@
     <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
   </Folder>
   <Folder Name="/bff/" />
-  <Folder Name="/bff/performance/">
-    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
-    <Project Path="bff/performance/Bff.Performance/Bff.Performance.csproj"/>
-  </Folder>
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.EF/Hosts.Bff.EF.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.InMemory/Hosts.Bff.InMemory.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.MultiFrontend/Hosts.Bff.MultiFrontend.csproj" />
+    <Project Path="bff/hosts/Hosts.Bff.Performance/Hosts.Bff.Performance.csproj" />
     <Project Path="bff/hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj" />
     <Project Path="bff/hosts/Hosts.ServiceDefaults/Hosts.ServiceDefaults.csproj" />
-    <Project Path="bff/hosts/Hosts.Bff.Performance/Hosts.Bff.Performance.csproj" />
   </Folder>
   <Folder Name="/bff/hosts/Blazor/" />
   <Folder Name="/bff/hosts/Blazor/PerComponent/">
@@ -45,6 +41,10 @@
   </Folder>
   <Folder Name="/bff/migrations/">
     <Project Path="bff/migrations/UserSessionDb/UserSessionDb.csproj" />
+  </Folder>
+  <Folder Name="/bff/performance/">
+    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
+    <Project Path="bff/performance/Bff.Performance/Bff.Performance.csproj" />
   </Folder>
   <Folder Name="/bff/src/">
     <Project Path="bff/src/Bff.Blazor.Client/Bff.Blazor.Client.csproj" />
@@ -148,6 +148,7 @@
   </Folder>
   <Folder Name="/identity-server/_solution-items/">
     <File Path="identity-server/README.md" />
+    <File Path="identity-server\CHANGELOG.md" />
   </Folder>
   <Folder Name="/identity-server/_solution-items/.github/">
     <File Path=".github/workflows/identity-server-ci.yml" />
