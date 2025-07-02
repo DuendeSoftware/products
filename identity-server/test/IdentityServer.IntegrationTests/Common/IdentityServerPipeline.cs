@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
@@ -22,6 +23,8 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
 namespace IntegrationTests.Common;
 
@@ -57,6 +60,7 @@ public class IdentityServerPipeline
 
     public IdentityServerOptions Options { get; set; }
     public List<Client> Clients { get; set; } = new List<Client>();
+    public Dictionary<string, JsonWebKey> ClientKeys { get; set; } = new Dictionary<string, JsonWebKey>();
     public List<IdentityResource> IdentityScopes { get; set; } = new List<IdentityResource>();
     public List<ApiResource> ApiResources { get; set; } = new List<ApiResource>();
     public List<ApiScope> ApiScopes { get; set; } = new List<ApiScope>();
@@ -436,6 +440,71 @@ public class IdentityServerPipeline
         if (extra != null)
         {
             foreach (var (key, value) in extra)
+            {
+                parameters[key] = value;
+            }
+        }
+
+        return await PushAuthorizationRequestAsync(parameters);
+    }
+
+    public async Task<(JsonDocument, HttpStatusCode)> PushAuthorizationRequestUsingJarAsync(
+        string clientId = "client2",
+        string clientSecret = "secret",
+        string responseType = "id_token",
+        string scope = "openid profile",
+        string redirectUri = "https://client2/callback",
+        string nonce = "123_nonce",
+        string state = "123_state",
+        DateTime? expires = null,
+        Dictionary<string, string> extraJwt = null,
+        Dictionary<string, string> extraForm = null
+    )
+    {
+        var jwtPayload = new Dictionary<string, string>
+        {
+            { "response_type", responseType },
+            { "client_id", clientId },
+            { "redirect_uri", redirectUri },
+            { "scope", scope },
+            { "state", state },
+            { "nonce", nonce }
+        };
+
+        if (extraJwt != null)
+        {
+            foreach (var (key, value) in extraJwt)
+            {
+                jwtPayload[key] = value;
+            }
+        }
+
+        if (!ClientKeys.TryGetValue(clientId, out var securityKey))
+        {
+            throw new InvalidOperationException("Client key not found");
+        }
+
+        expires ??= DateTime.UtcNow.AddMinutes(10);
+        var jwt = new JwtSecurityToken(
+            new JwtHeader(new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256)),
+            new JwtPayload(clientId, BaseUrl,
+                jwtPayload.Select(x => new Claim(x.Key, x.Value)),
+                notBefore: null,
+                expires: expires));
+
+        var jwtHandler = new JwtSecurityTokenHandler();
+        var jar = jwtHandler.WriteToken(jwt);
+
+        var parameters = new Dictionary<string, string>
+        {
+            { "client_id", clientId },
+            { "client_secret", clientSecret },
+            { "request", jar }
+        };
+
+        if (extraForm != null)
+        {
+            foreach (var (key, value) in extraForm)
             {
                 parameters[key] = value;
             }
