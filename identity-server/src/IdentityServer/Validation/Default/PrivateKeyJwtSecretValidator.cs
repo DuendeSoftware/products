@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -96,7 +97,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             // enforce strict audience validation.
             if (tokenForHeader.TryGetHeaderValue<string>("typ", out var jwtTyp))
             {
-                if (string.Equals(jwtTyp, "client-authentication+jwt", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(jwtTyp, JwtClaimTypes.JwtTypes.ClientAuthentication, StringComparison.OrdinalIgnoreCase))
                 {
                     enforceStrictAud = true;
                 }
@@ -141,7 +142,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             };
 
             // Strict audience validation requires that the token type be "client-authentication+jwt"
-            tokenValidationParameters.ValidTypes = ["client-authentication+jwt"];
+            tokenValidationParameters.ValidTypes = [JwtClaimTypes.JwtTypes.ClientAuthentication];
         }
         else
         {
