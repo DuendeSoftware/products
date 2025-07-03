@@ -3,6 +3,7 @@
 
 using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.SessionManagement.SessionStore;
@@ -10,12 +11,21 @@ namespace Duende.Bff.SessionManagement.SessionStore;
 public delegate PartitionKey BuildUserSessionPartitionKey();
 
 internal class UserSessionPartitionKeyBuilder(
+    IHttpContextAccessor accessor,
     IOptions<DataProtectionOptions> options,
     CurrentFrontendAccessor currentFrontendAccessor)
 {
     public PartitionKey BuildPartitionKey()
     {
         var applicationDiscriminator = options.Value.ApplicationDiscriminator?.Replace('|', ':');
+
+        if (accessor.HttpContext == null)
+        {
+            // Todo: EV: Blazor + multiple frontends do not mix. 
+            // When not running in a http context, we can only use the application discriminator.
+            return PartitionKey.Parse(applicationDiscriminator ?? "");
+        }
+
         if (currentFrontendAccessor.TryGet(out var frontend))
         {
             return PartitionKey.Parse(applicationDiscriminator == null

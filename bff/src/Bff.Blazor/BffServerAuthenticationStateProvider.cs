@@ -33,7 +33,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
     private readonly IUserSessionStore _sessionStore;
     private readonly PersistentComponentState _state;
     private readonly NavigationManager _navigation;
-    private readonly BuildUserSessionPartitionKey _userSessionPartitionBuilder;
+    private readonly BuildUserSessionPartitionKey _buildUserSessionPartitionKey;
     private readonly BffOptions _bffOptions;
     private readonly ILogger<BffServerAuthenticationStateProvider> _logger;
 
@@ -47,7 +47,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         IUserSessionStore sessionStore,
         PersistentComponentState persistentComponentState,
         NavigationManager navigation,
-        BuildUserSessionPartitionKey userSessionPartitionBuilder,
+        BuildUserSessionPartitionKey buildUserSessionPartitionKey,
         IOptions<BffBlazorServerOptions> blazorOptions,
         IOptions<BffOptions> bffOptions,
         ILoggerFactory loggerFactory)
@@ -56,7 +56,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         _sessionStore = sessionStore;
         _state = persistentComponentState;
         _navigation = navigation;
-        _userSessionPartitionBuilder = userSessionPartitionBuilder;
+        _buildUserSessionPartitionKey = buildUserSessionPartitionKey;
         _bffOptions = bffOptions.Value;
         _logger = loggerFactory.CreateLogger<BffServerAuthenticationStateProvider>();
 
@@ -141,13 +141,14 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         var sid = authenticationState.User.FindFirstValue(JwtClaimTypes.SessionId);
         var sub = authenticationState.User.FindFirstValue(JwtClaimTypes.Subject);
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter
+        var userSessionsFilter = new UserSessionsFilter
         {
-            PartitionKey = _userSessionPartitionBuilder(),
             SessionId = sid,
             SubjectId = sub
-        },
-            ct);
+        };
+        var partitionKey = _buildUserSessionPartitionKey();
+
+        var sessions = await _sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter, ct);
         return sessions.Count != 0;
     }
 }

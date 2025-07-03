@@ -77,10 +77,10 @@ internal class InMemoryUserSessionStore(
         return Task.CompletedTask;
     }
 
-    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CT ct = default)
+    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default)
     {
         filter.Validate();
-        var partition = GetPartition(filter.PartitionKey);
+        var partition = GetPartition(partitionKey);
 
         var query = partition.Values.AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
@@ -97,10 +97,10 @@ internal class InMemoryUserSessionStore(
         return Task.FromResult((IReadOnlyCollection<UserSession>)results);
     }
 
-    public Task DeleteUserSessionsAsync(UserSessionsFilter filter, CT ct = default)
+    public Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default)
     {
         filter.Validate();
-        var partition = GetPartition(filter.PartitionKey);
+        var partition = GetPartition(partitionKey);
 
         var query = partition.Values.AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))

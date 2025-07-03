@@ -98,11 +98,12 @@ public class ServerSideTicketStoreTests : BffTestBase
         {
             var sessionStore = scope.Resolve<IUserSessionStore>();
 
-            return await sessionStore.GetUserSessionsAsync(new UserSessionsFilter
+            var partitionKey = scope.Resolve<BuildUserSessionPartitionKey>()();
+            var userSessionsFilter = new UserSessionsFilter
             {
-                PartitionKey = scope.Resolve<BuildUserSessionPartitionKey>()(),
                 SubjectId = The.Sub
-            });
+            };
+            return await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter);
         }
     }
 

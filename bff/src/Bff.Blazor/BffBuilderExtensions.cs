@@ -16,6 +16,7 @@ public static class
     {
         ArgumentNullException.ThrowIfNull(builder);
 
+        // Todo: EV: make sure server side sessions is added, as it doesn't work otherwise. 
         builder.Services
             .AddOpenIdConnectAccessTokenManagement()
             .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()

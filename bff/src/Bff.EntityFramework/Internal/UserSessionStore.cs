@@ -105,9 +105,8 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task DeleteUserSessionsAsync(UserSessionsFilter filter, CT ct)
+    public async Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct)
     {
-        var partitionKey = filter.PartitionKey;
         filter.Validate();
         var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
@@ -177,10 +176,9 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CT ct)
+    public async Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct)
     {
         filter.Validate();
-        var partitionKey = filter.PartitionKey;
         var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {

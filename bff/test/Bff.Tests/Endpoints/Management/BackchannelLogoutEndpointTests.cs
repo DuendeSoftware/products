@@ -124,6 +124,7 @@ public class BackchannelLogoutEndpointTests : BffTestBase
         }
     }
 
+
     /// <summary>
     /// Get the user sessions for the provided frontend. If not provided, then the current frontend (if any) is used.
     /// </summary>
@@ -134,11 +135,12 @@ public class BackchannelLogoutEndpointTests : BffTestBase
         using (var scope = Bff.ResolveForFrontend(forFrontend ?? CurrentFrontend))
         {
             var sessionStore = scope.Resolve<IUserSessionStore>();
-            return await sessionStore.GetUserSessionsAsync(new UserSessionsFilter
+            var partitionKey = scope.Resolve<BuildUserSessionPartitionKey>()();
+            var userSessionsFilter = new UserSessionsFilter
             {
-                PartitionKey = scope.Resolve<BuildUserSessionPartitionKey>()(),
                 SubjectId = The.Sub
-            });
+            };
+            return await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter);
         }
     }
 

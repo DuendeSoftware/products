@@ -174,7 +174,6 @@ public class TestDataBuilder(TestData the)
 
     public UserSessionsFilter UserSessionsFilter() => new()
     {
-        PartitionKey = The.PartitionKey,
         SubjectId = The.Sub
     };
 

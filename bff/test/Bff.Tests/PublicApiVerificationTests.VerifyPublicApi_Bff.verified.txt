@@ -464,9 +464,9 @@ namespace Duende.Bff.SessionManagement.SessionStore
     {
         System.Threading.Tasks.Task CreateUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSession session, System.Threading.CancellationToken ct = default);
         System.Threading.Tasks.Task DeleteUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionKey key, System.Threading.CancellationToken ct = default);
-        System.Threading.Tasks.Task DeleteUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task DeleteUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.PartitionKey partitionKey, Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
         System.Threading.Tasks.Task<Duende.Bff.SessionManagement.SessionStore.UserSession?> GetUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionKey key, System.Threading.CancellationToken ct = default);
-        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Duende.Bff.SessionManagement.SessionStore.UserSession>> GetUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Duende.Bff.SessionManagement.SessionStore.UserSession>> GetUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.PartitionKey partitionKey, Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
         System.Threading.Tasks.Task UpdateUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionKey key, Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate session, System.Threading.CancellationToken ct = default);
     }
     public interface IUserSessionStoreCleanup
@@ -515,16 +515,10 @@ namespace Duende.Bff.SessionManagement.SessionStore
         public string Ticket { get; set; }
         public void CopyTo(Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate other) { }
     }
-    [System.Runtime.CompilerServices.RequiredMember]
     public sealed class UserSessionsFilter
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
-        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public UserSessionsFilter() { }
         public string? SessionId { get; set; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.SessionManagement.SessionStore.PartitionKey PartitionKey { get; init; }
         public string? SubjectId { get; init; }
         public void Validate() { }
     }

@@ -20,6 +20,7 @@ internal class SessionRevocationService(
     IOptions<BffOptions> options,
     IServerTicketStore ticketStore,
     IUserSessionStore sessionStore,
+    BuildUserSessionPartitionKey buildUserPartitionKey,
     IOpenIdConnectUserTokenEndpoint tokenEndpoint,
     ILogger<SessionRevocationService> logger) : ISessionRevocationService
 {
@@ -52,6 +53,6 @@ internal class SessionRevocationService(
             }
         }
 
-        await sessionStore.DeleteUserSessionsAsync(filter, ct);
+        await sessionStore.DeleteUserSessionsAsync(buildUserPartitionKey(), filter, ct);
     }
 }

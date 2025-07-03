@@ -61,12 +61,13 @@ internal class ServerSideTokenStore(
 
         logger.RetrievingSession(LogLevel.Debug, sid, sub);
 
-        var sessions = await sessionStore.GetUserSessionsAsync(new UserSessionsFilter
+        var userSessionsFilter = new UserSessionsFilter
         {
-            PartitionKey = userSessionPartitionKeyBuilder(),
             SubjectId = sub,
             SessionId = sid
-        });
+        };
+        var partitionKey = userSessionPartitionKeyBuilder();
+        var sessions = await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter);
 
         if (sessions.Count == 0)
         {

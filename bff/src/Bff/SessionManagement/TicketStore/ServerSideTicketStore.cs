@@ -38,9 +38,8 @@ internal class ServerSideTicketStore(
         // it's possible that the user re-triggered OIDC (somehow) prior to
         // the session DB records being cleaned up, so we should preemptively remove
         // conflicting session records for this sub/sid combination
-        await store.DeleteUserSessionsAsync(new UserSessionsFilter
+        await store.DeleteUserSessionsAsync(partitionKeyBuilder(), new UserSessionsFilter
         {
-            PartitionKey = partitionKeyBuilder(),
             SubjectId = ticket.GetSubjectId(),
             SessionId = ticket.GetSessionId()
         }, ct);
@@ -160,7 +159,7 @@ internal class ServerSideTicketStore(
 
         var list = new List<AuthenticationTicket>();
 
-        var sessions = await store.GetUserSessionsAsync(filter, ct);
+        var sessions = await store.GetUserSessionsAsync(partitionKeyBuilder(), filter, ct);
         foreach (var session in sessions)
         {
 

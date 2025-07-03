@@ -45,16 +45,18 @@ public interface IUserSessionStore
     /// <summary>
     /// Queries user sessions based on the filter.
     /// </summary>
+    /// <param name="partitionKey">The partition key to use</param>
     /// <param name="filter"></param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CT ct = default);
+    Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default);
 
     /// <summary>
     /// Deletes user sessions based on the filter.
     /// </summary>
+    /// <param name="partitionKey">The partition key</param>
     /// <param name="filter"></param>
     /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task DeleteUserSessionsAsync(UserSessionsFilter filter, CT ct = default);
+    Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default);
 }

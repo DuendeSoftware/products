@@ -257,9 +257,8 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
         {
-            PartitionKey = The.PartitionKey,
             SubjectId = "sub2"
         });
         items.Count().ShouldBe(3);
@@ -308,9 +307,8 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
         {
-            PartitionKey = The.PartitionKey,
             SubjectId = "invalid"
         });
         items.Count().ShouldBe(0);
@@ -345,9 +343,8 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
         {
-            PartitionKey = The.PartitionKey,
             SessionId = "sid2_2"
         });
         items.Count().ShouldBe(1);
@@ -389,9 +386,8 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
         {
-            PartitionKey = The.PartitionKey,
             SessionId = "invalid"
         });
         items.Count().ShouldBe(0);
@@ -431,9 +427,8 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
         {
-            PartitionKey = The.PartitionKey,
             SubjectId = "sub2",
             SessionId = "sid2_2"
         });
@@ -477,27 +472,24 @@ public class UserSessionStoreTests : IAsyncLifetime
         }));
 
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+            var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
             {
-                PartitionKey = The.PartitionKey,
                 SubjectId = "invalid",
                 SessionId = "invalid"
             });
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+            var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
             {
-                PartitionKey = The.PartitionKey,
                 SubjectId = "sub1",
                 SessionId = "invalid"
             });
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
+            var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
             {
-                PartitionKey = The.PartitionKey,
                 SubjectId = "invalid",
                 SessionId = "sid1_1"
             });
@@ -508,9 +500,8 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task GetUserSessionsAsync_for_missing_sub_and_sid_should_throw()
     {
-        Func<Task> f = () => _subject.GetUserSessionsAsync(new UserSessionsFilter()
+        Func<Task> f = () => _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter()
         {
-            PartitionKey = The.PartitionKey,
         });
         await f.ShouldThrowAsync<Exception>();
     }
@@ -551,9 +542,8 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         })); ;
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
         {
-            PartitionKey = The.PartitionKey,
             SubjectId = "sub2"
         });
         _database.UserSessions.Count().ShouldBe(3);
@@ -594,9 +584,8 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
         {
-            PartitionKey = The.PartitionKey,
             SubjectId = "invalid"
         });
         _database.UserSessions.Count().ShouldBe(6);
@@ -636,7 +625,7 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { PartitionKey = The.PartitionKey, SessionId = "sid2_2" });
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter { SessionId = "sid2_2" });
         _database.UserSessions.Count().ShouldBe(5);
         _database.UserSessions.Count(x => x.SessionId == "sid2_2").ShouldBe(0);
     }
@@ -674,7 +663,7 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SubjectId = "sub3";
             x.SessionId = "sid3_1";
         }));
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { PartitionKey = The.PartitionKey, SessionId = "invalid" });
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter { SessionId = "invalid" });
         _database.UserSessions.Count().ShouldBe(6);
     }
 
@@ -712,7 +701,7 @@ public class UserSessionStoreTests : IAsyncLifetime
             x.SessionId = "sid3_1";
         }));
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { PartitionKey = The.PartitionKey, SubjectId = "sub2", SessionId = "sid2_2" });
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" });
         _database.UserSessions.Count().ShouldBe(5);
         _database.UserSessions.Count(x => x.SubjectId == "sub2" && x.SessionId == "sid2_2").ShouldBe(0);
     }
@@ -752,27 +741,24 @@ public class UserSessionStoreTests : IAsyncLifetime
         }));
 
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+            await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
             {
-                PartitionKey = The.PartitionKey,
                 SubjectId = "invalid",
                 SessionId = "invalid"
             });
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+            await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
             {
-                PartitionKey = The.PartitionKey,
                 SubjectId = "sub1",
                 SessionId = "invalid"
             });
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+            await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
             {
-                PartitionKey = The.PartitionKey,
                 SubjectId = "invalid",
                 SessionId = "sid1_1"
             });
@@ -783,9 +769,8 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task DeleteUserSessionsAsync_for_missing_sub_and_sid_should_throw()
     {
-        Func<Task> f = () => _subject.DeleteUserSessionsAsync(new UserSessionsFilter()
+        Func<Task> f = () => _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter()
         {
-            PartitionKey = The.PartitionKey,
         });
         await f.ShouldThrowAsync<Exception>();
     }
