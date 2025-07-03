@@ -130,6 +130,7 @@
 		<PackageVersion Include="Xunit.SkippableFact" Version="1.5.23" />
 		
 		<PackageVersion Include="Yarp.ReverseProxy" Version="2.1.0" />
+		<PackageVersion Include="Verify.Xunit" Version="26.6.0" />
 
 		<!-- Transitive Dependencies -->
 		<!-- These packages are all transitive dependencies that would
