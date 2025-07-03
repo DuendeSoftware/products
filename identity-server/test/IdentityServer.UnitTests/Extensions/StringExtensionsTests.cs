@@ -206,7 +206,7 @@ public class StringExtensionsTests
     [Trait("Category", Category)]
     public void ReadQueryStringAsNameValueCollection_should_handle_empty_string()
     {
-        string url = string.Empty;
+        var url = string.Empty;
         var nvc = url.ReadQueryStringAsNameValueCollection();
         nvc.Count.ShouldBe(0);
     }
@@ -236,8 +236,9 @@ public class StringExtensionsTests
     [Trait("Category", Category)]
     public void ReadQueryStringAsNameValueCollection_should_not_ignore_fragment()
     {
-        // This is existing behavior. We might not actually want the fragment to be included, but
-        // I was reluctant to change that behavior during a refactor.
+        // This was test was written much after ReadQueryStringAsNameValueCollection, when the method was refactored.
+        // Fragments not being ignored was the pre-existing behavior. We might not actually want the fragment to be
+        // included, byt I was reluctant to change that behavior during a refactor.
         var url = "https://example.com/path?foo=bar&baz=qux#fragment";
         var nvc = url.ReadQueryStringAsNameValueCollection();
         nvc.Count.ShouldBe(2);

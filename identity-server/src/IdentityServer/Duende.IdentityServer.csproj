@@ -20,11 +20,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Telemetry\Tracing.cs">
+    <Compile Include="..\Shared\Telemetry\Tracing.cs">
       <Link>Tracing.cs</Link>
     </Compile>
-    <Compile Include="..\Telemetry\Telemetry.cs">
+    <Compile Include="..\Shared\Telemetry\Telemetry.cs">
       <Link>Telemetry.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Extensions\StringExtensions.cs">
+      <Link>Extensions\StringExtensions.cs</Link>
     </Compile>
   </ItemGroup>
 
