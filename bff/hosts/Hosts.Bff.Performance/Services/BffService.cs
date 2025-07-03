@@ -4,6 +4,7 @@
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Yarp;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
@@ -25,6 +26,13 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
         // Configure Kestrel to listen on the specified Uri
         builder.WebHost.UseUrls(urls);
 
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.All;
+            options.KnownProxies.Clear();
+            options.KnownNetworks.Clear();
+        });
+
         builder.Services.AddAuthorization();
         ConfigureServices(builder.Services);
 
@@ -35,6 +43,7 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
 
         // Build and run the web app
         var app = builder.Build();
+        app.UseForwardedHeaders();
 
         app.UseHttpsRedirection();
 

@@ -34,6 +34,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
                     options.Events.RaiseSuccessEvents = true;
 
                     options.EmitStaticAudienceClaim = true;
+                    options.KeyManagement.KeyPath = Path.GetTempPath();
                 })
                 .AddTestUsers([new TestUser()
                 {
@@ -56,7 +57,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
         isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
 
         var bffUrls = config.AsEnumerable()
-            .Where(x => x.Key.StartsWith("BffUrl"))
+            .Where(x => x.Key.StartsWith("BFFURL"))
             .Select(x => x.Value)
             .OfType<string>();
 
