@@ -13,7 +13,6 @@ namespace Duende.Bff.EntityFramework.Internal;
 /// </summary>
 #pragma warning disable CA1812 // internal class never instantiated? It is, but via DI
 internal sealed class UserSessionStore(
-    UserSessionPartitionKeyBuilder partitionKeyBuilder,
     ISessionDbContext sessionDbContext,
     ILogger<UserSessionStore> logger)
     : IUserSessionStore, IUserSessionStoreCleanup
@@ -22,12 +21,19 @@ internal sealed class UserSessionStore(
     /// <inheritdoc/>
     public async Task CreateUserSessionAsync(UserSession session, CT ct)
     {
+        if (!session.PartitionKey.HasValue)
+        {
+            throw new InvalidOperationException(nameof(session.PartitionKey) + " cannot be null");
+        }
+
+        if (!session.Key.HasValue)
+        {
+            throw new InvalidOperationException(nameof(session.Key));
+        }
+
         logger.CreatingUserSession(LogLevel.Debug, session.SubjectId, session.SessionId);
 
-        var item = new UserSessionEntity
-        {
-            PartitionKey = partitionKeyBuilder.BuildPartitionKey()
-        };
+        var item = new UserSessionEntity();
         session.CopyTo(item);
         sessionDbContext.UserSessions.Add(item);
 
@@ -62,13 +68,14 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task DeleteUserSessionAsync(string key, CT ct)
+    public async Task DeleteUserSessionAsync(UserSessionKey key, CT ct)
     {
-        var partitionKey = partitionKeyBuilder.BuildPartitionKey();
+        var userKey = key.UserKey;
+        var partitionKey = key.PartitionKey;
         var items = await sessionDbContext.UserSessions
-            .Where(x => x.Key == key && x.PartitionKey == partitionKey)
+            .Where(x => x.Key == userKey && x.PartitionKey == partitionKey)
             .ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.PartitionKey == partitionKey);
+        var item = items.SingleOrDefault(x => x.Key == userKey && x.PartitionKey == partitionKey);
 
         if (item == null)
         {
@@ -98,10 +105,9 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task DeleteUserSessionsAsync(UserSessionsFilter filter, CT ct)
+    public async Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct)
     {
         filter.Validate();
-        var partitionKey = partitionKeyBuilder.BuildPartitionKey();
         var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
@@ -147,12 +153,13 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task<UserSession?> GetUserSessionAsync(string key, CT ct)
+    public async Task<UserSession?> GetUserSessionAsync(UserSessionKey key, CT ct)
     {
-        var partitionKey = partitionKeyBuilder.BuildPartitionKey();
-        var items = await sessionDbContext.UserSessions.Where(x => x.Key == key && x.PartitionKey == partitionKey)
+        var userKey = key.UserKey;
+        var partitionKey = key.PartitionKey;
+        var items = await sessionDbContext.UserSessions.Where(x => x.Key == userKey && x.PartitionKey == partitionKey)
             .ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.PartitionKey == partitionKey);
+        var item = items.SingleOrDefault(x => x.Key == userKey && x.PartitionKey == partitionKey);
 
         if (item == null)
         {
@@ -169,10 +176,9 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CT ct)
+    public async Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct)
     {
         filter.Validate();
-        var partitionKey = partitionKeyBuilder.BuildPartitionKey();
         var query = sessionDbContext.UserSessions.Where(x => x.PartitionKey == partitionKey).AsQueryable();
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
@@ -208,13 +214,15 @@ internal sealed class UserSessionStore(
     }
 
     /// <inheritdoc/>
-    public async Task UpdateUserSessionAsync(string key, UserSessionUpdate session, CT ct)
+    public async Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, CT ct)
     {
-        var partitionKey = partitionKeyBuilder.BuildPartitionKey();
+        var userKey = key.UserKey;
+        var partitionKey = key.PartitionKey;
+
         var items = await sessionDbContext.UserSessions
-            .Where(x => x.Key == key && x.PartitionKey == partitionKey)
+            .Where(x => x.Key == userKey && x.PartitionKey == partitionKey)
             .ToArrayAsync(ct);
-        var item = items.SingleOrDefault(x => x.Key == key && x.PartitionKey == partitionKey);
+        var item = items.SingleOrDefault(x => x.Key == userKey && x.PartitionKey == partitionKey);
         if (item == null)
         {
             logger.NoRecordFoundForKey(LogLevel.Debug, key);

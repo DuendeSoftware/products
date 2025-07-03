@@ -21,6 +21,7 @@ internal class ServerSideTokenStore(
     IStoreTokensInAuthenticationProperties tokensInAuthProperties,
     IUserSessionStore sessionStore,
     IDataProtectionProvider dataProtectionProvider,
+    BuildUserSessionPartitionKey userSessionPartitionKeyBuilder,
     ILogger<ServerSideTokenStore> logger,
     AuthenticationStateProvider authenticationStateProvider) : IUserTokenStore
 {
@@ -60,11 +61,13 @@ internal class ServerSideTokenStore(
 
         logger.RetrievingSession(LogLevel.Debug, sid, sub);
 
-        var sessions = await sessionStore.GetUserSessionsAsync(new UserSessionsFilter
+        var userSessionsFilter = new UserSessionsFilter
         {
             SubjectId = sub,
             SessionId = sid
-        });
+        };
+        var partitionKey = userSessionPartitionKeyBuilder();
+        var sessions = await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter);
 
         if (sessions.Count == 0)
         {
@@ -114,6 +117,6 @@ internal class ServerSideTokenStore(
 
         session.Ticket = ticket.Serialize(_protector);
 
-        await sessionStore.UpdateUserSessionAsync(session.Key, session);
+        await sessionStore.UpdateUserSessionAsync(session.GetUserSessionKey(), session);
     }
 }

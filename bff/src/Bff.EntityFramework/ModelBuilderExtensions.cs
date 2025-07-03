@@ -1,8 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Duende.Bff.EntityFramework;
 
@@ -37,8 +39,8 @@ public static class ModelBuilderExtensions
 
             entity.HasKey(x => x.Id);
 
-            entity.Property(x => x.PartitionKey).HasMaxLength(200);
-            entity.Property(x => x.Key).IsRequired().HasMaxLength(200);
+            entity.Property(x => x.PartitionKey).HasConversion<PartitionKeyConverter>().HasMaxLength(200);
+            entity.Property(x => x.Key).HasConversion<UserKeyConverter>().IsRequired().HasMaxLength(200);
             entity.Property(x => x.SubjectId).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Ticket).IsRequired();
 
@@ -48,4 +50,12 @@ public static class ModelBuilderExtensions
             entity.HasIndex(x => x.Expires);
         });
     }
+
+    public class UserKeyConverter() : ValueConverter<UserKey, string>(
+        key => key.ToString(),
+        value => UserKey.Parse(value));
+
+    public class PartitionKeyConverter() : ValueConverter<PartitionKey, string>(
+        key => key.ToString(),
+        value => PartitionKey.Parse(value));
 }

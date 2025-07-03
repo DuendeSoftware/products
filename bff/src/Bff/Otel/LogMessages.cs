@@ -3,6 +3,7 @@
 
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -18,20 +19,20 @@ internal static partial class LogMessages
         message:
         $"Deserializing AuthenticationTicket envelope failed or found incorrect version for key {{{OTelParameters.Key}}}")]
     public static partial void AuthenticationTicketEnvelopeVersionInvalid(this ILogger logger, LogLevel logLevel,
-        string key);
+        UserSessionKey key);
 
     [LoggerMessage(
         message:
         $"Failed to unprotect AuthenticationTicket payload for key {{{OTelParameters.Key}}}")]
     public static partial void AuthenticationTicketPayloadInvalid(this ILogger logger, Exception? ex, LogLevel logLevel,
-        string key);
+        UserSessionKey key);
 
     [LoggerMessage(
         message:
         $"Failed to deserialize AuthenticationTicket payload for key {{{OTelParameters.Key}}}")]
     public static partial void AuthenticationTicketFailedToDeserialize(this ILogger logger, Exception? ex,
         LogLevel logLevel,
-        string key);
+        UserSessionKey key);
 
     [LoggerMessage(
         Message = "FrontendSelection: No frontends registered in the store.")]
@@ -130,7 +131,7 @@ internal static partial class LogMessages
     [LoggerMessage(
         message:
         $"No record found in user session store when trying to delete user session for key {{{OTelParameters.Key}}}")]
-    public static partial void NoRecordFoundForKey(this ILogger logger, LogLevel logLevel, string key);
+    public static partial void NoRecordFoundForKey(this ILogger logger, LogLevel logLevel, UserSessionKey key);
 
     [LoggerMessage(
         message:

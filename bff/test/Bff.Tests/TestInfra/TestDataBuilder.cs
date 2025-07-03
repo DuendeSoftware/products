@@ -172,7 +172,10 @@ public class TestDataBuilder(TestData the)
         },
     };
 
-    public UserSessionsFilter UserSessionsFilter() => new() { SubjectId = The.Sub };
+    public UserSessionsFilter UserSessionsFilter() => new()
+    {
+        SubjectId = The.Sub
+    };
 
     internal FrontendProxyConfiguration FrontendProxyConfiguration() => new()
     {
@@ -181,7 +184,8 @@ public class TestDataBuilder(TestData the)
 
     public UserSession UserSession() => new()
     {
-        Key = The.UserSessionKey,
+        PartitionKey = The.PartitionKey,
+        Key = The.UserKey,
         SessionId = "sid",
         SubjectId = "sub",
         Created = new DateTime(2020, 3, 1, 9, 12, 33, DateTimeKind.Utc),

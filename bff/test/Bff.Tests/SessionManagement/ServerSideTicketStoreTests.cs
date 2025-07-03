@@ -97,7 +97,13 @@ public class ServerSideTicketStoreTests : BffTestBase
         using (var scope = Bff.ResolveForFrontend(forFrontend ?? CurrentFrontend))
         {
             var sessionStore = scope.Resolve<IUserSessionStore>();
-            return await sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = The.Sub });
+
+            var partitionKey = scope.Resolve<BuildUserSessionPartitionKey>()();
+            var userSessionsFilter = new UserSessionsFilter
+            {
+                SubjectId = The.Sub
+            };
+            return await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter);
         }
     }
 

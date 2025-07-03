@@ -124,6 +124,7 @@ public sealed class BffBuilder(IServiceCollection services)
     /// <returns></returns>
     public BffBuilder AddServerSideSessions()
     {
+        Services.AddSingleton<BuildUserSessionPartitionKey>(sp => sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
         Services.AddSingleton<UserSessionPartitionKeyBuilder>();
         Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
         Services.AddTransient<IServerTicketStore, ServerSideTicketStore>();

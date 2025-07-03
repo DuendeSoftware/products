@@ -23,6 +23,8 @@ public class UserSessionStoreTests : IAsyncLifetime
     public TestDataBuilder Some => new TestDataBuilder(The);
     private readonly string _dbFilePath;
 
+    private UserSessionKey invalidUserSessionKey => new UserSessionKey(The.PartitionKey, UserKey.Parse("wrong"));
+
     public UserSessionStoreTests(ITestOutputHelper output)
     {
         var services = new ServiceCollection();
@@ -70,7 +72,7 @@ public class UserSessionStoreTests : IAsyncLifetime
     {
         await _subject.CreateUserSessionAsync(Some.UserSession());
 
-        using var session = UseFrontend(Some.BffFrontend());
+        using (UseFrontend(Some.BffFrontend()))
         {
             await _subject.CreateUserSessionAsync(Some.UserSession());
         }
@@ -87,7 +89,7 @@ public class UserSessionStoreTests : IAsyncLifetime
         var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
 
         // Now create a session (same sid, different ticket) in a different frontend
-        using var session = UseFrontend(Some.BffFrontend());
+        using (UseFrontend(Some.BffFrontend()))
         {
             await _subject.CreateUserSessionAsync(Some.UserSession().With(x => x.Ticket = "different"));
             var item2 = await _subject.GetUserSessionAsync(The.UserSessionKey);
@@ -115,7 +117,7 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task GetUserSessionAsync_for_invalid_key_should_return_null()
     {
-        var item = await _subject.GetUserSessionAsync("invalid");
+        var item = await _subject.GetUserSessionAsync(new UserSessionKey(The.PartitionKey, UserKey.Parse("wrong")));
         item.ShouldBeNull();
     }
 
@@ -138,7 +140,7 @@ public class UserSessionStoreTests : IAsyncLifetime
 
             var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
             item.ShouldNotBeNull();
-            item.Key.ShouldBe(The.UserSessionKey);
+            item.Key.ShouldBe(The.UserKey);
             item.SubjectId.ShouldBe("sub");
             item.SessionId.ShouldBe("sid");
             item.Ticket.ShouldBe("ticket2");
@@ -159,7 +161,7 @@ public class UserSessionStoreTests : IAsyncLifetime
 
             var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
             item.ShouldNotBeNull();
-            item.Key.ShouldBe(The.UserSessionKey);
+            item.Key.ShouldBe(The.UserKey);
             item.SubjectId.ShouldBe("sub2");
             item.SessionId.ShouldBe("sid2");
             item.Ticket.ShouldBe("ticket3");
@@ -172,14 +174,14 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task UpdateUserSessionAsync_for_invalid_key_should_succeed()
     {
-        await _subject.UpdateUserSessionAsync("key123", new UserSessionUpdate
+        await _subject.UpdateUserSessionAsync(The.UserSessionKey, new UserSessionUpdate
         {
             Ticket = "ticket2",
             Renewed = new DateTime(2024, 1, 3, 5, 7, 9, DateTimeKind.Utc),
             Expires = new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc)
         });
 
-        var item = await _subject.GetUserSessionAsync("key123");
+        var item = await _subject.GetUserSessionAsync(The.UserSessionKey);
         item.ShouldBeNull();
     }
 
@@ -219,157 +221,132 @@ public class UserSessionStoreTests : IAsyncLifetime
 
     [Fact]
     public async Task DeleteUserSessionAsync_for_invalid_key_should_succeed() =>
-        await _subject.DeleteUserSessionAsync("invalid");
+        await _subject.DeleteUserSessionAsync(invalidUserSessionKey);
 
     [Fact]
     public async Task GetUserSessionsAsync_for_valid_sub_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2" });
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+        {
+            SubjectId = "sub2"
+        });
         items.Count().ShouldBe(3);
         items.Select(x => x.SubjectId).Distinct().ToArray().ShouldBeEquivalentTo(new[] { "sub2" });
         items.Select(x => x.SessionId).ToArray().ShouldBeEquivalentTo(new[] { "sid2_1", "sid2_2", "sid2_3", });
     }
 
+    private UserSession BuildUserSessionWithRandomId() => new UserSession()
+    {
+        Key = UserKey.Parse(Guid.NewGuid().ToString()),
+        PartitionKey = The.PartitionKey,
+        Ticket = "ticket"
+    };
+
     [Fact]
     public async Task GetUserSessionsAsync_for_invalid_sub_should_return_empty()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid" });
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+        {
+            SubjectId = "invalid"
+        });
         items.Count().ShouldBe(0);
     }
 
     [Fact]
     public async Task GetUserSessionsAsync_for_valid_sid_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SessionId = "sid2_2" });
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+        {
+            SessionId = "sid2_2"
+        });
         items.Count().ShouldBe(1);
         items.Select(x => x.SubjectId).ToArray().ShouldBeEquivalentTo(new[] { "sub2" });
         items.Select(x => x.SessionId).ToArray().ShouldBeEquivalentTo(new[] { "sid2_2" });
@@ -378,101 +355,83 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task GetUserSessionsAsync_for_invalid_sid_should_return_empty()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SessionId = "invalid" });
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+        {
+            SessionId = "invalid"
+        });
         items.Count().ShouldBe(0);
     }
 
     [Fact]
     public async Task GetUserSessionsAsync_for_valid_sub_and_sid_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
-        { SubjectId = "sub2", SessionId = "sid2_2" });
+        var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+        {
+            SubjectId = "sub2",
+            SessionId = "sid2_2"
+        });
         items.Count().ShouldBe(1);
         items.Select(x => x.SubjectId).ToArray().ShouldBeEquivalentTo(new[] { "sub2" });
         items.Select(x => x.SessionId).ToArray().ShouldBeEquivalentTo(new[] { "sid2_2" });
@@ -481,62 +440,59 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task GetUserSessionsAsync_for_invalid_sub_and_sid_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
-            { SubjectId = "invalid", SessionId = "invalid" });
+            var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+            {
+                SubjectId = "invalid",
+                SessionId = "invalid"
+            });
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
-            { SubjectId = "sub1", SessionId = "invalid" });
+            var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+            {
+                SubjectId = "sub1",
+                SessionId = "invalid"
+            });
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter
-            { SubjectId = "invalid", SessionId = "sid1_1" });
+            var items = await _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+            {
+                SubjectId = "invalid",
+                SessionId = "sid1_1"
+            });
             items.Count().ShouldBe(0);
         }
     }
@@ -544,7 +500,9 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task GetUserSessionsAsync_for_missing_sub_and_sid_should_throw()
     {
-        Func<Task> f = () => _subject.GetUserSessionsAsync(new UserSessionsFilter());
+        Func<Task> f = () => _subject.GetUserSessionsAsync(The.PartitionKey, new UserSessionsFilter()
+        {
+        });
         await f.ShouldThrowAsync<Exception>();
     }
 
@@ -552,50 +510,42 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task DeleteUserSessionsAsync_for_valid_sub_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
-        {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2" });
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
+        {
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
+        {
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
+        {
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
+        {
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
+        {
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
+        {
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        })); ;
+
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+        {
+            SubjectId = "sub2"
+        });
         _database.UserSessions.Count().ShouldBe(3);
         _database.UserSessions.Count(x => x.SubjectId == "sub2").ShouldBe(0);
     }
@@ -603,100 +553,79 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task DeleteUserSessionsAsync_for_invalid_sub_should_do_nothing()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid" });
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+        {
+            SubjectId = "invalid"
+        });
         _database.UserSessions.Count().ShouldBe(6);
     }
 
     [Fact]
     public async Task DeleteUserSessionsAsync_for_valid_sid_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SessionId = "sid2_2" });
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter { SessionId = "sid2_2" });
         _database.UserSessions.Count().ShouldBe(5);
         _database.UserSessions.Count(x => x.SessionId == "sid2_2").ShouldBe(0);
     }
@@ -704,100 +633,75 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task DeleteUserSessionsAsync_for_invalid_sid_should_do_nothing()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
-
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SessionId = "invalid" });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter { SessionId = "invalid" });
         _database.UserSessions.Count().ShouldBe(6);
     }
 
     [Fact]
     public async Task DeleteUserSessionsAsync_for_valid_sub_and_sid_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" });
+        await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" });
         _database.UserSessions.Count().ShouldBe(5);
         _database.UserSessions.Count(x => x.SubjectId == "sub2" && x.SessionId == "sid2_2").ShouldBe(0);
     }
@@ -805,62 +709,59 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task DeleteUserSessionsAsync_for_invalid_sub_and_sid_should_succeed()
     {
-        await _subject.CreateUserSessionAsync(new UserSession
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub1",
-            SessionId = "sid1_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub1";
+            x.SessionId = "sid1_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_1",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_1";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_2",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_2";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub2",
-            SessionId = "sid2_3",
-        });
-        await _subject.CreateUserSessionAsync(new UserSession
+            x.SubjectId = "sub2";
+            x.SessionId = "sid2_3";
+        }));
+        await _subject.CreateUserSessionAsync(BuildUserSessionWithRandomId().With(x =>
         {
-            Key = Guid.NewGuid().ToString(),
-            Ticket = "ticket",
-            SubjectId = "sub3",
-            SessionId = "sid3_1",
-        });
+            x.SubjectId = "sub3";
+            x.SessionId = "sid3_1";
+        }));
 
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
-            { SubjectId = "invalid", SessionId = "invalid" });
+            await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+            {
+                SubjectId = "invalid",
+                SessionId = "invalid"
+            });
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
-            { SubjectId = "sub1", SessionId = "invalid" });
+            await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+            {
+                SubjectId = "sub1",
+                SessionId = "invalid"
+            });
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
-            { SubjectId = "invalid", SessionId = "sid1_1" });
+            await _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter
+            {
+                SubjectId = "invalid",
+                SessionId = "sid1_1"
+            });
             _database.UserSessions.Count().ShouldBe(6);
         }
     }
@@ -868,7 +769,9 @@ public class UserSessionStoreTests : IAsyncLifetime
     [Fact]
     public async Task DeleteUserSessionsAsync_for_missing_sub_and_sid_should_throw()
     {
-        Func<Task> f = () => _subject.DeleteUserSessionsAsync(new UserSessionsFilter());
+        Func<Task> f = () => _subject.DeleteUserSessionsAsync(The.PartitionKey, new UserSessionsFilter()
+        {
+        });
         await f.ShouldThrowAsync<Exception>();
     }
 
@@ -883,12 +786,12 @@ public class UserSessionStoreTests : IAsyncLifetime
 
         using var scope0 = provider.CreateScope();
         var ctx0 = scope0.ServiceProvider.GetRequiredService<SessionDbContext>();
-        var key = Guid.NewGuid().ToString();
+        var key = UserKey.Parse(Guid.NewGuid().ToString());
         ctx0.UserSessions.Add(new UserSessionEntity
         {
+            PartitionKey = The.PartitionKey,
             Key = key,
             Ticket = "ticket",
-            PartitionKey = "app",
             SubjectId = "sub",
             SessionId = "sid",
         });
@@ -928,11 +831,11 @@ public class UserSessionStoreTests : IAsyncLifetime
 
     public IDisposable UseFrontend(BffFrontend frontent)
     {
-        _provider.GetRequiredService<CurrentFrontendAccessor>().Set(frontent);
-
+        var original = The.PartitionKey;
+        The.PartitionKey = PartitionKey.Parse(frontent.Name.ToString());
         return new DelegateDisposable(() =>
         {
-            _provider.GetRequiredService<CurrentFrontendAccessor>().Set(null!);
+            The.PartitionKey = original;
         });
     }
 
