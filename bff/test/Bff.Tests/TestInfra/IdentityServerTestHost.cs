@@ -33,7 +33,6 @@ public class IdentityServerTestHost : TestHost
                     options.EmitStaticAudienceClaim = true;
                     options.UserInteraction.CreateAccountUrl = "/account/create";
                 })
-
                 .AddInMemoryClients(Clients)
                 .AddInMemoryIdentityResources(IdentityResources)
                 .AddInMemoryApiScopes(ApiScopes);
@@ -41,57 +40,59 @@ public class IdentityServerTestHost : TestHost
             idsrv.AddBackChannelLogoutHttpClient();
         };
 
-        OnConfigure += app =>
+        OnConfigureApp += app =>
         {
-            app.UseRouting();
-
-            app.UseIdentityServer();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
+            app.MapGet("/account/create", context =>
             {
-                endpoints.MapGet("/account/create", context =>
-                {
-                    return Task.CompletedTask;
-                });
+                return Task.CompletedTask;
+            });
 
-                endpoints.MapGet("/account/login", async ctx =>
-                {
-                    var props = PropsToSignIn ?? new AuthenticationProperties();
-                    await ctx.SignInAsync(UserToSignIn, props);
-                });
+            app.MapGet("/account/login", async ctx =>
+            {
+                var props = PropsToSignIn ?? new AuthenticationProperties();
+                await ctx.SignInAsync(UserToSignIn, props);
+            });
 
-                endpoints.MapGet("/account/logout", async ctx =>
-                {
-                    // signout as if the user were prompted
-                    await ctx.SignOutAsync(PropsToSignIn);
+            app.MapGet("/account/logout", async ctx =>
+            {
+                // signout as if the user were prompted
+                await ctx.SignOutAsync(PropsToSignIn);
 
-                    var logoutId = ctx.Request.Query["logoutId"];
-                    var interaction = ctx.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
+                var logoutId = ctx.Request.Query["logoutId"];
+                var interaction = ctx.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
 
-                    var signOutContext = await interaction.GetLogoutContextAsync(logoutId);
+                var signOutContext = await interaction.GetLogoutContextAsync(logoutId);
 
-                    ctx.Response.Redirect(signOutContext.PostLogoutRedirectUri ?? "/");
-                });
+                ctx.Response.Redirect(signOutContext.PostLogoutRedirectUri ?? "/");
+            });
 
-                endpoints.MapGet("/__signin", async ctx =>
-                {
-                    var props = PropsToSignIn ?? new AuthenticationProperties();
-                    await ctx.SignInAsync(UserToSignIn, props);
+            app.MapGet("/__signin", async ctx =>
+            {
+                var props = PropsToSignIn ?? new AuthenticationProperties();
+                await ctx.SignInAsync(UserToSignIn, props);
 
-                    ctx.Response.StatusCode = 204;
-                });
+                ctx.Response.StatusCode = 204;
+            });
 
-                endpoints.MapGet("/__signout", async ctx =>
-                {
-                    var props = PropsToSignIn ?? new AuthenticationProperties();
-                    await ctx.SignOutAsync(props);
-                    ctx.Response.StatusCode = (int)HttpStatusCode.NoContent;
-                });
+            app.MapGet("/__signout", async ctx =>
+            {
+                var props = PropsToSignIn ?? new AuthenticationProperties();
+                await ctx.SignOutAsync(props);
+                ctx.Response.StatusCode = (int)HttpStatusCode.NoContent;
             });
         };
 
         BrowserClient = Internet.BuildHttpClient<IdentityServerClient>(Url());
         BrowserClient.Host = this;
+    }
+
+    protected override void ConfigureApp(IApplicationBuilder app)
+    {
+        app.UseIdentityServer();
+        app.UseAuthorization();
+
+        app.UseRouting();
+        base.ConfigureApp(app);
     }
 
     public IdentityServerClient BrowserClient;

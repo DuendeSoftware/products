@@ -53,10 +53,10 @@ public static class AuthenticationTicketExtensions
     /// <summary>
     /// Extracts the issuance time
     /// </summary>
-    public static DateTime GetIssued(this AuthenticationTicket ticket)
+    public static DateTime GetIssued(this AuthenticationTicket ticket, DateTimeOffset utcNow)
     {
         ArgumentNullException.ThrowIfNull(ticket);
-        return ticket.Properties.IssuedUtc?.UtcDateTime ?? DateTime.UtcNow;
+        return ticket.Properties.IssuedUtc?.UtcDateTime ?? utcNow.UtcDateTime;
     }
 
     /// <summary>

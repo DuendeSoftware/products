@@ -14,18 +14,19 @@ namespace Duende.Bff.Tests.Endpoints.Management;
 public class UserEndpointTests : BffTestBase
 {
 
-    public UserEndpointTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureEndpoints += endpoints =>
-                                                                              {
-                                                                                  // Setup a login endpoint that allows you to simulate signing in as a specific
-                                                                                  // user in the BFF. 
-                                                                                  endpoints.MapGet("/__signin", async ctx =>
-                                                                                  {
-                                                                                      var props = new AuthenticationProperties();
-                                                                                      await ctx.SignInAsync(UserToSignIn!, props);
+    public UserEndpointTests(ITestOutputHelper output) : base(output) =>
+        Bff.OnConfigureApp += app =>
+        {
+            // Setup a login endpoint that allows you to simulate signing in as a specific
+            // user in the BFF. 
+            app.MapGet("/__signin", async ctx =>
+            {
+                var props = new AuthenticationProperties();
+                await ctx.SignInAsync(UserToSignIn!, props);
 
-                                                                                      ctx.Response.StatusCode = 204;
-                                                                                  });
-                                                                              };
+                ctx.Response.StatusCode = 204;
+            });
+        };
 
     public ClaimsPrincipal? UserToSignIn { get; set; }
 

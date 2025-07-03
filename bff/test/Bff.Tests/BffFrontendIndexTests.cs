@@ -57,9 +57,9 @@ public class BffFrontendIndexTests : BffTestBase
     [Fact]
     public async Task Given_index_can_call_local_api()
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet("/local", () => "ok");
+            app.MapGet("/local", () => "ok");
         };
 
         await InitializeAsync();

@@ -70,9 +70,9 @@ public class TestInfraTests(ITestOutputHelper output) : BffTestBase(output)
     [Fact]
     public async Task Can_add_api_endpoint_to_bff_host()
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet("/api/test", async context =>
+            app.MapGet("/api/test", async context =>
             {
                 context.Response.StatusCode = 200;
                 await context.Response.WriteAsync("Hello World");

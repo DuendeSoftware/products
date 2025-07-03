@@ -7,6 +7,7 @@
     }
     public static class BffBuilderExtensions
     {
-        public static Duende.Bff.BffBuilder AddBlazorServer(this Duende.Bff.BffBuilder builder, System.Action<Duende.Bff.Blazor.BffBlazorServerOptions>? configureOptions = null) { }
+        public static T AddBlazorServer<T>(this T builder, System.Action<Duende.Bff.Blazor.BffBlazorServerOptions>? configureOptions = null)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
     }
 }

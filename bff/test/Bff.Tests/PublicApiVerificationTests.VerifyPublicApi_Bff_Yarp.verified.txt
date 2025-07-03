@@ -2,9 +2,10 @@
 {
     public static class BffBuilderExtensions
     {
-        public static Duende.Bff.BffBuilder AddRemoteApis(this Duende.Bff.BffBuilder builder) { }
-        public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddYarpConfig(this Duende.Bff.BffBuilder builder, Microsoft.Extensions.Configuration.IConfiguration config) { }
-        public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddYarpConfig(this Duende.Bff.BffBuilder builder, Yarp.ReverseProxy.Configuration.RouteConfig[] routes, Yarp.ReverseProxy.Configuration.ClusterConfig[] clusters) { }
+        public static T AddRemoteApis<T>(this T builder)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddYarpConfig(this Duende.Bff.Builder.IBffServicesBuilder builder, Microsoft.Extensions.Configuration.IConfiguration config) { }
+        public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddYarpConfig(this Duende.Bff.Builder.IBffServicesBuilder builder, Yarp.ReverseProxy.Configuration.RouteConfig[] routes, Yarp.ReverseProxy.Configuration.ClusterConfig[] clusters) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffRemoteRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
     public delegate void BffYarpTransformBuilder(string localPath, Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context);
