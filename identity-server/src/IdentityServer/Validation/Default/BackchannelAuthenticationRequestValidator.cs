@@ -51,10 +51,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestValidator.ValidateRequest");
 
-        if (clientValidationResult == null)
-        {
-            throw new ArgumentNullException(nameof(clientValidationResult));
-        }
+        ArgumentNullException.ThrowIfNull(clientValidationResult);
 
         _logger.LogDebug("Start backchannel authentication request validation");
 
