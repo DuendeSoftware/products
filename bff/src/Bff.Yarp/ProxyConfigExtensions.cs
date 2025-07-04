@@ -43,7 +43,7 @@ public static class ProxyConfigExtensions
         return config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
     }
 
-    private static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
+    internal static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
     {
         Dictionary<string, string> metadata;
 
