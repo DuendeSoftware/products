@@ -98,6 +98,29 @@ public class YarpBffHost : GenericHost
                         }
                     }.WithAntiforgeryCheck()
                     .WithAccessToken(TokenType.User),
+                new RouteConfig
+                    {
+                        RouteId = "with_badly_cased_anti_forgery",
+                        ClusterId = "cluster1",
+
+                        Match = new RouteMatch
+                        {
+                            Path = "/api_badly_cased_anti_forgery/{**catch-all}"
+                        }
+                    }
+                    .WithOptionalUserAccessToken()
+                    .WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "TRue"),
+                new RouteConfig
+                    {
+                        RouteId = "with_badly_cased_optional_token",
+                        ClusterId = "cluster1",
+
+                        Match = new RouteMatch
+                        {
+                            Path = "/api_badly_cased_optional_token/{**catch-all}"
+                        }
+                    }
+                    .WithMetadata(Constants.Yarp.OptionalUserTokenMetadata, "tRUe"),
 
                 new RouteConfig
                     {

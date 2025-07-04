@@ -60,6 +60,33 @@ namespace Duende.Bff.Tests.Endpoints
             apiResult.ClientId.ShouldBeNull();
         }
 
+        [Fact]
+        public async Task call_to_api_badly_cased_anti_forgery()
+        {
+            var result = await YarpBasedBffHost.BrowserClient.GetAsync(
+                new Uri(YarpBasedBffHost.Url("/api_badly_cased_anti_forgery/test"))
+            );
+
+            result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+
+        }
+
+        [Fact]
+        public async Task call_to_api_badly_cased_optional_access_token()
+        {
+            await YarpBasedBffHost.BffLoginAsync("alice");
+
+
+            ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+                YarpBasedBffHost.Url("/api_badly_cased_optional_token/test")
+            );
+
+            apiResult.Method.ShouldBe("GET");
+            apiResult.Sub.ShouldBe("alice");
+            apiResult.ClientId.ShouldBe("spa");
+        }
+
+
         [Theory]
         [InlineData("/api_user/test")]
         [InlineData("/api_optional_user/test")]
