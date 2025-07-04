@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
 
-public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings> settings) : BffService(["BffUrl2", "BffUrl3"], config, settings)
+public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings> settings) : BffService(["BFFURL2", "BFFURL3"], config, settings)
 {
     public override void ConfigureServices(IServiceCollection services)
     {
@@ -17,7 +17,7 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
         .AddFrontends(new BffFrontend(BffFrontendName.Parse("default")))
 
         // Note, in order for this to work, we'll need to inject this as config
-        .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(Config.GetValue<Origin>("BffUrl3") ?? throw new InvalidOperationException("BFFUrl3 is null")));
+        .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(Origin.Parse(Config.GetValue<string>("BFFURL3") ?? throw new InvalidOperationException("BFFUrl3 is null"))));
 
     public override void ConfigureApp(WebApplication app) => app.MapGet("/", (CurrentFrontendAccessor currentFrontendAccessor) => "multi - " + currentFrontendAccessor.Get().Name);
 }

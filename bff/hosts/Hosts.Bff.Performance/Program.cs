@@ -30,8 +30,9 @@ if (startupConfiguration.IsServiceEnabled("bff"))
 {
     builder.Services.Configure<BffSettings>(builder.Configuration);
     builder.Services.AddHostedService<SingleFrontendBffService>();
+    builder.Services.AddHostedService<MultiFrontendBffService>();
+
 }
-// builder.Services.AddHostedService<MultiFrontendBffService>();
 // Add services to the container.
 
 var app = builder.Build();
