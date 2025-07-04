@@ -128,7 +128,9 @@ public class AccessTokenRequestTransform(
 
         return new BffRemoteApiEndpointMetadata()
         {
-            OptionalUserToken = yarp.Config?.Metadata?.GetValueOrDefault(Constants.Yarp.OptionalUserTokenMetadata) == "true",
+            OptionalUserToken =
+                string.Equals(yarp.Config?.Metadata?.GetValueOrDefault(Constants.Yarp.OptionalUserTokenMetadata),
+                    "true", StringComparison.OrdinalIgnoreCase),
             RequiredTokenType = requiredTokenType
         };
     }
