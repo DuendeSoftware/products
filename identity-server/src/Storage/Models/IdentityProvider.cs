@@ -46,10 +46,7 @@ public class IdentityProvider
     /// </summary>
     public IdentityProvider(string type, IdentityProvider other) : this(type)
     {
-        if (other == null)
-        {
-            throw new ArgumentNullException(nameof(other));
-        }
+        ArgumentNullException.ThrowIfNull(other);
 
         if (other.Type != type)
         {

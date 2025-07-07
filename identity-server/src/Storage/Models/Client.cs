@@ -121,7 +121,7 @@ public class Client
 
     /// <summary>
     /// Enum setting to control validation for the DPoP proof token expiration.
-    /// This supports both the client generated 'iat' value and/or the server generated 'nonce' value. 
+    /// This supports both the client generated 'iat' value and/or the server generated 'nonce' value.
     /// Defaults to only using the 'iat' value.
     /// </summary>
     public DPoPTokenExpirationValidationMode DPoPValidationMode { get; set; } = DPoPTokenExpirationValidationMode.Iat;
@@ -251,7 +251,7 @@ public class Client
     /// <summary>
     /// Absolute: the refresh token will expire on a fixed point in time (specified by the AbsoluteRefreshTokenLifetime)
     /// Sliding: when refreshing the token, the lifetime of the refresh token will be renewed (by the amount specified in SlidingRefreshTokenLifetime). The lifetime will not exceed AbsoluteRefreshTokenLifetime.
-    /// </summary>        
+    /// </summary>
     public TokenExpiration RefreshTokenExpiration { get; set; } = TokenExpiration.Absolute;
 
     /// <summary>
@@ -340,7 +340,7 @@ public class Client
     /// Gets or sets the maximum polling interval for this client in the CIBA
     /// and Device Code flows. If this client polls more frequently than the
     /// polling interval during those flows, it will receive a slow_down error
-    /// response. 
+    /// response.
     /// </summary>
     public int? PollingInterval { get; set; }
 
@@ -390,10 +390,7 @@ public class Client
     /// </exception>
     public static void ValidateGrantTypes(IEnumerable<string> grantTypes)
     {
-        if (grantTypes == null)
-        {
-            throw new ArgumentNullException(nameof(grantTypes));
-        }
+        ArgumentNullException.ThrowIfNull(grantTypes);
 
         // spaces are not allowed in grant types
         foreach (var type in grantTypes)
