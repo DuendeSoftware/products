@@ -122,7 +122,7 @@ public class DefaultClaimsService : IClaimsService
         };
 
         // log if client ID is overwritten
-        if (!string.Equals(request.ClientId, request.Client.ClientId))
+        if (!string.Equals(request.ClientId, request.Client.ClientId, StringComparison.InvariantCulture))
         {
             Logger.LogDebug("Client {clientId} is impersonating {impersonatedClientId}", request.Client.ClientId, request.ClientId);
         }

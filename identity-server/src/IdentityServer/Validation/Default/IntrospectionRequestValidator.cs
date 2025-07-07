@@ -79,7 +79,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
             {
                 if (_logger.IsEnabled(LogLevel.Debug))
                 {
-                    var sanitized = hint.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", "");
+                    var sanitized = hint.Replace(Environment.NewLine, "", StringComparison.InvariantCulture).Replace("\n", "", StringComparison.InvariantCulture).Replace("\r", "", StringComparison.InvariantCulture);
                     _logger.LogDebug("Token type hint found in request: {tokenTypeHint}", sanitized);
                 }
             }
@@ -87,7 +87,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
             {
                 if (_logger.IsEnabled(LogLevel.Debug))
                 {
-                    var sanitized = hint.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", "");
+                    var sanitized = hint.Replace(Environment.NewLine, "", StringComparison.InvariantCulture).Replace("\n", "", StringComparison.InvariantCulture).Replace("\r", "", StringComparison.InvariantCulture);
                     _logger.LogDebug("Unsupported token type hint found in request: {tokenTypeHint}", sanitized);
                 }
                 hint = null; // Discard an unknown hint, in line with RFC 7662
