@@ -245,7 +245,7 @@ internal static class StringExtensions
     public static NameValueCollection ReadQueryStringAsNameValueCollection(this string? url)
     {
         var collection = new NameValueCollection();
-        var queryString = url.QueryString();
+        var queryString = url?.QueryString();
         if (queryString == null)
         {
             return collection;
@@ -269,13 +269,8 @@ internal static class StringExtensions
         return collection;
     }
 
-    private static string? QueryString(this string? url)
+    private static string? QueryString(this string url)
     {
-        if (url == null)
-        {
-            return null;
-        }
-
         var i = url.IndexOf('?');
         if (i >= 0)
         {

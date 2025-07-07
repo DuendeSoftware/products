@@ -204,6 +204,15 @@ public class StringExtensionsTests
 
     [Fact]
     [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_handle_null()
+    {
+        string url = null;
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public void ReadQueryStringAsNameValueCollection_should_handle_empty_string()
     {
         var url = string.Empty;
