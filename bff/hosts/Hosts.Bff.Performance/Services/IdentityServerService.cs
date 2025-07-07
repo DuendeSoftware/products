@@ -8,6 +8,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
 using IdentityServer;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
@@ -22,6 +23,13 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
         builder.AddServiceDefaults();
         // Configure Kestrel to listen on the specified Uri
         builder.WebHost.UseUrls(Settings.IdentityServerUrl);
+
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.All;
+            options.KnownProxies.Clear();
+            options.KnownNetworks.Clear();
+        });
 
         builder.Services.AddAuthorization();
         builder.Services.AddHttpLogging();
@@ -83,6 +91,7 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
         isBuilder.AddInMemoryApiResources(Config.ApiResources);
 
         var app = builder.Build();
+        app.UseForwardedHeaders();
 
         app.UseHttpLogging();
         app.UseDeveloperExceptionPage();
