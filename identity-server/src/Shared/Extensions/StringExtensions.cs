@@ -271,10 +271,10 @@ internal static class StringExtensions
 
     private static string? QueryString(this string url)
     {
-        var i = url.IndexOf('?');
-        if (i >= 0)
+        var queryStringStart = url.IndexOf('?');
+        if (queryStringStart >= 0)
         {
-            return url.Substring(i + 1);
+            return url.Substring(queryStringStart + 1);
         }
 
         var uri = new Uri(url, UriKind.RelativeOrAbsolute);
