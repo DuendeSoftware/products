@@ -67,7 +67,9 @@ public class DefaultIssuerNameService : IIssuerNameService
 
             if (_options.LowerCaseIssuerUri)
             {
+#pragma warning disable CA1308 // we're intentionally using ToLowerInvariant here because of the config setting
                 issuer = issuer.ToLowerInvariant();
+#pragma warning restore CA1308
             }
         }
 
