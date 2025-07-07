@@ -59,7 +59,7 @@ public static class ValidatedAuthorizeRequestExtensions
     public static string GetPrefixedAcrValue(this ValidatedAuthorizeRequest request, string prefix)
     {
         var value = request.AuthenticationContextReferenceClasses
-            .FirstOrDefault(x => x.StartsWith(prefix));
+            .FirstOrDefault(x => x.StartsWith(prefix, StringComparison.Ordinal));
 
         if (value != null)
         {
@@ -91,7 +91,7 @@ public static class ValidatedAuthorizeRequestExtensions
 
     public static IEnumerable<string> GetAcrValues(this ValidatedAuthorizeRequest request) => request
             .AuthenticationContextReferenceClasses
-            .Where(acr => !Constants.KnownAcrValues.All.Any(well_known => acr.StartsWith(well_known)))
+            .Where(acr => !Constants.KnownAcrValues.All.Any(well_known => acr.StartsWith(well_known, StringComparison.Ordinal)))
             .Distinct()
             .ToArray();
 
@@ -170,7 +170,7 @@ public static class ValidatedAuthorizeRequestExtensions
             var collection = new NameValueCollection();
             foreach (var key in request.Raw.AllKeys)
             {
-                // https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests 
+                // https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests
                 // requires client id and response type to always be in URL
                 if (key == OidcConstants.AuthorizeRequest.ClientId ||
                     key == OidcConstants.AuthorizeRequest.ResponseType ||

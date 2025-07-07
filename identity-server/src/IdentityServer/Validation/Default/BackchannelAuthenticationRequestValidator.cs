@@ -235,7 +235,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             //////////////////////////////////////////////////////////
             // check custom acr_values: idp and tenant
             //////////////////////////////////////////////////////////
-            var tenant = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.Tenant));
+            var tenant = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.Tenant, StringComparison.Ordinal));
             if (tenant != null)
             {
                 _validatedRequest.AuthenticationContextReferenceClasses.Remove(tenant);
@@ -243,7 +243,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 _validatedRequest.Tenant = tenant;
             }
 
-            var idp = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.HomeRealm));
+            var idp = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.HomeRealm, StringComparison.Ordinal));
             if (idp != null)
             {
                 _validatedRequest.AuthenticationContextReferenceClasses.Remove(idp);

@@ -63,7 +63,7 @@ internal class MessageCookie<TModel>
         var key = CookiePrefix;
         foreach ((var name, var _) in _context.HttpContext.Request.Cookies)
         {
-            if (name.StartsWith(key))
+            if (name.StartsWith(key, StringComparison.Ordinal))
             {
                 yield return name;
             }
@@ -90,7 +90,7 @@ internal class MessageCookie<TModel>
                 Path = CookiePath,
                 IsEssential = true
                 // don't need to set same-site since cookie is expected to be sent
-                // to only another page in this host. 
+                // to only another page in this host.
             });
     }
 

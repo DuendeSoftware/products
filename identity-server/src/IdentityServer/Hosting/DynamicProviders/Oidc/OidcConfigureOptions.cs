@@ -22,7 +22,7 @@ internal class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConne
         context.AuthenticationOptions.SignOutScheme = context.DynamicProviderOptions.SignOutScheme;
 
         context.AuthenticationOptions.Authority = context.IdentityProvider.Authority;
-        context.AuthenticationOptions.RequireHttpsMetadata = context.IdentityProvider.Authority.StartsWith("https");
+        context.AuthenticationOptions.RequireHttpsMetadata = context.IdentityProvider.Authority.StartsWith("https", StringComparison.Ordinal);
 
         context.AuthenticationOptions.ClientId = context.IdentityProvider.ClientId;
         context.AuthenticationOptions.ClientSecret = context.IdentityProvider.ClientSecret;
