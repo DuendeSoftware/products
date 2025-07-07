@@ -187,7 +187,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
         {
             // sets query at the prior record from the last results, but in reverse order
             items = query.OrderByDescending(x => x.Key)
-                .Where(x => string.Compare(x.Key, first) < 0)
+                .Where(x => string.Compare(x.Key, first, StringComparison.Ordinal) < 0)
                 // and we +1 to see if there's a prev page
                 .Take(countRequested + 1)
                 .ToArray();
@@ -208,7 +208,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             if (items.Any())
             {
                 var postCountId = items[items.Length - 1].Key;
-                var postCount = query.Where(x => string.Compare(x.Key, postCountId) > 0).Count();
+                var postCount = query.Where(x => string.Compare(x.Key, postCountId, StringComparison.Ordinal) > 0).Count();
                 hasNext = postCount > 0;
                 currPage = totalPages - (int)Math.Ceiling((1.0 * postCount) / countRequested);
             }
@@ -226,7 +226,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
         {
             items = query.OrderBy(x => x.Key)
                 // if last is "", then this will just start at beginning
-                .Where(x => string.Compare(x.Key, last) > 0)
+                .Where(x => string.Compare(x.Key, last, StringComparison.Ordinal) > 0)
                 // and we +1 to see if there's a next page
                 .Take(countRequested + 1)
                 .ToArray();
@@ -244,7 +244,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             if (items.Any())
             {
                 var priorCountId = items[0].Key;
-                var priorCount = query.Where(x => string.Compare(x.Key, priorCountId) < 0).Count();
+                var priorCount = query.Where(x => string.Compare(x.Key, priorCountId, StringComparison.Ordinal) < 0).Count();
                 hasPrev = priorCount > 0;
                 currPage = 1 + (int)Math.Ceiling((1.0 * priorCount) / countRequested);
             }
