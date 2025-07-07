@@ -3,6 +3,7 @@
 
 
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Text;
 using System.Text.Encodings.Web;
 
@@ -65,7 +66,7 @@ internal static class NameValueCollectionExtensions
             var values = collection.GetValues(name);
             var value = values.First();
             value = HtmlEncoder.Default.Encode(value);
-            builder.AppendFormat(inputFieldFormat, name, value);
+            builder.AppendFormat(CultureInfo.InvariantCulture, inputFieldFormat, name, value);
         }
 
         return builder.ToString();

@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -81,7 +82,7 @@ public static class CryptoHelper
     /// <exception cref="InvalidOperationException"></exception>
     public static (Func<byte[], byte[]> hashFunction, int hashLength) GetHashFunctionForSigningAlgorithm(string signingAlgorithm)
     {
-        var hashLength = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
+        var hashLength = int.Parse(signingAlgorithm.AsSpan(signingAlgorithm.Length - 3), CultureInfo.InvariantCulture);
 
         Func<byte[], byte[]> hashFunction = hashLength switch
         {
@@ -103,7 +104,7 @@ public static class CryptoHelper
     [Obsolete("This method is obsolete and will be removed in a future version. Consider using GetHashFunctionForSigningAlgorithm instead for better performance (it does not allocate a HashAlgorithm)")]
     public static HashAlgorithm GetHashAlgorithmForSigningAlgorithm(string signingAlgorithm)
     {
-        var signingAlgorithmBits = int.Parse(signingAlgorithm.Substring(signingAlgorithm.Length - 3));
+        var signingAlgorithmBits = int.Parse(signingAlgorithm.AsSpan(signingAlgorithm.Length - 3), CultureInfo.InvariantCulture);
 
         return signingAlgorithmBits switch
         {

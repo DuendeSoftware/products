@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
@@ -58,14 +59,14 @@ internal class ProtectedResourceErrorHttpWriter : IHttpResponseWriter<ProtectedR
             errorDescription = "The access token expired";
         }
 
-        var errorString = string.Format($"error=\"{error}\"");
+        var errorString = string.Format(CultureInfo.InvariantCulture, $"error=\"{error}\"");
         if (errorDescription.IsMissing())
         {
             context.Response.Headers.Append(HeaderNames.WWWAuthenticate, new StringValues(new[] { "Bearer realm=\"IdentityServer\"", errorString }));
         }
         else
         {
-            var errorDescriptionString = string.Format($"error_description=\"{errorDescription}\"");
+            var errorDescriptionString = string.Format(CultureInfo.InvariantCulture, $"error_description=\"{errorDescription}\"");
             context.Response.Headers.Append(HeaderNames.WWWAuthenticate, new StringValues(new[] { "Bearer realm=\"IdentityServer\"", errorString, errorDescriptionString }));
         }
 

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration.DependencyInjection;
@@ -13,12 +14,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Hosting;
 
-// this decorates the real authentication service to detect when the 
+// this decorates the real authentication service to detect when the
 // user is being signed in. this allows us to ensure the user has
 // the claims needed for identity server to do its job. it also allows
 // us to track signin/signout so we can issue/remove the session id
 // cookie used for check session iframe for session management spec.
-// finally, we track if signout is called to collaborate with the 
+// finally, we track if signout is called to collaborate with the
 // FederatedSignoutAuthenticationHandlerProvider for federated signout.
 internal class IdentityServerAuthenticationService : IAuthenticationService
 {
@@ -146,7 +147,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
 
         if (identity.FindFirst(JwtClaimTypes.AuthenticationTime) == null)
         {
-            var time = new DateTimeOffset(authTime).ToUnixTimeSeconds().ToString();
+            var time = new DateTimeOffset(authTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
 
             _logger.LogDebug("Adding auth_time claim with value: {value}", time);
             identity.AddClaim(new Claim(JwtClaimTypes.AuthenticationTime, time, ClaimValueTypes.Integer64));

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
@@ -98,8 +99,8 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
 
         if (api != null)
         {
-            // APIs can only introspect access tokens. We ignore the hint and just immediately try to 
-            // validate the token as an access token. If that fails, claims will be null and 
+            // APIs can only introspect access tokens. We ignore the hint and just immediately try to
+            // validate the token as an access token. If that fails, claims will be null and
             // we'll return { "isActive": false }.
             claims = await GetAccessTokenClaimsAsync(token);
         }
@@ -190,8 +191,8 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
             {
                 new Claim("client_id", client.ClientId),
                 new Claim("token_type", TokenTypeHints.RefreshToken),
-                new Claim("iat", iat.ToString(), ClaimValueTypes.Integer),
-                new Claim("exp", (iat + refreshValidationResult.RefreshToken.Lifetime).ToString(), ClaimValueTypes.Integer),
+                new Claim("iat", iat.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer),
+                new Claim("exp", (iat + refreshValidationResult.RefreshToken.Lifetime).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer),
                 new Claim("sub", refreshValidationResult.RefreshToken.SubjectId),
             };
 
@@ -207,7 +208,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     }
 
     /// <summary>
-    /// Attempt to obtain the claims for a token as an access token, and validate that it belongs to the client. 
+    /// Attempt to obtain the claims for a token as an access token, and validate that it belongs to the client.
     /// </summary>
     private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, Client client)
     {
@@ -230,8 +231,8 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
 
     /// <summary>
     /// Attempt to obtain the claims for a token as an access token. This overload does no validation that the
-    /// token belongs to a particular client, and is intended for use when we have an API caller (any API can 
-    /// introspect a token). 
+    /// token belongs to a particular client, and is intended for use when we have an API caller (any API can
+    /// introspect a token).
     /// </summary>
     private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token)
     {

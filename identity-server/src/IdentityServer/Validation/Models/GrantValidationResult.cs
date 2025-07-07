@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
@@ -92,7 +93,7 @@ public class GrantValidationResult : ValidationResult
     /// </summary>
     /// <param name="subject">The subject claim used to uniquely identifier the user.</param>
     /// <param name="authenticationMethod">The authentication method which describes the custom grant type.</param>
-    /// <param name="claims">Additional claims that will be maintained in the principal. 
+    /// <param name="claims">Additional claims that will be maintained in the principal.
     /// If you want these claims to appear in token, you need to add them explicitly in your custom implementation of <see cref="Services.IProfileService"/> service.</param>
     /// <param name="identityProvider">The identity provider.</param>
     /// <param name="customResponse">The custom response.</param>
@@ -131,7 +132,7 @@ public class GrantValidationResult : ValidationResult
             new Claim(JwtClaimTypes.Subject, subject),
             new Claim(JwtClaimTypes.AuthenticationMethod, authenticationMethod),
             new Claim(JwtClaimTypes.IdentityProvider, identityProvider),
-            new Claim(JwtClaimTypes.AuthenticationTime, new DateTimeOffset(authTime).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+            new Claim(JwtClaimTypes.AuthenticationTime, new DateTimeOffset(authTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
         };
 
         if (!IEnumerableExtensions.IsNullOrEmpty(claims))
