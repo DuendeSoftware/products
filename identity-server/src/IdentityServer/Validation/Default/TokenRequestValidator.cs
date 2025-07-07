@@ -718,7 +718,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         if (result.RefreshToken.ProofType == null && result.RefreshToken.ContainsCnfValues())
         {
             // we need to extract the certificate / confirmation data from the tokens
-            proofs ??= result.RefreshToken.GetProofKeyThumbprints();
+            proofs = result.RefreshToken.GetProofKeyThumbprints();
             if (proofs.Any())
             {
                 // many different access tokens using diff pop mechanisms. the assumption is that they are all the same

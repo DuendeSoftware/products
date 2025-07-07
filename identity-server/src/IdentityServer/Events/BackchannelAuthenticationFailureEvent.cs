@@ -30,7 +30,7 @@ public class BackchannelAuthenticationFailureEvent : Event
 
             if (request.Subject != null && request.Subject.Identity.IsAuthenticated)
             {
-                SubjectId = request.Subject?.GetSubjectId();
+                SubjectId = request.Subject.GetSubjectId();
             }
         }
 
