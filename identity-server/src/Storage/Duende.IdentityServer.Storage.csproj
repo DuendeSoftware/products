@@ -12,4 +12,9 @@
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Shared\Extensions\StringExtensions.cs">
+      <Link>Extensions\StringExtensions.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>

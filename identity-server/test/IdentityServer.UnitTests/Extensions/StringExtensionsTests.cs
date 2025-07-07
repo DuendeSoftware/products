@@ -181,4 +181,116 @@ public class StringExtensionsTests
         " ://".IsUri().ShouldBeFalse();
         " file://path".IsUri().ShouldBeFalse();
     }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_parse_simple_query()
+    {
+        var url = "https://example.com/path?foo=bar&baz=qux";
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc.Count.ShouldBe(2);
+        nvc["foo"].ShouldBe("bar");
+        nvc["baz"].ShouldBe("qux");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_handle_no_query()
+    {
+        var url = "https://example.com/path";
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_handle_null()
+    {
+        string url = null;
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_handle_empty_string()
+    {
+        var url = string.Empty;
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_decode_urlencoded_values()
+    {
+        var url = "https://example.com/path?foo=bar%20baz&baz=qux%2Btest";
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc["foo"].ShouldBe("bar baz");
+        nvc["baz"].ShouldBe("qux+test");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_handle_duplicate_keys()
+    {
+        var url = "https://example.com/path?foo=bar&foo=baz";
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc.GetValues("foo").Length.ShouldBe(2);
+        nvc.GetValues("foo")[0].ShouldBe("bar");
+        nvc.GetValues("foo")[1].ShouldBe("baz");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_not_ignore_fragment()
+    {
+        // This was test was written much after ReadQueryStringAsNameValueCollection, when the method was refactored.
+        // Fragments not being ignored was the pre-existing behavior. We might not actually want the fragment to be
+        // included, byt I was reluctant to change that behavior during a refactor.
+        var url = "https://example.com/path?foo=bar&baz=qux#fragment";
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc.Count.ShouldBe(2);
+        nvc["foo"].ShouldBe("bar");
+        nvc["baz"].ShouldBe("qux#fragment");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_handle_key_without_value()
+    {
+        var url = "https://example.com/path?foo&bar=";
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc["foo"].ShouldBeNull();
+        nvc["bar"].ShouldBeNull();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void ReadQueryStringAsNameValueCollection_should_handle_urlencoded_keys()
+    {
+        var url = "https://example.com/path?foo%20bar=value1&baz%2Bqux=value2";
+        var nvc = url.ReadQueryStringAsNameValueCollection();
+        nvc["foo bar"].ShouldBe("value1");
+        nvc["baz+qux"].ShouldBe("value2");
+    }
+
+    [Fact]
+    public void ReadQueryStringAsNameValueCollection_should_handle_bare_query_string()
+    {
+        var queryString = "client_id=client1&response_type=id_token&scope=openid&redirect_uri=https%3A%2F%2Fclient1%2Fcallback&state=123_state&nonce=123_nonce&login_hint=login_hint_value&acr_values=acr_1%20acr_2%20tenant%3Atenant_value%20idp%3Aidp_value&display=popup&ui_locales=ui_locale_value&custom_foo=foo_value&foo=bar";
+        var result = queryString.ReadQueryStringAsNameValueCollection();
+        result["client_id"].ShouldBe("client1");
+        result["response_type"].ShouldBe("id_token");
+        result["scope"].ShouldBe("openid");
+        result["redirect_uri"].ShouldBe("https://client1/callback");
+        result["state"].ShouldBe("123_state");
+        result["nonce"].ShouldBe("123_nonce");
+        result["login_hint"].ShouldBe("login_hint_value");
+        result["acr_values"].ShouldBe("acr_1 acr_2 tenant:tenant_value idp:idp_value");
+        result["display"].ShouldBe("popup");
+        result["ui_locales"].ShouldBe("ui_locale_value");
+        result["custom_foo"].ShouldBe("foo_value");
+        result["foo"].ShouldBe("bar");
+    }
 }

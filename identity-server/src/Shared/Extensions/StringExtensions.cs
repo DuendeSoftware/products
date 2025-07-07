@@ -7,7 +7,6 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duende.IdentityServer.Extensions;
 
@@ -60,6 +59,7 @@ internal static class StringExtensions
         {
             return true;
         }
+
         if (value.Length > maxLength)
         {
             return true;
@@ -227,7 +227,8 @@ internal static class StringExtensions
     }
 
     [DebuggerStepThrough]
-    public static string AddQueryString(this string url, string name, string value) => url.AddQueryString(name + "=" + UrlEncoder.Default.Encode(value));
+    public static string AddQueryString(this string url, string name, string value) =>
+        url.AddQueryString(name + "=" + UrlEncoder.Default.Encode(value));
 
     [DebuggerStepThrough]
     public static string AddHashFragment(this string url, string query)
@@ -243,21 +244,48 @@ internal static class StringExtensions
     [DebuggerStepThrough]
     public static NameValueCollection ReadQueryStringAsNameValueCollection(this string? url)
     {
-        if (url != null)
+        var collection = new NameValueCollection();
+        var queryString = url?.QueryString();
+        if (queryString == null)
         {
-            var idx = url.IndexOf('?');
-            if (idx >= 0)
-            {
-                url = url.Substring(idx + 1);
-            }
-            var query = QueryHelpers.ParseNullableQuery(url);
-            if (query != null)
-            {
-                return query.AsNameValueCollection();
-            }
+            return collection;
         }
 
-        return new NameValueCollection();
+        var pairs = queryString.Split('&');
+        foreach (var pair in pairs)
+        {
+            if (string.IsNullOrEmpty(pair))
+            {
+                continue;
+            }
+
+            var kvp = pair.Split('=', 2);
+            var key = Uri.UnescapeDataString(kvp[0]);
+            var value = kvp.Length > 1 ? kvp[1] : null;
+            var unescaped = value.IsPresent() ? Uri.UnescapeDataString(kvp[1]) : null;
+            collection.Add(key, unescaped);
+        }
+
+        return collection;
+    }
+
+    private static string? QueryString(this string url)
+    {
+        var queryStringStart = url.IndexOf('?');
+        if (queryStringStart >= 0)
+        {
+            return url.Substring(queryStringStart + 1);
+        }
+
+        var uri = new Uri(url, UriKind.RelativeOrAbsolute);
+        if (uri.IsAbsoluteUri)
+        {
+            return uri.Query.IsPresent() ? uri.Query.Substring(1) : null;
+        }
+        else
+        {
+            return url;
+        }
     }
 
     public static string? GetOrigin(this string? url)
