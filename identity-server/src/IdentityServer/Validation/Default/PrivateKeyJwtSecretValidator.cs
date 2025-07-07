@@ -212,7 +212,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
     {
         if (validAudience.Length == tokenAudience.Length)
         {
-            if (string.Equals(validAudience, tokenAudience, StringComparison.InvariantCulture))
+            if (string.Equals(validAudience, tokenAudience, StringComparison.Ordinal))
             {
                 return true;
             }

@@ -249,7 +249,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
         {
             foreach (var grantType in context.Client.AllowedGrantTypes)
             {
-                if (!string.Equals(grantType, GrantType.Implicit, StringComparison.InvariantCulture))
+                if (!string.Equals(grantType, GrantType.Implicit, StringComparison.Ordinal))
                 {
                     if (context.Client.RequireClientSecret && context.Client.ClientSecrets.Count == 0)
                     {
@@ -258,7 +258,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
                     }
                 }
 
-                if (string.Equals(grantType, GrantType.ClientCredentials, StringComparison.InvariantCulture) && !context.Client.RequireClientSecret)
+                if (string.Equals(grantType, GrantType.ClientCredentials, StringComparison.Ordinal) && !context.Client.RequireClientSecret)
                 {
                     context.SetError("RequireClientSecret is false, but client is using client credentials grant type.");
                     return Task.CompletedTask;
