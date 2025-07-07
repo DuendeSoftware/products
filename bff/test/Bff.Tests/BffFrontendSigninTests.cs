@@ -2,10 +2,14 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
+using Duende.Bff.Yarp;
 using Duende.IdentityServer.Extensions;
+using Microsoft.Extensions.Caching.Hybrid;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
@@ -211,7 +215,7 @@ public class BffFrontendSigninTests : BffTestBase
             .CheckResponseContent(Bff.DefaultRootResponse);
 
         // Bit weird, but the easiest way to see if the new settings are used is to update
-        // it to a wrong value and see if it throws. 
+        // it to a wrong value and see if it throws.
         AddOrUpdateFrontend(bffFrontend with
         {
             ConfigureOpenIdConnectOptions = opt =>
@@ -223,6 +227,60 @@ public class BffFrontendSigninTests : BffTestBase
 
         await Bff.BrowserClient.Login()
             .ShouldThrowAsync<InvalidOperationException>();
+    }
+
+    private class NoOpHybridCache : HybridCache
+    {
+        public override ValueTask<T> GetOrCreateAsync<TState, T>(string key, TState state,
+            Func<TState, CancellationToken, ValueTask<T>> factory, HybridCacheEntryOptions? options = null,
+            IEnumerable<string>? tags = null, CancellationToken cancellationToken = new CancellationToken()) => factory(state, cancellationToken);
+
+        public override ValueTask SetAsync<T>(string key, T value, HybridCacheEntryOptions? options = null,
+            IEnumerable<string>? tags = null,
+            CancellationToken cancellationToken = new CancellationToken()) => ValueTask.CompletedTask;
+
+        public override ValueTask
+            RemoveAsync(string key, CancellationToken cancellationToken = new CancellationToken()) =>
+            ValueTask.CompletedTask;
+
+        public override ValueTask RemoveByTagAsync(string tag,
+            CancellationToken cancellationToken = new CancellationToken()) => ValueTask.CompletedTask;
+    }
+
+    [Fact]
+    public async Task When_updating_frontend_then_subsequent_api_call_uses_updated_token()
+    {
+        Bff.OnConfigureServices += services =>
+        {
+            services.AddSingleton<HybridCache, NoOpHybridCache>();
+        };
+        Bff.OnConfigureBff += bff => bff.AddRemoteApis();
+        IdentityServer.AddClient("differnet_client_id", Bff.Url());
+        await InitializeAsync();
+
+        var bffFrontend = Some.BffFrontend().WithRemoteApis(new RemoteApi(LocalPath.Parse("/test"), Api.Url()).WithAccessToken(RequiredTokenType.Client));
+        AddOrUpdateFrontend(bffFrontend);
+
+        await Bff.BrowserClient.Login()
+            .CheckResponseContent(Bff.DefaultRootResponse);
+
+        ApiCallDetails response = await Bff.BrowserClient.CallBffHostApi("/test");
+
+        AddOrUpdateFrontend(bffFrontend with
+        {
+            ConfigureOpenIdConnectOptions = opt =>
+            {
+                The.DefaultOpenIdConnectConfiguration(opt);
+                opt.ClientId = "differnet_client_id";
+            }
+        });
+
+        await Bff.BrowserClient.Login()
+            .CheckResponseContent(Bff.DefaultRootResponse);
+
+        ApiCallDetails response2 = await Bff.BrowserClient.CallBffHostApi("/test");
+        response2.Sub.ShouldBeNullOrEmpty();
+        response2.ClientId.ShouldBe("differnet_client_id");
     }
 
     [Fact]
@@ -239,7 +297,7 @@ public class BffFrontendSigninTests : BffTestBase
         Bff.BrowserClient.Cookies.Clear(Bff.Url());
 
         // Bit weird, but the easiest way to see if the new settings are used is to update
-        // it to a wrong value and see if it throws. 
+        // it to a wrong value and see if it throws.
         AddOrUpdateFrontend(bffFrontend with
         {
             ConfigureCookieOptions = opt => { opt.Cookie.Name = "my_custom_cookie_name"; }
