@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Hosts.Bff.Performance.Services;
 
-public class SingleFrontendBffService(IConfiguration config, IOptions<BffSettings> settings) : BffService(["BffUrl1"], config, settings)
+public class SingleFrontendBffService(IConfiguration config, IOptions<BffSettings> settings) : BffService(["BFFURL1"], config, settings)
 {
     public override void ConfigureServices(IServiceCollection services)
     {
