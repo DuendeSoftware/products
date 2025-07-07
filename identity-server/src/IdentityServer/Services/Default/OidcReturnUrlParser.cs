@@ -81,14 +81,14 @@ internal class OidcReturnUrlParser : IReturnUrlParser
         if (returnUrl.IsLocalUrl())
         {
             {
-                var index = returnUrl.IndexOf('?');
+                var index = returnUrl.IndexOf('?', StringComparison.InvariantCulture);
                 if (index >= 0)
                 {
                     returnUrl = returnUrl.Substring(0, index);
                 }
             }
             {
-                var index = returnUrl.IndexOf('#');
+                var index = returnUrl.IndexOf('#', StringComparison.InvariantCulture);
                 if (index >= 0)
                 {
                     returnUrl = returnUrl.Substring(0, index);

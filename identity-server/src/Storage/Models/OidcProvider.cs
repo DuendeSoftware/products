@@ -70,7 +70,7 @@ public class OidcProvider : IdentityProvider
     /// </summary>
     public bool GetClaimsFromUserInfoEndpoint
     {
-        get => this["GetClaimsFromUserInfoEndpoint"] == null || "true".Equals(this["GetClaimsFromUserInfoEndpoint"]);
+        get => this["GetClaimsFromUserInfoEndpoint"] == null || "true".Equals(this["GetClaimsFromUserInfoEndpoint"], StringComparison.InvariantCulture);
         set => this["GetClaimsFromUserInfoEndpoint"] = value ? "true" : "false";
     }
     /// <summary>
@@ -78,7 +78,7 @@ public class OidcProvider : IdentityProvider
     /// </summary>
     public bool UsePkce
     {
-        get => this["UsePkce"] == null || "true".Equals(this["UsePkce"]);
+        get => this["UsePkce"] == null || "true".Equals(this["UsePkce"], StringComparison.InvariantCulture);
         set => this["UsePkce"] = value ? "true" : "false";
     }
 

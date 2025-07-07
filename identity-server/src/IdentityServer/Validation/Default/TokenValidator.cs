@@ -132,7 +132,7 @@ internal class TokenValidator : ITokenValidator
 
         TokenValidationResult result;
 
-        if (token.Contains('.'))
+        if (token.Contains('.', StringComparison.InvariantCulture))
         {
             if (token.Length > _options.InputLengthRestrictions.Jwt)
             {
@@ -343,7 +343,7 @@ internal class TokenValidator : ITokenValidator
         var scopes = claims.Where(c => c.Type == JwtClaimTypes.Scope).ToArray();
         foreach (var scope in scopes)
         {
-            if (scope.Value.Contains(' '))
+            if (scope.Value.Contains(' ', StringComparison.InvariantCulture))
             {
                 claims.Remove(scope);
                 var values = scope.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
