@@ -402,7 +402,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 {
                     if (value is string customValueString)
                     {
-                        if (customValueString.StartsWith("~/") && Options.Discovery.ExpandRelativePathsInCustomEntries)
+                        if (customValueString.StartsWith("~/", StringComparison.Ordinal) && Options.Discovery.ExpandRelativePathsInCustomEntries)
                         {
                             entries.Add(key, baseUrl + customValueString.Substring(2));
                             continue;

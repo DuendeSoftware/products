@@ -49,7 +49,7 @@ internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
         writer.WriteStartArray("Assemblies");
         foreach (var assembly in assemblies.Where(assembly => assembly.GetName().Name != null &&
             (_exactMatches.Contains(assembly.GetName().Name) ||
-             _startsWithMatches.Any(prefix => assembly.GetName().Name!.StartsWith(prefix)))))
+             _startsWithMatches.Any(prefix => assembly.GetName().Name!.StartsWith(prefix, StringComparison.Ordinal)))))
         {
             writer.WriteStartObject();
             writer.WriteString("Name", assembly.GetName().Name);

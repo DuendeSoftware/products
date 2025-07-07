@@ -52,7 +52,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         if (request.AuthorizeRequestType != AuthorizeRequestType.PushedAuthorization)
         {
             var parRequired = _options.PushedAuthorization.Required || request.Client.RequirePushedAuthorization;
-            var parMissing = requestUri.IsMissing() || !requestUri.StartsWith(IdentityServerConstants.PushedAuthorizationRequestUri);
+            var parMissing = requestUri.IsMissing() || !requestUri.StartsWith(IdentityServerConstants.PushedAuthorizationRequestUri, StringComparison.Ordinal);
             if (parRequired && parMissing)
             {
                 LogError("Pushed authorization is required", request);
@@ -112,7 +112,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return Valid(request);
     }
 
-    private static bool IsParRequestUri(string requestUri) => requestUri.StartsWith(IdentityServerConstants.PushedAuthorizationRequestUri);
+    private static bool IsParRequestUri(string requestUri) => requestUri.StartsWith(IdentityServerConstants.PushedAuthorizationRequestUri, StringComparison.Ordinal);
 
     private string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request) => request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
 
