@@ -84,7 +84,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
                 var sid = await _userSession.GetSessionIdAsync();
                 var msg = new Message<LogoutMessage>(new LogoutMessage
                 {
-                    SubjectId = user?.GetSubjectId(),
+                    SubjectId = user.GetSubjectId(),
                     SessionId = sid,
                     ClientIds = clientIds
                 }, _clock.UtcNow.UtcDateTime);
