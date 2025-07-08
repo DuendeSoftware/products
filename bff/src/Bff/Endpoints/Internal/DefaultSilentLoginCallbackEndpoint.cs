@@ -31,7 +31,18 @@ internal class DefaultSilentLoginCallbackEndpoint(
         var json = $"{{source:'bff-silent-login', isLoggedIn:{result}}}";
 
         var nonce = CryptoRandom.CreateUniqueId(format: CryptoRandom.OutputFormat.Hex);
-        var origin = $"{context.Request.Scheme}://{context.Request.Host}";
+
+        string origin;
+
+        if (options.Value.AllowedSilentLoginReferers.Count == 0)
+        {
+            origin = $"{context.Request.Scheme}://{context.Request.Host}";
+        }
+        else if (!TryGetOriginFromReferer(context, out origin))
+        {
+            context.ReturnHttpProblem("Referer not allowed");
+            return;
+        }
 
         var html = $"<script nonce='{nonce}'>window.parent.postMessage({json}, '{origin}');</script>";
 
@@ -45,5 +56,24 @@ internal class DefaultSilentLoginCallbackEndpoint(
         logger.SilentLoginEndpointRenderingHtml(LogLevel.Debug, origin.Sanitize(), result);
 
         await context.Response.WriteAsync(html, Encoding.UTF8, cancellationToken);
+    }
+
+    private bool TryGetOriginFromReferer(HttpContext context, out string referer)
+    {
+        referer = null!;
+        if (!context.Request.Headers.TryGetValue("Referer", out var refererValues))
+        {
+            logger.SilentLoginEndpointRefererHeaderMissing(LogLevel.Information);
+            return false;
+        }
+
+        referer = refererValues.FirstOrDefault()?.TrimEnd('/') ?? string.Empty;
+        if (!options.Value.AllowedSilentLoginReferers.Contains(referer, StringComparer.OrdinalIgnoreCase))
+        {
+            logger.SilentLoginEndpointRefererNotAllowed(LogLevel.Information, referer.Sanitize() ?? "", string.Join(", ", options.Value.AllowedSilentLoginReferers));
+            return false;
+        }
+
+        return true;
     }
 }
