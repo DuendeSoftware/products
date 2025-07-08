@@ -30,9 +30,9 @@ internal class BffConfigureOpenIdConnectOptions(
         // Apply the defaults from the BFF configuration
         bffConfigurationValue.DefaultOidcSettings?.ApplyTo(options);
 
-        if (defaultOptionsValue.BackchannelMessageHandler != null && options.BackchannelHttpHandler == null)
+        if (defaultOptionsValue.BackchannelHttpHandler != null && options.BackchannelHttpHandler == null)
         {
-            options.BackchannelHttpHandler = defaultOptionsValue.BackchannelMessageHandler;
+            options.BackchannelHttpHandler = defaultOptionsValue.BackchannelHttpHandler;
         }
 
         // See if there is a frontend selected

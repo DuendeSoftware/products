@@ -37,9 +37,9 @@ public class DPoPTestsWithManualAuthentication(ITestOutputHelper output) : BffTe
         };
 
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.Client)
                 ;
         };

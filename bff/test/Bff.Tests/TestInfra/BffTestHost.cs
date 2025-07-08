@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.Builder;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
@@ -24,7 +25,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     public bool MapGetForRoot { get; set; } = true;
 
     public bool EnableBackChannelHandler { get; set; } = true;
-    public event Action<BffBuilder> OnConfigureBff = _ => { };
+    public event Action<IBffServicesBuilder> OnConfigureBff = _ => { };
 
     public override void Initialize()
     {
@@ -40,18 +41,18 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
             {
                 if (EnableBackChannelHandler)
                 {
-                    options.BackchannelMessageHandler = Internet;
+                    options.BackchannelHttpHandler = Internet;
                 }
             });
 
             OnConfigureBff(builder);
         };
 
-        OnConfigureEndpoints += endpoints =>
+        OnConfigureApp += app =>
         {
             if (MapGetForRoot)
             {
-                endpoints.MapGet("/", () => DefaultRootResponse);
+                app.MapGet("/", () => DefaultRootResponse);
             }
         };
     }
@@ -89,12 +90,4 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     }
 
     public void AddOrUpdateFrontend(BffFrontend frontend) => Resolve<FrontendCollection>().AddOrUpdate(frontend);
-}
-
-public class CallbackForwarderHttpClientFactory(Func<ForwarderHttpClientContext, HttpMessageInvoker> callback)
-    : IForwarderHttpClientFactory
-{
-    public Func<ForwarderHttpClientContext, HttpMessageInvoker> CreateInvoker { get; set; } = callback;
-
-    public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => CreateInvoker.Invoke(context);
 }

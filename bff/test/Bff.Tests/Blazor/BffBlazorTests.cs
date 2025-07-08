@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff;
 using Duende.Bff.Blazor;
 using Duende.Bff.Tests.Blazor.Components;
 using Duende.Bff.Tests.TestInfra;
@@ -30,11 +31,10 @@ public class BffBlazorTests : BffTestBase
                 .AddServerSideSessions();
         };
 
-        Bff.OnConfigure += app => app.UseAntiforgery();
-
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapRazorComponents<App>()
+            app.UseAntiforgery();
+            app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode()
                 .AddInteractiveWebAssemblyRenderMode();
         };

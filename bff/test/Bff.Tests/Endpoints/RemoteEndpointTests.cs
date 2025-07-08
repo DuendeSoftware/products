@@ -45,7 +45,7 @@ public class RemoteEndpointTests : BffTestBase
     [MemberData(nameof(AllSetups))]
     public async Task unauthenticated_calls_to_remote_endpoint_should_return_401(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
@@ -62,7 +62,7 @@ public class RemoteEndpointTests : BffTestBase
     [MemberData(nameof(AllSetups))]
     public async Task calls_to_remote_endpoint_should_forward_user_to_api(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
@@ -96,7 +96,7 @@ public class RemoteEndpointTests : BffTestBase
             _ => Scheme.Parse("cookie")
         };
 
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithUserAccessTokenParameter(new BffUserAccessTokenParameters
@@ -151,7 +151,7 @@ public class RemoteEndpointTests : BffTestBase
             _ => Scheme.Parse("cookie")
         };
 
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithUserAccessTokenParameter(new BffUserAccessTokenParameters
@@ -193,7 +193,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task put_to_remote_endpoint_should_forward_user_to_api(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
@@ -216,7 +216,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task post_to_remote_endpoint_should_forward_user_to_api(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken();
@@ -240,7 +240,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task calls_to_remote_endpoint_should_forward_user_or_anonymous_to_api(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.UserOrNone);
@@ -276,7 +276,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task calls_to_remote_endpoint_should_forward_client_token_to_api(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.Client);
@@ -304,7 +304,7 @@ public class RemoteEndpointTests : BffTestBase
             services.AddSingleton<FailureAccessTokenRetriever>();
         };
 
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessTokenRetriever<FailureAccessTokenRetriever>()
@@ -327,7 +327,7 @@ public class RemoteEndpointTests : BffTestBase
     public async Task calls_to_remote_api_that_returns_forbidden_will_return_forbidden(BffSetupType setup)
     {
         Api.ApiStatusCodeToReturn = HttpStatusCode.Forbidden;
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
@@ -345,7 +345,7 @@ public class RemoteEndpointTests : BffTestBase
     public async Task calls_to_remote_api_that_returns_unauthorized_will_return_unauthorized(BffSetupType setup)
     {
         Api.ApiStatusCodeToReturn = HttpStatusCode.Unauthorized;
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
@@ -369,7 +369,7 @@ public class RemoteEndpointTests : BffTestBase
             services.AddSingleton(new TestAccessTokenRetriever(() => CreateAccessToken("123", "fake-client")));
         };
 
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessTokenRetriever<TestAccessTokenRetriever>()
@@ -416,7 +416,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task calls_to_remote_endpoint_should_forward_user_or_client_to_api(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.UserOrClient);
@@ -452,7 +452,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task calls_to_remote_endpoint_with_anon_should_be_anon(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
@@ -486,7 +486,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task when_id_srv_client_is_disabled_then_unauthorized(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint("/api_user_or_client", Api.Url())
                 .WithAccessToken(RequiredTokenType.UserOrClient);
@@ -522,7 +522,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task response_status_401_from_remote_endpoint_should_return_401_from_bff(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
@@ -542,7 +542,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task response_status_403_from_remote_endpoint_should_return_403_from_bff(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
@@ -562,7 +562,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task calls_to_remote_endpoint_should_require_csrf(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.None);
@@ -579,7 +579,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task endpoints_that_disable_csrf_should_not_require_csrf_header(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path))
                 .WithAccessToken(RequiredTokenType.UserOrClient)
@@ -597,7 +597,7 @@ public class RemoteEndpointTests : BffTestBase
     [Theory, MemberData(nameof(AllSetups))]
     public async Task MapRemoteBffApiEndpoint_can_override_default_transform(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(The.Path, Api.Url(The.Path), c =>
                 {
@@ -642,7 +642,7 @@ public class RemoteEndpointTests : BffTestBase
     {
         var shouldDelay = false;
 
-        Api.OnConfigure += app =>
+        Api.OnConfigureApp += app =>
         {
             app.Use(async (c, n) =>
             {
@@ -664,7 +664,7 @@ public class RemoteEndpointTests : BffTestBase
             });
         };
 
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(
                     localPath: The.Path,
@@ -696,7 +696,7 @@ public class RemoteEndpointTests : BffTestBase
     {
         var shouldDelay = false;
 
-        Api.OnConfigure += app =>
+        Api.OnConfigureApp += app =>
         {
             app.Use(async (c, n) =>
             {
@@ -709,7 +709,7 @@ public class RemoteEndpointTests : BffTestBase
             });
         };
 
-        Bff.OnConfigureEndpoints += app =>
+        Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(
                     localPath: The.Path,

@@ -134,7 +134,7 @@ namespace Duende.Bff
     {
         public static Microsoft.AspNetCore.Authentication.AuthenticationTicket? Deserialize(this Duende.Bff.SessionManagement.SessionStore.UserSession session, Microsoft.AspNetCore.DataProtection.IDataProtector protector, Microsoft.Extensions.Logging.ILogger logger) { }
         public static System.DateTime? GetExpiration(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
-        public static System.DateTime GetIssued(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static System.DateTime GetIssued(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket, System.DateTimeOffset utcNow) { }
         public static string? GetSessionId(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
         public static string GetSubjectId(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
         public static string Serialize(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket, Microsoft.AspNetCore.DataProtection.IDataProtector protector) { }
@@ -154,17 +154,18 @@ namespace Duende.Bff
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffOpenIdCallbacks(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPathMapping(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
-    public sealed class BffBuilder
+    public static class BffBuilderExtensions
     {
-        public BffBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
-        public Duende.Bff.BffBuilder AddFrontends(params Duende.Bff.DynamicFrontends.BffFrontend[] frontends) { }
-        public Duende.Bff.BffBuilder AddServerSideSessions() { }
-        public Duende.Bff.BffBuilder AddServerSideSessions<T>()
+        public static T AddFrontends<T>(this T builder, params Duende.Bff.DynamicFrontends.BffFrontend[] frontends)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static Duende.Bff.Builder.IBffBuilder AddServerSideSessions<T>(this Duende.Bff.Builder.IBffServicesBuilder builder)
             where T :  class, Duende.Bff.SessionManagement.SessionStore.IUserSessionStore { }
-        public Duende.Bff.BffBuilder LoadConfiguration(Microsoft.Extensions.Configuration.IConfiguration section) { }
-        public Duende.Bff.BffBuilder WithDefaultCookieOptions(System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> oidc) { }
-        public Duende.Bff.BffBuilder WithDefaultOpenIdConnectOptions(System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> oidc) { }
+        public static T AddServerSideSessions<T>(this T builder)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T ConfigureCookies<T>(this T builder, System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> oidc)
+            where T : Duende.Bff.Builder.IBffBuilder { }
+        public static T ConfigureOpenIdConnect<T>(this T builder, System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> oidc)
+            where T : Duende.Bff.Builder.IBffBuilder { }
     }
     public static class BffEndpointRouteBuilderExtensions
     {
@@ -255,7 +256,33 @@ namespace Duende.Bff
     }
     public static class ServiceCollectionExtensions
     {
-        public static Duende.Bff.BffBuilder AddBff(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Duende.Bff.Configuration.BffOptions>? configureAction = null) { }
+        public static Duende.Bff.Builder.IBffServicesBuilder AddBff(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Duende.Bff.Configuration.BffOptions>? configureAction = null) { }
+    }
+}
+namespace Duende.Bff.Builder
+{
+    public interface IBffBuilder
+    {
+        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+    }
+    public interface IBffServicesBuilder : Duende.Bff.Builder.IBffBuilder
+    {
+        Duende.Bff.Builder.IBffServicesBuilder LoadConfiguration(Microsoft.Extensions.Configuration.IConfiguration section);
+    }
+    public sealed class WebApp : Microsoft.AspNetCore.Builder.IApplicationBuilder, Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
+    {
+        public System.IServiceProvider ApplicationServices { get; set; }
+        public System.Collections.Generic.ICollection<Microsoft.AspNetCore.Routing.EndpointDataSource> DataSources { get; }
+        public System.Collections.Generic.IDictionary<string, object?> Properties { get; }
+        public Microsoft.AspNetCore.Http.Features.IFeatureCollection ServerFeatures { get; }
+        public System.IServiceProvider ServiceProvider { get; }
+        public Microsoft.AspNetCore.Http.RequestDelegate Build() { }
+        public Microsoft.AspNetCore.Builder.IApplicationBuilder CreateApplicationBuilder() { }
+        public Microsoft.AspNetCore.Builder.IApplicationBuilder New() { }
+        public Microsoft.AspNetCore.Builder.IApplicationBuilder Use(System.Func<Microsoft.AspNetCore.Http.RequestDelegate, Microsoft.AspNetCore.Http.RequestDelegate> middleware) { }
+        [System.Obsolete(("Don\'t call UseEndpoints on WebApp. The WebApp directly implements IEndpointRouteB" +
+            "uilder."))]
+        public Duende.Bff.Builder.WebApp UseEndpoints(System.Action<Microsoft.AspNetCore.Routing.IEndpointRouteBuilder> configure) { }
     }
 }
 namespace Duende.Bff.Configuration
@@ -288,13 +315,12 @@ namespace Duende.Bff.Configuration
         public string AntiForgeryHeaderValue { get; set; }
         public bool AutomaticallyRegisterBffMiddleware { get; set; }
         public Microsoft.AspNetCore.Http.PathString BackChannelLogoutPath { get; }
+        public System.Net.Http.HttpMessageHandler? BackchannelHttpHandler { get; set; }
         public bool BackchannelLogoutAllUserSessions { get; set; }
-        public System.Net.Http.HttpMessageHandler? BackchannelMessageHandler { get; set; }
         public Duende.Bff.AccessTokenManagement.DPoPProofKey? DPoPJsonWebKey { get; set; }
         public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; }
         public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
         public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
-        public bool EnableSessionCleanup { get; set; }
         public bool EnforceBffMiddleware { get; set; }
         public string? IndexHtmlClientName { get; set; }
         public string? LicenseKey { get; set; }

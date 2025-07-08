@@ -25,15 +25,10 @@ internal class SessionCleanupHost(
 
     protected override async Task ExecuteAsync(CT ct)
     {
-        if (!_options.EnableSessionCleanup)
-        {
-            return;
-        }
-
         if (!IsIUserSessionStoreCleanupRegistered())
         {
-            logger.SessionCleanupNotRegistered(LogLevel.Warning);
-            return;
+            logger.SessionCleanupNotRegistered(LogLevel.Error);
+            throw new InvalidOperationException("No IUserSessionStoreCleanup is registered. Did you add session storage, such as EntityFramework?");
         }
 
         while (true)
@@ -70,7 +65,7 @@ internal class SessionCleanupHost(
         }
     }
 
-    private async Task RunAsync(CT ct = default)
+    internal async Task RunAsync(CT ct = default)
     {
         try
         {
