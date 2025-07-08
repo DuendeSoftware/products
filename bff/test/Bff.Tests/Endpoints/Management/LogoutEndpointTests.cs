@@ -85,9 +85,9 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     public async Task logout_endpoint_for_authenticated_user_without_sid_should_succeed(BffSetupType setup)
     {
         // Workaround to place a session cookie in the BFF without a session id claim.
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet("/__signin", async ctx =>
+            app.MapGet("/__signin", async ctx =>
             {
                 var props = new AuthenticationProperties();
                 await ctx.SignInAsync(
@@ -153,7 +153,7 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task logout_endpoint_should_accept_returnUrl(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints => endpoints.MapGet("/foo", () => "foo'd you");
+        Bff.OnConfigureApp += app => app.MapGet("/foo", () => "foo'd you");
 
         await ConfigureBff(setup);
         await Bff.BrowserClient.Login();

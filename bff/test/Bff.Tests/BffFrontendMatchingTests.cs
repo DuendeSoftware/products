@@ -16,9 +16,9 @@ public class BffFrontendMatchingTests : BffTestBase
         // Add a frontend that should never be matched
         AddOrUpdateFrontend(Some.NeverMatchingFrontEnd());
 
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet("/show-front-end",
+            app.MapGet("/show-front-end",
                 (CurrentFrontendAccessor currentFrontendAccessor) =>
                 {
                     if (currentFrontendAccessor.TryGet(out var frontend))

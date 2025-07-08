@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 
 namespace Bff.Tests.Blazor;
@@ -49,6 +50,7 @@ public class ServerSideTokenStoreTests
         // Note that we don't yet have tokens in the session
         var sessionService = new ServerSideTicketStore(
             metrics: new BffMetrics(new DummyMeterFactory()),
+            timeProvider: new FakeTimeProvider(),
             store: sessionStore,
             dataProtectionProvider: dataProtection,
             partitionKeyBuilder: () => The.PartitionKey,

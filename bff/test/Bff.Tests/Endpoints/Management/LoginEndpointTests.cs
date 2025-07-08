@@ -206,7 +206,7 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task login_endpoint_should_accept_returnUrl(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints => endpoints.MapGet("/foo", () => "foo'd you");
+        Bff.OnConfigureApp += app => app.MapGet("/foo", () => "foo'd you");
         await ConfigureBff(setup);
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login") + "?returnUrl=/foo")

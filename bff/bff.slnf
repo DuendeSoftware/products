@@ -21,6 +21,7 @@
       "bff\\hosts\\RemoteApis\\Hosts.RemoteApi.Isolated\\Hosts.RemoteApi.Isolated.csproj",
       "bff\\hosts\\RemoteApis\\Hosts.RemoteApi\\Hosts.RemoteApi.csproj",
       "bff\\migrations\\UserSessionDb\\UserSessionDb.csproj",
+      "bff\\performance\\Bff.Benchmarks\\Bff.Benchmarks.csproj",
       "bff\\src\\Bff.Blazor.Client\\Bff.Blazor.Client.csproj",
       "bff\\src\\Bff.Blazor\\Bff.Blazor.csproj",
       "bff\\src\\Bff.EntityFramework\\Bff.EntityFramework.csproj",

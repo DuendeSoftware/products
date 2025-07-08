@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Builder;
 using Duende.Bff.Configuration;
 using Duende.Bff.Yarp.Internal;
 using Microsoft.AspNetCore.Builder;
@@ -20,7 +21,7 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static BffBuilder AddRemoteApis(this BffBuilder builder)
+    public static T AddRemoteApis<T>(this T builder) where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(builder);
 
@@ -44,7 +45,7 @@ public static class BffBuilderExtensions
         return builder;
     }
 
-    public static IReverseProxyBuilder AddYarpConfig(this BffBuilder builder, RouteConfig[] routes,
+    public static IReverseProxyBuilder AddYarpConfig(this IBffServicesBuilder builder, RouteConfig[] routes,
         ClusterConfig[] clusters)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -57,7 +58,7 @@ public static class BffBuilderExtensions
         return yarpBuilder;
     }
 
-    public static IReverseProxyBuilder AddYarpConfig(this BffBuilder builder, IConfiguration config)
+    public static IReverseProxyBuilder AddYarpConfig(this IBffServicesBuilder builder, IConfiguration config)
     {
         ArgumentNullException.ThrowIfNull(builder);
 

@@ -14,13 +14,20 @@ namespace Duende.Bff.Tests.Endpoints;
 
 public class YarpTests : BffTestBase
 {
-    public YarpTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureEndpoints += endpoints =>
-    {
-        endpoints.MapReverseProxy(proxyApp => { proxyApp.UseAntiforgeryCheck(); });
-    };
+    public YarpTests(ITestOutputHelper output) : base(output) =>
+        Bff.OnConfigureApp += app =>
+        {
+            app.MapReverseProxy(proxyApp =>
+            {
+                proxyApp.UseAntiforgeryCheck();
+            });
+        };
 
     private void ConfigureYarp(RouteConfig routeConfig) =>
-        Bff.OnConfigureBff += bff => { bff.AddYarpConfig([routeConfig], [Some.ClusterConfig(Api)]); };
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.AddYarpConfig([routeConfig], [Some.ClusterConfig(Api)]);
+        };
 
     [Theory]
     [MemberData(nameof(AllSetups))]

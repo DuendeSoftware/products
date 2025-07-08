@@ -82,8 +82,8 @@ public abstract class BffTestBase : IAsyncDisposable
             IdentityServer.AddClient(The.ClientId, Bff.Url());
             Bff.OnConfigureBff += bff =>
             {
-                bff.WithDefaultOpenIdConnectOptions(openIdConfiguration);
-                bff.WithDefaultCookieOptions(options =>
+                bff.ConfigureOpenIdConnect(openIdConfiguration);
+                bff.ConfigureCookies(options =>
                 {
                     configureCookie?.Invoke(options);
                 });

@@ -17,9 +17,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task calls_to_authorized_local_endpoint_should_succeed(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -41,9 +41,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task calls_to_authorized_local_endpoint_without_csrf_should_succeed_without_antiforgery_header(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
@@ -66,9 +66,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task unauthenticated_calls_to_authorized_local_endpoint_should_fail(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -87,9 +87,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     public async Task calls_to_local_endpoint_should_require_antiforgery_header(BffSetupType setup)
     {
 
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
 
@@ -107,9 +107,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task calls_to_local_endpoint_without_csrf_should_not_require_antiforgery_header(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .SkipAntiforgery()
                 .AsBffApiEndpoint();
         };
@@ -129,9 +129,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task calls_to_anon_endpoint_should_allow_anonymous(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
         await ConfigureBff(setup);
@@ -149,9 +149,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task put_to_local_endpoint_should_succeed(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .AsBffApiEndpoint();
         };
         await ConfigureBff(setup);
@@ -177,9 +177,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task unauthenticated_non_bff_endpoint_should_return_302_for_login(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization();
         };
         await ConfigureBff(setup);
@@ -203,9 +203,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task unauthenticated_api_call_should_return_401(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -225,9 +225,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task forbidden_api_call_should_return_403(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -247,9 +247,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task challenge_response_should_return_401(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet(The.Path, c => c.ChallengeAsync())
+            app.MapGet(The.Path, c => c.ChallengeAsync())
                 .RequireAuthorization()
                 .AsBffApiEndpoint();
         };
@@ -270,9 +270,9 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
     [MemberData(nameof(AllSetups))]
     public async Task challenge_response_when_response_handling_skipped_should_trigger_redirect_for_login(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapGet(The.Path, c => c.ChallengeAsync())
+            app.MapGet(The.Path, c => c.ChallengeAsync())
                 .RequireAuthorization()
                 .AsBffApiEndpoint()
                 .SkipResponseHandling();

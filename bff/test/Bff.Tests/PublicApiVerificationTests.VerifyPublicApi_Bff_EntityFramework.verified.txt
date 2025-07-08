@@ -2,15 +2,23 @@ namespace Duende.Bff.EntityFramework
 {
     public static class BffBuilderExtensions
     {
-        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions(this Duende.Bff.BffBuilder bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action) { }
-        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions(this Duende.Bff.BffBuilder bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action) { }
-        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this Duende.Bff.BffBuilder bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
-            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext { }
-        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this Duende.Bff.BffBuilder bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
-            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext { }
-        public static Duende.Bff.BffBuilder AddEntityFrameworkServerSideSessionsServices<TContext>(this Duende.Bff.BffBuilder bffBuilder)
-            where TContext : Duende.Bff.EntityFramework.ISessionDbContext { }
-        public static Duende.Bff.BffBuilder ConfigureEntityFrameworkSessionStoreOptions(this Duende.Bff.BffBuilder bffBuilder, System.Action<Duende.Bff.EntityFramework.SessionStoreOptions> action) { }
+        public static T AddEntityFrameworkServerSideSessions<T>(this T bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessions<T>(this T bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessions<TContext, T>(this T bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessions<TContext, T>(this T bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessionsServices<TContext, T>(this T bffBuilder)
+            where TContext : Duende.Bff.EntityFramework.ISessionDbContext
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddSessionCleanupBackgroundProcess<T>(this T bffBuilder)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T ConfigureEntityFrameworkSessionStoreOptions<T>(this T bffBuilder, System.Action<Duende.Bff.EntityFramework.SessionStoreOptions> action)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
     }
     public interface ISessionDbContext
     {

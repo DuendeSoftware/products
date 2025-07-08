@@ -16,7 +16,7 @@ public class BffHost : Host
         OnConfigureServices += services =>
         {
             services.AddBff()
-                .WithDefaultOpenIdConnectOptions(oidc =>
+                .ConfigureOpenIdConnect(oidc =>
                 {
                     oidc.ClientId = "bff";
                     oidc.ClientSecret = "secret";

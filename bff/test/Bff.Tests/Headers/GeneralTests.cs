@@ -16,9 +16,9 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
     [Theory, MemberData(nameof(AllSetups))]
     public async Task local_endpoint_should_receive_standard_headers(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c))
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c))
                 .RequireAuthorization();
         };
         await ConfigureBff(setup);
@@ -40,9 +40,9 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
     public async Task custom_header_should_be_forwarded(BffSetupType setup)
     {
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.None);
         };
         await ConfigureBff(setup);
@@ -64,9 +64,9 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
     public async Task custom_header_should_be_forwarded_and_xforwarded_headers_should_be_created(BffSetupType setup)
     {
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
                 .WithAccessToken(RequiredTokenType.None);
         };
         await ConfigureBff(setup);
@@ -100,7 +100,7 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
     [Theory, MemberData(nameof(AllSetups))]
     public async Task If_management_endpoints_are_mapped_manually_then_warning_is_written(BffSetupType setup)
     {
-        Bff.OnConfigureEndpoints += endpoints => endpoints.MapBffManagementEndpoints();
+        Bff.OnConfigureApp += app => app.MapBffManagementEndpoints();
         await ConfigureBff(setup);
 
         // And we can log in, which means the login endpoint was registered
