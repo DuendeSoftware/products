@@ -195,13 +195,13 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
         var scheme = await AuthenticationSchemeProvider.GetDefaultChallengeSchemeAsync();
         if (scheme == null)
         {
-            throw new Exception("Failed to obtain default challenge scheme");
+            throw new InvalidOperationException("Failed to obtain default challenge scheme");
         }
 
         var options = OptionsMonitor.Get(scheme.Name);
         if (options == null)
         {
-            throw new Exception("Failed to obtain OIDC options for default challenge scheme");
+            throw new InvalidOperationException("Failed to obtain OIDC options for default challenge scheme");
         }
 
         var config = options.Configuration;
@@ -212,7 +212,7 @@ public class DefaultBackchannelLogoutService : IBackchannelLogoutService
 
         if (config == null)
         {
-            throw new Exception("Failed to obtain OIDC configuration");
+            throw new InvalidOperationException("Failed to obtain OIDC configuration");
         }
 
         var parameters = new TokenValidationParameters

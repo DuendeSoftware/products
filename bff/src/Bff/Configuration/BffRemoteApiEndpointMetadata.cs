@@ -42,7 +42,7 @@ public class BffRemoteApiEndpointMetadata : IBffApiEndpoint
             }
             else
             {
-                throw new Exception("Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
+                throw new InvalidOperationException("Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
             }
         }
     }

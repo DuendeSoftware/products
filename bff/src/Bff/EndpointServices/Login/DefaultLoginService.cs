@@ -54,7 +54,13 @@ public class DefaultLoginService : ILoginService
         {
             if (!await ReturnUrlValidator.IsValidAsync(returnUrl))
             {
-                throw new Exception("returnUrl is not valid: " + returnUrl);
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsJsonAsync(new HttpValidationProblemDetails()
+                {
+                    Title = "ReturnUrl is not valid",
+                });
+
+                return;
             }
         }
 

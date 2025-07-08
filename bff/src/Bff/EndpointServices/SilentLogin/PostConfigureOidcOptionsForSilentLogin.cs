@@ -32,7 +32,7 @@ public class PostConfigureOidcOptionsForSilentLogin : IPostConfigureOptions<Open
         {
             if (options.EventsType != null && !typeof(BffOpenIdConnectEvents).IsAssignableFrom(options.EventsType))
             {
-                throw new Exception("EventsType on OpenIdConnectOptions must derive from BffOpenIdConnectEvents to work with the BFF framework.");
+                throw new InvalidOperationException("EventsType on OpenIdConnectOptions must derive from BffOpenIdConnectEvents to work with the BFF framework.");
             }
 
             if (options.EventsType == null)
