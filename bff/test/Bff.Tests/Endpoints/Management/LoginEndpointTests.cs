@@ -227,4 +227,60 @@ public class LoginEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 
         problem.Errors.ShouldContainKey(Constants.RequestParameters.ReturnUrl);
     }
+
+    // This test proves that split host functionality works.
+    // https://github.com/DuendeSoftware/issues/issues/110
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task given_list_of_referers_when_receiving_referer_on_silent_callback_then_allowed(BffSetupType setup)
+    {
+        await ConfigureBff(setup);
+        Bff.BffOptions.AllowedSilentLoginReferers.Add("https://allowed.com");
+
+        await Bff.BrowserClient.Login();
+
+        Bff.BrowserClient.DefaultRequestHeaders.Add("Referer", "https://ALLOWED.com");
+
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
+            .CheckHttpStatusCode();
+
+        response.Content.Headers.ContentType!.MediaType.ShouldBe("text/html");
+
+        response.RequestMessage!.RequestUri.ShouldBe(Bff.Url("/bff/silent-login-callback"));
+
+        var message = await response.Content.ReadAsStringAsync();
+        message.ShouldContain("source:'bff-silent-login");
+        message.ShouldContain($"isLoggedIn:true");
+    }
+
+    // This test guards against missing referer headers
+    // https://github.com/DuendeSoftware/issues/issues/110
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task given_list_of_referers_without_missing_header_then_returns_bad_request(BffSetupType setup)
+    {
+        await ConfigureBff(setup);
+        Bff.BffOptions.AllowedSilentLoginReferers.Add("https://allowed.com");
+
+        await Bff.BrowserClient.Login();
+
+        await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
+            .CheckHttpStatusCode(HttpStatusCode.BadRequest);
+    }
+
+    // This test guards against incorrect referer
+    // https://github.com/DuendeSoftware/issues/issues/110
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task given_list_of_referers_with_invalid_referer_then_returns_bad_request(BffSetupType setup)
+    {
+        await ConfigureBff(setup);
+        Bff.BffOptions.AllowedSilentLoginReferers.Add("https://allowed.com");
+
+        await Bff.BrowserClient.Login();
+
+        Bff.BrowserClient.DefaultRequestHeaders.Add("Referer", "https://not_allowed.com");
+        await Bff.BrowserClient.GetAsync(Bff.Url("/bff/login?prompt=none"))
+            .CheckHttpStatusCode(HttpStatusCode.BadRequest);
+    }
 }

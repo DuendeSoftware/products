@@ -283,6 +283,7 @@ namespace Duende.Bff.Configuration
     public sealed class BffOptions
     {
         public BffOptions() { }
+        public System.Collections.ObjectModel.Collection<string> AllowedSilentLoginReferers { get; }
         public Duende.Bff.Configuration.AnonymousSessionResponse AnonymousSessionResponse { get; set; }
         public string AntiForgeryHeaderName { get; set; }
         public string AntiForgeryHeaderValue { get; set; }

@@ -27,4 +27,5 @@ internal class OTelParameters
     public const string Claims = "Claims";
     public const string Origin = "Origin";
     public const string IsLoggedIn = "IsLoggedIn";
+    public const string Referer = "Referer";
 }
