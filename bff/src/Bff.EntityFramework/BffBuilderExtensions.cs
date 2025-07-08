@@ -1,10 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Builder;
 using Duende.Bff.EntityFramework.Internal;
 using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Duende.Bff.EntityFramework;
 
@@ -19,7 +21,9 @@ public static class BffBuilderExtensions
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action) => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
+    public static T AddEntityFrameworkServerSideSessions<T>(this T bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action)
+        where T : IBffServicesBuilder
+        => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext, T>(action);
 
     /// <summary>
     /// Adds entity framework core support for user session store.
@@ -27,7 +31,9 @@ public static class BffBuilderExtensions
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<DbContextOptionsBuilder> action) => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
+    public static T AddEntityFrameworkServerSideSessions<T>(this T bffBuilder, Action<DbContextOptionsBuilder> action)
+        where T : IBffServicesBuilder
+        => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext, T>(action);
 
     /// <summary>
     /// Adds entity framework core support for user session store.
@@ -35,12 +41,13 @@ public static class BffBuilderExtensions
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public static BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this BffBuilder bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action)
+    public static T AddEntityFrameworkServerSideSessions<TContext, T>(this T bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action)
         where TContext : DbContext, ISessionDbContext
+        where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
         bffBuilder.Services.AddDbContext<TContext>(action);
-        return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext>();
+        return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext, T>();
     }
 
     /// <summary>
@@ -49,14 +56,14 @@ public static class BffBuilderExtensions
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public static BffBuilder AddEntityFrameworkServerSideSessions<TContext>(this BffBuilder bffBuilder, Action<DbContextOptionsBuilder> action)
+    public static T AddEntityFrameworkServerSideSessions<TContext, T>(this T bffBuilder, Action<DbContextOptionsBuilder> action)
         where TContext : DbContext, ISessionDbContext
+        where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
         bffBuilder.Services.AddDbContext<TContext>(action);
-        return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext>();
+        return bffBuilder.AddEntityFrameworkServerSideSessionsServices<TContext, T>();
     }
-
 
     /// <summary>
     /// Adds entity framework core support for user session store, but does not register a DbContext.
@@ -64,22 +71,36 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <param name="bffBuilder"></param>
     /// <returns></returns>
-    public static BffBuilder AddEntityFrameworkServerSideSessionsServices<TContext>(this BffBuilder bffBuilder)
+    public static T AddEntityFrameworkServerSideSessionsServices<TContext, T>(this T bffBuilder)
         where TContext : ISessionDbContext
+        where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
         bffBuilder.Services.AddTransient<IUserSessionStoreCleanup, UserSessionStore>();
         bffBuilder.Services.AddTransient<ISessionDbContext>(svcs => svcs.GetRequiredService<TContext>());
-        return bffBuilder.AddServerSideSessions<UserSessionStore>();
+        bffBuilder.AddServerSideSessions<UserSessionStore>();
+
+        return bffBuilder;
     }
 
     /// <summary>
     /// Allows configuring the SessionStoreOptions.
     /// </summary>
-    public static BffBuilder ConfigureEntityFrameworkSessionStoreOptions(this BffBuilder bffBuilder, Action<SessionStoreOptions> action)
+    public static T ConfigureEntityFrameworkSessionStoreOptions<T>(this T bffBuilder, Action<SessionStoreOptions> action)
+        where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
         bffBuilder.Services.Configure(action);
         return bffBuilder;
     }
+
+    public static T AddSessionCleanupBackgroundProcess<T>(this T bffBuilder)
+        where T : IBffServicesBuilder
+    {
+        ArgumentNullException.ThrowIfNull(bffBuilder);
+        bffBuilder.Services.AddSingleton<IHostedService, SessionCleanupHost>();
+        return bffBuilder;
+    }
+
 }
+

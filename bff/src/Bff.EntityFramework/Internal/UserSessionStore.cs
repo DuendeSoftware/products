@@ -11,12 +11,11 @@ namespace Duende.Bff.EntityFramework.Internal;
 /// <summary>
 /// Entity framework core implementation of IUserSessionStore
 /// </summary>
-#pragma warning disable CA1812 // internal class never instantiated? It is, but via DI
 internal sealed class UserSessionStore(
     ISessionDbContext sessionDbContext,
+    TimeProvider timeProvider,
     ILogger<UserSessionStore> logger)
     : IUserSessionStore, IUserSessionStoreCleanup
-#pragma warning restore CA1812 
 {
     /// <inheritdoc/>
     public async Task CreateUserSessionAsync(UserSession session, CT ct)
@@ -246,7 +245,7 @@ internal sealed class UserSessionStore(
         while (found >= batchSize)
         {
             var expired = await sessionDbContext.UserSessions
-                .Where(x => x.Expires < DateTime.UtcNow)
+                .Where(x => x.Expires < timeProvider.GetUtcNow())
                 .OrderBy(x => x.Id)
                 .Take(batchSize)
                 .ToArrayAsync(ct);

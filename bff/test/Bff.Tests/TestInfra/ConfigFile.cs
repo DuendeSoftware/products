@@ -19,9 +19,19 @@ internal class ConfigFile : IDisposable
         }
     }
 
-    public void Save(BffConfiguration config)
+    public void Save(BffConfiguration config, string? section = null)
     {
-        File.WriteAllText(ToString(), JsonSerializer.Serialize(config));
+        if (section == null)
+        {
+            File.WriteAllText(ToString(), JsonSerializer.Serialize(config));
+        }
+        else
+        {
+            File.WriteAllText(ToString(), JsonSerializer.Serialize(new Dictionary<string, BffConfiguration>()
+            {
+                [section] = config
+            }));
+        }
 
         if (_configuration == null)
         {

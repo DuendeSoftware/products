@@ -3,6 +3,7 @@
 
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Builder;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
@@ -84,7 +85,7 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
     {
     }
 
-    public virtual void ConfigureBff(BffBuilder bff)
+    public virtual void ConfigureBff(IBffServicesBuilder bff)
     {
     }
 

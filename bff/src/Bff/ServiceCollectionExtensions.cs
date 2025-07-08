@@ -1,22 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.AccessTokenManagement.OpenIdConnect;
-using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Builder;
 using Duende.Bff.Configuration;
-using Duende.Bff.DynamicFrontends;
-using Duende.Bff.Endpoints;
-using Duende.Bff.Endpoints.Internal;
-using Duende.Bff.Internal;
-using Duende.Bff.Otel;
-using Duende.Bff.SessionManagement.Configuration;
-using Duende.Bff.SessionManagement.Revocation;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace Duende.Bff;
 
@@ -28,58 +16,78 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Adds the Duende.BFF services to DI
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="configureAction"></param>
     /// <returns></returns>
-    public static BffBuilder AddBff(this IServiceCollection services, Action<BffOptions>? configureAction = null)
+    public static IBffServicesBuilder AddBff(this IServiceCollection services, Action<BffOptions>? configureAction = null)
     {
+        var builder = new BffBuilder(services);
+
         if (configureAction != null)
         {
-            services.Configure(configureAction);
+            builder.Services.Configure(configureAction);
         }
 
-        services.AddDistributedMemoryCache();
-        // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
-        // AddOpenIdConnectAccessTokenManagement because both configure the same options
-        // The AddOpenIdConnectAccessTokenManagement adds OR wraps the BackchannelHttpHandler
-        // to add DPoP support. However, our code can also add a backchannel handler. 
-        services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, BffConfigureOpenIdConnectOptions>();
-        services.AddOpenIdConnectAccessTokenManagement();
-
-        services.AddSingleton<IConfigureOptions<UserTokenManagementOptions>, ConfigureUserTokenManagementOptions>();
-
-        services.AddTransient<IReturnUrlValidator, LocalUrlReturnUrlValidator>();
-        services.TryAddSingleton<IAccessTokenRetriever, DefaultAccessTokenRetriever>();
-
-        // management endpoints
-        services.AddTransient<ILoginEndpoint, DefaultLoginEndpoint>();
-#pragma warning disable CS0618 // Type or member is obsolete
-        services.AddTransient<ISilentLoginEndpoint, DefaultSilentLoginEndpoint>();
-#pragma warning restore CS0618 // Type or member is obsolete
-        services.AddTransient<ISilentLoginCallbackEndpoint, DefaultSilentLoginCallbackEndpoint>();
-        services.AddTransient<ILogoutEndpoint, DefaultLogoutEndpoint>();
-        services.AddTransient<IUserEndpoint, DefaultUserEndpoint>();
-        services.AddTransient<IBackchannelLogoutEndpoint, DefaultBackchannelLogoutEndpoint>();
-        services.AddTransient<IDiagnosticsEndpoint, DefaultDiagnosticsEndpoint>();
-
-        // session management
-        services.TryAddTransient<ISessionRevocationService, NopSessionRevocationService>();
-
-        // cookie configuration
-        services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
-        services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieRevokeRefreshToken>();
-        services.AddSingleton<ActiveCookieAuthenticationScheme>();
-        services.AddSingleton<ActiveOpenIdConnectAuthenticationScheme>();
-
-        services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
-
-        services.AddSingleton<BffMetrics>();
-
-        // wrap ASP.NET Core
-        services.AddAuthentication();
-        services.AddTransientDecorator<IAuthenticationService, BffAuthenticationService>();
-
-        return new BffBuilder(services)
+        return builder
+            .AddBaseBffServices()
             .AddDynamicFrontends();
+    }
+}
+
+/// <summary>
+/// Encapsulates DI options for Duende.BFF
+/// </summary>
+internal class BffBuilder : IBffServicesBuilder
+{
+    /// <summary>
+    /// Encapsulates DI options for Duende.BFF
+    /// </summary>
+    internal BffBuilder(IServiceCollection services) => Services = services;
+
+    private IConfiguration? _loadedConfiguration;
+
+    private readonly List<LoadPluginConfiguration> _pluginConfigurationLoaders = [];
+
+    /// <summary>
+    /// Hook for a plugin to register itself for configuration loading.
+    /// </summary>
+    /// <param name="loadPluginConfiguration"></param>
+    void IBffServicesBuilder.RegisterConfigurationLoader(LoadPluginConfiguration loadPluginConfiguration)
+    {
+        if (_loadedConfiguration == null)
+        {
+            // If the configuration is not yet loaded, we store the loader for later execution
+            _pluginConfigurationLoaders.Add(loadPluginConfiguration);
+        }
+        else
+        {
+            // Configuration is already loaded, so we execute the loader immediately
+            loadPluginConfiguration(Services, _loadedConfiguration);
+        }
+    }
+
+    /// <summary>
+    /// The service collection
+    /// </summary>
+    public IServiceCollection Services { get; }
+
+    public IBffServicesBuilder LoadConfiguration(IConfiguration section)
+    {
+        if (_loadedConfiguration != null)
+        {
+            throw new InvalidOperationException("Already loaded configuration");
+        }
+
+        _loadedConfiguration = section;
+
+        Services.Configure<BffConfiguration>(section);
+
+        // Trigger all configuration loaders from plugins
+        foreach (var configLoader in _pluginConfigurationLoaders)
+        {
+            configLoader(Services, section);
+        }
+        // We no longer need them. 
+        _pluginConfigurationLoaders.Clear();
+
+        return this;
     }
 }

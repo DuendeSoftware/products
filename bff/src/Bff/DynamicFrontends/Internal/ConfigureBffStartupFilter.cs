@@ -28,12 +28,12 @@ internal class ConfigureBffStartupFilter : IStartupFilter
 
             next(app);
 
-            foreach (var loader in bffOptions.MiddlewareLoaders)
-            {
-                loader(app);
-            }
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {
+                foreach (var loader in bffOptions.MiddlewareLoaders)
+                {
+                    loader(app);
+                }
                 app.UseEndpoints(endpoints =>
                 {
                     if (!endpoints.AlreadyMappedManagementEndpoint(bffOptions.LoginPath, "Login"))

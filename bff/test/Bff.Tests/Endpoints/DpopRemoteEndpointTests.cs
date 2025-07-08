@@ -18,11 +18,10 @@ public class DpopRemoteEndpointTests(ITestOutputHelper output) : BffTestBase(out
         idSrvClient.RequireDPoP = true;
 
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
-        Bff.OnConfigureEndpoints += endpoints =>
+        Bff.OnConfigureApp += app =>
         {
-            endpoints.MapRemoteBffApiEndpoint(The.Path, Api.Url())
-                .WithAccessToken(RequiredTokenType.Client)
-                ;
+            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+                .WithAccessToken(RequiredTokenType.Client);
         };
 
         await base.InitializeAsync();

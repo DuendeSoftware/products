@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff;
+using Duende.Bff.Builder;
 using Duende.Bff.DynamicFrontends;
 using Microsoft.Extensions.Options;
 
@@ -17,7 +18,7 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
     {
         bff.WithDefaultOpenIdConnectOptions(o => DefaultOpenIdConfiguration.Apply(o, Settings))
             .AddFrontends(new BffFrontend(BffFrontendName.Parse("default")))
-
+            
             // Note, in order for this to work, we'll need to inject this as config
             .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(
                 Origin.Parse(Config.GetValue<string>("BFFURL3") ??

@@ -18,7 +18,7 @@ var services = builder.Services;
 
 // Add BFF services to DI - also add server-side session management
 services.AddBff()
-    .WithDefaultOpenIdConnectOptions(options =>
+    .ConfigureOpenIdConnect(options =>
     {
         var authority = ServiceDiscovery.ResolveService(AppHostServices.IdentityServer);
         options.Authority = authority.ToString();

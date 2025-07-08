@@ -25,14 +25,14 @@ internal static class Extensions
         services.AddBff(options =>
             {
                 options.BackchannelLogoutAllUserSessions = true;
-                options.EnableSessionCleanup = true;
             })
             .AddRemoteApis()
             .AddEntityFrameworkServerSideSessions(options =>
             {
                 //options.UseSqlServer(cn);
                 options.UseSqlite(cn, opt => opt.MigrationsAssembly(typeof(UserSessions).Assembly.FullName));
-            });
+            })
+            .AddSessionCleanupBackgroundProcess();
 
         // local APIs
         services.AddControllers();
