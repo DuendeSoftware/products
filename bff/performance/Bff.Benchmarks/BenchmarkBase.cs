@@ -12,9 +12,10 @@ using Perfolizer.Metrology;
 namespace Bff.Benchmarks;
 
 [Config(typeof(BenchmarkConfig))]
-public class BenchmarkBase
+public abstract class BenchmarkBase
 {
-
+    public abstract Task InitializeAsync();
+    public abstract Task DisposeAsync();
 }
 
 public class BenchmarkConfig : ManualConfig
@@ -31,7 +32,7 @@ public class BenchmarkConfig : ManualConfig
                 sizeUnit: SizeUnit.KB
             ));
 
-        AddJob(Job.ShortRun);
+        AddJob(Job.MediumRun);
 
         AddExporter(exporter);
     }

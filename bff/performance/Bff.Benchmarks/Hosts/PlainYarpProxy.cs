@@ -4,15 +4,17 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Configuration;
+using Yarp.ReverseProxy.Forwarder;
 
 namespace Bff.Benchmarks.Hosts;
 
 public class PlainYarpProxy : Host
 {
-    public PlainYarpProxy(Uri api)
+    internal PlainYarpProxy(Uri api, SimulatedInternet simulatedInternet) : base(new Uri("https://yarp"), simulatedInternet)
     {
         OnConfigureServices += services =>
         {
+            services.AddSingleton<IForwarderHttpClientFactory>(new SimulatedInternetYarpForwarderFactory(Internet));
             services.AddReverseProxy()
                 .LoadFromMemory(
                     [

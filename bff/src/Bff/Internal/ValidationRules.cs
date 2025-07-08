@@ -16,14 +16,14 @@ internal static partial class ValidationRules
             return isValid;
         };
 
-    [GeneratedRegex("^[a-zA-Z0-9_\\-:/\\.\\+]*$")]
+    [GeneratedRegex("^[a-zA-Z0-9_\\-\\.\\+]*$")]
     private static partial Regex AlphaNumericDashRegex();
 
     public static ValidationRule<string> AlphaNumericOrSelectSeparators() =>
         (string s, out string message) =>
         {
             var isValid = AlphaNumericDashRegex().IsMatch(s);
-            message = !isValid ? "The string must be alphanumeric or one of these characters: '_-+:/'. " : string.Empty;
+            message = !isValid ? "The string must be alphanumeric or one of these characters: '_-+'. " : string.Empty;
 
             return isValid;
         };

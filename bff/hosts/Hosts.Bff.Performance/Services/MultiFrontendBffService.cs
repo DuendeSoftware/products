@@ -13,11 +13,24 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
     {
     }
 
-    public override void ConfigureBff(BffBuilder bff) => bff.WithDefaultOpenIdConnectOptions(o => DefaultOpenIdConfiguration.Apply(o, Settings))
-        .AddFrontends(new BffFrontend(BffFrontendName.Parse("default")))
+    public override void ConfigureBff(BffBuilder bff)
+    {
+        bff.WithDefaultOpenIdConnectOptions(o => DefaultOpenIdConfiguration.Apply(o, Settings))
+            .AddFrontends(new BffFrontend(BffFrontendName.Parse("default")))
 
-        // Note, in order for this to work, we'll need to inject this as config
-        .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(Origin.Parse(Config.GetValue<string>("BFFURL3") ?? throw new InvalidOperationException("BFFUrl3 is null"))));
+            // Note, in order for this to work, we'll need to inject this as config
+            .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(
+                Origin.Parse(Config.GetValue<string>("BFFURL3") ??
+                             throw new InvalidOperationException("BFFUrl3 is null"))));
+
+        for (var i = 0; i < 100; i++)
+        {
+            bff.AddFrontends(
+                new BffFrontend(BffFrontendName.Parse("bff-with-path-" + i))
+                    .MappedToPath(LocalPath.Parse("/path" + i)));
+        }
+
+    }
 
     public override void ConfigureApp(WebApplication app) => app.MapGet("/", (CurrentFrontendAccessor currentFrontendAccessor) => "multi - " + currentFrontendAccessor.Get().Name);
 }

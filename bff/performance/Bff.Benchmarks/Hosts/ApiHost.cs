@@ -8,7 +8,7 @@ namespace Bff.Benchmarks.Hosts;
 
 public class ApiHost : Host
 {
-    public ApiHost(Uri identityServerUri) : base()
+    internal ApiHost(Uri identityServerUri, SimulatedInternet simulatedInternet) : base(new Uri("https://api"), simulatedInternet)
     {
         OnConfigureServices += services =>
         {
@@ -17,6 +17,7 @@ public class ApiHost : Host
                 {
                     options.Authority = identityServerUri.ToString();
                     options.MapInboundClaims = false;
+                    //options.BackchannelHttpHandler = simulatedInternet;
                 });
         };
 
