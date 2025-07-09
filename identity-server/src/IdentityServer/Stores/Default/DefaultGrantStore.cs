@@ -91,12 +91,12 @@ public class DefaultGrantStore<T>
     {
         var key = (value + KeySeparator + GrantType);
 
-        if (value.EndsWith(HexEncodingFormatSuffix))
+        if (value.EndsWith(HexEncodingFormatSuffix, StringComparison.Ordinal))
         {
             // newer format >= v6; uses hex encoding to avoid collation issues
             var bytes = Encoding.UTF8.GetBytes(key);
             var hash = SHA256.HashData(bytes);
-            return BitConverter.ToString(hash).Replace("-", "");
+            return BitConverter.ToString(hash).Replace("-", "", StringComparison.InvariantCulture);
         }
 
         // old format <= v5

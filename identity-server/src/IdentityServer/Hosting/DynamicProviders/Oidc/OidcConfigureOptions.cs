@@ -22,14 +22,14 @@ internal class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConne
         context.AuthenticationOptions.SignOutScheme = context.DynamicProviderOptions.SignOutScheme;
 
         context.AuthenticationOptions.Authority = context.IdentityProvider.Authority;
-        context.AuthenticationOptions.RequireHttpsMetadata = context.IdentityProvider.Authority.StartsWith("https");
+        context.AuthenticationOptions.RequireHttpsMetadata = context.IdentityProvider.Authority.StartsWith("https", StringComparison.Ordinal);
 
         context.AuthenticationOptions.ClientId = context.IdentityProvider.ClientId;
         context.AuthenticationOptions.ClientSecret = context.IdentityProvider.ClientSecret;
 
         context.AuthenticationOptions.ResponseType = context.IdentityProvider.ResponseType;
         context.AuthenticationOptions.ResponseMode =
-            context.IdentityProvider.ResponseType.Contains("id_token") ? "form_post" : "query";
+            context.IdentityProvider.ResponseType.Contains("id_token", StringComparison.InvariantCulture) ? "form_post" : "query";
         context.AuthenticationOptions.UsePkce = context.IdentityProvider.UsePkce;
 
         context.AuthenticationOptions.Scope.Clear();
@@ -44,7 +44,7 @@ internal class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConne
 #if NET5_0_OR_GREATER
         context.AuthenticationOptions.MapInboundClaims = false;
 #else
-            context.AuthenticationOptions.SecurityTokenValidator = new JwtSecurityTokenHandler 
+            context.AuthenticationOptions.SecurityTokenValidator = new JwtSecurityTokenHandler
             {
                 MapInboundClaims = false
             };

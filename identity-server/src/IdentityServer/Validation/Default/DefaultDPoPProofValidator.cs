@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -399,7 +400,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             skew = Options.DPoP.ServerClockSkew;
         }
 
-        // we do x2 here because clock might be might be before or after, so we're making cache duration 
+        // we do x2 here because clock might be might be before or after, so we're making cache duration
         // longer than the likelyhood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = Options.DPoP.ProofTokenValidityDuration + skew;
@@ -495,7 +496,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     protected virtual string CreateNonce(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         var now = Clock.UtcNow.ToUnixTimeSeconds();
-        return DataProtector.Protect(now.ToString());
+        return DataProtector.Protect(now.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>

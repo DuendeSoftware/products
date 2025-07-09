@@ -11,8 +11,8 @@ namespace Duende.IdentityServer.Validation;
 /// <para>
 /// This is to handle the fact that the order of multi-valued response_type lists is
 /// insignificant, per the <see href="https://tools.ietf.org/html/rfc6749#section-3.1.1">OAuth2 spec</see>
-/// and the 
-/// (<see href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0-03.html#terminology">OAuth 
+/// and the
+/// (<see href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0-03.html#terminology">OAuth
 /// 2.0 Multiple Response Type Encoding Practices draft </see>).
 /// </para>
 /// </remarks>
@@ -79,7 +79,7 @@ public class ResponseTypeEqualityComparer : IEqualityComparer<string>
         if (values.Length == 1)
         {
             // Only one value, so just spit out the hash code of the whole string
-            return value.GetHashCode();
+            return value.GetHashCode(StringComparison.InvariantCulture);
         }
 
         Array.Sort(values);

@@ -90,7 +90,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
     private async Task ProcessErrorAsync(AuthorizeResponse response, HttpContext context)
     {
-        // these are the conditions where we can send a response 
+        // these are the conditions where we can send a response
         // back directly to the client, otherwise we're only showing the error UI
         var isSafeError =
             response.Error == OidcConstants.AuthorizeErrors.AccessDenied ||
@@ -170,7 +170,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
             uri = uri.AddHashFragment(query);
         }
 
-        if (response.IsError && !uri.Contains('#'))
+        if (response.IsError && !uri.Contains('#', StringComparison.InvariantCulture))
         {
             // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29#section-4.1.3
             uri += "#_";
@@ -198,7 +198,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
     /// <summary>
     /// Gets the html that will set as the response when response_mode is
-    /// form_post. 
+    /// form_post.
     /// </summary>
     /// <param name="response"></param>
     protected virtual string GetFormPostHtml(AuthorizeResponse response)
@@ -207,8 +207,8 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
         var url = response.Request.RedirectUri;
         url = HtmlEncoder.Default.Encode(url);
-        html = html.Replace("{uri}", url);
-        html = html.Replace("{body}", response.ToNameValueCollection(_options).ToFormPost());
+        html = html.Replace("{uri}", url, StringComparison.InvariantCulture);
+        html = html.Replace("{body}", response.ToNameValueCollection(_options).ToFormPost(), StringComparison.InvariantCulture);
 
         return html;
     }

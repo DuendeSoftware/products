@@ -201,11 +201,11 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                     // path based
                     if (Options.MutualTls.DomainName.IsMissing())
                     {
-                        return baseUrl + endpoint.Replace(ProtocolRoutePaths.ConnectPathPrefix, ProtocolRoutePaths.MtlsPathPrefix);
+                        return baseUrl + endpoint.Replace(ProtocolRoutePaths.ConnectPathPrefix, ProtocolRoutePaths.MtlsPathPrefix, StringComparison.InvariantCulture);
                     }
 
                     // domain based
-                    if (Options.MutualTls.DomainName.Contains('.'))
+                    if (Options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
                     {
                         return $"https://{Options.MutualTls.DomainName}/{endpoint}";
                     }
@@ -402,7 +402,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 {
                     if (value is string customValueString)
                     {
-                        if (customValueString.StartsWith("~/") && Options.Discovery.ExpandRelativePathsInCustomEntries)
+                        if (customValueString.StartsWith("~/", StringComparison.Ordinal) && Options.Discovery.ExpandRelativePathsInCustomEntries)
                         {
                             entries.Add(key, baseUrl + customValueString.Substring(2));
                             continue;

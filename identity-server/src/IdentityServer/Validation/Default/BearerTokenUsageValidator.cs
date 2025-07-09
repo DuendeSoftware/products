@@ -61,7 +61,7 @@ internal class BearerTokenUsageValidator
         if (authorizationHeader.IsPresent())
         {
             var header = authorizationHeader.Trim();
-            if (header.StartsWith(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer))
+            if (header.StartsWith(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer, StringComparison.Ordinal))
             {
                 var value = header.Substring(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer.Length).Trim();
                 if (value.IsPresent())
