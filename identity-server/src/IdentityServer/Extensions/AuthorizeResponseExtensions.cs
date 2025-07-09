@@ -3,6 +3,7 @@
 
 
 using System.Collections.Specialized;
+using System.Globalization;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.ResponseHandling;
@@ -42,7 +43,7 @@ internal static class AuthorizeResponseExtensions
             {
                 collection.Add("access_token", response.AccessToken);
                 collection.Add("token_type", "Bearer");
-                collection.Add("expires_in", response.AccessTokenLifetime.ToString());
+                collection.Add("expires_in", response.AccessTokenLifetime.ToString(CultureInfo.InvariantCulture));
 
                 if (response.Scope.IsPresent())
                 {

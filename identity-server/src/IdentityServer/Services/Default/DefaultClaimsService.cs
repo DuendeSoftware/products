@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
@@ -146,7 +147,7 @@ public class DefaultClaimsService : IClaimsService
         }
 
         // add scopes (filter offline_access)
-        // we use the ScopeValues collection rather than the Resources.Scopes because we support dynamic scope values 
+        // we use the ScopeValues collection rather than the Resources.Scopes because we support dynamic scope values
         // from the request, so this issues those in the token.
         foreach (var scope in resourceResult.RawScopeValues.Where(x => x != IdentityServerConstants.StandardScopes.OfflineAccess))
         {
@@ -227,7 +228,7 @@ public class DefaultClaimsService : IClaimsService
         var claims = new List<Claim>
         {
             new Claim(JwtClaimTypes.Subject, subject.GetSubjectId()),
-            new Claim(JwtClaimTypes.AuthenticationTime, subject.GetAuthenticationTimeEpoch().ToString(), ClaimValueTypes.Integer64),
+            new Claim(JwtClaimTypes.AuthenticationTime, subject.GetAuthenticationTimeEpoch().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
             new Claim(JwtClaimTypes.IdentityProvider, subject.GetIdentityProvider())
         };
 

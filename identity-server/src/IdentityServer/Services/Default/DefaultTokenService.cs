@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
@@ -205,7 +206,7 @@ public class DefaultTokenService : ITokenService
 
         if (Options.EmitStaticAudienceClaim)
         {
-            token.Audiences.Add(string.Format(IdentityServerConstants.AccessTokenAudience, issuer.EnsureTrailingSlash()));
+            token.Audiences.Add(string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, issuer.EnsureTrailingSlash()));
         }
 
         // add cnf if present

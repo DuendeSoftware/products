@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
@@ -36,7 +37,7 @@ public interface IIdentityServerTools
     Task<string> IssueJwtAsync(int lifetime, IEnumerable<Claim> claims);
 
     /// <summary>
-    /// Issues a JWT with a specific lifetime, issuer, and set of claims. 
+    /// Issues a JWT with a specific lifetime, issuer, and set of claims.
     /// </summary>
     /// <param name="lifetime">The lifetime, in seconds, which will determine
     /// the exp claim of the token.</param>
@@ -50,7 +51,7 @@ public interface IIdentityServerTools
 
     /// <summary>
     /// Issues a JWT with a specific lifetime, issuer, token type, and set of
-    /// claims. 
+    /// claims.
     /// </summary>
     /// <param name="lifetime">The lifetime, in seconds, which will determine
     /// the exp claim of the token.</param>
@@ -176,7 +177,7 @@ public class IdentityServerTools : IIdentityServerTools
         {
             claims.Add(new Claim(
                 JwtClaimTypes.Audience,
-                string.Format(IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync()).EnsureTrailingSlash())));
+                string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync()).EnsureTrailingSlash())));
         }
 
         if (!IEnumerableExtensions.IsNullOrEmpty(audiences))
