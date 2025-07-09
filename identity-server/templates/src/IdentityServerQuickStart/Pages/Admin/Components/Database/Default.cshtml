@@ -1,0 +1,28 @@
+@model IdentityServerQuickStart.Pages.Components.Database.DatabaseViewModel
+
+<div class="card h-100 text-bg-light">
+    <h5 class="card-header">
+        <i class="bi bi-database me-2"></i>
+        Databases
+        <a href="https://docs.duendesoftware.com/identityserver/quickstarts/4-entity-framework/" class="float-end">
+            <i class="bi bi-book"></i>
+            <span class="d-none">Learn More</span>
+        </a>
+    </h5>
+    <div class="card-body">
+        <table class="table table-sm">
+            <tr>
+                <th scope="row">Configuration</th>
+                <td>@Model.ConfigurationDatabaseKind</td>
+            </tr>
+            <tr>
+                <th scope="row">Operational</th>
+                <td>@Model.OperationalDatabaseKind</td>
+            </tr>
+            <tr>
+                <th scope="row">Entity Framework Core</th>
+                <td>@Model.EntityFrameworkCoreVersion</td>
+            </tr>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+@page
+@model IdentityServerQuickStart.Pages.Logout.LoggedOut
+
+@{
+    Layout = "_LayoutLogin";
+}
+
+<div class="logged-out-page">
+
+    <div class="lead text-center mb-4">
+        <h1 class="text-brand mb-0">Logged out of IdentityServer</h1>
+
+        
+
+        @if (Model.View.PostLogoutRedirectUri == null)
+        {
+            <p>
+                You are now logged out, you can now close this page,<br />
+                or click <a class="PostLogoutRedirectUri" href="/">here</a> to return to the homepage.
+            </p>
+        } else
+        {
+            <p>
+                You are now logged out, you can now close this page.
+            </p>
+        }
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-12 col-lg-6 mb-3 mb-lg-0 mx-auto">
+
+            @if (Model.View.PostLogoutRedirectUri != null)
+            {
+                <div>
+                    Click <a class="PostLogoutRedirectUri" href="@Model.View.PostLogoutRedirectUri">here</a> to return to the
+                    <span>@Model.View.ClientName</span> application.
+                </div>
+            }
+
+            @if (Model.View.SignOutIframeUrl != null)
+            {
+                <iframe width="0" height="0" class="signout" src="@Model.View.SignOutIframeUrl"></iframe>
+            }
+
+        </div>
+
+    </div>
+</div>
+
+@section scripts
+{
+    @if (Model.View.AutomaticRedirectAfterSignOut)
+    {
+        <script src="~/js/signout-redirect.js"></script>
+    }
+}
