@@ -153,7 +153,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
 
         if (context.Request.GrantTypes.Contains(OidcConstants.GrantTypes.RefreshToken))
         {
-            // Note that if we ever support additional grant types that allow refresh tokens, this 
+            // Note that if we ever support additional grant types that allow refresh tokens, this
             // could be refactored.
             if (!context.Client.AllowedGrantTypes.Contains(GrantType.AuthorizationCode))
             {
@@ -240,7 +240,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         }
 
         if (context.Client.AllowedGrantTypes.Count == 1 &&
-            context.Client.AllowedGrantTypes.FirstOrDefault(t => t.Equals(GrantType.ClientCredentials)) != null)
+            context.Client.AllowedGrantTypes.FirstOrDefault(t => t.Equals(GrantType.ClientCredentials, StringComparison.InvariantCulture)) != null)
         {
             if (context.Request.RedirectUris?.Any() == true)
             {
@@ -302,7 +302,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     }
 
     /// <summary>
-    /// Validates the requested jwks to set the secrets of the client.  
+    /// Validates the requested jwks to set the secrets of the client.
     /// </summary>
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model that will have its secrets set, the DCR
@@ -571,7 +571,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// Validates details of the request that control the user interface,
     /// including the logo uri, client uri, initiate login uri, enable local
     /// login flag, and identity provider restrictions, and uses them to set the
-    /// corresponding client properties. 
+    /// corresponding client properties.
     /// </summary>
     /// <param name="context">The dynamic client registration context, which
     /// includes the client model that will have miscellaneous properties set,

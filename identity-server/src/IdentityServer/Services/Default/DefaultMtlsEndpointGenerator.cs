@@ -19,11 +19,11 @@ internal class DefaultMtlsEndpointGenerator(IServerUrls serverUrls, IOptions<Ide
         // path based
         if (options.Value.MutualTls.DomainName.IsMissing())
         {
-            return baseUrl + endpoint.Replace(IdentityServerConstants.ProtocolRoutePaths.ConnectPathPrefix, IdentityServerConstants.ProtocolRoutePaths.MtlsPathPrefix);
+            return baseUrl + endpoint.Replace(IdentityServerConstants.ProtocolRoutePaths.ConnectPathPrefix, IdentityServerConstants.ProtocolRoutePaths.MtlsPathPrefix, StringComparison.InvariantCulture);
         }
 
         // domain based
-        if (options.Value.MutualTls.DomainName.Contains('.'))
+        if (options.Value.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
         {
             return $"https://{options.Value.MutualTls.DomainName}/{endpoint}";
         }

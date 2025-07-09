@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -85,7 +86,7 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
         {
             foreach (var url in result.Result.FrontChannelLogoutUrls)
             {
-                sb.AppendFormat("<iframe loading='eager' allow='' src='{0}'></iframe>", HtmlEncoder.Default.Encode(url));
+                sb.AppendFormat(CultureInfo.InvariantCulture, "<iframe loading='eager' allow='' src='{0}'></iframe>", HtmlEncoder.Default.Encode(url));
                 sb.AppendLine();
             }
         }

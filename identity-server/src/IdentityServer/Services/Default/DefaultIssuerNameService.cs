@@ -42,14 +42,14 @@ public class DefaultIssuerNameService : IIssuerNameService
 
             if (_options.MutualTls.Enabled && _options.MutualTls.DomainName.IsPresent())
             {
-                if (!_options.MutualTls.DomainName.Contains('.'))
+                if (!_options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
                 {
                     var request = _httpContextAccessor.HttpContext.Request;
                     if (request.Host.Value.StartsWith(_options.MutualTls.DomainName, StringComparison.OrdinalIgnoreCase))
                     {
-                        // if MTLS is configured with domain like "foo", then the request will be for "foo.acme.com", 
+                        // if MTLS is configured with domain like "foo", then the request will be for "foo.acme.com",
                         // so the issuer we use is from the parent domain (e.g. "acme.com")
-                        // 
+                        //
                         // Host.Value is used to get unicode hostname, instead of ToUriComponent (aka punycode)
                         origin = request.Scheme + "://" + request.Host.Value.Substring(_options.MutualTls.DomainName.Length + 1);
                     }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -36,7 +37,7 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
         if (result && _context.GetSignOutCalled() && _context.Response.StatusCode == 200)
         {
             // given that this runs prior to the authentication middleware running
-            // we need to explicitly trigger authentication so we can have our 
+            // we need to explicitly trigger authentication so we can have our
             // session service populated with the current user info
             await _context.AuthenticateAsync();
 
@@ -75,7 +76,7 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
 
         if (_context.Response.Body.CanWrite)
         {
-            var iframe = string.Format(IframeHtml, iframeUrl);
+            var iframe = string.Format(CultureInfo.InvariantCulture, IframeHtml, iframeUrl);
             _context.Response.ContentType = "text/html";
             await _context.Response.WriteAsync(iframe);
             await _context.Response.Body.FlushAsync();

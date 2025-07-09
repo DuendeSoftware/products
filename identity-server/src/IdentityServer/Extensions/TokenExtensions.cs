@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
@@ -144,17 +145,17 @@ public static class TokenExtensions
 
         if (claim.ValueType == ClaimValueTypes.Integer || claim.ValueType == ClaimValueTypes.Integer32)
         {
-            return int.Parse(claim.Value);
+            return int.Parse(claim.Value, CultureInfo.InvariantCulture);
         }
 
         if (claim.ValueType == ClaimValueTypes.Integer64)
         {
-            return long.Parse(claim.Value);
+            return long.Parse(claim.Value, CultureInfo.InvariantCulture);
         }
 
         if (claim.ValueType == ClaimValueTypes.Double)
         {
-            return double.Parse(claim.Value);
+            return double.Parse(claim.Value, CultureInfo.InvariantCulture);
         }
 
         // Ignore case here so that we also match System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.Json ("JSON")
