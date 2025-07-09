@@ -66,9 +66,9 @@ public class ClientClaim
         {
             var hash = 17;
 
-            hash = hash * 23 + Value.GetHashCode();
-            hash = hash * 23 + Type.GetHashCode();
-            hash = hash * 23 + ValueType.GetHashCode();
+            hash = hash * 23 + Value.GetHashCode(StringComparison.InvariantCulture);
+            hash = hash * 23 + Type.GetHashCode(StringComparison.InvariantCulture);
+            hash = hash * 23 + ValueType.GetHashCode(StringComparison.InvariantCulture);
             return hash;
         }
     }

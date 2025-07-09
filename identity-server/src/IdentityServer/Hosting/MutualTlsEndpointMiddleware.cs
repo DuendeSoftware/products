@@ -44,7 +44,7 @@ public class MutualTlsEndpointMiddleware
             if (_options.MutualTls.DomainName.IsPresent())
             {
                 // separate domain
-                if (_options.MutualTls.DomainName.Contains('.'))
+                if (_options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
                 {
                     if (context.Request.Host.Host.Equals(_options.MutualTls.DomainName,
                             StringComparison.OrdinalIgnoreCase))

@@ -395,7 +395,7 @@ public class Client
         // spaces are not allowed in grant types
         foreach (var type in grantTypes)
         {
-            if (type.Contains(' '))
+            if (type.Contains(' ', StringComparison.InvariantCulture))
             {
                 throw new InvalidOperationException("Grant types cannot contain spaces");
             }

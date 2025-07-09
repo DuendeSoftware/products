@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -269,10 +270,10 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             // if absolute exp > 0, make sure we don't exceed absolute exp
             // if absolute exp = 0, allow indefinite slide
             var currentLifetime = request.RefreshToken.CreationTime.GetLifetimeInSeconds(Clock.UtcNow.UtcDateTime);
-            Logger.LogDebug("Current lifetime: {currentLifetime}", currentLifetime.ToString());
+            Logger.LogDebug("Current lifetime: {currentLifetime}", currentLifetime.ToString(CultureInfo.InvariantCulture));
 
             var newLifetime = currentLifetime + request.Client.SlidingRefreshTokenLifetime;
-            Logger.LogDebug("New lifetime: {slidingLifetime}", newLifetime.ToString());
+            Logger.LogDebug("New lifetime: {slidingLifetime}", newLifetime.ToString(CultureInfo.InvariantCulture));
 
             // zero absolute refresh token lifetime represents unbounded absolute lifetime
             // if absolute lifetime > 0, cap at absolute lifetime
@@ -280,7 +281,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             {
                 newLifetime = request.Client.AbsoluteRefreshTokenLifetime;
                 Logger.LogDebug("New lifetime exceeds absolute lifetime, capping it to {newLifetime}",
-                    newLifetime.ToString());
+                    newLifetime.ToString(CultureInfo.InvariantCulture));
             }
 
             request.RefreshToken.Lifetime = newLifetime;
