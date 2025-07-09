@@ -8,10 +8,22 @@ namespace Duende.Bff.Tests.Benchmarks;
 public static class BenchmarkTests
 {
     public class Login(Login.Fixture fixture)
-        : TestBase<Login.Fixture, LoginBenchmarks>(fixture)
+        : TestBase<Login.Fixture, MultiFrontendBenchmarks>(fixture)
     {
-        public class Fixture : LoginBenchmarks, IAsyncLifetime;
+        public class Fixture : MultiFrontendBenchmarks, IAsyncLifetime;
     }
+
+    public class Proxy(Proxy.Fixture fixture)
+        : TestBase<Proxy.Fixture, SingleFrontendBenchmarks>(fixture)
+    {
+        public class Fixture : SingleFrontendBenchmarks, IAsyncLifetime;
+    }
+
+    //public class Yarp(Yarp.Fixture fixture)
+    //    : TestBase<Yarp.Fixture, YarpBenchmarks>(fixture)
+    //{
+    //    public class Fixture : YarpBenchmarks, IAsyncLifetime;
+    //}
 
     public abstract class TestBase<TFixture, TBenchmarks>(TFixture fixture)
         : IClassFixture<TFixture>
@@ -27,7 +39,8 @@ public static class BenchmarkTests
             var method = typeof(TFixture).GetMethod(testName, BindingFlags.Public | BindingFlags.Instance);
             if (method == null)
             {
-                throw new InvalidOperationException($"No benchmark method {testName}found for benchmark {benchmark}");
+                throw new InvalidOperationException(
+                    $"No benchmark method {testName}found for benchmark {benchmark}");
             }
 
             await (Task)method.Invoke(fixture, null)!;
@@ -44,5 +57,4 @@ public static class BenchmarkTests
             return testMethods.Select(x => new[] { typeof(TBenchmarks).Name, x }).ToArray();
         }
     }
-
 }

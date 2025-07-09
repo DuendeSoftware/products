@@ -68,6 +68,31 @@ public class BffFrontendSigninTests : BffTestBase
     }
 
     [Fact]
+    public async Task Can_login_perf()
+    {
+        await InitializeAsync();
+
+        var frontEnd = (Some.BffFrontend() with
+        {
+            Name = BffFrontendName.Parse("with_somepath"),
+            SelectionCriteria = new FrontendSelectionCriteria()
+            {
+                MatchingPath = "/somepath"
+            },
+        });
+
+        IdentityServer.AddClientFor(frontEnd, [Bff.Url()]);
+
+        Bff.AddOrUpdateFrontend(frontEnd);
+        for (var i = 0; i < 10; i++)
+        {
+            var client = Internet.BuildHttpClient(Bff.Url());
+            await client.GetAsync("/somepath/bff/login")
+                .CheckResponseContent(Bff.DefaultRootResponse);
+        }
+    }
+
+    [Fact]
     public async Task can_signin_with_path_based_frontend()
     {
         await InitializeAsync();

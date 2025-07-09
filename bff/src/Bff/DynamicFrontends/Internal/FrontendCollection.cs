@@ -22,6 +22,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
     private readonly IDisposable? _stopSubscription;
 
     internal event Action<BffFrontend> OnFrontendChanged = (_) => { };
+    internal event Action<BffFrontend> OnFrontendAdded = (_) => { };
 
     public FrontendCollection(
         IOptionsMonitor<BffConfiguration> bffConfiguration,
@@ -152,12 +153,9 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
 
     public void AddOrUpdate(BffFrontend frontend)
     {
-        BffFrontend? existing;
         // Lock to avoid dirty writes from multiple threads. 
         lock (_syncRoot)
         {
-            existing = _frontends.FirstOrDefault(x => x.Name == frontend.Name);
-
             // By replacing the array, we avoid locking the entire list for read operations.
             Interlocked.Exchange(ref _frontends, _frontends
                 .Where(x => x.Name != frontend.Name)
@@ -165,11 +163,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                 .ToArray());
         }
 
-        // Notify subscribers that a frontend has changed.
-        if (existing != null)
-        {
-            OnFrontendChanged(existing);
-        }
+        OnFrontendChanged(frontend);
     }
 
     public void Remove(BffFrontendName frontendName)

@@ -109,7 +109,7 @@ public static class BffBuilderExtensions
         builder.Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
 
         builder.Services.AddTransient<CurrentFrontendAccessor>();
-        builder.Services.AddTransient<FrontendSelector>();
+        builder.Services.AddSingleton<FrontendSelector>();
 
         // Add a scheme provider that will inject authentication schemes that are needed for the BFF
         builder.Services.AddTransient<IAuthenticationSchemeProvider, BffAuthenticationSchemeProvider>();
