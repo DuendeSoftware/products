@@ -31,16 +31,13 @@ public abstract class Host : IAsyncDisposable
         _builder = WebApplication.CreateBuilder();
         // Logs interfere with the benchmarks, so we clear them
 
-
-
-
         // Ensure dev certificate is used for SSL
         if (Internet.UseKestrel)
         {
             _builder.Logging.ClearProviders();
             //_builder.Logging.AddSerilog(Internet.Log);
 
-            _builder.WebHost.UseUrls("https://127.0.0.1:0");
+            _builder.WebHost.UseUrls("https://*:0");
         }
         else
         {

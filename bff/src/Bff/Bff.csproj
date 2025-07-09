@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Bff.Benchmarks" />
     <InternalsVisibleTo Include="Duende.Bff.Blazor" />
     <InternalsVisibleTo Include="Duende.Bff.EntityFramework" />
     <InternalsVisibleTo Include="Duende.Bff.Yarp" />

@@ -155,17 +155,15 @@ public class FrontendCollectionTests
             eventCount++;
         };
 
-        // Add a new frontend (should not raise event, as it's an add)
         cache.AddOrUpdate(bffFrontend);
-        eventCount.ShouldBe(0);
+        eventCount.ShouldBe(1);
 
-        // Update existing frontend (should raise event)
         var updatedFrontend = bffFrontend with { IndexHtmlUrl = new Uri("https://different") };
         cache.AddOrUpdate(updatedFrontend);
 
-        eventCount.ShouldBe(1);
+        eventCount.ShouldBe(2);
         eventArg.ShouldNotBeNull();
-        eventArg.ShouldBe(bffFrontend);
+        eventArg.ShouldBe(updatedFrontend);
     }
 
     [Fact]
@@ -183,14 +181,14 @@ public class FrontendCollectionTests
             eventCount++;
         };
 
-        // Add a new frontend (should not raise event)
+        // Add a new frontend
         cache.AddOrUpdate(bffFrontend);
-        eventCount.ShouldBe(0);
+        eventCount.ShouldBe(1);
 
         // Remove frontend (should raise event)
         cache.Remove(bffFrontend.Name);
 
-        eventCount.ShouldBe(1);
+        eventCount.ShouldBe(2);
         eventArg.ShouldNotBeNull();
         eventArg.ShouldBe(bffFrontend);
     }

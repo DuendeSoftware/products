@@ -78,7 +78,7 @@ public sealed class BffBuilder(IServiceCollection services)
         Services.AddSingleton<IFrontendCollection>((sp) => sp.GetRequiredService<FrontendCollection>());
 
         Services.AddTransient<CurrentFrontendAccessor>();
-        Services.AddTransient<FrontendSelector>();
+        Services.AddSingleton<FrontendSelector>();
 
         // Add a scheme provider that will inject authentication schemes that are needed for the BFF
         Services.AddTransient<IAuthenticationSchemeProvider, BffAuthenticationSchemeProvider>();
