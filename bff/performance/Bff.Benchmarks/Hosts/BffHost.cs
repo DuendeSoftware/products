@@ -6,16 +6,27 @@ using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Yarp.ReverseProxy.Forwarder;
 
 namespace Bff.Benchmarks.Hosts;
 
 public class BffHost : Host
 {
-    public BffHost(Uri identityServer, Uri apiUri)
+    public event Action<BffBuilder> OnConfigureBff = _ => { };
+
+    internal BffHost(Uri bffUri, Uri identityServer, Uri apiUri, SimulatedInternet simulatedInternet) : base(bffUri, simulatedInternet)
     {
         OnConfigureServices += services =>
         {
-            services.AddBff()
+            var bff = services
+                .AddBff(opt =>
+                {
+                    if (!Internet.UseKestrel)
+                    {
+                        opt.BackchannelMessageHandler = simulatedInternet;
+                    }
+                })
                 .WithDefaultOpenIdConnectOptions(oidc =>
                 {
                     oidc.ClientId = "bff";
@@ -38,6 +49,11 @@ public class BffHost : Host
 
                 })
                 .AddRemoteApis();
+            if (!Internet.UseKestrel)
+            {
+                services.AddSingleton<IForwarderHttpClientFactory>(new SimulatedInternetYarpForwarderFactory(Internet));
+            }
+            OnConfigureBff(bff);
         };
         OnConfigure += app =>
         {
@@ -48,6 +64,8 @@ public class BffHost : Host
 
             app.UseBff();
             app.MapGet("/", () => "bff");
+            app.MapGet("/anon", () => "bff")
+                .AllowAnonymous();
 
             app.MapRemoteBffApiEndpoint("/allow_anon", apiUri);
             app.MapRemoteBffApiEndpoint("/client_token", apiUri)
@@ -58,5 +76,24 @@ public class BffHost : Host
         };
     }
 
-    public void AddFrontend(Uri uri) => GetService<IFrontendCollection>().AddOrUpdate(new BffFrontend(BffFrontendName.Parse(uri.ToString())).MappedToOrigin(Origin.Parse(uri)));
+    public void AddFrontend(BffFrontendName name) =>
+        GetService<IFrontendCollection>()
+            .AddOrUpdate(new BffFrontend(name));
+
+
+    public void AddFrontend(Uri uri) =>
+        GetService<IFrontendCollection>()
+        .AddOrUpdate(new BffFrontend(BffFrontendName.Parse(uri.Host + "-" + uri.Port))
+            .MappedToOrigin(Origin.Parse(uri)));
+
+    public void AddFrontend(LocalPath path) =>
+        GetService<IFrontendCollection>()
+            .AddOrUpdate(new BffFrontend(BffFrontendName.Parse(path.ToString().Replace("/", "")))
+                .MappedToPath(path));
+}
+
+internal class SimulatedInternetYarpForwarderFactory(SimulatedInternet simulatedInternet)
+    : IForwarderHttpClientFactory
+{
+    public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => new HttpMessageInvoker(simulatedInternet);
 }

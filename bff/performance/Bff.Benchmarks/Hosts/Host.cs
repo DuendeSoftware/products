@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,21 +12,44 @@ namespace Bff.Benchmarks.Hosts;
 
 public abstract class Host : IAsyncDisposable
 {
+    private Uri _uri;
+    internal SimulatedInternet Internet { get; }
+
+    public Uri Url(string? path = null) => path == null ? _uri : new Uri(_uri, path);
+
     private WebApplication _app = null!;
     private WebApplicationBuilder _builder = null!;
+    public TestServer Server { get; private set; } = null!;
 
     public event Action<IServiceCollection> OnConfigureServices = _ => { };
     public event Action<WebApplication> OnConfigure = _ => { };
 
-    public Host()
+    internal Host(Uri uri, SimulatedInternet simulatedInternet)
     {
+        _uri = uri;
+        Internet = simulatedInternet;
         _builder = WebApplication.CreateBuilder();
         // Logs interfere with the benchmarks, so we clear them
-        _builder.Logging.ClearProviders();
+
+
+
 
         // Ensure dev certificate is used for SSL
-        _builder.WebHost
-            .UseUrls("https://127.0.0.1:0");
+        if (Internet.UseKestrel)
+        {
+            _builder.Logging.ClearProviders();
+            //_builder.Logging.AddSerilog(Internet.Log);
+
+            _builder.WebHost.UseUrls("https://127.0.0.1:0");
+        }
+        else
+        {
+            _builder.Logging.AddConsole();
+            _builder.WebHost
+                .UseTestServer();
+        }
+
+
 
         _builder.Services.AddAuthentication();
         _builder.Services.AddAuthorization();
@@ -43,9 +67,21 @@ public abstract class Host : IAsyncDisposable
         OnConfigure(_app);
 
         _app.Start();
+
+        if (Internet.UseKestrel)
+        {
+            _uri = new Uri("https://localhost:" + new Uri(_app.Urls.First()).Port);
+        }
+        else
+        {
+
+            Server = _app.GetTestServer();
+
+            Internet.AddHandler(this);
+        }
+
     }
 
-    public Uri Url => new Uri("https://localhost:" + new Uri(_app.Urls.First()).Port);
     public async ValueTask DisposeAsync()
     {
         await _app.StopAsync();

@@ -67,7 +67,15 @@ public class IdentityServerService(IOptions<IdentityServerSettings> settings, IC
         var bffUrls = config.AsEnumerable()
             .Where(x => x.Key.StartsWith("BFFURL"))
             .Select(x => x.Value)
-            .OfType<string>();
+            .OfType<string>()
+            .ToList();
+
+
+        var bffUrl2 = config.GetValue<string>("BFFURL2");
+        for (var i = 0; i < 100; i++)
+        {
+            bffUrls.Add(bffUrl2 + "/path" + i);
+        }
 
         isBuilder.AddInMemoryClients([new Client
         {

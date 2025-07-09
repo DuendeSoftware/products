@@ -1,34 +1,48 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Reflection;
 using Bff.Benchmarks;
-
 namespace Duende.Bff.Tests.Benchmarks;
 
-public class BenchmarksTests(ProxyBenchmarksFixture benchmarks) : IClassFixture<ProxyBenchmarksFixture>
+public static class BenchmarkTests
 {
-    [Fact]
-    public async Task BffUserToken() =>
-        await benchmarks.BffUserToken();
+    public class Login(Login.Fixture fixture)
+        : TestBase<Login.Fixture, LoginBenchmarks>(fixture)
+    {
+        public class Fixture : LoginBenchmarks, IAsyncLifetime;
+    }
 
-    [Fact]
-    public async Task YarpProxy() =>
-        await benchmarks.YarpProxy();
+    public abstract class TestBase<TFixture, TBenchmarks>(TFixture fixture)
+        : IClassFixture<TFixture>
+        where TFixture : TBenchmarks, IAsyncLifetime
+        where TBenchmarks : BenchmarkBase
 
-    [Fact]
-    public async Task DirectToApi() =>
-        await benchmarks.DirectToApi();
+    {
 
-    [Fact]
-    public async Task BffClientCredentialsToken() =>
-        await benchmarks.BffClientCredentialsToken();
+        [Theory]
+        [MemberData(nameof(GetBenchmarksInFixture))]
+        public async Task InvokeBenchmarksAsTests(string benchmark, string testName)
+        {
+            var method = typeof(TFixture).GetMethod(testName, BindingFlags.Public | BindingFlags.Instance);
+            if (method == null)
+            {
+                throw new InvalidOperationException($"No benchmark method {testName}found for benchmark {benchmark}");
+            }
 
-    [Fact]
-    public async Task BffWithManyFrontends() =>
-        await benchmarks.BffWithManyFrontends();
-}
+            await (Task)method.Invoke(fixture, null)!;
+        }
 
-public class ProxyBenchmarksFixture : ProxyBenchmarks, IAsyncLifetime
-{
-    public async Task InitializeAsync() => await Start();
+        public static IEnumerable<object[]> GetBenchmarksInFixture()
+        {
+            var testMethods = typeof(TBenchmarks)
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(m => !m.IsSpecialName)
+                .Where(m => m.GetCustomAttribute<BenchmarkDotNet.Attributes.BenchmarkAttribute>() != null)
+                .Select(x => x.Name); // Excludes property getters/setters
+
+            return testMethods.Select(x => new[] { typeof(TBenchmarks).Name, x }).ToArray();
+        }
+    }
+
 }
