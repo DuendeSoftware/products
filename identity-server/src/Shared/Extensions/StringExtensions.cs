@@ -214,7 +214,7 @@ internal static class StringExtensions
     [DebuggerStepThrough]
     public static string AddQueryString(this string url, string query)
     {
-        if (!url.Contains('?'))
+        if (!url.Contains('?', StringComparison.InvariantCulture))
         {
             url += '?';
         }
@@ -233,7 +233,7 @@ internal static class StringExtensions
     [DebuggerStepThrough]
     public static string AddHashFragment(this string url, string query)
     {
-        if (!url.Contains('#'))
+        if (!url.Contains('#', StringComparison.InvariantCulture))
         {
             url += "#";
         }
@@ -271,7 +271,7 @@ internal static class StringExtensions
 
     private static string? QueryString(this string url)
     {
-        var queryStringStart = url.IndexOf('?');
+        var queryStringStart = url.IndexOf('?', StringComparison.InvariantCulture);
         if (queryStringStart >= 0)
         {
             return url.Substring(queryStringStart + 1);

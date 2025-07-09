@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
@@ -95,7 +96,7 @@ public class IdentityServerUser
 
         if (AuthenticationTime.HasValue)
         {
-            claims.Add(new Claim(JwtClaimTypes.AuthenticationTime, new DateTimeOffset(AuthenticationTime.Value).ToUnixTimeSeconds().ToString()));
+            claims.Add(new Claim(JwtClaimTypes.AuthenticationTime, new DateTimeOffset(AuthenticationTime.Value).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture)));
         }
 
         foreach (var amr in AuthenticationMethods)

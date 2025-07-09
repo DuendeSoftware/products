@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Cryptography;
 
 namespace Duende.IdentityServer.Services;
@@ -35,6 +36,6 @@ public class NumericUserCodeGenerator : IUserCodeGenerator
     public Task<string> GenerateAsync()
     {
         var next = RandomNumberGenerator.GetInt32(100000000, 1000000000);
-        return Task.FromResult(next.ToString());
+        return Task.FromResult(next.ToString(CultureInfo.InvariantCulture));
     }
 }

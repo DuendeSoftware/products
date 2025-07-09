@@ -201,11 +201,11 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                     // path based
                     if (Options.MutualTls.DomainName.IsMissing())
                     {
-                        return baseUrl + endpoint.Replace(ProtocolRoutePaths.ConnectPathPrefix, ProtocolRoutePaths.MtlsPathPrefix);
+                        return baseUrl + endpoint.Replace(ProtocolRoutePaths.ConnectPathPrefix, ProtocolRoutePaths.MtlsPathPrefix, StringComparison.InvariantCulture);
                     }
 
                     // domain based
-                    if (Options.MutualTls.DomainName.Contains('.'))
+                    if (Options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
                     {
                         return $"https://{Options.MutualTls.DomainName}/{endpoint}";
                     }
