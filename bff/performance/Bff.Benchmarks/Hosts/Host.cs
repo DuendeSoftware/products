@@ -40,7 +40,7 @@ public abstract class Host : IAsyncDisposable
             _builder.Logging.ClearProviders();
             //_builder.Logging.AddSerilog(Internet.Log);
 
-            _builder.WebHost.UseUrls("https://127.0.0.1:0");
+            _builder.WebHost.UseUrls("https://*:0");
         }
         else
         {
