@@ -5,52 +5,39 @@ using BenchmarkDotNet.Attributes;
 
 namespace Bff.Benchmarks;
 
-public class LoginBenchmarks : BenchmarkBase
+/// <summary>
+/// This test warms up all frontends by calling the login endpoint on each one.
+/// This means they are present in the cache. Just to make sure that, having many
+/// frontends active doesn't cause issues. 
+/// </summary>
+public class MultiFrontendWarmedUpLoginBenchmarks : BenchmarkBase
 {
     private MultiFrontendLoginFixture _fixture = null!;
-    private const int PathsToTest = 30;
+    private const int PathsToTest = 499;
 
     [GlobalSetup]
     public override async Task InitializeAsync()
     {
         _fixture = new MultiFrontendLoginFixture();
-        var bffClient = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
-
-        // Warm up the BFF Login
-        await bffClient.GetAsync("/bff/login")
-            .EnsureStatusCode();
 
         // Warm up each frontend
         for (var i = 0; i < PathsToTest; i++)
         {
             var c = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
-            var path = "/path" + (i + 100);
+            var path = GetPath(i);
             await c.GetAsync(path + "/bff/login")
                 .EnsureStatusCode();
         }
 
     }
 
-    [Benchmark]
-    public async Task BffLogin_single_frontend()
-    {
-        var client = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
-        await client.GetAsync("/bff/login")
-            .EnsureStatusCode();
-
-        await client.GetWithCSRF("/user_token")
-            .EnsureStatusCode();
-
-    }
-
-
     private static Random _random = new Random();
     [Benchmark]
-    public async Task BffLogin_multi_frontend()
+    public async Task Random_frontend_with_500_pre_warmed()
     {
         var client = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
 
-        var path = "/path" + _random.Next(100, PathsToTest + 100 - 1);
+        var path = GetPath(_random.Next(0, PathsToTest - 1));
 
         await client.GetAsync(path + "/bff/login")
             .EnsureStatusCode();

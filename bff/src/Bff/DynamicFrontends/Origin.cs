@@ -31,6 +31,8 @@ public sealed record Origin : IEquatable<HttpRequest>
         };
     }
 
+    internal HostString ToHostString() => new(Host, Port);
+
     public required string Scheme { get; init; }
 
     public required string Host { get; init; }

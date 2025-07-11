@@ -7,13 +7,13 @@ namespace Bff.Benchmarks;
 
 public class YarpBenchmarks : BenchmarkBase
 {
-    private ProxyFixture _fixture = null!;
+    private YarpFixture _fixture = null!;
     private HttpClient _yarpHttpClient = null!;
     private HttpClient _directHttpClient = null!;
     [GlobalSetup]
     public override Task InitializeAsync()
     {
-        _fixture = new ProxyFixture();
+        _fixture = new YarpFixture();
         _directHttpClient = _fixture.Internet.BuildHttpClient(_fixture.Api.Url());
         _yarpHttpClient = _fixture.Internet.BuildHttpClient(_fixture.YarpProxy.Url());
         return Task.CompletedTask;
