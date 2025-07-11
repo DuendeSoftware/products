@@ -12,7 +12,9 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 /// <summary>
 /// Container class for X509 keys.
 /// </summary>
+#pragma warning disable CA1001 // This would require larger changes and will need to be revisited in the future
 public class X509KeyContainer : KeyContainer
+#pragma warning restore CA1001
 {
     private const string ServerAuthenticationOid = "1.3.6.1.5.5.7.3.1";
 

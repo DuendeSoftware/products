@@ -8,7 +8,7 @@ using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
-internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
+internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
 {
     private long _jwtTokenIssued;
     private long _referenceTokenIssued;
@@ -183,4 +183,6 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
                 break;
         }
     }
+
+    public void Dispose() => _meterListener.Dispose();
 }

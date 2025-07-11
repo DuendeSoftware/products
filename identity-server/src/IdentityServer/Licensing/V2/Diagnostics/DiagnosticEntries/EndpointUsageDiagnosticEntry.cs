@@ -8,7 +8,7 @@ using Duende.IdentityServer.Extensions;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
-internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry
+internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
 {
     private long _authorizeCallback;
     private long _authorize;
@@ -140,4 +140,6 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry
                 break;
         }
     }
+
+    public void Dispose() => _meterListener.Dispose();
 }
