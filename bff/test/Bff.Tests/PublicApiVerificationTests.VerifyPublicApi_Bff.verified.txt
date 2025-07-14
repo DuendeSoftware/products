@@ -261,15 +261,7 @@ namespace Duende.Bff
 }
 namespace Duende.Bff.Builder
 {
-    public interface IBffBuilder
-    {
-        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
-    }
-    public interface IBffServicesBuilder : Duende.Bff.Builder.IBffBuilder
-    {
-        Duende.Bff.Builder.IBffServicesBuilder LoadConfiguration(Microsoft.Extensions.Configuration.IConfiguration section);
-    }
-    public sealed class WebApp : Microsoft.AspNetCore.Builder.IApplicationBuilder, Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
+    public sealed class BffWebApplication : Microsoft.AspNetCore.Builder.IApplicationBuilder, Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
     {
         public System.IServiceProvider ApplicationServices { get; set; }
         public System.Collections.Generic.ICollection<Microsoft.AspNetCore.Routing.EndpointDataSource> DataSources { get; }
@@ -282,7 +274,15 @@ namespace Duende.Bff.Builder
         public Microsoft.AspNetCore.Builder.IApplicationBuilder Use(System.Func<Microsoft.AspNetCore.Http.RequestDelegate, Microsoft.AspNetCore.Http.RequestDelegate> middleware) { }
         [System.Obsolete(("Don\'t call UseEndpoints on WebApp. The WebApp directly implements IEndpointRouteB" +
             "uilder."))]
-        public Duende.Bff.Builder.WebApp UseEndpoints(System.Action<Microsoft.AspNetCore.Routing.IEndpointRouteBuilder> configure) { }
+        public Duende.Bff.Builder.BffWebApplication UseEndpoints(System.Action<Microsoft.AspNetCore.Routing.IEndpointRouteBuilder> configure) { }
+    }
+    public interface IBffBuilder
+    {
+        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+    }
+    public interface IBffServicesBuilder : Duende.Bff.Builder.IBffBuilder
+    {
+        Duende.Bff.Builder.IBffServicesBuilder LoadConfiguration(Microsoft.Extensions.Configuration.IConfiguration section);
     }
 }
 namespace Duende.Bff.Configuration

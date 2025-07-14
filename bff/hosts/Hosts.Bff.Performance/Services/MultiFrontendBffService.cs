@@ -14,11 +14,11 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
     {
     }
 
-    public override void ConfigureBff(BffBuilder bff)
+    public override void ConfigureBff(IBffServicesBuilder bff)
     {
-        bff.WithDefaultOpenIdConnectOptions(o => DefaultOpenIdConfiguration.Apply(o, Settings))
+        bff.ConfigureOpenIdConnect(o => DefaultOpenIdConfiguration.Apply(o, Settings))
             .AddFrontends(new BffFrontend(BffFrontendName.Parse("default")))
-            
+
             // Note, in order for this to work, we'll need to inject this as config
             .AddFrontends(new BffFrontend(BffFrontendName.Parse("app1")).MappedToOrigin(
                 Origin.Parse(Config.GetValue<string>("BFFURL3") ??

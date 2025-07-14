@@ -15,14 +15,15 @@ public class CdnHost(TestHostContext context) : TestHost(context, new Uri("https
         """;
 
 
-    public override void Initialize() => OnConfigureApp += app =>
-                                              {
-                                                  app.UseAuthentication();
-                                                  // adds authorization for local and remote API endpoints
-                                                  app.UseAuthorization();
+    public override void Initialize() => OnConfigureApp +=
+        app =>
+        {
+            app.UseAuthentication();
+            // adds authorization for local and remote API endpoints
+            app.UseAuthorization();
 
-                                                  app.MapGet("/index.html", () => IndexHtml);
-                                              };
+            app.MapGet("/index.html", () => IndexHtml);
+        };
 
     protected override void ConfigureApp(IApplicationBuilder app)
     {

@@ -3,6 +3,7 @@
 
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.Builder;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Builder;
@@ -13,7 +14,7 @@ namespace Bff.Benchmarks.Hosts;
 
 public class BffHost : Host
 {
-    public event Action<BffBuilder> OnConfigureBff = _ => { };
+    public event Action<IBffServicesBuilder> OnConfigureBff = _ => { };
 
     internal BffHost(Uri bffUri, Uri identityServer, Uri apiUri, SimulatedInternet simulatedInternet) : base(bffUri, simulatedInternet)
     {
@@ -24,10 +25,10 @@ public class BffHost : Host
                 {
                     if (!Internet.UseKestrel)
                     {
-                        opt.BackchannelMessageHandler = simulatedInternet;
+                        opt.BackchannelHttpHandler = simulatedInternet;
                     }
                 })
-                .WithDefaultOpenIdConnectOptions(oidc =>
+                .ConfigureOpenIdConnect(oidc =>
                 {
                     oidc.ClientId = "bff";
                     oidc.ClientSecret = "secret";
