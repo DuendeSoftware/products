@@ -33,7 +33,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         _cache = cache;
         _transformer = transformer;
 
-        frontendCollection.OnFrontendChanged += async changedFrontend =>
+        async void OnFrontendCollectionOnOnFrontendChanged(BffFrontend changedFrontend)
         {
             try
             {
@@ -48,7 +48,9 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
                 logger.FailedToClearIndexHtmlCacheForFrontend(LogLevel.Warning, ex, changedFrontend.Name);
                 throw;
             }
-        };
+        }
+
+        frontendCollection.OnFrontendChanged += OnFrontendCollectionOnOnFrontendChanged;
     }
 
     public async Task<string?> GetIndexHtmlAsync(CT ct = default)

@@ -24,6 +24,11 @@ internal class FrontendSelector
         {
             _bffIndex = new BffIndex(logger, _frontends);
         };
+
+        _frontends.OnFrontendAdded += frontend =>
+        {
+            _bffIndex.AddFrontend(frontend);
+        };
     }
 
 

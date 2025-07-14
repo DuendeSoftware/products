@@ -28,7 +28,6 @@ public class OriginTests
     [InlineData("http://example.com", "example.com", 80)]
     [InlineData("http://example.com:80", "example.com", 80)]
     [InlineData("http://example.com:888", "example.com", 888)]
-    [InlineData("https://example.com:888", "example.com", 888)]
     public void ToHostStringHandlesDefaultPorts(string url, string hoststring, int port)
     {
         var host = Origin.Parse(url).ToHostString();

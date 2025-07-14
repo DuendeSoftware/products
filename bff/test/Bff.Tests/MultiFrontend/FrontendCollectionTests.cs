@@ -148,20 +148,66 @@ public class FrontendCollectionTests
 
         // Track event invocations
         BffFrontend? eventArg = null;
-        var eventCount = 0;
+        var addedCount = 0;
+        var updateCount = 0;
         cache.OnFrontendChanged += f =>
         {
             eventArg = f;
-            eventCount++;
+            updateCount++;
+        };
+        cache.OnFrontendAdded += f =>
+        {
+            eventArg = f;
+            addedCount++;
         };
 
         cache.AddOrUpdate(bffFrontend);
-        eventCount.ShouldBe(1);
+        addedCount.ShouldBe(1);
+        updateCount.ShouldBe(0);
 
         var updatedFrontend = bffFrontend with { IndexHtmlUrl = new Uri("https://different") };
         cache.AddOrUpdate(updatedFrontend);
 
-        eventCount.ShouldBe(2);
+        updateCount.ShouldBe(1);
+        addedCount.ShouldBe(1);
+        eventArg.ShouldNotBeNull();
+        eventArg.ShouldBe(updatedFrontend);
+    }
+
+    [Fact]
+    public void When_identical_frontend_is_updated_then_no_event_is_raised()
+    {
+        var cache = BuildFrontendCollection();
+        var bffFrontend = Some.BffFrontendWithSelectionCriteria() with
+        {
+            ConfigureOpenIdConnectOptions = null,
+            ConfigureCookieOptions = null
+        };
+
+        // Track event invocations
+        BffFrontend? eventArg = null;
+        var addedCount = 0;
+        var updateCount = 0;
+        cache.OnFrontendChanged += f =>
+        {
+            eventArg = f;
+            updateCount++;
+        };
+        cache.OnFrontendAdded += f =>
+        {
+            eventArg = f;
+            addedCount++;
+        };
+        cache.AddOrUpdate(bffFrontend);
+        addedCount.ShouldBe(1);
+        updateCount.ShouldBe(0);
+
+
+        var updatedFrontend = bffFrontend with { };
+        cache.AddOrUpdate(updatedFrontend);
+
+        updateCount.ShouldBe(0);
+        addedCount.ShouldBe(1);
         eventArg.ShouldNotBeNull();
         eventArg.ShouldBe(updatedFrontend);
     }
@@ -181,14 +227,13 @@ public class FrontendCollectionTests
             eventCount++;
         };
 
-        // Add a new frontend
+        //// Add a new frontend
         cache.AddOrUpdate(bffFrontend);
-        eventCount.ShouldBe(1);
 
         // Remove frontend (should raise event)
         cache.Remove(bffFrontend.Name);
 
-        eventCount.ShouldBe(2);
+        eventCount.ShouldBe(1);
         eventArg.ShouldNotBeNull();
         eventArg.ShouldBe(bffFrontend);
     }

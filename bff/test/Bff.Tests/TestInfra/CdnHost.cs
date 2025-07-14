@@ -23,6 +23,7 @@ public class CdnHost(TestHostContext context) : TestHost(context, new Uri("https
             app.UseAuthorization();
 
             app.MapGet("/index.html", () => IndexHtml);
+            app.MapGet("/index2.html", () => IndexHtml);
         };
 
     protected override void ConfigureApp(IApplicationBuilder app)

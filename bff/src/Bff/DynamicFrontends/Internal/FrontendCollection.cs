@@ -37,6 +37,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         _stopSubscription = bffConfiguration.OnChange(config =>
         {
             BffFrontend[] removedFrontends;
+            BffFrontend[] addedFrontends;
             BffFrontend[] changedFrontends;
 
             lock (_syncRoot)
@@ -50,10 +51,19 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                     .ToArray();
 
                 changedFrontends = newFrontends
-                    .Where(frontend => oldFrontends.Any(x => x.Name == frontend.Name))
+                    .Where(frontend => oldFrontends.Any(x => x.Name == frontend.Name && IsUpdated(x, frontend)))
+                    .ToArray();
+
+                addedFrontends = newFrontends
+                    .Where(frontend => oldFrontends.All(x => x.Name != frontend.Name))
                     .ToArray();
 
                 Interlocked.Exchange(ref _frontends, newFrontends);
+            }
+
+            foreach (var added in addedFrontends)
+            {
+                OnFrontendAdded(added);
             }
 
             foreach (var changed in changedFrontends)
@@ -68,94 +78,90 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         });
     }
 
+    private static bool IsUpdated(BffFrontend left, BffFrontend right)
+    {
+        if (!left.Equals(right))
+        {
+            return true;
+        }
+
+        // We can't compare the Action delegates. This means that, if there are options,
+        // then we assume they have changed. This is not as efficient as it could be,
+        // but at least the caches get cleared. Should this cause perf issues, we can
+        // actually execute the configure options and compare the results.
+        if (left.ConfigureCookieOptions != null
+            || right.ConfigureCookieOptions != null
+            || left.ConfigureOpenIdConnectOptions != null
+            || right.ConfigureOpenIdConnectOptions != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private BffFrontend[] ReadFrontends(
         BffConfiguration bffConfiguration,
         IEnumerable<BffFrontend> inMemory)
     {
         var fromOptions = bffConfiguration.Frontends.Select(x =>
         {
-            var frontend = x.Value;
+            var frontendConfiguration = x.Value;
 
             var frontendName = BffFrontendName.Parse(x.Key);
             var extensions = _plugins.Select(p => p.LoadExtension(frontendName)).OfType<IBffPlugin>().ToArray();
 
-            return new BffFrontend
+            var frontend = new BffFrontend
             {
                 Name = frontendName,
-                IndexHtmlUrl = frontend.IndexHtmlUrl,
-                ConfigureOpenIdConnectOptions = opt =>
-                {
-                    frontend.Oidc?.ApplyTo(opt);
-                },
-                ConfigureCookieOptions = opt =>
-                {
-                    frontend.Cookies?.ApplyTo(opt);
-                },
+                IndexHtmlUrl = frontendConfiguration.IndexHtmlUrl,
+
+                ConfigureOpenIdConnectOptions = frontendConfiguration.Oidc == null
+                    ? null
+                    : opt =>
+                    {
+                        frontendConfiguration.Oidc?.ApplyTo(opt);
+                    },
+                ConfigureCookieOptions = frontendConfiguration.Cookies == null
+                    ? null
+                    : opt =>
+                    {
+                        frontendConfiguration.Cookies?.ApplyTo(opt);
+                    },
                 SelectionCriteria = new FrontendSelectionCriteria()
                 {
                     // todo: parse or default
-                    MatchingOrigin = string.IsNullOrEmpty(frontend.MatchingOrigin)
+                    MatchingOrigin = string.IsNullOrEmpty(frontendConfiguration.MatchingOrigin)
                         ? null
-                        : Origin.Parse(frontend.MatchingOrigin),
-                    MatchingPath = string.IsNullOrEmpty(frontend.MatchingPath) ? null : frontend.MatchingPath,
+                        : Origin.Parse(frontendConfiguration.MatchingOrigin),
+                    MatchingPath = string.IsNullOrEmpty(frontendConfiguration.MatchingPath) ? null : frontendConfiguration.MatchingPath,
                 },
                 DataExtensions = extensions
             };
+            return frontend;
         });
 
         return inMemory.Concat(fromOptions).ToArray();
     }
 
-    //private static RemoteApi MapFrom(RemoteApiConfig config)
-    //{
-    //    Type? type = null;
-
-    //    if (config.TokenRetrieverTypeName != null)
-    //    {
-    //        type = Type.GetType(config.TokenRetrieverTypeName);
-    //        if (type == null)
-    //        {
-    //            throw new InvalidOperationException($"Type {config.TokenRetrieverTypeName} not found.");
-    //        }
-    //        if (!typeof(IAccessTokenRetriever).IsAssignableFrom(type))
-    //        {
-    //            throw new InvalidOperationException($"Type {config.TokenRetrieverTypeName} must implement IAccessTokenRetriever.");
-    //        }
-    //    }
-
-    //    var api = new RemoteApi
-    //    {
-    //        LocalPath = config.LocalPath ?? throw new InvalidOperationException("localpath cannot be empty"),
-    //        TargetUri = config.TargetUri ?? throw new InvalidOperationException("targeturi cannot be empty"),
-    //        RequiredTokenType = config.RequiredTokenType,
-    //        AccessTokenRetrieverType = type,
-    //        Parameters = Map(config.UserAccessTokenParameters)
-    //    };
-
-    //    return api;
-    //}
-
-    //private static BffUserAccessTokenParameters? Map(UserAccessTokenParameters? config)
-    //{
-    //    if (config == null)
-    //    {
-    //        return null;
-    //    }
-
-    //    return new BffUserAccessTokenParameters
-    //    {
-    //        SignInScheme = config.SignInScheme,
-    //        ChallengeScheme = config.ChallengeScheme,
-    //        ForceRenewal = config.ForceRenewal,
-    //        Resource = config.Resource
-    //    };
-    //}
-
     public void AddOrUpdate(BffFrontend frontend)
     {
+        var existingUpdated = false;
         // Lock to avoid dirty writes from multiple threads. 
         lock (_syncRoot)
         {
+            var existing = _frontends.FirstOrDefault(x => x.Name == frontend.Name);
+
+            if (existing != null)
+            {
+                existingUpdated = true;
+            }
+
+            if (existing != null && !IsUpdated(frontend, existing))
+            {
+                return;
+            }
+
             // By replacing the array, we avoid locking the entire list for read operations.
             Interlocked.Exchange(ref _frontends, _frontends
                 .Where(x => x.Name != frontend.Name)
@@ -163,7 +169,15 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                 .ToArray());
         }
 
-        OnFrontendChanged(frontend);
+        if (existingUpdated)
+        {
+            OnFrontendChanged(frontend);
+        }
+        else
+        {
+            OnFrontendAdded(frontend);
+        }
+
     }
 
     public void Remove(BffFrontendName frontendName)
