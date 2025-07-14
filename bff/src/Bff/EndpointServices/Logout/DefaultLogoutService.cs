@@ -71,7 +71,13 @@ public class DefaultLogoutService : ILogoutService
                 // prevent unauthenticated logout requests (similar to OIDC front channel)
                 if (Options.RequireLogoutSessionId && userSessionId != passedSessionId)
                 {
-                    throw new Exception("Invalid Session Id");
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    await context.Response.WriteAsJsonAsync(new HttpValidationProblemDetails()
+                    {
+                        Title = "Invalid Session id",
+                    });
+
+                    return;
                 }
             }
         }
@@ -81,7 +87,13 @@ public class DefaultLogoutService : ILogoutService
         {
             if (!await ReturnUrlValidator.IsValidAsync(returnUrl))
             {
-                throw new Exception("returnUrl is not valid: " + returnUrl);
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsJsonAsync(new HttpValidationProblemDetails()
+                {
+                    Title = "ReturnUrl is not valid",
+                });
+
+                return;
             }
         }
 
