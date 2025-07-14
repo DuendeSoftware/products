@@ -59,18 +59,21 @@ public static class HttpContextExtensions
                 clientIds = clientIds.Union(await userSession.GetClientListAsync());
             }
 
-            endSessionMsg = new LogoutNotificationContext
+            if (await AnyClientHasFrontChannelLogout(logoutMessage.ClientIds))
             {
-                SubjectId = logoutMessage.SubjectId,
-                SessionId = logoutMessage.SessionId,
-                ClientIds = clientIds
-            };
+                endSessionMsg = new LogoutNotificationContext
+                {
+                    SubjectId = logoutMessage.SubjectId,
+                    SessionId = logoutMessage.SessionId,
+                    ClientIds = clientIds
+                };
+            }
         }
         else if (currentSubId != null)
         {
-            // see if current user has any clients they need to signout of 
+            // see if current user has any clients they need to signout of
             var clientIds = await userSession.GetClientListAsync();
-            if (clientIds.Any())
+            if (clientIds.Any() && await AnyClientHasFrontChannelLogout(clientIds))
             {
                 endSessionMsg = new LogoutNotificationContext
                 {
@@ -98,5 +101,20 @@ public static class HttpContextExtensions
 
         // no sessions, so nothing to cleanup
         return null;
+
+        async Task<bool> AnyClientHasFrontChannelLogout(IEnumerable<string> clientIds)
+        {
+            var clientStore = context.RequestServices.GetRequiredService<IClientStore>();
+            foreach (var clientId in clientIds)
+            {
+                var client = await clientStore.FindEnabledClientByIdAsync(clientId);
+                if (client?.FrontChannelLogoutUri.IsPresent() == true)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
