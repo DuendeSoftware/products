@@ -101,6 +101,8 @@ public static class BffBuilderExtensions
     {
         builder.Services.AddHybridCache();
 
+        builder.Services.AddHostedService<BffCacheClearingHostedService>();
+
         builder.Services.AddTransient<IStartupFilter, ConfigureBffStartupFilter>();
 
         // Register the frontend collection, which will be used to store and retrieve frontends

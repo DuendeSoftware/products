@@ -243,8 +243,24 @@ public class BffFrontendSigninTests : BffTestBase
             RemoveAsync(string key, CancellationToken cancellationToken = new CancellationToken()) =>
             ValueTask.CompletedTask;
 
+        ManualResetEventSlim _waitUntilRemoveByTagAsyncCalled = new ManualResetEventSlim();
+
         public override ValueTask RemoveByTagAsync(string tag,
-            CancellationToken cancellationToken = new CancellationToken()) => ValueTask.CompletedTask;
+            CancellationToken cancellationToken = new CancellationToken())
+        {
+            _waitUntilRemoveByTagAsyncCalled.Set();
+            return new ValueTask();
+        }
+
+        public void WaitUntilRemoveByTagAsyncCalled(TimeSpan until)
+        {
+            _waitUntilRemoveByTagAsyncCalled.Wait(until);
+            if (!_waitUntilRemoveByTagAsyncCalled.IsSet)
+            {
+                throw new TimeoutException();
+            }
+        }
+
     }
 
     [Fact]
@@ -266,6 +282,8 @@ public class BffFrontendSigninTests : BffTestBase
 
         ApiCallDetails response = await Bff.BrowserClient.CallBffHostApi("/test");
 
+        var cache = (NoOpHybridCache)Bff.Resolve<HybridCache>();
+
         AddOrUpdateFrontend(bffFrontend with
         {
             ConfigureOpenIdConnectOptions = opt =>
@@ -274,6 +292,10 @@ public class BffFrontendSigninTests : BffTestBase
                 opt.ClientId = "differnet_client_id";
             }
         });
+
+        // Update frontend calls RemoveByTagAsync to clear the cache
+        // But it does so on a background thread, so we need to wait for it
+        cache.WaitUntilRemoveByTagAsyncCalled(TimeSpan.FromSeconds(1));
 
         await Bff.BrowserClient.Login()
             .CheckResponseContent(Bff.DefaultRootResponse);

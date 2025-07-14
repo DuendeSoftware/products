@@ -399,6 +399,14 @@ internal static partial class LogMessages
         message: $"Failed to clear hybrid cache for frontend {{{OTelParameters.Frontend}}}")]
     public static partial void FailedToClearSchemeCache(this ILogger logger, LogLevel logLevel, BffFrontendName frontend, Exception ex);
 
+    [LoggerMessage(
+        message: $"Error occurred while processing frontend changes")]
+    public static partial void ErrorWhileProcessingFrontendChanges(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: $"Failed to add frontend change to queue")]
+    public static partial void FailedToAddFrontendToQueue(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
+
 
     [LoggerMessage(
         message: "You do not have a valid license key for the Duende software. " +
