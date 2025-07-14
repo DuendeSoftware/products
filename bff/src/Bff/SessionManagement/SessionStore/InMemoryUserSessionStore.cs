@@ -17,7 +17,7 @@ public class InMemoryUserSessionStore : IUserSessionStore
     {
         if (!_store.TryAdd(session.Key, session.Clone()))
         {
-            throw new Exception("Key already exists");
+            throw new InvalidOperationException("Key already exists");
         }
         return Task.CompletedTask;
     }
