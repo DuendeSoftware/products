@@ -110,7 +110,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
 
     public event Action<IServiceCollection> OnConfigureServices = _ => { };
-    public event Action<WebApp> OnConfigureApp = _ => { };
+    public event Action<BffWebApplication> OnConfigureApp = _ => { };
 
     protected virtual void ConfigureServices(IServiceCollection services)
     {
@@ -140,7 +140,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
         app.UseEndpoints(endpoints =>
         {
-            OnConfigureApp(new WebApp(app, endpoints));
+            OnConfigureApp(new BffWebApplication(app, endpoints));
         });
     }
 
