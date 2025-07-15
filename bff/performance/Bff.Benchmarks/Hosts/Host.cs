@@ -33,11 +33,11 @@ public abstract class Host : IAsyncDisposable
 
 
 
-
+        _builder.Logging.ClearProviders();
         // Ensure dev certificate is used for SSL
         if (Internet.UseKestrel)
         {
-            _builder.Logging.ClearProviders();
+
             //_builder.Logging.AddSerilog(Internet.Log);
 
             _builder.WebHost.UseUrls("https://127.0.0.1:0");

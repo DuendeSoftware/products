@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Builder;
 using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.TestHost;
 
@@ -109,8 +110,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
 
     public event Action<IServiceCollection> OnConfigureServices = _ => { };
-    public event Action<IApplicationBuilder> OnConfigure = _ => { };
-    public event Action<IEndpointRouteBuilder> OnConfigureEndpoints = _ => { };
+    public event Action<BffWebApplication> OnConfigureApp = _ => { };
 
     protected virtual void ConfigureServices(IServiceCollection services)
     {
@@ -132,10 +132,16 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     protected virtual void ConfigureApp(IApplicationBuilder app)
     {
         _appServices = app.ApplicationServices;
-        app.Use(async (c, n) => { await n(); });
-        OnConfigure(app);
 
-        app.UseEndpoints(endpoints => { OnConfigureEndpoints(endpoints); });
+        app.Use(async (c, n) =>
+        {
+            await n();
+        });
+
+        app.UseEndpoints(endpoints =>
+        {
+            OnConfigureApp(new BffWebApplication(app, endpoints));
+        });
     }
 
     public async ValueTask DisposeAsync()
