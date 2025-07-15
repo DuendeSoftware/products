@@ -392,6 +392,23 @@ internal static partial class LogMessages
     public static partial void ErrorValidatingLogoutToken(this ILogger logger, LogLevel logLevel, Exception ex);
 
     [LoggerMessage(
+        message: $"A changed frontend was detected. Clearing caches for frontend {{{OTelParameters.Frontend}}}")]
+    public static partial void ChangedFrontendDetected_ClearingCaches(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
+
+    [LoggerMessage(
+        message: $"Failed to clear hybrid cache for frontend {{{OTelParameters.Frontend}}}")]
+    public static partial void FailedToClearSchemeCache(this ILogger logger, LogLevel logLevel, BffFrontendName frontend, Exception ex);
+
+    [LoggerMessage(
+        message: $"Error occurred while processing frontend changes")]
+    public static partial void ErrorWhileProcessingFrontendChanges(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: $"Failed to add frontend change to queue")]
+    public static partial void FailedToAddFrontendToQueue(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
+
+
+    [LoggerMessage(
         message: "You do not have a valid license key for the Duende software. " +
                  "This is allowed for development and testing scenarios. " +
                  "If you are running in production you are required to have a licensed version. " +
@@ -403,6 +420,8 @@ internal static partial class LogMessages
                  "If you are running in production you are required to have a licensed version. " +
                  "Please start a conversation with us: https://duendesoftware.com/contact")]
     public static partial void ErrorValidatingLicenseKey(this ILogger logger, LogLevel logLevel, Exception ex);
+
+
 
     public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 
