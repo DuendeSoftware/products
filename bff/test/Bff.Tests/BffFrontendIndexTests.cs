@@ -145,7 +145,7 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            IndexHtmlUrl = Cdn.Url("index.html")
+            IndexHtmlUrl = Cdn.Url("index2.html")
         });
 
         // Note, there is a possibility for a race condition because the cache is cleared executed using

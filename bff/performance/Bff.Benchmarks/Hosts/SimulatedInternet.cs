@@ -12,7 +12,7 @@ internal class SimulatedInternet : DelegatingHandler
 
 
 #if DEBUG
-    public bool UseKestrel { get; } = false;
+    public bool UseKestrel { get; } = true;
 #else
     public bool UseKestrel { get; } = true;
 #endif

@@ -22,6 +22,19 @@ public class OriginTests
         origin.Port.ShouldBe(443); // Default HTTPS port
     }
 
+    [Theory]
+    [InlineData("https://example.com:888", "example.com", 888)]
+    [InlineData("https://example.com:443", "example.com", 443)]
+    [InlineData("http://example.com", "example.com", 80)]
+    [InlineData("http://example.com:80", "example.com", 80)]
+    [InlineData("http://example.com:888", "example.com", 888)]
+    public void ToHostStringHandlesDefaultPorts(string url, string hoststring, int port)
+    {
+        var host = Origin.Parse(url).ToHostString();
+
+        host.ShouldBe(new HostString(hoststring, port));
+    }
+
     [Fact]
     public void Parse_WithValidHttpUrl_SetsCorrectProperties()
     {

@@ -5,9 +5,9 @@ using BenchmarkDotNet.Attributes;
 
 namespace Bff.Benchmarks;
 
-public class ProxyBenchmarks : BenchmarkBase
+public class SingleFrontendBenchmarks : BenchmarkBase
 {
-    private ProxyFixture _fixture = null!;
+    private SingleFrontendFixture _fixture = null!;
 
     private HttpClient _authenticatedBffClient = null!;
     private HttpClient _anonBffClient = null!;
@@ -17,7 +17,7 @@ public class ProxyBenchmarks : BenchmarkBase
     [GlobalSetup]
     public override async Task InitializeAsync()
     {
-        _fixture = new ProxyFixture();
+        _fixture = new SingleFrontendFixture();
 
         _authenticatedBffClient = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
         await _authenticatedBffClient.GetAsync("/bff/login")
@@ -32,38 +32,32 @@ public class ProxyBenchmarks : BenchmarkBase
 
     }
 
-
-
     [Benchmark]
-    public async Task BffUserToken() => await _authenticatedBffClient
+    public async Task SingleFrontend_UserToken() => await _authenticatedBffClient
             .GetWithCSRF("/user_token")
             .EnsureStatusCode();
 
     [Benchmark]
-    public async Task BffClientCredentialsToken() => await _authenticatedBffClient
+    public async Task SingleFrontend_ClientCredentialsToken() => await _authenticatedBffClient
             .GetWithCSRF("/client_token")
             .EnsureStatusCode();
 
     [Benchmark]
-    public async Task BffAnonEndpoint() => await _anonBffClient
+    public async Task SingleFrontend_AnonLocalEndpoint() => await _anonBffClient
         .GetAsync("/anon")
         .EnsureStatusCode();
 
     [Benchmark]
-    public async Task BffLocalEndpoint() => await _authenticatedBffClient
+    public async Task SingleFrontend_LocalEndpoint() => await _authenticatedBffClient
         .GetAsync("/anon")
         .EnsureStatusCode();
 
     [Benchmark]
-    public async Task BffLogin()
+    public async Task SingleFrontend_Login()
     {
         var client = _fixture.Internet.BuildHttpClient(_fixture.Bff.Url());
         await client.GetAsync("/bff/login")
             .EnsureStatusCode();
-
-        await client.GetWithCSRF("/user_token")
-            .EnsureStatusCode();
-
     }
 
 

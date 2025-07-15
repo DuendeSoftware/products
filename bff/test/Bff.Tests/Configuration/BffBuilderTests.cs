@@ -160,6 +160,9 @@ public class BffBuilderTests
         {
             Name = The.FrontendName,
         });
+
+        found.ConfigureCookieOptions.ShouldBeNull();
+        found.ConfigureOpenIdConnectOptions.ShouldBeNull();
     }
 
     [Fact]

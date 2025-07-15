@@ -1,8 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
+using Bff.Benchmarks;
 
 
-BenchmarkRunner.Run(typeof(Program).Assembly, ManualConfig.CreateMinimumViable());
+BenchmarkRunner.Run(typeof(Program).Assembly, new BenchmarkConfig());
