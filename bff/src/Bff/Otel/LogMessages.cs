@@ -12,6 +12,15 @@ namespace Duende.Bff.Otel;
 internal static partial class LogMessages
 {
     [LoggerMessage(
+        Message = $"AllowedSilentLoginReferrers have been configured but no referer header was found on silent login callback. Returning bad request. ")]
+    public static partial void SilentLoginEndpointRefererHeaderMissing(this ILogger logger, LogLevel level);
+
+    [LoggerMessage(
+        Message = $"Referer {OTelParameters.Referer} not in allowed referers: {{AllowedReferers}}")]
+    public static partial void SilentLoginEndpointRefererNotAllowed(this ILogger logger, LogLevel level, string referer, string allowedReferers);
+
+
+    [LoggerMessage(
         Message = $"Proxy response error. local path: '{{{OTelParameters.LocalPath}}}', error: '{{{OTelParameters.Error}}}'")]
     public static partial void ProxyResponseError(this ILogger logger, LogLevel level, string localPath, string error);
 

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Collections.ObjectModel;
 using Duende.Bff.AccessTokenManagement;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -157,4 +158,14 @@ public sealed class BffOptions
     public bool AutomaticallyRegisterBffMiddleware { get; set; } = true;
 
     internal List<LoadPluginMiddlewares> MiddlewareLoaders { get; set; } = [];
+
+    /// <summary>
+    /// When using silent login in a split host scenario (where the api and bff are hosted on different domains),
+    /// then the silent login script needs to be able to know which window to post the message to.
+    /// In this case, we use the referer header, but this is a potential security risk. So, we check against a list of allowed referers.
+    ///
+    /// Note, referer is actually an incorrect spelling of the word referrer, but it is the spelling used in the HTTP specification.
+    /// https://en.wikipedia.org/wiki/HTTP_referer
+    /// </summary>
+    public Collection<string> AllowedSilentLoginReferers { get; } = new();
 }
