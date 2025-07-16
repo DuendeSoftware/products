@@ -36,7 +36,8 @@ public static class Config
     private static Uri bffDPopUrl = ServiceDiscovery.ResolveService(AppHostServices.BffDpop);
     private static Uri bffEfUrl = ServiceDiscovery.ResolveService(AppHostServices.BffEf);
     private static Uri bffBlazorPerComponentUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorPerComponent);
-    private static Uri bffBlazorWebAssemblyUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorWebassembly); public static IEnumerable<Client> Clients =>
+    private static Uri bffBlazorWebAssemblyUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorWebassembly);
+    public static IEnumerable<Client> Clients =>
     [
         BuildClient("bff.perf",
             ServiceDiscovery.ResolveService(AppHostServices.BffPerf, "single"),
@@ -106,9 +107,9 @@ public static class Config
                 GrantType.ClientCredentials,
                 OidcConstants.GrantTypes.TokenExchange
             },
-        RedirectUris = uris.Select(u => new Uri(u, "signin-oidc").ToString()).ToList(),
-        FrontChannelLogoutUri = new Uri(uris.First(), "signout-oidc").ToString(),
-        PostLogoutRedirectUris = uris.Select(u => new Uri(u, "signout-callback-oidc").ToString()).ToList(),
+        RedirectUris = uris.Select(u => CombineUriPath(u, "signin-oidc").ToString()).ToList(),
+        FrontChannelLogoutUri = CombineUriPath(uris.First(), "signout-oidc").ToString(),
+        PostLogoutRedirectUris = uris.Select(u => CombineUriPath(u, "signout-callback-oidc").ToString()).ToList(),
 
         AllowOfflineAccess = true,
         AllowedScopes = { "openid", "profile", "api" },
@@ -118,4 +119,10 @@ public static class Config
         AccessTokenLifetime = 15 // Force refresh
     };
 
+    private static Uri CombineUriPath(Uri baseUri, string relativePath)
+    {
+        var basePath = baseUri.AbsolutePath.TrimEnd('/');
+        var relPath = relativePath.TrimStart('/');
+        return new Uri(baseUri, $"{basePath}/{relPath}");
+    }
 }
