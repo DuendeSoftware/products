@@ -44,8 +44,8 @@ bffBuilder
         options.Authority = authority.ToString();
 
         // confidential client using code flow + PKCE
-        //options.ClientId = "bff.multi-frontend.default";
-        //options.ClientSecret = "secret";
+        options.ClientId = "bff.multi-frontend.default";
+        options.ClientSecret = "secret";
         options.ResponseType = "code";
         options.ResponseMode = "query";
 
@@ -153,12 +153,13 @@ app.Map("/static", staticApp =>
 
 app.MapGet("/local/self-contained", (CurrentFrontendAccessor currentFrontendAccessor, ClaimsPrincipal user) =>
 {
-
+    var frontendName = currentFrontendAccessor.Get().Name.ToString();
+    var userName = user?.FindFirst("name")?.Value ?? user?.FindFirst("sub")?.Value;
     var data = new
     {
-        FrontendName = currentFrontendAccessor.Get().Name.ToString(),
+        FrontendName = frontendName,
         Message = "Hello from self-contained local API",
-        User = user!.FindFirst("name")?.Value ?? user!.FindFirst("sub")!.Value
+        User = userName
     };
 
     return data;

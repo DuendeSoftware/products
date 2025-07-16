@@ -36,7 +36,8 @@ public static class Config
     private static Uri bffDPopUrl = ServiceDiscovery.ResolveService(AppHostServices.BffDpop);
     private static Uri bffEfUrl = ServiceDiscovery.ResolveService(AppHostServices.BffEf);
     private static Uri bffBlazorPerComponentUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorPerComponent);
-    private static Uri bffBlazorWebAssemblyUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorWebassembly); public static IEnumerable<Client> Clients =>
+    private static Uri bffBlazorWebAssemblyUrl = ServiceDiscovery.ResolveService(AppHostServices.BffBlazorWebassembly);
+    public static IEnumerable<Client> Clients =>
     [
         BuildClient("bff.perf",
             ServiceDiscovery.ResolveService(AppHostServices.BffPerf, "single"),
@@ -57,12 +58,12 @@ public static class Config
         BuildClient("bff.multi-frontend.config", client =>
         {
             client.AllowedScopes.Add("scope-for-isolated-api");
-        }, new Uri(bffMultiFrontendUrl, "from-config")),
+        }, new Uri(bffMultiFrontendUrl, "from-config/")),
 
         BuildClient("bff.multi-frontend.with-path", client =>
         {
             client.AllowedScopes.Add("scope-for-isolated-api");
-        }, new Uri(bffMultiFrontendUrl, "with-path")),
+        }, new Uri(bffMultiFrontendUrl, "with-path/")),
 
         BuildClient("bff.multi-frontend.with-domain", client =>
         {
@@ -117,5 +118,4 @@ public static class Config
         AbsoluteRefreshTokenLifetime = 60,
         AccessTokenLifetime = 15 // Force refresh
     };
-
 }
