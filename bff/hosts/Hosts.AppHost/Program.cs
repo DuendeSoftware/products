@@ -29,7 +29,7 @@ var perf = builder.AddProject<Projects.Hosts_Bff_Performance>(AppHostServices.Bf
 var bffMulti = builder.AddProject<Projects.Hosts_Bff_MultiFrontend>(AppHostServices.BffMultiFrontend)
     .WithExternalHttpEndpoints()
     .WithUrl("https://app1.localhost:5005", "https://app1.localhost:5005")
-    .WithUrl("https://localhost:5005/with-path", "https://localhost/with-path")
+    .WithUrl("https://localhost:5005/with-path/", "https://localhost/with-path/")
     .WithAwaitedReference(idServer)
     .WithAwaitedReference(isolatedApi)
     .WithAwaitedReference(api)

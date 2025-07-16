@@ -58,12 +58,12 @@ public static class Config
         BuildClient("bff.multi-frontend.config", client =>
         {
             client.AllowedScopes.Add("scope-for-isolated-api");
-        }, new Uri(bffMultiFrontendUrl, "from-config")),
+        }, new Uri(bffMultiFrontendUrl, "from-config/")),
 
         BuildClient("bff.multi-frontend.with-path", client =>
         {
             client.AllowedScopes.Add("scope-for-isolated-api");
-        }, new Uri(bffMultiFrontendUrl, "with-path")),
+        }, new Uri(bffMultiFrontendUrl, "with-path/")),
 
         BuildClient("bff.multi-frontend.with-domain", client =>
         {
@@ -107,9 +107,9 @@ public static class Config
                 GrantType.ClientCredentials,
                 OidcConstants.GrantTypes.TokenExchange
             },
-        RedirectUris = uris.Select(u => CombineUriPath(u, "signin-oidc").ToString()).ToList(),
-        FrontChannelLogoutUri = CombineUriPath(uris.First(), "signout-oidc").ToString(),
-        PostLogoutRedirectUris = uris.Select(u => CombineUriPath(u, "signout-callback-oidc").ToString()).ToList(),
+        RedirectUris = uris.Select(u => new Uri(u, "signin-oidc").ToString()).ToList(),
+        FrontChannelLogoutUri = new Uri(uris.First(), "signout-oidc").ToString(),
+        PostLogoutRedirectUris = uris.Select(u => new Uri(u, "signout-callback-oidc").ToString()).ToList(),
 
         AllowOfflineAccess = true,
         AllowedScopes = { "openid", "profile", "api" },
@@ -118,11 +118,4 @@ public static class Config
         AbsoluteRefreshTokenLifetime = 60,
         AccessTokenLifetime = 15 // Force refresh
     };
-
-    private static Uri CombineUriPath(Uri baseUri, string relativePath)
-    {
-        var basePath = baseUri.AbsolutePath.TrimEnd('/');
-        var relPath = relativePath.TrimStart('/');
-        return new Uri(baseUri, $"{basePath}/{relPath}");
-    }
 }
