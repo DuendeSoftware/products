@@ -129,10 +129,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                     },
                 SelectionCriteria = new FrontendSelectionCriteria()
                 {
-                    // todo: parse or default
-                    MatchingOrigin = string.IsNullOrEmpty(frontendConfiguration.MatchingOrigin)
-                        ? null
-                        : Origin.Parse(frontendConfiguration.MatchingOrigin),
+                    MatchingOrigin = Origin.ParseOrDefault(frontendConfiguration.MatchingOrigin),
                     MatchingPath = string.IsNullOrEmpty(frontendConfiguration.MatchingPath) ? null : frontendConfiguration.MatchingPath,
                 },
                 DataExtensions = extensions

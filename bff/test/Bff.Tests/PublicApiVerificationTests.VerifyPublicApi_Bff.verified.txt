@@ -442,6 +442,7 @@ namespace Duende.Bff.DynamicFrontends
         public System.Uri ToUri() { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(string origin) { }
         public static Duende.Bff.DynamicFrontends.Origin Parse(System.Uri uri) { }
+        public static Duende.Bff.DynamicFrontends.Origin? ParseOrDefault(string? origin) { }
     }
 }
 namespace Duende.Bff.Endpoints
