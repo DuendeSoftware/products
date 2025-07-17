@@ -31,20 +31,21 @@ internal class RemoteRouteHandler(
         {
             NewConfig = new HttpClientConfig()
             {
-
+                
             }
         });
-        var requestConfig = new ForwarderRequestConfig
-        {
-            // todo: timeout configurable?
-            ActivityTimeout = TimeSpan.FromSeconds(100)
-        };
 
         var bffTransformBuilder = customBffYarpTransformBuilder ??
              DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken;
 
         foreach (var route in frontend.GetRemoteApis())
         {
+            var requestConfig = new ForwarderRequestConfig
+            {
+                ActivityTimeout = route.ActivityTimeout,
+                AllowResponseBuffering = route.AllowResponseBuffering,
+            };
+
             // Path matching must be case insensitive
             if (context.Request.Path.StartsWithSegments(route.LocalPath.ToString(), StringComparison.OrdinalIgnoreCase))
             {

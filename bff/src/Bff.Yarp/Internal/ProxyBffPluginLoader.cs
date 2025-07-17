@@ -48,6 +48,8 @@ internal sealed class ProxyBffPluginLoader(IOptionsMonitor<ProxyConfiguration> p
             TargetUri = config.TargetUri ?? throw new InvalidOperationException("targeturi cannot be empty"),
             RequiredTokenType = config.RequiredTokenType,
             AccessTokenRetrieverType = type,
+            ActivityTimeout = config.ActivityTimeout,
+            AllowResponseBuffering = config.AllowResponseBuffering,
             Parameters = Map(config.UserAccessTokenParameters)
         };
 

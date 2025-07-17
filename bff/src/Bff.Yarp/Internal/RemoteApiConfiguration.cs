@@ -31,4 +31,14 @@ internal sealed record RemoteApiConfiguration
     /// The parameters for retrieving a user access token.
     /// </summary>
     public UserAccessTokenParameters? UserAccessTokenParameters { get; init; }
+
+    /// <summary>
+    /// How long a request is allowed to remain idle between any operation completing, after which it will be canceled. The default is 100 seconds. The timeout will reset when response headers are received or after successfully reading or writing any request, response, or streaming data like gRPC or WebSockets. TCP keep-alive packets and HTTP/2 protocol pings will not reset the timeout, but WebSocket pings will.
+    /// </summary>
+    public TimeSpan? ActivityTimeout { get; set; }
+
+    /// <summary>
+    /// Allows to use write buffering when sending a response back to the client, if the server hosting YARP (e.g. IIS) supports it. NOTE: enabling it can break SSE (server side event) scenarios.
+    /// </summary>
+    public bool? AllowResponseBuffering { get; set; }
 }

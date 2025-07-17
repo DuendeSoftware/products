@@ -40,6 +40,8 @@
         [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
         public RemoteApi(Duende.Bff.LocalPath localPath, System.Uri targetUri) { }
         public System.Type? AccessTokenRetrieverType { get; init; }
+        public System.TimeSpan? ActivityTimeout { get; init; }
+        public bool? AllowResponseBuffering { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public Duende.Bff.LocalPath LocalPath { get; init; }
         public Duende.Bff.Configuration.BffUserAccessTokenParameters? Parameters { get; init; }
@@ -52,6 +54,8 @@
         public Duende.Bff.Yarp.RemoteApi WithAccessToken(Duende.Bff.AccessTokenManagement.RequiredTokenType type) { }
         public Duende.Bff.Yarp.RemoteApi WithAccessTokenRetriever<TRetriever>()
             where TRetriever : Duende.Bff.AccessTokenManagement.IAccessTokenRetriever { }
+        public Duende.Bff.Yarp.RemoteApi WithActivityTimeout(System.TimeSpan timeout) { }
+        public Duende.Bff.Yarp.RemoteApi WithResponseBufferingAllowed(bool allow) { }
         public Duende.Bff.Yarp.RemoteApi WithUserAccessTokenParameters(Duende.Bff.Configuration.BffUserAccessTokenParameters parameters) { }
     }
     public static class ReverseProxyBuilderExtensions
