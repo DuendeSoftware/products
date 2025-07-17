@@ -34,7 +34,7 @@ public sealed record RemoteApi
                && Equals(Parameters, other.Parameters);
     }
 
-    public override int GetHashCode() => HashCode.Combine(LocalPath, TargetUri, (int)RequiredTokenType, AccessTokenRetrieverType, Parameters);
+    public override int GetHashCode() => HashCode.Combine(LocalPath, TargetUri, (int)RequiredTokenType, AccessTokenRetrieverType, Parameters, ActivityTimeout, AllowResponseBuffering);
 
     [SetsRequiredMembers]
     public RemoteApi(LocalPath localPath, Uri targetUri)
