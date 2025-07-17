@@ -3,6 +3,7 @@
 
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Builder;
+using Duende.Bff.SessionManagement.SessionStore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,8 @@ public static class
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        // Todo: EV: make sure server side sessions is added, as it doesn't work otherwise. 
+        builder.Services.AddActivatedSingleton<ServerSideSessionChecker>();
+
         builder.Services
             .AddOpenIdConnectAccessTokenManagement()
             .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>()
@@ -30,5 +32,21 @@ public static class
         }
 
         return builder;
+    }
+
+    /// <summary>
+    /// This class sole purpose is to ensure that server-side sessions are configured
+    /// If not, it will throw an exception when the BFF starting up.
+    /// </summary>
+    internal class ServerSideSessionChecker
+    {
+        public ServerSideSessionChecker(IUserSessionStore? sessions = null)
+        {
+            if (sessions == null)
+            {
+                throw new InvalidOperationException(
+                    "Server-side sessions are not configured. Please call bff.AddServerSideSessions() in your BFF configuration.");
+            }
+        }
     }
 }
