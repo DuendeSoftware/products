@@ -14,14 +14,14 @@ public abstract class KeyContainer
     /// <summary>
     /// Constructor for KeyContainer.
     /// </summary>
-    public KeyContainer()
+    protected KeyContainer()
     {
     }
 
     /// <summary>
     /// Constructor for RsaKeyContainer.
     /// </summary>
-    public KeyContainer(string id, string algorithm, DateTime created)
+    protected KeyContainer(string id, string algorithm, DateTime created)
     {
         Id = id;
         Algorithm = algorithm;
