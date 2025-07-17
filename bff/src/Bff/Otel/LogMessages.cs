@@ -12,6 +12,10 @@ namespace Duende.Bff.Otel;
 internal static partial class LogMessages
 {
     [LoggerMessage(
+        Message = $"Duplicate 'default' frontend configured. This is a frontend without an origin and path. The first one is used. ")]
+    public static partial void DuplicateDefaultRouteConfigured(this ILogger logger, LogLevel level);
+
+    [LoggerMessage(
         Message = $"Failed to apply yarp access token request transform.")]
     public static partial void FailedToApplyYarpAccessTokenRequestTransform(this ILogger logger, Exception ex, LogLevel level);
 
