@@ -12,6 +12,10 @@ namespace Duende.Bff.Otel;
 internal static partial class LogMessages
 {
     [LoggerMessage(
+        Message = $"Failed to apply yarp access token request transform.")]
+    public static partial void FailedToApplyYarpAccessTokenRequestTransform(this ILogger logger, Exception ex, LogLevel level);
+
+    [LoggerMessage(
         Message = $"AllowedSilentLoginReferrers have been configured but no referer header was found on silent login callback. Returning bad request. ")]
     public static partial void SilentLoginEndpointRefererHeaderMissing(this ILogger logger, LogLevel level);
 
