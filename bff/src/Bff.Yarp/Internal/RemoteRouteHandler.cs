@@ -1,10 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Collections.Concurrent;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Http;
-using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms.Builder;
 
@@ -17,7 +17,8 @@ internal class RemoteRouteHandler(
     BffYarpTransformBuilder? customBffYarpTransformBuilder = null
     )
 {
-    private IForwarderHttpClientFactory _forwarderHttpClientFactory = forwarderHttpClientFactory ?? new ForwarderHttpClientFactory();
+    private readonly IForwarderHttpClientFactory _forwarderHttpClientFactory = forwarderHttpClientFactory ?? new ForwarderHttpClientFactory();
+    private readonly ConcurrentDictionary<LocalPath, HttpTransformer> _cachedTransformersPerPath = new();
 
     public async Task<bool> HandleAsync(HttpContext context, CancellationToken ct)
     {
@@ -27,13 +28,9 @@ internal class RemoteRouteHandler(
             return false;
         }
 
-        var invoker = _forwarderHttpClientFactory.CreateClient(new ForwarderHttpClientContext()
-        {
-            NewConfig = new HttpClientConfig()
-            {
-                
-            }
-        });
+        // a HTTP invoker is like a http client
+        // since we get it from a factory, it should be disposed after use
+        using var invoker = _forwarderHttpClientFactory.CreateClient(new ForwarderHttpClientContext());
 
         var bffTransformBuilder = customBffYarpTransformBuilder ??
              DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken;
@@ -51,19 +48,25 @@ internal class RemoteRouteHandler(
             {
                 var bffRemoteApiEndpointMetadata = new BffRemoteApiEndpointMetadata()
                 {
-                    // Todo: EV: Should we allow somehow the TokenParameters to be set?
-                    TokenType = route.RequiredTokenType
+                    TokenType = route.RequiredTokenType,
+                    BffUserAccessTokenParameters = route.Parameters,
                 };
+
+                if (route.AccessTokenRetrieverType != null)
+                {
+                    bffRemoteApiEndpointMetadata.AccessTokenRetriever = route.AccessTokenRetrieverType;
+                }
+
                 context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(bffRemoteApiEndpointMetadata), null));
 
-                // Todo: EV: Should we cache this?
-                var httpTransformer = transformBuilder.Create(c => bffTransformBuilder(route.LocalPath, c));
+                var httpTransformer = _cachedTransformersPerPath.GetOrAdd(
+                    key: route.LocalPath,
+                    valueFactory: (p) => transformBuilder.Create(c => bffTransformBuilder(p, c)));
+
                 var destinationPrefix = route.TargetUri.ToString();
 
-                var error = await httpForwarder.SendAsync(context, destinationPrefix, invoker, requestConfig,
+                await httpForwarder.SendAsync(context, destinationPrefix, invoker, requestConfig,
                     httpTransformer, ct);
-
-                // Todo: EV: what to do with an error here. 
 
                 return true;
             }
