@@ -20,6 +20,22 @@ public sealed record Origin : IEquatable<HttpRequest>
         return Parse(uri);
     }
 
+    public static Origin? ParseOrDefault(string? origin)
+    {
+        if (string.IsNullOrEmpty(origin))
+        {
+            return null;
+        }
+        try
+        {
+            return Parse(origin);
+        }
+        catch (UriFormatException)
+        {
+            return null;
+        }
+    }
+
     public static Origin Parse(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
