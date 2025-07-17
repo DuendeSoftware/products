@@ -16,6 +16,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
     private readonly IHttpClientFactory _clientFactory;
     private readonly CurrentFrontendAccessor _currentFrontendAccessor;
     private readonly HybridCache _cache;
+    private readonly ILogger<IndexHtmlHttpClient> _logger;
     private readonly IIndexHtmlTransformer? _transformer;
     private readonly CancellationTokenSource _stopping = new();
 
@@ -31,35 +32,13 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         _clientFactory = clientFactory;
         _currentFrontendAccessor = currentFrontendAccessor;
         _cache = cache;
+        _logger = logger;
         _transformer = transformer;
-
-        async void OnFrontendCollectionOnOnFrontendChanged(BffFrontend changedFrontend)
-        {
-            try
-            {
-                await cache.RemoveAsync(BuildCacheKey(changedFrontend), _stopping.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                logger.FailedToClearIndexHtmlCacheForFrontend(LogLevel.Warning, ex, changedFrontend.Name);
-                throw;
-            }
-        }
-
-        frontendCollection.OnFrontendChanged += OnFrontendCollectionOnOnFrontendChanged;
     }
 
     public async Task<string?> GetIndexHtmlAsync(CT ct = default)
     {
-        if (!_currentFrontendAccessor.TryGet(out var frontend))
-        {
-            // Todo: log
-            return null!;
-        }
+        var frontend = _currentFrontendAccessor.Get();
 
         var cacheKey = BuildCacheKey(frontend);
 
@@ -73,11 +52,10 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
                     var response = await client.GetAsync(frontend.IndexHtmlUrl, ct1);
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        // Todo: log
+                        _logger.IndexHtmlRetrievalFailed(LogLevel.Information, frontend.Name,
+                            response.StatusCode);
                         throw new PreventCacheException();
                     }
-
-                    // Todo: log
 
                     var html = await response.Content.ReadAsStringAsync(ct1);
 
@@ -85,6 +63,8 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
                     {
                         return html;
                     }
+
+                    _logger.RetrievedIndexHTML(LogLevel.Information, frontend.Name, response.StatusCode);
 
                     var transformed = await _transformer.Transform(html, ct1);
                     return transformed;
@@ -101,7 +81,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         }
     }
 
-    private static string BuildCacheKey(BffFrontend frontend) => "Duende.Bff.IndexHtml:" + frontend.Name;
+    internal static string BuildCacheKey(BffFrontend frontend) => "Duende.Bff.IndexHtml:" + frontend.Name;
 
 #pragma warning disable CA1032 // Do not use a custom message for this exception, as it is used to prevent caching
 #pragma warning disable CA1064 // do not make this exception public as it's purely internal
