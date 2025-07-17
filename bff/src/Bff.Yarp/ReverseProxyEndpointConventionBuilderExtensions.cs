@@ -30,9 +30,6 @@ public static class ReverseProxyEndpointConventionBuilderExtensions
     public static ReverseProxyConventionBuilder MapBffReverseProxy(this IEndpointRouteBuilder endpoints) => endpoints.MapReverseProxy()
             .AsBffApiEndpoint();
 
-    // TODO: do we also need a SkipAntiforgery API?
-    // TODO: review the API comment below
-
     /// <summary>
     /// Adds anti-forgery protection to YARP
     /// </summary>
