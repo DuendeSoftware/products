@@ -14,6 +14,8 @@
 
   <PropertyGroup>
     <!--
+    CA1034: Nested Types are OK
+
     Currently all existing warnings are suppressed. We will remove them as we address them. But this configuration
     allows us to prevent new warnings from being introduced while we work on the existing ones.
     -->
