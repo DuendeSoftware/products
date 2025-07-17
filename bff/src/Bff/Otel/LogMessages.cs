@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.SessionManagement.SessionStore;
@@ -11,6 +12,15 @@ namespace Duende.Bff.Otel;
 
 internal static partial class LogMessages
 {
+    [LoggerMessage(
+        Message = $"Retrieved IndexHTML for {{{OTelParameters.Frontend}}}. Statuscode was {{{OTelParameters.StatusCode}}}")]
+    public static partial void RetrievedIndexHTML(this ILogger logger, LogLevel level, BffFrontendName frontend, HttpStatusCode statusCode);
+
+
+    [LoggerMessage(
+        Message = $"Failed to retrieve IndexHTML for {{{OTelParameters.Frontend}}}. Statuscode was {{{OTelParameters.StatusCode}}}. This result will not be cached.")]
+    public static partial void IndexHtmlRetrievalFailed(this ILogger logger, LogLevel level, BffFrontendName frontend, HttpStatusCode statusCode);
+
     [LoggerMessage(
         Message = $"Duplicate 'default' frontend configured. This is a frontend without an origin and path. The first one is used. ")]
     public static partial void DuplicateDefaultRouteConfigured(this ILogger logger, LogLevel level);
