@@ -4,68 +4,105 @@
 using System.Collections.Concurrent;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.DynamicFrontends.Internal;
 using Microsoft.AspNetCore.Http;
+using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace Duende.Bff.Yarp.Internal;
-internal class RemoteRouteHandler(
-    CurrentFrontendAccessor currentFrontendAccessor,
-    IHttpForwarder httpForwarder,
-    ITransformBuilder transformBuilder,
-    IForwarderHttpClientFactory? forwarderHttpClientFactory = null,
-    BffYarpTransformBuilder? customBffYarpTransformBuilder = null
-    )
+internal class RemoteRouteHandler : IDisposable
 {
-    private readonly IForwarderHttpClientFactory _forwarderHttpClientFactory = forwarderHttpClientFactory ?? new ForwarderHttpClientFactory();
-    private readonly ConcurrentDictionary<LocalPath, HttpTransformer> _cachedTransformersPerPath = new();
+
+    // A cache of transformers for each frontend and local path.
+    private readonly ConcurrentDictionary<BffFrontendName, ConcurrentDictionary<LocalPath, HttpTransformer>> _cache = new();
+
+    // In Yarp, the forwarder is created when you call 'map'. 
+    private readonly HttpMessageInvoker _invoker;
+
+    private BffYarpTransformBuilder _bffTransformBuilder;
+
+    private readonly CurrentFrontendAccessor _currentFrontendAccessor;
+    private readonly IHttpForwarder _httpForwarder;
+    private readonly ITransformBuilder _transformBuilder;
+
+    public RemoteRouteHandler(CurrentFrontendAccessor currentFrontendAccessor,
+        IHttpForwarder httpForwarder,
+        ITransformBuilder transformBuilder,
+        FrontendCollection frontendCollection,
+        IForwarderHttpClientFactory? forwarderHttpClientFactory = null,
+        BffYarpTransformBuilder? customBffYarpTransformBuilder = null)
+    {
+        _currentFrontendAccessor = currentFrontendAccessor;
+        forwarderHttpClientFactory ??= new ForwarderHttpClientFactory();
+        _httpForwarder = httpForwarder;
+        _transformBuilder = transformBuilder;
+
+        // Create a single invoker that lives until the end of this class.
+        // This is similar to what yarp does. https://github.com/dotnet/yarp/blob/main/src/ReverseProxy/Routing/DirectForwardingIEndpointRouteBuilderExtensions.cs#L84
+        _invoker = forwarderHttpClientFactory
+            .CreateClient(new ForwarderHttpClientContext()
+            {
+                NewConfig = HttpClientConfig.Empty
+            });
+
+        _bffTransformBuilder = customBffYarpTransformBuilder ??
+                                    DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken;
+
+        // When the frontend collection changes, we clear the transformer cache for that frontend.
+        // This ensures that any changes to the frontend configuration are reflected in the transformers.
+        frontendCollection.OnFrontendChanged += ClearTransformerCacheFor;
+    }
+
+    private HttpTransformer GetOrCreateTransformerFor(BffFrontend frontend, RemoteApi api)
+    {
+        // Yarp creates a transformer per path while mapping the routes. 
+        // we also want to do that, but clear the cache when the frontend configuration changes. 
+        var transformersForFrontend = _cache
+            .GetOrAdd(frontend.Name, _ => new());
+
+        return transformersForFrontend
+            .GetOrAdd(api.LocalPath, path => _transformBuilder.Create(c => _bffTransformBuilder(path, c)));
+    }
+
+    public void ClearTransformerCacheFor(BffFrontend frontend) => _cache.TryRemove(frontend.Name, out _);
 
     public async Task<bool> HandleAsync(HttpContext context, CancellationToken ct)
     {
-
-        if (!currentFrontendAccessor.TryGet(out var frontend))
+        if (!_currentFrontendAccessor.TryGet(out var frontend))
         {
             return false;
         }
 
-        // a HTTP invoker is like a http client
-        // since we get it from a factory, it should be disposed after use
-        using var invoker = _forwarderHttpClientFactory.CreateClient(new ForwarderHttpClientContext());
-
-        var bffTransformBuilder = customBffYarpTransformBuilder ??
-             DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken;
-
-        foreach (var route in frontend.GetRemoteApis())
+        foreach (var remoteApi in frontend.GetRemoteApis())
         {
             var requestConfig = new ForwarderRequestConfig
             {
-                ActivityTimeout = route.ActivityTimeout,
-                AllowResponseBuffering = route.AllowResponseBuffering,
+                ActivityTimeout = remoteApi.ActivityTimeout,
+                AllowResponseBuffering = remoteApi.AllowResponseBuffering,
             };
 
             // Path matching must be case insensitive
-            if (context.Request.Path.StartsWithSegments(route.LocalPath.ToString(), StringComparison.OrdinalIgnoreCase))
+            if (context.Request.Path.StartsWithSegments(remoteApi.LocalPath.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 var bffRemoteApiEndpointMetadata = new BffRemoteApiEndpointMetadata()
                 {
-                    TokenType = route.RequiredTokenType,
-                    BffUserAccessTokenParameters = route.Parameters,
+                    TokenType = remoteApi.RequiredTokenType,
+                    BffUserAccessTokenParameters = remoteApi.Parameters,
                 };
 
-                if (route.AccessTokenRetrieverType != null)
+                if (remoteApi.AccessTokenRetrieverType != null)
                 {
-                    bffRemoteApiEndpointMetadata.AccessTokenRetriever = route.AccessTokenRetrieverType;
+                    bffRemoteApiEndpointMetadata.AccessTokenRetriever = remoteApi.AccessTokenRetrieverType;
                 }
 
                 context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(bffRemoteApiEndpointMetadata), null));
 
-                var httpTransformer = _cachedTransformersPerPath.GetOrAdd(
-                    key: route.LocalPath,
-                    valueFactory: (p) => transformBuilder.Create(c => bffTransformBuilder(p, c)));
+                var httpTransformer = GetOrCreateTransformerFor(frontend, remoteApi);
 
-                var destinationPrefix = route.TargetUri.ToString();
+                var destinationPrefix = remoteApi.TargetUri.ToString();
 
-                await httpForwarder.SendAsync(context, destinationPrefix, invoker, requestConfig,
+                await _httpForwarder.SendAsync(context, destinationPrefix, _invoker, requestConfig,
                     httpTransformer, ct);
 
                 return true;
@@ -74,4 +111,6 @@ internal class RemoteRouteHandler(
         // No routes matched
         return false;
     }
+
+    public void Dispose() => _invoker.Dispose();
 }
