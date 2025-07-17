@@ -50,7 +50,7 @@ public class BffBlazorTests(ITestOutputHelper testOutputHelper) : BffTestBase(te
     public async Task Without_serverside_sessions_add_blazorserver_fails(BffSetupType setup)
     {
         _addServerSideSessions = false;
-        var ex = await Should.ThrowAsync<InvalidOperationException>(async () =>  await ConfigureBff(setup));
+        var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await ConfigureBff(setup));
         ex.Message.ShouldContain(".AddServerSideSessions()");
     }
 

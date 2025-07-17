@@ -330,7 +330,7 @@ public class BffBuilderTests
         expected.DataExtensions.Length.ShouldBe(1);
         var proxyConfig = (ProxyBffPlugin)expected.DataExtensions[0];
         proxyConfig.RemoteApis.Length.ShouldBe(1);
-        proxyConfig.RemoteApis[0].ShouldBe(Some.RemoteApi() with 
+        proxyConfig.RemoteApis[0].ShouldBe(Some.RemoteApi() with
         {
             AllowResponseBuffering = true,
             ActivityTimeout = TimeSpan.FromSeconds(987)

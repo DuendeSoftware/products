@@ -8,7 +8,6 @@ using Duende.Bff.Internal;
 using Duende.Bff.Otel;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

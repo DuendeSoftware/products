@@ -7,8 +7,6 @@ using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
@@ -83,7 +81,7 @@ public class BffRemoteApiTests : BffTestBase
     {
 
         AddOrUpdateFrontend(Some.BffFrontend()
-            .WithRemoteApis(Some.RemoteApi() with 
+            .WithRemoteApis(Some.RemoteApi() with
             {
                 TargetUri = Api.Url(),
                 Parameters = new BffUserAccessTokenParameters
