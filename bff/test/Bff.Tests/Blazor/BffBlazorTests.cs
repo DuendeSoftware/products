@@ -10,9 +10,10 @@ using Xunit.Abstractions;
 
 namespace Bff.Tests.Blazor;
 
-public class BffBlazorTests : BffTestBase
+public class BffBlazorTests(ITestOutputHelper testOutputHelper) : BffTestBase(testOutputHelper)
 {
-    public BffBlazorTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    private bool _addServerSideSessions = true;
+    public override async Task InitializeAsync()
     {
         Bff.MapGetForRoot = false;
         Bff.OnConfigureServices += services =>
@@ -27,8 +28,12 @@ public class BffBlazorTests : BffTestBase
 
         Bff.OnConfigureBff += bff =>
         {
-            bff.AddBlazorServer()
-                .AddServerSideSessions();
+            bff.AddBlazorServer();
+
+            if (_addServerSideSessions)
+            {
+                bff.AddServerSideSessions();
+            }
         };
 
         Bff.OnConfigureApp += app =>
@@ -38,6 +43,15 @@ public class BffBlazorTests : BffTestBase
                 .AddInteractiveServerRenderMode()
                 .AddInteractiveWebAssemblyRenderMode();
         };
+        await base.InitializeAsync();
+    }
+
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task Without_serverside_sessions_add_blazorserver_fails(BffSetupType setup)
+    {
+        _addServerSideSessions = false;
+        var ex = await Should.ThrowAsync<InvalidOperationException>(async () =>  await ConfigureBff(setup));
+        ex.Message.ShouldContain(".AddServerSideSessions()");
     }
 
     [Theory, MemberData(nameof(AllSetups))]
