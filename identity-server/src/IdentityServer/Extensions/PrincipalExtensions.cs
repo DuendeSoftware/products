@@ -3,6 +3,7 @@
 
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Security.Claims;
 using System.Security.Principal;
 using Duende.IdentityModel;
@@ -46,7 +47,7 @@ public static class PrincipalExtensions
             throw new InvalidOperationException("auth_time is missing.");
         }
 
-        return long.Parse(claim.Value);
+        return long.Parse(claim.Value, CultureInfo.InvariantCulture);
     }
 
     /// <summary>

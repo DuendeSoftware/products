@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Duende.IdentityModel;
@@ -414,11 +415,11 @@ internal class TokenValidator : ITokenValidator
         {
             new Claim(JwtClaimTypes.Issuer, token.Issuer),
             new Claim(JwtClaimTypes.NotBefore,
-                new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-            new Claim(JwtClaimTypes.IssuedAt, new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(),
+                new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
+            new Claim(JwtClaimTypes.IssuedAt, new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64),
             new Claim(JwtClaimTypes.Expiration,
-                new DateTimeOffset(token.CreationTime).AddSeconds(token.Lifetime).ToUnixTimeSeconds().ToString(),
+                new DateTimeOffset(token.CreationTime).AddSeconds(token.Lifetime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64)
         };
 

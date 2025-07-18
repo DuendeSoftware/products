@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Extensions;
@@ -155,7 +156,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         var subjectClone = subject.Clone();
         if (!subject.HasClaim(x => x.Type == JwtClaimTypes.AuthenticationTime))
         {
-            subjectClone.Identities.First().AddClaim(new Claim(JwtClaimTypes.AuthenticationTime, _systemClock.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer));
+            subjectClone.Identities.First().AddClaim(new Claim(JwtClaimTypes.AuthenticationTime, _systemClock.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer));
         }
 
         if (!subject.HasClaim(x => x.Type == JwtClaimTypes.IdentityProvider))
