@@ -52,7 +52,9 @@ public class CorsPolicyService : ICorsPolicyService
     /// <returns></returns>
     public async Task<bool> IsOriginAllowedAsync(string origin)
     {
+#pragma warning disable CA1308 // this has historically been normalized to lower case and RFC 3986 instructs to normalize to lowercase
         origin = origin.ToLowerInvariant();
+#pragma warning restore CA1308
 
         var query = from o in DbContext.ClientCorsOrigins
                     where o.Origin == origin
