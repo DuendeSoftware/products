@@ -19,7 +19,7 @@ public abstract class KeyContainer
     }
 
     /// <summary>
-    /// Constructor for RsaKeyContainer.
+    /// Constructor for KeyContainer.
     /// </summary>
     protected KeyContainer(string id, string algorithm, DateTime created)
     {
