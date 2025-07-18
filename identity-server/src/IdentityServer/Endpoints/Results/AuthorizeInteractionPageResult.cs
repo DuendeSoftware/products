@@ -27,7 +27,7 @@ public abstract class AuthorizeInteractionPageResult : EndpointResult<AuthorizeI
     /// <param name="redirectUrl"></param>
     /// <param name="returnUrlParameterName"></param>
     /// <exception cref="System.ArgumentNullException">request</exception>
-    public AuthorizeInteractionPageResult(ValidatedAuthorizeRequest request, string redirectUrl, string returnUrlParameterName)
+    protected AuthorizeInteractionPageResult(ValidatedAuthorizeRequest request, string redirectUrl, string returnUrlParameterName)
     {
         Request = request ?? throw new ArgumentNullException(nameof(request));
         RedirectUrl = redirectUrl ?? throw new ArgumentNullException(nameof(redirectUrl));
@@ -108,7 +108,7 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
         var url = result.RedirectUrl;
         if (!url.IsLocalUrl())
         {
-            // this converts the relative redirect path to an absolute one if we're 
+            // this converts the relative redirect path to an absolute one if we're
             // redirecting to a different server
             returnUrl = _urls.Origin + returnUrl;
         }

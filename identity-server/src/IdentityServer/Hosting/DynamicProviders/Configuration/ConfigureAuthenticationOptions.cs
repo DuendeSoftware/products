@@ -31,7 +31,7 @@ public abstract class ConfigureAuthenticationOptions<TAuthenticationOptions, TId
     /// </summary>
     /// <param name="httpContextAccessor"></param>
     /// <param name="logger"></param>
-    public ConfigureAuthenticationOptions(IHttpContextAccessor httpContextAccessor, ILogger<ConfigureAuthenticationOptions<TAuthenticationOptions, TIdentityProvider>> logger)
+    protected ConfigureAuthenticationOptions(IHttpContextAccessor httpContextAccessor, ILogger<ConfigureAuthenticationOptions<TAuthenticationOptions, TIdentityProvider>> logger)
     {
         _httpContextAccessor = httpContextAccessor;
         _logger = logger;
