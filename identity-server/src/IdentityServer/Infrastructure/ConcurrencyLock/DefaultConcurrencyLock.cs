@@ -7,8 +7,9 @@ namespace Duende.IdentityServer.Internal;
 /// <summary>
 /// Default implementation.
 /// </summary>
-public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>
+public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>, IDisposable
 {
+    private bool _isDisposed;
     private readonly SemaphoreSlim Lock = new SemaphoreSlim(1);
 
     /// <inheritdoc/>
@@ -24,4 +25,25 @@ public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>
 
     /// <inheritdoc/>
     public void Unlock() => Lock.Release();
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            Lock?.Dispose();
+        }
+
+        _isDisposed = true;
+    }
 }
