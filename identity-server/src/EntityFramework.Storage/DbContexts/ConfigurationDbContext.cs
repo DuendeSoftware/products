@@ -104,7 +104,7 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
 
     /// <summary>
     /// Override this method to further configure the model that was discovered by convention from the entity types
-    /// exposed in <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1" /> properties on your derived context. The resulting model may be cached
+    /// exposed in <see cref="Microsoft.EntityFrameworkCore.DbSet{T}" /> properties on your derived context. The resulting model may be cached
     /// and re-used for subsequent instances of your derived context.
     /// </summary>
     /// <param name="modelBuilder">The builder being used to construct the model for this context. Databases (and other extensions) typically
@@ -112,7 +112,7 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
     /// to a given database.</param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <remarks>
-    /// If a model is explicitly set on the options for this context (via <see cref="M:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.UseModel(Microsoft.EntityFrameworkCore.Metadata.IModel)" />)
+    /// If a model is explicitly set on the options for this context (via <see cref="Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.UseModel(Microsoft.EntityFrameworkCore.Metadata.IModel)" />)
     /// then this method will not be run.
     /// </remarks>
     protected override void OnModelCreating(ModelBuilder modelBuilder)

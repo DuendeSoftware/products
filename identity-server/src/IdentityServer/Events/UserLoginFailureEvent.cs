@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Events;
 public class UserLoginFailureEvent : Event
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="T:Duende.IdentityServer.Events.UserLoginFailureEvent" /> class.
+    /// Initializes a new instance of the <see cref="Duende.IdentityServer.Events.UserLoginFailureEvent" /> class.
     /// </summary>
     /// <param name="username">The username.</param>
     /// <param name="error">The error.</param>
