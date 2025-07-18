@@ -24,13 +24,13 @@ internal class DynamicSchemeAuthenticationMiddleware
     {
         // this is needed to dynamically load the handler if this load balanced server
         // was not the one that initiated the call out to the provider
-        if (context.Request.Path.StartsWithSegments(_options.PathPrefix))
+        if (context.Request.Path.StartsWithSegments(_options.PathPrefix, StringComparison.InvariantCulture))
         {
             var startIndex = _options.PathPrefix.ToString().Length;
             if (context.Request.Path.Value.Length > startIndex)
             {
                 var scheme = context.Request.Path.Value.Substring(startIndex + 1);
-                var idx = scheme.IndexOf('/');
+                var idx = scheme.IndexOf('/', StringComparison.InvariantCulture);
                 if (idx > 0)
                 {
                     // this assumes the path is: /<PathPrefix>/<scheme>/<extra>

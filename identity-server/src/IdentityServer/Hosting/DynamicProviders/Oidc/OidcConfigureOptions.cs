@@ -29,7 +29,7 @@ internal class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConne
 
         context.AuthenticationOptions.ResponseType = context.IdentityProvider.ResponseType;
         context.AuthenticationOptions.ResponseMode =
-            context.IdentityProvider.ResponseType.Contains("id_token") ? "form_post" : "query";
+            context.IdentityProvider.ResponseType.Contains("id_token", StringComparison.InvariantCulture) ? "form_post" : "query";
         context.AuthenticationOptions.UsePkce = context.IdentityProvider.UsePkce;
 
         context.AuthenticationOptions.Scope.Clear();
@@ -44,7 +44,7 @@ internal class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConne
 #if NET5_0_OR_GREATER
         context.AuthenticationOptions.MapInboundClaims = false;
 #else
-            context.AuthenticationOptions.SecurityTokenValidator = new JwtSecurityTokenHandler 
+            context.AuthenticationOptions.SecurityTokenValidator = new JwtSecurityTokenHandler
             {
                 MapInboundClaims = false
             };

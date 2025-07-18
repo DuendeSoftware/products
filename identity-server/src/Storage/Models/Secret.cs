@@ -78,15 +78,15 @@ public class Secret
     /// Returns a hash code for this instance.
     /// </summary>
     /// <returns>
-    /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+    /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
     /// </returns>
     public override int GetHashCode()
     {
         unchecked
         {
             var hash = 17;
-            hash = hash * 23 + (Value?.GetHashCode() ?? 0);
-            hash = hash * 23 + (Type?.GetHashCode() ?? 0);
+            hash = hash * 23 + (Value?.GetHashCode(StringComparison.InvariantCulture) ?? 0);
+            hash = hash * 23 + (Type?.GetHashCode(StringComparison.InvariantCulture) ?? 0);
 
             return hash;
         }

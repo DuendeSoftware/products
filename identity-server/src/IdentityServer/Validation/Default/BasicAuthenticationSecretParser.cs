@@ -69,7 +69,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
         // The client and secret are first url escaped, then concatenated with a colon separator, and finally base 64 encoded
         // In the worst case, every character of the client id and secret are escaped (e.g., @ becomes %40)
         // Base 64 encoding represents 24 bits (3 bytes) with 4 encoded characters with up to 2 characters of padding
-        // Thus, the worst case max length of the header is 
+        // Thus, the worst case max length of the header is
         //   schemeLength + ((InputLengthRestrictions.ClientId + InputLengthRestrictions.ClientSecret) * 3 + 1) * 4/3 (plus 1 for colon)
         // = schemeLength + (InputLengthRestrictions.ClientId + InputLengthRestrictions.ClientSecret) * 4 + 4/3
         // We can't have 4/3 characters, so we round 4/3 up to 2 and add 2 additional bytes of padding
@@ -104,7 +104,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
             return notfound;
         }
 
-        var ix = pair.IndexOf(':');
+        var ix = pair.IndexOf(':', StringComparison.InvariantCulture);
         if (ix == -1)
         {
             _logger.LogWarning("Malformed Basic Authentication credential.");
@@ -166,6 +166,6 @@ public class BasicAuthenticationSecretParser : ISecretParser
             return string.Empty;
         }
 
-        return Uri.UnescapeDataString(value.Replace("+", "%20"));
+        return Uri.UnescapeDataString(value.Replace("+", "%20", StringComparison.InvariantCulture));
     }
 }
