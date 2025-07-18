@@ -31,7 +31,7 @@ public static class ServerUrlExtensions
     {
         if (urlOrPath.IsLocalUrl())
         {
-            if (urlOrPath.StartsWith("~/"))
+            if (urlOrPath.StartsWith("~/", StringComparison.Ordinal))
             {
                 urlOrPath = urlOrPath.Substring(1);
             }
@@ -52,7 +52,7 @@ public static class ServerUrlExtensions
             return null;
         }
 
-        if (path.StartsWith("~/"))
+        if (path.StartsWith("~/", StringComparison.Ordinal))
         {
             path = path.Substring(1);
         }
