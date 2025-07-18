@@ -29,7 +29,7 @@ public class TestLoggerProvider(WriteTestOutput writeOutput, string name) : ILog
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
-            var msg = $"[{logLevel}] {_category} : {formatter(state, exception)}";
+            var msg = $"[{logLevel}] {_category} : {formatter(state, exception)} " + exception?.ToString();
             _parent.Log(msg);
         }
     }

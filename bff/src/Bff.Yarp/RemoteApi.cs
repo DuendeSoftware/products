@@ -25,10 +25,16 @@ public sealed record RemoteApi
             return true;
         }
 
-        return LocalPath.Equals(other.LocalPath) && TargetUri.Equals(other.TargetUri) && RequiredTokenType == other.RequiredTokenType && AccessTokenRetrieverType == other.AccessTokenRetrieverType && Equals(Parameters, other.Parameters);
+        return LocalPath.Equals(other.LocalPath)
+               && TargetUri.Equals(other.TargetUri)
+               && RequiredTokenType == other.RequiredTokenType
+               && ActivityTimeout == other.ActivityTimeout
+               && AllowResponseBuffering == other.AllowResponseBuffering
+               && AccessTokenRetrieverType == other.AccessTokenRetrieverType
+               && Equals(Parameters, other.Parameters);
     }
 
-    public override int GetHashCode() => HashCode.Combine(LocalPath, TargetUri, (int)RequiredTokenType, AccessTokenRetrieverType, Parameters);
+    public override int GetHashCode() => HashCode.Combine(LocalPath, TargetUri, (int)RequiredTokenType, AccessTokenRetrieverType, Parameters, ActivityTimeout, AllowResponseBuffering);
 
     [SetsRequiredMembers]
     public RemoteApi(LocalPath localPath, Uri targetUri)
@@ -47,6 +53,20 @@ public sealed record RemoteApi
     public Type? AccessTokenRetrieverType { get; init; }
 
     public BffUserAccessTokenParameters? Parameters { get; init; }
+
+    public TimeSpan? ActivityTimeout { get; init; }
+
+    public RemoteApi WithActivityTimeout(TimeSpan timeout) => this with
+    {
+        ActivityTimeout = timeout
+    };
+
+    public bool? AllowResponseBuffering { get; init; }
+
+    public RemoteApi WithResponseBufferingAllowed(bool allow) => this with
+    {
+        AllowResponseBuffering = allow
+    };
 
     public RemoteApi WithAccessToken(RequiredTokenType type) => this with
     {

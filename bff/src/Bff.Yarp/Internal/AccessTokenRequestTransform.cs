@@ -28,68 +28,77 @@ internal class AccessTokenRequestTransform(
     /// <inheritdoc />
     public override async ValueTask ApplyAsync(RequestTransformContext context)
     {
-        var endpoint = context.HttpContext.GetEndpoint();
-        if (endpoint == null)
+        try
         {
-            throw new InvalidOperationException("endpoint not found");
+            var endpoint = context.HttpContext.GetEndpoint();
+            if (endpoint == null)
+            {
+                throw new InvalidOperationException("endpoint not found");
+            }
+
+            BffUserAccessTokenParameters? userAccessTokenParameters = null;
+
+            context.HttpContext.RequestServices.CheckLicense();
+
+            // Get the metadata
+            var metadata =
+                // Either from the endpoint directly, when using mapbff
+                endpoint.Metadata.GetMetadata<BffRemoteApiEndpointMetadata>()
+                // or from yarp
+                ?? GetBffMetadataFromYarp(endpoint)
+                ?? throw new InvalidOperationException("API endpoint is missing BFF metadata");
+
+            if (metadata.BffUserAccessTokenParameters != null)
+            {
+                userAccessTokenParameters = metadata.BffUserAccessTokenParameters;
+            }
+
+            if (context.HttpContext.RequestServices.GetRequiredService(metadata.AccessTokenRetriever)
+                is not IAccessTokenRetriever accessTokenRetriever)
+            {
+                throw new InvalidOperationException("TokenRetriever is not an IAccessTokenRetriever");
+            }
+
+            var accessTokenContext = new AccessTokenRetrievalContext()
+            {
+                HttpContext = context.HttpContext,
+                Metadata = metadata,
+                UserTokenRequestParameters = userAccessTokenParameters,
+                ApiAddress = new Uri(context.DestinationPrefix),
+                LocalPath = context.HttpContext.Request.Path
+            };
+            var result = await accessTokenRetriever.GetAccessTokenAsync(accessTokenContext);
+
+            switch (result)
+            {
+                case BearerTokenResult bearerToken:
+                    ApplyBearerToken(context, bearerToken);
+                    break;
+                case DPoPTokenResult dpopToken:
+                    await ApplyDPoPToken(context, dpopToken);
+                    break;
+                case AccessTokenRetrievalError tokenError:
+
+                    if (ShouldSignOutUser(tokenError, metadata))
+                    {
+                        // see if we need to sign out
+                        var authenticationSchemeProvider = context.HttpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+                        // get rid of local cookie first
+                        var signInScheme = await authenticationSchemeProvider.GetDefaultSignInSchemeAsync();
+                        await context.HttpContext.SignOutAsync(signInScheme?.Name);
+                    }
+
+                    ApplyError(context, tokenError, metadata.TokenType);
+                    break;
+                case NoAccessTokenResult:
+                    break;
+            }
         }
-
-        BffUserAccessTokenParameters? userAccessTokenParameters = null;
-
-        context.HttpContext.RequestServices.CheckLicense();
-
-        // Get the metadata
-        var metadata =
-            // Either from the endpoint directly, when using mapbff
-            endpoint.Metadata.GetMetadata<BffRemoteApiEndpointMetadata>()
-            // or from yarp
-            ?? GetBffMetadataFromYarp(endpoint)
-            ?? throw new InvalidOperationException("API endpoint is missing BFF metadata");
-
-        if (metadata.BffUserAccessTokenParameters != null)
+        catch (Exception ex)
         {
-            userAccessTokenParameters = metadata.BffUserAccessTokenParameters;
-        }
-
-        if (context.HttpContext.RequestServices.GetRequiredService(metadata.AccessTokenRetriever)
-            is not IAccessTokenRetriever accessTokenRetriever)
-        {
-            throw new InvalidOperationException("TokenRetriever is not an IAccessTokenRetriever");
-        }
-
-        var accessTokenContext = new AccessTokenRetrievalContext()
-        {
-            HttpContext = context.HttpContext,
-            Metadata = metadata,
-            UserTokenRequestParameters = userAccessTokenParameters,
-            ApiAddress = new Uri(context.DestinationPrefix),
-            LocalPath = context.HttpContext.Request.Path
-        };
-        var result = await accessTokenRetriever.GetAccessTokenAsync(accessTokenContext);
-
-        switch (result)
-        {
-            case BearerTokenResult bearerToken:
-                ApplyBearerToken(context, bearerToken);
-                break;
-            case DPoPTokenResult dpopToken:
-                await ApplyDPoPToken(context, dpopToken);
-                break;
-            case AccessTokenRetrievalError tokenError:
-
-                if (ShouldSignOutUser(tokenError, metadata))
-                {
-                    // see if we need to sign out
-                    var authenticationSchemeProvider = context.HttpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
-                    // get rid of local cookie first
-                    var signInScheme = await authenticationSchemeProvider.GetDefaultSignInSchemeAsync();
-                    await context.HttpContext.SignOutAsync(signInScheme?.Name);
-                }
-
-                ApplyError(context, tokenError, metadata.TokenType);
-                break;
-            case NoAccessTokenResult:
-                break;
+            // We have to catch and log here, because yarp swallows the error otherwise
+            logger.FailedToApplyYarpAccessTokenRequestTransform(ex, LogLevel.Error);
+            throw;
         }
     }
 

@@ -8,6 +8,12 @@ namespace Duende.Bff.Tests.TestInfra;
 public class TestTokenRetriever : IAccessTokenRetriever
 {
 
+    public AccessTokenRetrievalContext? UsedContext { get; set; }
+
     public Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context,
-        CancellationToken ct = default) => Task.FromResult<AccessTokenResult>(new NoAccessTokenResult());
+        CancellationToken ct = default)
+    {
+        UsedContext = context;
+        return Task.FromResult<AccessTokenResult>(new NoAccessTokenResult());
+    }
 }
