@@ -6,7 +6,9 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.DependencyInjection;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -25,12 +27,16 @@ public class DefaultIdentityServerInteractionServiceTests
     private MockUserSession _mockUserSession = new MockUserSession();
     private MockReturnUrlParser _mockReturnUrlParser = new MockReturnUrlParser();
     private MockServerUrls _mockServerUrls = new MockServerUrls();
+    private List<Client> _clients = [];
+    private InMemoryClientStore _mockClientStore;
 
     private ResourceValidationResult _resourceValidationResult;
 
     public DefaultIdentityServerInteractionServiceTests()
     {
-        _mockMockHttpContextAccessor = new MockHttpContextAccessor(_options, _mockUserSession, _mockEndSessionStore, _mockServerUrls);
+        _mockClientStore = new InMemoryClientStore(_clients);
+        _mockMockHttpContextAccessor = new MockHttpContextAccessor(_options, _mockUserSession, _mockEndSessionStore,
+            _mockServerUrls, configureServices: services => services.AddSingleton<IClientStore>(_mockClientStore));
 
         _subject = new DefaultIdentityServerInteractionService(new StubClock(),
             _mockMockHttpContextAccessor,
@@ -61,9 +67,29 @@ public class DefaultIdentityServerInteractionServiceTests
     }
 
     [Fact]
-    public async Task GetLogoutContextAsync_valid_session_no_logout_id_should_provide_iframe()
+    public async Task GetLogoutContextAsync_valid_session_with_client_without_front_channel_logout_uri_and_no_logout_id_should_not_provide_iframe()
+    {
+        _clients.Add(new Client
+        {
+            ClientId = "foo"
+        });
+        _mockUserSession.SessionId = "session";
+        _mockUserSession.User = new IdentityServerUser("123").CreatePrincipal();
+
+        var context = await _subject.GetLogoutContextAsync(null);
+
+        context.SignOutIFrameUrl.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task GetLogoutContextAsync_valid_session_with_client_with_front_channel_logout_uri_and_no_logout_id_should_provide_iframe()
     {
         _mockUserSession.Clients.Add("foo");
+        _clients.Add(new Client
+        {
+            ClientId = "foo",
+            FrontChannelLogoutUri = "https://client.com/logout",
+        });
         _mockUserSession.SessionId = "session";
         _mockUserSession.User = new IdentityServerUser("123").CreatePrincipal();
 
