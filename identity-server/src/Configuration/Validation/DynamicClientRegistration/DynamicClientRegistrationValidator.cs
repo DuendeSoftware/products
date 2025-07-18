@@ -240,7 +240,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         }
 
         if (context.Client.AllowedGrantTypes.Count == 1 &&
-            context.Client.AllowedGrantTypes.FirstOrDefault(t => t.Equals(GrantType.ClientCredentials, StringComparison.InvariantCulture)) != null)
+            context.Client.AllowedGrantTypes.FirstOrDefault(t => t.Equals(GrantType.ClientCredentials, StringComparison.Ordinal)) != null)
         {
             if (context.Request.RedirectUris?.Any() == true)
             {
