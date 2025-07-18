@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.AspNetIdentity;
 /// <summary>
 /// Implements callback for SecurityStampValidator's OnRefreshingPrincipal event.
 /// </summary>
-public class SecurityStampValidatorCallback
+public static class SecurityStampValidatorCallback
 {
     /// <summary>
     /// Maintains the claims captured at login time that are not being created by ASP.NET Identity.

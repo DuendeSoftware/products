@@ -10,7 +10,7 @@ using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Models;
 
-public class GrantTypes
+public static class GrantTypes
 {
     public static ICollection<string> Implicit =>
         new[] { GrantType.Implicit };
