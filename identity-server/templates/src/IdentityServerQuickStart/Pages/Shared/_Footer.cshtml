@@ -1,0 +1,13 @@
+@using System.Reflection;
+@{
+    string version = typeof(Duende.IdentityServer.Hosting.IdentityServerMiddleware)
+                         .Assembly
+                         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                         ?.InformationalVersion.Split('+').First()
+                     ?? "unavailable";
+}
+<footer class="bg-light py-3 pe-3 mt-auto w-100 border-top">
+    <div class="text-end">
+        <span class="badge text-bg-brand">Version @version</span>
+    </div>
+</footer>
