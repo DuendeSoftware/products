@@ -34,12 +34,12 @@ jobs:
         shell: bash
         working-directory: aspnetcore-authentication-jwtbearer
     steps:
-    - name: Validate Version Input
-      run: echo '${{ github.event.inputs.version }}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$'
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: Validate Version Input
+      run: echo '${{ github.event.inputs.version }}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$'
     - name: Checkout target branch
       if: github.event.inputs.branch != 'main'
       run: git checkout ${{ github.event.inputs.branch }}
