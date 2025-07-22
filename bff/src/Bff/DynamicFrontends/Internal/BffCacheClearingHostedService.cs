@@ -87,6 +87,9 @@ internal class BffCacheClearingHostedService(
             // This is necessary to ensure that the new frontend's client credentials are used
             var clientCredentialsClientName = OpenIdConnectTokenManagementDefaults.ToClientName(changedFrontend.OidcSchemeName);
             await hybridCache.RemoveByTagAsync(clientCredentialsClientName, cancellationToken);
+
+            // Also clear the index.html cache for the frontend
+            await hybridCache.RemoveAsync(IndexHtmlHttpClient.BuildCacheKey(changedFrontend), cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

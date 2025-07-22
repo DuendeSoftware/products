@@ -254,46 +254,12 @@ public class BffFrontendSigninTests : BffTestBase
             .ShouldThrowAsync<InvalidOperationException>();
     }
 
-    private class NoOpHybridCache : HybridCache
-    {
-        public override ValueTask<T> GetOrCreateAsync<TState, T>(string key, TState state,
-            Func<TState, CancellationToken, ValueTask<T>> factory, HybridCacheEntryOptions? options = null,
-            IEnumerable<string>? tags = null, CancellationToken cancellationToken = new CancellationToken()) => factory(state, cancellationToken);
-
-        public override ValueTask SetAsync<T>(string key, T value, HybridCacheEntryOptions? options = null,
-            IEnumerable<string>? tags = null,
-            CancellationToken cancellationToken = new CancellationToken()) => ValueTask.CompletedTask;
-
-        public override ValueTask
-            RemoveAsync(string key, CancellationToken cancellationToken = new CancellationToken()) =>
-            ValueTask.CompletedTask;
-
-        ManualResetEventSlim _waitUntilRemoveByTagAsyncCalled = new ManualResetEventSlim();
-
-        public override ValueTask RemoveByTagAsync(string tag,
-            CancellationToken cancellationToken = new CancellationToken())
-        {
-            _waitUntilRemoveByTagAsyncCalled.Set();
-            return new ValueTask();
-        }
-
-        public void WaitUntilRemoveByTagAsyncCalled(TimeSpan until)
-        {
-            _waitUntilRemoveByTagAsyncCalled.Wait(until);
-            if (!_waitUntilRemoveByTagAsyncCalled.IsSet)
-            {
-                throw new TimeoutException();
-            }
-        }
-
-    }
-
     [Fact]
     public async Task When_updating_frontend_then_subsequent_api_call_uses_updated_token()
     {
         Bff.OnConfigureServices += services =>
         {
-            services.AddSingleton<HybridCache, NoOpHybridCache>();
+            services.AddSingleton<HybridCache, TestHybridCache>();
         };
         Bff.OnConfigureBff += bff => bff.AddRemoteApis();
         IdentityServer.AddClient("differnet_client_id", Bff.Url());
@@ -307,7 +273,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         ApiCallDetails response = await Bff.BrowserClient.CallBffHostApi("/test");
 
-        var cache = (NoOpHybridCache)Bff.Resolve<HybridCache>();
+        var cache = (TestHybridCache)Bff.Resolve<HybridCache>();
 
         AddOrUpdateFrontend(bffFrontend with
         {

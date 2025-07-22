@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -9,12 +10,14 @@ namespace Duende.Bff.DynamicFrontends.Internal;
 
 internal class BffIndex
 {
+    private readonly ILogger _logger;
     private readonly Dictionary<HostString, PathTrie<BffFrontend>> _perOrigin = new();
     private readonly PathTrie<BffFrontend> _perPath = new();
     private BffFrontend? _defaultFrontend;
 
     public BffIndex(ILogger logger, FrontendCollection frontends)
     {
+        _logger = logger;
         foreach (var frontend in frontends)
         {
             AddFrontend(frontend);
@@ -30,7 +33,7 @@ internal class BffIndex
             {
                 if (_defaultFrontend != null)
                 {
-                    // Todo: logger.warn
+                    _logger.DuplicateDefaultRouteConfigured(LogLevel.Warning);
                     return;
                 }
 

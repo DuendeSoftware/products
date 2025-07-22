@@ -35,7 +35,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
         OnConfigureServices += services =>
         {
             services.AddSingleton<IForwarderHttpClientFactory>(
-                new CallbackForwarderHttpClientFactory(context => new HttpMessageInvoker(Internet)));
+                new CallbackForwarderHttpClientFactory(context => new HttpMessageInvoker(Internet, false)));
 
             var builder = services.AddBff(options =>
             {

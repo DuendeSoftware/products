@@ -131,10 +131,20 @@ public static class BffBuilderExtensions
 
         builder.Services.TryAddSingleton<IIndexHtmlClient, IndexHtmlHttpClient>();
 
-        var indexHtmlClientBuilder = builder.Services.AddHttpClient(Constants.HttpClientNames.IndexHtmlHttpClient);
+        builder.Services.ApplyBackchannelHttpHandlerFromOptions();
 
-        // Todo: factor this to an extension method
-        builder.Services.Configure<HttpClientFactoryOptions>(indexHtmlClientBuilder.Name, options =>
+        return builder;
+    }
+
+    /// <summary>
+    /// If the BffOptions.BackchannelHttpHandler is set, this will apply it to the IndexHtmlHttpClient
+    /// </summary>
+    /// <param name="services"></param>
+    internal static void ApplyBackchannelHttpHandlerFromOptions(this IServiceCollection services)
+    {
+        var indexHtmlClientBuilder = services.AddHttpClient(Constants.HttpClientNames.IndexHtmlHttpClient);
+
+        services.Configure<HttpClientFactoryOptions>(indexHtmlClientBuilder.Name, options =>
         {
             options.HttpMessageHandlerBuilderActions.Add(httpMessageHandlerBuilder =>
             {
@@ -145,8 +155,6 @@ public static class BffBuilderExtensions
                 }
             });
         });
-
-        return builder;
     }
 
     /// <summary>

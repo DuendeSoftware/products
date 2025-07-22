@@ -293,6 +293,8 @@ public class BffBuilderTests
                 ["frontends:_FrontendName_:Oidc:mapInboundClaims"] = "False",
                 ["frontends:_FrontendName_:RemoteApis:0:localPath"] = The.Path,
                 ["frontends:_FrontendName_:RemoteApis:0:targetUri"] = The.Url.ToString(),
+                ["frontends:_FrontendName_:RemoteApis:0:activityTimeout"] = TimeSpan.FromSeconds(987).ToString(),
+                ["frontends:_FrontendName_:RemoteApis:0:allowResponseBuffering"] = true.ToString(),
                 ["frontends:_FrontendName_:RemoteApis:0:requiredTokenType"] = The.RequiredTokenType.ToString(),
                 ["frontends:_FrontendName_:RemoteApis:0:tokenRetrieverTypeName"] =
                     The.TokenRetrieverType.AssemblyQualifiedName,
@@ -328,7 +330,11 @@ public class BffBuilderTests
         expected.DataExtensions.Length.ShouldBe(1);
         var proxyConfig = (ProxyBffPlugin)expected.DataExtensions[0];
         proxyConfig.RemoteApis.Length.ShouldBe(1);
-        proxyConfig.RemoteApis[0].ShouldBe(Some.RemoteApi());
+        proxyConfig.RemoteApis[0].ShouldBe(Some.RemoteApi() with
+        {
+            AllowResponseBuffering = true,
+            ActivityTimeout = TimeSpan.FromSeconds(987)
+        });
     }
 
     [Fact]

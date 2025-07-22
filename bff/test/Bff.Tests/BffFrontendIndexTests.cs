@@ -5,6 +5,7 @@ using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
+using Microsoft.Extensions.Caching.Hybrid;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
@@ -128,6 +129,7 @@ public class BffFrontendIndexTests : BffTestBase
         Bff.OnConfigureServices += services =>
         {
             services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
+            services.AddSingleton<HybridCache, TestHybridCache>();
         };
 
         await InitializeAsync();
@@ -147,7 +149,8 @@ public class BffFrontendIndexTests : BffTestBase
         {
             IndexHtmlUrl = Cdn.Url("index2.html")
         });
-
+        var cache = (TestHybridCache)Bff.Resolve<HybridCache>();
+        cache.WaitUntilRemoveAsyncCalled(TimeSpan.FromSeconds(5));
         // Note, there is a possibility for a race condition because the cache is cleared executed using
         // asynchronously in the background. But because the cache is mocked it's all synchronous.
         // Add synchronization to the test if it starts to become unstable. 
