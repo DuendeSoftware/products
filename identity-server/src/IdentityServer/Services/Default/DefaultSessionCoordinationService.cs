@@ -140,14 +140,17 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         {
             var client = await ClientStore.FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
 
-            var shouldCoordinate =
-                client.CoordinateLifetimeWithUserSession == true ||
-                (Options.Authentication.CoordinateClientLifetimesWithUserSession && client.CoordinateLifetimeWithUserSession != false);
-
-            if (shouldCoordinate)
+            if (client != null)
             {
-                // this implies they should also be contacted for backchannel logout below
-                clientsToCoordinate.Add(clientId);
+                var shouldCoordinate =
+                    client.CoordinateLifetimeWithUserSession == true ||
+                    (Options.Authentication.CoordinateClientLifetimesWithUserSession && client.CoordinateLifetimeWithUserSession != false);
+
+                if (shouldCoordinate)
+                {
+                    // this implies they should also be contacted for backchannel logout below
+                    clientsToCoordinate.Add(clientId);
+                }
             }
         }
 
