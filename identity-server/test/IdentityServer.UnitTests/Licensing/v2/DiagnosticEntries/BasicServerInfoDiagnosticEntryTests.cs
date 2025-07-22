@@ -12,11 +12,15 @@ public class BasicServerInfoDiagnosticEntryTests
     public async Task WriteAsync_ShouldWriteBasicServerInfo()
     {
         const string expectedHostName = "testing.local";
+        var expectedServerStartTime = DateTime.UtcNow.AddMinutes(-5);
+        var expectedCurrentServerTime = DateTime.UtcNow;
         var subject = new BasicServerInfoDiagnosticEntry(() => expectedHostName);
 
-        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
+        var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject, expectedServerStartTime, expectedCurrentServerTime);
 
         var basicServerInfo = result.RootElement.GetProperty("BasicServerInfo");
         basicServerInfo.GetProperty("HostName").GetString().ShouldBe(expectedHostName);
+        basicServerInfo.GetProperty("ServerStartTime").GetString().ShouldBe(expectedServerStartTime.ToString("o"));
+        basicServerInfo.GetProperty("CurrentServerTime").GetString().ShouldBe(expectedCurrentServerTime.ToString("o"));
     }
 }
