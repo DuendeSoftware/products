@@ -233,11 +233,11 @@ void GenerateReleaseWorkflow(Product product)
         .Defaults().Run("bash", product.Name).Job;
 
     job.Step()
-        .Name("Validate Version Input")
-        .Run($@"echo '{contexts.Event.Input.Version}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$'");
+        .ActionsCheckout();
 
     job.Step()
-        .ActionsCheckout();
+        .Name("Validate Version Input")
+        .Run($@"echo '{contexts.Event.Input.Version}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$'");
 
     job.StepGitCheckoutCustomBranch();
     job.StepGitConfig();
