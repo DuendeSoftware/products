@@ -14,4 +14,5 @@ public static class GrantType
     public const string ClientCredentials = "client_credentials";
     public const string ResourceOwnerPassword = "password";
     public const string DeviceFlow = "urn:ietf:params:oauth:grant-type:device_code";
+    public const string RefreshToken = "refresh_token";
 }

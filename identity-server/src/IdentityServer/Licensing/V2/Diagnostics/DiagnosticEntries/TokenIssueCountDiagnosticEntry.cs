@@ -25,6 +25,7 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
     private long _clientCredentialsGrantTypeFlows;
     private long _resourceOwnerPasswordGrantTypeFlows;
     private long _deviceFlowGrantTypeFlows;
+    private long _refreshTokenGrantTypeFlows;
     private long _otherGrantTypeFlows;
 
     private readonly MeterListener _meterListener;
@@ -177,6 +178,9 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry
                 break;
             case GrantType.DeviceFlow:
                 Interlocked.Increment(ref _deviceFlowGrantTypeFlows);
+                break;
+            case GrantType.RefreshToken:
+                Interlocked.Increment(ref _refreshTokenGrantTypeFlows);
                 break;
             default:
                 Interlocked.Increment(ref _otherGrantTypeFlows);
