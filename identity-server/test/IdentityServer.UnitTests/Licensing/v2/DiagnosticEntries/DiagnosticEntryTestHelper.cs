@@ -10,14 +10,14 @@ namespace IdentityServer.UnitTests.Licensing.V2.DiagnosticEntries;
 
 internal static class DiagnosticEntryTestHelper
 {
-    public static async Task<JsonDocument> WriteEntryToJson(IDiagnosticEntry subject)
+    public static async Task<JsonDocument> WriteEntryToJson(IDiagnosticEntry subject, DateTime? serverStartTime = null, DateTime? currentServerTime = null)
     {
         var bufferWriter = new ArrayBufferWriter<byte>();
 
         await using var writer = new Utf8JsonWriter(bufferWriter, new JsonWriterOptions { Indented = false });
         writer.WriteStartObject();
 
-        await subject.WriteAsync(writer);
+        await subject.WriteAsync(new DiagnosticContext(serverStartTime ?? DateTime.UtcNow.AddMinutes(-5), currentServerTime ?? DateTime.UtcNow), writer);
 
         writer.WriteEndObject();
         await writer.FlushAsync();

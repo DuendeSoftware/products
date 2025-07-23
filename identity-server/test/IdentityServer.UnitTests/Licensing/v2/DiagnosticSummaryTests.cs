@@ -25,7 +25,7 @@ public class DiagnosticSummaryTests
             secondDiagnosticEntry,
             thirdDiagnosticEntry
         };
-        var summary = new DiagnosticSummary(entries, new IdentityServerOptions(), new StubLoggerFactory(logger));
+        var summary = new DiagnosticSummary(DateTime.UtcNow, entries, new IdentityServerOptions(), new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
 
@@ -42,7 +42,7 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = chunkSize * 2 };
-        var summary = new DiagnosticSummary([diagnosticEntry], options, new StubLoggerFactory(logger));
+        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
 
@@ -61,7 +61,7 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = 2, OutputCharacter = '€' };
-        var summary = new DiagnosticSummary([diagnosticEntry], options, new StubLoggerFactory(logger));
+        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
 
@@ -76,7 +76,7 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = options.Diagnostics.ChunkSize * 2 };
-        var summary = new DiagnosticSummary([diagnosticEntry], options, new StubLoggerFactory(logger));
+        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
         foreach (var entry in logger.Collector.GetSnapshot())
@@ -91,7 +91,7 @@ public class DiagnosticSummaryTests
         var options = new IdentityServerOptions();
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = 100000 };
-        var summary = new DiagnosticSummary([diagnosticEntry], options, new StubLoggerFactory(logger));
+        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
 
@@ -103,7 +103,7 @@ public class DiagnosticSummaryTests
     private class TestDiagnosticEntry : IDiagnosticEntry
     {
         public bool WasCalled { get; private set; }
-        public Task WriteAsync(Utf8JsonWriter writer)
+        public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
         {
             WasCalled = true;
             return Task.CompletedTask;
@@ -115,7 +115,7 @@ public class DiagnosticSummaryTests
         public int OutputLength { get; set; }
         public char OutputCharacter { get; set; } = 'x';
 
-        public Task WriteAsync(Utf8JsonWriter writer)
+        public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
         {
             writer.WriteString("test", new string(OutputCharacter, OutputLength));
             return Task.CompletedTask;

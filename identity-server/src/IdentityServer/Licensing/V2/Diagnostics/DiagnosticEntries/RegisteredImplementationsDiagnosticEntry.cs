@@ -160,7 +160,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
         }
     };
 
-    public Task WriteAsync(Utf8JsonWriter writer)
+    public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         writer.WriteStartObject("RegisteredImplementations");
 
