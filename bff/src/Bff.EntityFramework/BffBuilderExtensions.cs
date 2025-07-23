@@ -98,7 +98,8 @@ public static class BffBuilderExtensions
         where T : IBffServicesBuilder
     {
         ArgumentNullException.ThrowIfNull(bffBuilder);
-        bffBuilder.Services.AddSingleton<IHostedService, SessionCleanupHost>();
+        bffBuilder.Services.AddSingleton<SessionCleanupHost>();
+        bffBuilder.Services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<SessionCleanupHost>());
         return bffBuilder;
     }
 
