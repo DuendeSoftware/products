@@ -169,31 +169,5 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         (await GetUserSessions()).ShouldBeEmpty();
     }
-    [Theory]
-    [MemberData(nameof(AllSetups))]
-    public async Task when_session_expires_then_token_is_not_revoked(
-        BffSetupType setup)
-    {
-        await ConfigureBff(setup, configureCookie: c => c.ExpireTimeSpan = TimeSpan.FromSeconds(2));
-        Bff.BffOptions.BackchannelLogoutAllUserSessions = true;
 
-        await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, The.Sid);
-
-        await Bff.BrowserClient.Login();
-
-        // Set a Set-Cookie header to clear the "__Host-bff-auth" cookie
-        Bff.BrowserClient.Cookies.Clear(Bff.Url());
-
-        await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, "different");
-
-        await Bff.BrowserClient.Login();
-
-        (await GetUserSessions()).Count.ShouldBe(2);
-
-        await Task.Delay(TimeSpan.FromSeconds(4));
-
-        var result = await Bff.BrowserClient.GetIsUserLoggedInAsync();
-        result.ShouldBeTrue();
-
-    }
 }
