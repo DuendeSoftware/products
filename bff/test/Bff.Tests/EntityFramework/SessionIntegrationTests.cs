@@ -106,7 +106,7 @@ public class HostBuilder_SessionTests(ITestOutputHelper output) : BffTestBase(ou
     [Fact]
     public async Task Will_cleanup_sessions_even_if_in_other_host()
     {
-        var host2 = new BffTestHost(Context, IdentityServer);
+        await using var host2 = new BffTestHost(Context, IdentityServer);
 
         host2.OnConfigureBff += bff =>
         {
@@ -152,6 +152,7 @@ public class HostBuilder_SessionTests(ITestOutputHelper output) : BffTestBase(ou
             SubjectId = The.Sub
         });
         sessions.Count.ShouldBe(0);
+
     }
 
 
