@@ -4,6 +4,7 @@
 
 ## Enhancements
 - Skip front-channel logout iframe when unnecessary by @bhazen
+- Callback option for path detection in Dynamic Providers by @bhazen
 
 ## Bug Fixes
 - Reject Pushed Authorization Requests with parameters duplicated in a JAR by @wcabus

@@ -4,6 +4,7 @@
 
 using System.Net;
 using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
@@ -37,6 +38,8 @@ public class DynamicProvidersTests
 
     public string Idp1FrontChannelLogoutUri { get; set; }
 
+    private Action<IdentityServerOptions> _configureIdentityServerOptions = options => { };
+
     public DynamicProvidersTests()
     {
         _idp1 = new GenericHost("https://idp1");
@@ -45,7 +48,7 @@ public class DynamicProvidersTests
             services.AddRouting();
             services.AddAuthorization();
 
-            services.AddIdentityServer()
+            services.AddIdentityServer(_configureIdentityServerOptions)
                 .AddInMemoryClients(new Client[] {
                     new Client
                     {
@@ -146,7 +149,7 @@ public class DynamicProvidersTests
             services.AddRouting();
             services.AddAuthorization();
 
-            services.AddIdentityServer()
+            services.AddIdentityServer(_configureIdentityServerOptions)
                 .AddInMemoryClients(new Client[] { })
                 .AddInMemoryIdentityResources(new IdentityResource[] { })
                 .AddInMemoryOidcProviders(_oidcProviders)
@@ -226,13 +229,13 @@ public class DynamicProvidersTests
                 });
             });
         };
-
-        _host.InitializeAsync().Wait();
     }
 
     [Fact]
     public async Task challenge_should_trigger_authorize_request_to_dynamic_idp()
     {
+        await _host.InitializeAsync();
+
         var response = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp1"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -242,6 +245,8 @@ public class DynamicProvidersTests
     [Fact]
     public async Task signout_should_trigger_endsession_request_to_dynamic_idp()
     {
+        await _host.InitializeAsync();
+
         var response = await _host.HttpClient.GetAsync(_host.Url("/logout?scheme=idp1"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -251,6 +256,8 @@ public class DynamicProvidersTests
     [Fact]
     public async Task challenge_should_trigger_authorize_request_to_static_idp()
     {
+        await _host.InitializeAsync();
+
         var response = await _host.HttpClient.GetAsync(_host.Url("/challenge?scheme=idp2"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
@@ -261,9 +268,13 @@ public class DynamicProvidersTests
     // the cookie processing in this workflow requires updates to .NET5 for our test browser and cookie container
     // https://github.com/dotnet/runtime/issues/26776
 
-    [Fact]
-    public async Task redirect_uri_should_process_dynamic_provider_signin_result()
+    [Theory]
+    [ClassData(typeof(DynamicProviderConfigurationData))]
+    public async Task redirect_uri_should_process_dynamic_provider_signin_result(DynamicProviderTestScenario testScenario)
     {
+        _configureIdentityServerOptions = testScenario.ConfigureOptions;
+        await _host.InitializeAsync();
+
         var response = await _host.BrowserClient.GetAsync(_host.Url("/challenge?scheme=idp1"));
         var authzUrl = response.Headers.Location.ToString();
 
@@ -284,6 +295,8 @@ public class DynamicProvidersTests
     [Fact]
     public async Task redirect_uri_should_process_static_provider_signin_result()
     {
+        await _host.InitializeAsync();
+
         var response = await _host.BrowserClient.GetAsync(_host.Url("/challenge?scheme=idp2"));
         var authzUrl = response.Headers.Location.ToString();
 
@@ -299,9 +312,13 @@ public class DynamicProvidersTests
         body.ShouldBe("2"); // sub
     }
 
-    [Fact]
-    public async Task redirect_uri_should_work_when_dynamic_provider_not_in_cache()
+    [Theory]
+    [ClassData(typeof(DynamicProviderConfigurationData))]
+    public async Task redirect_uri_should_work_when_dynamic_provider_not_in_cache(DynamicProviderTestScenario testScenario)
     {
+        _configureIdentityServerOptions = testScenario.ConfigureOptions;
+        await _host.InitializeAsync();
+
         var response = await _host.BrowserClient.GetAsync(_host.Url("/challenge?scheme=idp1"));
         var authzUrl = response.Headers.Location.ToString();
 
@@ -321,9 +338,13 @@ public class DynamicProvidersTests
         body.ShouldBe("1"); // sub
     }
 
-    [Fact]
-    public async Task front_channel_signout_from_dynamic_idp_should_sign_user_out()
+    [Theory]
+    [ClassData(typeof(DynamicProviderConfigurationData))]
+    public async Task front_channel_signout_from_dynamic_idp_should_sign_user_out(DynamicProviderTestScenario testScenario)
     {
+        _configureIdentityServerOptions = testScenario.ConfigureOptions;
+        await _host.InitializeAsync();
+
         var response = await _host.BrowserClient.GetAsync(_host.Url("/challenge?scheme=idp1"));
         var authzUrl = response.Headers.Location.ToString();
 
@@ -359,16 +380,50 @@ public class DynamicProvidersTests
     }
 #endif
 
-    [Fact]
-    public async Task missing_segments_in_redirect_uri_should_return_not_found()
+    [Theory]
+    [ClassData(typeof(DynamicProviderConfigurationData))]
+    public async Task missing_segments_in_redirect_uri_should_return_not_found(DynamicProviderTestScenario testScenario)
     {
+        _configureIdentityServerOptions = testScenario.ConfigureOptions;
+        await _host.InitializeAsync();
+
         var response = await _host.HttpClient.GetAsync(_host.Url("/federation/idp1"));
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
-    [Fact]
-    public async Task federation_endpoint_with_no_scheme_should_return_not_found()
+
+    [Theory]
+    [ClassData(typeof(DynamicProviderConfigurationData))]
+    public async Task federation_endpoint_with_no_scheme_should_return_not_found(DynamicProviderTestScenario testScenario)
     {
+        _configureIdentityServerOptions = testScenario.ConfigureOptions;
+        await _host.InitializeAsync();
+
         var response = await _host.HttpClient.GetAsync(_host.Url("/federation"));
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    // Note: this extra little level of indirection is needed to ensure that the test scenarios show
+    // test names that are meaningful and not the result of the ToString() method on the Action delegate.
+    public record DynamicProviderTestScenario(string Name, Action<IdentityServerOptions> ConfigureOptions)
+    {
+        public override string ToString() => Name;
+    }
+
+    private class DynamicProviderConfigurationData : TheoryData<DynamicProviderTestScenario>
+    {
+        public DynamicProviderConfigurationData()
+        {
+            Add(new("Default PathPrefix", _ => { }));
+            Add(new("PathPrefix Callback",
+                options => options.DynamicProviders.PathMatchingCallback = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/federation/idp1", StringComparison.InvariantCulture))
+                    {
+                        return Task.FromResult("idp1");
+                    }
+
+                    return Task.FromResult((string)null);
+                }));
+        }
     }
 }
