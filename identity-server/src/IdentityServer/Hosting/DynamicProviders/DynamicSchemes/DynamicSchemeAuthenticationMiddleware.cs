@@ -25,7 +25,7 @@ internal class DynamicSchemeAuthenticationMiddleware
         string scheme = null;
         if (_options.PathMatchingCallback is not null)
         {
-            scheme = _options.PathMatchingCallback(context);
+            scheme = await _options.PathMatchingCallback(context);
         }
         // this is needed to dynamically load the handler if this load balanced server
         // was not the one that initiated the call out to the provider

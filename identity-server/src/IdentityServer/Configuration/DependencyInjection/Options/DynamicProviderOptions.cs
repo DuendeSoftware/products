@@ -26,7 +26,7 @@ public class DynamicProviderOptions
     /// If set, this callback will be used over <see cref="PathPrefix"/> to determine if the request is for a dynamic provider.
     /// If the request is a match, the callback should return the name of the scheme which matched.
     /// </summary>
-    public Func<HttpContext, string?>? PathMatchingCallback { get; set; }
+    public Func<HttpContext, Task<string?>>? PathMatchingCallback { get; set; }
 
     /// <summary>
     /// Scheme used for signin. Defaults to the constant IdentityServerConstants.ExternalCookieAuthenticationScheme.

@@ -414,7 +414,16 @@ public class DynamicProvidersTests
         public DynamicProviderConfigurationData()
         {
             Add(new("Default PathPrefix", _ => { }));
-            Add(new("PathPrefix Callback", options => options.DynamicProviders.PathMatchingCallback = ctx => ctx.Request.Path.StartsWithSegments("/federation/idp1", StringComparison.InvariantCulture) ? "idp1" : null));
+            Add(new("PathPrefix Callback",
+                options => options.DynamicProviders.PathMatchingCallback = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/federation/idp1", StringComparison.InvariantCulture))
+                    {
+                        return Task.FromResult("idp1");
+                    }
+
+                    return Task.FromResult((string)null);
+                }));
         }
     }
 }
