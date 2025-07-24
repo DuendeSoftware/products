@@ -169,5 +169,4 @@ public class BackchannelLogoutEndpointTests : BffTestBase
 
         (await GetUserSessions()).ShouldBeEmpty();
     }
-
 }
