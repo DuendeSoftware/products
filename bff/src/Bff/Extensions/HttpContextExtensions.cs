@@ -42,26 +42,41 @@ internal static class HttpContextExtensions
         };
 
         // Map the result onto the appropriate type of access token result (Bearer vs DPoP)
-        return token switch
+        if (token is null or { AccessToken: null })
         {
-            null or { AccessToken: null } =>
-                optional ?
-                    new NoAccessTokenResult() :
-                    new NoAccessTokenReturnedError("Missing access token"),
-            { AccessTokenType: OidcConstants.TokenResponse.BearerTokenType } =>
-                new BearerTokenResult(token.AccessToken),
-            { AccessTokenType: OidcConstants.TokenResponse.DPoPTokenType, DPoPJsonWebKey: not null } =>
-                 new DPoPTokenResult(token.AccessToken, token.DPoPJsonWebKey),
-            { AccessTokenType: OidcConstants.TokenResponse.DPoPTokenType, DPoPJsonWebKey: null } =>
-                 new MissingDPopTokenError("Missing DPoP Json Web Key for DPoP token"),
-            { AccessTokenType: string accessTokenType } =>
-                new UnexpectedAccessTokenError($"Unexpected access token type: {accessTokenType} - should be one of 'DPoP' or 'Bearer'"),
-            { AccessTokenType: null } =>
-                // Fall back to bearer tokens when the access token type is absent.
-                // In some edge cases, we've seen bearer tokens not have their type specified.
-                // But that wouldn't be the case if you had a DPoP token.
-                new BearerTokenResult(token.AccessToken)
-        };
+            return optional ? new NoAccessTokenResult() : new NoAccessTokenReturnedError("Missing access token");
+        }
+
+        if (token.AccessTokenType != null
+            && token.AccessTokenType.Equals(OidcConstants.TokenResponse.BearerTokenType, StringComparison.OrdinalIgnoreCase))
+        {
+            return new BearerTokenResult(token.AccessToken);
+        }
+
+        if (token.AccessTokenType != null
+            && token.AccessTokenType.Equals(OidcConstants.TokenResponse.DPoPTokenType, StringComparison.OrdinalIgnoreCase)
+            && token.DPoPJsonWebKey != null)
+        {
+            return new DPoPTokenResult(token.AccessToken, token.DPoPJsonWebKey);
+        }
+
+        if (token.AccessTokenType != null
+            && token.AccessTokenType.Equals(OidcConstants.TokenResponse.DPoPTokenType, StringComparison.OrdinalIgnoreCase)
+            && token.DPoPJsonWebKey == null)
+        {
+            return new MissingDPopTokenError("Missing DPoP Json Web Key for DPoP token");
+        }
+
+        if (token is { AccessTokenType: null })
+        {
+            // Fall back to bearer tokens when the access token type is absent.
+            // In some edge cases, we've seen bearer tokens not have their type specified.
+            // But that wouldn't be the case if you had a DPoP token.
+            return new BearerTokenResult(token.AccessToken);
+        }
+
+        return new UnexpectedAccessTokenError(
+            $"Unexpected access token type: {token.AccessTokenType} - should be one of 'DPoP' or 'Bearer'");
 
         static async Task<ClientCredentialsToken> GetUserOrClientAccessTokenAsync(HttpContext context, UserTokenRequestParameters? userAccessTokenParameters)
         {
