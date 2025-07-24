@@ -426,20 +426,6 @@ internal static partial class LogMessages
     public static partial void FailedToAddFrontendToQueue(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
 
 
-    [LoggerMessage(
-        message: "You do not have a valid license key for the Duende software. " +
-                 "This is allowed for development and testing scenarios. " +
-                 "If you are running in production you are required to have a licensed version. " +
-                 "Please start a conversation with us: https://duendesoftware.com/contact")]
-    public static partial void NoValidLicense(this ILogger logger, LogLevel logLevel);
-
-    [LoggerMessage(
-        message: "Error validating the license key" +
-                 "If you are running in production you are required to have a licensed version. " +
-                 "Please start a conversation with us: https://duendesoftware.com/contact")]
-    public static partial void ErrorValidatingLicenseKey(this ILogger logger, LogLevel logLevel, Exception ex);
-
-
 
     public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 

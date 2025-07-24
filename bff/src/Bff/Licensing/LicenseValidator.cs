@@ -1,213 +1,62 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-// This class has not been designed to work with 'nullable'
-#nullable disable
-
-using System.Security.Claims;
-using System.Security.Cryptography;
-using Duende.Bff.Otel;
+using Duende.Private.Licensing;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
-
-// Logging APIs used by Duende license validation
-#pragma warning disable CA1848
-#pragma warning disable CA2254
 
 namespace Duende.Bff.Licensing;
 
-// shared APIs needed for Duende license validation
-internal partial class LicenseValidator
+internal class LicenseValidator(ILogger<LicenseValidator> logger, LicenseAccessor<BffLicense> license, TimeProvider timeProvider)
 {
-    private static readonly string[] LicenseFileNames = new[]
+    private bool? _licenseCheckResult;
+    public bool IsValid()
     {
-        "Duende_License.key",
-        "Duende_IdentityServer_License.key",
-    };
-
-    private static ILogger Logger = null!;
-    private static Action<string, object[]> ErrorLog = null!;
-    private static Action<string, object[]> InformationLog = null!;
-    private static Action<string, object[]> WarningLog = null!;
-    private static Action<string, object[]> DebugLog = null!;
-
-    private static License License;
-
-    private static void Initalize(ILoggerFactory loggerFactory, string productName, string key, bool isDevelopment = false)
-    {
-        Logger = loggerFactory.CreateLogger($"Duende.{productName}.License");
-
-        key ??= LoadFromFile();
-        License = ValidateKey(key);
-
-        if (License?.RedistributionFeature == true && !isDevelopment)
+        if (_licenseCheckResult != null)
         {
-            // for redistribution/prod scenarios, we want most of these to be at trace level
-            ErrorLog = WarningLog = InformationLog = DebugLog = LogToTrace;
+            return _licenseCheckResult.Value;
         }
-        else
-        {
-            ErrorLog = LogToError;
-            WarningLog = LogToWarning;
-            InformationLog = LogToInformation;
-            DebugLog = LogToDebug;
-        }
+        _licenseCheckResult = CheckLicense();
+        return _licenseCheckResult.Value;
+
     }
 
-    private static string LoadFromFile()
+    private bool CheckLicense()
     {
-        foreach (var name in LicenseFileNames)
+
+        if (!license.Current.IsConfigured)
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), name);
-            if (File.Exists(path))
-            {
-                return File.ReadAllText(path).Trim();
-            }
+            logger.NoValidLicense(LogLevel.Error);
+            return false;
         }
 
-        return null;
+        if (license.Current.Expiration <= timeProvider.GetUtcNow())
+        {
+            logger.LicenseHasExpired(LogLevel.Error, license.Current.Expiration, license.Current.ContactInfo, license.Current.CompanyName);
+            return false;
+        }
+
+        if (!license.Current.BffFeature)
+        {
+            logger.NotLicensedForBff(LogLevel.Error, license.Current.ContactInfo, license.Current.CompanyName);
+            return false;
+        }
+
+        logger.LicenseDetails(
+            LogLevel.Debug,
+            license.Current.Edition.ToString(),
+            license.Current.Expiration,
+            license.Current.ContactInfo,
+            license.Current.CompanyName,
+            license.Current.FrontendLimit switch
+            {
+                null => "not licensed for multi-frontend feature",
+                0 => "not licensed for multi-frontend feature",
+                -1 => "unlimited",
+                > 0 => license.Current.FrontendLimit.ToString(),
+                // Should't happen, but just in case
+                _ => "not licensed for multi-frontend feature"
+            });
+
+        return true;
     }
-
-    public static void ValidateLicense()
-    {
-        if (Logger == null)
-        {
-            throw new InvalidOperationException("LicenseValidator.Initalize has not yet been called.");
-        }
-
-        var errors = new List<string>();
-
-        if (License == null)
-        {
-            // we're not using our _warningLog because we always want this emitted regardless of the context
-            Logger.NoValidLicense(LogLevel.Warning);
-            LicenseValidator.WarnForProductFeaturesWhenMissingLicense();
-            return;
-        }
-
-        DebugLog.Invoke("The Duende license key details: {@license}", new[] { License });
-
-        if (License.Expiration.HasValue)
-        {
-            var diff = DateTime.UtcNow.Date.Subtract(License.Expiration.Value.Date).TotalDays;
-            if (diff > 0 && !License.RedistributionFeature)
-            {
-                errors.Add($"Your license for the Duende software expired {diff} days ago.");
-            }
-        }
-
-        LicenseValidator.ValidateProductFeaturesForLicense(errors);
-
-        if (errors.Count > 0)
-        {
-            foreach (var err in errors)
-            {
-                ErrorLog.Invoke(err, Array.Empty<object>());
-            }
-
-            ErrorLog.Invoke(
-                "Please contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software.",
-                new[] { License.ContactInfo, License.CompanyName });
-        }
-        else
-        {
-            if (License.Expiration.HasValue)
-            {
-                InformationLog.Invoke("You have a valid license key for the Duende software {edition} edition for use at {licenseCompany}. The license expires on {licenseExpiration}.",
-                    new object[] { License.Edition, License.CompanyName, License.Expiration.Value.ToLongDateString() });
-            }
-            else
-            {
-                InformationLog.Invoke(
-                    "You have a valid license key for the Duende software {edition} edition for use at {licenseCompany}.",
-                    new object[] { License.Edition, License.CompanyName });
-            }
-        }
-    }
-
-    internal static License ValidateKey(string licenseKey)
-    {
-        if (!string.IsNullOrWhiteSpace(licenseKey))
-        {
-            var handler = new JsonWebTokenHandler();
-
-            var rsa = new RSAParameters
-            {
-                Exponent = Convert.FromBase64String("AQAB"),
-                Modulus = Convert.FromBase64String(
-                    "tAHAfvtmGBng322TqUXF/Aar7726jFELj73lywuCvpGsh3JTpImuoSYsJxy5GZCRF7ppIIbsJBmWwSiesYfxWxBsfnpOmAHU3OTMDt383mf0USdqq/F0yFxBL9IQuDdvhlPfFcTrWEL0U2JsAzUjt9AfsPHNQbiEkOXlIwtNkqMP2naynW8y4WbaGG1n2NohyN6nfNb42KoNSR83nlbBJSwcc3heE3muTt3ZvbpguanyfFXeoP6yyqatnymWp/C0aQBEI5kDahOU641aDiSagG7zX1WaF9+hwfWCbkMDKYxeSWUkQOUOdfUQ89CQS5wrLpcU0D0xf7/SrRdY2TRHvQ=="),
-            };
-
-            var key = new RsaSecurityKey(rsa)
-            {
-                KeyId = "IdentityServerLicensekey/7ceadbb78130469e8806891025414f16"
-            };
-
-            var parms = new TokenValidationParameters
-            {
-                ValidIssuer = "https://duendesoftware.com",
-                ValidAudience = "IdentityServer",
-                IssuerSigningKey = key,
-                // CA5404: Do not set ValidateLifetime to false in production code
-                // this is OK for the license key validation, as we do not want to enforce expiration on the license key itself
-#pragma warning disable CA5404
-                ValidateLifetime = false
-#pragma warning restore CA5404
-            };
-            var validateResult = handler.ValidateTokenAsync(licenseKey, parms).Result;
-            if (validateResult.IsValid)
-            {
-                return new License(new ClaimsPrincipal(validateResult.ClaimsIdentity));
-            }
-            else
-            {
-                Logger.ErrorValidatingLicenseKey(LogLevel.Critical, validateResult.Exception);
-            }
-        }
-
-        return null;
-    }
-
-
-    private static void LogToTrace(string message, params object[] args)
-    {
-        if (Logger.IsEnabled(LogLevel.Trace))
-        {
-            Logger.LogTrace(message, args);
-        }
-    }
-
-    private static void LogToDebug(string message, params object[] args)
-    {
-        if (Logger.IsEnabled(LogLevel.Debug))
-        {
-            Logger.LogDebug(message, args);
-        }
-    }
-
-    private static void LogToInformation(string message, params object[] args)
-    {
-        if (Logger.IsEnabled(LogLevel.Information))
-        {
-            Logger.LogInformation(message, args);
-        }
-    }
-
-    private static void LogToWarning(string message, params object[] args)
-    {
-        if (Logger.IsEnabled(LogLevel.Warning))
-        {
-            Logger.LogWarning(message, args);
-        }
-    }
-
-    private static void LogToError(string message, params object[] args)
-    {
-        if (Logger.IsEnabled(LogLevel.Error))
-        {
-            Logger.LogError(message, args);
-        }
-    }
-
 }

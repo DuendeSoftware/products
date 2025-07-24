@@ -12,11 +12,13 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="Duende.Private.Licensing" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="Duende.Bff.Tests" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+
   </ItemGroup>
 
 </Project>

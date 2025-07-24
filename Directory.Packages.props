@@ -14,6 +14,7 @@
     <PackageVersion Include="Duende.IdentityModel" Version="7.1.0" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.1.0" />
+    <PackageVersion Include="Duende.Private.Licensing" Version="1.0.0" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
     <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.16" />

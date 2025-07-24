@@ -18,6 +18,8 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     private BffHttpClient _browserClient = null!;
     public BffOptions BffOptions => Resolve<IOptions<BffOptions>>().Value;
 
+    public string? LicenseKey = null;
+
     /// <summary>
     /// Should a default response for "/" be mapped?
     /// When logging in, you'll return to '/'. This should return just an 'ok' response. 
@@ -43,6 +45,8 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
                 {
                     options.BackchannelHttpHandler = Internet;
                 }
+
+                options.LicenseKey = LicenseKey;
             });
 
             OnConfigureBff(builder);
