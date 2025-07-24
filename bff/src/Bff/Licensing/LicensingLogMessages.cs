@@ -13,6 +13,7 @@ internal static partial class LicensingLogMessages
                      - Edition: {Edition}
                      - Expiration: {ExpirationDate}
                      - LicenseContact: {LicenseContact}
+                     - LicenseCompany: {licenseCompany}        
                      - Number of frontends licensed: {NumberOfFrontends}
                     """)]
     public static partial void LicenseDetails(this ILogger logger, LogLevel level, string? edition, DateTimeOffset? expirationDate, string licenseContact, string licenseCompany, string? numberOfFrontends);
