@@ -11,8 +11,10 @@ internal class Decorator<TService>
     public Decorator(TService instance) => Instance = instance;
 }
 
+#pragma warning disable CA1812 // This class is not instantiated directly, but rather used by the DI container
 internal class Decorator<TService, TImpl> : Decorator<TService>
     where TImpl : class, TService
+#pragma warning restore CA1812
 {
     public Decorator(TImpl instance) : base(instance)
     {
