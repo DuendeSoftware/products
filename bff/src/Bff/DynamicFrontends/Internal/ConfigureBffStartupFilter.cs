@@ -19,27 +19,15 @@ internal class ConfigureBffStartupFilter : IStartupFilter
 
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {
-                app.UseBffFrontendSelection();
-                app.UseBffPathMapping();
-                app.UseBffOpenIdCallbacks();
+                app.UseForwardedHeaders();
+                app.UseBffPreProcessing();
             }
 
             next(app);
 
             if (bffOptions.AutomaticallyRegisterBffMiddleware)
             {
-                foreach (var loader in bffOptions.MiddlewareLoaders)
-                {
-                    loader(app);
-                }
-                app.UseEndpoints(endpoints =>
-                {
-                    if (!endpoints.AlreadyMappedManagementEndpoint(bffOptions.LoginPath, "Login"))
-                    {
-                        endpoints.MapBffManagementEndpoints();
-                    }
-                });
-                app.UseBffIndexPages();
+                app.UseBffPostProcessing();
 
             }
         };
