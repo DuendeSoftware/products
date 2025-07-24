@@ -4,11 +4,13 @@
 using System.Security.Claims;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.Licensing;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Yarp;
 using Duende.Bff.Yarp.Internal;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Logging.Abstractions;
 using Yarp.ReverseProxy.Configuration;
 
 namespace Duende.Bff.Tests.TestInfra;
@@ -16,6 +18,9 @@ namespace Duende.Bff.Tests.TestInfra;
 public class TestDataBuilder(TestData the)
 {
     public readonly TestData The = the;
+
+    internal LicenseValidator LicenseValidator =>
+        new LicenseValidator(new NullLogger<LicenseValidator>(), new ClaimsPrincipal(), The.Clock);
 
     public BffFrontend BffFrontend() =>
         new()

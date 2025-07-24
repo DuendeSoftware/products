@@ -48,7 +48,8 @@ public static class BffBuilderExtensions
     {
         builder.Services.AddSingleton<GetLicenseKey>(sp => () => sp.GetRequiredService<IOptions<BffOptions>>().Value.LicenseKey);
         builder.Services.AddSingleton<LicenseAccessor<BffLicense>>();
-        builder.Services.AddSingleton<LicenseValidator>();
+        builder.Services.AddSingleton<BffLicense>(sp => sp.GetRequiredService<LicenseAccessor<BffLicense>>().Current);
+        builder.Services.TryAddSingleton<LicenseValidator>();
         builder.Services.AddDistributedMemoryCache();
         // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
         // AddOpenIdConnectAccessTokenManagement because both configure the same options

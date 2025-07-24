@@ -31,6 +31,7 @@ internal static partial class LicensingLogMessages
         message: """
                    You do not have a valid license key for the Duende BFF security framework.
                    This is allowed for development and testing scenarios.
+                   When unlicensed, the bFF will limit the number of active sessions to 5.
                    If you are running in production you are required to have a licensed version.
                    Please start a conversation with us: https://duendesoftware.com/contact
                    """)]
@@ -49,4 +50,33 @@ internal static partial class LicensingLogMessages
                  "If you are running in production you are required to have a licensed version. " +
                  "Please start a conversation with us: https://duendesoftware.com/contact")]
     public static partial void ErrorValidatingLicenseKey(this ILogger logger, LogLevel logLevel, Exception ex);
+
+    [LoggerMessage(
+        message: """
+                 Frontend #{FrontendsUsed} with name {FrontendName} was added. The license allows for unlimited frontends.
+                 """)]
+    public static partial void UnlimitedFrontends(this ILogger logger, LogLevel logLevel, string frontendName,
+        int frontendsUsed);
+    [LoggerMessage(
+        message: """
+                 Frontend {FrontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.
+                 """)]
+    public static partial void FrontendAdded(this ILogger logger, LogLevel logLevel, string frontendName,
+        int frontendsUsed, int frontendLimit);
+
+    [LoggerMessage(
+        message: """
+                 Frontend {FrontendName} was added. This exceeds the maximum number of frontends allowed by your license.
+                 Currently using {frontendsUsed} of {frontendLimit} in the BFF License.
+                 """)]
+    public static partial void FrontendLimitExceeded(this ILogger logger, LogLevel logLevel, string frontendName,
+        int frontendsUsed, int frontendLimit);
+
+    [LoggerMessage(
+        message: """
+                 Frontend {FrontendName} was added. However, your current license does not support multiple frontends.
+                 If you are running in production you are required to have a license for each frontend.
+                 Please start a conversation with us: https://duendesoftware.com/contact
+                 """)]
+    public static partial void NotLicensedForMultiFrontend(this ILogger logger, LogLevel logLevel, string frontendName);
 }

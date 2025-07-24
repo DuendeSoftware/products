@@ -12,17 +12,19 @@ namespace Duende.Bff.Tests.MultiFrontend;
 
 public class FrontendSelectorTests
 {
-    private readonly FrontendCollection _frontendCollection =
-        new(plugins: [],
-            bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration()));
+    private readonly FrontendCollection _frontendCollection;
 
     private readonly FrontendSelector _selector;
     private static readonly TestData The = new();
-
+    internal TestDataBuilder Some => new(The);
     private readonly StringBuilder _logMessages = new();
 
     public FrontendSelectorTests()
     {
+        _frontendCollection = new(plugins: [],
+            bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration()),
+            licenseValidator: Some.LicenseValidator
+        );
         var testLoggerProvider = new TestLoggerProvider((s) =>
             _logMessages.AppendLine(s), "", forceToWriteOutput: true);
         var loggerFactory = new LoggerFactory([testLoggerProvider]);
