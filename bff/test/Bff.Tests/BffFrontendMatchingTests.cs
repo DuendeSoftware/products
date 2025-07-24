@@ -3,6 +3,7 @@
 
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
+using Microsoft.AspNetCore.HttpOverrides;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
@@ -80,6 +81,33 @@ public class BffFrontendMatchingTests : BffTestBase
 
         var client = Internet.BuildHttpClient(The.DomainName);
 
+        var frontend = await GetSelectedFrontend(client);
+        frontend.ShouldBe(The.FrontendName);
+    }
+
+    [Fact]
+    public async Task Will_also_respect_xforwarded_host()
+    {
+        Bff.OnConfigureServices += services =>
+        {
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedHost;
+            });
+        };
+        await InitializeAsync();
+        AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            SelectionCriteria = new FrontendSelectionCriteria()
+            {
+                MatchingOrigin = Origin.Parse(The.DomainName)
+            }
+        });
+
+        //Internet.AddCustomHandler(map: The.DomainName, to: Bff);
+
+        var client = Internet.BuildHttpClient(Bff.Url());
+        client.DefaultRequestHeaders.Add("x-forwarded-host", The.DomainName.Host);
         var frontend = await GetSelectedFrontend(client);
         frontend.ShouldBe(The.FrontendName);
     }

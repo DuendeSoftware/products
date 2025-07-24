@@ -79,8 +79,16 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     protected override void ConfigureApp(IApplicationBuilder app)
     {
         app.UseRouting();
-
+        app.Use(async (c, n) =>
+        {
+            await n();
+        });
         app.UseAuthentication();
+        app.Use(async (c, n) =>
+        {
+            await n();
+            Console.WriteLine();
+        });
         app.UseAuthorization();
 
         app.UseBff();
