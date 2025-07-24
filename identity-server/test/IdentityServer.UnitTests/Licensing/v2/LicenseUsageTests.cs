@@ -99,8 +99,8 @@ public class LicenseUsageTests
         var initialLogSnapshot = _logger.Collector.GetSnapshot();
         initialLogSnapshot.ShouldContain(r =>
             r.Level == LogLevel.Error &&
-            r.Message.StartsWith(
-                "You do not have a license, and you have processed requests for 6 clients. This number requires a tier of license higher than Starter Edition. The clients used were:"));
+            r.Message ==
+                "You are using IdentityServer in trial mode and have processed requests for 6 clients. In production, this will require a license with sufficient client capacity. You can either purchase a license tier that includes this many clients or add additional client capacity to a Starter Edition license. The clients used were: client3, client2, client1, client0, client5, client4. See https://duende.link/l/trial for more information.");
     }
 
     [Fact]
@@ -116,8 +116,7 @@ public class LicenseUsageTests
         var logSnapshot = _logger.Collector.GetSnapshot();
         logSnapshot.ShouldContain(r =>
             r.Level == LogLevel.Error &&
-            r.Message.StartsWith(
-                "Your license for Duende IdentityServer only permits 5 number of clients. You have processed requests for 6 clients and are still within the threshold of 5 for exceeding permitted clients. In a future version of client limit will be enforced. The clients used were:"));
+            r.Message == "Your IdentityServer license includes 5 clients but you have processed requests for 6 clients. Please contact joe@duendesoftware.com from _test or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The clients used were: client3, client2, client1, client0, client5, client4. See https://duende.link/l/threshold for more information.");
     }
 
     [Fact]
@@ -148,7 +147,7 @@ public class LicenseUsageTests
         var logSnapshot = _logger.Collector.GetSnapshot();
         logSnapshot.ShouldContain(r =>
             r.Level == LogLevel.Error &&
-            r.Message.StartsWith("Your license for Duende IdentityServer only permits 5 number of clients. You have processed requests for 11 clients and are beyond the threshold of 5 for exceeding permitted clients. In a future version of client limit will be enforced. The clients used were:"));
+            r.Message.StartsWith("Your IdentityServer license includes 5 clients but you have processed requests for 11 clients"));
     }
 
     [Fact]
@@ -213,10 +212,8 @@ public class LicenseUsageTests
         _licenseUsageTracker.IssuerUsed("issuer2");
 
         var initialLogSnapshot = _logger.Collector.GetSnapshot();
-        initialLogSnapshot.ShouldContain(r =>
-            r.Level == LogLevel.Error &&
-            r.Message.StartsWith(
-                $"You do not have a license, and you have processed requests for 2 issuers. If you are deliberately hosting multiple URLs then this number requires a license per issuer, or the Enterprise Edition tier of license. If not then this might be due to your server being accessed via different URLs or a direct IP and/or you have reverse proxy or a gateway involved, and this suggests a network infrastructure configuration problem. The issuers used were: "));
+        initialLogSnapshot.ShouldContain(r => r.Level == LogLevel.Error && r.Message ==
+            "You are using IdentityServer in trial mode and have processed requests for 2 issuers. This indicates that requests for each issuer are being sent to this instance of IdentityServer, which may be due to a network infrastructure configuration issue. If you intend to use multiple issuers, either a license per issuer or an Enterprise Edition license is required. In a future version, this limit will be enforced after a threshold is exceeded. The issuers used were: issuer1, issuer2. See https://duende.link/l/trial for more information.");
     }
 
     [Fact]
@@ -228,12 +225,8 @@ public class LicenseUsageTests
         _licenseUsageTracker.IssuerUsed("issuer2");
 
         var logSnapshot = _logger.Collector.GetSnapshot();
-        logSnapshot.ShouldContain(r =>
-            r.Level == LogLevel.Error &&
-            r.Message.StartsWith(
-                "Your license for Duende IdentityServer only permits 1 number of issuers. You have processed requests for 2 issuers and are still within the threshold of 1. The issuers used were: ") &&
-            r.Message.EndsWith(
-                "This might be due to your server being accessed via different URLs or a direct IP and/or you have reverse proxy or a gateway involved. This suggests a network infrastructure configuration problem, or you are deliberately hosting multiple URLs and require an upgraded license. In a future version of issuer limit will be enforced."));
+        logSnapshot.ShouldContain(r => r.Level == LogLevel.Error && r.Message ==
+            "Your license for IdentityServer includes 1 issuer(s) but you have processed requests for 2 issuers. This indicates that requests for each issuer are being sent to this instance of IdentityServer, which may be due to a network infrastructure configuration issue. If you intend to use multiple issuers, please contact joe@duendesoftware.com from _test or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The issuers used were issuer1, issuer2. See https://duende.link/l/threshold for more information.");
     }
 
     [Fact]
@@ -258,12 +251,8 @@ public class LicenseUsageTests
         _licenseUsageTracker.IssuerUsed("issuer3");
 
         var logSnapshot = _logger.Collector.GetSnapshot();
-        logSnapshot.ShouldContain(r =>
-            r.Level == LogLevel.Error &&
-            r.Message.StartsWith(
-                "Your license for Duende IdentityServer only permits 1 number of issuers. You have processed requests for 3 issuers and are over the threshold of 1. The issuers used were: ") &&
-            r.Message.EndsWith(
-                "This might be due to your server being accessed via different URLs or a direct IP and/or you have reverse proxy or a gateway involved. This suggests a network infrastructure configuration problem, or you are deliberately hosting multiple URLs and require an upgraded license. In a future version of issuer limit will be enforced."));
+        logSnapshot.ShouldContain(r => r.Level == LogLevel.Error && r.Message ==
+            "Your license for IdentityServer includes 1 issuer(s) but you have processed requests for 3 issuers. This indicates that requests for each issuer are being sent to this instance of IdentityServer, which may be due to a network infrastructure configuration issue. If you intend to use multiple issuers, please contact joe@duendesoftware.com from _test or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The issuers used were issuer3, issuer1, issuer2. See https://duende.link/l/threshold for more information.");
     }
 
     [Fact]

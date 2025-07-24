@@ -44,7 +44,7 @@ public class LicenseExpirationCheckerTests
         // REMINDER - If this test needs to change because the log message was updated, so should no_warning_is_logged_for_unexpired_license
         _logger.Collector.GetSnapshot().ShouldContain(r =>
                 r.Message ==
-                "The IdentityServer license is expired. In a future version of IdentityServer, license expiration will be enforced after a grace period.",
+                "Your IdentityServer license is expired. Please contact joe@duendesoftware.com from _test or start a conversation with us at https://duende.link/l/contact to renew your license as soon as possible. In a future version, license expiration will be enforced after a grace period. See https://duende.link/l/expired for more information.",
             1);
     }
 
@@ -58,7 +58,7 @@ public class LicenseExpirationCheckerTests
         _expirationCheck.CheckExpiration();
 
         _logger.Collector.GetSnapshot().ShouldNotContain(r =>
-                r.Message == "The IdentityServer license is expired. In a future version of IdentityServer, license expiration will be enforced after a grace period.");
+                r.Message == "Your IdentityServer license is expired. Please contact joe@duendesoftware.com from _test or start a conversation with us at https://duende.link/l/contact to renew your license as soon as possible. In a future version, license expiration will be enforced after a grace period. See https://duende.link/l/expired for more information.");
     }
 
     [Theory]

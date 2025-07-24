@@ -105,13 +105,14 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
 
         EnsureAdded(ref _clientIds, _clientIdLock, clientId);
 
+        // Only log for redistribution case because license v2 logs all other cases
         if (license != null && license.RedistributionFeature)
         {
             if (_clientIds.Count > license.ClientLimit)
             {
                 ErrorLog.Invoke(
-                    "Your license for Duende IdentityServer only permits {clientLimit} number of clients. You have processed requests for {clientCount}. The clients used were: {clients}.",
-                    [license.ClientLimit, _clientIds.Count, _clientIds.ToArray()]);
+                    "Your license for IdentityServer includes {clientLimit} clients but you have processed requests for {clientCount} clients. Please contact {contactInfo} at {companyName} or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The clients used were: {clients}.",
+                    [license.ClientLimit, _clientIds.Count, license.ContactInfo, license.CompanyName, _clientIds.ToArray()]);
             }
         }
     }
@@ -131,12 +132,13 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
 
         EnsureAdded(ref _issuers, _issuerLock, iss);
 
+        // Only log for redistribution case because license v2 logs all other cases
         if (license != null && license.RedistributionFeature)
         {
             if (_issuers.Count > license.IssuerLimit)
             {
                 ErrorLog.Invoke(
-                    "Your license for Duende IdentityServer only permits {issuerLimit} number of issuers. You have processed requests for {issuerCount}. The issuers used were: {issuers}. This might be due to your server being accessed via different URLs or a direct IP and/or you have reverse proxy or a gateway involved. This suggests a network infrastructure configuration problem, or you are deliberately hosting multiple URLs and require an upgraded license.",
+                    "Your license for IdentityServer includes {issuerLimit} issuers but you have processed requests for {issuerCount} issuers. This indicates that requests for each issuer are being sent to this instance of IdentityServer, which may be due to a network infrastructure configuration issue. If you intend to use multiple issuers, please contact {contactInfo} at {companyName} or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The issuers used were {issuers}.",
                     [license.IssuerLimit, _issuers.Count, _issuers.ToArray()]);
             }
         }
