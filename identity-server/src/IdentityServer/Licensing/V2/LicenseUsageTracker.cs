@@ -55,21 +55,23 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFacto
             return;
         }
 
-        if (licenseAccessor.Current.IsConfigured)
+        var license = licenseAccessor.Current;
+
+        if (license.IsConfigured)
         {
-            if (licenseAccessor.Current.Redistribution || !licenseAccessor.Current.ClientLimit.HasValue)
+            if (license.Redistribution || !license.ClientLimit.HasValue)
             {
                 return;
             }
 
-            var clientLimitOverage = _clientsUsed.Values.Count - licenseAccessor.Current.ClientLimit;
+            var clientLimitOverage = _clientsUsed.Values.Count - license.ClientLimit;
             switch (clientLimitOverage)
             {
                 case > ClientLimitExceededThreshold:
-                    _logger.ClientLimitExceededOverThreshold(licenseAccessor.Current.ClientLimit.Value, _clientsUsed.Values.Count, ClientLimitExceededThreshold, _clientsUsed.Values);
+                    _logger.ClientLimitExceededOverThreshold(license.ClientLimit.Value, _clientsUsed.Values.Count, license.ContactInfo, license.CompanyName, _clientsUsed.Values);
                     break;
                 case > 0:
-                    _logger.ClientLimitExceededWithinOverageThreshold(licenseAccessor.Current.ClientLimit.Value, _clientsUsed.Values.Count, ClientLimitExceededThreshold, _clientsUsed.Values);
+                    _logger.ClientLimitExceededWithinOverageThreshold(license.ClientLimit.Value, _clientsUsed.Values.Count, license.ContactInfo, license.CompanyName, _clientsUsed.Values);
                     break;
             }
         }
@@ -93,21 +95,23 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFacto
             return;
         }
 
-        if (licenseAccessor.Current.IsConfigured)
+        var license = licenseAccessor.Current;
+
+        if (license.IsConfigured)
         {
-            if (licenseAccessor.Current.Redistribution || !licenseAccessor.Current.IssuerLimit.HasValue)
+            if (license.Redistribution || !license.IssuerLimit.HasValue)
             {
                 return;
             }
 
-            var issuerLimitOverage = _issuersUsed.Values.Count - licenseAccessor.Current.IssuerLimit;
+            var issuerLimitOverage = _issuersUsed.Values.Count - license.IssuerLimit;
             switch (issuerLimitOverage)
             {
                 case > IssuerLimitExceededThreshold:
-                    _logger.IssuerLimitExceededOverThreshold(licenseAccessor.Current.IssuerLimit.Value, _issuersUsed.Values.Count, IssuerLimitExceededThreshold, _issuersUsed.Values);
+                    _logger.IssuerLimitExceededOverThreshold(license.IssuerLimit.Value, _issuersUsed.Values.Count, license.ContactInfo, license.CompanyName, _issuersUsed.Values);
                     break;
                 case > 0:
-                    _logger.IssuerLimitExceededWithinOverageThreshold(licenseAccessor.Current.IssuerLimit.Value, _issuersUsed.Values.Count, IssuerLimitExceededThreshold, _issuersUsed.Values);
+                    _logger.IssuerLimitExceededWithinOverageThreshold(license.IssuerLimit.Value, _issuersUsed.Values.Count, license.ContactInfo, license.CompanyName, _issuersUsed.Values);
                     break;
             }
         }

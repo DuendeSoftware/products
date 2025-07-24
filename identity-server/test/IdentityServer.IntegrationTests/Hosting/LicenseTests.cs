@@ -72,6 +72,6 @@ public class LicenseTests : IDisposable
         }
 
         _mockPipeline.MockLogger.LogMessages.ShouldContain(
-            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. For more information, please see http://duende.link/trialmode.");
+            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. See https://duende.link/l/trial for more information.");
     }
 }
