@@ -70,7 +70,7 @@ public class Client
     /// <summary>
     /// Specifies whether a consent screen is required (defaults to <c>false</c>)
     /// </summary>
-    public bool RequireConsent { get; set; } = false;
+    public bool RequireConsent { get; set; }
 
     /// <summary>
     /// Specifies whether user can choose to store consent decisions (defaults to <c>true</c>)
@@ -98,12 +98,12 @@ public class Client
     /// <summary>
     /// Specifies whether a proof key can be sent using plain method (not recommended and defaults to <c>false</c>.)
     /// </summary>
-    public bool AllowPlainTextPkce { get; set; } = false;
+    public bool AllowPlainTextPkce { get; set; }
 
     /// <summary>
     /// Specifies whether the client must use a request object on authorize requests (defaults to <c>false</c>.)
     /// </summary>
-    public bool RequireRequestObject { get; set; } = false;
+    public bool RequireRequestObject { get; set; }
 
     /// <summary>
     /// Controls whether access tokens are transmitted via the browser for this client (defaults to <c>false</c>).
@@ -112,7 +112,7 @@ public class Client
     /// <value>
     /// <c>true</c> if access tokens can be transmitted via the browser; otherwise, <c>false</c>.
     /// </value>
-    public bool AllowAccessTokensViaBrowser { get; set; } = false;
+    public bool AllowAccessTokensViaBrowser { get; set; }
 
     /// <summary>
     /// Specifies whether a DPoP (Demonstrating Proof-of-Possession) token is requied to be used by this client (defaults to <c>false</c>).
@@ -164,7 +164,7 @@ public class Client
     /// <summary>
     /// Gets or sets a value indicating whether [allow offline access]. Defaults to <c>false</c>.
     /// </summary>
-    public bool AllowOfflineAccess { get; set; } = false;
+    public bool AllowOfflineAccess { get; set; }
 
     /// <summary>
     /// Specifies the api scopes that the client is allowed to request. If empty, the client can't access any scope
@@ -175,7 +175,7 @@ public class Client
     /// When requesting both an id token and access token, should the user claims always be added to the id token instead of requiring the client to use the userinfo endpoint.
     /// Defaults to <c>false</c>.
     /// </summary>
-    public bool AlwaysIncludeUserClaimsInIdToken { get; set; } = false;
+    public bool AlwaysIncludeUserClaimsInIdToken { get; set; }
 
     /// <summary>
     /// Lifetime of identity token in seconds (defaults to 300 seconds / 5 minutes)
@@ -210,7 +210,7 @@ public class Client
     /// <summary>
     /// Lifetime of a user consent in seconds. Defaults to null (no expiration)
     /// </summary>
-    public int? ConsentLifetime { get; set; } = null;
+    public int? ConsentLifetime { get; set; }
 
     /// <summary>
     /// Lifetime of pushed authorization requests for this client. If this lifetime is set, it takes precedence over
@@ -224,7 +224,7 @@ public class Client
     /// configuration flag to require pushed authorization in PushedAuthorizationOptions. Pushed authorization is
     /// required for a client if either the global configuration flag is enabled or if this flag is set for that client.
     /// </summary>
-    public bool RequirePushedAuthorization { get; set; } = false;
+    public bool RequirePushedAuthorization { get; set; }
 
     /// <summary>
     /// Specifies if tokens should be rotated when they are used. Defaults to
@@ -246,7 +246,7 @@ public class Client
     /// <value>
     /// <c>true</c> if the token should be updated; otherwise, <c>false</c>.
     /// </value>
-    public bool UpdateAccessTokenClaimsOnRefresh { get; set; } = false;
+    public bool UpdateAccessTokenClaimsOnRefresh { get; set; }
 
     /// <summary>
     /// Absolute: the refresh token will expire on a fixed point in time (specified by the AbsoluteRefreshTokenLifetime)
@@ -295,7 +295,7 @@ public class Client
     /// <value>
     /// <c>true</c> if claims should always be sent; otherwise, <c>false</c>.
     /// </value>
-    public bool AlwaysSendClientClaims { get; set; } = false;
+    public bool AlwaysSendClientClaims { get; set; }
 
     /// <summary>
     /// Gets or sets a value to prefix it on client claim types. Defaults to <c>client_</c>.

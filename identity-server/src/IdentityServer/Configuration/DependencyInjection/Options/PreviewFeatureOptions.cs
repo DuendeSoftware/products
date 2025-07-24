@@ -9,14 +9,14 @@ namespace Duende.IdentityServer.Configuration;
 public class PreviewFeatureOptions
 {
     /// <summary>
-    /// Enables Caching of Discovery Document based on ResponseCaching Interval 
+    /// Enables Caching of Discovery Document based on ResponseCaching Interval
     /// </summary>
-    public bool EnableDiscoveryDocumentCache { get; set; } = false;
+    public bool EnableDiscoveryDocumentCache { get; set; }
 
     /// <summary>
     /// When clients authenticate with private_key_jwt assertions, validate the audience of the assertion strictly: the audience must be this IdentityServer's issuer identifier as a single string.
     /// </summary>
-    public bool StrictClientAssertionAudienceValidation { get; set; } = false;
+    public bool StrictClientAssertionAudienceValidation { get; set; }
 
     /// <summary>
     /// DiscoveryDocument Cache Duration

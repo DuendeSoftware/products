@@ -27,7 +27,7 @@ public class AuthenticationOptions
     /// <summary>
     /// Specifies if the cookie should be sliding or not (only effective if the built-in cookie middleware is used)
     /// </summary>
-    public bool CookieSlidingExpiration { get; set; } = false;
+    public bool CookieSlidingExpiration { get; set; }
 
     /// <summary>
     /// Specifies the SameSite mode for the internal authentication and temp cookie
@@ -40,7 +40,7 @@ public class AuthenticationOptions
     /// <value>
     /// <c>true</c> if required; otherwise, <c>false</c>.
     /// </value>
-    public bool RequireAuthenticatedUserForSignOutMessage { get; set; } = false;
+    public bool RequireAuthenticatedUserForSignOutMessage { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the cookie used for the check session endpoint.

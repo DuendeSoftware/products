@@ -508,8 +508,8 @@ public class ServerSideSessionStore : IServerSideSessionStore
         public int First { get; init; }
         public int Last { get; init; }
         public int CurrentPage { get; set; } = 1;
-        public bool HasNext { get; set; } = false;
-        public bool HasPrev { get; set; } = false;
+        public bool HasNext { get; set; }
+        public bool HasPrev { get; set; }
         public Entities.ServerSideSession[] Items { get; set; } = Array.Empty<Entities.ServerSideSession>();
     }
 }

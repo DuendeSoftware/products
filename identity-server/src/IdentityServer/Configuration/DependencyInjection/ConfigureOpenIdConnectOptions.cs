@@ -22,7 +22,7 @@ internal class ConfigureOpenIdConnectOptions : IPostConfigureOptions<OpenIdConne
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
-    private static bool warnedInMemory = false;
+    private static bool warnedInMemory;
 
     public void PostConfigure(string name, OpenIdConnectOptions options)
     {
