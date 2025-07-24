@@ -73,7 +73,10 @@ internal static class HttpContextExtensions
 
             if (userTokenResult.WasSuccessful(out var userToken, out var userTokenFailure))
             {
-                if (userToken.AccessTokenType != OidcConstants.TokenResponse.DPoPTokenType)
+                // Doing a case insensitive comparison here, because some openid connect providers return
+                // non standard casing: https://github.com/orgs/DuendeSoftware/discussions/280#discussioncomment-13862452
+                if (!string.Equals(userToken.AccessTokenType, OidcConstants.TokenResponse.DPoPTokenType,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     return new BearerTokenResult
                     {
@@ -112,7 +115,10 @@ internal static class HttpContextExtensions
         var clientTokenResult = await context.GetClientAccessTokenAsync(userAccessTokenRequestParameters, ct);
         if (clientTokenResult.WasSuccessful(out var clientToken, out var clientTokenFailure))
         {
-            if (clientToken.AccessTokenType != OidcConstants.TokenResponse.DPoPTokenType)
+            // Doing a case insensitive comparison here, because some openid connect providers return
+            // non standard casing: https://github.com/orgs/DuendeSoftware/discussions/280#discussioncomment-13862452
+            if (!string.Equals(clientToken.AccessTokenType, OidcConstants.TokenResponse.DPoPTokenType,
+                    StringComparison.OrdinalIgnoreCase))
             {
                 return new BearerTokenResult
                 {
