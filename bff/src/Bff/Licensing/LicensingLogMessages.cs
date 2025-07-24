@@ -32,8 +32,7 @@ internal static partial class LicensingLogMessages
     [LoggerMessage(
         message: """
                    You do not have a valid license key for the Duende BFF Security Framework.
-                   This is allowed for development and testing scenarios.
-                   When unlicensed, the BFF will limit the number of active sessions to 5.
+                   When unlicensed, BFF will run in trial mode. It will limit the number of active sessions to 5.
                    If you are running in production you are required to have a licensed version.
                    Please start a conversation with us: https://duendesoftware.com/contact
                    
@@ -44,6 +43,7 @@ internal static partial class LicensingLogMessages
     [LoggerMessage(
         message: """
                    Your license key does not include the BFF feature.
+                   BFF will run in trial mode. It will limit the number of active sessions to 5. 
                    Please contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,
                    or start a conversation with us: https://duendesoftware.com/contact.
                    """)]
