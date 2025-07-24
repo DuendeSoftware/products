@@ -22,4 +22,8 @@
     <InternalsVisibleTo Include="Duende.Bff.Yarp" />
     <InternalsVisibleTo Include="Duende.Bff.Tests" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Private.Licensing" />
+  </ItemGroup>
 </Project>

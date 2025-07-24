@@ -10,11 +10,13 @@ using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Endpoints;
 using Duende.Bff.Endpoints.Internal;
 using Duende.Bff.Internal;
+using Duende.Bff.Licensing;
 using Duende.Bff.Otel;
 using Duende.Bff.SessionManagement.Configuration;
 using Duende.Bff.SessionManagement.Revocation;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
+using Duende.Private.Licensing;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -44,6 +46,10 @@ public static class BffBuilderExtensions
 
     internal static T AddBaseBffServices<T>(this T builder) where T : IBffServicesBuilder
     {
+        builder.Services.AddSingleton<GetLicenseKey>(sp => () => sp.GetRequiredService<IOptions<BffOptions>>().Value.LicenseKey);
+        builder.Services.AddSingleton<LicenseAccessor<BffLicense>>();
+        builder.Services.AddSingleton<BffLicense>(sp => sp.GetRequiredService<LicenseAccessor<BffLicense>>().Current);
+        builder.Services.TryAddSingleton<LicenseValidator>();
         builder.Services.AddDistributedMemoryCache();
         // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
         // AddOpenIdConnectAccessTokenManagement because both configure the same options

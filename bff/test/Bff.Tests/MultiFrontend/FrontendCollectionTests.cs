@@ -38,7 +38,8 @@ public class FrontendCollectionTests
     private FrontendCollection BuildFrontendCollection()
     {
         // No longer inject OptionsCache
-        var cache = new FrontendCollection(_bffConfigurationOptionsMonitor, [], _frontendsConfiguredDuringStartup);
+        var cache = new FrontendCollection(Some.LicenseValidator,
+            _bffConfigurationOptionsMonitor, [], _frontendsConfiguredDuringStartup);
         return cache;
     }
 

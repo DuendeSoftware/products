@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 using Duende.Bff.Configuration;
 using Duende.Bff.Internal;
+using Duende.Bff.Licensing;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Components;
@@ -50,6 +51,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         BuildUserSessionPartitionKey buildUserSessionPartitionKey,
         IOptions<BffBlazorServerOptions> blazorOptions,
         IOptions<BffOptions> bffOptions,
+        LicenseValidator licenseValidator,
         ILoggerFactory loggerFactory)
         : base(loggerFactory)
     {
@@ -65,20 +67,16 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         AuthenticationStateChanged += OnAuthenticationStateChanged;
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
 
-        CheckLicense(loggerFactory, _bffOptions);
+        CheckLicense(licenseValidator);
     }
 
-    internal static bool LicenseChecked;
 
-    internal static void CheckLicense(ILoggerFactory loggerFactory, BffOptions options)
+    internal static void CheckLicense(LicenseValidator validator)
     {
-        if (LicenseChecked == false)
+        if (!validator.IsValid())
         {
-            Licensing.LicenseValidator.Initalize(loggerFactory, options);
-            Licensing.LicenseValidator.ValidateLicense();
+            // todo: license enforcement
         }
-
-        LicenseChecked = true;
     }
 
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task) => _authenticationStateTask = task;

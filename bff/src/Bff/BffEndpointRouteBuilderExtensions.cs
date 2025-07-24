@@ -4,6 +4,7 @@
 using Duende.Bff.Configuration;
 using Duende.Bff.Endpoints;
 using Duende.Bff.Endpoints.Internal;
+using Duende.Bff.Licensing;
 using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using LicenseValidator = Duende.Bff.Licensing.LicenseValidator;
 
 
 namespace Duende.Bff;
@@ -175,15 +175,13 @@ public static class BffEndpointRouteBuilderExtensions
 
     internal static void CheckLicense(this IServiceProvider serviceProvider)
     {
-        if (LicenseChecked == false)
+        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        var options = serviceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
+
+        var license = serviceProvider.GetRequiredService<LicenseValidator>();
+        if (!license.IsValid())
         {
-            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-            var options = serviceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
-
-            LicenseValidator.Initalize(loggerFactory, options);
-            LicenseValidator.ValidateLicense();
+            // Todo, enforce license validation
         }
-
-        LicenseChecked = true;
     }
 }
