@@ -1,3 +1,4 @@
+using Duende.Bff;
 using Serilog;
 
 namespace BffLocalApi;

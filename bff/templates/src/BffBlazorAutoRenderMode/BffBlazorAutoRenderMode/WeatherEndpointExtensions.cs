@@ -1,3 +1,5 @@
+using Duende.Bff;
+
 namespace BffBlazorAutoRenderMode;
 
 public static class WeatherEndpointExtensions

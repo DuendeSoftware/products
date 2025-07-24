@@ -1,4 +1,5 @@
 using Duende.Bff;
+using Duende.Bff.AccessTokenManagement;
 
 namespace BffRemoteApi;
 
@@ -25,5 +26,5 @@ public class Api
 {
     public string? LocalPath { get; set; }
     public string? RemoteUrl { get; set; }
-    public TokenType RequiredToken { get; set; }
+    public RequiredTokenType RequiredToken { get; set; }
 }

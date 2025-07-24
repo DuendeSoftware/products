@@ -18,8 +18,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.3" Condition="'$(Framework)' == 'net9.0'" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.15" Condition="'$(Framework)' == 'net8.0'" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.15" Condition="'$(Framework)' == 'net8.0'" />
-    <PackageReference Include="Duende.BFF" Version="3.0.0" />
-    <PackageReference Include="Duende.BFF.Blazor" Version="3.0.0" />
+    <PackageReference Include="Duende.BFF" Version="4.0.0-rc.1" />
+    <PackageReference Include="Duende.BFF.Blazor" Version="4.0.0-rc.1" />
   </ItemGroup>
 
 </Project>

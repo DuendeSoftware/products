@@ -1,5 +1,6 @@
 using BffBlazorAutoRenderMode;
 using BffBlazorAutoRenderMode.Components;
+using Duende.Bff;
 using Duende.Bff.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
