@@ -7,7 +7,7 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class ResourceInfoDiagnosticEntry(ResourceLoadedTracker resourceLoadedTracker) : IDiagnosticEntry
 {
-    public Task WriteAsync(Utf8JsonWriter writer)
+    public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         writer.WriteStartObject("Resources");
 

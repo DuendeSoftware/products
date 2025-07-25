@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics.DiagnosticEntries;
 
 internal class AuthSchemeInfoDiagnosticEntry(IAuthenticationSchemeProvider authenticationSchemeProvider) : IDiagnosticEntry
 {
-    public async Task WriteAsync(Utf8JsonWriter writer)
+    public async Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         var schemes = await authenticationSchemeProvider.GetAllSchemesAsync();
 

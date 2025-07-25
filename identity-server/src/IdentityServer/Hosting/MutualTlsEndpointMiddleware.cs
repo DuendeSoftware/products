@@ -35,62 +35,114 @@ public class MutualTlsEndpointMiddleware
         _sanitizedLogger = new SanitizedLogger<MutualTlsEndpointMiddleware>(logger);
     }
 
+    internal enum MtlsEndpointType
+    {
+        None,
+        SeparateDomain,
+        Subdomain,
+        PathBased
+    }
+
+    internal MtlsEndpointType DetermineMtlsEndpointType(HttpContext context, out PathString? subPath)
+    {
+        subPath = null;
+
+        if (!_options.MutualTls.Enabled)
+        {
+            return MtlsEndpointType.None;
+        }
+
+        if (_options.MutualTls.DomainName.IsPresent())
+        {
+            if (_options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
+            {
+                var requestedHost = HostString.FromUriComponent(_options.MutualTls.DomainName);
+                // Separate domain
+                if (RequestedHostMatches(context.Request.Host, _options.MutualTls.DomainName))
+                {
+                    _sanitizedLogger.LogDebug("Requiring mTLS because the request's domain matches the configured mTLS domain name.");
+                    return MtlsEndpointType.SeparateDomain;
+                }
+            }
+            else
+            {
+                // Subdomain
+                if (context.Request.Host.Host.StartsWith(_options.MutualTls.DomainName + ".", StringComparison.OrdinalIgnoreCase))
+                {
+                    _sanitizedLogger.LogDebug("Requiring mTLS because the request's subdomain matches the configured mTLS domain name.");
+                    return MtlsEndpointType.Subdomain;
+                }
+            }
+
+            _sanitizedLogger.LogDebug("Not requiring mTLS because this request's domain does not match the configured mTLS domain name.");
+            return MtlsEndpointType.None;
+        }
+
+        // Check path-based MTLS
+        if (context.Request.Path.StartsWithSegments(
+            ProtocolRoutePaths.MtlsPathPrefix.EnsureLeadingSlash(), out var path))
+        {
+            _sanitizedLogger.LogDebug("Requiring mTLS because the request's path begins with the configured mTLS path prefix.");
+            subPath = path;
+            return MtlsEndpointType.PathBased;
+        }
+
+        return MtlsEndpointType.None;
+    }
+
     /// <inheritdoc />
     public async Task Invoke(HttpContext context, IAuthenticationSchemeProvider schemes)
     {
-        if (_options.MutualTls.Enabled)
+        var mtlsConfigurationStyle = DetermineMtlsEndpointType(context, out var subPath);
+
+        if (mtlsConfigurationStyle != MtlsEndpointType.None)
         {
-            // domain-based MTLS
-            if (_options.MutualTls.DomainName.IsPresent())
+            var result = await TriggerCertificateAuthentication(context);
+            if (!result.Succeeded)
             {
-                // separate domain
-                if (_options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
-                {
-                    if (context.Request.Host.Host.Equals(_options.MutualTls.DomainName,
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        var result = await TriggerCertificateAuthentication(context);
-                        if (!result.Succeeded)
-                        {
-                            return;
-                        }
-                    }
-                }
-                // sub-domain
-                else
-                {
-                    if (context.Request.Host.Host.StartsWith(_options.MutualTls.DomainName + ".", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var result = await TriggerCertificateAuthentication(context);
-                        if (!result.Succeeded)
-                        {
-                            return;
-                        }
-                    }
-                }
+                return;
             }
-            // path based MTLS
-            else if (context.Request.Path.StartsWithSegments(ProtocolRoutePaths.MtlsPathPrefix.EnsureLeadingSlash(), out var subPath))
+
+            // Additional processing for path-based MTLS
+            if (mtlsConfigurationStyle == MtlsEndpointType.PathBased && subPath.HasValue)
             {
-                var result = await TriggerCertificateAuthentication(context);
+                var path = ProtocolRoutePaths.ConnectPathPrefix + subPath.Value.ToString().EnsureLeadingSlash();
+                path = path.EnsureLeadingSlash();
 
-                if (result.Succeeded)
-                {
-                    var path = ProtocolRoutePaths.ConnectPathPrefix + subPath.ToString().EnsureLeadingSlash();
-                    path = path.EnsureLeadingSlash();
-
-                    _sanitizedLogger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
-                        context.Request.Path.ToString(), path);
-                    context.Request.Path = path;
-                }
-                else
-                {
-                    return;
-                }
+                _sanitizedLogger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
+                    context.Request.Path.ToString(), path);
+                context.Request.Path = path;
             }
         }
 
         await _next(context);
+    }
+
+
+    private bool RequestedHostMatches(HostString requestHost, string configuredDomain)
+    {
+        // Parse the configured domain which might contain a port
+        var configuredHostname = configuredDomain;
+        var configuredPort = 443;
+
+        var colonIndex = configuredDomain.IndexOf(':', StringComparison.InvariantCulture);
+        if (colonIndex >= 0)
+        {
+            configuredHostname = configuredDomain.Substring(0, colonIndex);
+            if (int.TryParse(configuredDomain.AsSpan(colonIndex + 1), out var port))
+            {
+                configuredPort = port;
+            }
+        }
+
+        // Compare hostnames (case-insensitive)
+        if (!string.Equals(requestHost.Host, configuredHostname, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var requestPort = requestHost.Port ?? 443;
+        return requestPort == configuredPort;
     }
 
     private async Task<AuthenticateResult> TriggerCertificateAuthentication(HttpContext context)

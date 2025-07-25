@@ -45,7 +45,7 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
         _meterListener.Start();
     }
 
-    public Task WriteAsync(Utf8JsonWriter writer)
+    public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         writer.WriteStartObject("EndpointUsage");
 

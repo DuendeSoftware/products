@@ -39,7 +39,7 @@ internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
         _startsWithMatches = startsWithMatches ?? _defaultStartsWithMatches;
     }
 
-    public Task WriteAsync(Utf8JsonWriter writer)
+    public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         var assemblies = GetAssemblyInfo();
         writer.WriteStartObject("AssemblyInfo");
