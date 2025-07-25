@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version in format X.Y.Z or X.Y.Z-preview.'
+        description: 'Version in format X.Y.Z, X.Y.Z-preview.N, or X.Y.Z-rc.N'
         type: string
         required: true
         default: '0.0.0'
@@ -39,7 +39,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Validate Version Input
-      run: echo '${{ github.event.inputs.version }}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$'
+      run: echo '${{ github.event.inputs.version }}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$' || (echo 'Invalid version format' && exit 1)
     - name: Checkout target branch
       if: github.event.inputs.branch != 'main'
       run: git checkout ${{ github.event.inputs.branch }}

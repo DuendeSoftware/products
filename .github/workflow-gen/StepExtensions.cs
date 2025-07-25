@@ -182,7 +182,7 @@ public static class StepExtensions
 
     public static WorkflowDispatch InputVersionBranchAndTagOverride(this WorkflowDispatch workflow) =>
         workflow.Inputs(
-            new StringInput("version", "Version in format X.Y.Z or X.Y.Z-preview.", true, "0.0.0"),
+            new StringInput("version", "Version in format X.Y.Z, X.Y.Z-preview.N, or X.Y.Z-rc.N", true, "0.0.0"),
             new StringInput("branch", "(Optional) the name of the branch to release from", false, "main"),
             new BooleanInput("remove-tag-if-exists", "If set, will remove the existing tag. Use this if you have issues with the previous release action", false, false));
 
@@ -225,14 +225,14 @@ public static class StepExtensions
     /// Only (trusted) contributors can open branches in the main repo, so these builds can run with a higher trust level.
     /// So, they are running with trigger 'push'. These builds have access to the secrets and thus they can do things like
     /// sign, push the packages, etc..
-    /// 
+    ///
     /// External contributors can only create branches on external repo's. These builds run with a lower trust level.
     /// So, they are running with trigger 'pull_request'. These builds do not have access to the secrets and thus they can't
     /// sign, push the packages, etc..
     ///
     /// Now, if a trusted contributor creates a branch in the main repo, then creates a PR, we don't want to run the build twice.
     /// This prevents that. The build will only run once, on the branch with the higher trust level.
-    /// 
+    ///
     /// </summary>
     public static Job RunEitherOnBranchOrAsPR(this Job job)
         => job.If(
