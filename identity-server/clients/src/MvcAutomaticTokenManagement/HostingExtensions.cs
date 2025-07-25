@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authentication;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MvcAutomaticTokenManagement;

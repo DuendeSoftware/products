@@ -7,9 +7,8 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.0" />
     <PackageVersion Include="BullsEye" Version="5.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="3.2.0" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0-rc.1" Condition=" '$(IsBffProject)' == 'true' " />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="3.2.0" Condition=" '$(IsBffProject)' != 'true' " />
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.0.0-rc.2" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0-rc.2" />
     <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.1.3" />
     <PackageVersion Include="Duende.IdentityModel" Version="7.1.0" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
