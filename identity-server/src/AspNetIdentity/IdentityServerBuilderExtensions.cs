@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class IdentityServerBuilderExtensions
 {
     /// <summary>
-    /// Configures IdentityServer to use the ASP.NET Identity implementations 
+    /// Configures IdentityServer to use the ASP.NET Identity implementations
     /// of IUserClaimsPrincipalFactory, IResourceOwnerPasswordValidator, and IProfileService.
     /// Also configures some of ASP.NET Identity's options for use with IdentityServer (such as claim types to use
     /// and authentication cookie settings).

@@ -25,6 +25,17 @@ public class Startup
         services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        services.Configure<IdentityOptions>(opt =>
+        {
+            // Complexity requirements are not actually helpful, but the length should be >>3 in practice. This is done
+            // for demo purposes only (user bob/bob).
+            opt.Password.RequireDigit = false;
+            opt.Password.RequireLowercase = false;
+            opt.Password.RequireUppercase = false;
+            opt.Password.RequireNonAlphanumeric = false;
+            opt.Password.RequiredLength = 3;
+        });
     }
 
     public void Configure(IApplicationBuilder app)
