@@ -228,7 +228,11 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddSingleton<IDiagnosticEntry, ClientInfoDiagnosticEntry>();
         builder.Services.AddSingleton<ResourceLoadedTracker>();
         builder.Services.AddSingleton<IDiagnosticEntry, ResourceInfoDiagnosticEntry>();
-        builder.Services.AddSingleton<DiagnosticSummary>();
+        builder.Services.AddSingleton(serviceProvider => new DiagnosticSummary(
+            DateTime.UtcNow,
+            serviceProvider.GetServices<IDiagnosticEntry>(),
+            serviceProvider.GetRequiredService<IdentityServerOptions>(),
+            serviceProvider.GetRequiredService<ILoggerFactory>()));
         builder.Services.AddHostedService<DiagnosticHostedService>();
 
         return builder;

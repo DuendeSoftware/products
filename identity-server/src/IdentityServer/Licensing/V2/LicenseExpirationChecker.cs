@@ -21,7 +21,7 @@ internal class LicenseExpirationChecker(
         if (!_expiredLicenseWarned && !license.Current.Redistribution && IsExpired)
         {
             _expiredLicenseWarned = true;
-            _logger.LicenseHasExpired();
+            _logger.LicenseHasExpired(license.Current.ContactInfo ?? "<contact info missing>", license.Current.CompanyName ?? "<company name missing>");
         }
     }
 

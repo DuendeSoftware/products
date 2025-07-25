@@ -23,7 +23,7 @@ internal class IdentityServerOptionsDiagnosticEntry(IOptions<IdentityServerOptio
         WriteIndented = false
     };
 
-    public Task WriteAsync(Utf8JsonWriter writer)
+    public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         writer.WritePropertyName("IdentityServerOptions");
 

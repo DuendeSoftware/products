@@ -42,7 +42,7 @@ public class ProtocolRequestCounterTests
         // REMINDER - If this test needs to change because the log message was updated, so should warning_is_not_logged_before_too_many_protocol_requests_are_handled
         var logRecord = _logger.Collector.GetSnapshot().Single();
         logRecord.Message.ShouldBe(
-            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {_counter.Threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. For more information, please see http://duende.link/trialmode.");
+            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {_counter.Threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. See https://duende.link/l/trial for more information.");
     }
 
     [Fact]
@@ -56,6 +56,6 @@ public class ProtocolRequestCounterTests
 
         var logRecords = _logger.Collector.GetSnapshot().Select(l => l.Message);
         logRecords.ShouldNotContain(
-            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {_counter.Threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. For more information, please see http://duende.link/trialmode.");
+            $"You are using IdentityServer in trial mode and have exceeded the trial threshold of {_counter.Threshold} requests handled by IdentityServer. In a future version, you will need to restart the server or configure a license key to continue testing. See https://duende.link/l/trial for more information.");
     }
 }

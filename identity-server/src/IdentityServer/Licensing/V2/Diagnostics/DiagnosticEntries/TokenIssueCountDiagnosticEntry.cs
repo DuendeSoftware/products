@@ -13,11 +13,11 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
     private long _jwtTokenIssued;
     private long _referenceTokenIssued;
     private long _refreshTokenIssued;
-    private long _jwtDPoPTokenIssued;
-    private long _referenceDPoPTokenIssued;
-    private long _jwtMTLSTokenIssued;
-    private long _referenceMTLSTokenIssued;
     private long _idTokenIssued;
+
+    private long _tokensWithNoConstraint;
+    private long _tokensWithDPoPConstraint;
+    private long _tokensWithMtlsConstraint;
 
     private long _implicitGrantTypeFlows;
     private long _hybridGrantTypeFlows;
@@ -25,6 +25,7 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
     private long _clientCredentialsGrantTypeFlows;
     private long _resourceOwnerPasswordGrantTypeFlows;
     private long _deviceFlowGrantTypeFlows;
+    private long _refreshTokenGrantTypeFlows;
     private long _otherGrantTypeFlows;
 
     private readonly MeterListener _meterListener;
@@ -46,26 +47,38 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
         _meterListener.Start();
     }
 
-    public Task WriteAsync(Utf8JsonWriter writer)
+    public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         writer.WritePropertyName("TokenIssueCounts");
         writer.WriteStartObject();
 
-        writer.WriteNumber("Jwt", _jwtTokenIssued);
-        writer.WriteNumber("Reference", _referenceTokenIssued);
-        writer.WriteNumber("JwtDPoP", _jwtDPoPTokenIssued);
-        writer.WriteNumber("ReferenceDPoP", _referenceDPoPTokenIssued);
-        writer.WriteNumber("JwtMTLS", _jwtMTLSTokenIssued);
-        writer.WriteNumber("ReferenceMTLS", _referenceMTLSTokenIssued);
-        writer.WriteNumber("Refresh", _refreshTokenIssued);
-        writer.WriteNumber("Id", _idTokenIssued);
+        writer.WriteStartObject("RequestsByGrantType");
         writer.WriteNumber(GrantType.Implicit, _implicitGrantTypeFlows);
         writer.WriteNumber(GrantType.Hybrid, _hybridGrantTypeFlows);
         writer.WriteNumber(GrantType.AuthorizationCode, _authorizationCodeGrantTypeFlows);
         writer.WriteNumber(GrantType.ClientCredentials, _clientCredentialsGrantTypeFlows);
         writer.WriteNumber(GrantType.ResourceOwnerPassword, _resourceOwnerPasswordGrantTypeFlows);
         writer.WriteNumber(GrantType.DeviceFlow, _deviceFlowGrantTypeFlows);
+        writer.WriteNumber(GrantType.RefreshToken, _refreshTokenGrantTypeFlows);
         writer.WriteNumber("Other", _otherGrantTypeFlows);
+        writer.WriteEndObject();
+
+        writer.WriteStartObject("AccessTokensByType");
+        writer.WriteNumber("Jwt", _jwtTokenIssued);
+        writer.WriteNumber("Reference", _referenceTokenIssued);
+        writer.WriteEndObject();
+
+        writer.WriteStartObject("AccessTokensBySenderConstraint");
+        writer.WriteNumber("None", _tokensWithNoConstraint);
+        writer.WriteNumber("DPoP", _tokensWithDPoPConstraint);
+        writer.WriteNumber("mTLS", _tokensWithMtlsConstraint);
+        writer.WriteEndObject();
+
+        writer.WriteStartObject("TokensByType");
+        writer.WriteNumber("Access", _jwtTokenIssued + _referenceTokenIssued);
+        writer.WriteNumber("Refresh", _refreshTokenIssued);
+        writer.WriteNumber("Id", _idTokenIssued);
+        writer.WriteEndObject();
 
         writer.WriteEndObject();
 
@@ -119,25 +132,26 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
 
         if (accessTokenIssued)
         {
-            switch (proofType)
+            switch (accessTokenType)
             {
-                case ProofType.None when accessTokenType == AccessTokenType.Jwt:
+                case AccessTokenType.Jwt:
                     Interlocked.Increment(ref _jwtTokenIssued);
                     break;
-                case ProofType.None when accessTokenType == AccessTokenType.Reference:
+                case AccessTokenType.Reference:
                     Interlocked.Increment(ref _referenceTokenIssued);
                     break;
-                case ProofType.DPoP when accessTokenType == AccessTokenType.Jwt:
-                    Interlocked.Increment(ref _jwtDPoPTokenIssued);
+            }
+
+            switch (proofType)
+            {
+                case ProofType.None:
+                    Interlocked.Increment(ref _tokensWithNoConstraint);
                     break;
-                case ProofType.DPoP when accessTokenType == AccessTokenType.Reference:
-                    Interlocked.Increment(ref _referenceDPoPTokenIssued);
+                case ProofType.ClientCertificate:
+                    Interlocked.Increment(ref _tokensWithMtlsConstraint);
                     break;
-                case ProofType.ClientCertificate when accessTokenType == AccessTokenType.Jwt:
-                    Interlocked.Increment(ref _jwtMTLSTokenIssued);
-                    break;
-                case ProofType.ClientCertificate when accessTokenType == AccessTokenType.Reference:
-                    Interlocked.Increment(ref _referenceMTLSTokenIssued);
+                case ProofType.DPoP:
+                    Interlocked.Increment(ref _tokensWithDPoPConstraint);
                     break;
             }
         }
@@ -177,6 +191,9 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
                 break;
             case GrantType.DeviceFlow:
                 Interlocked.Increment(ref _deviceFlowGrantTypeFlows);
+                break;
+            case GrantType.RefreshToken:
+                Interlocked.Increment(ref _refreshTokenGrantTypeFlows);
                 break;
             default:
                 Interlocked.Increment(ref _otherGrantTypeFlows);
