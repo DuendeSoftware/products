@@ -10,6 +10,7 @@
     <!-- If we do not have a value for framework from running dotnet new, default to one so things build in an IDE -->
     <Framework>$(TargetFramework)</Framework>
     <DefineConstants Condition="'$(Framework)' != 'net8.0'">UseMapStaticAssets</DefineConstants>
+    <IsDevelopmentTime>true</IsDevelopmentTime>
   </PropertyGroup>
   
   <ItemGroup>
@@ -21,5 +22,15 @@
     <PackageReference Include="Duende.BFF" Version="3.0.0" />
     <PackageReference Include="Duende.BFF.Blazor" Version="3.0.0" />
   </ItemGroup>
+  
+  <ItemGroup Condition="'$(IsDevelopmentTime)' == 'true'">
+    <CssHeader Include="Components\MapStaticAssetsLinkTags.razor" Condition="'$(Framework)' == 'net9.0'" />
+    <Content Remove="Components\MapStaticAssetsLinkTags.razor" Condition="'$(Framework)' == 'net8.0'" />
+    <CssHeader Include="Components\LegacyLinkTags.razor" Condition="'$(Framework)' == 'net8.0'" />
+    <Content Remove="Components\LegacyLinkTags.razor" Condition="'$(Framework)' == 'net9.0'" />
+  </ItemGroup>
 
+  <Target Name="RenameCssLinksComponent" BeforeTargets="BeforeBuild" Condition="'$(IsDevelopmentTime)' == 'true'">
+    <Copy SourceFiles="@(CssHeader)" DestinationFiles="Components\CssLinks.razor"/>
+  </Target>
 </Project>
