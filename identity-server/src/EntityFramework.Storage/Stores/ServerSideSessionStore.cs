@@ -471,8 +471,8 @@ public class ServerSideSessionStore : IServerSideSessionStore
             var parts = filter.ResultsToken.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (parts != null && parts.Length == 2)
             {
-                int.TryParse(parts[0], out first);
-                int.TryParse(parts[1], out last);
+                _ = int.TryParse(parts[0], out first);
+                _ = int.TryParse(parts[1], out last);
             }
         }
 

@@ -15,23 +15,20 @@ namespace Duende.IdentityServer.Stores.Serialization;
 /// <seealso cref="IPersistentGrantSerializer" />
 public class PersistentGrantSerializer : IPersistentGrantSerializer
 {
-    private static readonly JsonSerializerOptions Settings;
+    private static readonly JsonSerializerOptions Settings = new()
+    {
+        IgnoreReadOnlyFields = true,
+        IgnoreReadOnlyProperties = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters =
+        {
+            new ClaimConverter(),
+            new ClaimsPrincipalConverter()
+        }
+    };
 
     private readonly PersistentGrantOptions _options;
     private readonly IDataProtector _provider;
-
-    static PersistentGrantSerializer()
-    {
-        Settings = new JsonSerializerOptions
-        {
-            IgnoreReadOnlyFields = true,
-            IgnoreReadOnlyProperties = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        Settings.Converters.Add(new ClaimConverter());
-        Settings.Converters.Add(new ClaimsPrincipalConverter());
-    }
 
     /// <summary>
     /// Ctor.
