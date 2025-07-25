@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Duende.IdentityServer.AspNetIdentity;
 
+#pragma warning disable CA1812 // This class is not instantiated directly, but rather used by the DI container
 internal class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
     where TUser : class
+#pragma warning restore CA1812
 {
     private readonly Decorator<IUserClaimsPrincipalFactory<TUser>> _inner;
     private UserManager<TUser> _userManager;
