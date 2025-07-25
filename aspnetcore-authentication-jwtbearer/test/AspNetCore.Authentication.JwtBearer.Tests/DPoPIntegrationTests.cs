@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
-using Duende.AccessTokenManagement;
+using Duende.AccessTokenManagement.DPoP;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 using Duende.AspNetCore.TestFramework;
@@ -13,7 +13,7 @@ using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Xunit.Abstractions;
@@ -75,22 +75,21 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
-        token.AccessToken.ShouldNotBeNull();
+        token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
         api.HttpClient.SetToken("DPoP", token.AccessToken);
 
         // Create proof token for api call
-        var dpopService =
-            new DefaultDPoPProofService(new TestDPoPNonceStore(), new NullLogger<DefaultDPoPProofService>());
+        var dpopService = app.Server.Services.GetRequiredService<IDPoPProofService>();
         var proof = await dpopService.CreateProofTokenAsync(new DPoPProofRequest
         {
             AccessToken = token.AccessToken,
-            DPoPJsonWebKey = jwk,
-            Method = "GET",
-            Url = "http://localhost/"
+            DPoPProofKey = jwk,
+            Method = HttpMethod.Get,
+            Url = new Uri("http://localhost/")
         });
         proof.ShouldNotBeNull();
-        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, [proof.ProofToken, proof.ProofToken]);
+        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, [proof.Value, proof.Value]);
 
         var result = await api.HttpClient.GetAsync("/");
 
@@ -121,22 +120,21 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
-        token.AccessToken.ShouldNotBeNull();
+        token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
         api.HttpClient.SetToken(scheme, token.AccessToken);
 
         // Create proof token for api call
-        var dpopService =
-            new DefaultDPoPProofService(new TestDPoPNonceStore(), new NullLogger<DefaultDPoPProofService>());
+        var dpopService = app.Server.Services.GetRequiredService<IDPoPProofService>();
         var proof = await dpopService.CreateProofTokenAsync(new DPoPProofRequest
         {
             AccessToken = token.AccessToken,
-            DPoPJsonWebKey = jwk,
-            Method = "GET",
-            Url = "http://localhost/"
+            DPoPProofKey = jwk,
+            Method = HttpMethod.Get,
+            Url = new Uri("http://localhost/")
         });
         proof.ShouldNotBeNull();
-        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof.ProofToken);
+        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof.Value);
 
         var result = await api.HttpClient.GetAsync("/");
 
@@ -161,7 +159,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
-        token.AccessToken.ShouldNotBeNull();
+        token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
         api.HttpClient.SetToken("DPoP", token.AccessToken);
 
@@ -194,23 +192,22 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
-        token.AccessToken.ShouldNotBeNull();
+        token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
         api.HttpClient.SetToken(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP, token.AccessToken);
 
         // Create proof token for api call
-        var dpopService =
-            new DefaultDPoPProofService(new TestDPoPNonceStore(), new NullLogger<DefaultDPoPProofService>());
+        var dpopService = app.Server.Services.GetRequiredService<IDPoPProofService>();
         var proof = await dpopService.CreateProofTokenAsync(new DPoPProofRequest
         {
             AccessToken = token.AccessToken,
-            DPoPJsonWebKey = jwk,
-            Method = "GET",
-            Url = "http://localhost/",
-            DPoPNonce = new string('x', maxLength + 1) // <--- Most important part of the test
+            DPoPProofKey = jwk,
+            Method = HttpMethod.Get,
+            Url = new Uri("http://localhost/"),
+            DPoPNonce = DPoPNonce.Parse(new string('x', maxLength + 1)) // <--- Most important part of the test
         });
         proof.ShouldNotBeNull();
-        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof.ProofToken);
+        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof.Value);
 
         var result = await api.HttpClient.GetAsync("/");
 
@@ -231,12 +228,16 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         var identityServer = await CreateIdentityServer();
         var api = new ApiHost(identityServer, testOutputHelper, baseAddress);
         api.OnConfigureServices += services =>
+        {
             services.ConfigureDPoPTokensForScheme(ApiHost.AuthenticationScheme,
                 opt =>
                 {
                     opt.TokenMode = DPoPMode.DPoPOnly;
                     configureDPoP?.Invoke(opt);
                 });
+
+            services.AddSingleton<IDPoPNonceStore, TestDPoPNonceStore>();
+        };
         api.OnConfigure += app =>
             app.MapGet("/", () => "default route")
                 .RequireAuthorization();
@@ -244,12 +245,12 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         return api;
     }
 
-    private static string CreateJwk()
+    private DPoPProofKey CreateJwk()
     {
         var rsaKey = new RsaSecurityKey(RSA.Create(2048));
         var jwkKey = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
         jwkKey.Alg = "RS256";
         var jwk = JsonSerializer.Serialize(jwkKey);
-        return jwk;
+        return DPoPProofKey.Parse(jwk);
     }
 }

@@ -3,6 +3,7 @@
 
 using System.Net;
 using System.Web;
+using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
@@ -126,15 +127,15 @@ public class AppHost : GenericHost
 
             endpoints.MapGet("/user_token", async context =>
             {
-                var token = await context.GetUserAccessTokenAsync();
-                await context.Response.WriteAsJsonAsync(token);
+                var tokenResult = await context.GetUserAccessTokenAsync();
+                await context.Response.WriteAsJsonAsync(tokenResult.Token);
             });
 
             endpoints.MapGet("/user_token_with_resource/{resource}", async (string resource, HttpContext context) =>
             {
                 var token = await context.GetUserAccessTokenAsync(new UserTokenRequestParameters
                 {
-                    Resource = resource
+                    Resource = Resource.Parse(resource)
                 });
                 await context.Response.WriteAsJsonAsync(token);
             });
