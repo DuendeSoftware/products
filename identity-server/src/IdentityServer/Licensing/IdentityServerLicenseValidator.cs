@@ -64,7 +64,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private void EnsureAdded(ref HashSet<string> hashSet, object lockObject, string key)
+    private static void EnsureAdded(ref HashSet<string> hashSet, object lockObject, string key)
     {
         // Lock free test first.
         if (!hashSet.Contains(key))

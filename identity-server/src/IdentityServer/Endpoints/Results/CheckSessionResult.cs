@@ -35,7 +35,7 @@ internal class CheckSessionHttpWriter : IHttpResponseWriter<CheckSessionResult>
     }
 
     private void AddCspHeaders(HttpContext context) => context.Response.AddScriptCspHeaders(_options.Csp, IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript);
-    private string GetHtml(string cookieName)
+    private static string GetHtml(string cookieName)
     {
         if (cookieName != LastCheckSessionCookieName)
         {

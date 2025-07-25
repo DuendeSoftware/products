@@ -30,7 +30,7 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
     {
     }
 
-    private string GetConsentKey(string subjectId, string clientId, bool useHexEncoding = true)
+    private static string GetConsentKey(string subjectId, string clientId, bool useHexEncoding = true)
     {
         if (useHexEncoding)
         {

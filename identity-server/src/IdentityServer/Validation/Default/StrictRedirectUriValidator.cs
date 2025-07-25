@@ -28,7 +28,9 @@ public class StrictRedirectUriValidator : IRedirectUriValidator
     /// <param name="uris">The uris.</param>
     /// <param name="requestedUri">The requested URI.</param>
     /// <returns></returns>
+#pragma warning disable CA1822 // Changing this on a protected method in a public class would be a breaking change.
     protected bool StringCollectionContainsString(IEnumerable<string> uris, string requestedUri)
+#pragma warning restore CA1822
     {
         if (IEnumerableExtensions.IsNullOrEmpty(uris))
         {

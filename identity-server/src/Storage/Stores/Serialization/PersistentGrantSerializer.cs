@@ -107,7 +107,7 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
         throw new Exception($"Invalid version in persisted grant data: '{container.PersistentGrantDataContainerVersion}'.");
     }
 
-    private void PostProcess(RefreshToken refreshToken)
+    private static void PostProcess(RefreshToken refreshToken)
     {
         if (refreshToken != null && refreshToken.Version < 5)
         {

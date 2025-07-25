@@ -114,7 +114,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
 
     private static bool IsParRequestUri(string requestUri) => requestUri.StartsWith(IdentityServerConstants.PushedAuthorizationRequestUri, StringComparison.Ordinal);
 
-    private string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request) => request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
+    private static string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request) => request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
 
     public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request)
     {
@@ -168,7 +168,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    public AuthorizeRequestValidationResult? ValidatePushedAuthorizationBindingToClient(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, ValidatedAuthorizeRequest authorizeRequest)
+    public static AuthorizeRequestValidationResult? ValidatePushedAuthorizationBindingToClient(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, ValidatedAuthorizeRequest authorizeRequest)
     {
         var parClientId = pushedAuthorizationRequest.PushedParameters.Get(OidcConstants.AuthorizeRequest.ClientId);
         if (parClientId != authorizeRequest.ClientId)
@@ -181,7 +181,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    public AuthorizeRequestValidationResult? ValidatePushedAuthorizationExpiration(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, ValidatedAuthorizeRequest authorizeRequest)
+    public static AuthorizeRequestValidationResult? ValidatePushedAuthorizationExpiration(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, ValidatedAuthorizeRequest authorizeRequest)
     {
         if (DateTime.UtcNow > pushedAuthorizationRequest.ExpiresAtUtc)
         {
@@ -203,7 +203,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    private string? GetReferenceValue(ValidatedAuthorizeRequest request)
+    private static string? GetReferenceValue(ValidatedAuthorizeRequest request)
     {
         var requestUri = request.Raw.Get(OidcConstants.AuthorizeRequest.RequestUri);
         if (requestUri.IsPresent())
@@ -335,9 +335,9 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return Valid(request);
     }
 
-    private AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null) => new AuthorizeRequestValidationResult(request, error, description);
+    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null) => new AuthorizeRequestValidationResult(request, error, description);
 
-    private AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
+    private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
 
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {

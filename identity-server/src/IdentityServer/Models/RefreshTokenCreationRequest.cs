@@ -34,7 +34,7 @@ public class RefreshTokenCreationRequest
     public IEnumerable<string> AuthorizedScopes { get; set; } = default!;
 
     /// <summary>
-    /// The resource indicators. Null indicates there was no authorization step, thus no restrictions. 
+    /// The resource indicators. Null indicates there was no authorization step, thus no restrictions.
     /// Non-null means there was an authorization step, and subsequent requested resource indicators must be in the original list.
     /// </summary>
     public IEnumerable<string>? AuthorizedResourceIndicators { get; set; }
@@ -57,7 +57,9 @@ public class RefreshTokenCreationRequest
     /// <summary>
     /// Called to validate the <see cref="RefreshTokenCreationRequest"/> before it is processed.
     /// </summary>
+#pragma warning disable CA1822 // Changing this on a public method in a public class would be a breaking change.
     public void Validate()
+#pragma warning restore CA1822
     {
         //if (ValidatedResources == null) throw new ArgumentNullException(nameof(ValidatedResources));
         //if (ValidatedRequest == null) throw new ArgumentNullException(nameof(ValidatedRequest));
