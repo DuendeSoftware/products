@@ -48,12 +48,12 @@ public class IdentityServerOptions
     /// <summary>
     /// Emits an aud claim with the format issuer/resources. That's needed for some older access token validation plumbing. Defaults to false.
     /// </summary>
-    public bool EmitStaticAudienceClaim { get; set; } = false;
+    public bool EmitStaticAudienceClaim { get; set; }
 
     /// <summary>
     /// Specifies whether scopes in JWTs are emitted as array or string
     /// </summary>
-    public bool EmitScopesAsSpaceDelimitedStringInJwt { get; set; } = false;
+    public bool EmitScopesAsSpaceDelimitedStringInJwt { get; set; }
 
     /// <summary>
     /// Specifies whether authorize responses contain the iss parameter (https://www.rfc-editor.org/rfc/rfc9207.html)
@@ -63,18 +63,18 @@ public class IdentityServerOptions
     /// <summary>
     /// Specifies whether the s_hash claim gets emitted in identity tokens. Defaults to false.
     /// </summary>
-    public bool EmitStateHash { get; set; } = false;
+    public bool EmitStateHash { get; set; }
 
     /// <summary>
     /// Specifies whether the JWT typ and content-type for JWT secured authorization requests is checked according to IETF spec.
     /// This might break older OIDC conformant request objects.
     /// </summary>
-    public bool StrictJarValidation { get; set; } = false;
+    public bool StrictJarValidation { get; set; }
 
     /// <summary>
     /// Specifies if a user's tenant claim is compared to the tenant acr_values parameter value to determine if the login page is displayed. Defaults to false.
     /// </summary>
-    public bool ValidateTenantOnAuthorization { get; set; } = false;
+    public bool ValidateTenantOnAuthorization { get; set; }
 
     /// <summary>
     /// Gets or sets the endpoint configuration.

@@ -35,7 +35,7 @@ public class ConfigurationStoreOptions
     /// <value>
     /// The default schema.
     /// </value>
-    public string? DefaultSchema { get; set; } = null;
+    public string? DefaultSchema { get; set; }
 
     /// <summary>
     /// Gets or sets the identity resource table configuration.
@@ -216,7 +216,7 @@ public class ConfigurationStoreOptions
     /// <summary>
     /// Gets or set if EF DbContext pooling is enabled.
     /// </summary>
-    public bool EnablePooling { get; set; } = false;
+    public bool EnablePooling { get; set; }
 
     /// <summary>
     /// Gets or set the pool size to use when DbContext pooling is enabled. If not set, the EF default is used.

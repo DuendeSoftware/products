@@ -119,7 +119,7 @@ public class MutualTlsEndpointMiddleware
     }
 
 
-    private bool RequestedHostMatches(HostString requestHost, string configuredDomain)
+    private static bool RequestedHostMatches(HostString requestHost, string configuredDomain)
     {
         // Parse the configured domain which might contain a port
         var configuredHostname = configuredDomain;

@@ -56,9 +56,9 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         return Valid(request);
     }
 
-    private DeviceAuthorizationRequestValidationResult Valid(ValidatedDeviceAuthorizationRequest request) => new DeviceAuthorizationRequestValidationResult(request);
+    private static DeviceAuthorizationRequestValidationResult Valid(ValidatedDeviceAuthorizationRequest request) => new DeviceAuthorizationRequestValidationResult(request);
 
-    private DeviceAuthorizationRequestValidationResult Invalid(ValidatedDeviceAuthorizationRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new DeviceAuthorizationRequestValidationResult(request, error, description);
+    private static DeviceAuthorizationRequestValidationResult Invalid(ValidatedDeviceAuthorizationRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new DeviceAuthorizationRequestValidationResult(request, error, description);
 
     private void LogError(string message, ValidatedDeviceAuthorizationRequest request)
     {

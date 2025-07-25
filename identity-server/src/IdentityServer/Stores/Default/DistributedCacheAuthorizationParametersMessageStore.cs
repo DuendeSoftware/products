@@ -28,7 +28,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
         _handleGenerationService = handleGenerationService;
     }
 
-    private string CacheKeyPrefix => "DistributedCacheAuthorizationParametersMessageStore";
+    private static string CacheKeyPrefix => "DistributedCacheAuthorizationParametersMessageStore";
 
     /// <inheritdoc/>
     public virtual async Task<string> WriteAsync(Message<IDictionary<string, string[]>> message)

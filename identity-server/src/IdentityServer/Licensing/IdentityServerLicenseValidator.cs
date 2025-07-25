@@ -64,7 +64,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private void EnsureAdded(ref HashSet<string> hashSet, object lockObject, string key)
+    private static void EnsureAdded(ref HashSet<string> hashSet, object lockObject, string key)
     {
         // Lock free test first.
         if (!hashSet.Contains(key))
@@ -144,7 +144,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private bool ValidateServerSideSessionsWarned = false;
+    private bool ValidateServerSideSessionsWarned;
     public void ValidateServerSideSessions()
     {
         if (License != null)
@@ -161,7 +161,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private bool CanUseDPoPWarned = false;
+    private bool CanUseDPoPWarned;
     public void ValidateDPoP()
     {
         if (License != null)
@@ -178,7 +178,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private bool ValidateResourceIndicatorsWarned = false;
+    private bool ValidateResourceIndicatorsWarned;
     public void ValidateResourceIndicators(string resourceIndicator)
     {
         if (!string.IsNullOrWhiteSpace(resourceIndicator))
@@ -198,7 +198,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private bool ValidateParWarned = false;
+    private bool ValidateParWarned;
     public void ValidatePar()
     {
         if (License != null)
@@ -234,7 +234,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private bool ValidateDynamicProvidersWarned = false;
+    private bool ValidateDynamicProvidersWarned;
     public void ValidateDynamicProviders()
     {
         if (License != null)
@@ -251,7 +251,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private bool ValidateCibaWarned = false;
+    private bool ValidateCibaWarned;
     public void ValidateCiba()
     {
         if (License != null)

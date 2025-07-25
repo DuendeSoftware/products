@@ -20,7 +20,7 @@ public class Client
     public string Description { get; set; }
     public string ClientUri { get; set; }
     public string LogoUri { get; set; }
-    public bool RequireConsent { get; set; } = false;
+    public bool RequireConsent { get; set; }
     public bool AllowRememberConsent { get; set; } = true;
     public bool AlwaysIncludeUserClaimsInIdToken { get; set; }
     public List<ClientGrantType> AllowedGrantTypes { get; set; }
@@ -43,13 +43,13 @@ public class Client
     public string AllowedIdentityTokenSigningAlgorithms { get; set; }
     public int AccessTokenLifetime { get; set; } = 3600;
     public int AuthorizationCodeLifetime { get; set; } = 300;
-    public int? ConsentLifetime { get; set; } = null;
+    public int? ConsentLifetime { get; set; }
     public int AbsoluteRefreshTokenLifetime { get; set; } = 2592000;
     public int SlidingRefreshTokenLifetime { get; set; } = 1296000;
     public int RefreshTokenUsage { get; set; } = (int)TokenUsage.OneTimeOnly;
     public bool UpdateAccessTokenClaimsOnRefresh { get; set; }
     public int RefreshTokenExpiration { get; set; } = (int)TokenExpiration.Absolute;
-    public int AccessTokenType { get; set; } = 0; // AccessTokenType.Jwt;
+    public int AccessTokenType { get; set; }  // Default is AccessTokenType.Jwt;
     public bool EnableLocalLogin { get; set; } = true;
     public List<ClientIdPRestriction> IdentityProviderRestrictions { get; set; }
     public bool IncludeJwtId { get; set; }

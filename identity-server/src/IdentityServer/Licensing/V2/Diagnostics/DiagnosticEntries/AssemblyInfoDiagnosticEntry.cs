@@ -63,7 +63,7 @@ internal class AssemblyInfoDiagnosticEntry : IDiagnosticEntry
         return Task.CompletedTask;
     }
 
-    private List<Assembly> GetAssemblyInfo()
+    private static List<Assembly> GetAssemblyInfo()
     {
         var assemblies = AssemblyLoadContext.Default.Assemblies
             .OrderBy(a => a.FullName)

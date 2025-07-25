@@ -84,7 +84,7 @@ internal class ClientLoadedTracker : IDisposable
         }
     }
 
-    private bool JsonElementEquals(JsonElement a, JsonElement b)
+    private static bool JsonElementEquals(JsonElement a, JsonElement b)
     {
         if (a.ValueKind != b.ValueKind)
         {

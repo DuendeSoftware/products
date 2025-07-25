@@ -35,7 +35,7 @@ internal class MessageCookie<TModel>
         _protector = provider.CreateProtector(MessageType);
     }
 
-    private string MessageType => typeof(TModel).Name;
+    private static string MessageType => typeof(TModel).Name;
 
     private string Protect(Message<TModel> message)
     {
@@ -52,9 +52,9 @@ internal class MessageCookie<TModel>
         return message;
     }
 
-    private string CookiePrefix => MessageType + ".";
+    private static string CookiePrefix => MessageType + ".";
 
-    private string GetCookieFullName(string id) => CookiePrefix + id;
+    private static string GetCookieFullName(string id) => CookiePrefix + id;
 
     private string CookiePath => _urls.BasePath.CleanUrlPath();
 

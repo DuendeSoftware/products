@@ -77,7 +77,7 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
         }
     }
 
-    private string GetHtml(EndSessionCallbackResult result)
+    private static string GetHtml(EndSessionCallbackResult result)
     {
         var sb = new StringBuilder();
         sb.Append("<!DOCTYPE html><html><style>iframe{{display:none;width:0;height:0;}}</style><body>");

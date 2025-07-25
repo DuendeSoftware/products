@@ -240,7 +240,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         }
     }
 
-    private IQueryable<Entities.ServerSideSession> Filter(IQueryable<Entities.ServerSideSession> query, SessionFilter filter)
+    private static IQueryable<Entities.ServerSideSession> Filter(IQueryable<Entities.ServerSideSession> query, SessionFilter filter)
     {
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
@@ -471,8 +471,8 @@ public class ServerSideSessionStore : IServerSideSessionStore
             var parts = filter.ResultsToken.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (parts != null && parts.Length == 2)
             {
-                int.TryParse(parts[0], out first);
-                int.TryParse(parts[1], out last);
+                _ = int.TryParse(parts[0], out first);
+                _ = int.TryParse(parts[1], out last);
             }
         }
 
@@ -508,8 +508,8 @@ public class ServerSideSessionStore : IServerSideSessionStore
         public int First { get; init; }
         public int Last { get; init; }
         public int CurrentPage { get; set; } = 1;
-        public bool HasNext { get; set; } = false;
-        public bool HasPrev { get; set; } = false;
+        public bool HasNext { get; set; }
+        public bool HasPrev { get; set; }
         public Entities.ServerSideSession[] Items { get; set; } = Array.Empty<Entities.ServerSideSession>();
     }
 }

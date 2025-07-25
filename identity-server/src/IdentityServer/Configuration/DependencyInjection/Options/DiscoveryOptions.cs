@@ -73,7 +73,7 @@ public class DiscoveryOptions
     /// <value>
     /// The cache interval in seconds.
     /// </value>
-    public int? ResponseCacheInterval { get; set; } = null;
+    public int? ResponseCacheInterval { get; set; }
 
     /// <summary>
     /// Adds custom entries to the discovery document

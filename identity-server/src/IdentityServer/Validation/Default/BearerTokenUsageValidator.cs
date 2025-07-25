@@ -88,7 +88,7 @@ internal class BearerTokenUsageValidator
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns></returns>
-    public async Task<BearerTokenUsageValidationResult> ValidatePostBodyAsync(HttpContext context)
+    public static async Task<BearerTokenUsageValidationResult> ValidatePostBodyAsync(HttpContext context)
     {
         var token = (await context.Request.ReadFormAsync())["access_token"].FirstOrDefault();
         if (token.IsPresent())

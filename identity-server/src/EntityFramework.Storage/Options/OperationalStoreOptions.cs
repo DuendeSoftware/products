@@ -35,7 +35,7 @@ public class OperationalStoreOptions
     /// <value>
     /// The default schema.
     /// </value>
-    public string? DefaultSchema { get; set; } = null;
+    public string? DefaultSchema { get; set; }
 
     /// <summary>
     /// Gets or sets the persisted grants table configuration.
@@ -82,7 +82,7 @@ public class OperationalStoreOptions
     /// <value>
     ///   <c>true</c> if [enable token cleanup]; otherwise, <c>false</c>.
     /// </value>
-    public bool EnableTokenCleanup { get; set; } = false;
+    public bool EnableTokenCleanup { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether consumed tokens will be included in the automatic clean up.
@@ -90,7 +90,7 @@ public class OperationalStoreOptions
     /// <value>
     ///   <c>true</c> if consumed tokens are to be included in cleanup; otherwise, <c>false</c>.
     /// </value>
-    public bool RemoveConsumedTokens { get; set; } = false;
+    public bool RemoveConsumedTokens { get; set; }
 
     /// <summary>
     /// Gets or sets the consumed token cleanup delay (in seconds). The default
@@ -98,7 +98,7 @@ public class OperationalStoreOptions
     /// marked as consumed can be deleted. Note that only refresh tokens with
     /// OneTimeOnly usage can be marked as consumed.
     /// </summary>
-    public int ConsumedTokenCleanupDelay { get; set; } = 0;
+    public int ConsumedTokenCleanupDelay { get; set; }
 
     /// <summary>
     /// Gets or sets the token cleanup interval (in seconds). The default is 3600 (1 hour).
@@ -129,7 +129,7 @@ public class OperationalStoreOptions
     /// <summary>
     /// Gets or set if EF DbContext pooling is enabled.
     /// </summary>
-    public bool EnablePooling { get; set; } = false;
+    public bool EnablePooling { get; set; }
 
     /// <summary>
     /// Gets or set the pool size to use when DbContext pooling is enabled. If not set, the EF default is used.

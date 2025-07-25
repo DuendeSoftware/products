@@ -409,7 +409,7 @@ internal class TokenValidator : ITokenValidator
         };
     }
 
-    private IEnumerable<Claim> ReferenceTokenToClaims(Token token)
+    private static IEnumerable<Claim> ReferenceTokenToClaims(Token token)
     {
         var claims = new List<Claim>
         {
@@ -458,7 +458,7 @@ internal class TokenValidator : ITokenValidator
         }
     }
 
-    private TokenValidationResult Invalid(string error) => new TokenValidationResult
+    private static TokenValidationResult Invalid(string error) => new TokenValidationResult
     {
         IsError = true,
         Error = error

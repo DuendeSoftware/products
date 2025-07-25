@@ -110,7 +110,7 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
                     }
                     break;
                 case Telemetry.Metrics.Tags.RefreshTokenIssued:
-                    bool.TryParse(tag.Value?.ToString(), out refreshTokenIssued);
+                    _ = bool.TryParse(tag.Value?.ToString(), out refreshTokenIssued);
                     break;
                 case Telemetry.Metrics.Tags.ProofType:
                     if (!Enum.TryParse(tag.Value?.ToString(), out proofType))
@@ -119,10 +119,10 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
                     }
                     break;
                 case Telemetry.Metrics.Tags.AccessTokenIssued:
-                    bool.TryParse(tag.Value?.ToString(), out accessTokenIssued);
+                    _ = bool.TryParse(tag.Value?.ToString(), out accessTokenIssued);
                     break;
                 case Telemetry.Metrics.Tags.IdTokenIssued:
-                    bool.TryParse(tag.Value?.ToString(), out identityTokenIssued);
+                    _ = bool.TryParse(tag.Value?.ToString(), out identityTokenIssued);
                     break;
                 case Telemetry.Metrics.Tags.GrantType:
                     grantType = tag.Value?.ToString();

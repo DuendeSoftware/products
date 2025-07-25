@@ -10,7 +10,9 @@ namespace Duende.IdentityServer.Configuration.EntityFramework;
 /// <summary>
 /// Provides cancellation tokens based on the incoming http request
 /// </summary>
+#pragma warning disable CA1812 // This class is not instantiated directly, but rather used by the DI container
 internal class DefaultCancellationTokenProvider : ICancellationTokenProvider
+#pragma warning restore CA1812
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 

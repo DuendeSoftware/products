@@ -88,7 +88,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
 
     public Task ForbidAsync(HttpContext context, string scheme, AuthenticationProperties properties) => _inner.ForbidAsync(context, scheme, properties);
 
-    private void AssertRequiredClaims(ClaimsPrincipal principal)
+    private static void AssertRequiredClaims(ClaimsPrincipal principal)
     {
         // for now, we don't allow more than one identity in the principal/cookie
         if (principal.Identities.Count() != 1)
