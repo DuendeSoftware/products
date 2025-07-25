@@ -51,7 +51,7 @@ public class DefaultIssuerNameService : IIssuerNameService
                         // so the issuer we use is from the parent domain (e.g. "acme.com")
                         //
                         // Host.Value is used to get unicode hostname, instead of ToUriComponent (aka punycode)
-                        origin = request.Scheme + "://" + request.Host.Value.Substring(_options.MutualTls.DomainName.Length + 1);
+                        origin = string.Concat(request.Scheme, "://", request.Host.Value.AsSpan(_options.MutualTls.DomainName.Length + 1));
                     }
                 }
             }
