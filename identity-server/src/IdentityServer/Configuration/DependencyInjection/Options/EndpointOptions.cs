@@ -20,9 +20,9 @@ public class EndpointsOptions
     public bool EnableAuthorizeEndpoint { get; set; } = true;
 
     /// <summary>
-    /// Gets or sets if JWT request_uri processing is enabled on the authorize endpoint. 
+    /// Gets or sets if JWT request_uri processing is enabled on the authorize endpoint.
     /// </summary>
-    public bool EnableJwtRequestUri { get; set; } = false;
+    public bool EnableJwtRequestUri { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the token endpoint is enabled.
