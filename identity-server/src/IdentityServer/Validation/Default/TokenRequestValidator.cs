@@ -1222,7 +1222,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         return Valid();
     }
 
-    private bool ValidateCodeVerifierAgainstCodeChallenge(string codeVerifier, string codeChallenge, string codeChallengeMethod)
+    private static bool ValidateCodeVerifierAgainstCodeChallenge(string codeVerifier, string codeChallenge, string codeChallengeMethod)
     {
         if (codeChallengeMethod == OidcConstants.CodeChallengeMethods.Plain)
         {

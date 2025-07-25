@@ -152,7 +152,7 @@ internal class PushedAuthorizationRequestValidator(
     /// context.</param>
     /// <returns>A task containing the <see
     /// cref="PushedAuthorizationValidationResult"/>.</returns>
-    private Task<PushedAuthorizationValidationResult> ValidateRequestUriAsync(PushedAuthorizationRequestValidationContext context)
+    private static Task<PushedAuthorizationValidationResult> ValidateRequestUriAsync(PushedAuthorizationRequestValidationContext context)
     {
         // Reject request_uri parameter
         if (context.RequestParameters.Get(OidcConstants.AuthorizeRequest.RequestUri).IsPresent())

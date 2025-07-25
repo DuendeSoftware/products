@@ -28,7 +28,7 @@ public class DistributedCacheStateDataFormatter : ISecureDataFormat<Authenticati
         _name = name;
     }
 
-    private string CacheKeyPrefix => "DistributedCacheStateDataFormatter";
+    private static string CacheKeyPrefix => "DistributedCacheStateDataFormatter";
 
     private IDistributedCache Cache => _provider.GetRequiredService<IDistributedCache>();
     private IDataProtector Protector => _provider.GetRequiredService<IDataProtectionProvider>().CreateProtector(CacheKeyPrefix, _name);

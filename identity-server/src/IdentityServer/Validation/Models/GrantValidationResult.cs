@@ -147,7 +147,7 @@ public class GrantValidationResult : ValidationResult
         CustomResponse = customResponse;
     }
 
-    private string ConvertTokenErrorEnumToString(TokenRequestErrors error) => error switch
+    private static string ConvertTokenErrorEnumToString(TokenRequestErrors error) => error switch
     {
         TokenRequestErrors.InvalidClient => OidcConstants.TokenErrors.InvalidClient,
         TokenRequestErrors.InvalidGrant => OidcConstants.TokenErrors.InvalidGrant,

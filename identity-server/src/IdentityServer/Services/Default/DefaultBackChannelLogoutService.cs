@@ -161,7 +161,9 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// </summary>
     /// <param name="request"></param>
     /// <returns>The claims to include in the token.</returns>
+#pragma warning disable CA1822 // Changing this on a protected method in a public class would be a breaking change.
     protected Task<IEnumerable<Claim>> CreateClaimsForTokenAsync(BackChannelLogoutRequest request)
+#pragma warning restore CA1822
     {
         if (request.SessionIdRequired && request.SessionId == null)
         {

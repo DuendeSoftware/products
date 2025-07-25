@@ -67,7 +67,7 @@ public class CachingResourceStore<T> : IResourceStore
         _apiResourceNames = apiResourceNames;
     }
 
-    private string GetKey(IEnumerable<string> names)
+    private static string GetKey(IEnumerable<string> names)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingResourceStore.GetKey");
 
@@ -119,7 +119,7 @@ public class CachingResourceStore<T> : IResourceStore
 
         if (uncachedScopes.Any())
         {
-            // now we need to lookup the remaining items. it's possible this is happening concurrently, so 
+            // now we need to lookup the remaining items. it's possible this is happening concurrently, so
             // we're going to use the "allcache" to throttle this lookup since the cache has concurrency lock.
             // also, the "allcache" conveniently holds Resources objects so it can handle all three of our resource types.
             // the results will then be put into the correct and specific cache as individual items for subsequent lookups.
@@ -225,7 +225,7 @@ public class CachingResourceStore<T> : IResourceStore
 
         if (uncachedNames.Any())
         {
-            // now we need to lookup the remaining items. it's possible this is happening concurrently, so 
+            // now we need to lookup the remaining items. it's possible this is happening concurrently, so
             // we're going to use the "allcache" to throttle this lookup since the cache has concurrency lock.
             // also, the "allcache" conveniently holds Resources objects so it can handle all three of our resource types.
             // the results will then be put into the correct and specific cache as individual items for subsequent lookups.

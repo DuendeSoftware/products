@@ -159,7 +159,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
         return notfound;
     }
 
-    private string UrlDecode(string value)
+    private static string UrlDecode(string value)
     {
         if (value.IsMissing())
         {

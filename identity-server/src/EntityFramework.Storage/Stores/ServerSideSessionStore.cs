@@ -240,7 +240,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         }
     }
 
-    private IQueryable<Entities.ServerSideSession> Filter(IQueryable<Entities.ServerSideSession> query, SessionFilter filter)
+    private static IQueryable<Entities.ServerSideSession> Filter(IQueryable<Entities.ServerSideSession> query, SessionFilter filter)
     {
         if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {

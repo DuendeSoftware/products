@@ -34,8 +34,7 @@ public class Authorize_ProtocolValidation_Valid_PAR
             ClientId = differentClientInAuthorizeRequest
         };
 
-        var validator = Factory.CreateRequestObjectValidator();
-        var result = validator.ValidatePushedAuthorizationBindingToClient(par, request);
+        var result = RequestObjectValidator.ValidatePushedAuthorizationBindingToClient(par, request);
 
         result.ShouldNotBeNull();
         result.IsError.ShouldBe(true);
@@ -55,7 +54,7 @@ public class Authorize_ProtocolValidation_Valid_PAR
         };
 
         var validator = Factory.CreateRequestObjectValidator();
-        var result = validator.ValidatePushedAuthorizationExpiration(par, authorizeRequest);
+        var result = RequestObjectValidator.ValidatePushedAuthorizationExpiration(par, authorizeRequest);
 
         result.ShouldNotBeNull();
         result.IsError.ShouldBe(true);

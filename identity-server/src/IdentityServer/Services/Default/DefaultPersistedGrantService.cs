@@ -131,7 +131,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
         return Enumerable.Empty<Grant>();
     }
 
-    private IEnumerable<Grant> Join(IEnumerable<Grant> first, IEnumerable<Grant> second)
+    private static IEnumerable<Grant> Join(IEnumerable<Grant> first, IEnumerable<Grant> second)
     {
         var list = first.ToList();
 
