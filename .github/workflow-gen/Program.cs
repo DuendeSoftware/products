@@ -237,7 +237,7 @@ void GenerateReleaseWorkflow(Product product)
 
     job.Step()
         .Name("Validate Version Input")
-        .Run($@"echo '{contexts.Event.Input.Version}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$'");
+        .Run($@"echo '{contexts.Event.Input.Version}' | grep -P '^\d+\.\d+\.\d+(-preview\.\d+|-rc\.\d+)?$' || (echo 'Invalid version format' && exit 1)");
 
     job.StepGitCheckoutCustomBranch();
     job.StepGitConfig();

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version in format X.Y.Z or X.Y.Z-preview.'
+        description: 'Version in format X.Y.Z, X.Y.Z-preview.N, or X.Y.Z-rc.N'
         type: string
         required: true
         default: '0.0.0'
