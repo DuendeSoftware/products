@@ -56,6 +56,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     /// </summary>
     protected readonly ILogger Logger;
 
+    private static readonly string[] SubjectTypesSupported = ["public"];
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DiscoveryResponseGenerator"/> class.
     /// </summary>
@@ -345,7 +347,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, signingAlgorithms);
         }
 
-        entries.Add(OidcConstants.Discovery.SubjectTypesSupported, new[] { "public" });
+        entries.Add(OidcConstants.Discovery.SubjectTypesSupported, SubjectTypesSupported);
         entries.Add(OidcConstants.Discovery.CodeChallengeMethodsSupported, new[] { OidcConstants.CodeChallengeMethods.Plain, OidcConstants.CodeChallengeMethods.Sha256 });
 
         if (Options.Endpoints.EnableAuthorizeEndpoint)
