@@ -60,7 +60,7 @@ public class TokenCleanupHost : IHostedService
     /// <summary>
     /// Stops the token cleanup polling.
     /// </summary>
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         if (_options.EnableTokenCleanup)
         {
@@ -71,11 +71,9 @@ public class TokenCleanupHost : IHostedService
 
             _logger.LogDebug("Stopping grant removal");
 
-            _source.Cancel();
+            await _source.CancelAsync();
             _source = null;
         }
-
-        return Task.CompletedTask;
     }
 
     private async Task StartInternalAsync(CancellationToken cancellationToken)
