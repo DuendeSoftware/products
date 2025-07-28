@@ -14,7 +14,7 @@ namespace Duende.IdentityServer;
 /// <summary>
 /// Model properties of an IdentityServer user
 /// </summary>
-internal class IdentityServerUser
+internal sealed class IdentityServerUser
 {
     /// <summary>
     /// Subject ID (mandatory)

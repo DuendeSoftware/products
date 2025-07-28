@@ -429,7 +429,7 @@ public class Client
         }
     }
 
-    internal class GrantTypeValidatingHashSet : ICollection<string>
+    internal sealed class GrantTypeValidatingHashSet : ICollection<string>
     {
         private readonly ICollection<string> _inner;
 

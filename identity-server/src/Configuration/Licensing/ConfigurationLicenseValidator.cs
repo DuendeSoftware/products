@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Duende.IdentityServer;
 
 // APIs needed for IdentityServer specific license validation
-internal class ConfigurationLicenseValidator : LicenseValidator<ConfigurationLicense>
+internal sealed class ConfigurationLicenseValidator : LicenseValidator<ConfigurationLicense>
 {
     internal readonly static ConfigurationLicenseValidator Instance = new ConfigurationLicenseValidator();
 
