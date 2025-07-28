@@ -396,7 +396,9 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         {
             foreach (var (key, value) in Options.Discovery.CustomEntries)
             {
+#pragma warning disable CA1864 // Keep to avoid unnecessary string manipulations if we have duplicate keys
                 if (entries.ContainsKey(key))
+#pragma warning restore CA1864
                 {
                     Logger.LogError("Discovery custom entry {key} cannot be added, because it already exists.", key);
                 }
