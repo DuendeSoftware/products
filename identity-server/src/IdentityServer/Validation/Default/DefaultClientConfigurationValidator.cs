@@ -83,7 +83,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <returns></returns>
     protected virtual Task ValidateGrantTypesAsync(ClientConfigurationValidationContext context)
     {
-        if (context.Client.AllowedGrantTypes?.Any() != true)
+        if (context.Client.AllowedGrantTypes?.Count == 0)
         {
             context.SetError("no allowed grant type specified");
         }
@@ -140,7 +140,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <returns></returns>
     protected virtual Task ValidateRedirectUriAsync(ClientConfigurationValidationContext context)
     {
-        if (context.Client.AllowedGrantTypes?.Any() == true)
+        if (context.Client.AllowedGrantTypes?.Count > 0)
         {
             if (context.Client.AllowedGrantTypes.Contains(GrantType.AuthorizationCode) ||
                 context.Client.AllowedGrantTypes.Contains(GrantType.Hybrid) ||
@@ -152,7 +152,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
                 var allowedByPar = _options.PushedAuthorization.AllowUnregisteredPushedRedirectUris &&
                     context.Client.RequireClientSecret;
 
-                if (context.Client.RedirectUris?.Any() == false &&
+                if (context.Client.RedirectUris?.Count == 0 &&
                     !allowedByPar)
                 {
                     context.SetError("No redirect URI configured.");
@@ -170,7 +170,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <returns></returns>
     protected virtual Task ValidateAllowedCorsOriginsAsync(ClientConfigurationValidationContext context)
     {
-        if (context.Client.AllowedCorsOrigins?.Any() == true)
+        if (context.Client.AllowedCorsOrigins.Count > 0)
         {
             foreach (var origin in context.Client.AllowedCorsOrigins)
             {
@@ -211,7 +211,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <returns></returns>
     protected virtual Task ValidateUriSchemesAsync(ClientConfigurationValidationContext context)
     {
-        if (context.Client.RedirectUris?.Any() == true)
+        if (context.Client.RedirectUris?.Count > 0)
         {
             foreach (var uri in context.Client.RedirectUris)
             {
@@ -223,7 +223,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
             }
         }
 
-        if (context.Client.PostLogoutRedirectUris?.Any() == true)
+        if (context.Client.PostLogoutRedirectUris?.Count > 0)
         {
             foreach (var uri in context.Client.PostLogoutRedirectUris)
             {
@@ -245,7 +245,7 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <returns></returns>
     protected virtual Task ValidateSecretsAsync(ClientConfigurationValidationContext context)
     {
-        if (context.Client.AllowedGrantTypes?.Any() == true)
+        if (context.Client.AllowedGrantTypes?.Count > 0)
         {
             foreach (var grantType in context.Client.AllowedGrantTypes)
             {

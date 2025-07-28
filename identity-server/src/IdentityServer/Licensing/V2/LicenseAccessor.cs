@@ -44,7 +44,7 @@ internal class LicenseAccessor(IdentityServerOptions options, ILogger<LicenseAcc
             }
 
             var licenseClaims = ValidateKey(key);
-            return licenseClaims.Any() ? // (ValidateKey will return an empty collection if it fails)
+            return licenseClaims.Length > 0 ? // (ValidateKey will return an empty collection if it fails)
                 new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims))) : new License();
         }
     }

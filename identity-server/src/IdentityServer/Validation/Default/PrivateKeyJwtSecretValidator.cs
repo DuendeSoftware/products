@@ -79,7 +79,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             return fail;
         }
 
-        if (!trustedKeys.Any())
+        if (trustedKeys.Count == 0)
         {
             _logger.LogError("There are no keys available to validate client assertion.");
             return fail;

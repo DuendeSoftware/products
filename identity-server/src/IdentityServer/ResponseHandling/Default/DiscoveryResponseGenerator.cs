@@ -191,7 +191,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                     mtlsEndpoints.Add(OidcConstants.Discovery.PushedAuthorizationRequestEndpoint, ConstructMtlsEndpoint(ProtocolRoutePaths.PushedAuthorization));
                 }
 
-                if (mtlsEndpoints.Any())
+                if (mtlsEndpoints.Count > 0)
                 {
                     entries.Add(OidcConstants.Discovery.MtlsEndpointAliases, mtlsEndpoints);
                 }
@@ -254,7 +254,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 scopes.Add(StandardScopes.OfflineAccess);
             }
 
-            if (scopes.Any())
+            if (scopes.Count > 0)
             {
                 entries.Add(OidcConstants.Discovery.ScopesSupported, scopes.ToArray());
             }
@@ -365,7 +365,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 entries.Add(OidcConstants.Discovery.RequestUriParameterSupported, true);
             }
 
-            if (Options.UserInteraction.PromptValuesSupported?.Any() == true)
+            if (Options.UserInteraction.PromptValuesSupported?.Count > 0)
             {
                 entries.Add(OidcConstants.Discovery.PromptValuesSupported, Options.UserInteraction.PromptValuesSupported.ToArray());
             }

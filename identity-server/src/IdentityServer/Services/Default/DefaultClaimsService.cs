@@ -128,7 +128,7 @@ public class DefaultClaimsService : IClaimsService
         }
 
         // check for client claims
-        if (request.ClientClaims != null && request.ClientClaims.Any())
+        if (request.ClientClaims != null && request.ClientClaims.Count > 0)
         {
             if (subject == null || request.Client.AlwaysSendClientClaims)
             {

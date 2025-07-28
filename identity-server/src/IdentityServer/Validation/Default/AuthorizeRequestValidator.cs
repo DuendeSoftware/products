@@ -514,12 +514,12 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
 
         if (!validatedResources.Succeeded)
         {
-            if (validatedResources.InvalidResourceIndicators.Any())
+            if (validatedResources.InvalidResourceIndicators.Count > 0)
             {
                 return Invalid(request, OidcConstants.AuthorizeErrors.InvalidTarget, "Invalid resource indicator");
             }
 
-            if (validatedResources.InvalidScopes.Any())
+            if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(request, OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope");
             }
@@ -528,13 +528,13 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         _licenseUsage.ResourceIndicatorsUsed(resourceIndicators);
         IdentityServerLicenseValidator.Instance.ValidateResourceIndicators(resourceIndicators);
 
-        if (validatedResources.Resources.IdentityResources.Any() && !request.IsOpenIdRequest)
+        if (validatedResources.Resources.IdentityResources.Count > 0 && !request.IsOpenIdRequest)
         {
             LogError("Identity related scope requests, but no openid scope", request);
             return Invalid(request, OidcConstants.AuthorizeErrors.InvalidScope, "Identity scopes requested, but openid scope is missing");
         }
 
-        if (validatedResources.Resources.ApiScopes.Any())
+        if (validatedResources.Resources.ApiScopes.Count > 0)
         {
             request.IsApiResourceRequest = true;
         }
@@ -546,21 +546,21 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         switch (requirement)
         {
             case Constants.ScopeRequirement.Identity:
-                if (!validatedResources.Resources.IdentityResources.Any())
+                if (validatedResources.Resources.IdentityResources.Count == 0)
                 {
                     _sanitizedLogger.LogError("Requests for id_token response type must include identity scopes");
                     responseTypeValidationCheck = false;
                 }
                 break;
             case Constants.ScopeRequirement.IdentityOnly:
-                if (!validatedResources.Resources.IdentityResources.Any() || validatedResources.Resources.ApiScopes.Any())
+                if (validatedResources.Resources.IdentityResources.Count == 0 || validatedResources.Resources.ApiScopes.Count > 0)
                 {
                     _sanitizedLogger.LogError("Requests for id_token response type only must not include resource scopes");
                     responseTypeValidationCheck = false;
                 }
                 break;
             case Constants.ScopeRequirement.ResourceOnly:
-                if (validatedResources.Resources.IdentityResources.Any() || !validatedResources.Resources.ApiScopes.Any())
+                if (validatedResources.Resources.IdentityResources.Count > 0 || validatedResources.Resources.ApiScopes.Count == 0)
                 {
                     _sanitizedLogger.LogError("Requests for token response type only must include resource scopes, but no identity scopes.");
                     responseTypeValidationCheck = false;
@@ -759,7 +759,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         if (idp.IsPresent())
         {
             // if idp is present but client does not allow it, strip it from the request message
-            if (request.Client.IdentityProviderRestrictions != null && request.Client.IdentityProviderRestrictions.Any())
+            if (request.Client.IdentityProviderRestrictions != null && request.Client.IdentityProviderRestrictions.Count > 0)
             {
                 if (!request.Client.IdentityProviderRestrictions.Contains(idp))
                 {

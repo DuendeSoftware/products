@@ -41,7 +41,7 @@ public static class HttpResponseExtensions
                 response.Headers.Append("Cache-Control", $"max-age={maxAge}");
             }
 
-            if (varyBy?.Any() == true)
+            if (varyBy?.Length > 0)
             {
                 var vary = varyBy.Aggregate((x, y) => x + ',' + y);
                 if (response.Headers.ContainsKey("Vary"))

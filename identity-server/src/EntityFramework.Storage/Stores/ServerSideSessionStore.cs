@@ -420,7 +420,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         }
 
         // how many are to the left of these results?
-        if (pagination.Items.Any())
+        if (pagination.Items.Length > 0)
         {
             var priorCountId = pagination.Items[0].Id;
             var priorCount = await query.CountAsync(x => x.Id < last, cancellationToken);
@@ -451,7 +451,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         }
 
         // how many are to the right of these results?
-        if (pagination.Items.Any())
+        if (pagination.Items.Length > 0)
         {
             var postCountId = pagination.Items[pagination.Items.Length - 1].Id;
             var postCount = await query.CountAsync(x => x.Id > postCountId, cancellationToken);

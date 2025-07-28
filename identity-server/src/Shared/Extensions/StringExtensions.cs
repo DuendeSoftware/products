@@ -40,7 +40,7 @@ internal static class StringExtensions
         scopes = scopes.Trim();
         var parsedScopes = scopes.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList();
 
-        if (parsedScopes.Any())
+        if (parsedScopes.Count > 0)
         {
             parsedScopes.Sort();
             return parsedScopes;

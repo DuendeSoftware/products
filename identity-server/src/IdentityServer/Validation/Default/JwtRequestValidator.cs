@@ -110,7 +110,7 @@ public class JwtRequestValidator : IJwtRequestValidator
             return fail;
         }
 
-        if (!trustedKeys.Any())
+        if (trustedKeys.Count == 0)
         {
             Logger.LogError("There are no keys available to validate JWT.");
             return fail;

@@ -276,7 +276,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         }
         // check external idp restrictions if user not using local idp
         else if (request.Client.IdentityProviderRestrictions != null &&
-                 request.Client.IdentityProviderRestrictions.Any() &&
+                 request.Client.IdentityProviderRestrictions.Count > 0 &&
                  !request.Client.IdentityProviderRestrictions.Contains(currentIdp))
         {
             Logger.LogInformation("Showing login: User is logged in with idp: {idp}, but idp not in client restriction list.", currentIdp);

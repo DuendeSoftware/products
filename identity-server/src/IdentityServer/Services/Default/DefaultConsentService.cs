@@ -162,7 +162,7 @@ public class DefaultConsentService : IConsentService
             var clientId = client.ClientId;
 
             var scopes = parsedScopes?.Select(x => x.RawValue).ToArray();
-            if (scopes != null && scopes.Any())
+            if (scopes != null && scopes.Length > 0)
             {
                 Logger.LogDebug("Client allows remembering consent, and consent given. Updating consent store for subject: {subject}", subject.GetSubjectId());
 

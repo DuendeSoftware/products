@@ -169,12 +169,12 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
         if (!validatedResources.Succeeded)
         {
-            if (validatedResources.InvalidResourceIndicators.Any())
+            if (validatedResources.InvalidResourceIndicators.Count > 0)
             {
                 return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidTarget, "Invalid resource indicator");
             }
 
-            if (validatedResources.InvalidScopes.Any())
+            if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidScope, "Invalid scope");
             }
@@ -251,7 +251,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
                 // check if idp is present but client does not allow it, and then ignore it
                 if (_validatedRequest.Client.IdentityProviderRestrictions != null &&
-                    _validatedRequest.Client.IdentityProviderRestrictions.Any())
+                    _validatedRequest.Client.IdentityProviderRestrictions.Count > 0)
                 {
                     if (!_validatedRequest.Client.IdentityProviderRestrictions.Contains(idp))
                     {

@@ -205,7 +205,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             }
 
             // how many are to the right of these results?
-            if (items.Any())
+            if (items.Length > 0)
             {
                 var postCountId = items[items.Length - 1].Key;
                 var postCount = query.Where(x => string.Compare(x.Key, postCountId, StringComparison.Ordinal) > 0).Count();
@@ -241,7 +241,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             }
 
             // how many are to the left of these results?
-            if (items.Any())
+            if (items.Length > 0)
             {
                 var priorCountId = items[0].Key;
                 var priorCount = query.Where(x => string.Compare(x.Key, priorCountId, StringComparison.Ordinal) < 0).Count();

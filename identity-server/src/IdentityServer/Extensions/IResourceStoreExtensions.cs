@@ -39,7 +39,7 @@ public static class IResourceStoreExtensions
         // we can do this, since it's hard to get the values in the store.
         var identityScopeNames = identity.Select(x => x.Name).ToArray();
         var dups = GetDuplicates(identityScopeNames);
-        if (dups.Any())
+        if (dups.Length > 0)
         {
             var names = dups.Aggregate((x, y) => x + ", " + y);
             throw new Exception(
@@ -48,7 +48,7 @@ public static class IResourceStoreExtensions
 
         var apiNames = apiResources.Select(x => x.Name);
         dups = GetDuplicates(apiNames);
-        if (dups.Any())
+        if (dups.Length > 0)
         {
             var names = dups.Aggregate((x, y) => x + ", " + y);
             throw new Exception(
@@ -57,7 +57,7 @@ public static class IResourceStoreExtensions
 
         var scopesNames = apiScopes.Select(x => x.Name);
         dups = GetDuplicates(scopesNames);
-        if (dups.Any())
+        if (dups.Length > 0)
         {
             var names = dups.Aggregate((x, y) => x + ", " + y);
             throw new Exception(
@@ -65,7 +65,7 @@ public static class IResourceStoreExtensions
         }
 
         var overlap = identityScopeNames.Intersect(scopesNames).ToArray();
-        if (overlap.Any())
+        if (overlap.Length > 0)
         {
             var names = overlap.Aggregate((x, y) => x + ", " + y);
             throw new Exception(

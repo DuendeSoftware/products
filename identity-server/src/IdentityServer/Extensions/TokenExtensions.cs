@@ -45,7 +45,7 @@ public static class TokenExtensions
             payload.Add(JwtClaimTypes.Expiration, exp);
 
             // add audience claim(s)
-            if (token.Audiences.Any())
+            if (token.Audiences.Count > 0)
             {
                 if (token.Audiences.Count == 1)
                 {

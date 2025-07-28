@@ -24,5 +24,5 @@ public class ParsedScopesResult
     /// <summary>
     /// Indicates if the result of parsing the scopes was successful.
     /// </summary>
-    public bool Succeeded => Errors == null || !Errors.Any();
+    public bool Succeeded => Errors == null || Errors.Count == 0;
 }

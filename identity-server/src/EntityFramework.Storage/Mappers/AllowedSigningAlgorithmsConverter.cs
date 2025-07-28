@@ -8,7 +8,7 @@ internal static class AllowedSigningAlgorithmsConverter
 {
     public static string Convert(ICollection<string> sourceMember)
     {
-        if (sourceMember == null || !sourceMember.Any())
+        if (sourceMember == null || sourceMember.Count == 0)
         {
             return null;
         }
