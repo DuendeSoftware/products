@@ -437,9 +437,9 @@ public class Client
 
         public GrantTypeValidatingHashSet(IEnumerable<string> values) => _inner = new HashSet<string>(values);
 
-        private ICollection<string> Clone() => new HashSet<string>(this);
+        private HashSet<string> Clone() => new HashSet<string>(this);
 
-        private ICollection<string> CloneWith(params string[] values)
+        private HashSet<string> CloneWith(params string[] values)
         {
             var clone = Clone();
             foreach (var item in values)

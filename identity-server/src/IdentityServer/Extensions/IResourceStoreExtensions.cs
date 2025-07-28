@@ -73,7 +73,7 @@ public static class IResourceStoreExtensions
         }
     }
 
-    private static IEnumerable<string> GetDuplicates(IEnumerable<string> names)
+    private static string[] GetDuplicates(IEnumerable<string> names)
     {
         var duplicates = names
             .GroupBy(x => x)
