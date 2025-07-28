@@ -177,7 +177,9 @@ public class IdentityServerTools : IIdentityServerTools
         {
             claims.Add(new Claim(
                 JwtClaimTypes.Audience,
+#pragma warning disable CA1863 // Would require changing a public const on a public class and be a breaking change
                 string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync()).EnsureTrailingSlash())));
+#pragma warning restore CA1863
         }
 
         if (!IEnumerableExtensions.IsNullOrEmpty(audiences))

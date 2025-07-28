@@ -206,7 +206,9 @@ public class DefaultTokenService : ITokenService
 
         if (Options.EmitStaticAudienceClaim)
         {
+#pragma warning disable CA1863 // Would require changing a public const on a public class and be a breaking change
             token.Audiences.Add(string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, issuer.EnsureTrailingSlash()));
+#pragma warning restore CA1863
         }
 
         // add cnf if present
