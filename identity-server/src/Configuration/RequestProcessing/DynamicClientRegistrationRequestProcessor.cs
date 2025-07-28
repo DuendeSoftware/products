@@ -56,8 +56,8 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
         }
         else if (clientSecretResult is SuccessfulStep)
         {
-            if (context.Items.ContainsKey("secret") && context.Items["secret"] is Secret s &&
-               context.Items.ContainsKey("plainText") && context.Items["plainText"] is string pt)
+            if (context.Items.TryGetValue("secret", out var secretValue) && secretValue is Secret s &&
+               context.Items.TryGetValue("plainText", out var plainTextValue) && plainTextValue is string pt)
             {
                 secret = s;
                 plainText = pt;
