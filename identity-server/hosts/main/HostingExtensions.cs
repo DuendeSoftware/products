@@ -1,12 +1,15 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityServer;
 using IdentityServerHost.Extensions;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
@@ -16,7 +19,23 @@ internal static class HostingExtensions
 {
     internal static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
+        builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+        builder.Services.Configure<RequestLocalizationOptions>(options =>
+        {
+            var supportedCultures = new[]
+            {
+                new CultureInfo("en-US"),
+                new CultureInfo("nb-NO")
+            };
+
+            options.SupportedCultures = supportedCultures;
+            options.SupportedUICultures = supportedCultures;
+            options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(supportedCultures[0]);
+        });
+
         builder.Services.AddRazorPages()
+            .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
             .AddRazorRuntimeCompilation();
 
         builder.Services.AddControllers();
@@ -131,6 +150,10 @@ internal static class HostingExtensions
         app.UseStaticFiles();
 
         app.UseRouting();
+
+        var locOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>();
+        app.UseRequestLocalization(locOptions.Value);
+
         app.UseIdentityServer();
         app.UseAuthorization();
 

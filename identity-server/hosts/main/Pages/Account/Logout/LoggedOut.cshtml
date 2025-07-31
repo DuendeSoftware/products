@@ -1,10 +1,12 @@
 @page
+@using Microsoft.AspNetCore.Mvc.Localization
 @model IdentityServerHost.Pages.Logout.LoggedOut
+@inject IViewLocalizer ViewLocalizer
 
 <div class="logged-out-page">
     <h1>
-        Logout
-        <small>You are now logged out</small>
+      @ViewLocalizer["Logout"]
+        <small>@ViewLocalizer["You are now logged out"]</small>
     </h1>
 
     @if (Model.View.PostLogoutRedirectUri != null)
