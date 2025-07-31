@@ -2,10 +2,17 @@
 // See LICENSE in the project root for license information.
 
 using System.Globalization;
+using System.Resources;
 using System.Text;
 using Duende.IdentityServer.Licensing;
 using IdentityServerHost;
+using Microsoft.Extensions.Localization;
 using Serilog;
+
+// Note: This is necessary for localization to work correctly since our root namespace does
+// not match the assembly name.
+[assembly: RootNamespace("IdentityServerHost")]
+[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.MainAssembly)]
 
 SerilogDefaults.Bootstrap();
 
