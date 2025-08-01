@@ -10,6 +10,7 @@
     <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
     <MinVerTagPrefix>is-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
+    <IsIdSrvProject>true</IsIdSrvProject>
   </PropertyGroup>
 
   <PropertyGroup>
