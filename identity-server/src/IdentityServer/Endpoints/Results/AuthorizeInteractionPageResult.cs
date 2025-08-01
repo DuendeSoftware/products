@@ -53,6 +53,7 @@ public abstract class AuthorizeInteractionPageResult : EndpointResult<AuthorizeI
 internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<AuthorizeInteractionPageResult>
 {
     private readonly IServerUrls _urls;
+    private readonly IUiLocalesService _localesService;
     private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;
 
     /// <summary>
@@ -60,9 +61,11 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
     /// </summary>
     public AuthorizeInteractionPageHttpWriter(
         IServerUrls urls,
+        IUiLocalesService localesService,
         IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
     {
         _urls = urls;
+        _localesService = localesService;
         _authorizationParametersMessageStore = authorizationParametersMessageStore;
     }
 
@@ -111,6 +114,11 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
             // this converts the relative redirect path to an absolute one if we're
             // redirecting to a different server
             returnUrl = _urls.Origin + returnUrl;
+        }
+        else
+        {
+            // if we're redirecting to a local URL, ensure we persist the UI locales in a way .net's localization will pick them up
+            await _localesService.StoreUiLocalesForRedirectAsync(result.Request.UiLocales);
         }
 
         url = url.AddQueryString(result.ReturnUrlParameterName, returnUrl);

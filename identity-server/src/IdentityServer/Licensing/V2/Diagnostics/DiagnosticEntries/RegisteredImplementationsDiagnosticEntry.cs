@@ -95,6 +95,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IUserCodeGenerator), [typeof(NumericUserCodeGenerator)]),
                 new(typeof(IUserCodeService), [typeof(DefaultUserCodeService)]),
                 new(typeof(IUserSession), [typeof(DefaultUserSession)]),
+                new(typeof(IUiLocalesService), [typeof(DefaultUiLocalesService)]),
             ]
         },
         {
