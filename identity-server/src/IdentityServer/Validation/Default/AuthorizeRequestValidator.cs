@@ -83,6 +83,13 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             AuthorizeRequestType = authorizeRequestType
         };
 
+        //validate ui_locales first so it's available for the rest of the flow for better localization support in the case of errors
+        var uiLocalesResult = ValidateUiLocales(request);
+        if (uiLocalesResult.IsError)
+        {
+            return uiLocalesResult;
+        }
+
         // load client_id
         // client_id must always be present on the request
         var loadClientResult = await LoadClientAsync(request);
@@ -103,6 +110,13 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         if (roValidationResult.IsError)
         {
             return roValidationResult;
+        }
+
+        // need to validate ui_locales again if it came from the request object
+        uiLocalesResult = ValidateUiLocales(request);
+        if (uiLocalesResult.IsError)
+        {
+            return uiLocalesResult;
         }
 
         // validate client_id and redirect_uri
@@ -159,6 +173,26 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     }
 
     // Support JAR + PAR together - if there is a request object within the PAR, extract it
+
+    private AuthorizeRequestValidationResult ValidateUiLocales(ValidatedAuthorizeRequest request)
+    {
+        //////////////////////////////////////////////////////////
+        // check ui locales
+        //////////////////////////////////////////////////////////
+        var uilocales = request.Raw.Get(OidcConstants.AuthorizeRequest.UiLocales);
+        if (uilocales.IsPresent())
+        {
+            if (uilocales.Length > _options.InputLengthRestrictions.UiLocale)
+            {
+                LogError("UI locale too long", request);
+                return Invalid(request, description: "Invalid ui_locales");
+            }
+
+            request.UiLocales = uilocales;
+        }
+
+        return Valid(request);
+    }
 
     private async Task<AuthorizeRequestValidationResult> LoadClientAsync(ValidatedAuthorizeRequest request)
     {
@@ -660,21 +694,6 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         request.PromptModes = request.OriginalPromptModes.Except(request.ProcessedPromptModes).ToArray();
-
-        //////////////////////////////////////////////////////////
-        // check ui locales
-        //////////////////////////////////////////////////////////
-        var uilocales = request.Raw.Get(OidcConstants.AuthorizeRequest.UiLocales);
-        if (uilocales.IsPresent())
-        {
-            if (uilocales.Length > _options.InputLengthRestrictions.UiLocale)
-            {
-                LogError("UI locale too long", request);
-                return Invalid(request, description: "Invalid ui_locales");
-            }
-
-            request.UiLocales = uilocales;
-        }
 
         //////////////////////////////////////////////////////////
         // check display
