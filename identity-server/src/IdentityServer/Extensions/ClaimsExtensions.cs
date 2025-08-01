@@ -23,14 +23,12 @@ internal static class ClaimsExtensions
 
         foreach (var claim in distinctClaims)
         {
-            if (!d.ContainsKey(claim.Type))
+            if (!d.TryGetValue(claim.Type, out var value))
             {
                 d.Add(claim.Type, GetValue(claim));
             }
             else
             {
-                var value = d[claim.Type];
-
                 if (value is List<object> list)
                 {
                     list.Add(GetValue(claim));

@@ -242,7 +242,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         if (context.Client.AllowedGrantTypes.Count == 1 &&
             context.Client.AllowedGrantTypes.FirstOrDefault(t => t.Equals(GrantType.ClientCredentials, StringComparison.Ordinal)) != null)
         {
-            if (context.Request.RedirectUris?.Any() == true)
+            if (context.Request.RedirectUris?.Count > 0)
             {
                 return StepResult.Failure("redirect URI not compatible with client_credentials grant type", DynamicClientRegistrationErrors.InvalidRedirectUri);
             }

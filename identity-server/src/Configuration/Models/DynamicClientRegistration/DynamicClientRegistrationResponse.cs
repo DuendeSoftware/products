@@ -24,7 +24,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
     /// Initializes a new instance of the <see
     /// cref="DynamicClientRegistrationResponse"/> class copying properties from
     /// the specified request and client. This tries to copy from the client's
-    /// properties, and only uses the request if it must. Doing so means that the 
+    /// properties, and only uses the request if it must. Doing so means that the
     /// response will better reflect the actually created client record.
     /// </summary>
     /// <param name="request">The request used to initialize the
@@ -59,7 +59,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
         }
 
         //// Redirect Uris
-        if (client.RedirectUris.Any())
+        if (client.RedirectUris.Count > 0)
         {
             RedirectUris = client.RedirectUris.Select(s => new Uri(s)).ToList();
         }
@@ -122,7 +122,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
         if (client.AllowedScopes.Contains("openid"))
         {
             IdentityTokenLifetime = client.IdentityTokenLifetime;
-            AllowedIdentityTokenSigningAlgorithms = client.AllowedIdentityTokenSigningAlgorithms.Any() ?
+            AllowedIdentityTokenSigningAlgorithms = client.AllowedIdentityTokenSigningAlgorithms.Count > 0 ?
                 client.AllowedIdentityTokenSigningAlgorithms : null;
         }
 

@@ -25,9 +25,9 @@ public class KeyManagementOptions
     public int RsaKeySize { get; set; } = 2048;
 
     /// <summary>
-    /// The signing algorithms allowed. 
+    /// The signing algorithms allowed.
     /// If none are specified, then "RS256" will be used as the default.
-    /// The first in the collection will be used as the default. 
+    /// The first in the collection will be used as the default.
     /// </summary>
     public ICollection<SigningAlgorithmOptions> SigningAlgorithms { get; set; } = new List<SigningAlgorithmOptions>();
 
@@ -35,7 +35,7 @@ public class KeyManagementOptions
     internal IEnumerable<string> AllowedSigningAlgorithmNames => SigningAlgorithms.Select(x => x.Name);
 
     /// <summary>
-    /// When no keys have been created yet, this is the window of time considered to be an initialization 
+    /// When no keys have been created yet, this is the window of time considered to be an initialization
     /// period to allow all servers to synchronize if the keys are being created for the first time.
     /// Defaults to 5 minutes.
     /// </summary>
@@ -102,7 +102,7 @@ public class KeyManagementOptions
 
     internal void Validate()
     {
-        if (SigningAlgorithms?.Any() != true)
+        if (SigningAlgorithms.Count == 0)
         {
             SigningAlgorithms = new[] { new SigningAlgorithmOptions("RS256") };
         }
@@ -118,14 +118,14 @@ public class KeyManagementOptions
         }
 
         var invalid = AllowedSigningAlgorithmNames.Where(x => !SupportedSigningAlgorithms.Contains(x)).ToArray();
-        if (invalid.Any())
+        if (invalid.Length > 0)
         {
             var values = invalid.Aggregate((x, y) => $"{x}, {y}");
             throw new Exception($"Invalid signing algorithm(s): '{values}'.");
         }
 
         var invalidEcKeys = SigningAlgorithms.Where(x => x.IsEcKey && x.UseX509Certificate).ToArray();
-        if (invalidEcKeys.Any())
+        if (invalidEcKeys.Length > 0)
         {
             var values = invalidEcKeys.Select(x => x.Name).Aggregate((x, y) => $"{x}, {y}");
             throw new Exception($"UseX509Certificate not currently supported for EC keys. Signing algorithm(s): '{values}'.");

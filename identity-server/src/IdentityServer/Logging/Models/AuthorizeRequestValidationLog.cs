@@ -58,7 +58,7 @@ internal class AuthorizeRequestValidationLog
             }
         }
 
-        if (request.AuthenticationContextReferenceClasses.Any())
+        if (request.AuthenticationContextReferenceClasses?.Count > 0)
         {
             AuthenticationContextReferenceClasses = request.AuthenticationContextReferenceClasses;
         }

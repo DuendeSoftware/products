@@ -68,7 +68,7 @@ public class LogoutNotificationService : ILogoutNotificationService
             }
         }
 
-        if (frontChannelUrls.Any())
+        if (frontChannelUrls.Count > 0)
         {
             var msg = frontChannelUrls.Aggregate((x, y) => x + ", " + y);
             _sanitizedLogger.LogDebug("Client front-channel logout URLs: {0}", msg);
@@ -110,7 +110,7 @@ public class LogoutNotificationService : ILogoutNotificationService
             }
         }
 
-        if (backChannelLogouts.Any())
+        if (backChannelLogouts.Count > 0)
         {
             var msg = backChannelLogouts.Select(x => x.LogoutUri).Aggregate((x, y) => x + ", " + y);
             _sanitizedLogger.LogDebug("Client back-channel logout URLs: {0}", msg);

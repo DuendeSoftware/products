@@ -56,6 +56,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     /// </summary>
     protected readonly ILogger Logger;
 
+    private static readonly string[] SubjectTypesSupported = ["public"];
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DiscoveryResponseGenerator"/> class.
     /// </summary>
@@ -189,7 +191,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                     mtlsEndpoints.Add(OidcConstants.Discovery.PushedAuthorizationRequestEndpoint, ConstructMtlsEndpoint(ProtocolRoutePaths.PushedAuthorization));
                 }
 
-                if (mtlsEndpoints.Any())
+                if (mtlsEndpoints.Count > 0)
                 {
                     entries.Add(OidcConstants.Discovery.MtlsEndpointAliases, mtlsEndpoints);
                 }
@@ -252,7 +254,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 scopes.Add(StandardScopes.OfflineAccess);
             }
 
-            if (scopes.Any())
+            if (scopes.Count > 0)
             {
                 entries.Add(OidcConstants.Discovery.ScopesSupported, scopes.ToArray());
             }
@@ -345,7 +347,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, signingAlgorithms);
         }
 
-        entries.Add(OidcConstants.Discovery.SubjectTypesSupported, new[] { "public" });
+        entries.Add(OidcConstants.Discovery.SubjectTypesSupported, SubjectTypesSupported);
         entries.Add(OidcConstants.Discovery.CodeChallengeMethodsSupported, new[] { OidcConstants.CodeChallengeMethods.Plain, OidcConstants.CodeChallengeMethods.Sha256 });
 
         if (Options.Endpoints.EnableAuthorizeEndpoint)
@@ -363,7 +365,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 entries.Add(OidcConstants.Discovery.RequestUriParameterSupported, true);
             }
 
-            if (Options.UserInteraction.PromptValuesSupported?.Any() == true)
+            if (Options.UserInteraction.PromptValuesSupported?.Count > 0)
             {
                 entries.Add(OidcConstants.Discovery.PromptValuesSupported, Options.UserInteraction.PromptValuesSupported.ToArray());
             }
@@ -394,7 +396,9 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         {
             foreach (var (key, value) in Options.Discovery.CustomEntries)
             {
+#pragma warning disable CA1864 // Keep to avoid unnecessary string manipulations if we have duplicate keys
                 if (entries.ContainsKey(key))
+#pragma warning restore CA1864
                 {
                     Logger.LogError("Discovery custom entry {key} cannot be added, because it already exists.", key);
                 }

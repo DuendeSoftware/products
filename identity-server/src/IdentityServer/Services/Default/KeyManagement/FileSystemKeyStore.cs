@@ -81,7 +81,7 @@ public class FileSystemKeyStore : ISigningKeyStore
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    public Task StoreKeyAsync(SerializedKey key)
+    public async Task StoreKeyAsync(SerializedKey key)
     {
         if (!_directory.Exists)
         {
@@ -91,9 +91,7 @@ public class FileSystemKeyStore : ISigningKeyStore
         var json = KeySerializer.Serialize(key);
 
         var path = Path.Combine(_directory.FullName, KeyFilePrefix + key.Id + KeyFileExtension);
-        File.WriteAllText(path, json, Encoding.UTF8);
-
-        return Task.CompletedTask;
+        await File.WriteAllTextAsync(path, json, Encoding.UTF8);
     }
 
     /// <summary>

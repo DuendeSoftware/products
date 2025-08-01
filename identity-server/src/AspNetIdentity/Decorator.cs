@@ -12,7 +12,7 @@ internal class Decorator<TService>
 }
 
 #pragma warning disable CA1812 // This class is not instantiated directly, but rather used by the DI container
-internal class Decorator<TService, TImpl> : Decorator<TService>
+internal sealed class Decorator<TService, TImpl> : Decorator<TService>
     where TImpl : class, TService
 #pragma warning restore CA1812
 {
@@ -21,7 +21,7 @@ internal class Decorator<TService, TImpl> : Decorator<TService>
     }
 }
 
-internal class DisposableDecorator<TService> : Decorator<TService>, IDisposable
+internal sealed class DisposableDecorator<TService> : Decorator<TService>, IDisposable
 {
     public DisposableDecorator(TService instance) : base(instance)
     {

@@ -3,6 +3,7 @@
 
 
 using System.Globalization;
+using System.Text;
 using Duende.IdentityServer.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +14,7 @@ namespace Duende.IdentityServer.Hosting.FederatedSignOut;
 
 internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandler
 {
-    private const string IframeHtml = "<iframe style='display:none' width='0' height='0' src='{0}'></iframe>";
+    private static readonly CompositeFormat IframeHtml = CompositeFormat.Parse("<iframe style='display:none' width='0' height='0' src='{0}'></iframe>");
 
     private readonly IAuthenticationRequestHandler _inner;
     private readonly HttpContext _context;

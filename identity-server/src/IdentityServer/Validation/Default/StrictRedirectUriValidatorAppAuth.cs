@@ -14,6 +14,8 @@ namespace Duende.IdentityServer.Validation;
 /// <seealso cref="StrictRedirectUriValidator" />
 public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
 {
+    private static readonly char[] PathSeparators = ['/', '?', '#'];
+
     private readonly ILogger _logger;
 
     /// <summary>
@@ -101,7 +103,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
         }
 
         string portAsString;
-        var indexOfPathSeparator = parts[2].IndexOfAny(new[] { '/', '?', '#' });
+        var indexOfPathSeparator = parts[2].IndexOfAny(PathSeparators);
         if (indexOfPathSeparator > 0)
         {
             portAsString = parts[2].Substring(0, indexOfPathSeparator);

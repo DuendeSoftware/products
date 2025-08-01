@@ -76,7 +76,7 @@ public class ResourceStore : IResourceStore
             .Where(x => apiResourceNames.Contains(x.Name))
             .Select(x => x.ToModel()).ToArray();
 
-        if (result.Any())
+        if (result.Length > 0)
         {
             Logger.LogDebug("Found {apis} API resource in database", result.Select(x => x.Name));
         }

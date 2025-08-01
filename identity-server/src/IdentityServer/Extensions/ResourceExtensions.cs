@@ -117,10 +117,10 @@ public static class ResourceExtensions
             return apis.First().AllowedAccessTokenSigningAlgorithms;
         }
 
-        var allAlgorithms = apis.Where(r => r.AllowedAccessTokenSigningAlgorithms.Any()).Select(r => r.AllowedAccessTokenSigningAlgorithms).ToList();
+        var allAlgorithms = apis.Where(r => r.AllowedAccessTokenSigningAlgorithms.Count > 0).Select(r => r.AllowedAccessTokenSigningAlgorithms).ToList();
 
         // resources need to agree on allowed signing algorithms
-        if (allAlgorithms.Any())
+        if (allAlgorithms.Count > 0)
         {
             var allowedAlgorithms = IntersectLists(allAlgorithms);
 

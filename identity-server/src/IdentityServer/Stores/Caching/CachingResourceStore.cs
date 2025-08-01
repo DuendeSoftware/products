@@ -117,7 +117,7 @@ public class CachingResourceStore<T> : IResourceStore
             }
         }
 
-        if (uncachedScopes.Any())
+        if (uncachedScopes.Count > 0)
         {
             // now we need to lookup the remaining items. it's possible this is happening concurrently, so
             // we're going to use the "allcache" to throttle this lookup since the cache has concurrency lock.
@@ -223,7 +223,7 @@ public class CachingResourceStore<T> : IResourceStore
             }
         }
 
-        if (uncachedNames.Any())
+        if (uncachedNames.Count > 0)
         {
             // now we need to lookup the remaining items. it's possible this is happening concurrently, so
             // we're going to use the "allcache" to throttle this lookup since the cache has concurrency lock.

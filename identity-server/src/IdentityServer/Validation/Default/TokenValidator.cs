@@ -409,7 +409,7 @@ internal class TokenValidator : ITokenValidator
         };
     }
 
-    private static IEnumerable<Claim> ReferenceTokenToClaims(Token token)
+    private static List<Claim> ReferenceTokenToClaims(Token token)
     {
         var claims = new List<Claim>
         {

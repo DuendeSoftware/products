@@ -160,7 +160,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
             return Invalid(request, OidcConstants.AuthorizeErrors.UnauthorizedClient, "Invalid scope");
         }
 
-        if (validatedResources.Resources.IdentityResources.Any() && !request.IsOpenIdRequest)
+        if (validatedResources.Resources.IdentityResources.Count > 0 && !request.IsOpenIdRequest)
         {
             LogError("Identity related scope requests, but no openid scope", request);
             return Invalid(request, OidcConstants.AuthorizeErrors.InvalidScope);

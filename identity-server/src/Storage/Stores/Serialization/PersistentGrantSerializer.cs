@@ -133,7 +133,7 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
     }
 }
 
-internal class PersistentGrantDataContainer
+internal sealed class PersistentGrantDataContainer
 {
     public int PersistentGrantDataContainerVersion { get; set; }
     public bool DataProtected { get; set; }

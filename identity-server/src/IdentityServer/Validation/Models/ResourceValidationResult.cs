@@ -44,7 +44,7 @@ public class ResourceValidationResult
     /// <summary>
     /// Indicates if the result was successful.
     /// </summary>
-    public bool Succeeded => ParsedScopes.Any() && !InvalidScopes.Any() && !InvalidResourceIndicators.Any();
+    public bool Succeeded => ParsedScopes.Count > 0 && InvalidScopes.Count == 0 && InvalidResourceIndicators.Count == 0;
 
     /// <summary>
     /// The resources of the result.

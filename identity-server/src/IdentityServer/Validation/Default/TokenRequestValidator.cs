@@ -466,11 +466,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         if (!validatedResources.Succeeded)
         {
-            if (validatedResources.InvalidResourceIndicators.Any())
+            if (validatedResources.InvalidResourceIndicators.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Invalid resource indicator.");
             }
-            if (validatedResources.InvalidScopes.Any())
+            if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope.");
             }
@@ -545,7 +545,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(scopeError);
         }
 
-        if (_validatedRequest.ValidatedResources.Resources.IdentityResources.Any())
+        if (_validatedRequest.ValidatedResources.Resources.IdentityResources.Count > 0)
         {
             LogError("Client cannot request OpenID scopes in client credentials flow", new { clientId = _validatedRequest.Client.ClientId });
             return Invalid(OidcConstants.TokenErrors.InvalidScope);
@@ -719,7 +719,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         {
             // we need to extract the certificate / confirmation data from the tokens
             proofs = result.RefreshToken.GetProofKeyThumbprints();
-            if (proofs.Any())
+            if (proofs.Length > 0)
             {
                 // many different access tokens using diff pop mechanisms. the assumption is that they are all the same
                 var numberOfTypes = proofs.Select(x => x.Type).Distinct().Count();
@@ -765,7 +765,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         if (priorProofType != ProofType.None && !_validatedRequest.Client.RequireClientSecret)
         {
             proofs ??= result.RefreshToken.GetProofKeyThumbprints();
-            if (proofs.Any())
+            if (proofs.Length > 0)
             {
                 var thumbprint = proofs.First().Thumbprint;
                 if (_validatedRequest.ProofKeyThumbprint != thumbprint)
@@ -814,11 +814,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         if (!validatedResources.Succeeded)
         {
-            if (validatedResources.InvalidResourceIndicators.Any())
+            if (validatedResources.InvalidResourceIndicators.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Invalid resource indicator.");
             }
-            if (validatedResources.InvalidScopes.Any())
+            if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope.");
             }
@@ -896,11 +896,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         if (!validatedResources.Succeeded)
         {
-            if (validatedResources.InvalidResourceIndicators.Any())
+            if (validatedResources.InvalidResourceIndicators.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Invalid resource indicator.");
             }
-            if (validatedResources.InvalidScopes.Any())
+            if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope.");
             }
@@ -985,11 +985,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         if (!validatedResources.Succeeded)
         {
-            if (validatedResources.InvalidResourceIndicators.Any())
+            if (validatedResources.InvalidResourceIndicators.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidTarget, "Invalid resource indicator.");
             }
-            if (validatedResources.InvalidScopes.Any())
+            if (validatedResources.InvalidScopes.Count > 0)
             {
                 return Invalid(OidcConstants.AuthorizeErrors.InvalidScope, "Invalid scope.");
             }
@@ -1158,13 +1158,13 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         if (!resourceValidationResult.Succeeded)
         {
-            if (resourceValidationResult.InvalidResourceIndicators.Any())
+            if (resourceValidationResult.InvalidResourceIndicators.Count > 0)
             {
                 LogError("Invalid resource indicator");
                 return OidcConstants.TokenErrors.InvalidTarget;
             }
 
-            if (resourceValidationResult.InvalidScopes.Any())
+            if (resourceValidationResult.InvalidScopes.Count > 0)
             {
                 LogError("Invalid scopes requested");
             }

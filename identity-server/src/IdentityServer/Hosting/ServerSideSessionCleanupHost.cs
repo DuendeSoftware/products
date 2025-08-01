@@ -59,7 +59,7 @@ public class ServerSideSessionCleanupHost : IHostedService
     /// <summary>
     /// Stops the token cleanup polling.
     /// </summary>
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         if (_options.ServerSideSessions.RemoveExpiredSessions)
         {
@@ -70,11 +70,9 @@ public class ServerSideSessionCleanupHost : IHostedService
 
             _logger.LogDebug("Stopping server-side session removal");
 
-            _source.Cancel();
+            await _source.CancelAsync();
             _source = null;
         }
-
-        return Task.CompletedTask;
     }
 
     private async Task StartInternalAsync(CancellationToken cancellationToken)
