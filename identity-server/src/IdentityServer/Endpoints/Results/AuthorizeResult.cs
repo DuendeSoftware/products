@@ -12,6 +12,7 @@ using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.Endpoints.Results;
 
@@ -215,6 +216,13 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
     private async Task RedirectToErrorPageAsync(AuthorizeResponse response, HttpContext context)
     {
+        // TODO: move this to be injected during a release when we can make that breaking change
+        var uiLocalesService = context.RequestServices.GetService<IUiLocalesService>();
+        if (uiLocalesService != null)
+        {
+            await uiLocalesService.StoreUiLocalesForRedirectAsync(response.Request?.UiLocales);
+        }
+
         var errorModel = new ErrorMessage
         {
             ActivityId = System.Diagnostics.Activity.Current?.Id,
