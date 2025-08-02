@@ -61,6 +61,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Index.nb-NO.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Pages\Account\Logout\Index.nb-NO.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Index.nb-NO.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -80,6 +85,10 @@
       <LastGenOutput>LoggedOut.nb-NO.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Pages\Home\Error\Index.nb-NO.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Index.nb-NO.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Pages\Account\Logout\Index.nb-NO.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Index.nb-NO.Designer.cs</LastGenOutput>
     </EmbeddedResource>
