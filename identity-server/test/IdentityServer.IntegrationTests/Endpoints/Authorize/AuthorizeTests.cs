@@ -1672,6 +1672,30 @@ public class AuthorizeTests
         cookie.ShouldNotBeNull();
         cookie.Value.ShouldBe(Uri.EscapeDataString(CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(new CultureInfo("nb-NO")))));
     }
+
+    [Fact]
+    public async Task redirect_to_error_page_should_set_cookie_from_ui_locales_when_ui_locales_parameter_is_populated()
+    {
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client1",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://client1/invalid",
+            state: "123_state",
+            nonce: "123_nonce",
+            extra: new
+            {
+                ui_locales = "nb-NO"
+            });
+
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+
+        var cookie = _mockPipeline.BrowserClient.GetCookie("https://server", CookieRequestCultureProvider.DefaultCookieName);
+        cookie.ShouldNotBeNull();
+        cookie.Value.ShouldBe(Uri.EscapeDataString(CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(new CultureInfo("nb-NO")))));
+    }
 }
 
 public class MockAuthzInteractionService : IAuthorizeInteractionResponseGenerator
