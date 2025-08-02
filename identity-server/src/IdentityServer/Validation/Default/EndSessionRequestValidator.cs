@@ -90,17 +90,31 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
 
         Logger.LogDebug("Start end session request validation");
 
-        var isAuthenticated = subject.IsAuthenticated();
-
-        if (!isAuthenticated && Options.Authentication.RequireAuthenticatedUserForSignOutMessage)
-        {
-            return Invalid("User is anonymous. Ignoring end session parameters");
-        }
-
         var validatedRequest = new ValidatedEndSessionRequest
         {
             Raw = parameters
         };
+
+        var uilocales = parameters.Get(OidcConstants.EndSessionRequest.UiLocales);
+        if (uilocales.IsPresent())
+        {
+            if (uilocales.Length > Options.InputLengthRestrictions.UiLocale)
+            {
+                var log = new EndSessionRequestValidationLog(validatedRequest);
+                Logger.LogWarning("UI locale too long. It will be ignored." + Environment.NewLine + "{@details}", log);
+            }
+            else
+            {
+                validatedRequest.UiLocales = uilocales;
+            }
+        }
+
+        var isAuthenticated = subject.IsAuthenticated();
+
+        if (!isAuthenticated && Options.Authentication.RequireAuthenticatedUserForSignOutMessage)
+        {
+            return Invalid("User is anonymous. Ignoring end session parameters", validatedRequest);
+        }
 
         var idTokenHint = parameters.Get(OidcConstants.EndSessionRequest.IdTokenHint);
         if (idTokenHint.IsPresent())
@@ -158,20 +172,6 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             validatedRequest.ClientIds = await UserSession.GetClientListAsync();
         }
 
-        var uilocales = parameters.Get(OidcConstants.EndSessionRequest.UiLocales);
-        if (uilocales.IsPresent())
-        {
-            if (uilocales.Length > Options.InputLengthRestrictions.UiLocale)
-            {
-                var log = new EndSessionRequestValidationLog(validatedRequest);
-                Logger.LogWarning("UI locale too long. It will be ignored." + Environment.NewLine + "{@details}", log);
-            }
-            else
-            {
-                validatedRequest.UiLocales = uilocales;
-            }
-        }
-
         LogSuccess(validatedRequest);
 
         return new EndSessionValidationResult
@@ -204,7 +204,8 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         {
             IsError = true,
             Error = "Invalid request",
-            ErrorDescription = message
+            ErrorDescription = message,
+            ValidatedRequest = request
         };
     }
 

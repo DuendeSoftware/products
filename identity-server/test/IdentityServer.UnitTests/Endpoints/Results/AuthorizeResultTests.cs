@@ -12,6 +12,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 
@@ -31,6 +32,10 @@ public class AuthorizeResultTests
 
     public AuthorizeResultTests()
     {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton<IUiLocalesService, MockUiLocaleService>();
+        _context.RequestServices = serviceCollection.BuildServiceProvider();
+
         _urls = new DefaultServerUrls(new HttpContextAccessor { HttpContext = _context });
 
         _context.Request.Scheme = "https";
