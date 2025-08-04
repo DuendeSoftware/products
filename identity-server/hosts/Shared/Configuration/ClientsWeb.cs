@@ -46,7 +46,7 @@ public static class ClientsWeb
 
                 AllowedScopes = allowedScopes
             },
-                
+
             ///////////////////////////////////////////
             // MVC Automatic Token Management Sample
             //////////////////////////////////////////
@@ -72,7 +72,7 @@ public static class ClientsWeb
 
                 AllowedScopes = allowedScopes
             },
-                
+
             ///////////////////////////////////////////
             // MVC Code Flow Sample
             //////////////////////////////////////////
@@ -153,7 +153,7 @@ public static class ClientsWeb
 
                 AllowedScopes = allowedScopes
             },
-                
+
             ///////////////////////////////////////////
             // MVC Code Flow with JAR/JWT Sample
             //////////////////////////////////////////
@@ -185,6 +185,43 @@ public static class ClientsWeb
                 RedirectUris = { "https://localhost:44304/signin-oidc" },
                 FrontChannelLogoutUri = "https://localhost:44304/signout-oidc",
                 PostLogoutRedirectUris = { "https://localhost:44304/signout-callback-oidc" },
+
+                AllowOfflineAccess = true,
+
+                AllowedScopes = allowedScopes
+            },
+
+            ///////////////////////////////////////////
+            // MVC Code Flow with JAR URI/JWT Sample
+            //////////////////////////////////////////
+            new Client
+            {
+                ClientId = "mvc.jar-uri.jwt",
+                ClientName = "MVC Code Flow with JAR/JWT",
+
+                ClientSecrets =
+                {
+                    new Secret
+                    {
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey,
+                        Value =
+                            """
+                            {
+                                "e":"AQAB",
+                                "kid":"ZzAjSnraU3bkWGnnAqLapYGpTyNfLbjbzgAPbbW2GEA",
+                                "kty":"RSA",
+                                "n":"wWwQFtSzeRjjerpEM5Rmqz_DsNaZ9S1Bw6UbZkDLowuuTCjBWUax0vBMMxdy6XjEEK4Oq9lKMvx9JzjmeJf1knoqSNrox3Ka0rnxXpNAz6sATvme8p9mTXyp0cX4lF4U2J54xa2_S9NF5QWvpXvBeC4GAJx7QaSw4zrUkrc6XyaAiFnLhQEwKJCwUw4NOqIuYvYp_IXhw-5Ti_icDlZS-282PcccnBeOcX7vc21pozibIdmZJKqXNsL1Ibx5Nkx1F1jLnekJAmdaACDjYRLL_6n3W4wUp19UvzB1lGtXcJKLLkqB6YDiZNu16OSiSprfmrRXvYmvD8m6Fnl5aetgKw"
+                            }
+                            """
+                    }
+                },
+
+                AllowedGrantTypes = GrantTypes.Code,
+                RequireRequestObject = true,
+
+                RedirectUris = { "https://localhost:44305/signin-oidc" },
+                FrontChannelLogoutUri = "https://localhost:44305/signout-oidc",
+                PostLogoutRedirectUris = { "https://localhost:44305/signout-callback-oidc" },
 
                 AllowOfflineAccess = true,
 
