@@ -1,0 +1,32 @@
+﻿@page
+@using Microsoft.AspNetCore.Authentication
+@model SecureModel
+@{
+}
+
+<h2>Claims</h2>
+
+<div class="panel">
+  <form method="post" asp-page-handler="RenewTokens">
+    <button type="submit" class="btn btn-primary">Renew Tokens</button>
+  </form>
+</div>
+
+
+<dl>
+  @foreach (var claim in User.Claims)
+  {
+    <dt>@claim.Type</dt>
+    <dd>@claim.Value</dd>
+  }
+</dl>
+
+<h2>Properties</h2>
+
+<dl>
+  @foreach (var prop in (await Model.HttpContext.AuthenticateAsync()).Properties!.Items)
+  {
+    <dt>@prop.Key</dt>
+    <dd>@prop.Value</dd>
+  }
+</dl>
