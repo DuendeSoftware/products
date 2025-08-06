@@ -5,7 +5,7 @@
     "Duende",
     "IdentityServer"
   ],
-  "name": "Duende IdentityServer with Entity Framework Stores",
+  "name": "Duende IdentityServer",
   "identity": "Duende.IdentityServer",
   "groupIdentity": "Duende.IdentityServer",
   "shortName": [
