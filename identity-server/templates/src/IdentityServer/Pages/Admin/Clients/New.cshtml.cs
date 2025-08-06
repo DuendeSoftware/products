@@ -16,8 +16,7 @@ public class NewModel(ClientRepository repository) : PageModel
 
     public void OnGet(string type) => InputModel = new CreateClientModel
     {
-        Flow = type == "m2m" ? Flow.ClientCredentials : Flow.CodeFlowWithPkce,
-        ClientId = Guid.NewGuid().ToString()
+        Flow = type == "m2m" ? Flow.ClientCredentials : Flow.CodeFlowWithPkce
     };
 
     public async Task<IActionResult> OnPostAsync()
