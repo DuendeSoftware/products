@@ -1,7 +1,7 @@
 using Duende.IdentityServer.Licensing;
 using Microsoft.AspNetCore.Mvc;
 
-namespace IdentityServerQuickStart.ViewComponents;
+namespace IdentityServerTemplate.ViewComponents;
 
 public class LicenseSummaryViewComponent(LicenseUsageSummary licenseUsageSummary) : ViewComponent
 {

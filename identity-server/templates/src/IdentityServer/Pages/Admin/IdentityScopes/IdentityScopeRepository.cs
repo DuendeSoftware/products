@@ -5,7 +5,7 @@ using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServerQuickStart.Pages.Admin.IdentityScopes;
+namespace IdentityServerTemplate.Pages.Admin.IdentityScopes;
 
 public class IdentityScopeSummaryModel
 {

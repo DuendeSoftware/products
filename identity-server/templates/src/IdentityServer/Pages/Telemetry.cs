@@ -1,6 +1,6 @@
 using System.Diagnostics.Metrics;
 
-namespace IdentityServerQuickStart.Pages;
+namespace IdentityServerTemplate.Pages;
 
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1724 // Type names should not match namespaces

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Home;
+namespace IdentityServerTemplate.Pages.Home;
 
 [AllowAnonymous]
 public class Index : PageModel

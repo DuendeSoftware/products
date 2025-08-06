@@ -1,6 +1,6 @@
 using Duende.IdentityServer.Models;
 
-namespace IdentityServerQuickStart.Pages.Error;
+namespace IdentityServerTemplate.Pages.Error;
 
 public class ViewModel
 {

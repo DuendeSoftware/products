@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Ciba;
+namespace IdentityServerTemplate.Pages.Ciba;
 
 [Authorize]
 [SecurityHeaders]

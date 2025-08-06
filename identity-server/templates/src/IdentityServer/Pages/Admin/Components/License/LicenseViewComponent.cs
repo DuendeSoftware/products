@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Duende.IdentityServer;
 using Microsoft.AspNetCore.Mvc;
 
-namespace IdentityServerQuickStart.ViewComponents;
+namespace IdentityServerTemplate.ViewComponents;
 
 public class LicenseViewComponent(IdentityServerLicense? license = null) : ViewComponent
 {

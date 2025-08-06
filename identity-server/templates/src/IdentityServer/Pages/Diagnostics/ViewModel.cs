@@ -3,7 +3,7 @@ using System.Text.Json;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 
-namespace IdentityServerQuickStart.Pages.Diagnostics;
+namespace IdentityServerTemplate.Pages.Diagnostics;
 
 public class ViewModel
 {

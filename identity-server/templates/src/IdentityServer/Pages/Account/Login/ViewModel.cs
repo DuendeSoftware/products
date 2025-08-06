@@ -1,4 +1,4 @@
-namespace IdentityServerQuickStart.Pages.Login;
+namespace IdentityServerTemplate.Pages.Login;
 
 public class ViewModel
 {

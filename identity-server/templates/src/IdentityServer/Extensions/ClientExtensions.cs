@@ -1,6 +1,6 @@
 using Duende.IdentityServer.Models;
 
-namespace IdentityServerQuickStart.Extensions;
+namespace IdentityServerTemplate.Extensions;
 
 public static class ClientExtensions
 {

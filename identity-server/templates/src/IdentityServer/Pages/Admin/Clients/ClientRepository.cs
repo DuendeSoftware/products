@@ -4,10 +4,10 @@ using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Models;
-using IdentityServerQuickStart.Extensions;
+using IdentityServerTemplate.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServerQuickStart.Pages.Admin.Clients;
+namespace IdentityServerTemplate.Pages.Admin.Clients;
 
 public class ClientSummaryModel
 {

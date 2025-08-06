@@ -1,4 +1,4 @@
-namespace IdentityServerQuickStart.Pages.Logout;
+namespace IdentityServerTemplate.Pages.Logout;
 
 public static class LogoutOptions
 {

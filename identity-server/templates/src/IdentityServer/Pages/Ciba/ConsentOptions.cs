@@ -1,4 +1,4 @@
-namespace IdentityServerQuickStart.Pages.Ciba;
+namespace IdentityServerTemplate.Pages.Ciba;
 
 public static class ConsentOptions
 {

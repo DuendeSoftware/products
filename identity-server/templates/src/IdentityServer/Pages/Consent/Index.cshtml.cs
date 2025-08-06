@@ -4,12 +4,12 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using IdentityServerQuickStart.Extensions;
+using IdentityServerTemplate.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Consent;
+namespace IdentityServerTemplate.Pages.Consent;
 
 [Authorize]
 [SecurityHeaders]

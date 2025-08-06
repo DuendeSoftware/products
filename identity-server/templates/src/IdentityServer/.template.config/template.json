@@ -15,18 +15,18 @@
     "language": "C#",
     "type": "project"
   },
-  "sourceName": "IdentityServer",
+  "sourceName": "IdentityServerTemplate",
   "preferNameDirectory": true,
   "primaryOutputs": [
     {
-      "path": "IdentityServerQuickStart.csproj"
+      "path": "IdentityServerTemplate.csproj"
     }
   ],
   "symbols": {
     "RenameCommonNamespace": {
       "datatype": "string",
       "displayName": "Fix common host namespace.",
-      "replaces": "IdentityServerQuickStart",
+      "replaces": "IdentityServerTemplate",
       "type": "derived",
       "valueSource": "name",
       "valueTransform": "safe_namespace"

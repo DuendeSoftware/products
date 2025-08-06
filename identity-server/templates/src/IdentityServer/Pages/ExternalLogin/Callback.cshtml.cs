@@ -4,13 +4,13 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using IdentityServerQuickStart.Extensions;
+using IdentityServerTemplate.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.ExternalLogin;
+namespace IdentityServerTemplate.Pages.ExternalLogin;
 
 [AllowAnonymous]
 [SecurityHeaders]

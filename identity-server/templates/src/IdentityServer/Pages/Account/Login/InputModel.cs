@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace IdentityServerQuickStart.Pages.Login;
+namespace IdentityServerTemplate.Pages.Login;
 
 public class InputModel
 {

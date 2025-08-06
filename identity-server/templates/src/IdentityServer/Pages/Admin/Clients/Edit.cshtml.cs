@@ -1,10 +1,10 @@
-using IdentityServerQuickStart.Pages.Admin.ApiScopes;
-using IdentityServerQuickStart.Pages.Admin.IdentityScopes;
+using IdentityServerTemplate.Pages.Admin.ApiScopes;
+using IdentityServerTemplate.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Admin.Clients;
+namespace IdentityServerTemplate.Pages.Admin.Clients;
 
 [SecurityHeaders]
 [Authorize(Config.Policies.Admin)]

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 
-namespace IdentityServerQuickStart.Pages.Device;
+namespace IdentityServerTemplate.Pages.Device;
 
 [SecurityHeaders]
 [Authorize]

@@ -1,10 +1,10 @@
-using IdentityServerQuickStart.Extensions;
+using IdentityServerTemplate.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Diagnostics;
+namespace IdentityServerTemplate.Pages.Diagnostics;
 
 [SecurityHeaders]
 [Authorize]

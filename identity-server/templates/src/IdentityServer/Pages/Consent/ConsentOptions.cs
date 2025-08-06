@@ -1,4 +1,4 @@
-namespace IdentityServerQuickStart.Pages.Consent;
+namespace IdentityServerTemplate.Pages.Consent;
 
 public static class ConsentOptions
 {

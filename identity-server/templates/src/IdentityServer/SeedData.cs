@@ -3,7 +3,7 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-namespace IdentityServerQuickStart;
+namespace IdentityServerTemplate;
 
 public class SeedData
 {

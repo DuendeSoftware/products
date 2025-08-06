@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Text;
 using Duende.IdentityServer.Licensing;
-using IdentityServerQuickStart;
-using IdentityServerQuickStart.Extensions;
+using IdentityServerTemplate;
+using IdentityServerTemplate.Extensions;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()

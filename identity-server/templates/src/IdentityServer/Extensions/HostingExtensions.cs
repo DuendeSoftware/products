@@ -1,14 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using Duende.IdentityServer;
-using IdentityServerQuickStart.Pages.Admin.ApiScopes;
-using IdentityServerQuickStart.Pages.Admin.Clients;
-using IdentityServerQuickStart.Pages.Admin.IdentityScopes;
+using IdentityServerTemplate.Pages.Admin.ApiScopes;
+using IdentityServerTemplate.Pages.Admin.Clients;
+using IdentityServerTemplate.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
-namespace IdentityServerQuickStart.Extensions;
+namespace IdentityServerTemplate.Extensions;
 
 internal static class HostingExtensions
 {

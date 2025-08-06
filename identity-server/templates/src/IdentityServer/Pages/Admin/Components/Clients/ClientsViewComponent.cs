@@ -2,7 +2,7 @@ using Duende.IdentityServer.EntityFramework.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServerQuickStart.Pages.Admin.Components.Clients;
+namespace IdentityServerTemplate.Pages.Admin.Components.Clients;
 
 public class ClientsViewComponent(ConfigurationDbContext database) : ViewComponent
 {

@@ -2,7 +2,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Mvc;
 
-namespace IdentityServerQuickStart.Pages.Admin.Components.ServerSideSessions;
+namespace IdentityServerTemplate.Pages.Admin.Components.ServerSideSessions;
 
 public class ServerSideSessionsViewComponent(ISessionManagementService sessions) : ViewComponent
 {

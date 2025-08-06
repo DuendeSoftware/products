@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Portal;
+namespace IdentityServerTemplate.Pages.Portal;
 
 public class Index : PageModel
 {

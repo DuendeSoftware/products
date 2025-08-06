@@ -2,7 +2,7 @@ using Duende.IdentityServer.EntityFramework.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServerQuickStart.Pages.Components.Database;
+namespace IdentityServerTemplate.Pages.Components.Database;
 
 public class DatabaseViewComponent(
     PersistedGrantDbContext persistedGrants,

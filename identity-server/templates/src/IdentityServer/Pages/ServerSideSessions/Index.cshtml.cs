@@ -1,12 +1,12 @@
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
-using IdentityServerQuickStart.Extensions;
+using IdentityServerTemplate.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.ServerSideSessions;
+namespace IdentityServerTemplate.Pages.ServerSideSessions;
 
 [Authorize(Config.Policies.Admin)]
 public class IndexModel(ISessionManagementService? sessionManagementService = null) : PageModel

@@ -1,5 +1,5 @@
 @page
-@model IdentityServerQuickStart.Pages.Ciba.IndexModel
+@model IdentityServerTemplate.Pages.Ciba.IndexModel
 @{
 }
 
@@ -13,7 +13,7 @@
             @Model.LoginRequest.Client.ClientName
             <small class="text-muted">is requesting your permission</small>
         </h1>
-        
+
         <h3>
             Verify that this identifier matches what the client is displaying:
             <em class="text-primary">@Model.LoginRequest.BindingMessage</em>
@@ -25,6 +25,6 @@
         <div>
             <a class="btn btn-primary" asp-page="/Ciba/Consent" asp-route-id="@Model.LoginRequest.InternalId">Yes, Continue</a>
         </div>
-        
+
     </div>
 </div>

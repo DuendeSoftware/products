@@ -2,7 +2,7 @@ using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Error;
+namespace IdentityServerTemplate.Pages.Error;
 
 [AllowAnonymous]
 [SecurityHeaders]

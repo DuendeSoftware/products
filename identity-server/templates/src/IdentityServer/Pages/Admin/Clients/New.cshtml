@@ -1,5 +1,5 @@
 @page
-@model IdentityServerQuickStart.Pages.Admin.Clients.NewModel
+@model IdentityServerTemplate.Pages.Admin.Clients.NewModel
 
 <div class="container-fluid mb-4 px-0">
     <header class="pb-3 mb-4 border-bottom">
@@ -82,7 +82,7 @@
                                 <input class="form-control form-control-sm" asp-for="@Model.InputModel.Secret" autofocus />
                             </div>
 
-                            @if (Model.InputModel.Flow == IdentityServerQuickStart.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                            @if (Model.InputModel.Flow == IdentityServerTemplate.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
                             {
                                 <div class="form-group mb-3">
                                     <label asp-for="@Model.InputModel.BaseUrl" class="form-label"></label>

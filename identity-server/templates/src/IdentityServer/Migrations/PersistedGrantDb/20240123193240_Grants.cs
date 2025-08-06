@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace IdentityServerQuickStart.Migrations.PersistedGrantDb;
+namespace IdentityServerTemplate.Migrations.PersistedGrantDb;
 
 /// <inheritdoc />
 public partial class Grants : Migration

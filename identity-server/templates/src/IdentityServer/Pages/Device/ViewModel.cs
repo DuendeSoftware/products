@@ -1,4 +1,4 @@
-namespace IdentityServerQuickStart.Pages.Device;
+namespace IdentityServerTemplate.Pages.Device;
 
 public class ViewModel
 {

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerQuickStart.Pages.Admin.Clients;
+namespace IdentityServerTemplate.Pages.Admin.Clients;
 
 [Authorize(Config.Policies.Admin)]
 public class DeleteModel(ClientRepository clientRepository) : PageModel

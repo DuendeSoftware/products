@@ -1,7 +1,7 @@
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServerQuickStart.Pages.Portal;
+namespace IdentityServerTemplate.Pages.Portal;
 
 public class ThirdPartyInitiatedLoginLink
 {

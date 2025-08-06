@@ -1,4 +1,4 @@
-namespace IdentityServerQuickStart.Pages;
+namespace IdentityServerTemplate.Pages;
 
 internal static class Log
 {

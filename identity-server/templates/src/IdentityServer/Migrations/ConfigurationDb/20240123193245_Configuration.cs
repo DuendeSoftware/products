@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace IdentityServerQuickStart.Migrations.ConfigurationDb;
+namespace IdentityServerTemplate.Migrations.ConfigurationDb;
 
 /// <inheritdoc />
 public partial class Configuration : Migration

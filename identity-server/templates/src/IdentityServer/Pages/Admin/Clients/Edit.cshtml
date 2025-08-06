@@ -1,5 +1,5 @@
 @page
-@model IdentityServerQuickStart.Pages.Admin.Clients.EditModel
+@model IdentityServerTemplate.Pages.Admin.Clients.EditModel
 
 <link href="~/lib/prism/prism.css" rel="stylesheet" />
 <script src="~/lib/prism/prism.js"></script>
@@ -110,7 +110,7 @@
                                    autofocus />
                         </div>
 
-                        @if (Model.InputModel.Flow == IdentityServerQuickStart.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                        @if (Model.InputModel.Flow == IdentityServerTemplate.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
                         {
                             <div class="form-group mb-3">
                                 <label asp-for="InputModel.RedirectUri" class="form-label"></label>
@@ -215,7 +215,7 @@
                     </div>
                 </div>
 
-                @if (Model.InputModel.Flow == IdentityServerQuickStart.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                @if (Model.InputModel.Flow == IdentityServerTemplate.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
                 {
                     <div class="card text-bg-light mb-3">
                         <h5 class="card-header">
