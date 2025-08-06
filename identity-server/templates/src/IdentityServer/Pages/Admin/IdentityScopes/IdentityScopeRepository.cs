@@ -95,6 +95,11 @@ public class IdentityScopeRepository(ConfigurationDbContext context)
     public async Task CreateAsync(IdentityScopeModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
+        var exists = await _context.IdentityResources.AnyAsync(x => x.Name == model.Name);
+        if (exists)
+        {
+            throw new ValidationException($"An Identity Resource with the name '{model.Name}' already exists.");
+        }
         var scope = new Duende.IdentityServer.Models.IdentityResource()
         {
             Name = model.Name,
