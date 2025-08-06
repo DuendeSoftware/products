@@ -1,0 +1,38 @@
+@page
+@model IdentityServerTemplate.Pages.Logout.Index
+
+@{
+    Layout = "_LayoutLogin";
+}
+
+<div class="login-page">
+
+    <div class="lead text-center mb-4">
+        <h1 class="text-brand mb-0">Logout of IdentityServer?</h1>
+        <p>
+          You will need to re-authenticate the next time an app wants to log you in.
+        </p>
+    </div>
+
+    <div class="row">
+
+        <div class="col-12 col-lg-6 mb-3 mb-lg-0 mx-auto">
+
+            <!-- Form -->
+            <form asp-page="/Account/Logout/Index">
+                <input type="hidden" name="logoutId" value="@Model.LogoutId" />
+
+                <div class="d-grid">
+                    <button class="btn btn-primary">Yes, log me out...</button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="/" class="text-decoration-none">No, don't log me out...</a>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,84 @@
+@page
+@model IdentityServerTemplate.Pages.Admin.IdentityScopes.IndexModel
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-person-badge text-brand"></i>
+            Identity Scopes
+        </h1>
+        <span class="text-muted">
+            Identity scopes define what user-related information (like profile, email, or phone) can be requested and shared through OpenID Connect authentication.
+        </span>
+    </header>
+
+    <div class="d-flex justify-content-end align-items-end bg-body-tertiary p-2 flex-nowrap">
+
+        <!-- Actions: keep dropdown + form together, no wrap -->
+        <div class="d-flex align-items-center flex-nowrap gap-2">
+
+            <a class="btn btn-outline-primary" href="/Admin/IdentityScopes/New">
+                New Scope
+            </a>
+
+            <!-- Filter/Search form -->
+            <form role="search" class="row g-2 flex-grow-1 align-items-end">
+                <div class="col-auto">
+                    <input class="form-control me-2"
+                           type="text"
+                           id="filter"
+                           name="filter"
+                           placeholder="Filter"
+                           value="@Model.Filter" />
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-brand" type="submit">
+                        <i class="bi bi-filter"></i>
+                        Filter
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Display Name</th>
+            <th><span class="d-none">Actions</span></th>
+        </tr>
+    </thead>
+
+    <tbody class="table-group-divider">
+        @foreach (var scope in Model.Scopes)
+        {
+            <tr>
+                <td class="align-middle fw-bold">@scope.Name</td>
+                <td class="align-middle">@scope.DisplayName</td>
+                <td class="text-end">
+                    <a asp-page="/admin/identityscopes/edit" asp-route-id="@scope.Name">
+                        <i class="bi bi-pencil-square"></i>
+                        <span class="d-none">Edit</span>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@if (!Model.Scopes.Any())
+{
+    <div class="row">
+        <div class="col">
+            <div class="alert alert-light text-center">
+                Youy do not have any Identity Scopes configured.<br />
+                Click "New Scope" above to begin adding a new Identity Scope.
+            </div>
+        </div>
+    </div>
+}

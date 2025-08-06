@@ -56,6 +56,7 @@
       "identity-server\\templates\\src\\IdentityServerEmpty\\IdentityServerEmpty.csproj",
       "identity-server\\templates\\src\\IdentityServerEntityFramework\\IdentityServerEntityFramework.csproj",
       "identity-server\\templates\\src\\IdentityServerInMem\\IdentityServerInMem.csproj",
+      "identity-server\\templates\\src\\IdentityServer\\IdentityServerTemplate.csproj",
       "identity-server\\test\\Configuration.IntegrationTests\\Configuration.IntegrationTests.csproj",
       "identity-server\\test\\EntityFramework.Storage.UnitTests\\EntityFramework.Storage.UnitTests.csproj",
       "identity-server\\test\\IdentityServer.IntegrationTests\\IdentityServer.IntegrationTests.csproj",

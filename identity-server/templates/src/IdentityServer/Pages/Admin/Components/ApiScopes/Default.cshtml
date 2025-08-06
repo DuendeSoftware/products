@@ -1,0 +1,17 @@
+@model IdentityServerTemplate.Pages.Admin.Components.ApiScopes.ApiScopesViewModel
+
+<div class="card h-100 text-bg-light">
+    <h5 class="card-header">
+        <i class="bi bi-shield-lock me-2"></i>
+        API Scopes
+        <a asp-page="/Admin/ApiScopes/Index" class="float-end">
+            <i class="bi bi-plus-circle"></i>
+            <span class="d-none">Add API Scopes</span>
+        </a>
+    </h5>
+    <div class="card-body">
+        <p class="display-2 mb-0 text-center">
+            @Model.Count
+        </p>
+    </div>
+</div>

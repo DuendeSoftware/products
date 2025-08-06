@@ -1,0 +1,56 @@
+@model IdentityServerTemplate.ViewComponents.LicenseViewModel
+
+<div class="card h-100 text-bg-light">
+    <h5 class="card-header">
+        <i class="bi bi-award me-2"></i>
+        License
+        <a href="https://duendesoftware.com/products/identityserver#pricing"
+           class="float-end">
+            <i class="bi bi-chat-heart"></i>
+            <span class="d-none">See Licenses</span>
+        </a>
+    </h5>
+    <div class="card-body">
+        @if (Model.HasLicense)
+        {
+            <table class="table table-sm">
+                <tr>
+                    <th scope="row">Company</th>
+                    <td>@Model.License.CompanyName</td>
+                </tr>
+                <tr>
+                    <th scope="row">Edition</th>
+                    <td>@Model.License.Edition</td>
+                </tr>
+                <tr>
+                    <th scope="row">Serial Number</th>
+                    <td>@Model.License.SerialNumber</td>
+                </tr>
+                <tr>
+                    <th scope="row">Expiration</th>
+                    <td>@Model.License.Expiration</td>
+                </tr>
+                <tr>
+                    <th scope="row">Clients</th>
+                    <td>@Model.License.ClientLimit</td>
+                </tr>
+                <tr>
+                    <th scope="row">Issuers</th>
+                    <td>@Model.License.IssuerLimit</td>
+                </tr>
+            </table>
+        }
+        else
+        {
+            <p class="display-4 mb-0 text-center">
+                @Model.LicenseText
+            </p>
+            <div class="text-center">
+
+                <a type="button" class="btn btn-brand btn-sm mt-3" href="https://duendesoftware.com/products/identityserver#pricing" target="_blank">
+                    See IdentityServer Product Information
+                </a>
+            </div>
+        }
+    </div>
+</div>

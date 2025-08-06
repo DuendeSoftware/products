@@ -1,0 +1,91 @@
+@page
+@model IdentityServerTemplate.Pages.Diagnostics.Index
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-ticket-perforated text-brand"></i>
+            Authentication Cookie Information
+        </h1>
+        <span class="text-muted">
+            Think of the Cookie Authentication page as a live debugger for user sessions: it lists every claim and property stored in the auth cookie (like user ID, roles, expiry and any custom data) so you can quickly see exactly what’s being saved and sent with each request—making it easy to spot and fix any issues with your login or session handling.
+        </span>
+    </header>
+</div>
+
+<div class="row">
+    <div class="col">
+
+        <div class="card text-bg-light mb-3">
+            <h5 class="card-header">
+                <i class="bi bi-bar-chart-steps"></i>
+                Claims
+            </h5>
+            <div class="card-body pt-2">
+
+                <small class="mb-2 text-body-secondary d-block fst-italic">
+                    Lists each user claim (like user ID, email, roles) included in the auth ticket so you can see what identity data your app has.
+                </small>
+
+                @if (Model.View.AuthenticateResult.Principal != null)
+                {
+                    <dl>
+                        @foreach (var claim in Model.View.AuthenticateResult.Principal.Claims)
+                        {
+                            <dt>@claim.Type</dt>
+                            <dd>@claim.Value</dd>
+                        }
+                    </dl>
+                }
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col">
+
+        <div class="card text-bg-light mb-3">
+            <h5 class="card-header">
+                <i class="bi bi-sliders2"></i>
+                Properties
+            </h5>
+            <div class="card-body pt-2 text-wrap text-break">
+
+                <small class="mb-2 text-body-secondary d-block fst-italic">
+                    Shows the authentication ticket metadata (such as issued/expiry timestamps, authentication scheme, and any custom flags) so you know exactly how the session is configured.
+                </small>
+
+                <dl>
+                    @if (Model.View.AuthenticateResult.Properties != null)
+                    {
+                        @foreach (var prop in Model.View.AuthenticateResult.Properties.Items)
+                        {
+                            <dt>@prop.Key</dt>
+                            <dd>@prop.Value</dd>
+                        }
+                    }
+                    @if (Model.View.Clients.Any())
+                    {
+                        <dt>Clients</dt>
+                        <dd>
+                            @{
+                                var clients = Model.View.Clients.ToArray();
+                                for (var i = 0; i < clients.Length; i++)
+                                {
+                                    <text>@clients[i]</text>
+                                    if (i < clients.Length - 1)
+                                    {
+                                        <text>, </text>
+                                    }
+                                }
+                            }
+                        </dd>
+                    }
+                </dl>
+
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+
+    <title>Duende IdentityServer</title>
+
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
+
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+
+    <div class="container-fluid vh-100">
+        <div class="row justify-content-center h-100">
+            <div class="col-12 col-sm-10 col-md-8 d-flex flex-column">
+
+                <img class="d-block mx-auto mt-2 w-25" src="~/img/duende-logo-full.svg" alt="Duende Logo">
+
+                <!-- Scrollable main -->
+                <main class="p-3 flex-grow-1 overflow-auto">
+                    @RenderBody()
+                </main>
+
+            </div>
+
+            <!-- Footer locked to bottom -->
+            <partial name="_footer" />
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.slim.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

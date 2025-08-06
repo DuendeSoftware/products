@@ -1,0 +1,107 @@
+@page
+@model IdentityServerTemplate.Pages.Login.Index
+
+@{
+    Layout = "_LayoutLogin";
+}
+
+<div class="login-page">
+
+    <div class="lead text-center">
+        <h1 class="text-brand mb-0">Login</h1>
+        <p>Choose how to login</p>
+    </div>
+
+    <partial name="_ValidationSummary" />
+
+    <div class="row">
+
+        @if (Model.View.EnableLocalLogin)
+        {
+            <div class="col-12 col-lg-6 mb-3 mb-lg-0 mx-auto">
+
+                <div class="card text-bg-light">
+                    <h5 class="card-header">
+                        Local Account
+                    </h5>
+                    <div class="card-body pt-2">
+
+                        <!-- Form -->
+                        <form asp-page="/Account/Login/Index">
+                            <input type="hidden" asp-for="Input.ReturnUrl" />
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Input.Username"></label>
+                                <input class="form-control form-control-sm" placeholder="Username" asp-for="Input.Username" autofocus>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="Input.Password"></label>
+                                <input type="password" class="form-control form-control-sm" placeholder="Password" asp-for="Input.Password" autocomplete="off">
+                            </div>
+
+                            @if (Model.View.AllowRememberLogin)
+                            {
+                                <div class="form-group mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" asp-for="Input.RememberLogin">
+                                        <label class="form-check-label" asp-for="Input.RememberLogin">
+                                            Remember My Login
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+
+                            <small class="d-block mb-3">
+                                Tip: for testing, use either <code>bob</code>/<code>bob</code>, <code>alice</code>/<code>alice</code> or <code>admin</code>/<code>admin</code>
+                            </small>
+
+                            <button class="btn btn-primary" name="Input.Button" value="login">Login</button>
+                            <button class="btn btn-secondary" name="Input.Button" value="cancel">Cancel</button>
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+        @if (Model.View.VisibleExternalProviders.Any())
+        {
+            <div class="col-12 col-lg-6 mx-auto">
+
+                <div class="card text-bg-light">
+                    <h5 class="card-header">
+                        External Account
+                    </h5>
+                    <div class="card-body">
+
+                        <!-- External providers (preconfigured or dynamic) -->
+                        <ul class="list-inline">
+                            @foreach (var provider in Model.View.VisibleExternalProviders)
+                            {
+                                <li class="list-inline-item">
+                                    <a class="btn btn-primary"
+                                       asp-page="/ExternalLogin/Challenge"
+                                       asp-route-scheme="@provider.AuthenticationScheme"
+                                       asp-route-returnUrl="@Model.Input.ReturnUrl">
+                                        @provider.DisplayName
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+        @if (!Model.View.EnableLocalLogin && !Model.View.VisibleExternalProviders.Any())
+        {
+            <div class="alert alert-warning">
+                <strong>Invalid login request</strong>
+                There are no login schemes configured for this request.
+            </div>
+        }
+    </div>
+</div>

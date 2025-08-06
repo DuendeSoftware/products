@@ -1,0 +1,17 @@
+@model IdentityServerTemplate.Pages.Admin.Components.IdentityScopes.IdentityScopesViewModel
+
+<div class="card h-100 text-bg-light">
+    <h5 class="card-header">
+        <i class="bi bi-person-badge me-2"></i>
+        Identity Scopes
+        <a asp-page="/Admin/IdentityScopes/Index" class="float-end">
+            <i class="bi bi-plus-circle"></i>
+            <span class="d-none">Add Identity Scopes</span>
+        </a>
+    </h5>
+    <div class="card-body">
+        <p class="display-2 mb-0 text-center">
+            @Model.Count
+        </p>
+    </div>
+</div>

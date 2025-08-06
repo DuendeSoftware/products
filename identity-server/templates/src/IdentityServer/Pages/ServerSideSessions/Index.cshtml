@@ -1,0 +1,194 @@
+@page
+@model IdentityServerTemplate.Pages.ServerSideSessions.IndexModel
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-hourglass-split text-brand"></i>
+            Server Side Sessions
+        </h1>
+        <span class="text-muted">
+            Server-side sessions in Duende IdentityServer provide centralized session management and storage,
+            allowing tracking of user authentication state, active clients, and token validity.
+            These sessions enable features like single sign-out and session monitoring across multiple applications.
+        </span>
+    </header>
+</div>
+
+@if (Model.UserSessions == null)
+{
+    <div class="alert alert-warning" role="alert">
+        You do not have server-side sessions enabled.<br />
+        To do so, use <i>AddServerSideSessions</i> on your IdentityServer configuration.<br />
+        See the <a href="https://docs.duendesoftware.com/identityserver/ui/server-side-sessions">documentation</a> for
+        more information.
+    </div>
+}
+else
+{
+    @if (Model.UserSessions != null)
+    {
+        <div class="d-flex justify-content-end align-items-end bg-body-tertiary p-2 flex-nowrap">
+
+            <!-- Actions: keep dropdown + form together, no wrap -->
+            <div class="d-flex align-items-center flex-nowrap gap-2">
+
+                <!-- Filter/Search form -->
+                <form method="get" class="row g-2 flex-grow-1 align-items-end">
+                    <div class="col-auto">
+                        <label asp-for="DisplayNameFilter" class="visually-hidden">Name</label>
+                        <input asp-for="DisplayNameFilter" type="search"
+                               class="form-control"
+                               placeholder="Name" />
+                    </div>
+                    <div class="col-auto">
+                        <label asp-for="SessionIdFilter" class="visually-hidden">Session ID</label>
+                        <input asp-for="SessionIdFilter" type="search"
+                               class="form-control"
+                               placeholder="Session ID" />
+                    </div>
+                    <div class="col-auto">
+                        <label asp-for="SubjectIdFilter" class="visually-hidden">Subject ID</label>
+                        <input asp-for="SubjectIdFilter" type="search"
+                               class="form-control"
+                               placeholder="Subject ID" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-brand">
+                            <i class="bi bi-filter"></i>
+                            Filter
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <div class="d-flex align-items-end mb-3">
+
+            @* Prev button *@
+            @if (Model.UserSessions.HasPrevResults)
+            {
+                <a class="btn btn-primary me-3"
+                   asp-page="/ServerSideSessions/Index"
+                   asp-route-prev="true"
+                   asp-route-token="@Model.UserSessions.ResultsToken"
+                   asp-route-DisplayNameFilter="@Model.DisplayNameFilter"
+                   asp-route-SubjectIdFilter="@Model.SubjectIdFilter"
+                   asp-route-SessionIdFilter="@Model.SessionIdFilter">
+                    &larr; Prev
+                </a>
+            }
+
+            @* Next button *@
+            @if (Model.UserSessions.HasNextResults)
+            {
+                <a class="btn btn-primary ms-3"
+                   asp-page="/ServerSideSessions/Index"
+                   asp-route-token="@Model.UserSessions.ResultsToken"
+                   asp-route-DisplayNameFilter="@Model.DisplayNameFilter"
+                   asp-route-SubjectIdFilter="@Model.SubjectIdFilter"
+                   asp-route-SessionIdFilter="@Model.SessionIdFilter">
+                    Next &rarr;
+                </a>
+            }
+        </div>
+    }
+
+    @if (Model.UserSessions?.Results.Any() == true)
+    {
+        <div class="mt-4">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Details</th>
+                        <th class="text-center">Display Name</th>
+                        <th class="text-center">Lifetime (UTC)</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    @foreach (var session in Model.UserSessions.Results)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-bold">
+                                    <i class="bi bi-person-fill"></i>
+                                    SubjectId: @session.SubjectId
+                                </div>
+                                <div class="text-muted fst-italic">
+                                    <i class="bi bi-hourglass"></i>
+                                    SessionId: @session.SessionId
+                                </div>
+                                <div class="text-muted fst-italic">
+                                    <i class="bi bi-laptop"></i>
+                                    Clients:
+                                    @if (session.ClientIds?.Any() == true)
+                                    {
+                                        @(session.ClientIds.Aggregate((x, y) => $"{x}, {y}"))
+                                    }
+                                    else
+                                    {
+                                        @("None")
+                                    }
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (string.IsNullOrEmpty(session.DisplayName))
+                                {
+                                    <i class='text-muted'>None</i>
+                                }
+                                else
+                                {
+                                    <span>@session.DisplayName</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @session.Created.ToUniversalTime()
+                                <i class="bi bi-caret-right-fill text-muted"></i>
+                                @if (session.Expires.HasValue)
+                                {
+                                    @session.Expires.Value.ToUniversalTime()
+                                }
+                                else
+                                {
+                                    <i class="text-muted fst-italic">Unknown</i>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <button type="submit"
+                                        class="btn btn-link text-danger m-0 p-0"
+                                        form="delete-form"
+                                        asp-page="/ServerSideSessions/Index"
+                                        asp-route-sessionid="@session.SessionId"
+                                        data-confirm="Are you sure you want to delete this session?">
+                                    <i class="bi bi-trash"></i>
+                                    <span class="d-none">Delete</span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-group-divider">
+                    <tr>
+                        <td colspan="5" class="text-bg-light">
+                            Total Results: @Model.UserSessions.TotalCount |
+                            Page @Model.UserSessions.CurrentPage of @Model.UserSessions.TotalPages
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <form id="delete-form" method="post" class="d-none"></form>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col">
+                <div class="alert alert-light text-center">
+                    No Sessions Found.
+                </div>
+            </div>
+        </div>
+    }
+}

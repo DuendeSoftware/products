@@ -1,0 +1,314 @@
+@page
+@model IdentityServerTemplate.Pages.Admin.Clients.EditModel
+
+<link href="~/lib/prism/prism.css" rel="stylesheet" />
+<script src="~/lib/prism/prism.js"></script>
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-laptop text-brand"></i>
+            Edit Client - @Model.InputModel.ClientId
+        </h1>
+        <span class="text-muted">
+            Edit the configuration for an existing client
+        </span>
+    </header>
+</div>
+
+@if (Model.Updated)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> Client has been updated successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+        </button>
+    </div>
+}
+
+<div class="clients-page">
+
+    <partial name="_ValidationSummary" />
+
+    <form method="post">
+
+        <div class="form-group mb-3 text-start">
+
+            <a class="btn btn-sm btn-outline-secondary" asp-page="/Admin/Clients/Index"
+               data-unsaved="Any unsaved changes will be lost. Are you sure?">
+                <i class="bi bi-chevron-double-left"></i>
+                Go Back
+            </a>
+
+            <button class="btn btn-sm btn-success"
+                    type="submit"
+                    name="Button"
+                    value="save">
+                <i class="bi bi-floppy"></i>
+                Save Changes
+            </button>
+
+            <button class="btn btn-sm btn-danger"
+                    type="submit"
+                    name="Button"
+                    value="delete"
+                    data-confirm="Are you sure you want to delete this Client?">
+                <i class="bi bi-trash"></i>
+                Delete
+            </button>
+
+            <a href="/Admin/Clients/EditSecret?clientid=@Model.InputModel.ClientId"
+               class="btn btn-sm btn-warning">
+                <i class="bi bi-lock"></i>
+                Update Client Secret
+            </a>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-12 col-md-6">
+
+                <div class="card text-bg-light">
+                    <h5 class="card-header">
+                        <i class="bi bi-gear"></i>
+                        Client Settings
+                    </h5>
+                    <div class="card-body pt-2">
+
+                        <small class="mb-2 text-body-secondary d-block fst-italic">
+                            Defines the core parameters that identify your application to the identity provider—such as its name,
+                            client ID, secret and the allowed redirect/callback URLs for authentication flows.
+                        </small>
+
+                        <div class="row mb-3">
+                            <div class="col-md">
+                                <label asp-for="InputModel.ClientId" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.ClientId"
+                                       readonly />
+                            </div>
+
+                            <div class="col-md">
+                                <label asp-for="InputModel.Flow" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.Flow"
+                                       readonly />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="InputModel.Name" class="form-label"></label>
+                            <input class="form-control form-control-sm"
+                                   asp-for="InputModel.Name"
+                                   autofocus />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="InputModel.AccessTokenLifetime" class="form-label"></label>
+                            <input class="form-control form-control-sm"
+                                   asp-for="InputModel.AccessTokenLifetime"
+                                   autofocus />
+                        </div>
+
+                        @if (Model.InputModel.Flow == IdentityServerTemplate.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                        {
+                            <div class="form-group mb-3">
+                                <label asp-for="InputModel.RedirectUri" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.RedirectUri" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="InputModel.InitiateLoginUri" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.InitiateLoginUri" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="InputModel.LogoUri" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.LogoUri" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="InputModel.PostLogoutRedirectUri" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.PostLogoutRedirectUri" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="InputModel.FrontChannelLogoutUri" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.FrontChannelLogoutUri" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="InputModel.BackChannelLogoutUri" class="form-label"></label>
+                                <input class="form-control form-control-sm"
+                                       asp-for="InputModel.BackChannelLogoutUri" />
+                            </div>
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12 col-md-6">
+
+                <div class="card text-bg-light mb-3">
+                    <h5 class="card-header">
+                        <i class="bi bi-sliders"></i>
+                        Allowed Scopes
+                    </h5>
+                    <div class="card-body pt-2">
+
+                        <small class="mb-2 text-body-secondary d-block fst-italic">
+                            Specifies which API scopes and identity claims this client is permitted to request, thereby controlling
+                            the level of access it can obtain to protected resources.
+                        </small>
+
+                        <div class="row gx-3">
+
+                            @if (Model.ApiScopes.Count > 0)
+                            {
+                                <label class="fw-medium border-bottom mb-1">API Scopes</label>
+                                foreach (var scope in Model.ApiScopes)
+                                {
+                                    var isChecked = Model.InputModel.AllowedScopes.Contains(scope.Name) ? "checked" : "";
+                                    <div class="col-12 col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   name="InputModel.AllowedScopes"
+                                                   id="scope_api_@scope.Name"
+                                                   value="@scope.Name"
+                                                   @isChecked />
+                                            <label class="form-check-label"
+                                                   for="scope_api_@scope.Name">
+                                                @scope.Name (<i>@scope.DisplayName</i>)
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                            @if (Model.IdentityScopes.Count > 0)
+                            {
+                                <label class="fw-medium border-bottom mb-1 mt-2">Identity Scopes</label>
+                                foreach (var scope in Model.IdentityScopes)
+                                {
+                                    var isChecked = Model.InputModel.AllowedScopes.Contains(scope.Name) ? "checked" : "";
+                                    <div class="col-12 col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   name="InputModel.AllowedScopes"
+                                                   id="scope_id_@scope.Name"
+                                                   value="@scope.Name"
+                                                   @isChecked />
+                                            <label class="form-check-label"
+                                                   for="scope_id_@scope.Name">
+                                                @scope.Name (<i>@scope.DisplayName</i>)
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.InputModel.Flow == IdentityServerTemplate.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                {
+                    <div class="card text-bg-light mb-3">
+                        <h5 class="card-header">
+                            <i class="bi bi-shield-lock"></i>
+                            Consent Options
+                        </h5>
+                        <div class="card-body pt-2">
+
+                            <small class="mb-2 text-body-secondary d-block fst-italic">
+                                Configures how and when end users are prompted to approve the client’s requested permissions, tailoring
+                                the user’s consent experience.
+                            </small>
+
+                            <div class="row gx-3">
+                                <div class="col-12 col-md-6 mb-2">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input"
+                                               asp-for="InputModel.RequireConsent" />
+                                        <label class="form-check-label"
+                                               asp-for="InputModel.RequireConsent">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 mb-2">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input"
+                                               asp-for="InputModel.AllowRememberConsent" />
+                                        <label class="form-check-label"
+                                               asp-for="InputModel.AllowRememberConsent">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.InputModel.ClientConfigurationSample != null)
+                {
+                    <div class="card text-bg-light mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">
+                                <i class="bi bi-shield-lock"></i>
+                                Sample Client Configuration
+                            </span>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#configSnippet"
+                                    aria-expanded="false"
+                                    aria-controls="configSnippet"
+                                    id="snippetToggle">
+                                Show
+                            </button>
+                        </div>
+
+                        <div id="configSnippet" class="collapse">
+                            <div class="card-body p-2">
+
+                                <small class="mb-2 text-body-secondary d-block fst-italic">
+                                    A sample configuration you can use to set up this client application. Changes are shown once saved.
+                                </small>
+
+                                <div class="p-2">
+                                    <pre class="mb-0"><code class="language-csharp">@Model.InputModel.ClientConfigurationSample</code></pre>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+    </form>
+</div>
+@{
+    <script>
+        (function() {
+          var toggleBtn = document.getElementById('snippetToggle');
+          var collapseEl = document.getElementById('configSnippet');
+
+          collapseEl.addEventListener('shown.bs.collapse', function () {
+            toggleBtn.textContent = 'Hide';
+            toggleBtn.setAttribute('aria-expanded', 'true');
+          });
+          collapseEl.addEventListener('hidden.bs.collapse', function () {
+            toggleBtn.textContent = 'Show';
+            toggleBtn.setAttribute('aria-expanded', 'false');
+          });
+        })();
+    </script>
+}

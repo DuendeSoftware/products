@@ -229,3 +229,7 @@ artifacts
 *.Artifacts/
 
 reports
+
+*.db
+*.db-shm
+*.db-wal

@@ -1,0 +1,35 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "IdentityServer"
+  ],
+  "name": "Duende IdentityServer",
+  "identity": "Duende.IdentityServer",
+  "groupIdentity": "Duende.IdentityServer",
+  "shortName": [
+    "duende-is"
+  ],
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "IdentityServerTemplate",
+  "preferNameDirectory": true,
+  "primaryOutputs": [
+    {
+      "path": "IdentityServerTemplate.csproj"
+    }
+  ],
+  "symbols": {
+    "RenameCommonNamespace": {
+      "datatype": "string",
+      "displayName": "Fix common host namespace.",
+      "replaces": "IdentityServerTemplate",
+      "type": "derived",
+      "valueSource": "name",
+      "valueTransform": "safe_namespace"
+    }
+  }
+}

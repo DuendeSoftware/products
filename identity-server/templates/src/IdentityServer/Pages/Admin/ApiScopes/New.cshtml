@@ -1,0 +1,103 @@
+@page
+@using System.Text.Json
+@model IdentityServerTemplate.Pages.Admin.ApiScopes.NewModel
+
+@{
+    var cfg = new
+    {
+        items = Model.InputModel.ClaimsSuggestions.Select(c => new { value = c, label = c }),
+        selected = Model.InputModel.UserClaims,
+        separator = "| |",
+        allowNew = true,
+        allowClear = true,
+        showDropIcon = false,
+        suggestionsThreshold = 1
+    };
+
+    var jsonCfg = JsonSerializer.Serialize(cfg);
+}
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-shield-lock text-brand"></i>
+            New API Scope
+        </h1>
+        <span class="text-muted">
+            Setup the configuration for a new API Scope
+        </span>
+    </header>
+</div>
+
+<partial name="_ValidationSummary" />
+
+<form method="post">
+
+    <div class="form-group mb-3">
+
+        <a class="btn btn-sm btn-outline-secondary" asp-page="/Admin/ApiScopes/Index">
+            <i class="bi bi-chevron-double-left"></i>
+            Go Back
+        </a>
+
+        <button class="btn btn-sm btn-success"
+                type="submit"
+                name="Button"
+                value="save">
+            <i class="bi bi-floppy"></i>
+            Create Scope
+        </button>
+
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+
+            <div class="card text-bg-light">
+                <h5 class="card-header">
+                    <i class="bi bi-gear"></i>
+                    API Scope Details
+                </h5>
+                <div class="card-body pt-2">
+
+                    <small class="mb-2 text-body-secondary d-block fst-italic">
+                        Defines each named scope alongside the precise API permissions or resource endpoints (for example, <code>`orders:read`</code> or <code>`products:write`</code>) that clients can request access to.
+                    </small>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="@Model.InputModel.Name" class="form-label"></label>
+                        <input class="form-control form-control-sm" asp-for="@Model.InputModel.Name" autofocus />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="@Model.InputModel.DisplayName" class="form-label"></label>
+                        <input class="form-control form-control-sm" asp-for="@Model.InputModel.DisplayName" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="@Model.InputModel.UserClaims" class="form-label">User Claims (space delimited)</label>
+
+                        <select id="@Html.IdFor(m => m.InputModel.UserClaims)"
+                                name="@Html.NameFor(m => m.InputModel.UserClaims)"
+                                class="form-select"
+                                multiple="multiple"
+                                data-config='@jsonCfg'
+                                data-allow-new="true"
+                                data-allow-clear="true"
+                                data-show-drop-icon="false"
+                                data-separator="| |">
+
+                            <option disabled hidden value="">Type a claim...</option>
+                            @foreach (var i in Model.InputModel.UserClaims)
+                            {
+                                <option selected="selected" value="@i">@i</option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</form>
