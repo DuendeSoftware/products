@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -53,8 +54,15 @@ public class NewModel(ClientRepository repository) : PageModel
             }
         }
 
-        await repository.CreateAsync(InputModel);
-        Created = true;
+        try
+        {
+            await repository.CreateAsync(InputModel);
+            Created = true;
+        }
+        catch (ValidationException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+        }
 
         return Page();
     }

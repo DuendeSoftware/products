@@ -192,6 +192,13 @@ public class ClientRepository(ConfigurationDbContext context)
         var defaultMachineToMachineScopes = Array.Empty<string>();
 
         ArgumentNullException.ThrowIfNull(model);
+
+        var exists = await context.Clients.AnyAsync(x => x.ClientId == model.Name);
+        if (exists)
+        {
+            throw new ValidationException($"A Client with the id '{model.ClientId}' already exists.");
+        }
+
         var client = new Duende.IdentityServer.Models.Client
         {
             ClientId = model.ClientId.Trim(),
