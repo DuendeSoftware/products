@@ -1,40 +1,49 @@
-# Duende IdentityServer Quickstart
+# Duende IdentityServer
 
-Welcome to the Duende IdentityServer quickstart, a template designed to help you quickly get up and running with an OpenID Connect and OAuth 2.0 provider (OP). Please take the time to read this document to get a general overview of what the template offers and what proposed changes you can apply to make it your own.
+Welcome to your new Duende IdentityServer! This template is designed to help you quickly get up and running with a secure OpenID Connect and OAuth 2.0 provider.
 
-We encourage you to modify this template to fit your needs, whether for local development, staging environments, or production deployments.
+This document provides an overview of the template and how to customize it for your own needs, whether for local development, staging, or production.
 
-## Template Information
+## Key Features
 
-Here are some noteworthy attributes of this template that you should consider:
+Here are some key features of this template:
 
 ### .NET 9+
 
-The template targets .NET 9, so you will need the latest .NET 9 SDK, which you can get from [dot.net](https://dotnet.microsoft.com/en-us/download)
+This template targets .NET 9. You can get the latest SDK from [dotnet.microsoft.com](https://dotnet.microsoft.com/en-us/download)
 
-### EntityFramework Core 9 SQLite
+### EntityFramework Core 9 with SQLite
 
-The template uses EntityFramework Core 9 with an SQLite database. The SQLite database is only meant for development purposes, and you should swap it for another relational database implementation, such as SQL Server, PostgreSQL, or MySQL/MariaDB. SQLite uses on-disk files to store data, and files of `.db`, `.db-shm`, and `.db-wal` are ignored from version control by default.
+This template uses our [EntityFramework Store](https://docs.duendesoftware.com/identityserver/data/ef) to persist configuration and operational data.
 
-### In-Memory Users
+For simplicity, it's pre-configured with SQLite. This is great for development and testing, but *it is not recommended for production*. We strongly advise switching to a more robust relational database like SQL Server, PostgreSQL, or MySQL for production environments.
 
-This template utilizes and in-memory user store, and you can find these users in `TestUsers.cs`. This is fine for testing purposes, but you may want to consider storing users in a database at some point by implementing [`IProfileService`](https://docs.duendesoftware.com/identityserver/reference/services/profile-service/#duendeidentityserverservicesiprofileservice) or using [ASP.NET Identity](https://docs.duendesoftware.com/identityserver/aspnet-identity/) as a user storage mechanism.
+By default, the SQLite database files (.db, .db-shm, .db-wal) are ignored by Git.
+
+### In-Memory Test Users
+For demonstration purposes, we've included an in-memory user store in TestUsers.cs. This approach is *for development only and should not be used in production.*
+
+For a production environment, you should replace this with your own user database or integrate with [ASP.NET Identity](https://docs.duendesoftware.com/identityserver/aspnet-identity/). To do that, you'll need to
+1. Update the login UI
+   Replace the `TestUserStore` in the UI with logic that validates users against your store.
+2. Provide an implementation of `IProfileService`
+   This service is used to populate claims in tokens and the userinfo endpoint.
+   - For custom user stores: You will write you own implementation.
+   - For ASP.NET Identity: You can use the built-in implementation provided by our ASP.NET Identity integration package.
 
 ### CSS Style Assets
 
-This template used [Bootstrap 5](https://getbootstrap.com/) and Sass files. While we provide Sass files, we do not offer
-build tooling to recompile them in this solution. You can build these files using built-in IDE tooling or command-line
-tools such as [Vite](https://vitejs.dev/), [Webpack](https://webpack.js.org/), or [Gulp](https://gulpjs.com/).
+The user interface is styled with [Bootstrap 5](https://getbootstrap.com/). We include the source Sass files, but this template does not provide a build tool to recompile them. To customize the styles, you'll need to recompile the Sass files using your preferred tool, such as your IDE's built-in features or a command-line tool like [Vite](https://vitejs.dev/), [Webpack](https://webpack.js.org/), or [Gulp](https://gulpjs.com/).
 
 ## Getting Started
 
-To run this application, you only need to build and run the application.
+To get started, just run the project:
 
 ```bash
 dotnet run --project <ProjectName>
 ```
 
-The application will seed some initial data, which can be found in `Program.cs`.
+On first launch, the application will seed the database with initial configuration data and test users. This logic is located in SeedData.cs and is called from Program.cs.
 
 ```csharp
 // this seeding is only for the template to bootstrap the DB and users.
@@ -44,7 +53,7 @@ SeedData.EnsureSeedData(app);
 Log.Information("Done seeding database.");
 ```
 
-After launching the web application, you can log in using the following credentials:
+You can now log in with one of the pre-configured test users found in the `TestUsers.cs` file:
 
 | User  | Password |
 |-------|----------|
@@ -52,13 +61,13 @@ After launching the web application, you can log in using the following credenti
 | alice | alice    |
 | bob   | bob      |
 
-You can find these users in the `TestUsers` file. We highly recommend you log in as `admin` to configure clients, scopes, and claims.
+We recommend logging in as `admin` to explore the administration UI, where you can configure clients, scopes, and claims.
 
 ## Documentation
 
-To read more about Duende IdentityServer, we recommend you visit our [official documentation](https://docs.duendesoftware.com). There, you can learn about security topics and how to implement them in your ASP.NET Core solutions.
+To read more about Duende IdentityServer, visit our [official documentation](https://docs.duendesoftware.com). There, you can learn about security topics and how to implement them in your ASP.NET Core solutions.
 
-You can also get a jump start on your Duende IdentityServer knowledge by [completing our Quickstart series](https://docs.duendesoftware.com/identityserver/quickstarts/0-overview/) where you'll learn the ins and outs of implementing your custom identity provider.
+You can also get a jump start on your Duende IdentityServer knowledge by [completing our Quickstart series](https://docs.duendesoftware.com/identityserver/quickstarts/0-overview/) where you'll learn the ins and outs of implementing your own identity provider.
 
 ## License
 
