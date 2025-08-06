@@ -15,7 +15,7 @@ public class ClientSummaryModel
     [DisplayName("Client Id")]
     public string ClientId { get; set; } = default!;
 
-    [DisplayName("Client Name")]
+    [DisplayName("Display Name")]
     public string? Name { get; set; }
 
     [Required]
