@@ -18,8 +18,6 @@ This template uses our [EntityFramework Store](https://docs.duendesoftware.com/i
 
 For simplicity, it's pre-configured with SQLite. This is great for development and testing, but *it is not recommended for production*. We strongly advise switching to a more robust relational database like SQL Server, PostgreSQL, or MySQL for production environments.
 
-By default, the SQLite database files (.db, .db-shm, .db-wal) are ignored by Git.
-
 ### In-Memory Test Users
 For demonstration purposes, we've included an in-memory user store in TestUsers.cs. This approach is *for development only and should not be used in production.*
 
