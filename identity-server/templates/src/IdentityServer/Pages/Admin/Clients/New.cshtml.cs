@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,8 +16,7 @@ public class NewModel(ClientRepository repository) : PageModel
 
     public void OnGet(string type) => InputModel = new CreateClientModel
     {
-        Flow = type == "m2m" ? Flow.ClientCredentials : Flow.CodeFlowWithPkce,
-        ClientId = Guid.NewGuid().ToString()
+        Flow = type == "m2m" ? Flow.ClientCredentials : Flow.CodeFlowWithPkce
     };
 
     public async Task<IActionResult> OnPostAsync()
@@ -53,8 +53,15 @@ public class NewModel(ClientRepository repository) : PageModel
             }
         }
 
-        await repository.CreateAsync(InputModel);
-        Created = true;
+        try
+        {
+            await repository.CreateAsync(InputModel);
+            Created = true;
+        }
+        catch (ValidationException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+        }
 
         return Page();
     }

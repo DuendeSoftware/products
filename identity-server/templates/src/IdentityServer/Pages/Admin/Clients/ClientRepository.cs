@@ -15,7 +15,7 @@ public class ClientSummaryModel
     [DisplayName("Client Id")]
     public string ClientId { get; set; } = default!;
 
-    [DisplayName("Client Name")]
+    [DisplayName("Display Name")]
     public string? Name { get; set; }
 
     [Required]
@@ -192,6 +192,13 @@ public class ClientRepository(ConfigurationDbContext context)
         var defaultMachineToMachineScopes = Array.Empty<string>();
 
         ArgumentNullException.ThrowIfNull(model);
+
+        var exists = await context.Clients.AnyAsync(x => x.ClientId == model.Name);
+        if (exists)
+        {
+            throw new ValidationException($"A Client with the id '{model.ClientId}' already exists.");
+        }
+
         var client = new Duende.IdentityServer.Models.Client
         {
             ClientId = model.ClientId.Trim(),

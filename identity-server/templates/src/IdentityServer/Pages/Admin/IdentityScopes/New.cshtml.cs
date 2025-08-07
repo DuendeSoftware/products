@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -19,8 +20,15 @@ public class NewModel(IdentityScopeRepository repository) : PageModel
     {
         if (ModelState.IsValid)
         {
-            await repository.CreateAsync(InputModel);
-            return RedirectToPage("/Admin/IdentityScopes/Edit", new { id = InputModel.Name });
+            try
+            {
+                await repository.CreateAsync(InputModel);
+                return RedirectToPage("/Admin/IdentityScopes/Edit", new { id = InputModel.Name });
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
         }
 
         return Page();

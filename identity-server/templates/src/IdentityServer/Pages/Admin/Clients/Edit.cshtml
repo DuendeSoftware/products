@@ -39,7 +39,7 @@
                 Go Back
             </a>
 
-            <button class="btn btn-sm btn-success"
+            <button class="btn btn-sm btn-brand"
                     type="submit"
                     name="Button"
                     value="save">
@@ -99,8 +99,7 @@
                         <div class="form-group mb-3">
                             <label asp-for="InputModel.Name" class="form-label"></label>
                             <input class="form-control form-control-sm"
-                                   asp-for="InputModel.Name"
-                                   autofocus />
+                                   asp-for="InputModel.Name" />
                         </div>
 
                         <div class="form-group mb-3">
@@ -118,16 +117,6 @@
                                        asp-for="InputModel.RedirectUri" />
                             </div>
                             <div class="form-group mb-3">
-                                <label asp-for="InputModel.InitiateLoginUri" class="form-label"></label>
-                                <input class="form-control form-control-sm"
-                                       asp-for="InputModel.InitiateLoginUri" />
-                            </div>
-                            <div class="form-group mb-3">
-                                <label asp-for="InputModel.LogoUri" class="form-label"></label>
-                                <input class="form-control form-control-sm"
-                                       asp-for="InputModel.LogoUri" />
-                            </div>
-                            <div class="form-group mb-3">
                                 <label asp-for="InputModel.PostLogoutRedirectUri" class="form-label"></label>
                                 <input class="form-control form-control-sm"
                                        asp-for="InputModel.PostLogoutRedirectUri" />
@@ -138,9 +127,19 @@
                                        asp-for="InputModel.FrontChannelLogoutUri" />
                             </div>
                             <div class="form-group mb-3">
-                                <label asp-for="InputModel.BackChannelLogoutUri" class="form-label"></label>
-                                <input class="form-control form-control-sm"
-                                       asp-for="InputModel.BackChannelLogoutUri" />
+                              <label asp-for="InputModel.BackChannelLogoutUri" class="form-label"></label>
+                              <input class="form-control form-control-sm"
+                                     asp-for="InputModel.BackChannelLogoutUri" />
+                            </div>
+                            <div class="form-group mb-3">
+                              <label asp-for="InputModel.InitiateLoginUri" class="form-label"></label>
+                              <input class="form-control form-control-sm"
+                                     asp-for="InputModel.InitiateLoginUri" />
+                            </div>
+                            <div class="form-group mb-3">
+                              <label asp-for="InputModel.LogoUri" class="form-label"></label>
+                              <input class="form-control form-control-sm"
+                                     asp-for="InputModel.LogoUri" />
                             </div>
                         }
 

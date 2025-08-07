@@ -95,6 +95,11 @@ public class ApiScopeRepository(ConfigurationDbContext context)
     public async Task CreateAsync(ApiScopeModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
+        var exists = await _context.ApiScopes.AnyAsync(x => x.Name == model.Name);
+        if (exists)
+        {
+            throw new ValidationException($"An API Scope with the name '{model.Name}' already exists.");
+        }
         var scope = new Duende.IdentityServer.Models.ApiScope()
         {
             Name = model.Name,

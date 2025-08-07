@@ -38,7 +38,7 @@
                     Go Back
                 </a>
 
-                <button class="btn btn-sm btn-success" type="submit">
+                <button class="btn btn-sm btn-brand" type="submit">
                     <i class="bi bi-floppy"></i>
                     Create Client
                 </button>
@@ -54,14 +54,24 @@
                         </h5>
                         <div class="card-body pt-2">
 
-                            <small class="mb-2 text-body-secondary d-block fst-italic">
-                                Defines the core parameters that identify your application to the identity provider—such as its name, client ID, secret and the allowed redirect/callback URLs for authentication flows.
-                            </small>
-                            <div class="form-group mb-3">
+                          <small class="mb-2 text-body-secondary d-block fst-italic">
+                            Defines the core parameters that identify your application to the identity provider—such as its name, client ID, secret and the allowed redirect/callback URLs for authentication flows.
+                          </small>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.ClientId" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.ClientId" autofocus />
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.Secret" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.Secret" />
+                          </div>
+
+                          <div class="form-group mb-3">
                                 <label asp-for="InputModel.Name" class="form-label"></label>
                                 <input class="form-control form-control-sm"
-                                       asp-for="InputModel.Name"
-                                       autofocus />
+                                       asp-for="InputModel.Name" />
                             </div>
 
                             <div class="form-group mb-3">
@@ -72,21 +82,11 @@
                                 </select>
                             </div>
 
-                            <div class="form-group mb-3">
-                                <label asp-for="@Model.InputModel.ClientId" class="form-label"></label>
-                                <input class="form-control form-control-sm" asp-for="@Model.InputModel.ClientId" autofocus />
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label asp-for="@Model.InputModel.Secret" class="form-label"></label>
-                                <input class="form-control form-control-sm" asp-for="@Model.InputModel.Secret" autofocus />
-                            </div>
-
                             @if (Model.InputModel.Flow == IdentityServerTemplate.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
                             {
                                 <div class="form-group mb-3">
                                     <label asp-for="@Model.InputModel.BaseUrl" class="form-label"></label>
-                                    <input class="form-control form-control-sm" asp-for="@Model.InputModel.BaseUrl" autofocus />
+                                    <input class="form-control form-control-sm" asp-for="@Model.InputModel.BaseUrl" />
                                 </div>
 
                                 <small class="d-block bg-white rounded border p-1 px-2">
