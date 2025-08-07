@@ -32,12 +32,12 @@ public class AssertionService(IConfiguration configuration)
         var now = DateTime.UtcNow;
 
         var token = new JwtSecurityToken(
-            "mvc.jar.jwt",
+            "mvc.jar-uri.jwt",
             configuration["is-host"] + "/connect/token",
             new List<Claim>()
             {
                 new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()),
-                new Claim(JwtClaimTypes.Subject, "mvc.jar.jwt"),
+                new Claim(JwtClaimTypes.Subject, "mvc.jar-uri.jwt"),
                 new Claim(JwtClaimTypes.IssuedAt, ((DateTimeOffset) now).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
             },
             now,
@@ -62,7 +62,7 @@ public class AssertionService(IConfiguration configuration)
         }
 
         var token = new JwtSecurityToken(
-            "mvc.jar.jwt",
+            "mvc.jar-uri.jwt",
             configuration["is-host"],
             claims,
             now,

@@ -143,6 +143,7 @@ void ConfigureWebClients()
     RegisterClientIfEnabled<Projects.MvcHybridBackChannel>("mvc-hybrid-backchannel");
     RegisterClientIfEnabled<Projects.MvcJarJwt>("mvc-jar-jwt");
     RegisterClientIfEnabled<Projects.MvcJarUriJwt>("mvc-jar-uri-jwt");
+    RegisterClientIfEnabled<Projects.Web>("web");
 }
 
 void ConfigureConsoleClients()

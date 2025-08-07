@@ -36,7 +36,7 @@ public class OidcEvents : OpenIdConnectEvents
         context.ProtocolMessage.Parameters.Clear();
         context.ProtocolMessage.ClientId = clientId;
         context.ProtocolMessage.RedirectUri = redirectUri;
-        context.ProtocolMessage.SetParameter("request_uri", $"https://localhost:44304/ro?id={id}");
+        context.ProtocolMessage.SetParameter("request_uri", $"https://localhost:44305/ro?id={id}");
 
         return Task.CompletedTask;
     }

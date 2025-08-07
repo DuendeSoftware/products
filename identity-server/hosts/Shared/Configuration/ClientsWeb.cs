@@ -46,7 +46,7 @@ public static class ClientsWeb
 
                 AllowedScopes = allowedScopes
             },
-                
+
             ///////////////////////////////////////////
             // MVC Automatic Token Management Sample
             //////////////////////////////////////////
@@ -72,7 +72,7 @@ public static class ClientsWeb
 
                 AllowedScopes = allowedScopes
             },
-                
+
             ///////////////////////////////////////////
             // MVC Code Flow Sample
             //////////////////////////////////////////
@@ -129,72 +129,6 @@ public static class ClientsWeb
             },
 
             ///////////////////////////////////////////
-            // MVC PAR Sample
-            //////////////////////////////////////////
-            new Client
-            {
-                ClientId = "mvc.par",
-                ClientName = "MVC PAR Client",
-
-                ClientSecrets =
-                {
-                    new Secret("secret".Sha256())
-                },
-
-                RequireRequestObject = false,
-
-                RequireConsent = true,
-                AllowedGrantTypes = GrantTypes.Code,
-
-                RequirePushedAuthorization = true,
-                // RedirectUris = { "https://localhost:44305/signin-oidc" },
-                FrontChannelLogoutUri = "https://localhost:44305/signout-oidc",
-                PostLogoutRedirectUris = { "https://localhost:44305/signout-callback-oidc" },
-
-                AllowOfflineAccess = true,
-
-                AllowedScopes = allowedScopes
-            },
-
-
-            //////////////////////////////////////////////////////
-            // MVC PAR Sample with JAR and Jwt Private Key Auth
-            //////////////////////////////////////////////////////
-            new Client
-            {
-                ClientId = "mvc.jar.par",
-                ClientName = "MVC PAR Client with JAR",
-
-                ClientSecrets =
-                {
-                    new Secret
-                    {
-                        Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                        Value = """
-                                {"e":"AQAB",
-                                 "kid":"ZzAjSnraU3bkWGnnAqLapYGpTyNfLbjbzgAPbbW2GEA",
-                                 "kty":"RSA",
-                                 "n":"wWwQFtSzeRjjerpEM5Rmqz_DsNaZ9S1Bw6UbZkDLowuuTCjBWUax0vBMMxdy6XjEEK4Oq9lKMvx9JzjmeJf1knoqSNrox3Ka0rnxXpNAz6sATvme8p9mTXyp0cX4lF4U2J54xa2_S9NF5QWvpXvBeC4GAJx7QaSw4zrUkrc6XyaAiFnLhQEwKJCwUw4NOqIuYvYp_IXhw-5Ti_icDlZS-282PcccnBeOcX7vc21pozibIdmZJKqXNsL1Ibx5Nkx1F1jLnekJAmdaACDjYRLL_6n3W4wUp19UvzB1lGtXcJKLLkqB6YDiZNu16OSiSprfmrRXvYmvD8m6Fnl5aetgKw"
-                                }
-                                """
-                    }
-                },
-
-                RequireRequestObject = true,
-
-                RequireConsent = true,
-                AllowedGrantTypes = GrantTypes.Code,
-
-                RedirectUris = { "https://localhost:44306/signin-oidc" },
-                FrontChannelLogoutUri = "https://localhost:44306/signout-oidc",
-                PostLogoutRedirectUris = { "https://localhost:44306/signout-callback-oidc" },
-
-                AllowOfflineAccess = true,
-
-                AllowedScopes = allowedScopes
-            },
-
-            ///////////////////////////////////////////
             // MVC Hybrid Flow Sample (Back Channel logout)
             //////////////////////////////////////////
             new Client
@@ -219,7 +153,7 @@ public static class ClientsWeb
 
                 AllowedScopes = allowedScopes
             },
-                
+
             ///////////////////////////////////////////
             // MVC Code Flow with JAR/JWT Sample
             //////////////////////////////////////////
@@ -251,6 +185,85 @@ public static class ClientsWeb
                 RedirectUris = { "https://localhost:44304/signin-oidc" },
                 FrontChannelLogoutUri = "https://localhost:44304/signout-oidc",
                 PostLogoutRedirectUris = { "https://localhost:44304/signout-callback-oidc" },
+
+                AllowOfflineAccess = true,
+
+                AllowedScopes = allowedScopes
+            },
+
+            ///////////////////////////////////////////
+            // MVC Code Flow with JAR URI/JWT Sample
+            //////////////////////////////////////////
+            new Client
+            {
+                ClientId = "mvc.jar-uri.jwt",
+                ClientName = "MVC Code Flow with JAR/JWT",
+
+                ClientSecrets =
+                {
+                    new Secret
+                    {
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey,
+                        Value =
+                            """
+                            {
+                                "e":"AQAB",
+                                "kid":"ZzAjSnraU3bkWGnnAqLapYGpTyNfLbjbzgAPbbW2GEA",
+                                "kty":"RSA",
+                                "n":"wWwQFtSzeRjjerpEM5Rmqz_DsNaZ9S1Bw6UbZkDLowuuTCjBWUax0vBMMxdy6XjEEK4Oq9lKMvx9JzjmeJf1knoqSNrox3Ka0rnxXpNAz6sATvme8p9mTXyp0cX4lF4U2J54xa2_S9NF5QWvpXvBeC4GAJx7QaSw4zrUkrc6XyaAiFnLhQEwKJCwUw4NOqIuYvYp_IXhw-5Ti_icDlZS-282PcccnBeOcX7vc21pozibIdmZJKqXNsL1Ibx5Nkx1F1jLnekJAmdaACDjYRLL_6n3W4wUp19UvzB1lGtXcJKLLkqB6YDiZNu16OSiSprfmrRXvYmvD8m6Fnl5aetgKw"
+                            }
+                            """
+                    }
+                },
+
+                AllowedGrantTypes = GrantTypes.Code,
+                RequireRequestObject = true,
+
+                RedirectUris = { "https://localhost:44305/signin-oidc" },
+                FrontChannelLogoutUri = "https://localhost:44305/signout-oidc",
+                PostLogoutRedirectUris = { "https://localhost:44305/signout-callback-oidc" },
+
+                AllowOfflineAccess = true,
+
+                AllowedScopes = allowedScopes
+            },
+
+            ///////////////////////////////////////////
+            // MVC Code Flow with DPoP, JAR, PAR, Private Key JWT, Back Channel Logout
+            //////////////////////////////////////////
+            new Client
+            {
+                ClientId = "web",
+                ClientName = "Web Security Baseline",
+
+                ClientSecrets =
+                {
+                    new Secret
+                    {
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey,
+                        Value =
+                            """
+                            {
+                                "kty": "RSA",
+                                "e": "AQAB",
+                                "use": "sig",
+                                "kid": "web-0001",
+                                "alg": "PS256",
+                                "n": "oTAx8S7xFwQ7gFixieULyMG9JIeNLzLkXdw7rRCRjKhJy67jPjHkbT51uDTntWc_rx7S6GoKBjJCCau1JnBS9Z9UX7d84Ado0aeLCYjZPOMRm1u0OB6kxOa46bB4-uke7fnWTQN8motNycvyXFd7kENqtkk2hmxB1wvr1WPSnJ037JqJ3-j9ZEM016GCj98_R_aJtJQg2jhv9rGJMIRdr2JhzAjKFg4m6W_MRSdxzrEtF3mNGGIpIPRw8_bH5uvQG6dIUfpOWr1IPbmIzbk5JOAwrtthG_1v8J-8QJ8Md5IJgMvKBTow5pX2YTE632vHVZedL3lhopehDQJzqpRo-w"
+                            }
+                            """
+                    }
+                },
+
+                AllowedGrantTypes = GrantTypes.Code,
+
+                RedirectUris = { "https://localhost:44306/signin-oidc" },
+                BackChannelLogoutUri = "https://localhost:44306/BackChannelLogout",
+                PostLogoutRedirectUris = { "https://localhost:44306/signout-callback-oidc" },
+
+                RequireDPoP = true,
+                RequireRequestObject = true,
+                RequirePushedAuthorization = true,
 
                 AllowOfflineAccess = true,
 
