@@ -46,7 +46,7 @@ internal static class HostingExtensions
                 options.Authority = authority;
                 options.RequireHttpsMetadata = false;
 
-                options.ClientId = "mvc.jar.jwt";
+                options.ClientId = "mvc.jar-uri.jwt";
 
                 // code flow + PKCE (PKCE is turned on by default)
                 options.ResponseType = "code";
