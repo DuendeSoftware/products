@@ -55,7 +55,7 @@
                                 Tip: for testing, use either <code>bob</code>/<code>bob</code>, <code>alice</code>/<code>alice</code> or <code>admin</code>/<code>admin</code>
                             </small>
 
-                            <button class="btn btn-primary" name="Input.Button" value="login">Login</button>
+                            <button class="btn btn-brand" name="Input.Button" value="login">Login</button>
                             <button class="btn btn-secondary" name="Input.Button" value="cancel">Cancel</button>
                         </form>
 
@@ -80,7 +80,7 @@
                             @foreach (var provider in Model.View.VisibleExternalProviders)
                             {
                                 <li class="list-inline-item">
-                                    <a class="btn btn-primary"
+                                    <a class="btn btn-brand"
                                        asp-page="/ExternalLogin/Challenge"
                                        asp-route-scheme="@provider.AuthenticationScheme"
                                        asp-route-returnUrl="@Model.Input.ReturnUrl">
