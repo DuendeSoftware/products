@@ -282,6 +282,7 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<ISessionCoordinationService, DefaultSessionCoordinationService>();
         builder.Services.TryAddTransient<IReplayCache, DefaultReplayCache>();
         builder.Services.TryAddTransient<IClock, DefaultClock>();
+        builder.Services.TryAddTransient<IUiLocalesService, DefaultUiLocalesService>();
 
         builder.Services.TryAddTransient<IBackchannelAuthenticationThrottlingService, DistributedBackchannelAuthenticationThrottlingService>();
         builder.Services.TryAddTransient<IBackchannelAuthenticationUserNotificationService, NopBackchannelAuthenticationUserNotificationService>();

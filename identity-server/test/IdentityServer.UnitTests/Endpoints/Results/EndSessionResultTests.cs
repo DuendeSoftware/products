@@ -34,7 +34,7 @@ public class EndSessionResultTests
         _options.UserInteraction.LogoutUrl = "~/logout";
         _options.UserInteraction.LogoutIdParameter = "logoutId";
 
-        _subject = new EndSessionHttpWriter(_options, new StubClock(), _urls, _mockLogoutMessageStore);
+        _subject = new EndSessionHttpWriter(_options, new StubClock(), _urls, _mockLogoutMessageStore, new MockUiLocaleService());
     }
 
     [Fact]
