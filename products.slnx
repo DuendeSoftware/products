@@ -135,12 +135,12 @@
   </Folder>
   <Folder Name="/identity-server/templates/" />
   <Folder Name="/identity-server/templates/src/">
+    <Project Path="identity-server/templates/src/IdentityServer/IdentityServerTemplate.csproj" />
     <Project Path="identity-server/templates/src/IdentityServerAspNetIdentity/IdentityServerAspNetIdentity.csproj" />
     <Project Path="identity-server/templates/src/IdentityServerEmpty/IdentityServerEmpty.csproj" />
     <Project Path="identity-server/templates/src/IdentityServerEntityFramework/IdentityServerEntityFramework.csproj" />
     <Project Path="identity-server/templates/src/IdentityServerInMem/IdentityServerInMem.csproj" />
-    <Project Path="identity-server/templates/src/IdentityServer/IdentityServerTemplate.csproj" />
-    <Project Path="identity-server/templates/src/TemplateWebApp/TemplateWebApp.csproj" />
+    <Project Path="identity-server/templates/src/WebApp/TemplateWebApp.csproj" />
   </Folder>
   <Folder Name="/identity-server/test/">
     <Project Path="identity-server/test/Configuration.IntegrationTests/Configuration.IntegrationTests.csproj" />

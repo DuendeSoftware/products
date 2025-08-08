@@ -24,10 +24,10 @@
   ],
   "symbols": {
     "RenameCommonNamespace": {
-      "datatype": "string",
-      "displayName": "Fix common host namespace.",
-      "replaces": "TemplateWebApp",
       "type": "derived",
+      "datatype": "string",
+      "replaces": "TemplateWebApp",
+      "displayName": "Fix common host namespace.",
       "valueSource": "name",
       "valueTransform": "safe_namespace"
     },
@@ -35,24 +35,28 @@
     "Authority": {
       "type": "parameter",
       "datatype": "string",
+      "replaces": "{{ Authority }}",
       "displayName": "Identity provider authority URL",
       "defaultValue": "https://demo.duendesoftware.com"
     },
     "ClientId": {
       "type": "parameter",
       "datatype": "string",
+      "replaces": "{{ ClientId }}",
       "displayName": "Identity provider client ID",
       "defaultValue": "interactive.confidential"
     },
     "ClientSecret": {
       "type": "parameter",
       "datatype": "string",
+      "replaces": "{{ ClientSecret }}",
       "displayName": "Identity provider client secret",
       "defaultValue": "secret"
     },
     "Scopes": {
       "type": "parameter",
       "datatype": "string",
+      "replaces": "{{ Scopes }}",
       "displayName": "Identity provider scopes",
       "defaultValue": "openid profile email"
     }

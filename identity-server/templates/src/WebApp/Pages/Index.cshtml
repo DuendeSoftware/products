@@ -18,13 +18,13 @@
 
     </h1>
     <p>
-        This is a basic minimal Web Application, preconfigured using current best practices.
+        This is a minimal web application, preconfigured with OpenID Connect according to current best practices.
     </p>
 
     @if (!Model.IsAuthenticated)
     {
         <p>
-            To get started, click <a asp-area="" asp-page="/Login">Login</a> to sign in using the Duende IdentityServer Demo server.
+            To get started, click <a asp-area="" asp-page="/Login">Login</a> to sign in using your configured OpenId Provider.
         </p>
     }
 </div>

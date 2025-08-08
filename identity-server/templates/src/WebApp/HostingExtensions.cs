@@ -78,13 +78,18 @@ internal static class HostingExtensions
                 options.DisableTelemetry = true;
             });
 
-        builder.Services.AddOpenIdConnectAccessTokenManagement();
+        // Uncomment to set up Duende.AccessTokenManagement to automatically manage access tokens for API calls.
+        // builder.Services.AddOpenIdConnectAccessTokenManagement();
+        // builder.Services.AddUserAccessTokenHttpClient(name: "client", configureClient: client =>
+        // {
+        //     client.BaseAddress = new Uri("https://example.com/api/");
+        // });
 
         // In production, use a secure location for storing keys, such as Azure Key Vault or AWS Secrets Manager.
         // Make sure to secure the keys at rest.
         builder.Services.AddDataProtection()
             .SetApplicationName("TemplateWebApp")
-            .PersistKeysToFileSystem(new DirectoryInfo("/keys"));
+            .PersistKeysToFileSystem(new DirectoryInfo("./keys"));
 
         return builder.Build();
     }
