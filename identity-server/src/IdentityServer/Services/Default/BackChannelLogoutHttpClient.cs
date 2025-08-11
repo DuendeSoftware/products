@@ -41,7 +41,8 @@ public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
 
         try
         {
-            var response = await _client.PostAsync(url, new FormUrlEncodedContent(payload), _cancellationTokenProvider.CancellationToken);
+            using var formEncodedContent = new FormUrlEncodedContent(payload);
+            var response = await _client.PostAsync(url, formEncodedContent, _cancellationTokenProvider.CancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogDebug("Response from back-channel logout endpoint: {url} status code: {status}", url, (int)response.StatusCode);

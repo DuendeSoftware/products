@@ -22,7 +22,9 @@ public static class CryptoHelper
     /// Creates a new RSA security key.
     /// </summary>
     /// <returns></returns>
+#pragma warning disable CA2000 // See: https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1433
     public static RsaSecurityKey CreateRsaSecurityKey(int keySize = 2048) => new RsaSecurityKey(RSA.Create(keySize))
+#pragma warning restore CA2000
     {
         KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)
     };
@@ -33,7 +35,9 @@ public static class CryptoHelper
     /// <param name="curve">The name of the curve as defined in
     /// https://tools.ietf.org/html/rfc7518#section-6.2.1.1.</param>
     /// <returns></returns>
+#pragma warning disable CA2000 // See: https://github.com/dotnet/runtime/issues/99605
     public static ECDsaSecurityKey CreateECDsaSecurityKey(string curve = JsonWebKeyECTypes.P256) => new ECDsaSecurityKey(ECDsa.Create(GetCurveFromCrvValue(curve)))
+#pragma warning restore CA2000
     {
         KeyId = CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)
     };
