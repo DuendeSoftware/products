@@ -227,5 +227,47 @@ public static class ClientsWeb
 
                 AllowedScopes = allowedScopes
             },
+
+            ///////////////////////////////////////////
+            // MVC Code Flow with DPoP, JAR, PAR, Private Key JWT, Back Channel Logout
+            //////////////////////////////////////////
+            new Client
+            {
+                ClientId = "web",
+                ClientName = "Web Security Baseline",
+
+                ClientSecrets =
+                {
+                    new Secret
+                    {
+                        Type = IdentityServerConstants.SecretTypes.JsonWebKey,
+                        Value =
+                            """
+                            {
+                                "kty": "RSA",
+                                "e": "AQAB",
+                                "use": "sig",
+                                "kid": "web-0001",
+                                "alg": "PS256",
+                                "n": "oTAx8S7xFwQ7gFixieULyMG9JIeNLzLkXdw7rRCRjKhJy67jPjHkbT51uDTntWc_rx7S6GoKBjJCCau1JnBS9Z9UX7d84Ado0aeLCYjZPOMRm1u0OB6kxOa46bB4-uke7fnWTQN8motNycvyXFd7kENqtkk2hmxB1wvr1WPSnJ037JqJ3-j9ZEM016GCj98_R_aJtJQg2jhv9rGJMIRdr2JhzAjKFg4m6W_MRSdxzrEtF3mNGGIpIPRw8_bH5uvQG6dIUfpOWr1IPbmIzbk5JOAwrtthG_1v8J-8QJ8Md5IJgMvKBTow5pX2YTE632vHVZedL3lhopehDQJzqpRo-w"
+                            }
+                            """
+                    }
+                },
+
+                AllowedGrantTypes = GrantTypes.Code,
+
+                RedirectUris = { "https://localhost:44306/signin-oidc" },
+                BackChannelLogoutUri = "https://localhost:44306/BackChannelLogout",
+                PostLogoutRedirectUris = { "https://localhost:44306/signout-callback-oidc" },
+
+                RequireDPoP = true,
+                RequireRequestObject = true,
+                RequirePushedAuthorization = true,
+
+                AllowOfflineAccess = true,
+
+                AllowedScopes = allowedScopes
+            },
         };
 }

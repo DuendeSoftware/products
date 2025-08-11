@@ -1,4 +1,4 @@
-   <Solution>
+<Solution>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
@@ -102,6 +102,7 @@
     <Project Path="identity-server/clients/src/MvcHybridBackChannel/MvcHybridBackChannel.csproj" />
     <Project Path="identity-server/clients/src/MvcJarJwt/MvcJarJwt.csproj" />
     <Project Path="identity-server/clients/src/MvcJarUriJwt/MvcJarUriJwt.csproj" />
+    <Project Path="identity-server/clients/src/Web/Web.csproj" />
     <Project Path="identity-server/clients/src/WindowsConsoleSystemBrowser/WindowsConsoleSystemBrowser.csproj" />
   </Folder>
   <Folder Name="/identity-server/clients/src/APIs/">

@@ -50,6 +50,7 @@
     <ProjectReference Include="..\..\clients\src\MvcHybridBackChannel\MvcHybridBackChannel.csproj" />
     <ProjectReference Include="..\..\clients\src\MvcJarJwt\MvcJarJwt.csproj" />
     <ProjectReference Include="..\..\clients\src\MvcJarUriJwt\MvcJarUriJwt.csproj" />
+    <ProjectReference Include="..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\clients\src\WindowsConsoleSystemBrowser\WindowsConsoleSystemBrowser.csproj" />
     <ProjectReference Include="..\..\hosts\AspNetIdentity\Host.AspNetIdentity.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\hosts\Configuration\Host.Configuration.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
