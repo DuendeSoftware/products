@@ -59,7 +59,9 @@ public class EcKeyContainer : KeyContainer
             Q = Q,
         };
 
+#pragma warning disable CA2000 // See: https://github.com/dotnet/runtime/issues/99605
         var key = new ECDsaSecurityKey(ECDsa.Create(parameters))
+#pragma warning restore CA2000
         {
             KeyId = Id
         };

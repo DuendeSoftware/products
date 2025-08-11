@@ -42,7 +42,7 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultJwtRequestUriHttpClient.GetJwt");
 
-        var req = new HttpRequestMessage(HttpMethod.Get, url);
+        using var req = new HttpRequestMessage(HttpMethod.Get, url);
         req.Options.TryAdd(IdentityServerConstants.JwtRequestClientKey, client);
 
         var response = await _client.SendAsync(req, _cancellationTokenProvider.CancellationToken);
