@@ -5,6 +5,8 @@
 ## Breaking Changes
 - Address CA1707 violations by @bhazen
   - This PR removed the unused Duende.IdentityServer.Models.DiscoveryDocument class which was public
+- Address CA2211 violations by @bhazen
+  - This PR marked static properties referring to counters in Telemetry.cs as readonly
 
 ## Enhancements
 - Skip front-channel logout iframe when unnecessary by @bhazen
