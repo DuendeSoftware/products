@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using Duende.IdentityServer;
 using IdentityServerTemplate.Pages.Admin.ApiScopes;
@@ -7,11 +8,47 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using Serilog.Filters;
 
 namespace IdentityServerTemplate.Extensions;
 
 internal static class HostingExtensions
 {
+
+    public static WebApplicationBuilder ConfigureLogging(this WebApplicationBuilder builder)
+    {
+        // Write most logs to the console but diagnostic data to a file.
+        // See https://docs.duendesoftware.com/identityserver/diagnostics/data
+        builder.Host.UseSerilog((ctx, lc) =>
+        {
+            lc.WriteTo.Logger(consoleLogger =>
+            {
+                consoleLogger.WriteTo.Console(
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
+                    formatProvider: CultureInfo.InvariantCulture);
+                if (builder.Environment.IsDevelopment())
+                {
+                    consoleLogger.Filter.ByExcluding(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
+                }
+            });
+            if (builder.Environment.IsDevelopment())
+            {
+                lc.WriteTo.Logger(fileLogger =>
+                {
+                    fileLogger
+                        .WriteTo.File("./diagnostics/diagnostic.log", rollingInterval: RollingInterval.Day,
+                            fileSizeLimitBytes: 1024 * 1024 * 10, // 10 MB
+                            rollOnFileSizeLimit: true,
+                            outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
+                            formatProvider: CultureInfo.InvariantCulture)
+                        .Filter
+                        .ByIncludingOnly(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
+                }).Enrich.FromLogContext().ReadFrom.Configuration(ctx.Configuration);
+            }
+        });
+        return builder;
+    }
+
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddHttpContextAccessor();
@@ -33,6 +70,12 @@ internal static class HostingExtensions
                 options.Events.RaiseSuccessEvents = true;
 
                 options.ServerSideSessions.UserDisplayNameClaimType = "name";
+
+                // Use a large chunk size for diagnostic logs in development where it will be redirected to a local file
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.Diagnostics.ChunkSize = 1024 * 1024 * 10; // 10 MB
+                }
             })
             .AddTestUsers(TestUsers.Users)
             // this adds the config data from DB (clients, resources, CORS)
