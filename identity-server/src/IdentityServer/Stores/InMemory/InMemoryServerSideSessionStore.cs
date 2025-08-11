@@ -219,7 +219,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
                 // we need to start over and re-query from the beginning.
                 filter.ResultsToken = null;
                 filter.RequestPriorResults = false;
-                return QuerySessionsAsync(filter);
+                return QuerySessionsAsync(filter, cancellationToken);
             }
         }
         else
