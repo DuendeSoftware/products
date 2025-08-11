@@ -2,5 +2,6 @@
 <Project>
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <IsIdSrvProject>true</IsIdSrvProject>
   </PropertyGroup>
 </Project>

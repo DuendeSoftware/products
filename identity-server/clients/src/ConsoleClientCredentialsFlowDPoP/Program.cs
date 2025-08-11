@@ -4,6 +4,8 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using Clients;
+using Duende.AccessTokenManagement;
+using Duende.AccessTokenManagement.DPoP;
 using Duende.IdentityModel.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,13 +29,13 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddClientCredentialsTokenManagement()
     .AddClient("client", client =>
     {
-        client.TokenEndpoint = disco.TokenEndpoint;
-        client.ClientId = "client";
-        client.ClientSecret = "secret";
+        client.TokenEndpoint = new Uri(disco.TokenEndpoint ?? throw new InvalidOperationException());
+        client.ClientId = ClientId.Parse("client");
+        client.ClientSecret = ClientSecret.Parse("secret");
         client.DPoPJsonWebKey = CreateDPoPKey();
     });
 
-builder.Services.AddClientCredentialsHttpClient("test", "client", config =>
+builder.Services.AddClientCredentialsHttpClient("test", ClientCredentialsClientName.Parse("client"), config =>
     {
         config.BaseAddress = new Uri("https://dpop-api");
     })
@@ -53,11 +55,12 @@ Console.WriteLine(response.PrettyPrintJson());
 Environment.Exit(0);
 
 
-static string CreateDPoPKey()
+static DPoPProofKey CreateDPoPKey()
 {
     var key = new RsaSecurityKey(RSA.Create(2048));
     var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(key);
     jwk.Alg = "PS256";
     var jwkJson = JsonSerializer.Serialize(jwk);
-    return jwkJson;
+
+    return DPoPProofKey.Parse(jwkJson);
 }

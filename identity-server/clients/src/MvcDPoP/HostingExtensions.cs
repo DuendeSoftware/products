@@ -4,8 +4,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text.Json;
-using Duende.AccessTokenManagement;
-using Microsoft.AspNetCore.Authentication;
+using Duende.AccessTokenManagement.DPoP;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MvcDPoP;
@@ -72,8 +72,6 @@ internal static class HostingExtensions
                 options.DisableTelemetry = true;
             });
 
-        builder.Services.AddTransient<IDPoPProofService, CustomProofService>();
-
         // add automatic token management
         builder.Services.AddOpenIdConnectAccessTokenManagement(options =>
         {
@@ -82,7 +80,7 @@ internal static class HostingExtensions
             var rsaKey = new RsaSecurityKey(RSA.Create(2048));
             var jwk = JsonWebKeyConverter.ConvertFromSecurityKey(rsaKey);
             jwk.Alg = "PS256";
-            options.DPoPJsonWebKey = JsonSerializer.Serialize(jwk);
+            options.DPoPJsonWebKey = DPoPProofKey.Parse(JsonSerializer.Serialize(jwk));
         });
 
         // add HTTP client to call protected API
