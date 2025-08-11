@@ -135,7 +135,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (_operationalStoreNotification != null)
                 {
-                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(expiredGrants);
+                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(expiredGrants, cancellationToken);
                 }
             }
         }
@@ -197,7 +197,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (_operationalStoreNotification != null)
                 {
-                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(consumedGrants);
+                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(consumedGrants, cancellationToken);
                 }
             }
         }
@@ -255,7 +255,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (_operationalStoreNotification != null)
                 {
-                    await _operationalStoreNotification.DeviceCodesRemovedAsync(expiredCodes);
+                    await _operationalStoreNotification.DeviceCodesRemovedAsync(expiredCodes, cancellationToken);
                 }
             }
         }
