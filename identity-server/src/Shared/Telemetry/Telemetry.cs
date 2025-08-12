@@ -164,7 +164,7 @@ public static class Telemetry
         /// <summary>
         /// Successful Api Secret validations
         /// </summary>
-        public static Counter<long> ApiSecretValidationCounter
+        public static readonly Counter<long> ApiSecretValidationCounter
             = Meter.CreateCounter<long>(Counters.ApiSecretValidation);
 
         /// <summary>
@@ -220,7 +220,7 @@ public static class Telemetry
         /// <summary>
         /// Client configuration validation
         /// </summary>
-        public static Counter<long> ClientValidationCounter =
+        public static readonly Counter<long> ClientValidationCounter =
             Meter.CreateCounter<long>(Counters.ClientConfigValidation);
 
         /// <summary>
@@ -247,7 +247,7 @@ public static class Telemetry
         /// <summary>
         /// Successful Client Secret validations
         /// </summary>
-        public static Counter<long> ClientSecretValidationCounter =
+        public static readonly Counter<long> ClientSecretValidationCounter =
             Meter.CreateCounter<long>(Counters.ClientSecretValidation);
 
         /// <summary>
@@ -302,7 +302,7 @@ public static class Telemetry
         /// <summary>
         /// Dynamic identityprovider validations
         /// </summary>
-        public static Counter<long> DynamicIdentityProviderValidationCounter
+        public static readonly Counter<long> DynamicIdentityProviderValidationCounter
             = Meter.CreateCounter<long>(Counters.DynamicIdentityProviderValidation);
 
         /// <summary>
@@ -358,7 +358,7 @@ public static class Telemetry
         /// <summary>
         /// Pushed Authorization Request Counter
         /// </summary>
-        public static Counter<long> PushedAuthorizationRequestCounter
+        public static readonly Counter<long> PushedAuthorizationRequestCounter
             = Meter.CreateCounter<long>(Counters.PushedAuthorizationRequest);
 
         /// <summary>
@@ -385,7 +385,7 @@ public static class Telemetry
         /// <summary>
         /// Resource Owner Authentication Counter
         /// </summary>
-        public static Counter<long> ResourceOwnerAuthenticationCounter
+        public static readonly Counter<long> ResourceOwnerAuthenticationCounter
             = Meter.CreateCounter<long>(Counters.ResourceOwnerAuthentication);
 
         /// <summary>
