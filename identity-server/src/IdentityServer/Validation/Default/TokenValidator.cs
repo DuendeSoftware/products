@@ -289,7 +289,9 @@ internal class TokenValidator : ITokenValidator
         }
         else
         {
+#pragma warning disable CA5404 // This is intentional
             parameters.ValidateAudience = false;
+#pragma warning restore CA5404
 
             // if no audience is specified, we make at least sure that it is an access token
             if (_options.AccessTokenJwtType.IsPresent())
