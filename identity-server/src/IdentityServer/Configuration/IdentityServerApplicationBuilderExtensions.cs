@@ -43,7 +43,7 @@ public static class IdentityServerApplicationBuilderExtensions
         app.UseMiddleware<DynamicSchemeAuthenticationMiddleware>();
 
         // it seems ok if we have UseAuthentication more than once in the pipeline --
-        // this will just re-run the various callback handlers and the default authN 
+        // this will just re-run the various callback handlers and the default authN
         // handler, which just re-assigns the user on the context. claims transformation
         // will run twice, since that's not cached (whereas the authN handler result is)
         // related: https://github.com/aspnet/Security/issues/1399
@@ -225,7 +225,9 @@ public static class IdentityServerApplicationBuilderExtensions
         {
             var error = message ?? $"Required service {service.FullName} is not registered in the DI container. Aborting startup";
 
+#pragma warning disable CA2254 // This message may not be structured, and the value is also used below making conditionals awkward
             logger.LogCritical(error);
+#pragma warning restore CA2254
 
             if (doThrow)
             {
