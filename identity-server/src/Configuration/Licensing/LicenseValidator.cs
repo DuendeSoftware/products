@@ -79,7 +79,9 @@ internal class LicenseValidator<T>
                           "Please start a conversation with us: https://duendesoftware.com/contact";
 
             // we're not using our _warningLog because we always want this emitted regardless of the context
+#pragma warning disable CA2254 // Structured logging is not needed for this message
             Logger.LogWarning(message);
+#pragma warning restore CA2254
             WarnForProductFeaturesWhenMissingLicense();
             return;
         }
@@ -186,7 +188,9 @@ internal class LicenseValidator<T>
     {
         if (Logger.IsEnabled(LogLevel.Trace))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogTrace(Logger, message, args);
+#pragma warning restore CA2254
         }
     }
 
@@ -194,7 +198,9 @@ internal class LicenseValidator<T>
     {
         if (Logger.IsEnabled(LogLevel.Debug))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogDebug(Logger, message, args);
+#pragma warning restore CA2254
         }
     }
 
@@ -202,7 +208,9 @@ internal class LicenseValidator<T>
     {
         if (Logger.IsEnabled(LogLevel.Information))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogInformation(Logger, message, args);
+#pragma warning restore CA2254
         }
     }
 
@@ -210,7 +218,9 @@ internal class LicenseValidator<T>
     {
         if (Logger.IsEnabled(LogLevel.Warning))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogWarning(Logger, message, args);
+#pragma warning restore CA2254
         }
     }
 
@@ -218,7 +228,9 @@ internal class LicenseValidator<T>
     {
         if (Logger.IsEnabled(LogLevel.Error))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogError(Logger, message, args);
+#pragma warning restore CA2254
         }
     }
 }
