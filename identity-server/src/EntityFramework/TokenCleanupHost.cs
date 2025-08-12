@@ -80,7 +80,9 @@ public class TokenCleanupHost : IHostedService
     {
         // Start the first run at a random interval.
         var delay = _options.FuzzTokenCleanupStart
+#pragma warning disable CA5394 // Randomness for security does not apply here
             ? TimeSpan.FromSeconds(Random.Shared.Next(_options.TokenCleanupInterval))
+#pragma warning restore CA5394
             : CleanupInterval;
 
         while (true)
