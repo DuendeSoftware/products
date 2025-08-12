@@ -12,7 +12,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Trace))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogTrace(logger, message);
+#pragma warning restore CA2254
         }
     }
 
@@ -20,7 +22,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Trace))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogTrace(logger, message, arg0);
+#pragma warning restore CA2254
         }
     }
 
@@ -28,7 +32,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Trace))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogTrace(logger, message, arg0, arg1);
+#pragma warning restore CA2254
         }
     }
 
@@ -36,7 +42,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Trace))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogTrace(logger, message, arg0, arg1, arg2);
+#pragma warning restore CA2254
         }
     }
 
@@ -44,7 +52,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Trace))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogTrace(logger, message, arg0, arg1, arg2, arg3);
+#pragma warning restore CA2254
         }
     }
 
@@ -52,7 +62,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Debug))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogDebug(logger, message);
+#pragma warning restore CA2254
         }
     }
 
@@ -60,7 +72,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Debug))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogDebug(logger, message, arg0);
+#pragma warning restore CA2254
         }
     }
 
@@ -68,7 +82,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Debug))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogDebug(logger, message, arg0, arg1);
+#pragma warning restore CA2254
         }
     }
 
@@ -76,7 +92,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Debug))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogDebug(logger, message, arg0, arg1, arg2);
+#pragma warning restore CA2254
         }
     }
 
@@ -84,7 +102,9 @@ internal static class ILoggerDevExtensions
     {
         if (logger.IsEnabled(LogLevel.Debug))
         {
+#pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
             LoggerExtensions.LogDebug(logger, message, arg0, arg1, arg2, arg3);
+#pragma warning restore CA2254
         }
     }
 

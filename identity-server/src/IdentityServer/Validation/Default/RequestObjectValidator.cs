@@ -342,12 +342,12 @@ internal class RequestObjectValidator : IRequestObjectValidator
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {
         var requestDetails = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
-        _logger.LogError(message + "\n{@requestDetails}", requestDetails);
+        _logger.LogError("{Message}: {@requestDetails}", message, requestDetails);
     }
 
     private void LogError(string message, string detail, ValidatedAuthorizeRequest request)
     {
         var requestDetails = new AuthorizeRequestValidationLog(request, _options.Logging.AuthorizeRequestSensitiveValuesFilter);
-        _logger.LogError(message + ": {detail}\n{@requestDetails}", detail, requestDetails);
+        _logger.LogError("{Message}: {detail}:{@requestDetails}", message, detail, requestDetails);
     }
 }
