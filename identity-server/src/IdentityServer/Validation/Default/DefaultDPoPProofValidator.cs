@@ -250,9 +250,11 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             var key = new Microsoft.IdentityModel.Tokens.JsonWebKey(result.JsonWebKey);
             var tvp = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
+#pragma warning disable CA5404 // This is intentional
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateLifetime = false,
+#pragma warning restore CA5404
                 IssuerSigningKey = key,
             };
 
