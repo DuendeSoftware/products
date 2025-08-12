@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Builder extension methods for registering additional services 
+/// Builder extension methods for registering additional services
 /// </summary>
 public static class IdentityServerBuilderExtensionsAdditional
 {
@@ -121,7 +121,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddClientStore<T>(this IIdentityServerBuilder builder)
         where T : class, IClientStore
     {
-        builder.Services.TryAddTransient(typeof(T));
+        builder.Services.TryAddTransient<T>();
         builder.Services.AddTransient<IClientStore, ValidatingClientStore<T>>();
 
         return builder;
@@ -218,7 +218,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddCorsPolicyCache<T>(this IIdentityServerBuilder builder)
         where T : class, ICorsPolicyService
     {
-        builder.Services.TryAddTransient(typeof(T));
+        builder.Services.TryAddTransient<T>();
         builder.Services.AddTransient<ICorsPolicyService, CachingCorsPolicyService<T>>();
         return builder;
     }
@@ -538,8 +538,8 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddIdentityProviderStore<T>(this IIdentityServerBuilder builder)
         where T : class, IIdentityProviderStore
     {
-        builder.Services.TryAddTransient(typeof(T));
-        builder.Services.TryAddTransient(typeof(ValidatingIdentityProviderStore<T>));
+        builder.Services.TryAddTransient<T>();
+        builder.Services.TryAddTransient<ValidatingIdentityProviderStore<T>>();
         builder.Services.AddTransient<IIdentityProviderStore, NonCachingIdentityProviderStore<ValidatingIdentityProviderStore<T>>>();
 
         return builder;
