@@ -38,18 +38,21 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
         IdentityServerOptions options,
         IClock clock,
         IServerUrls urls,
-        IMessageStore<LogoutMessage> logoutMessageStore)
+        IMessageStore<LogoutMessage> logoutMessageStore,
+        IUiLocalesService localesService)
     {
         _options = options;
         _clock = clock;
         _urls = urls;
         _logoutMessageStore = logoutMessageStore;
+        _localesService = localesService;
     }
 
     private IdentityServerOptions _options;
     private IClock _clock;
     private IServerUrls _urls;
     private IMessageStore<LogoutMessage> _logoutMessageStore;
+    private readonly IUiLocalesService _localesService;
 
     public async Task WriteHttpResponse(EndSessionResult result, HttpContext context)
     {
@@ -72,6 +75,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
         if (redirect.IsLocalUrl())
         {
             redirect = _urls.GetIdentityServerRelativeUrl(redirect);
+            await _localesService.StoreUiLocalesForRedirectAsync(result.Result.ValidatedRequest?.UiLocales);
         }
 
         if (id != null)

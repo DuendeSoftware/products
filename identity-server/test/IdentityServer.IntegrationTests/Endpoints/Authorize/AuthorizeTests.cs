@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Net;
 using System.Security.Claims;
 using Duende.IdentityModel;
@@ -14,6 +15,8 @@ using Duende.IdentityServer.Stores.Default;
 using Duende.IdentityServer.Test;
 using Duende.IdentityServer.Validation;
 using IntegrationTests.Common;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationTests.Endpoints.Authorize;
@@ -108,6 +111,22 @@ public class AuthorizeTests
                 Name = "api2"
             }
         });
+
+        _mockPipeline.OnPostConfigureServices += (services) =>
+        {
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo("en-US"),
+                    new CultureInfo("nb-NO")
+                };
+
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+                options.DefaultRequestCulture = new RequestCulture(supportedCultures[0]);
+            });
+        };
 
         _mockPipeline.Initialize();
     }
@@ -1563,6 +1582,119 @@ public class AuthorizeTests
         response.Headers.Location.GetLeftPart(UriPartial.Path).ShouldBe("https://server/custom");
         mockAuthzInteractionService.Request.PromptModes.ShouldContain("custom-prompt");
         mockAuthzInteractionService.Request.PromptModes.Count().ShouldBe(1);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task redirect_to_login_should_set_cookie_from_ui_locales_when_ui_locales_parameter_is_populated()
+    {
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client1",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://client1/callback",
+            state: "123_state",
+            nonce: "123_nonce",
+            extra: new
+            {
+                ui_locales = "nb-NO"
+            });
+
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.LoginWasCalled.ShouldBeTrue();
+
+        var cookie = _mockPipeline.BrowserClient.GetCookie("https://server", CookieRequestCultureProvider.DefaultCookieName);
+        cookie.ShouldNotBeNull();
+        cookie.Value.ShouldBe(Uri.EscapeDataString(CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(new CultureInfo("nb-NO")))));
+    }
+
+    [Fact]
+    public async Task redirect_to_consent_should_set_cookie_from_ui_locales_when_ui_locales_parameter_is_populated()
+    {
+        await _mockPipeline.LoginAsync("bob");
+
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client1",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://client1/callback",
+            state: "123_state",
+            nonce: "123_nonce",
+            extra: new
+            {
+                prompt = "consent",
+                ui_locales = "nb-NO"
+            });
+
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.ConsentWasCalled.ShouldBeTrue();
+
+        var cookie = _mockPipeline.BrowserClient.GetCookie("https://server", CookieRequestCultureProvider.DefaultCookieName);
+        cookie.ShouldNotBeNull();
+        cookie.Value.ShouldBe(Uri.EscapeDataString(CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(new CultureInfo("nb-NO")))));
+    }
+
+    [Fact]
+    public async Task
+        redirect_to_create_account_should_set_cookie_from_ui_locales_when_ui_locales_parameter_is_populated()
+    {
+        _mockPipeline.OnPreConfigureServices += svcs =>
+        {
+            svcs.PostConfigure<IdentityServerOptions>(opts =>
+            {
+                opts.UserInteraction.CreateAccountUrl = "/account/create";
+            });
+        };
+        _mockPipeline.Initialize();
+
+        await _mockPipeline.LoginAsync("bob");
+
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client1",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://client1/callback",
+            state: "123_state",
+            nonce: "123_nonce",
+            extra: new
+            {
+                prompt = "create",
+                ui_locales = "nb-NO"
+            });
+
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.CreateAccountWasCalled.ShouldBeTrue();
+
+        var cookie = _mockPipeline.BrowserClient.GetCookie("https://server", CookieRequestCultureProvider.DefaultCookieName);
+        cookie.ShouldNotBeNull();
+        cookie.Value.ShouldBe(Uri.EscapeDataString(CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(new CultureInfo("nb-NO")))));
+    }
+
+    [Fact]
+    public async Task redirect_to_error_page_should_set_cookie_from_ui_locales_when_ui_locales_parameter_is_populated()
+    {
+        var url = _mockPipeline.CreateAuthorizeUrl(
+            clientId: "client1",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://client1/invalid",
+            state: "123_state",
+            nonce: "123_nonce",
+            extra: new
+            {
+                ui_locales = "nb-NO"
+            });
+
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+
+        _mockPipeline.ErrorWasCalled.ShouldBeTrue();
+
+        var cookie = _mockPipeline.BrowserClient.GetCookie("https://server", CookieRequestCultureProvider.DefaultCookieName);
+        cookie.ShouldNotBeNull();
+        cookie.Value.ShouldBe(Uri.EscapeDataString(CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(new CultureInfo("nb-NO")))));
     }
 }
 

@@ -1,10 +1,12 @@
 @page
+@using Microsoft.AspNetCore.Mvc.Localization
 @model IdentityServerHost.Pages.Login.Index
+@inject IViewLocalizer ViewLocalizer
 
 <div class="login-page">
     <div class="lead">
-        <h1>Login</h1>
-        <p>Choose how to login</p>
+        <h1>@ViewLocalizer["Login"]</h1>
+        <p>@ViewLocalizer["Choose how to login"]</p>
     </div>
 
     <partial name="_ValidationSummary" />
@@ -31,7 +33,7 @@
                                 <label asp-for="Input.Password"></label>
                                 <input type="password" class="form-control" placeholder="Password" asp-for="Input.Password" autocomplete="off">
                             </div>
-                            
+
                             @if (Model.View.AllowRememberLogin)
                             {
                                 <div class="form-group">
@@ -43,7 +45,7 @@
                                     </div>
                                 </div>
                             }
-                            
+
                             <button class="btn btn-primary" name="Input.Button" value="login">Login</button>
                             <button class="btn btn-secondary" name="Input.Button" value="cancel">Cancel</button>
                         </form>

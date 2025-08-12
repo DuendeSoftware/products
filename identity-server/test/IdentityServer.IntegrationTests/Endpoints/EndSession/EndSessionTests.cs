@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Globalization;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
@@ -12,7 +13,10 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using IntegrationTests.Common;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationTests.Endpoints.EndSession;
 
@@ -89,6 +93,22 @@ public class EndSessionTests
         _mockPipeline.IdentityScopes.AddRange(new IdentityResource[] {
             new IdentityResources.OpenId()
         });
+
+        _mockPipeline.OnPostConfigureServices += (services) =>
+        {
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                var supportedCultures = new[]
+                {
+                    new CultureInfo("en-US"),
+                    new CultureInfo("nb-NO")
+                };
+
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+                options.DefaultRequestCulture = new RequestCulture(supportedCultures[0]);
+            });
+        };
 
         _mockPipeline.Initialize();
     }
@@ -200,6 +220,33 @@ public class EndSessionTests
         _mockPipeline.LogoutRequest.ClientId.ShouldBe("client2");
         _mockPipeline.LogoutRequest.PostLogoutRedirectUri.ShouldBe("https://client2/signout-callback2");
         _mockPipeline.LogoutRequest.UiLocales.ShouldBeNull();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task ui_locales_should_be_persisted_in_cookie_on_local_redirect()
+    {
+        await _mockPipeline.LoginAsync("bob");
+
+        var authorization = await _mockPipeline.RequestAuthorizationEndpointAsync(
+            clientId: "client2",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://client2/callback",
+            state: "123_state",
+            nonce: "123_nonce");
+
+        var id_token = authorization.IdentityToken;
+
+        var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.EndSessionEndpoint +
+                                                                  "?id_token_hint=" + id_token +
+                                                                  "&post_logout_redirect_uri=https://client2/signout-callback2" +
+                                                                  "&ui_locales=nb-NO");
+
+        _mockPipeline.LogoutWasCalled.ShouldBeTrue();
+        var cookie = _mockPipeline.BrowserClient.GetCookie("http://server", CookieRequestCultureProvider.DefaultCookieName);
+        cookie.ShouldNotBeNull();
+        cookie.Value.ShouldBe(Uri.EscapeDataString(CookieRequestCultureProvider.MakeCookieValue(new RequestCulture("nb-NO"))));
     }
 
     [Fact]
