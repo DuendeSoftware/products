@@ -105,7 +105,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
             return await CreateHybridFlowResponseAsync(request);
         }
 
-        Logger.LogError("Unsupported grant type: " + request.GrantType);
+        Logger.LogError("Unsupported grant type: {GrantType}", request.GrantType);
         throw new InvalidOperationException("invalid grant type: " + request.GrantType);
     }
 

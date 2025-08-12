@@ -135,7 +135,9 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
     {
         if (logError)
         {
+#pragma warning disable CA2254 // Structured logging is not needed for this message
             _logger.LogError(logMessage);
+#pragma warning restore CA2254
         }
 
         if (request != null)
