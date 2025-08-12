@@ -464,7 +464,7 @@ internal class TokenValidator : ITokenValidator
         Error = error
     };
 
-    private void LogError(string message) => _logger.LogError(message + "\n{@logMessage}", _log);
+    private void LogError(string message) => _logger.LogError("{Message}:{@logMessage}", message, _log);
 
-    private void LogSuccess() => _logger.LogDebug("Token validation success\n{@logMessage}", _log);
+    private void LogSuccess() => _logger.LogDebug("Token validation success:{@logMessage}", _log);
 }

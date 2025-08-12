@@ -103,7 +103,9 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
 
     private DeviceFlowInteractionResult LogAndReturnError(string error, string errorDescription = null)
     {
+#pragma warning disable CA2254 // Structured logging is not needed for this message
         _logger.LogError(errorDescription);
+#pragma warning restore CA2254
         return DeviceFlowInteractionResult.Failure(error);
     }
 }

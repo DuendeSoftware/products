@@ -101,7 +101,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             if (uilocales.Length > Options.InputLengthRestrictions.UiLocale)
             {
                 var log = new EndSessionRequestValidationLog(validatedRequest);
-                Logger.LogWarning("UI locale too long. It will be ignored." + Environment.NewLine + "{@details}", log);
+                Logger.LogWarning("UI locale too long. It will be ignored:{@details}", log);
             }
             else
             {
@@ -193,11 +193,13 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         if (request != null)
         {
             var log = new EndSessionRequestValidationLog(request);
-            Logger.LogInformation(message + Environment.NewLine + "{@details}", log);
+            Logger.LogInformation("{Message}:{@details}", message, log);
         }
         else
         {
+#pragma warning disable CA2254 // Structured logging is not needed for this message
             Logger.LogInformation(message);
+#pragma warning restore CA2254
         }
 
         return new EndSessionValidationResult
@@ -216,7 +218,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     protected virtual void LogSuccess(ValidatedEndSessionRequest request)
     {
         var log = new EndSessionRequestValidationLog(request);
-        Logger.LogInformation("End session request validation success" + Environment.NewLine + "{@details}", log);
+        Logger.LogInformation("End session request validation success:{@details}", log);
     }
 
     /// <inheritdoc />
