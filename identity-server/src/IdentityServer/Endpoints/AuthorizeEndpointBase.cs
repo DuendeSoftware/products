@@ -169,7 +169,9 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
     {
         if (logError)
         {
+#pragma warning disable CA2254 // Structured logging is not needed for this message
             Logger.LogError(logMessage);
+#pragma warning restore CA2254
         }
 
         if (request != null)
