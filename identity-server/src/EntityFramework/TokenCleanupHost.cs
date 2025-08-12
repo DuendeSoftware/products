@@ -102,7 +102,7 @@ public class TokenCleanupHost : IHostedService
             }
             catch (Exception ex)
             {
-                _logger.LogError("Task.Delay exception: {0}. Exiting.", ex.Message);
+                _logger.LogError("Task.Delay exception: {ExceptionMessage}. Exiting.", ex.Message);
                 break;
             }
 

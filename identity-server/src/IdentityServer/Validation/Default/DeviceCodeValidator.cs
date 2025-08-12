@@ -64,14 +64,14 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         // validate client binding
         if (deviceCode.ClientId != context.Request.Client.ClientId)
         {
-            _logger.LogError("Client {0} is trying to use a device code from client {1}", context.Request.Client.ClientId, deviceCode.ClientId);
+            _logger.LogError("Client {ClientId} is trying to use a device code from client {DeviceCodeClientId}", context.Request.Client.ClientId, deviceCode.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);
             return;
         }
 
         if (await _throttlingService.ShouldSlowDown(context.DeviceCode, deviceCode))
         {
-            _logger.LogError("Client {0} is polling too fast", deviceCode.ClientId);
+            _logger.LogError("Client {ClientId} is polling too fast", deviceCode.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.SlowDown);
             return;
         }

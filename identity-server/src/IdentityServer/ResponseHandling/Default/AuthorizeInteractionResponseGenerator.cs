@@ -177,7 +177,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         if (request.PromptModes.Contains(OidcConstants.PromptModes.Login) ||
             request.PromptModes.Contains(OidcConstants.PromptModes.SelectAccount))
         {
-            Logger.LogInformation("Showing login: request contains prompt={0}", request.PromptModes.ToSpaceSeparatedString());
+            Logger.LogInformation("Showing login: request contains prompt={PromptModes}", request.PromptModes.ToSpaceSeparatedString());
             // remove prompt so when we redirect back in from login page
             // we won't think we need to force a prompt again
             request.RemovePrompt();
