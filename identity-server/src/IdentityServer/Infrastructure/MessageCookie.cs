@@ -158,7 +158,7 @@ internal class MessageCookie<TModel>
         catch (CryptographicException e)
         {
             // cookie was protected with a different key/algorithm
-            _logger.LogDebug(e, "Unable to unprotect cookie {0}", name);
+            _logger.LogDebug(e, "Unable to unprotect cookie {CookieName}", name);
         }
 
         return rank;
