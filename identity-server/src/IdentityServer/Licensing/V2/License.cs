@@ -97,7 +97,7 @@ internal class License
 
         if (!claims.HasClaim("feature", "unlimited_issuers"))
         {
-            // default 
+            // default
             IssuerLimit = 1;
 
             if (int.TryParse(claims.FindFirst("issuer_limit")?.Value, out var issuerLimit))
@@ -137,7 +137,7 @@ internal class License
     public DateTimeOffset? Expiration { get; init; }
 
     /// <summary>
-    /// The license edition 
+    /// The license edition
     /// </summary>
     public LicenseEdition? Edition { get; init; }
 
@@ -220,7 +220,7 @@ internal class License
                 }
             }
         }
-        throw new ArgumentException("Unknown license feature {feature}", claimValue);
+        return LicenseFeature.Unknown;
     }
 
 
