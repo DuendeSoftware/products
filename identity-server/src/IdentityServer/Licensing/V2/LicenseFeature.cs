@@ -12,6 +12,11 @@ namespace Duende.IdentityServer.Licensing.V2;
 internal enum LicenseFeature : ulong
 {
     /// <summary>
+    /// Used as a default case for missing or unknown features
+    /// </summary>
+    Unknown = 0,
+
+    /// <summary>
     /// Automatic Key Management
     /// </summary>
     [Description("key_management")]

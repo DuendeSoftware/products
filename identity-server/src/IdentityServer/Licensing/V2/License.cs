@@ -220,7 +220,7 @@ internal class License
                 }
             }
         }
-        throw new ArgumentException("Unknown license feature {feature}", claimValue);
+        return LicenseFeature.Unknown;
     }
 
 
