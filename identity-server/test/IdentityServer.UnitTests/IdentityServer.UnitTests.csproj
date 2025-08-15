@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
-
+    <PackageReference Include="System.Text.Json" VersionOverride="9.0.8" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,5 +32,8 @@
     <Folder Include="Licensing\v2\licenses\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Text.Json.Serialization.RespectNullableAnnotationsDefault" Value="true" />
+  </ItemGroup>
 
 </Project>
