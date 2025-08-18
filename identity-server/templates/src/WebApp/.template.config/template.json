@@ -9,7 +9,7 @@
   "identity": "Duende.IdentityServer.WebClient",
   "groupIdentity": "Duende.IdentityServer.WebClient",
   "shortName": [
-    "is-webclient"
+    "duende-webclient"
   ],
   "tags": {
     "language": "C#",
@@ -31,7 +31,6 @@
       "valueSource": "name",
       "valueTransform": "safe_namespace"
     },
-
     "Authority": {
       "type": "parameter",
       "datatype": "string",
