@@ -26,7 +26,7 @@ internal class ClientLoadedTracker : IDisposable
         WriteIndented = false
     };
 
-    public ClientLoadedTracker() => _defaultClient = JsonSerializer.SerializeToDocument(new Client(), _serializerOptions);
+    public ClientLoadedTracker() => _defaultClient = JsonSerializer.SerializeToDocument(new Client { ClientId = "" }, _serializerOptions);
 
     public void TrackClientLoaded(Client client)
     {
