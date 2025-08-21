@@ -21,6 +21,6 @@
     Currently all existing warnings are suppressed. We will remove them as we address them. But this configuration
     allows us to prevent new warnings from being introduced while we work on the existing ones.
     -->
-    <NoWarn>$(NoWarn);CA1002;CA1008;CA1031;CA1034;CA1040;CA1051;CA1054;CA1055;CA1056;CA1062;CA1716;CA1724;CA1725;CA1727;CA1819;CA1848;CA1851;CA2201;CA2007;CA2208;CA2227;CA2234;CA2254;CA2263;CA5404;CA5394;</NoWarn>
+    <NoWarn>$(NoWarn);CA1002;CA1008;CA1031;CA1034;CA1040;CA1051;CA1054;CA1055;CA1056;CA1062;CA1716;CA1724;CA1725;CA1727;CA1819;CA1848;CA1851;CA2201;CA2007;CA2208;CA2227;CA2234;</NoWarn>
   </PropertyGroup>
 </Project>

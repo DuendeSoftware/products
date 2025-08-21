@@ -1256,11 +1256,11 @@ internal class TokenRequestValidator : ITokenRequestValidator
             {
                 if (values == null)
                 {
-                    _logger.Log(logLevel, message + ", {@details}", details);
+                    _logger.Log(logLevel, "{Message}: {@details}", message, details);
                 }
                 else
                 {
-                    _logger.Log(logLevel, message + " {@values}, details: {@details}", values, details);
+                    _logger.Log(logLevel, "{Message}: {@values}, details: {@details}", message, values, details);
                 }
 
             }

@@ -71,7 +71,9 @@ internal class UserInfoEndpoint : IEndpointHandler
         {
             var error = "No access token found.";
 
+#pragma warning disable CA2254 // Structured logging is not needed for this message
             _logger.LogError(error);
+#pragma warning restore CA2254
             return Error(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 

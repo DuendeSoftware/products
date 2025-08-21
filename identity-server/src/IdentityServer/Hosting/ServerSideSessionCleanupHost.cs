@@ -81,7 +81,9 @@ public class ServerSideSessionCleanupHost : IHostedService
 
         // Start the first run at a random interval.
         var delay = _options.ServerSideSessions.FuzzExpiredSessionRemovalStart
+#pragma warning disable CA5394 // Randomness for security does not apply here
             ? TimeSpan.FromSeconds(Random.Shared.Next(removalFrequencySeconds))
+#pragma warning restore CA5394
             : _options.ServerSideSessions.RemoveExpiredSessionsFrequency;
 
         while (true)

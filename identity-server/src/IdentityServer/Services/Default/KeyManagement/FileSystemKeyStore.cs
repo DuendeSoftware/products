@@ -69,7 +69,7 @@ public class FileSystemKeyStore : ISigningKeyStore
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error reading file: " + file.Name);
+                _logger.LogError(ex, "Error reading file: {FileName}", file.Name);
             }
         }
 
@@ -108,7 +108,7 @@ public class FileSystemKeyStore : ISigningKeyStore
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting file: " + path);
+            _logger.LogError(ex, "Error deleting file: {FilePath}", path);
         }
 
         return Task.CompletedTask;

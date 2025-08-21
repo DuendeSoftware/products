@@ -289,7 +289,9 @@ internal class TokenValidator : ITokenValidator
         }
         else
         {
+#pragma warning disable CA5404 // This is intentional
             parameters.ValidateAudience = false;
+#pragma warning restore CA5404
 
             // if no audience is specified, we make at least sure that it is an access token
             if (_options.AccessTokenJwtType.IsPresent())
@@ -464,7 +466,7 @@ internal class TokenValidator : ITokenValidator
         Error = error
     };
 
-    private void LogError(string message) => _logger.LogError(message + "\n{@logMessage}", _log);
+    private void LogError(string message) => _logger.LogError("{Message}:{@logMessage}", message, _log);
 
-    private void LogSuccess() => _logger.LogDebug("Token validation success\n{@logMessage}", _log);
+    private void LogSuccess() => _logger.LogDebug("Token validation success:{@logMessage}", _log);
 }

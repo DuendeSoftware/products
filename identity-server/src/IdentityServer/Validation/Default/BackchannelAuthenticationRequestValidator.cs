@@ -528,11 +528,13 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             {
                 if (values == null)
                 {
-                    _logger.Log(logLevel, message + ", {@details}", details);
+                    _logger.Log(logLevel, "{Message}: {@details}", message, details);
                 }
                 else
                 {
+#pragma warning disable CA2254 // This cannot be static because the message parameter is a template to be used with values
                     _logger.Log(logLevel, message + ", details: {@details}", values, details);
+#pragma warning restore CA2254
                 }
 
             }

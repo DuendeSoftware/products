@@ -63,13 +63,13 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
     private void LogError(string message, ValidatedDeviceAuthorizationRequest request)
     {
         var requestDetails = new DeviceAuthorizationRequestValidationLog(request);
-        _logger.LogError(message + "\n{requestDetails}", requestDetails);
+        _logger.LogError("{Message}:{RequestDetails}", message, requestDetails);
     }
 
     private void LogError(string message, string detail, ValidatedDeviceAuthorizationRequest request)
     {
         var requestDetails = new DeviceAuthorizationRequestValidationLog(request);
-        _logger.LogError(message + ": {detail}\n{requestDetails}", detail, requestDetails);
+        _logger.LogError("{Message}: {Detail}:{RequestDetails}", message, detail, requestDetails);
     }
 
     private DeviceAuthorizationRequestValidationResult ValidateClient(ValidatedDeviceAuthorizationRequest request, ClientSecretValidationResult clientValidationResult)
