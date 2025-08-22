@@ -69,6 +69,7 @@
   <Folder Name="/identity-server/" />
   <Folder Name="/identity-server/aspire/">
     <Project Path="identity-server/aspire/AppHosts/All/All.csproj" />
+    <Project Path="identity-server/aspire/AppHosts/Dev/Dev.csproj" />
     <Project Path="identity-server/aspire/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/identity-server/clients/" />
