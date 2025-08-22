@@ -53,7 +53,6 @@
     <ProjectReference Include="..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\clients\src\WindowsConsoleSystemBrowser\WindowsConsoleSystemBrowser.csproj" />
     <ProjectReference Include="..\..\hosts\AspNetIdentity\Host.AspNetIdentity.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\hosts\Configuration\Host.Configuration.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\hosts\EntityFramework\Host.EntityFramework.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\hosts\EntityFramework-dotnet9\Host.EntityFramework.dotnet9.csproj" />
     <ProjectReference Include="..\..\hosts\main\Host.Main.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
