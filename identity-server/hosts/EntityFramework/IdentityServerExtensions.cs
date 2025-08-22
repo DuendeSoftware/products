@@ -48,6 +48,13 @@ internal static class IdentityServerExtensions
                 UseX509Certificate = true
             });
 
+            // In load-balanced environments, synchronization delay is important.
+            // In development, we're never load balanced and can skip it to start up faster.
+            if (builder.Environment.IsDevelopment())
+            {
+                options.KeyManagement.InitializationSynchronizationDelay = TimeSpan.Zero;
+            }
+
             options.MutualTls.Enabled = true;
 
             options.Diagnostics.ChunkSize = 1024 * 1000 - 32; // 1 MB minus some formatting space;
