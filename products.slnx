@@ -113,7 +113,6 @@
   </Folder>
   <Folder Name="/identity-server/hosts/">
     <Project Path="identity-server/hosts/AspNetIdentity/Host.AspNetIdentity.csproj" />
-    <Project Path="identity-server/hosts/Configuration/Host.Configuration.csproj" />
     <Project Path="identity-server/hosts/EntityFramework-dotnet9/Host.EntityFramework.dotnet9.csproj" />
     <Project Path="identity-server/hosts/EntityFramework/Host.EntityFramework.csproj" />
     <Project Path="identity-server/hosts/main/Host.Main.csproj" />

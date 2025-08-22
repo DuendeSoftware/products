@@ -36,14 +36,6 @@ void ConfigureIdentityServerHosts()
 
         projectRegistry.Add("is-host", hostMain);
     }
-    if (HostIsEnabled(nameof(Projects.Host_Configuration)))
-    {
-        var hostConfiguration = builder
-            .AddProject<Projects.Host_Configuration>("is-host")
-            .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
-
-        projectRegistry.Add("is-host", hostConfiguration);
-    }
 
     // These hosts require a database
     var dbHosts = new List<string>

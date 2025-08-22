@@ -40,7 +40,6 @@
       "identity-server\\clients\\src\\Web\\Web.csproj",
       "identity-server\\clients\\src\\WindowsConsoleSystemBrowser\\WindowsConsoleSystemBrowser.csproj",
       "identity-server\\hosts\\AspNetIdentity\\Host.AspNetIdentity.csproj",
-      "identity-server\\hosts\\Configuration\\Host.Configuration.csproj",
       "identity-server\\hosts\\EntityFramework-dotnet9\\Host.EntityFramework.dotnet9.csproj",
       "identity-server\\hosts\\EntityFramework\\Host.EntityFramework.csproj",
       "identity-server\\hosts\\main\\Host.Main.csproj",
