@@ -73,7 +73,6 @@ internal static class IdentityServerExtensions
                 // this enables automatic token cleanup. this is optional.
                 options.EnableTokenCleanup = true;
                 options.RemoveConsumedTokens = true;
-                options.TokenCleanupInterval = 180; // interval in seconds
             })
             .AddAppAuthRedirectUriValidator()
             .AddServerSideSessions()
@@ -94,10 +93,7 @@ internal static class IdentityServerExtensions
 
         builder.Services.AddDistributedMemoryCache();
 
-        builder.Services.AddIdentityServerConfiguration(opt =>
-        {
-            opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
-        })
+        builder.Services.AddIdentityServerConfiguration(opt => { })
             .AddClientConfigurationStore();
 
         builder.Services.AddTransient<IDynamicClientRegistrationRequestProcessor, CustomClientRegistrationProcessor>();

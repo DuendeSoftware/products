@@ -22,18 +22,15 @@ public class Index : PageModel
     private readonly IDeviceFlowInteractionService _interaction;
     private readonly IEventService _events;
     private readonly IOptions<IdentityServerOptions> _options;
-    private readonly ILogger<Index> _logger;
 
     public Index(
         IDeviceFlowInteractionService interaction,
         IEventService eventService,
-        IOptions<IdentityServerOptions> options,
-        ILogger<Index> logger)
+        IOptions<IdentityServerOptions> options)
     {
         _interaction = interaction;
         _events = eventService;
         _options = options;
-        _logger = logger;
     }
 
     public ViewModel View { get; set; } = default!;

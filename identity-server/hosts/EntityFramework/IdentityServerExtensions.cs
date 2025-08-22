@@ -93,10 +93,7 @@ internal static class IdentityServerExtensions
 
         builder.Services.AddDistributedMemoryCache();
 
-        builder.Services.AddIdentityServerConfiguration(opt =>
-        {
-            // opt.DynamicClientRegistration.SecretLifetime = TimeSpan.FromHours(1);
-        })
+        builder.Services.AddIdentityServerConfiguration(opt => { })
             .AddClientConfigurationStore();
 
         builder.Services.AddTransient<IDynamicClientRegistrationRequestProcessor, CustomClientRegistrationProcessor>();

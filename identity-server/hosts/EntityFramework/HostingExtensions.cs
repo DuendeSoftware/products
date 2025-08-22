@@ -88,7 +88,7 @@ internal static class HostingExtensions
                 options.Scope.Add("email");
                 options.MapInboundClaims = false;
             })
-            .AddOpenIdConnect("demoidsrv", "IdentityServer", options =>
+            .AddOpenIdConnect("demoidsrv", "IdentityServer (Configuration)", options =>
             {
                 options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
                 options.SignOutScheme = IdentityServerConstants.SignoutScheme;
