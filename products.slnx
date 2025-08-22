@@ -114,9 +114,13 @@
   </Folder>
   <Folder Name="/identity-server/hosts/">
     <Project Path="identity-server/hosts/AspNetIdentity/Host.AspNetIdentity.csproj" />
-    <Project Path="identity-server/hosts/EntityFramework-dotnet9/Host.EntityFramework.dotnet9.csproj" />
-    <Project Path="identity-server/hosts/EntityFramework/Host.EntityFramework.csproj" />
+    <Project Path="identity-server/hosts/EntityFramework/EntityFramework8/Host.EntityFramework8.csproj" />
+    <Project Path="identity-server/hosts/EntityFramework/EntityFramework9/Host.EntityFramework9.csproj" />
     <Project Path="identity-server/hosts/main/Host.Main.csproj" />
+  </Folder>
+  <Folder Name="/identity-server/hosts/UI/">
+    <Project Path="identity-server/hosts/UI/Main/UI.Main.csproj" />
+    <Project Path="identity-server/hosts/UI/EntityFramework/UI.EntityFramework.csproj" />
   </Folder>
   <Folder Name="/identity-server/migrations/">
     <Project Path="identity-server/migrations/AspNetIdentityDb/AspNetIdentityDb.csproj" />

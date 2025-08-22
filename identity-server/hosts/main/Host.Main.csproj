@@ -36,8 +36,8 @@
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
     <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\UI\Main\Main.csproj" />
   </ItemGroup>
-
 
   <ItemGroup>
     <Compile Include="..\Shared\Configuration\**\*.cs">
