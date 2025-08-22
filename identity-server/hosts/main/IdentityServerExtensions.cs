@@ -79,6 +79,8 @@ internal static class IdentityServerExtensions
             ])
             .AddLicenseSummary();
 
+        builder.Services.AddIdentityServerConfiguration(opt => { })
+            .AddInMemoryClientConfigurationStore();
 
         builder.Services.AddDistributedMemoryCache();
 
