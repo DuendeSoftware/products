@@ -2,7 +2,8 @@
   "solution": {
     "path": "..\\products.slnx",
     "projects": [
-      "identity-server\\aspire\\AppHost\\AppHost.csproj",
+      "identity-server\\aspire\\AppHosts\\All\\All.csproj",
+      "identity-server\\aspire\\AppHosts\\Dev\\Dev.csproj",
       "identity-server\\aspire\\ServiceDefaults\\ServiceDefaults.csproj",
       "identity-server\\clients\\src\\APIs\\DPoPApi\\DPoPApi.csproj",
       "identity-server\\clients\\src\\APIs\\MtlsApi\\MtlsApi.csproj",
