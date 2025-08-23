@@ -116,7 +116,7 @@
     <Project Path="identity-server/hosts/AspNetIdentity/Host.AspNetIdentity.csproj" />
     <Project Path="identity-server/hosts/EntityFramework/EntityFramework8/Host.EntityFramework8.csproj" />
     <Project Path="identity-server/hosts/EntityFramework/EntityFramework9/Host.EntityFramework9.csproj" />
-    <Project Path="identity-server/hosts/main/Host.Main.csproj" />
+    <Project Path="identity-server/hosts/Main/Host.Main.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/UI/">
     <Project Path="identity-server/hosts/UI/Main/UI.Main.csproj" />
