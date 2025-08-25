@@ -26,8 +26,7 @@ public class WireupTests(ITestOutputHelper output) : BffTestBase(output)
         AddOrUpdateFrontend(Some.BffFrontend());
         Bff.OnConfigureBffOptions += options =>
         {
-            // We've had customers who wanted to use a route parameter in the management base path
-            //https://github.com/orgs/DuendeSoftware/discussions/301
+            // https://github.com/orgs/DuendeSoftware/discussions/301
             // Turns out there was a bug in the code that prevented this from working - fixed now.
             options.AutomaticallyRegisterBffMiddleware = true;
             options.ManagementBasePath = "/{value}/bff";
