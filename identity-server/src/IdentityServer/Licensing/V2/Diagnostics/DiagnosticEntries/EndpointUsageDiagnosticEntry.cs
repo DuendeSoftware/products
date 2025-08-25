@@ -24,6 +24,7 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
     private long _tokenRevocation;
     private long _token;
     private long _userInfo;
+    private long _oAuthMetadata;
     private long _other;
 
     private readonly MeterListener _meterListener;
@@ -63,6 +64,7 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.Revocation.EnsureLeadingSlash(), _tokenRevocation);
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.Token.EnsureLeadingSlash(), _token);
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.UserInfo.EnsureLeadingSlash(), _userInfo);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.OAuth2AuthorizationServerMetadata.EnsureLeadingSlash(), _oAuthMetadata);
         writer.WriteNumber("other", _other);
 
         writer.WriteEndObject();
@@ -134,6 +136,10 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.UserInfo:
                 Interlocked.Increment(ref _userInfo);
+                break;
+            //NOTE: cannot use const because of template matching in this route
+            case { } s when s.StartsWith(".well-known/oauth-authorization-server", StringComparison.OrdinalIgnoreCase):
+                Interlocked.Increment(ref _oAuthMetadata);
                 break;
             default:
                 Interlocked.Increment(ref _other);

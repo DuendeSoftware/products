@@ -110,6 +110,82 @@ public class EndpointRouterTests
         result.ShouldBeNull();
     }
 
+    [InlineData("/.well-known/oauth-authorization-server")]
+    [InlineData("/.well-known/oauth-authorization-server/identity")]
+    [Theory]
+    public void Find_should_match_route_that_uses_template(string path)
+    {
+        _endpoints.Add(new Duende.IdentityServer.Hosting.Endpoint(IdentityServerConstants.EndpointNames.OAuth2AuthorizationServerMetadata, "/.well-known/oauth-authorization-server/{*subPath}", typeof(MyEndpointHandler))
+        {
+            UsesRouteTemplate = true
+        });
+
+        var ctx = new DefaultHttpContext();
+        ctx.Request.Path = new PathString(path);
+        ctx.RequestServices = new StubServiceProvider();
+
+        var result = _subject.Find(ctx);
+
+        result.ShouldBeOfType<MyEndpointHandler>();
+    }
+
+    [Fact]
+    public void Find_return_null_for_route_that_uses_template_when_path_is_incorrect()
+    {
+        _endpoints.Add(new Duende.IdentityServer.Hosting.Endpoint(IdentityServerConstants.EndpointNames.OAuth2AuthorizationServerMetadata, "/.well-known/oauth-authorization-server/{*subPath}", typeof(MyEndpointHandler))
+        {
+            UsesRouteTemplate = true
+        });
+
+        var ctx = new DefaultHttpContext();
+        ctx.Request.Path = new PathString("/.not-well-known/oauth-authorization-server");
+        ctx.RequestServices = new StubServiceProvider();
+
+        var result = _subject.Find(ctx);
+
+        result.ShouldBeNull();
+    }
+
+    [InlineData("/.well-known/oauth-authorization-server")]
+    [InlineData("/.well-known/oauth-authorization-server/identity")]
+    [Theory]
+    public void Find_should_match_route_that_uses_template_with_on_router_matched_when_on_route_matched_callback_returns_true(string path)
+    {
+        _endpoints.Add(new Duende.IdentityServer.Hosting.Endpoint(IdentityServerConstants.EndpointNames.OAuth2AuthorizationServerMetadata, "/.well-known/oauth-authorization-server/{*subPath}", typeof(MyEndpointHandler))
+        {
+            UsesRouteTemplate = true,
+            OnRouteMatched = (_, _, _) => true
+        });
+
+        var ctx = new DefaultHttpContext();
+        ctx.Request.Path = new PathString(path);
+        ctx.RequestServices = new StubServiceProvider();
+
+        var result = _subject.Find(ctx);
+
+        result.ShouldBeOfType<MyEndpointHandler>();
+    }
+
+    [InlineData("/.well-known/oauth-authorization-server")]
+    [InlineData("/.well-known/oauth-authorization-server/identity")]
+    [Theory]
+    public void Find_should_not_match_route_that_uses_template_with_on_router_matched_when_on_route_matched_callback_returns_false(string path)
+    {
+        _endpoints.Add(new Duende.IdentityServer.Hosting.Endpoint(IdentityServerConstants.EndpointNames.OAuth2AuthorizationServerMetadata, "/.well-known/oauth-authorization-server/{*subPath}", typeof(MyEndpointHandler))
+        {
+            UsesRouteTemplate = true,
+            OnRouteMatched = (_, _, _) => false
+        });
+
+        var ctx = new DefaultHttpContext();
+        ctx.Request.Path = new PathString(path);
+        ctx.RequestServices = new StubServiceProvider();
+
+        var result = _subject.Find(ctx);
+
+        result.ShouldBeNull();
+    }
+
     private class MyEndpointHandler : IEndpointHandler
     {
         public Task<IEndpointResult> ProcessAsync(HttpContext context) => throw new NotImplementedException();
