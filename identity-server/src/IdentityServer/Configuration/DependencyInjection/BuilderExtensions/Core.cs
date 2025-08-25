@@ -34,6 +34,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -118,7 +119,8 @@ public static class IdentityServerBuilderExtensionsCore
         builder.AddEndpoint<DeviceAuthorizationEndpoint>(EndpointNames.DeviceAuthorization, ProtocolRoutePaths.DeviceAuthorization.EnsureLeadingSlash());
         builder.AddEndpoint<DiscoveryKeyEndpoint>(EndpointNames.Jwks, ProtocolRoutePaths.DiscoveryWebKeys.EnsureLeadingSlash());
         builder.AddEndpoint<DiscoveryEndpoint>(EndpointNames.Discovery, ProtocolRoutePaths.DiscoveryConfiguration.EnsureLeadingSlash());
-        builder.AddEndpoint<DiscoveryEndpoint>(EndpointNames.OAuth2AuthorizationServerMetadata, ProtocolRoutePaths.OAuth2AuthorizationServerMetadata.EnsureLeadingSlash());
+        builder.AddEndpoint<DiscoveryEndpoint>(EndpointNames.OAuth2AuthorizationServerMetadata, ProtocolRoutePaths.OAuth2AuthorizationServerMetadata.EnsureLeadingSlash(),
+            true, EndpointHelpers.OAuth2AuthorizationServerMetadataHelpers.OnRouteMatched);
         builder.AddEndpoint<EndSessionCallbackEndpoint>(EndpointNames.EndSession, ProtocolRoutePaths.EndSessionCallback.EnsureLeadingSlash());
         builder.AddEndpoint<EndSessionEndpoint>(EndpointNames.EndSession, ProtocolRoutePaths.EndSession.EnsureLeadingSlash());
         builder.AddEndpoint<IntrospectionEndpoint>(EndpointNames.Introspection, ProtocolRoutePaths.Introspection.EnsureLeadingSlash());
@@ -157,11 +159,18 @@ public static class IdentityServerBuilderExtensionsCore
     /// <param name="builder">The builder.</param>
     /// <param name="name">The name.</param>
     /// <param name="path">The path.</param>
-    public static IIdentityServerBuilder AddEndpoint<TEndpoint>(this IIdentityServerBuilder builder, string name, PathString path)
+    /// <param name="usesRouteTemplate">Whether the endpoint usees a route template. Defaults to false.</param>
+    /// <param name="onRouteMatched">Method invoked on a route template matche for additional actions/validation. Defaults to null.</param>
+    public static IIdentityServerBuilder AddEndpoint<TEndpoint>(this IIdentityServerBuilder builder, string name, PathString path,
+        bool usesRouteTemplate = false, Func<HttpContext, RouteValueDictionary, ILogger, bool>? onRouteMatched = null)
         where TEndpoint : class, IEndpointHandler
     {
         builder.Services.AddTransient<TEndpoint>();
-        builder.Services.AddSingleton(new Duende.IdentityServer.Hosting.Endpoint(name, path, typeof(TEndpoint)));
+        builder.Services.AddSingleton(new Duende.IdentityServer.Hosting.Endpoint(name, path, typeof(TEndpoint))
+        {
+            UsesRouteTemplate = usesRouteTemplate,
+            OnRouteMatched = onRouteMatched
+        });
 
         return builder;
     }
