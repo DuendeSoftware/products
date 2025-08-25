@@ -74,8 +74,10 @@ public static class BffEndpointRouteBuilderExtensions
         PathString route,
         string name)
     {
-        if (endpoints.DataSources.Any(x =>
-                x.Endpoints.OfType<RouteEndpoint>().Any(x => x.RoutePattern.RawText == route.ToString())))
+        // check if there is a route endpoint that matches the provided pathstring
+        if (endpoints.DataSources
+            .Any(ds => ds.Endpoints.OfType<RouteEndpoint>()
+               .Any(endpoint => endpoint.RoutePattern.RawText == route.Value)))
         {
             var logger = endpoints.ServiceProvider.GetRequiredService<ILogger<BffBuilder>>();
             logger.AlreadyMappedManagementEndpoint(LogLevel.Warning, name);
