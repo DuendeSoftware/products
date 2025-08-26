@@ -13,7 +13,9 @@ namespace Duende.Bff.Endpoints.Internal;
 /// <summary>
 /// Service for handling silent login requests
 /// </summary>
+#pragma warning disable CS0618 // Type or member is obsolete
 internal class DefaultSilentLoginEndpoint(IOptions<BffOptions> options, ILogger<DefaultSilentLoginEndpoint> logger) : ISilentLoginEndpoint
+#pragma warning restore CS0618 // Type or member is obsolete
 {
     /// <summary>
     /// The BFF options

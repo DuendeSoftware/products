@@ -106,6 +106,6 @@ public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
         // And we can log in, which means the login endpoint was registered
         await Bff.BrowserClient.Login();
 
-        Context.LogMessages.ToString().ShouldContain("Already mapped Login endpoint");
+        Context.LogMessages.ToString().ShouldContain("Management endpoints are automatically mapped");
     }
 }
