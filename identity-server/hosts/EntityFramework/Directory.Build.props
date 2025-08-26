@@ -6,7 +6,7 @@
     <AnalysisMode>all</AnalysisMode>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <ImplicitUsings>enable</ImplicitUsings>
- </PropertyGroup>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" />
@@ -41,21 +41,7 @@
     <ProjectReference Include="..\..\..\src\Configuration.EntityFramework\Duende.IdentityServer.Configuration.EntityFramework.csproj" />
     <ProjectReference Include="..\..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
     <ProjectReference Include="..\..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\..\Shared\Configuration\**\*.cs">
-      <Link>Shared\Configuration\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Include="..\..\Shared\Customization\**\*.cs">
-      <Link>Shared\Customization\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\..\Shared\EntityFramework\**\*.cs">
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </Compile>
+    <ProjectReference Include="..\..\Shared\Host.Shared.csproj" />
   </ItemGroup>
 
 </Project>

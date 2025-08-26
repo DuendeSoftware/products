@@ -28,10 +28,19 @@ builder.Build().Run();
 void ConfigureIdentityServerHosts()
 {
     // These hosts don't require additional infrastructure
-    if (HostIsEnabled(nameof(Projects.Host_Main)))
+    if (HostIsEnabled(nameof(Projects.Host_Main8)))
     {
         var hostMain = builder
-            .AddProject<Projects.Host_Main>("is-host")
+            .AddProject<Projects.Host_Main8>("is-host")
+            .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
+
+        projectRegistry.Add("is-host", hostMain);
+    }
+
+    if (HostIsEnabled(nameof(Projects.Host_Main9)))
+    {
+        var hostMain = builder
+            .AddProject<Projects.Host_Main9>("is-host")
             .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
 
         projectRegistry.Add("is-host", hostMain);
@@ -41,8 +50,8 @@ void ConfigureIdentityServerHosts()
     var dbHosts = new List<string>
     {
         nameof(Projects.Host_AspNetIdentity),
-        nameof(Projects.Host_EntityFramework),
-        nameof(Projects.Host_EntityFramework_dotnet9)
+        nameof(Projects.Host_EntityFramework8),
+        nameof(Projects.Host_EntityFramework9)
     };
 
     if (dbHosts.Any(HostIsEnabled))
@@ -73,9 +82,9 @@ void ConfigureIdentityServerHosts()
             projectRegistry.Add("is-host", hostAspNetIdentity);
         }
 
-        if (HostIsEnabled(nameof(Projects.Host_EntityFramework)))
+        if (HostIsEnabled(nameof(Projects.Host_EntityFramework8)))
         {
-            var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework>(name: "is-host")
+            var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework8>(name: "is-host")
                 .WithHttpHealthCheck(path: "/.well-known/openid-configuration")
                 .WithReference(identityServerDb, connectionName: "DefaultConnection");
 
@@ -90,9 +99,9 @@ void ConfigureIdentityServerHosts()
             projectRegistry.Add("is-host", hostEntityFramework);
         }
 
-        if (HostIsEnabled(nameof(Projects.Host_EntityFramework_dotnet9)))
+        if (HostIsEnabled(nameof(Projects.Host_EntityFramework9)))
         {
-            var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework_dotnet9>(name: "is-host")
+            var hostEntityFramework = builder.AddProject<Projects.Host_EntityFramework9>(name: "is-host")
                 .WithHttpHealthCheck(path: "/.well-known/openid-configuration")
                 .WithReference(identityServerDb, connectionName: "DefaultConnection");
 

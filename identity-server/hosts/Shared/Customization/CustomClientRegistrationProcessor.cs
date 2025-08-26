@@ -12,7 +12,7 @@ using Duende.IdentityServer.Stores;
 namespace IdentityServerHost.Extensions;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated via DI container")]
-internal sealed class CustomClientRegistrationProcessor(
+public sealed class CustomClientRegistrationProcessor(
     IdentityServerConfigurationOptions options,
     IClientConfigurationStore dcrStore,
     IClientStore clientStore) : DynamicClientRegistrationRequestProcessor(options, dcrStore)
