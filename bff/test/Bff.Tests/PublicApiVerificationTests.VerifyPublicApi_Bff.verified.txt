@@ -465,6 +465,8 @@ namespace Duende.Bff.Endpoints
         bool IsValidAsync(System.Uri returnUrl);
     }
     public interface ISilentLoginCallbackEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
+        "w handled by passing the prompt=none parameter to the login endpoint."))]
     public interface ISilentLoginEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
     public interface IUserEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
 }

@@ -8,6 +8,10 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_ncrunch|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DEBUG_NCRUNCH</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="Serilog" />
