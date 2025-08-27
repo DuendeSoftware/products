@@ -174,7 +174,8 @@ public class IdentityServerPipeline
             .AddInMemoryApiScopes(ApiScopes)
             .AddTestUsers(Users)
             .AddDeveloperSigningCredential(persistKey: false)
-            .AddMutualTlsSecretValidators();
+            .AddMutualTlsSecretValidators()
+            .AddLicenseSummary();
 
         services.AddHttpClient(IdentityServerConstants.HttpClients.BackChannelLogoutHttpClient)
             .AddHttpMessageHandler(() => BackChannelMessageHandler);

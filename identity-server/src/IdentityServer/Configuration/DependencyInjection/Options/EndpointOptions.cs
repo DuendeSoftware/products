@@ -103,4 +103,12 @@ public class EndpointsOptions
     /// <c>true</c> if the pushed authorization endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
     public bool EnablePushedAuthorizationEndpoint { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the OAuth 2.0 metadata endpoint (.well-known/oauth-authorization-server) is enabled.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the OAuth 2.0 discovery metadata is enabled; otherwise, <c>false</c>.
+    /// </value>
+    public bool EnableOAuth2MetadataEndpoint { get; set; } = true;
 }

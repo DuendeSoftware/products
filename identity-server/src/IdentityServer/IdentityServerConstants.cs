@@ -216,7 +216,7 @@ public static class IdentityServerConstants
         public const string CheckSession = "Checksession";
         public const string UserInfo = "Userinfo";
         public const string PushedAuthorization = "PushedAuthorization";
-        public const string OAuth2AuthorizationServerMetadata = "OAuth2AuthorizationServerMetadata";
+        public const string OAuthMetadata = "OAuthMetadata";
 
     }
 
@@ -256,7 +256,7 @@ public static class IdentityServerConstants
         public const string CheckSession = ConnectPathPrefix + "/checksession";
         public const string DeviceAuthorization = ConnectPathPrefix + "/deviceauthorization";
         public const string PushedAuthorization = ConnectPathPrefix + "/par";
-        public const string OAuth2AuthorizationServerMetadata = ".well-known/oauth-authorization-server/{*subPath}";
+        public const string OAuthMetadata = ".well-known/oauth-authorization-server";
 
 
         public const string MtlsPathPrefix = ConnectPathPrefix + "/mtls";
