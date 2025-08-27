@@ -3,7 +3,7 @@
 
 namespace IdentityServerHost.Pages;
 
-internal static class Log
+public static class Log
 {
     private static readonly Action<ILogger, string?, Exception?> _invalidId = LoggerMessage.Define<string?>(
         LogLevel.Error,

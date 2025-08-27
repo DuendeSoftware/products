@@ -49,7 +49,8 @@ void ConfigureIdentityServerHosts()
     // These hosts require a database
     var dbHosts = new List<string>
     {
-        nameof(Projects.Host_AspNetIdentity),
+        nameof(Projects.Host_AspNetIdentity8),
+        nameof(Projects.Host_AspNetIdentity9),
         nameof(Projects.Host_EntityFramework8),
         nameof(Projects.Host_EntityFramework9)
     };
@@ -65,9 +66,26 @@ void ConfigureIdentityServerHosts()
         var identityServerDb = sqlServer
             .AddDatabase(name: "IdentityServerDb", databaseName: "IdentityServer");
 
-        if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity)))
+        if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity8)))
         {
-            var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity>(name: "is-host")
+            var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity8>(name: "is-host")
+                .WithHttpHealthCheck(path: "/.well-known/openid-configuration")
+                .WithReference(identityServerDb, connectionName: "DefaultConnection");
+
+            if (appConfig.RunDatabaseMigrations)
+            {
+                var aspnetMigration = builder.AddProject<Projects.AspNetIdentityDb>(name: "aspnetidentitydb-migrations")
+                    .WithReference(identityServerDb, connectionName: "DefaultConnection")
+                    .WaitFor(identityServerDb);
+                hostAspNetIdentity.WaitForCompletion(aspnetMigration);
+            }
+
+            projectRegistry.Add("is-host", hostAspNetIdentity);
+        }
+
+        if (HostIsEnabled(nameof(Projects.Host_AspNetIdentity9)))
+        {
+            var hostAspNetIdentity = builder.AddProject<Projects.Host_AspNetIdentity9>(name: "is-host")
                 .WithHttpHealthCheck(path: "/.well-known/openid-configuration")
                 .WithReference(identityServerDb, connectionName: "DefaultConnection");
 

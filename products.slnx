@@ -113,8 +113,11 @@
     <Project Path="identity-server/clients/src/APIs/SimpleApi/SimpleApi.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/">
-    <Project Path="identity-server/hosts/AspNetIdentity/Host.AspNetIdentity.csproj" />
     <Project Path="identity-server/hosts/Shared/Host.Shared.csproj" />
+  </Folder>
+  <Folder Name="/identity-server/hosts/AspNetIdentity/">
+    <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity8/Host.AspNetIdentity8.csproj" />
+    <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity9/Host.AspNetIdentity9.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/EntityFramework/">
     <Project Path="identity-server/hosts/EntityFramework/EntityFramework8/Host.EntityFramework8.csproj" />
@@ -127,6 +130,7 @@
   <Folder Name="/identity-server/hosts/UI/">
     <Project Path="identity-server/hosts/UI/Main/UI.Main.csproj" />
     <Project Path="identity-server/hosts/UI/EntityFramework/UI.EntityFramework.csproj" />
+    <Project Path="identity-server/hosts/UI/AspNetIdentity/UI.AspNetIdentity.csproj" />
   </Folder>
   <Folder Name="/identity-server/migrations/">
     <Project Path="identity-server/migrations/AspNetIdentityDb/AspNetIdentityDb.csproj" />

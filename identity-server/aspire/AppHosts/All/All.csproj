@@ -52,7 +52,8 @@
     <ProjectReference Include="..\..\..\clients\src\MvcJarUriJwt\MvcJarUriJwt.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\..\clients\src\WindowsConsoleSystemBrowser\WindowsConsoleSystemBrowser.csproj" />
-    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\Host.AspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\AspNetIdentity8\Host.AspNetIdentity8.csproj" />
+    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\AspNetIdentity9\Host.AspNetIdentity9.csproj" />
     <ProjectReference Include="..\..\..\hosts\EntityFramework\EntityFramework8\Host.EntityFramework8.csproj" />
     <ProjectReference Include="..\..\..\hosts\EntityFramework\EntityFramework9\Host.EntityFramework9.csproj" />
     <ProjectReference Include="..\..\..\hosts\Main\Main8\Host.Main8.csproj" />

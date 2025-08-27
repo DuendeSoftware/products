@@ -10,7 +10,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\hosts\AspNetIdentity\Host.AspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\hosts\AspNetIdentity\AspNetIdentity8\Host.AspNetIdentity8.csproj" />
+    <!-- TODO - Revisit this -->
+    <ProjectReference Include="..\..\hosts\UI\AspNetIdentity\UI.AspNetIdentity.csproj" />
     <ProjectReference Include="..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
   </ItemGroup>
 
