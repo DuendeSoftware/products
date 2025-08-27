@@ -2,84 +2,139 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Hosting;
-using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Testing;
-using UnitTests.Common;
 
 namespace UnitTests.Hosting;
 
 public class EndpointHelpersTests
 {
-    [Fact]
-    public void OnRouteMatched_WhenRouteDoesNotStartWithWellKnown_ReturnsFalse()
+    [InlineData("/.WELL-KNOWN/OAUTH-AUTHORIZATION-SERVER")]
+    [InlineData("/.well-known/oauth-authorization-server")]
+    [Theory]
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathStartsWithWellKnown_ReturnsTrue(string path)
     {
-        var routeValues = new RouteValueDictionary { { "subPath", "metadata" } };
-        var serverUrlsMock = new MockServerUrls();
-        var services = new ServiceCollection();
-        services.AddSingleton<IServerUrls>(serverUrlsMock);
-        var serviceProvider = services.BuildServiceProvider();
         var context = new DefaultHttpContext
         {
             Request =
             {
-                PathBase = new PathString("/identity")
-            },
-            RequestServices = serviceProvider
+                Path = path
+            }
         };
 
-        var result = EndpointHelpers.OAuth2AuthorizationServerMetadataHelpers.OnRouteMatched(context, routeValues, new FakeLogger());
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
+
+        result.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathStartsWithWellKnownWithTrailingSlash_ReturnsTrue()
+    {
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = "/.well-known/oauth-authorization-server/"
+            }
+        };
+
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
+
+        result.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathStartsWithWellKnownAndHasMoreSegments_ReturnsTrue()
+    {
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = "/.well-known/oauth-authorization-server/extra"
+            }
+        };
+
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
+
+        result.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathStartsWithSegmentWithExtraInIt_ReturnsFalse()
+    {
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = "/.well-known/extra/oauth-authorization-server-extra"
+            }
+        };
+
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
 
         result.ShouldBeFalse();
     }
 
     [Fact]
-    public void OnRouteMatched_WhenSubPathIsValidString_SetsBasePath()
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathIsEmpty_ReturnsFalse()
     {
-        var routeValues = new RouteValueDictionary { { "subPath", "metadata" } };
-        var serverUrlsMock = new MockServerUrls();
-        var services = new ServiceCollection();
-        services.AddSingleton<IServerUrls>(serverUrlsMock);
-        var serviceProvider = services.BuildServiceProvider();
-        var context = new DefaultHttpContext { RequestServices = serviceProvider };
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = ""
+            }
+        };
 
-        var result = EndpointHelpers.OAuth2AuthorizationServerMetadataHelpers.OnRouteMatched(context, routeValues, new FakeLogger());
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
 
-        result.ShouldBeTrue();
-        serverUrlsMock.BasePath.ShouldBe("/metadata");
+        result.ShouldBeFalse();
     }
 
     [Fact]
-    public void OnRouteMatched_WhenSubPathIsMissing_DoesNothing()
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathIsRoot_ReturnsFalse()
     {
-        var routeValues = new RouteValueDictionary();
-        var serverUrlsMock = new MockServerUrls();
-        var services = new ServiceCollection();
-        services.AddSingleton<IServerUrls>(serverUrlsMock);
-        var serviceProvider = services.BuildServiceProvider();
-        var context = new DefaultHttpContext { RequestServices = serviceProvider };
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = "/"
+            }
+        };
 
-        var result = EndpointHelpers.OAuth2AuthorizationServerMetadataHelpers.OnRouteMatched(context, routeValues, new FakeLogger());
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
 
-        result.ShouldBeTrue();
-        serverUrlsMock.BasePath.ShouldBeNull();
+        result.ShouldBeFalse();
     }
 
     [Fact]
-    public void OnRouteMatched_WhenSubPathIsNotString_SetsBasePath()
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathIsNull_ReturnsFalse()
     {
-        var routeValues = new RouteValueDictionary { { "subPath", 123 } };
-        var serverUrlsMock = new MockServerUrls();
-        var services = new ServiceCollection();
-        services.AddSingleton<IServerUrls>(serverUrlsMock);
-        var serviceProvider = services.BuildServiceProvider();
-        var context = new DefaultHttpContext { RequestServices = serviceProvider };
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = null
+            }
+        };
 
-        var result = EndpointHelpers.OAuth2AuthorizationServerMetadataHelpers.OnRouteMatched(context, routeValues, new FakeLogger());
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
 
-        result.ShouldBeTrue();
-        serverUrlsMock.BasePath.ShouldBe("/123");
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void OAuthMetadataEndpoint_IsMatch_WhenPathDoesNotStartWithWellKnown_ReturnsFalse()
+    {
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = "/identity/metadata"
+            }
+        };
+
+        var result = EndpointHelpers.OAuthMetadataHelpers.IsMatch(context);
+
+        result.ShouldBeFalse();
     }
 }

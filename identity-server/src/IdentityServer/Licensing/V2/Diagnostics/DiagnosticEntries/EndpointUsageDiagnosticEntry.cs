@@ -64,7 +64,7 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.Revocation.EnsureLeadingSlash(), _tokenRevocation);
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.Token.EnsureLeadingSlash(), _token);
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.UserInfo.EnsureLeadingSlash(), _userInfo);
-        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.OAuth2AuthorizationServerMetadata.EnsureLeadingSlash(), _oAuthMetadata);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.OAuthMetadata.EnsureLeadingSlash(), _oAuthMetadata);
         writer.WriteNumber("other", _other);
 
         writer.WriteEndObject();
@@ -137,8 +137,8 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
             case IdentityServerConstants.ProtocolRoutePaths.UserInfo:
                 Interlocked.Increment(ref _userInfo);
                 break;
-            //NOTE: cannot use const because of template matching in this route
-            case { } s when s.StartsWith(".well-known/oauth-authorization-server", StringComparison.OrdinalIgnoreCase):
+            //NOTE: need to use StartsWith because this route can have additional segments
+            case { } s when s.StartsWith(IdentityServerConstants.ProtocolRoutePaths.OAuthMetadata, StringComparison.OrdinalIgnoreCase):
                 Interlocked.Increment(ref _oAuthMetadata);
                 break;
             default:
