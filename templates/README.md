@@ -38,6 +38,12 @@ Creates a basic Duende IdentityServer host that uses ASP.NET Identity for user m
 ### dotnet new duende-is-ef
 Creates a basic Duende IdentityServer host that uses Entity Framework for configuration and state management. If you seed the database, you will get a couple of basic client and resource registrations. The `SeedData.cs` file controls the initial configuration data.
 
+### dotnet new duende-is
+The Duende IdentityServer template is our most feature-rich offering and a great starting point for developers who want a simple yet effective UI/UX experience.
+
+The template is built on the Entity Framework Core template but provides an administrative UI for managing clients, scopes, and claims against a database storage engine.
+It also has a diagnostics dashboard showing system information, including the licensing tier and features currently used in your IdentityServer deployment.
+
 
 # BFF Templates
 
