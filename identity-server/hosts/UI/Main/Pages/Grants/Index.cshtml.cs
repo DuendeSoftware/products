@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Grants;
+namespace Duende.IdentityServer.UI.Pages.Grants;
 
 [SecurityHeaders]
 [Authorize]

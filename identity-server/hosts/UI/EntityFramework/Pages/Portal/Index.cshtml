@@ -1,5 +1,5 @@
 ﻿@page
-@model IdentityServerHost.Pages.Portal.Index
+@model Duende.IdentityServer.UI.EntityFramework.Pages.Portal.Index
 
 <div class="portal-page">
 
@@ -17,12 +17,12 @@
             You do not have any clients configured with an InitiateLoginUri.
         </div>
     }
-    
+
     <ul class="list-group">
     @foreach (var client in Model.Clients)
     {
         <li class="list-group-item">
-            <a href="@client.InitiateLoginUri">@client.LinkText</a>    
+            <a href="@client.InitiateLoginUri">@client.LinkText</a>
         </li>
     }
     </ul>

@@ -3,7 +3,6 @@
 
 using System.Security.Claims;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
@@ -12,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.ExternalLogin;
+namespace Duende.IdentityServer.UI.Pages.ExternalLogin;
 
 [AllowAnonymous]
 [SecurityHeaders]

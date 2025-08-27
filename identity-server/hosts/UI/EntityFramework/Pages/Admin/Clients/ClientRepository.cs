@@ -8,7 +8,7 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServerHost.Pages.Admin.Clients;
+namespace Duende.IdentityServer.UI.EntityFramework.Pages.Admin.Clients;
 
 public class ClientSummaryModel
 {

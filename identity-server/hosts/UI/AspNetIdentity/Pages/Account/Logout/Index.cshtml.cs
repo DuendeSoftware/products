@@ -5,6 +5,8 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.UI.Pages;
+using Duende.IdentityServer.UI.Pages.Account.Logout;
 using IdentityServerHost.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Logout;
+namespace Duende.IdentityServer.UI.AspNetIdentity.Pages.Account.Logout;
 
 [SecurityHeaders]
 [AllowAnonymous]
@@ -80,7 +82,7 @@ public class Index : PageModel
 
             // raise the logout event
             await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
-            Telemetry.Metrics.UserLogout(idp);
+            Duende.IdentityServer.UI.Pages.Telemetry.Metrics.UserLogout(idp);
 
             // if it's a local login we can ignore this workflow
             if (idp != null && idp != Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider)

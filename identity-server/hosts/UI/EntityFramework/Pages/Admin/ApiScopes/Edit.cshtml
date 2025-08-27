@@ -1,5 +1,5 @@
 @page
-@model IdentityServerHost.Pages.Admin.ApiScopes.EditModel
+@model Duende.IdentityServer.UI.EntityFramework.Pages.Admin.ApiScopes.EditModel
 @{
 }
 
@@ -20,7 +20,7 @@
                     <label asp-for="@Model.InputModel.DisplayName"></label>
                     <input class="form-control" asp-for="@Model.InputModel.DisplayName" autofocus />
                 </div>
-                
+
                 <div class="form-group">
                     <label asp-for="@Model.InputModel.UserClaims">User Claims (space delimited)</label>
                     <input class="form-control" asp-for="@Model.InputModel.UserClaims" />

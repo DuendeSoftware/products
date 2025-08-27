@@ -9,7 +9,7 @@ using Duende.IdentityServer.Configuration.RequestProcessing;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 
-namespace IdentityServerHost.Extensions;
+namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated via DI container")]
 public sealed class CustomClientRegistrationProcessor(

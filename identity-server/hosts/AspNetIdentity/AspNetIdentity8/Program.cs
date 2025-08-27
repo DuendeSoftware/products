@@ -18,7 +18,7 @@ try
 
     builder.ConfigureSerilogDefaults();
     builder.AddServiceDefaults()
-        .AddOpenTelemetryMeters(IdentityServerHost.Pages.Telemetry.ServiceName);
+        .AddOpenTelemetryMeters(Duende.IdentityServer.UI.Pages.Telemetry.ServiceName);
 
     var app = builder
         .ConfigureServices()

@@ -1,5 +1,5 @@
 @page
-@model IdentityServerHost.Pages.Logout.Index
+@model Duende.IdentityServer.UI.Pages.Account.Logout.Index
 
 <div class="logout-page">
     <div class="lead">
@@ -9,7 +9,7 @@
 
     <form asp-page="/Account/Logout/Index">
         <input type="hidden" name="logoutId" value="@Model.LogoutId"  />
-        
+
         <div class="form-group">
             <button class="btn btn-primary">Yes</button>
         </div>

@@ -4,7 +4,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Device;
+namespace Duende.IdentityServer.UI.Pages.Device;
 
 [SecurityHeaders]
 [Authorize]

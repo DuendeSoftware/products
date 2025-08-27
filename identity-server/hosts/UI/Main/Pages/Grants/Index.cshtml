@@ -1,5 +1,5 @@
 @page
-@model IdentityServerHost.Pages.Grants.Index
+@model Duende.IdentityServer.UI.Pages.Grants.Index
 @{
 }
 
@@ -21,7 +21,7 @@
     }
     else
     {
-        foreach (var grant in Model.View.Grants) 
+        foreach (var grant in Model.View.Grants)
         {
             <div class="card">
                 <div class="card-header">
@@ -42,13 +42,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <ul class="list-group list-group-flush">
                     @if (grant.Description != null)
                     {
                         <li class="list-group-item">
                             <label>Description:</label> @grant.Description
-                        </li>   
+                        </li>
                     }
                     <li class="list-group-item">
                         <label>Created:</label> @grant.Created.ToString("yyyy-MM-dd")

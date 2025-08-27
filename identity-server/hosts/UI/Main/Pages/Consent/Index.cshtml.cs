@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Consent;
+namespace Duende.IdentityServer.UI.Pages.Consent;
 
 [Authorize]
 [SecurityHeaders]

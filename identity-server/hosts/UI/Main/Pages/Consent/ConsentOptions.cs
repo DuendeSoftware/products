@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace IdentityServerHost.Pages.Consent;
+namespace Duende.IdentityServer.UI.Pages.Consent;
 
 public static class ConsentOptions
 {

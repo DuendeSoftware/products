@@ -1,5 +1,6 @@
 @page
-@model IdentityServerHost.Pages.Admin.Clients.EditModel
+@using Duende.IdentityServer.UI.EntityFramework.Pages.Admin.Clients;
+@model Duende.IdentityServer.UI.EntityFramework.Pages.Admin.Clients.EditModel
 @{
 }
 
@@ -22,13 +23,13 @@
                     <label asp-for="@Model.InputModel.Name"></label>
                     <input class="form-control" asp-for="@Model.InputModel.Name" autofocus />
                 </div>
-                
+
                 <div class="form-group">
                     <label asp-for="@Model.InputModel.AllowedScopes">Allowed Scopes (space delimited)</label>
                     <input class="form-control" asp-for="@Model.InputModel.AllowedScopes" />
                 </div>
 
-                @if (Model.InputModel.Flow == IdentityServerHost.Pages.Admin.Clients.Flow.CodeFlowWithPkce)
+                @if (Model.InputModel.Flow == Flow.CodeFlowWithPkce)
                 {
                     <div class="form-group">
                         <label asp-for="@Model.InputModel.RedirectUri"></label>

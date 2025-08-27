@@ -6,7 +6,7 @@ using System.Text.Json;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 
-namespace IdentityServerHost.Pages.Diagnostics;
+namespace Duende.IdentityServer.UI.Pages.Diagnostics;
 
 public class ViewModel
 {

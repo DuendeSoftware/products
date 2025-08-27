@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace IdentityServerHost.Pages;
+namespace Duende.IdentityServer.UI.Pages;
 
 public static class Log
 {

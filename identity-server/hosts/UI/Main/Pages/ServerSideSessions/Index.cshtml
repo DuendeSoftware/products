@@ -1,5 +1,5 @@
 @page
-@model IdentityServerHost.Pages.ServerSideSessions.IndexModel
+@model Duende.IdentityServer.UI.Pages.ServerSideSessions.IndexModel
 
     <div class="users-page">
         <div class="row">
@@ -8,7 +8,7 @@
                     <div class="card-header">
                         <h2>User Sessions</h2>
                     </div>
-                
+
                     <div class="card-body">
 
                     @if (Model.UserSessions != null)
@@ -18,7 +18,7 @@
                                 @if (Model.UserSessions.HasPrevResults)
                                 {
                                     <a class="btn btn-primary" asp-page="/ServerSideSessions/Index"
-                                         asp-route-prev="true" 
+                                         asp-route-prev="true"
                                          asp-route-token="@Model.UserSessions.ResultsToken"
                                          asp-route-DisplayNameFilter="@Model.DisplayNameFilter"
                                          asp-route-SubjectIdFilter="@Model.SubjectIdFilter"
@@ -78,7 +78,7 @@
                         }
 
                         <br />
-                    
+
                         @if (Model.UserSessions.Results.Any())
                         {
                             <div>
@@ -131,7 +131,7 @@
                         }
                     }
                     else
-                    { 
+                    {
                         <div class="row">
                             <div class="col">
                                 You do not have server-side sessions enabled.

@@ -7,7 +7,7 @@ using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityServerHost.Pages.Admin.ApiScopes;
+namespace Duende.IdentityServer.UI.EntityFramework.Pages.Admin.ApiScopes;
 
 public class ApiScopeSummaryModel
 {

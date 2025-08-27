@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.ExternalLogin;
+namespace Duende.IdentityServer.UI.Pages.ExternalLogin;
 
 [AllowAnonymous]
 [SecurityHeaders]
@@ -31,7 +31,7 @@ public class Challenge : PageModel
             throw new ArgumentException("invalid return URL");
         }
 
-        // start challenge and roundtrip the return URL and scheme 
+        // start challenge and roundtrip the return URL and scheme
         var props = new AuthenticationProperties
         {
             RedirectUri = Url.Page("/externallogin/callback"),

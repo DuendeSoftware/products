@@ -3,9 +3,9 @@
 
 using System.Security.Claims;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.UI.Pages;
 using IdentityServerHost.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServerHost.Pages.ExternalLogin;
+namespace Duende.IdentityServer.UI.AspNetIdentity.Pages.ExternalLogin;
 
 [AllowAnonymous]
 [SecurityHeaders]
@@ -98,7 +98,7 @@ public class Callback : PageModel
         // check if external login is in the context of an OIDC request
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
         await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.Id, user.UserName, true, context?.Client.ClientId));
-        Telemetry.Metrics.UserLogin(context?.Client.ClientId, provider!);
+        Duende.IdentityServer.UI.Pages.Telemetry.Metrics.UserLogin(context?.Client.ClientId, provider!);
 
         if (context != null)
         {

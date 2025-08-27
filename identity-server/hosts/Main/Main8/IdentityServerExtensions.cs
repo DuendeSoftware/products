@@ -5,8 +5,8 @@ using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
-using IdentityServerHost.Configuration;
-using IdentityServerHost.Extensions;
+using Duende.IdentityServer.Hosts.Shared.Configuration;
+using Duende.IdentityServer.Hosts.Shared.Customization;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.IdentityModel.Tokens;
 

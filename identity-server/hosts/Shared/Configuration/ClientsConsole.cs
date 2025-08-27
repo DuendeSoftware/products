@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Cryptography.X509Certificates;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 
-namespace IdentityServerHost.Configuration;
+namespace Duende.IdentityServer.Hosts.Shared.Configuration;
 
 public static class ClientsConsole
 {

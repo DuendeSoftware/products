@@ -1,11 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.UI.Pages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Admin.ApiScopes;
+namespace Duende.IdentityServer.UI.EntityFramework.Pages.Admin.ApiScopes;
 
 [SecurityHeaders]
 [Authorize]

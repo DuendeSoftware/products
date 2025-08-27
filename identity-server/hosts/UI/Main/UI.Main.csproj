@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <RootNamespace>Duende.IdentityServer.UI</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

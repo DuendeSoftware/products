@@ -4,10 +4,9 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Test;
 
-namespace IdentityServerHost.Configuration;
+namespace Duende.IdentityServer.Hosts.Shared.Configuration;
 
 public static class TestUsers
 {

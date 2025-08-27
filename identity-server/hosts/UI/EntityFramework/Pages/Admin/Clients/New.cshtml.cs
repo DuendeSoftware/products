@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityModel;
+using Duende.IdentityServer.UI.Pages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Admin.Clients;
+namespace Duende.IdentityServer.UI.EntityFramework.Pages.Admin.Clients;
 
 [SecurityHeaders]
 [Authorize]

@@ -4,7 +4,7 @@
 using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityServer;
-using IdentityServerHost.Extensions;
+using Duende.IdentityServer.Hosts.Shared.Customization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Server.Kestrel.Core;

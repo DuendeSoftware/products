@@ -4,9 +4,9 @@
 using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
-using IdentityServerHost.Extensions;
-using IdentityServerHost.Pages.Admin.ApiScopes;
-using IdentityServerHost.Pages.Admin.IdentityScopes;
+using Duende.IdentityServer.Hosts.Shared.Customization;
+using Duende.IdentityServer.UI.EntityFramework.Pages.Admin.ApiScopes;
+using Duende.IdentityServer.UI.EntityFramework.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
@@ -64,8 +64,8 @@ internal static class HostingExtensions
         builder.Services.Configure<RazorPagesOptions>(options =>
             options.Conventions.AuthorizeFolder("/Admin", "admin"));
 
-        builder.Services.AddTransient<Pages.Admin.Clients.ClientRepository>();
-        builder.Services.AddTransient<Pages.Portal.ClientRepository>();
+        builder.Services.AddTransient<Duende.IdentityServer.UI.EntityFramework.Pages.Admin.Clients.ClientRepository>();
+        builder.Services.AddTransient<Duende.IdentityServer.UI.EntityFramework.Pages.Portal.ClientRepository>();
         builder.Services.AddTransient<IdentityScopeRepository>();
         builder.Services.AddTransient<ApiScopeRepository>();
     }

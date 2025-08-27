@@ -3,7 +3,7 @@
 
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Portal;
+namespace Duende.IdentityServer.UI.EntityFramework.Pages.Portal;
 
 public class Index : PageModel
 {
