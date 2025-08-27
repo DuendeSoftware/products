@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.Collections.Concurrent;
+using Duende.Private.Licensing;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.V2;
@@ -12,33 +13,33 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFacto
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
 
-    private readonly ConcurrentHashSet<LicenseFeature> _otherFeatures = new();
-    private readonly ConcurrentHashSet<LicenseFeature> _businessFeatures = new();
-    private readonly ConcurrentHashSet<LicenseFeature> _enterpriseFeatures = new();
+    private readonly ConcurrentHashSet<IdentityServerLicenseFeature> _otherFeatures = new();
+    private readonly ConcurrentHashSet<IdentityServerLicenseFeature> _businessFeatures = new();
+    private readonly ConcurrentHashSet<IdentityServerLicenseFeature> _enterpriseFeatures = new();
     private readonly ConcurrentHashSet<string> _clientsUsed = new();
     private readonly ConcurrentHashSet<string> _issuersUsed = new();
 
     private const int ClientLimitExceededThreshold = 5;
     private const int IssuerLimitExceededThreshold = 1;
 
-    public void FeatureUsed(LicenseFeature feature)
+    public void FeatureUsed(IdentityServerLicenseFeature feature)
     {
         switch (feature)
         {
-            case LicenseFeature.ResourceIsolation:
-            case LicenseFeature.DynamicProviders:
-            case LicenseFeature.CIBA:
-            case LicenseFeature.DPoP:
+            case IdentityServerLicenseFeature.ResourceIsolation:
+            case IdentityServerLicenseFeature.DynamicProviders:
+            case IdentityServerLicenseFeature.CIBA:
+            case IdentityServerLicenseFeature.DPoP:
                 _enterpriseFeatures.Add(feature);
                 break;
-            case LicenseFeature.KeyManagement:
-            case LicenseFeature.PAR:
-            case LicenseFeature.ServerSideSessions:
-            case LicenseFeature.DCR:
+            case IdentityServerLicenseFeature.KeyManagement:
+            case IdentityServerLicenseFeature.PAR:
+            case IdentityServerLicenseFeature.ServerSideSessions:
+            case IdentityServerLicenseFeature.DCR:
                 _businessFeatures.Add(feature);
                 break;
-            case LicenseFeature.ISV:
-            case LicenseFeature.Redistribution:
+            case IdentityServerLicenseFeature.ISV:
+            case IdentityServerLicenseFeature.Redistribution:
                 _otherFeatures.Add(feature);
                 break;
         }

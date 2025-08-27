@@ -25,7 +25,7 @@ public class EndpointRouterTests
         _pathMap = new Dictionary<string, Duende.IdentityServer.Hosting.Endpoint>();
         _endpoints = new List<Duende.IdentityServer.Hosting.Endpoint>();
         _options = new IdentityServerOptions();
-        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance);
+        var licenseAccessor = new LicenseAccessor(() => null, NullLogger<LicenseAccessor>.Instance);
         var licenseExpirationChecker = new LicenseExpirationChecker(licenseAccessor, new MockSystemClock(), new NullLoggerFactory());
         var protocolRequestCounter = new ProtocolRequestCounter(licenseAccessor, new NullLoggerFactory());
         _subject = new EndpointRouter(_endpoints, protocolRequestCounter, licenseExpirationChecker, _options, new SanitizedLogger<EndpointRouter>(TestLogger.Create<EndpointRouter>()));

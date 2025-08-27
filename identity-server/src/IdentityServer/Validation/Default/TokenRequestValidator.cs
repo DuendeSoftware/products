@@ -14,6 +14,7 @@ using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Duende.Private.Licensing;
 using Microsoft.Extensions.Logging;
 using static Duende.IdentityServer.IdentityServerConstants;
 
@@ -242,7 +243,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // DPoP
         if (context.DPoPProofToken.IsPresent())
         {
-            _licenseUsage.FeatureUsed(LicenseFeature.DPoP);
+            _licenseUsage.FeatureUsed(IdentityServerLicenseFeature.DPoP);
             IdentityServerLicenseValidator.Instance.ValidateDPoP();
 
             if (context.DPoPProofToken.Length > _options.InputLengthRestrictions.DPoPProofToken)
@@ -929,7 +930,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.UnauthorizedClient);
         }
 
-        _licenseUsage.FeatureUsed(LicenseFeature.CIBA);
+        _licenseUsage.FeatureUsed(IdentityServerLicenseFeature.CIBA);
         IdentityServerLicenseValidator.Instance.ValidateCiba();
 
         /////////////////////////////////////////////

@@ -9,6 +9,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
+using Duende.Private.Licensing;
 using Microsoft.Extensions.Logging;
 using static Duende.IdentityServer.Constants;
 
@@ -71,7 +72,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.UnauthorizedClient, "Unauthorized client");
         }
 
-        _licenseUsage.FeatureUsed(LicenseFeature.CIBA);
+        _licenseUsage.FeatureUsed(IdentityServerLicenseFeature.CIBA);
         IdentityServerLicenseValidator.Instance.ValidateCiba();
 
         //////////////////////////////////////////////////////////

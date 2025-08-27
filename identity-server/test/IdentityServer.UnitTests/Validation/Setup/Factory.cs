@@ -269,7 +269,7 @@ internal static class Factory
             resourceValidator,
             userSession,
             requestObjectValidator,
-            new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
+            new LicenseUsageTracker(new LicenseAccessor(() => null, NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
             new SanitizedLogger<AuthorizeRequestValidator>(TestLogger.Create<AuthorizeRequestValidator>()));

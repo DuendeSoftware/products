@@ -11,14 +11,12 @@ namespace IdentityServer.UnitTests.Licensing.V2;
 
 public class LicenseUsageTests
 {
-    private IdentityServerOptions _options;
     private FakeLogger _logger;
     private LicenseUsageTracker _licenseUsageTracker;
 
     private void Init(string licenseKey)
     {
-        _options = new IdentityServerOptions { LicenseKey = licenseKey };
-        var licenseAccessor = new LicenseAccessor(_options, NullLogger<LicenseAccessor>.Instance);
+        var licenseAccessor = new LicenseAccessor(() => licenseKey, NullLogger<LicenseAccessor>.Instance);
         _logger = new FakeLogger();
         _licenseUsageTracker = new LicenseUsageTracker(licenseAccessor, new StubLoggerFactory(_logger));
     }
@@ -28,32 +26,32 @@ public class LicenseUsageTests
     {
         Init(null);
 
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.KeyManagement);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.PAR);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.ResourceIsolation);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.DynamicProviders);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.CIBA);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.ServerSideSessions);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.DPoP);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.DCR);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.ISV);
-        _licenseUsageTracker.FeatureUsed(LicenseFeature.Redistribution);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.KeyManagement);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.PAR);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.ResourceIsolation);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.DynamicProviders);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.CIBA);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.ServerSideSessions);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.DPoP);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.DCR);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.ISV);
+        _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.Redistribution);
 
         var summary = _licenseUsageTracker.GetSummary();
 
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.KeyManagement.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.PAR.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.ServerSideSessions.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.DCR.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.KeyManagement.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.KeyManagement.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.PAR.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.ServerSideSessions.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.DCR.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.KeyManagement.ToString());
 
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.ResourceIsolation.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.DynamicProviders.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.CIBA.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.DPoP.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.ResourceIsolation.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.DynamicProviders.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.CIBA.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.DPoP.ToString());
 
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.ISV.ToString());
-        summary.FeaturesUsed.ShouldContain(LicenseFeature.Redistribution.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.ISV.ToString());
+        summary.FeaturesUsed.ShouldContain(IdentityServerLicenseFeature.Redistribution.ToString());
     }
 
     [Fact]

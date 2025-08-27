@@ -26,7 +26,7 @@ public class LicenseExpirationCheckerTests
     public LicenseExpirationCheckerTests()
     {
         _options = new IdentityServerOptions();
-        _licenseAccessor = new LicenseAccessor(_options, new NullLogger<LicenseAccessor>());
+        _licenseAccessor = new LicenseAccessor(() => _options.LicenseKey, new NullLogger<LicenseAccessor>());
         _mockSystemClock = new MockSystemClock();
         _logger = new FakeLogger<LicenseExpirationChecker>();
         _expirationCheck = new LicenseExpirationChecker(_licenseAccessor, _mockSystemClock, new StubLoggerFactory(_logger));

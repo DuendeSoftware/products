@@ -14,6 +14,7 @@ using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Validation;
+using Duende.Private.Licensing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -51,7 +52,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
 
         _logger.LogDebug("Start pushed authorization request");
 
-        _features.FeatureUsed(LicenseFeature.PAR);
+        _features.FeatureUsed(IdentityServerLicenseFeature.PAR);
 
         NameValueCollection values;
         if (HttpMethods.IsPost(context.Request.Method))
