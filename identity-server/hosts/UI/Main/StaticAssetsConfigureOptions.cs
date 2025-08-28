@@ -1,3 +1,6 @@
+// Copyright (c) Duende Software. All rights reserved.
+// See LICENSE in the project root for license information.
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
@@ -24,8 +27,5 @@ internal class StaticAssetsConfigureOptions(IWebHostEnvironment environment) : I
 
 public static class IdentityServerUIExtensions
 {
-    public static void AddIdentityServerUI(this WebApplicationBuilder builder)
-    {
-        builder.Services.ConfigureOptions<StaticAssetsConfigureOptions>();
-    }
+    public static void AddIdentityServerUI(this WebApplicationBuilder builder) => builder.Services.ConfigureOptions<StaticAssetsConfigureOptions>();
 }
