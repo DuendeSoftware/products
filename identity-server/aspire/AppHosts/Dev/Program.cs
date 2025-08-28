@@ -3,7 +3,7 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var identityServerHost = builder.AddProject<Projects.Host_EntityFramework_dotnet9>(name: "is-host")
+var identityServerHost = builder.AddProject<Projects.Host_Main9>(name: "is-host")
     .WithHttpHealthCheck(path: "/.well-known/openid-configuration");
 
 var api = builder.AddProject<Projects.DPoPApi>("dpop-api")

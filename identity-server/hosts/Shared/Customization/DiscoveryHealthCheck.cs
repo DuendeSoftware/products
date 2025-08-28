@@ -5,7 +5,7 @@ using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Duende.IdentityServer;
+namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 public class DiscoveryHealthCheck : IHealthCheck
 {

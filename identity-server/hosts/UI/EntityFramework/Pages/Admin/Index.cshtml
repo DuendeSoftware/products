@@ -1,0 +1,23 @@
+@page
+@model Duende.IdentityServer.UI.EntityFramework.Pages.Admin.IndexModel
+@{
+}
+
+<div class="admin-page">
+    <h2>
+        Duende IdentityServer Admin
+    </h2>
+
+    <div class="row">
+        <p>There are simple administrative pages.</p>
+    </div>
+
+    <div class="row">
+        <div class="list-group">
+            <a class="list-group-item list-group-item-action" asp-page="/Admin/Clients/Index">Clients</a>
+            <a class="list-group-item list-group-item-action" asp-page="/Admin/IdentityScopes/Index">Identity Scopes</a>
+            <a class="list-group-item list-group-item-action" asp-page="/Admin/ApiScopes/Index">API Scopes</a>
+        </div>
+    </div>
+</div>
+

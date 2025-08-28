@@ -3,7 +3,7 @@
 
 using Duende.IdentityServer.Validation;
 
-namespace IdentityServerHost.Extensions;
+namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 public class ParameterizedScopeParser(ILogger<DefaultScopeParser> logger) : DefaultScopeParser(logger)
 {

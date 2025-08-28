@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using Duende.IdentityServer.Validation;
 
-namespace IdentityServerHost.Extensions;
+namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 public class ParameterizedScopeTokenRequestValidator : ICustomTokenRequestValidator
 {

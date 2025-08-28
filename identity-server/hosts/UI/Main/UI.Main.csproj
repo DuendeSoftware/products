@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <RootNamespace>Duende.IdentityServer.UI</RootNamespace>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\**\*" />
+  </ItemGroup>
+
+</Project>

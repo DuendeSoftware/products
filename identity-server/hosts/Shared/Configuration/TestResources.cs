@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 
-namespace IdentityServerHost.Configuration;
+namespace Duende.IdentityServer.Hosts.Shared.Configuration;
 
 public static class TestResources
 {
