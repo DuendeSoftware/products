@@ -81,7 +81,6 @@ public static class BffBuilderExtensions
         builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
         builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureTrialMode>();
         builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieRevokeRefreshToken>();
-        builder.Services.AddSingleton<TrialMode>();
         builder.Services.AddSingleton<ActiveCookieAuthenticationScheme>();
         builder.Services.AddSingleton<ActiveOpenIdConnectAuthenticationScheme>();
 

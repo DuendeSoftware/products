@@ -44,6 +44,7 @@ internal static partial class LicensingLogMessages
     [LoggerMessage(
         message: $$"""
                    Trial Mode: Session {sessionid} started. Currently using {sessionCount} of {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}} maximum active sessions.
+                   You do not have a valid license key for the Duende BFF Security Framework, so Duende.BFF runs in trial mode.
                    To obtain a valid license, please start a conversation with us: https://duendesoftware.com/contact
 
                    See https://duende.link/l/bff/trial for more information.
@@ -54,6 +55,7 @@ internal static partial class LicensingLogMessages
         message: $$"""
                   Trial mode limit of maximum {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}} is reached.
                   Session {sessionid} is terminated. 
+                  You do not have a valid license key for the Duende BFF Security Framework, so Duende.BFF  runs in trial mode.
                   To obtain a valid license, please start a conversation with us: https://duendesoftware.com/contact
                   
                   See https://duende.link/l/bff/trial for more information.
@@ -62,13 +64,13 @@ internal static partial class LicensingLogMessages
 
     [LoggerMessage(
         message: $$"""
-                   Trial mode limit of maximum {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}} is reached.
-                   Session {sessionid} is terminated. 
+                   Request blocked because trial limits have been exceeded and this session '{sessionid}' is terminated. 
+                   You do not have a valid license key for the Duende BFF Security Framework, so Duende.BFF runs in trial mode.
                    To obtain a valid license, please start a conversation with us: https://duendesoftware.com/contact
 
                    See https://duende.link/l/bff/trial for more information.
                    """)]
-    public static partial void TrialModeUnknownSession(this ILogger logger, LogLevel logLevel, string sessionId);
+    public static partial void TrialModeRequestBlockedDueToTerminatedSession(this ILogger logger, LogLevel logLevel, string sessionId);
 
     [LoggerMessage(
         message: $$"""

@@ -24,10 +24,6 @@ internal class ConfigureBffStartupFilter : IStartupFilter
                 app.UseBffPreProcessing();
             }
 
-            // Todo: only if no license
-
-            app.UseMiddleware<TrialModeVerificationMiddleware>();
-
             next(app);
 
             if (bffOptions.AutomaticallyRegisterBffMiddleware)

@@ -2,9 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Licensing;
+using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
+using Duende.Bff.Yarp;
 using Microsoft.Extensions.Time.Testing;
 using Xunit.Abstractions;
 
@@ -25,13 +28,19 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     public async Task Given_no_license_then_number_of_active_sessions_is_limited()
     {
         Bff.LicenseKey = null;
-
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.AddRemoteApis();
+        };
+        Bff.OnConfigureApp += app => app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            .WithAccessToken(RequiredTokenType.UserOrNone);
 
         await InitializeAsync();
         AddOrUpdateFrontend(Some.BffFrontend());
 
         var activeSessions = new List<BffHttpClient>();
 
+        // log in with the maximum number of users. 
         for (int i = 0; i < Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialMode; i++)
         {
             var client = Bff.BuildBrowserClient(Bff.Url());
@@ -39,24 +48,76 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
             await client.Login();
         }
 
-        bool isLoggedIn = false;
+        // Verify all users are still logged in. 
+        bool isLoggedIn;
+        ApiCallDetails result;
         foreach (var activeSession in activeSessions)
         {
             isLoggedIn = await activeSession.GetIsUserLoggedInAsync();
             isLoggedIn.ShouldBeTrue();
+
+            result = await activeSession.CallBffHostApi(The.Path);
+            result.Sub.ShouldNotBeNull();
+
         }
 
+        // Log in with another user. It should be logged in. 
         await Bff.BrowserClient.Login();
         isLoggedIn = await Bff.BrowserClient.GetIsUserLoggedInAsync();
         isLoggedIn.ShouldBeTrue();
+        result = await Bff.BrowserClient.CallBffHostApi(The.Path);
+        result.Sub.ShouldNotBeNull();
 
+        // But the first user should now be logged out.
         isLoggedIn = await activeSessions.First().GetIsUserLoggedInAsync();
         isLoggedIn.ShouldBeFalse();
+        result = await activeSessions.First().CallBffHostApi(The.Path);
+        result.Sub.ShouldBeNull();
 
-        isLoggedIn = await activeSessions.First().GetIsUserLoggedInAsync();
-        isLoggedIn.ShouldBeFalse();
+        // The second user should still be logged in though, because it's the first one
+        // that get's signed out. 
+        isLoggedIn = await activeSessions.Skip(1).First().GetIsUserLoggedInAsync();
+        isLoggedIn.ShouldBeTrue();
+        result = await activeSessions.Skip(1).First().CallBffHostApi(The.Path);
+        result.Sub.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task Logging_out_releases_licenses()
+    {
+        Bff.LicenseKey = null;
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.AddRemoteApis();
+        };
+        Bff.OnConfigureApp += app => app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
+            .WithAccessToken(RequiredTokenType.UserOrNone);
+
+        await InitializeAsync();
+        AddOrUpdateFrontend(Some.BffFrontend());
+
+        // Log in with a client. 
+        var firstClient = Bff.BuildBrowserClient(Bff.Url());
+        await firstClient.Login();
+
+        // Then we'll log in with several more clients, up to the limit.
+        // but also log out. This should clear the used licenses again. 
+        for (int i = 0; i < Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialMode; i++)
+        {
+            var client = Bff.BuildBrowserClient(Bff.Url());
+            await client.Login();
+            await client.Logout();
+        }
+
+        // And behold.. the user is still logged in. 
+        var isLoggedIn = await firstClient.GetIsUserLoggedInAsync();
+        isLoggedIn.ShouldBeTrue();
+
+        ApiCallDetails result = await firstClient.CallBffHostApi(The.Path);
+        result.Sub.ShouldNotBeNull();
 
     }
+
 
     [Fact]
     public async Task Given_expired_license_then_log_error()
@@ -115,13 +176,10 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
                 new Claim("bff_frontend_limit", "10"),
             ];
 
-            services.AddSingleton<LicenseValidator>(sp =>
-            {
-                return new LicenseValidator(
-                    logger: sp.GetRequiredService<ILogger<LicenseValidator>>(),
-                    claims: new ClaimsPrincipal(new ClaimsIdentity(claims)),
-                    timeProvider: The.Clock);
-            });
+            services.AddSingleton<LicenseValidator>(sp => new LicenseValidator(
+                logger: sp.GetRequiredService<ILogger<LicenseValidator>>(),
+                claims: new ClaimsPrincipal(new ClaimsIdentity(claims)),
+                timeProvider: The.Clock));
         };
         await InitializeAsync();
 
