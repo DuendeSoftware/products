@@ -2,10 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using System.Security.Claims;
 using Duende.Bff.Builder;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
+using Duende.Bff.Licensing;
 using Microsoft.Extensions.Options;
 using Yarp.ReverseProxy.Forwarder;
 
@@ -17,8 +19,13 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     public readonly string DefaultRootResponse = "Default response from root";
     private BffHttpClient _browserClient = null!;
     public BffOptions BffOptions => Resolve<IOptions<BffOptions>>().Value;
+    public Action<BffOptions> OnConfigureBffOptions = _ => { };
 
-    public string? LicenseKey = null;
+    public void SetLicenseKey(string? value)
+    {
+        _licenseClaims = [];
+        _licenseKey = value;
+    }
 
     /// <summary>
     /// Should a default response for "/" be mapped?
@@ -29,6 +36,14 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     public bool EnableBackChannelHandler { get; set; } = true;
     public event Action<IBffServicesBuilder> OnConfigureBff = _ => { };
 
+    private Claim[]? _licenseClaims = null;
+    private string? _licenseKey = null;
+
+    public void ConfigureLicense(Claim[] claims)
+    {
+        _licenseClaims = claims.ToArray();
+    }
+
     public override void Initialize()
     {
         var baseAddress = Url();
@@ -36,6 +51,19 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
 
         OnConfigureServices += services =>
         {
+            if (_licenseClaims == null)
+            {
+                _licenseClaims = Some.AllowAllLicenseClaims();
+            }
+
+            if (_licenseClaims.Any() && _licenseKey == null)
+            {
+                services.AddSingleton<LicenseValidator>(sp => new LicenseValidator(
+                    logger: sp.GetRequiredService<ILogger<LicenseValidator>>(),
+                    claims: new ClaimsPrincipal(new ClaimsIdentity(_licenseClaims)),
+                    timeProvider: The.Clock));
+            }
+
             services.AddSingleton<IForwarderHttpClientFactory>(
                 new CallbackForwarderHttpClientFactory(context => new HttpMessageInvoker(Internet, false)));
 
@@ -46,7 +74,8 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
                     options.BackchannelHttpHandler = Internet;
                 }
 
-                options.LicenseKey = LicenseKey;
+                OnConfigureBffOptions(options);
+                options.LicenseKey = _licenseKey;
             });
 
             OnConfigureBff(builder);

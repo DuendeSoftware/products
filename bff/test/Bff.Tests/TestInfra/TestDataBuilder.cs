@@ -19,8 +19,38 @@ public class TestDataBuilder(TestData the)
 {
     public readonly TestData The = the;
 
-    internal LicenseValidator LicenseValidator =>
-        new LicenseValidator(new NullLogger<LicenseValidator>(), new ClaimsPrincipal(), The.Clock);
+    internal LicenseValidator LicenseValidator => new(
+            logger: new NullLogger<LicenseValidator>(),
+            claims: new ClaimsPrincipal(new ClaimsIdentity(AllowAllLicenseClaims())),
+            timeProvider: The.Clock);
+
+    public Claim[] AllowAllLicenseClaims()
+    {
+        return LicenseClaims(true, License.LicenseEdition.Bff, -1);
+    }
+
+    public Claim[] LicenseClaims(bool licensed = true, License.LicenseEdition? edition = null,
+        int? numberOfLicenses = null)
+    {
+        List<Claim> claims = [];
+
+        if (licensed)
+        {
+            claims.Add(new Claim("feature", "bff"));
+        }
+
+        if (edition != null)
+        {
+            claims.Add(new Claim("edition", edition.ToString()!));
+        }
+
+        if (numberOfLicenses != null)
+        {
+            claims.Add(new Claim("bff_frontend_limit", numberOfLicenses.ToString()!));
+        }
+
+        return claims.ToArray();
+    }
 
     public BffFrontend BffFrontend() =>
         new()

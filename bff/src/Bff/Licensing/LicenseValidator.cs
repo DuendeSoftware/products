@@ -70,26 +70,27 @@ internal class LicenseValidator(ILogger<LicenseValidator> logger, BffLicense lic
         return true;
     }
 
-    public void LogFrontendAdded(BffFrontendName frontendName, int frontendCount)
+    public bool CanAddFrontend(BffFrontendName frontendName, int frontendCount)
     {
         if (license?.FrontendLimit == null)
         {
             logger.NotLicensedForMultiFrontend(LogLevel.Error, frontendName);
-            return;
+            return false;
         }
         if (license.FrontendLimit == -1)
         {
             // unlimited frontends
             logger.UnlimitedFrontends(LogLevel.Debug, frontendName, frontendCount);
-            return;
+            return true;
         }
 
         if (license.FrontendLimit < frontendCount)
         {
             logger.FrontendLimitExceeded(LogLevel.Error, frontendName, frontendCount, license.FrontendLimit.Value);
-            return;
+            return false;
         }
 
         logger.FrontendAdded(LogLevel.Debug, frontendName, frontendCount, license.FrontendLimit.Value);
+        return true;
     }
 }

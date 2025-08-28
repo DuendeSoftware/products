@@ -20,7 +20,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
     public TestServer Server { get; private set; } = null!;
 
-    private TestLoggerProvider Logger { get; } = new(context.WriteOutput, baseAddress.Host + " - ");
+    protected TestLoggerProvider LoggerProvider { get; } = new(context.WriteOutput, baseAddress.Host + " - ");
 
     /// <summary>
     /// Allows you to resolve a service directly from the container AS IF it's requested for a specific frontend
@@ -123,7 +123,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
         services.AddLogging(options =>
         {
             options.SetMinimumLevel(LogLevel.Debug);
-            options.AddProvider(Logger);
+            options.AddProvider(LoggerProvider);
         });
 
         OnConfigureServices(services);
@@ -147,7 +147,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     public async ValueTask DisposeAsync()
     {
         await CastAndDispose(Server);
-        await CastAndDispose(Logger);
+        await CastAndDispose(LoggerProvider);
 
         return;
 

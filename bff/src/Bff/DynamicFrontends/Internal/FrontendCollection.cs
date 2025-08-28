@@ -64,7 +64,13 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
 
                 foreach (var frontend in addedFrontends)
                 {
-                    _licenseValidator.LogFrontendAdded(frontend.Name, ++totalFrontends);
+                    if (!_licenseValidator.CanAddFrontend(frontend.Name, ++totalFrontends))
+                    {
+                        // prevent adding of this frontend
+                        newFrontends = newFrontends
+                            .Where(x => x.Name != frontend.Name)
+                            .ToArray();
+                    }
                 }
 
                 Interlocked.Exchange(ref _frontends, newFrontends);
@@ -173,6 +179,12 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                 return;
             }
 
+            if (!existingUpdated && !_licenseValidator.CanAddFrontend(frontend.Name, _frontends.Length + 1))
+            {
+                // Prevent adding of the frontend because the license doesn't allow it.
+                return;
+            }
+
             // By replacing the array, we avoid locking the entire list for read operations.
             Interlocked.Exchange(ref _frontends, _frontends
                 .Where(x => x.Name != frontend.Name)
@@ -186,7 +198,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         }
         else
         {
-            _licenseValidator.LogFrontendAdded(frontend.Name, _frontends.Length);
             OnFrontendAdded(frontend);
         }
 

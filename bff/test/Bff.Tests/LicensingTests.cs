@@ -18,7 +18,7 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     [Fact]
     public async Task Given_no_license_then_error_log()
     {
-        Bff.LicenseKey = null;
+        Bff.SetLicenseKey(null);
 
         await InitializeAsync();
         Context.LogMessages.ToString().ShouldContain("You do not have a valid license key for the Duende BFF security framework");
@@ -27,7 +27,7 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     [Fact]
     public async Task Given_no_license_then_number_of_active_sessions_is_limited()
     {
-        Bff.LicenseKey = null;
+        Bff.SetLicenseKey(null);
         Bff.OnConfigureBff += bff =>
         {
             bff.AddRemoteApis();
@@ -35,8 +35,9 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
         Bff.OnConfigureApp += app => app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
             .WithAccessToken(RequiredTokenType.UserOrNone);
 
+        ConfigureSingleFrontendAuthentication();
+
         await InitializeAsync();
-        AddOrUpdateFrontend(Some.BffFrontend());
 
         var activeSessions = new List<BffHttpClient>();
 
@@ -85,7 +86,7 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     [Fact]
     public async Task Logging_out_releases_licenses()
     {
-        Bff.LicenseKey = null;
+        Bff.SetLicenseKey(null);
         Bff.OnConfigureBff += bff =>
         {
             bff.AddRemoteApis();
@@ -93,9 +94,9 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
         Bff.OnConfigureApp += app => app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
             .WithAccessToken(RequiredTokenType.UserOrNone);
 
+        ConfigureSingleFrontendAuthentication();
         await InitializeAsync();
-        AddOrUpdateFrontend(Some.BffFrontend());
-
+        
         // Log in with a client. 
         var firstClient = Bff.BuildBrowserClient(Bff.Url());
         await firstClient.Login();
@@ -123,7 +124,7 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     public async Task Given_expired_license_then_log_error()
     {
 
-        Bff.LicenseKey = "eyJhbGciOiJQUzI1NiIsImtpZCI6IklkZW50aXR5U2VydmVyTGljZW5zZWtleS83Y2VhZGJiNzgxMzA0NjllODgwNjg5MTAyNTQxNGYxNiIsInR5cCI6ImxpY2Vuc2Urand0In0.eyJpc3MiOiJodHRwczovL2R1ZW5kZXNvZnR3YXJlLmNvbSIsImF1ZCI6IklkZW50aXR5U2VydmVyIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MzE2Mjg4MDAsImNvbXBhbnlfbmFtZSI6Il90ZXN0IiwiY29udGFjdF9pbmZvIjoiam9lQGR1ZW5kZXNvZnR3YXJlLmNvbSIsImVkaXRpb24iOiJTdGFydGVyIiwiaWQiOiI3ODk2IiwiZmVhdHVyZSI6ImJmZiJ9.YcRGLlVuNBSqNuO1mdXk4GvvVEQFfQUNAnTkzs9W2iNKCxLXrZ5mDPuyTNsDSwEqsfXG8bUCVFxFGp1Bfkxs8hUIBiKuVXfeIB_lmpj5f-KueZ_XlWm0pYT-ROAzVbDdNgMR9YqCPAw8ANclk7HwRcXc0VnLNcKRFrZ0OOWNysFIanTmg7hRIQmDuMLNc2j8HCZSRJ06fijecS72lM4Vv9a6myJvAsASQhKnWTLzQvdzW7T99eobLy45qJu39LMTQkPkkJUS41YPmi2_kEmeMcRucgU4dQKHD5zT9KmzPVWJwsyowWIJ6U7lZ8FXZ8c9POsQeTeQEJY6FheJ2Ut-6Q";
+        Bff.SetLicenseKey("eyJhbGciOiJQUzI1NiIsImtpZCI6IklkZW50aXR5U2VydmVyTGljZW5zZWtleS83Y2VhZGJiNzgxMzA0NjllODgwNjg5MTAyNTQxNGYxNiIsInR5cCI6ImxpY2Vuc2Urand0In0.eyJpc3MiOiJodHRwczovL2R1ZW5kZXNvZnR3YXJlLmNvbSIsImF1ZCI6IklkZW50aXR5U2VydmVyIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MzE2Mjg4MDAsImNvbXBhbnlfbmFtZSI6Il90ZXN0IiwiY29udGFjdF9pbmZvIjoiam9lQGR1ZW5kZXNvZnR3YXJlLmNvbSIsImVkaXRpb24iOiJTdGFydGVyIiwiaWQiOiI3ODk2IiwiZmVhdHVyZSI6ImJmZiJ9.YcRGLlVuNBSqNuO1mdXk4GvvVEQFfQUNAnTkzs9W2iNKCxLXrZ5mDPuyTNsDSwEqsfXG8bUCVFxFGp1Bfkxs8hUIBiKuVXfeIB_lmpj5f-KueZ_XlWm0pYT-ROAzVbDdNgMR9YqCPAw8ANclk7HwRcXc0VnLNcKRFrZ0OOWNysFIanTmg7hRIQmDuMLNc2j8HCZSRJ06fijecS72lM4Vv9a6myJvAsASQhKnWTLzQvdzW7T99eobLy45qJu39LMTQkPkkJUS41YPmi2_kEmeMcRucgU4dQKHD5zT9KmzPVWJwsyowWIJ6U7lZ8FXZ8c9POsQeTeQEJY6FheJ2Ut-6Q");
 
         await InitializeAsync();
         Context.LogMessages.ToString().ShouldContain("Your license for Duende BFF security framework has expired on");
@@ -149,7 +150,7 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     private void SetupValidLicenseWithoutFrontends()
     {
         The.Clock = new FakeTimeProvider(new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero));
-        Bff.LicenseKey = "eyJhbGciOiJQUzI1NiIsImtpZCI6IklkZW50aXR5U2VydmVyTGljZW5zZWtleS83Y2VhZGJiNzgxMzA0NjllODgwNjg5MTAyNTQxNGYxNiIsInR5cCI6ImxpY2Vuc2Urand0In0.eyJpc3MiOiJodHRwczovL2R1ZW5kZXNvZnR3YXJlLmNvbSIsImF1ZCI6IklkZW50aXR5U2VydmVyIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MzE2Mjg4MDAsImNvbXBhbnlfbmFtZSI6Il90ZXN0IiwiY29udGFjdF9pbmZvIjoiam9lQGR1ZW5kZXNvZnR3YXJlLmNvbSIsImVkaXRpb24iOiJTdGFydGVyIiwiaWQiOiI3ODk2IiwiZmVhdHVyZSI6ImJmZiJ9.YcRGLlVuNBSqNuO1mdXk4GvvVEQFfQUNAnTkzs9W2iNKCxLXrZ5mDPuyTNsDSwEqsfXG8bUCVFxFGp1Bfkxs8hUIBiKuVXfeIB_lmpj5f-KueZ_XlWm0pYT-ROAzVbDdNgMR9YqCPAw8ANclk7HwRcXc0VnLNcKRFrZ0OOWNysFIanTmg7hRIQmDuMLNc2j8HCZSRJ06fijecS72lM4Vv9a6myJvAsASQhKnWTLzQvdzW7T99eobLy45qJu39LMTQkPkkJUS41YPmi2_kEmeMcRucgU4dQKHD5zT9KmzPVWJwsyowWIJ6U7lZ8FXZ8c9POsQeTeQEJY6FheJ2Ut-6Q";
+        Bff.SetLicenseKey("eyJhbGciOiJQUzI1NiIsImtpZCI6IklkZW50aXR5U2VydmVyTGljZW5zZWtleS83Y2VhZGJiNzgxMzA0NjllODgwNjg5MTAyNTQxNGYxNiIsInR5cCI6ImxpY2Vuc2Urand0In0.eyJpc3MiOiJodHRwczovL2R1ZW5kZXNvZnR3YXJlLmNvbSIsImF1ZCI6IklkZW50aXR5U2VydmVyIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MzE2Mjg4MDAsImNvbXBhbnlfbmFtZSI6Il90ZXN0IiwiY29udGFjdF9pbmZvIjoiam9lQGR1ZW5kZXNvZnR3YXJlLmNvbSIsImVkaXRpb24iOiJTdGFydGVyIiwiaWQiOiI3ODk2IiwiZmVhdHVyZSI6ImJmZiJ9.YcRGLlVuNBSqNuO1mdXk4GvvVEQFfQUNAnTkzs9W2iNKCxLXrZ5mDPuyTNsDSwEqsfXG8bUCVFxFGp1Bfkxs8hUIBiKuVXfeIB_lmpj5f-KueZ_XlWm0pYT-ROAzVbDdNgMR9YqCPAw8ANclk7HwRcXc0VnLNcKRFrZ0OOWNysFIanTmg7hRIQmDuMLNc2j8HCZSRJ06fijecS72lM4Vv9a6myJvAsASQhKnWTLzQvdzW7T99eobLy45qJu39LMTQkPkkJUS41YPmi2_kEmeMcRucgU4dQKHD5zT9KmzPVWJwsyowWIJ6U7lZ8FXZ8c9POsQeTeQEJY6FheJ2Ut-6Q");
     }
 
     [Fact]
@@ -167,20 +168,8 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     [Fact]
     public async Task When_licenced_for_frontends_then_info()
     {
-        SetupValidLicenseWithoutFrontends();
+        Bff.ConfigureLicense(Some.LicenseClaims(licensed: true, numberOfLicenses: 10));
 
-        Bff.OnConfigureServices += services =>
-        {
-            Claim[] claims = [
-                new Claim("feature", "bff"),
-                new Claim("bff_frontend_limit", "10"),
-            ];
-
-            services.AddSingleton<LicenseValidator>(sp => new LicenseValidator(
-                logger: sp.GetRequiredService<ILogger<LicenseValidator>>(),
-                claims: new ClaimsPrincipal(new ClaimsIdentity(claims)),
-                timeProvider: The.Clock));
-        };
         await InitializeAsync();
 
         Bff.AddOrUpdateFrontend(Some.BffFrontend());
@@ -216,6 +205,7 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
         {
             Name = BffFrontendName.Parse("second")
         });
+        Bff.Resolve<IFrontendCollection>().Count.ShouldBe(1);
         var log = Context.LogMessages.ToString();
         log.ShouldContain($"Frontend {The.FrontendName} was added. Currently using 1 of 1 in the BFF License");
         log.ShouldContain($"Frontend second was added. This exceeds the maximum number of frontends allowed by your license");
