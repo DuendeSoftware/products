@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer;
+using Duende.IdentityServer.UI;
+using Duende.IdentityServer.UI.AspNetIdentity.Models;
 using IdentityServerHost.Data;
-using IdentityServerHost.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -27,6 +28,8 @@ internal static class HostingExtensions
 
         builder.ConfigureIdentityServer();
         builder.AddExternalIdentityProviders();
+
+        builder.AddIdentityServerUI();
 
         return builder.Build();
     }

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Hosts.Shared.Configuration;
-using IdentityServerHost.Models;
+using Duende.IdentityServer.UI.AspNetIdentity.Models;
 
 namespace IdentityServerHost;
 

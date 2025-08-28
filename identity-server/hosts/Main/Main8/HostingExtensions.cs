@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Hosts.Shared.Customization;
+using Duende.IdentityServer.UI;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -66,6 +67,8 @@ internal static class HostingExtensions
                 https.AllowAnyClientCertificate(); // Needed for the "ephemeral" mtls client
             });
         });
+
+        builder.AddIdentityServerUI();
 
         return builder.Build();
     }

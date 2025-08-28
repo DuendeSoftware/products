@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosts.Shared.Customization;
+using Duende.IdentityServer.UI;
 using Duende.IdentityServer.UI.EntityFramework.Pages.Admin.ApiScopes;
 using Duende.IdentityServer.UI.EntityFramework.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -50,6 +51,8 @@ internal static class HostingExtensions
                 https.AllowAnyClientCertificate(); // Needed for the "ephemeral" mtls client
             });
         });
+
+        builder.AddIdentityServerUI();
 
         return builder.Build();
     }
