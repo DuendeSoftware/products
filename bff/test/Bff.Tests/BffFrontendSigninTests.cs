@@ -46,6 +46,28 @@ public class BffFrontendSigninTests : BffTestBase
 
 
     [Fact]
+    public async Task Can_login()
+    {
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend());
+
+        await Bff.BrowserClient.Login()
+            .CheckResponseContent(Bff.DefaultRootResponse);
+
+        await Bff.BrowserClient.GetAsync("/secret")
+            .CheckHttpStatusCode();
+
+        var cookie = Bff.BrowserClient.Cookies.GetCookies(Bff.Url()).FirstOrDefault();
+        cookie.ShouldNotBeNull();
+        cookie.HttpOnly.ShouldBeTrue();
+        cookie.Name.ShouldBe(Constants.Cookies.HostPrefix + "_" + The.FrontendName);
+        cookie.Secure.ShouldBeTrue();
+        cookie.Path.ShouldBe("/");
+    }
+
+
+    [Fact]
     public async Task cannot_access_secret_page_without_logging_in()
     {
         await InitializeAsync();
@@ -204,28 +226,6 @@ public class BffFrontendSigninTests : BffTestBase
         var message = await response.Content.ReadAsStringAsync();
         message.ShouldContain("source:'bff-silent-login");
         message.ShouldContain("isLoggedIn:true");
-    }
-
-
-    [Fact]
-    public async Task Can_login()
-    {
-        await InitializeAsync();
-
-        AddOrUpdateFrontend(Some.BffFrontend());
-
-        await Bff.BrowserClient.Login()
-            .CheckResponseContent(Bff.DefaultRootResponse);
-
-        await Bff.BrowserClient.GetAsync("/secret")
-            .CheckHttpStatusCode();
-
-        var cookie = Bff.BrowserClient.Cookies.GetCookies(Bff.Url()).FirstOrDefault();
-        cookie.ShouldNotBeNull();
-        cookie.HttpOnly.ShouldBeTrue();
-        cookie.Name.ShouldBe(Constants.Cookies.HostPrefix + "_" + The.FrontendName);
-        cookie.Secure.ShouldBeTrue();
-        cookie.Path.ShouldBe("/");
     }
 
     [Fact]

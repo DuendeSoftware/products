@@ -30,9 +30,9 @@ internal static partial class LicensingLogMessages
 
 
     [LoggerMessage(
-        message: """
+        message: $"""
                    You do not have a valid license key for the Duende BFF Security Framework.
-                   When unlicensed, BFF will run in trial mode. It will limit the number of active sessions to 5.
+                   When unlicensed, BFF will run in trial mode. It will limit the number of active sessions to {Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}.
                    If you are running in production you are required to have a licensed version.
                    Please start a conversation with us: https://duendesoftware.com/contact
                    
@@ -40,10 +40,40 @@ internal static partial class LicensingLogMessages
                    """)]
     public static partial void NoValidLicense(this ILogger logger, LogLevel logLevel);
 
+
     [LoggerMessage(
-        message: """
+        message: $$"""
+                   Trial Mode: Session {sessionid} started. Currently using {sessionCount} of {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}} maximum active sessions.
+                   To obtain a valid license, please start a conversation with us: https://duendesoftware.com/contact
+
+                   See https://duende.link/l/bff/trial for more information.
+                   """)]
+    public static partial void TrialModeSessionStarted(this ILogger logger, LogLevel logLevel, string sessionId, int sessionCount);
+
+    [LoggerMessage(
+        message: $$"""
+                  Trial mode limit of maximum {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}} is reached.
+                  Session {sessionid} is terminated. 
+                  To obtain a valid license, please start a conversation with us: https://duendesoftware.com/contact
+                  
+                  See https://duende.link/l/bff/trial for more information.
+                  """)]
+    public static partial void TrialModeSessionTerminated(this ILogger logger, LogLevel logLevel, string sessionId);
+
+    [LoggerMessage(
+        message: $$"""
+                   Trial mode limit of maximum {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}} is reached.
+                   Session {sessionid} is terminated. 
+                   To obtain a valid license, please start a conversation with us: https://duendesoftware.com/contact
+
+                   See https://duende.link/l/bff/trial for more information.
+                   """)]
+    public static partial void TrialModeUnknownSession(this ILogger logger, LogLevel logLevel, string sessionId);
+
+    [LoggerMessage(
+        message: $$"""
                    Your license key does not include the BFF feature.
-                   BFF will run in trial mode. It will limit the number of active sessions to 5. 
+                   BFF will run in trial mode. It will limit the number of active sessions to {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialModeString}}. 
                    Please contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,
                    or start a conversation with us: https://duendesoftware.com/contact.
                    """)]

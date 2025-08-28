@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.Configuration;
+using Duende.Bff.SessionManagement.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,10 @@ internal class ConfigureBffStartupFilter : IStartupFilter
                 app.UseForwardedHeaders();
                 app.UseBffPreProcessing();
             }
+
+            // Todo: only if no license
+
+            app.UseMiddleware<TrialModeVerificationMiddleware>();
 
             next(app);
 

@@ -22,6 +22,43 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
     }
 
     [Fact]
+    public async Task Given_no_license_then_number_of_active_sessions_is_limited()
+    {
+        Bff.LicenseKey = null;
+
+
+        await InitializeAsync();
+        AddOrUpdateFrontend(Some.BffFrontend());
+
+        var activeSessions = new List<BffHttpClient>();
+
+        for (int i = 0; i < Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialMode; i++)
+        {
+            var client = Bff.BuildBrowserClient(Bff.Url());
+            activeSessions.Add(client);
+            await client.Login();
+        }
+
+        bool isLoggedIn = false;
+        foreach (var activeSession in activeSessions)
+        {
+            isLoggedIn = await activeSession.GetIsUserLoggedInAsync();
+            isLoggedIn.ShouldBeTrue();
+        }
+
+        await Bff.BrowserClient.Login();
+        isLoggedIn = await Bff.BrowserClient.GetIsUserLoggedInAsync();
+        isLoggedIn.ShouldBeTrue();
+
+        isLoggedIn = await activeSessions.First().GetIsUserLoggedInAsync();
+        isLoggedIn.ShouldBeFalse();
+
+        isLoggedIn = await activeSessions.First().GetIsUserLoggedInAsync();
+        isLoggedIn.ShouldBeFalse();
+
+    }
+
+    [Fact]
     public async Task Given_expired_license_then_log_error()
     {
 

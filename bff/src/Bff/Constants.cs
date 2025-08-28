@@ -137,4 +137,10 @@ public static class Constants
 
     }
 
+    internal static class LicenseEnforcement
+    {
+        internal const int MaximumNumberOfActiveSessionsInTrialMode = 5;
+        internal const string MaximumNumberOfActiveSessionsInTrialModeString = "5";
+    }
+
 }
