@@ -17,6 +17,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     public readonly string DefaultRootResponse = "Default response from root";
     private BffHttpClient _browserClient = null!;
     public BffOptions BffOptions => Resolve<IOptions<BffOptions>>().Value;
+    public Action<BffOptions> OnConfigureBffOptions = _ => { };
 
     public string? LicenseKey = null;
 
@@ -47,6 +48,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
                 }
 
                 options.LicenseKey = LicenseKey;
+                OnConfigureBffOptions(options);
             });
 
             OnConfigureBff(builder);
