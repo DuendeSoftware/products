@@ -41,7 +41,7 @@ public class EndpointUsageDiagnosticEntryTests
         var endpointUsage = result.RootElement.GetProperty("EndpointUsage");
         foreach (var endpoint in _endpoints)
         {
-            endpointUsage.GetProperty(endpoint).GetInt64().ShouldBe(1);
+            endpointUsage.GetProperty(endpoint.Value!).GetInt64().ShouldBe(1);
         }
     }
 
@@ -70,7 +70,7 @@ public class EndpointUsageDiagnosticEntryTests
         endpointUsage.GetProperty("other").GetInt64().ShouldBe(1);
         foreach (var endpoint in _endpoints)
         {
-            endpointUsage.GetProperty(endpoint).GetInt64().ShouldBe(0);
+            endpointUsage.GetProperty(endpoint.Value!).GetInt64().ShouldBe(0);
         }
     }
 

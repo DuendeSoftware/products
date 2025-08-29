@@ -16,6 +16,7 @@ public class Endpoint
     {
         Name = name;
         Path = path;
+        IsMatch = context => context.Request.Path.Equals(Path, StringComparison.OrdinalIgnoreCase);
         Handler = handlerType;
     }
 
@@ -42,4 +43,12 @@ public class Endpoint
     /// The handler.
     /// </value>
     public Type Handler { get; set; }
+
+    /// <summary>
+    /// Determines if the request matches this endpoint.
+    /// </summary>
+    /// <value>
+    /// The function that determines if the request matches this endpoint.
+    /// </value>
+    public Func<HttpContext, bool> IsMatch { get; set; }
 }

@@ -143,6 +143,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IExtensionGrantValidator), []),
                 new(typeof(IIdentityProviderConfigurationValidator), [typeof(DefaultIdentityProviderConfigurationValidator)]),
                 new(typeof(IIntrospectionRequestValidator), [typeof(IntrospectionRequestValidator)]),
+                new(typeof(IIssuerPathValidator), [typeof(DefaultIssuerPathValidator)]),
                 new(typeof(IJwtRequestValidator), [typeof(JwtRequestValidator)]),
                 new(typeof(IPushedAuthorizationRequestValidator), [typeof(PushedAuthorizationRequestValidator)]),
                 new(typeof(IRedirectUriValidator), [typeof(StrictRedirectUriValidator)]),

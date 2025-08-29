@@ -110,6 +110,23 @@ public class EndpointRouterTests
         result.ShouldBeNull();
     }
 
+    [Fact]
+    public void Find_should_return_null_when_endpoint_match_function_returns_false()
+    {
+        _endpoints.Add(new Duende.IdentityServer.Hosting.Endpoint(IdentityServerConstants.EndpointNames.Authorize, "/ep1", typeof(MyEndpointHandler))
+        {
+            IsMatch = _ => false
+        });
+        _endpoints.Add(new Duende.IdentityServer.Hosting.Endpoint("ep2", "/ep2", typeof(MyOtherEndpointHandler)));
+
+        var ctx = new DefaultHttpContext();
+        ctx.Request.Path = new PathString("/ep1");
+        ctx.RequestServices = new StubServiceProvider();
+
+        var result = _subject.Find(ctx);
+        result.ShouldBeNull();
+    }
+
     private class MyEndpointHandler : IEndpointHandler
     {
         public Task<IEndpointResult> ProcessAsync(HttpContext context) => throw new NotImplementedException();

@@ -24,8 +24,7 @@ internal class EndpointRouter(
 
         foreach (var endpoint in endpoints)
         {
-            var path = endpoint.Path;
-            if (context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase))
+            if (endpoint.IsMatch(context))
             {
                 var endpointName = endpoint.Name;
                 sanitizedLogger.LogDebug("Request path {path} matched to endpoint type {endpoint}", context.Request.Path, endpointName);
