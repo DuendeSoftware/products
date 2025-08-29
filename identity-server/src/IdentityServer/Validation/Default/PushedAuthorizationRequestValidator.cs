@@ -9,6 +9,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Services;
+using Duende.Private.Licensing;
 using Microsoft.Extensions.Logging;
 using static Duende.IdentityServer.IdentityServerConstants;
 
@@ -47,7 +48,7 @@ internal class PushedAuthorizationRequestValidator(
     public async Task<PushedAuthorizationValidationResult> ValidateAsync(PushedAuthorizationRequestValidationContext context)
     {
         // Licensing
-        licenseUsage.FeatureUsed(LicenseFeature.PAR);
+        licenseUsage.FeatureUsed(IdentityServerLicenseFeature.PAR);
         IdentityServerLicenseValidator.Instance.ValidatePar();
 
         // -- Request URI validation --
