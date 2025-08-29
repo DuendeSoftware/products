@@ -39,10 +39,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
     private Claim[]? _licenseClaims = null;
     private string? _licenseKey = null;
 
-    public void ConfigureLicense(Claim[] claims)
-    {
-        _licenseClaims = claims.ToArray();
-    }
+    public void ConfigureLicense(Claim[] claims) => _licenseClaims = claims.ToArray();
 
     public override void Initialize()
     {

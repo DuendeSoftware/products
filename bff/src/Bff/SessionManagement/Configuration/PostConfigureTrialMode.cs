@@ -7,7 +7,6 @@ using Duende.Bff.Internal;
 using Duende.Bff.Licensing;
 using Duende.IdentityModel;
 using Duende.Private.Licensing;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -111,7 +110,7 @@ internal class PostConfigureTrialMode(
             {
                 newSessions.Remove(sid);
             }
-                    
+
             Interlocked.Exchange(ref _activeSessionIds, newSessions.ToArray());
             _sessionsToBlock.TryRemove(sid, out var _);
         }
@@ -152,9 +151,4 @@ internal class PostConfigureTrialMode(
         }
         return Task.CompletedTask;
     }
-}
-
-internal class TrialModeSessionLimitExceededException(string message) : Exception(message)
-{
-
 }

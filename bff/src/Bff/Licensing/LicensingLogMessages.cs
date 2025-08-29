@@ -112,7 +112,7 @@ internal static partial class LicensingLogMessages
 
     [LoggerMessage(
         message: """
-                 Blocked attempt add Frontend third! This frontend exceeds the maximum number of frontends allowed by your license. This exceeds the maximum number of frontends allowed by your license.
+                 Blocked attempt add Frontend '{frontEndName}'! This frontend exceeds the maximum number of frontends allowed by your license.
                  Currently using {frontendsUsed} frontends of maximum {frontendLimit} frontends in the BFF License.
                  
                  See https://duende.link/l/bff/threshold for more information.

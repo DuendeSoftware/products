@@ -78,7 +78,7 @@ internal class LicenseValidator(ILogger<LicenseValidator> logger, BffLicense lic
             // Adding frontends is allowed in trial mode
             return true;
         }
-            
+
         if (license?.FrontendLimit == null)
         {
             logger.NotLicensedForMultiFrontend(LogLevel.Error, frontendName);

@@ -14,7 +14,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
     private readonly object _syncRoot = new();
 
     /// <summary>
-    /// Backing store for the frontends. This is marked 'volatile' because it can be read / updated from multiple threads.
+    /// Backing store for the frontends. This is replaced atomically when frontends are added / updated / removed.
     /// When adding / updating, we create a new array to avoid locking the entire list for read operations.
     /// </summary>
     private BffFrontend[] _frontends;
@@ -33,7 +33,19 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
     {
         _licenseValidator = licenseValidator;
         _plugins = plugins.ToArray();
-        _frontends = ReadFrontends(bffConfiguration.CurrentValue, frontendsConfiguredDuringStartup ?? []);
+        var startupFrontends = ReadFrontends(bffConfiguration.CurrentValue, frontendsConfiguredDuringStartup ?? []);
+        var startupFrontendsCount = 0;
+        foreach (var frontend in startupFrontends)
+        {
+            if (!_licenseValidator.CanAddFrontend(frontend.Name, ++startupFrontendsCount))
+            {
+                // prevent adding of this frontend
+                startupFrontends = startupFrontends
+                    .Where(x => x.Name != frontend.Name)
+                    .ToArray();
+            }
+        }
+        _frontends = startupFrontends;
 
         // Subscribe to configuration changes
         _stopSubscription = bffConfiguration.OnChange(config =>

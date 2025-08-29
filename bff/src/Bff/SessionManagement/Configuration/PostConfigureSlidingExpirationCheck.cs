@@ -1,14 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Claims;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
-using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Internal;
 using Duende.Bff.Otel;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

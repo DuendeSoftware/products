@@ -24,10 +24,7 @@ public class TestDataBuilder(TestData the)
             claims: new ClaimsPrincipal(new ClaimsIdentity(AllowAllLicenseClaims())),
             timeProvider: The.Clock);
 
-    public Claim[] AllowAllLicenseClaims()
-    {
-        return LicenseClaims(true, License.LicenseEdition.Bff, -1);
-    }
+    public Claim[] AllowAllLicenseClaims() => LicenseClaims(true, License.LicenseEdition.Bff, -1);
 
     public Claim[] LicenseClaims(bool licensed = true, License.LicenseEdition? edition = null,
         int? numberOfLicenses = null)
