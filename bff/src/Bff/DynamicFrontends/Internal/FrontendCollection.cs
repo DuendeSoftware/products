@@ -17,7 +17,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
     /// Backing store for the frontends. This is marked 'volatile' because it can be read / updated from multiple threads.
     /// When adding / updating, we create a new array to avoid locking the entire list for read operations.
     /// </summary>
-    private volatile BffFrontend[] _frontends;
+    private BffFrontend[] _frontends;
 
     private readonly IDisposable? _stopSubscription;
 

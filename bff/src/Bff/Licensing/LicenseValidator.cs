@@ -72,6 +72,13 @@ internal class LicenseValidator(ILogger<LicenseValidator> logger, BffLicense lic
 
     public bool CanAddFrontend(BffFrontendName frontendName, int frontendCount)
     {
+        if (!license.IsConfigured)
+        {
+            logger.AddedFrontendTrialMode(LogLevel.Warning, frontendName, frontendCount);
+            // Adding frontends is allowed in trial mode
+            return true;
+        }
+            
         if (license?.FrontendLimit == null)
         {
             logger.NotLicensedForMultiFrontend(LogLevel.Error, frontendName);
@@ -84,9 +91,16 @@ internal class LicenseValidator(ILogger<LicenseValidator> logger, BffLicense lic
             return true;
         }
 
+        if (license.FrontendLimit + 1 == frontendCount)
+        {
+            // This is a grace frontend. It will be added, but we warn as if it's not being added .
+            logger.FrontendLimitGraceMessage(LogLevel.Error, frontendName, frontendCount, license.FrontendLimit.Value);
+            return true;
+        }
+
         if (license.FrontendLimit < frontendCount)
         {
-            logger.FrontendLimitExceeded(LogLevel.Error, frontendName, frontendCount, license.FrontendLimit.Value);
+            logger.BlockedFrontendAddingDueToLimitExceeded(LogLevel.Error, frontendName, frontendCount, license.FrontendLimit.Value);
             return false;
         }
 

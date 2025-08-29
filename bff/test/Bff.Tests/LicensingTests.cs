@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net;
 using System.Security.Claims;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
@@ -70,10 +71,24 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
         result.Sub.ShouldNotBeNull();
 
         // But the first user should now be logged out.
-        isLoggedIn = await activeSessions.First().GetIsUserLoggedInAsync();
-        isLoggedIn.ShouldBeFalse();
-        result = await activeSessions.First().CallBffHostApi(The.Path);
-        result.Sub.ShouldBeNull();
+        var expectedError = $$"""
+                      This request is blocked because it exceeds the trial limits of {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialMode}} active sessions.
+
+                      Duende.BFF is currently running in trial mode because there is no valid license configured.
+
+                      See https://duende.link/l/bff/threshold for more information.
+                      """;
+
+        await activeSessions.First().GetAsync("/bff/user")
+            .CheckHttpStatusCode(HttpStatusCode.InternalServerError)
+            .CheckResponseContent(
+                expectedError);
+
+        await activeSessions.First().GetAsync(The.Path)
+            .CheckHttpStatusCode(HttpStatusCode.InternalServerError)
+            .CheckResponseContent(
+                expectedError);
+
 
         // The second user should still be logged in though, because it's the first one
         // that get's signed out. 
@@ -161,7 +176,7 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
 
         Bff.AddOrUpdateFrontend(Some.BffFrontend());
         var log = Context.LogMessages.ToString();
-        log.ShouldContain($"Frontend {The.FrontendName} was added. However, your current license does not support multiple frontends");
+        log.ShouldContain($"Blocked attempt to add Frontend '{The.FrontendName}'. Your current license does not support multiple frontends.");
 
     }
 
@@ -174,12 +189,12 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
 
         Bff.AddOrUpdateFrontend(Some.BffFrontend());
         var log = Context.LogMessages.ToString();
-        log.ShouldContain($"Frontend {The.FrontendName} was added. Currently using 1 of 10 in the BFF License");
+        log.ShouldContain($"Frontend '{The.FrontendName}' was added. Currently using 1 frontends of maximum 10 frontends in the BFF License.");
 
     }
 
     [Fact]
-    public async Task When_exceeding_number_of_licensed_frontends_then_warning()
+    public async Task When_exceeding_number_of_licensed_frontends_then_frontend_doesnt_get_added()
     {
         SetupValidLicenseWithoutFrontends();
 
@@ -205,10 +220,34 @@ public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
         {
             Name = BffFrontendName.Parse("second")
         });
-        Bff.Resolve<IFrontendCollection>().Count.ShouldBe(1);
+        Bff.AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            Name = BffFrontendName.Parse("third")
+        });
+        Bff.Resolve<IFrontendCollection>().Count.ShouldBe(2, "The 3rd frontend should be blocked");
         var log = Context.LogMessages.ToString();
-        log.ShouldContain($"Frontend {The.FrontendName} was added. Currently using 1 of 1 in the BFF License");
-        log.ShouldContain($"Frontend second was added. This exceeds the maximum number of frontends allowed by your license");
+        log.ShouldContain($"Frontend '{The.FrontendName}' was added. Currently using 1 frontends of maximum 1 frontends in the BFF License.");
+        log.ShouldContain($"Attempt to add Frontend 'second' detected. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using 2 frontends of maximum 1 frontends in the BFF License.");
+        log.ShouldContain($"Blocked attempt add Frontend third! This frontend exceeds the maximum number of frontends allowed by your license. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using 3 frontends of maximum 1 frontends in the BFF License.");
 
     }
+
+    [Fact]
+    public async Task when_in_trial_mode_adding_frontends_works_with_error()
+    {
+        Bff.SetLicenseKey(null);
+
+        await InitializeAsync();
+        Bff.AddOrUpdateFrontend(Some.BffFrontend());
+        Bff.AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            Name = BffFrontendName.Parse("second")
+        });
+
+        Bff.Resolve<IFrontendCollection>().Count.ShouldBe(2);
+
+        var log = Context.LogMessages.ToString();
+        log.ShouldContain($"Detected attempt to add Frontend '{The.FrontendName}'. In trial mode, you can try out the multi-frontend feature.\r\n\r\nHowever, if you are running in production you are required to have a license for each frontend.\r\nYou are currently using Currently using 1 frontends.");
+    }
+
 }

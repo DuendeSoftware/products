@@ -89,34 +89,56 @@ internal static partial class LicensingLogMessages
 
     [LoggerMessage(
         message: """
-                 Frontend #{FrontendsUsed} with name {FrontendName} was added. The license allows for unlimited frontends.
+                 Frontend #{FrontendsUsed} with name '{FrontendName}' was added. The license allows for unlimited frontends.
                  """)]
     public static partial void UnlimitedFrontends(this ILogger logger, LogLevel logLevel, string frontendName,
         int frontendsUsed);
     [LoggerMessage(
         message: """
-                 Frontend {FrontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.
+                 Frontend '{FrontendName}' was added. Currently using {frontendsUsed} frontends of maximum {frontendLimit} frontends in the BFF License.
                  """)]
     public static partial void FrontendAdded(this ILogger logger, LogLevel logLevel, string frontendName,
         int frontendsUsed, int frontendLimit);
 
     [LoggerMessage(
         message: """
-                 Frontend {FrontendName} was added. This exceeds the maximum number of frontends allowed by your license.
-                 Currently using {frontendsUsed} of {frontendLimit} in the BFF License.
+                 Attempt to add Frontend '{FrontendName}' detected. This exceeds the maximum number of frontends allowed by your license.
+                 Currently using {frontendsUsed} frontends of maximum {frontendLimit} frontends in the BFF License.
                  
                  See https://duende.link/l/bff/threshold for more information.
                  """)]
-    public static partial void FrontendLimitExceeded(this ILogger logger, LogLevel logLevel, string frontendName,
+    public static partial void FrontendLimitGraceMessage(this ILogger logger, LogLevel logLevel, string frontendName,
         int frontendsUsed, int frontendLimit);
 
     [LoggerMessage(
         message: """
-                 Frontend {FrontendName} was added. However, your current license does not support multiple frontends.
+                 Blocked attempt add Frontend third! This frontend exceeds the maximum number of frontends allowed by your license. This exceeds the maximum number of frontends allowed by your license.
+                 Currently using {frontendsUsed} frontends of maximum {frontendLimit} frontends in the BFF License.
+                 
+                 See https://duende.link/l/bff/threshold for more information.
+                 """)]
+    public static partial void BlockedFrontendAddingDueToLimitExceeded(this ILogger logger, LogLevel logLevel, string frontendName,
+        int frontendsUsed, int frontendLimit);
+
+    [LoggerMessage(
+        message: """
+                 Blocked attempt to add Frontend '{FrontendName}'. Your current license does not support multiple frontends.
                  If you are running in production you are required to have a license for each frontend.
                  Please start a conversation with us: https://duendesoftware.com/contact
                  
                  See https://duende.link/l/bff/threshold for more information.
                  """)]
     public static partial void NotLicensedForMultiFrontend(this ILogger logger, LogLevel logLevel, string frontendName);
+
+    [LoggerMessage(
+        message: """
+                 Detected attempt to add Frontend '{FrontendName}'. In trial mode, you can try out the multi-frontend feature.
+                 
+                 However, if you are running in production you are required to have a license for each frontend.
+                 You are currently using Currently using {frontendsUsed} frontends.
+                 Please start a conversation with us: https://duendesoftware.com/contact
+
+                 See https://duende.link/l/bff/threshold for more information.
+                 """)]
+    public static partial void AddedFrontendTrialMode(this ILogger logger, LogLevel logLevel, string frontendName, int frontendsUsed);
 }

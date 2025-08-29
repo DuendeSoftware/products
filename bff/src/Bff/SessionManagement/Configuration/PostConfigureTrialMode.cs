@@ -7,6 +7,7 @@ using Duende.Bff.Internal;
 using Duende.Bff.Licensing;
 using Duende.IdentityModel;
 using Duende.Private.Licensing;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -45,8 +46,8 @@ internal class PostConfigureTrialMode(
     : IPostConfigureOptions<CookieAuthenticationOptions>
 {
 
-    private volatile string[] _activeSessionIds = [];
-    private readonly ConcurrentDictionary<string, bool> _sessionsToKill = [];
+    private string[] _activeSessionIds = [];
+    private readonly ConcurrentDictionary<string, bool> _sessionsToBlock = [];
 
     /// <inheritdoc />
     public void PostConfigure(string? name, CookieAuthenticationOptions options)
@@ -77,10 +78,18 @@ internal class PostConfigureTrialMode(
     private Task PreventAccessForUsersExceedingLimit(CookieValidatePrincipalContext ctx)
     {
         var sid = ctx.Principal?.FindFirst(JwtClaimTypes.SessionId)?.Value;
-        if (sid != null && _sessionsToKill.ContainsKey(sid))
+        if (sid != null && _sessionsToBlock.ContainsKey(sid))
         {
             logger.TrialModeRequestBlockedDueToTerminatedSession(LogLevel.Error, sid);
             ctx.RejectPrincipal();
+            throw new TrialModeSessionLimitExceededException(
+                $$"""
+                  This request is blocked because it exceeds the trial limits of {{Constants.LicenseEnforcement.MaximumNumberOfActiveSessionsInTrialMode}} active sessions.
+                  
+                  Duende.BFF is currently running in trial mode because there is no valid license configured.
+                  
+                  See https://duende.link/l/bff/threshold for more information.
+                  """);
         }
 
         return Task.CompletedTask;
@@ -104,7 +113,7 @@ internal class PostConfigureTrialMode(
             }
                     
             Interlocked.Exchange(ref _activeSessionIds, newSessions.ToArray());
-            _sessionsToKill.TryRemove(sid, out var _);
+            _sessionsToBlock.TryRemove(sid, out var _);
         }
         return Task.CompletedTask;
     }
@@ -130,7 +139,7 @@ internal class PostConfigureTrialMode(
             {
                 var removed = newSessions[0];
                 newSessions.RemoveAt(0);
-                _sessionsToKill.TryAdd(removed, true);
+                _sessionsToBlock.TryAdd(removed, true);
                 logger.TrialModeSessionTerminated(LogLevel.Error, removed);
             }
             else
@@ -143,4 +152,9 @@ internal class PostConfigureTrialMode(
         }
         return Task.CompletedTask;
     }
+}
+
+internal class TrialModeSessionLimitExceededException(string message) : Exception(message)
+{
+
 }
