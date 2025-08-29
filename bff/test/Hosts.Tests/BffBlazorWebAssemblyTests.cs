@@ -1,7 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Hosts.Tests.TestInfra.Retries;
+using Duende.Xunit.Playwright;
+using Duende.Xunit.Playwright.Retries;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
@@ -9,8 +10,8 @@ using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
-public class BffBlazorWebAssemblyTests(ITestOutputHelper output, AppHostFixture fixture)
-    : PlaywrightTestBase(output, fixture)
+public class BffBlazorWebAssemblyTests(ITestOutputHelper output, BffHostTestFixture fixture)
+    : BffPlaywrightTestBase(output, fixture)
 {
     public async Task<WebAssemblyPageModel> GoToHome()
     {

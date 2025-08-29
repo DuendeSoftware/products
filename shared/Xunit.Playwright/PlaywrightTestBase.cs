@@ -2,13 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using System.Reflection;
-using Hosts.Tests.TestInfra;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Hosts.Tests;
+namespace Duende.Xunit.Playwright;
 
 public class Defaults
 {
@@ -17,12 +16,11 @@ public class Defaults
 }
 
 [WithTestName]
-[Collection(AppHostCollection.CollectionName)]
-public class PlaywrightTestBase : PageTest, IDisposable
+public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : class
 {
     private readonly IDisposable _loggingScope;
 
-    public PlaywrightTestBase(ITestOutputHelper output, AppHostFixture fixture)
+    public PlaywrightTestBase(ITestOutputHelper output, AppHostFixture<THost> fixture)
     {
         Output = output;
         Fixture = fixture;
@@ -36,7 +34,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
         {
 #if DEBUG_NCRUNCH
             // Running in NCrunch. NCrunch cannot build the aspire project, so it needs
-            // to be started manually. 
+            // to be started manually.
             Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
 #endif
         }
@@ -58,7 +56,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
     public override async Task DisposeAsync()
     {
         var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? Environment.CurrentDirectory;
-        // if path ends with /bin/{build configuration}/{dotnetversion}, then strip that from the path. 
+        // if path ends with /bin/{build configuration}/{dotnetversion}, then strip that from the path.
         var bin = Path.GetFullPath(Path.Combine(path, "../../"));
         if (bin.EndsWith("\\bin\\") || bin.EndsWith("/bin/"))
         {
@@ -82,14 +80,14 @@ public class PlaywrightTestBase : PageTest, IDisposable
         Locale = "en-US",
         ColorScheme = ColorScheme.Light,
 
-        // We need to ignore https errors to make this work on the build server. 
+        // We need to ignore https errors to make this work on the build server.
         // Even though we use dotnet dev-certs https --trust on the build agent,
-        // it still claims the certs are invalid. 
+        // it still claims the certs are invalid.
         IgnoreHTTPSErrors = true,
     };
 
 
-    public AppHostFixture Fixture { get; }
+    public AppHostFixture<THost> Fixture { get; }
 
     public ITestOutputHelper Output { get; }
 

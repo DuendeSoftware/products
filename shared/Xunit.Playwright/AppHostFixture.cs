@@ -2,46 +2,19 @@
 // See LICENSE in the project root for license information.
 
 using Aspire.Hosting;
-using Hosts.ServiceDefaults;
 using Microsoft.Extensions.Logging;
 
 #if !DEBUG_NCRUNCH
 using Microsoft.Extensions.Logging.Console;
-using Projects;
 #endif
 
 using Serilog;
 using Serilog.Core;
 using Serilog.Extensions.Logging;
 
-namespace Hosts.Tests.TestInfra;
+namespace Duende.Xunit.Playwright;
 
-[CollectionDefinition(AppHostCollection.CollectionName)]
-public class AppHostCollection : ICollectionFixture<AppHostFixture>
-{
-    public const string CollectionName = "apphost collection";
-    // This class has no code, and is never created. Its purpose is simply
-    // to be the place to apply [CollectionDefinition] and all the
-    // ICollectionFixture<> interfaces.
-}
-
-/// <summary>
-///     This fixture will launch the app host, if needed.
-///     It has 3 modes:
-///     - Directly. Then the test fixture will launch an aspire test host. It will run all tests against the aspire test
-///     host.
-///     In order to make this work, there were two things that I needed to overcome (see below). Service Discovery and
-///     Shared CookieContainers.
-///     - With manually run aspire host.The advantage of this is that you can keep your aspire host running
-///     and only iterate on your tests. This is more efficient for writing the tests.It also leaves the door open to
-///     re-using these tests to run them against a deployed in stance somewhere in the future.Downside is that you cannot
-///     debug both your tests and host at the same time because visual studio compiles them in the same location.
-///     - With NCrunch. It turns out that NCrunch doesn't support building aspire projects.
-///     However, I've always found that iterating over tests using ncrunch is the fastest way to get feedback.So, to make
-///     this work, I had to add a conditional compilation.
-/// </summary>
-// ReSharper disable once ClassNeverInstantiated.Global
-public class AppHostFixture : IAsyncLifetime
+public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetime where THost : class
 {
     private readonly TextWriter _startupLogs = new StringWriter();
     private WriteTestOutput? _activeWriter;
@@ -90,7 +63,7 @@ public class AppHostFixture : IAsyncLifetime
         // Not running in ncrunch AND no service found running.
         // So, create an AppHost that will be used for the duration of this test run.
         var appHost = await DistributedApplicationTestingBuilder
-                .CreateAsync<Hosts_AppHost>();
+                .CreateAsync<THost>();
         appHost.Configuration["DcpPublisher:RandomizePorts"] = "false";
 
         appHost.Services.ConfigureHttpClientDefaults(c => c.ConfigurePrimaryHttpMessageHandler(() =>
@@ -115,7 +88,7 @@ public class AppHostFixture : IAsyncLifetime
 
         // Wait for all the services so that their logs are mostly written.
 
-        foreach (var resource in AppHostServices.All)
+        foreach (var resource in routes.ServiceNames)
         {
             await resourceNotificationService.WaitForResourceAsync(
                     resource,
@@ -251,18 +224,7 @@ public class AppHostFixture : IAsyncLifetime
     {
         if (UsingAlreadyRunningInstance)
         {
-            // An aspire host is already found (likely was started manually)
-            // so build an http client that directly points to this host.
-            var url = clientName switch
-            {
-                AppHostServices.Bff => "https://localhost:5002",
-                AppHostServices.BffBlazorPerComponent => "https://localhost:5105",
-                AppHostServices.BffMultiFrontend => "https://localhost:5005",
-                AppHostServices.BffBlazorWebassembly => "https://localhost:5006",
-                AppHostServices.TemplateBffBlazor => "https://localhost:7035",
-                _ => throw new InvalidOperationException("client not configured")
-            };
-            return new Uri(url);
+            return routes.UrlTo(clientName);
         }
         else
         {

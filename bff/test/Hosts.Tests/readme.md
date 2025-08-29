@@ -12,9 +12,6 @@ dotnet build
 pwsh bin/Debug/net9.0/playwright.ps1 install --with-deps
 ```
 
-
-
-
 The actual tests have been written in such a way that they only need an HTTP client to work. If you don't do anything,
 then the system will start an aspire test host, run the tests, then kill the aspire host again.
 

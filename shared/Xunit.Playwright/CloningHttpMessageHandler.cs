@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Hosts.Tests.TestInfra;
+namespace Duende.Xunit.Playwright;
 
 public class CloningHttpMessageHandler(HttpClient innerHttpClient) : HttpMessageHandler
 {
