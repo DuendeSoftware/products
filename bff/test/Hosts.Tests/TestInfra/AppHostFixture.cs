@@ -87,8 +87,8 @@ public class AppHostFixture : IAsyncLifetime
             }
         }
 
-        // Not running in ncrunch AND no service found running. 
-        // So, create an AppHost that will be used for the duration of this test run. 
+        // Not running in ncrunch AND no service found running.
+        // So, create an AppHost that will be used for the duration of this test run.
         var appHost = await DistributedApplicationTestingBuilder
                 .CreateAsync<Hosts_AppHost>();
         appHost.Configuration["DcpPublisher:RandomizePorts"] = "false";
@@ -108,12 +108,12 @@ public class AppHostFixture : IAsyncLifetime
 
         _app = await appHost.BuildAsync();
 
-        var resourceNotificationService = (await appHost.BuildAsync()).Services
+        var resourceNotificationService = _app.Services
             .GetRequiredService<ResourceNotificationService>();
 
-        await (await appHost.BuildAsync()).StartAsync();
+        await _app.StartAsync();
 
-        // Wait for all the services so that their logs are mostly written. 
+        // Wait for all the services so that their logs are mostly written.
 
         foreach (var resource in AppHostServices.All)
         {
@@ -172,7 +172,7 @@ public class AppHostFixture : IAsyncLifetime
     private void WriteLogs(string logMessage) => _activeWriter?.Invoke(logMessage);
 
     /// <summary>
-    ///     This method builds a http client.
+    /// This method builds an http client.
     /// </summary>
     /// <param name="clientName"></param>
     /// <returns></returns>
@@ -189,7 +189,7 @@ public class AppHostFixture : IAsyncLifetime
             inner = new SocketsHttpHandler
             {
                 // We need to disable cookies and follow redirects
-                // because we do this manually (see below). 
+                // because we do this manually (see below).
                 UseCookies = false,
                 AllowAutoRedirect = false
             };
@@ -198,11 +198,11 @@ public class AppHostFixture : IAsyncLifetime
         {
 #if DEBUG_NCRUNCH
         // This should not be reached for NCrunch because either the service is already running
-        // or the test base has thrown a SkipException. 
+        // or the test base has thrown a SkipException.
         throw new InvalidOperationException("This should not be reached in NCrunch");
 #else
-            // If we're here, that means that we need to create a http client that's pointing to
-            // aspire. 
+            // If we're here, that means that we need to create an http client that's pointing to
+            // aspire.
             if (_app == null)
             {
                 throw new NotSupportedException("App should not be null");
@@ -212,15 +212,15 @@ public class AppHostFixture : IAsyncLifetime
             baseAddress = client.BaseAddress;
 
             // We can't directly use the HTTP Client, because we need cookie support, but if we
-            // enable that the cookies get shared across multiple requests 
+            // enable that the cookies get shared across multiple requests
             // https://github.com/dotnet/AspNetCore.Docs/issues/15848
             // By wrapping the http client, then handling all the cookies
-            // ourselves, we bypass this problem. 
+            // ourselves, we bypass this problem.
             inner = new CloningHttpMessageHandler(client);
 #endif
         }
 
-        // Log every call that's made (including if it was part of a redirect). 
+        // Log every call that's made (including if it was part of a redirect).
         var loggingHandler =
             new RequestLoggingHandler(
                 CreateLogger<RequestLoggingHandler>()
@@ -232,15 +232,15 @@ public class AppHostFixture : IAsyncLifetime
         // Manually take care of cookies (see reason why above)
         var cookieHandler = new CookieHandler(loggingHandler, new CookieContainer());
 
-        // Follow redirects when needed. 
+        // Follow redirects when needed.
         var redirectHandler = new AutoFollowRedirectHandler(CreateLogger<AutoFollowRedirectHandler>())
         {
             InnerHandler = cookieHandler
         };
 
-        // Return a http client that follows redirects, uses cookies and logs all requests. 
+        // Return an http client that follows redirects, uses cookies and logs all requests.
         // For aspire, this is needed otherwise cookies are shared, but it also
-        // gives a much clearer debug output (each request gets logged). 
+        // gives a much clearer debug output (each request gets logged).
         return new HttpClient(redirectHandler)
         {
             BaseAddress = baseAddress
@@ -252,7 +252,7 @@ public class AppHostFixture : IAsyncLifetime
         if (UsingAlreadyRunningInstance)
         {
             // An aspire host is already found (likely was started manually)
-            // so build a http client that directly points to this host. 
+            // so build an http client that directly points to this host.
             var url = clientName switch
             {
                 AppHostServices.Bff => "https://localhost:5002",
