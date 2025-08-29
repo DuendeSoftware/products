@@ -32,7 +32,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
                 return;
             }
 
-            logger.AuthenticatingScheme(LogLevel.Warning, scheme);
+            logger.SigningOutOfScheme(LogLevel.Debug, scheme);
             await _inner.SignOutAsync(context, frontend.OidcSchemeName, properties);
             return;
         }
@@ -49,7 +49,7 @@ internal class BffAuthenticationService(Decorator<IAuthenticationService> decora
                 return await _inner.AuthenticateAsync(context, scheme);
             }
 
-            logger.AuthenticatingScheme(LogLevel.Warning, scheme);
+            logger.AuthenticatingScheme(LogLevel.Trace, scheme);
             return await _inner.AuthenticateAsync(context, frontend.CookieSchemeName);
         }
 
