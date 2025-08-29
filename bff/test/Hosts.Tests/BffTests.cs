@@ -1,18 +1,21 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Xunit.Playwright;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.TestInfra;
+using Projects;
 using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
-public class BffTests : IntegrationTestBase
+[Collection(BffAppHostCollection.CollectionName)]
+public class BffTests : IntegrationTestBase<Hosts_AppHost>
 {
     private readonly HttpClient _httpClient;
     private readonly BffClient _bffClient;
 
-    public BffTests(ITestOutputHelper output, AppHostFixture fixture) : base(output: output, fixture: fixture)
+    public BffTests(ITestOutputHelper output, BffHostTestFixture fixture) : base(output: output, fixture: fixture)
     {
         _httpClient = CreateHttpClient(AppHostServices.Bff);
         _bffClient = new BffClient(CreateHttpClient(AppHostServices.Bff));
@@ -28,7 +31,6 @@ public class BffTests : IntegrationTestBase
     [SkippableFact]
     public async Task Can_initiate_login()
     {
-
         var response = await _httpClient.GetAsync("/");
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 

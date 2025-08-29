@@ -3,7 +3,7 @@
 
 using Microsoft.Net.Http.Headers;
 
-namespace Hosts.Tests.TestInfra;
+namespace Duende.Xunit.Playwright;
 
 public class CookieHandler : DelegatingHandler
 {

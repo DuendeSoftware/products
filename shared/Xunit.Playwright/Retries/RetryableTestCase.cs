@@ -4,7 +4,7 @@
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Duende.Hosts.Tests.TestInfra.Retries;
+namespace Duende.Xunit.Playwright.Retries;
 
 public class RetryableTestCase(
     IMessageSink sink,

@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace Hosts.Tests.TestInfra;
+namespace Duende.Xunit.Playwright;
 
 public class RequestLoggingHandler(
     ILogger<RequestLoggingHandler> log,
