@@ -1,13 +1,16 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
 using Duende.Bff;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Builder;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.Licensing;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Yarp.ReverseProxy.Forwarder;
 
 namespace Bff.Benchmarks.Hosts;
@@ -50,6 +53,18 @@ public class BffHost : Host
 
                 })
                 .AddRemoteApis();
+
+            services.AddSingleton<LicenseValidator>(sp => new LicenseValidator(
+                logger: sp.GetRequiredService<ILogger<LicenseValidator>>(),
+                claims: new ClaimsPrincipal(new ClaimsIdentity(
+                [
+                    // Allow the BFF and unlimited frontends
+                    new Claim("feature", "bff"),
+                    new Claim("bff_frontend_limit", "-1"),
+
+                ])),
+                timeProvider: sp.GetRequiredService<TimeProvider>()));
+
             if (!Internet.UseKestrel)
             {
                 services.AddSingleton<IForwarderHttpClientFactory>(new SimulatedInternetYarpForwarderFactory(Internet));

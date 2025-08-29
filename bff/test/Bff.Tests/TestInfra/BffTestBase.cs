@@ -21,7 +21,6 @@ public abstract class BffTestBase : IAsyncDisposable
     // Keep a list of frontends that are added before initialization
     private readonly List<BffFrontend> _frontendBuffer = new();
 
-
     protected BffTestBase(ITestOutputHelper output)
     {
         Context = new TestHostContext(output);
@@ -37,7 +36,6 @@ public abstract class BffTestBase : IAsyncDisposable
             ResponseType = The.ResponseType,
             ResponseMode = The.ResponseMode,
         };
-
 
         Api = new ApiHost(Context, IdentityServer);
         Bff = new BffTestHost(Context, IdentityServer);
@@ -245,5 +243,14 @@ public abstract class BffTestBase : IAsyncDisposable
         };
 
     protected void AdvanceClock(TimeSpan by) => The.Clock.SetUtcNow(The.Clock.GetUtcNow().Add(by));
+
+    protected void ConfigureSingleFrontendAuthentication()
+    {
+        Bff.OnConfigureBffOptions += options =>
+        {
+            options.ConfigureOpenIdConnectDefaults = The.DefaultOpenIdConnectConfiguration;
+        };
+        IdentityServer.AddClient(The.ClientId, Bff.Url());
+    }
 }
 
