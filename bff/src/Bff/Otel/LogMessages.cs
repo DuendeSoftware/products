@@ -263,6 +263,9 @@ internal static partial class LogMessages
     [LoggerMessage(
         message: "Authenticating scheme: {Scheme}")]
     public static partial void AuthenticatingScheme(this ILogger logger, LogLevel logLevel, string? scheme);
+    [LoggerMessage(
+        message: "Signing out of scheme: {Scheme}")]
+    public static partial void SigningOutOfScheme(this ILogger logger, LogLevel logLevel, string? scheme);
 
     [LoggerMessage(
         message: "Setting OIDC ProtocolMessage.Prompt to 'none' for BFF silent login")]
