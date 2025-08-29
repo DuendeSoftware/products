@@ -37,12 +37,14 @@ public static class BffEndpointRouteBuilderExtensions
     public static void MapBffManagementEndpoints(this IEndpointRouteBuilder endpoints)
     {
         ArgumentNullException.ThrowIfNull(endpoints);
-        var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
-        if (endpoints.AlreadyMappedManagementEndpoint(options.LoginPath, "Login"))
+        var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>();
+        var logger = endpoints.ServiceProvider.GetRequiredService<ILogger<BffOptions>>();
+        if (options.Value.AutomaticallyRegisterBffMiddleware)
         {
-            return;
+            logger.AlreadyMappedManagementEndpoints(LogLevel.Warning);
         }
 
+        ArgumentNullException.ThrowIfNull(endpoints);
         endpoints.MapBffManagementLoginEndpoint();
 #pragma warning disable CS0618 // Type or member is obsolete
         endpoints.MapBffManagementSilentLoginEndpoints();
@@ -64,26 +66,16 @@ public static class BffEndpointRouteBuilderExtensions
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
+        if (endpoints.AlreadyMappedManagementEndpoint(options.LoginPath))
+        {
+            return;
+        }
         endpoints.MapGet(options.LoginPath.Value!, ProcessWith<ILoginEndpoint>)
             .WithMetadata(new BffUiEndpointAttribute())
             .AllowAnonymous();
     }
 
-    internal static bool AlreadyMappedManagementEndpoint(
-        this IEndpointRouteBuilder endpoints,
-        PathString route,
-        string name)
-    {
-        if (endpoints.DataSources.Any(x =>
-                x.Endpoints.OfType<RouteEndpoint>().Any(x => x.RoutePattern.RawText == route.ToString())))
-        {
-            var logger = endpoints.ServiceProvider.GetRequiredService<ILogger<BffBuilder>>();
-            logger.AlreadyMappedManagementEndpoint(LogLevel.Warning, name);
-            return true;
-        }
 
-        return false;
-    }
 
     /// <summary>
     /// Adds the silent login BFF management endpoints
@@ -98,14 +90,20 @@ public static class BffEndpointRouteBuilderExtensions
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
-        endpoints.MapGet(options.SilentLoginPath.Value!, ProcessWith<ISilentLoginEndpoint>)
-            .WithName("SilentLogin")
-            .WithMetadata(new BffUiEndpointAttribute())
-            .AllowAnonymous();
+        if (!endpoints.AlreadyMappedManagementEndpoint(options.SilentLoginPath))
+        {
+            endpoints.MapGet(options.SilentLoginPath.Value!, ProcessWith<ISilentLoginEndpoint>)
+                .WithName("SilentLogin")
+                .WithMetadata(new BffUiEndpointAttribute())
+                .AllowAnonymous();
+        }
 
-        endpoints.MapGet(options.SilentLoginCallbackPath.Value!, ProcessWith<ISilentLoginCallbackEndpoint>)
-            .WithMetadata(new BffUiEndpointAttribute())
-            .AllowAnonymous();
+        if (!endpoints.AlreadyMappedManagementEndpoint(options.SilentLoginCallbackPath))
+        {
+            endpoints.MapGet(options.SilentLoginCallbackPath.Value!, ProcessWith<ISilentLoginCallbackEndpoint>)
+                .WithMetadata(new BffUiEndpointAttribute())
+                .AllowAnonymous();
+        }
     }
 
     /// <summary>
@@ -118,6 +116,11 @@ public static class BffEndpointRouteBuilderExtensions
         endpoints.CheckLicense();
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
+
+        if (endpoints.AlreadyMappedManagementEndpoint(options.LogoutPath))
+        {
+            return;
+        }
 
         endpoints.MapGet(options.LogoutPath.Value!, ProcessWith<ILogoutEndpoint>)
             .WithName("Logout")
@@ -136,6 +139,11 @@ public static class BffEndpointRouteBuilderExtensions
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
+        if (endpoints.AlreadyMappedManagementEndpoint(options.UserPath))
+        {
+            return;
+        }
+
         endpoints.MapGet(options.UserPath.Value!, ProcessWith<IUserEndpoint>)
             .AllowAnonymous()
             .AsBffApiEndpoint();
@@ -152,6 +160,11 @@ public static class BffEndpointRouteBuilderExtensions
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
+        if (endpoints.AlreadyMappedManagementEndpoint(options.BackChannelLogoutPath))
+        {
+            return;
+        }
+
         endpoints.MapPost(options.BackChannelLogoutPath.Value!, ProcessWith<IBackchannelLogoutEndpoint>)
             .AllowAnonymous();
     }
@@ -167,9 +180,18 @@ public static class BffEndpointRouteBuilderExtensions
 
         var options = endpoints.ServiceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
 
+        if (endpoints.AlreadyMappedManagementEndpoint(options.DiagnosticsPath))
+        {
+            return;
+        }
+
         endpoints.MapGet(options.DiagnosticsPath.Value!, ProcessWith<IDiagnosticsEndpoint>)
             .AllowAnonymous();
     }
+    internal static bool AlreadyMappedManagementEndpoint(
+        this IEndpointRouteBuilder endpoints,
+        PathString route) => endpoints.DataSources.Any(x =>
+                                      x.Endpoints.OfType<RouteEndpoint>().Any(x => x.RoutePattern.RawText == route.ToString()));
 
     internal static void CheckLicense(this IEndpointRouteBuilder endpoints) => endpoints.ServiceProvider.CheckLicense();
 

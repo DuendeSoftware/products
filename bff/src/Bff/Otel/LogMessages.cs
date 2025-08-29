@@ -257,8 +257,8 @@ internal static partial class LogMessages
 
     [LoggerMessage(
         message:
-        $"Already mapped {{{OTelParameters.Name}}} endpoint, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()")]
-    public static partial void AlreadyMappedManagementEndpoint(this ILogger logger, LogLevel logLevel, string name);
+        $"Management endpoints are automatically mapped, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()")]
+    public static partial void AlreadyMappedManagementEndpoints(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
         message: "Authenticating scheme: {Scheme}")]
