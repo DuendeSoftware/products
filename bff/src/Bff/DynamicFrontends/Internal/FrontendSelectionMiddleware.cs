@@ -11,6 +11,7 @@ namespace Duende.Bff.DynamicFrontends.Internal;
 internal class FrontendSelectionMiddleware(
     RequestDelegate next,
     ILogger<FrontendSelectionMiddleware> logger,
+    IFrontendCollection frontends,
     FrontendSelector frontendSelector)
 {
     public async Task InvokeAsync(HttpContext context)
@@ -30,7 +31,14 @@ internal class FrontendSelectionMiddleware(
         }
         else
         {
-            logger.NoFrontendSelected(LogLevel.Debug);
+            if (frontends.Count > 0)
+            {
+                logger.NoFrontendSelected(LogLevel.Debug);
+            }
+            else
+            {
+                logger.MultiFrontendDisabled(LogLevel.Trace);
+            }
             await next(context);
         }
     }

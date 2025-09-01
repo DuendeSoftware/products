@@ -249,8 +249,9 @@ public class BffBuilderTests
 
         var found = frontends.First(x => x.Name == The.FrontendName);
 
-        var oidcOptionsFactory = provider.GetRequiredService<IOptionsFactory<OpenIdConnectOptions>>();
-        var openIdConnectOptions = oidcOptionsFactory.Create(frontends.First().OidcSchemeName);
+        var factory = provider.GetRequiredService<IOptionsFactory<OpenIdConnectOptions>>();
+
+        var openIdConnectOptions = factory.Create(BffAuthenticationSchemes.BffOpenIdConnect);
 
         ValidateOpenIdConnectOptions(openIdConnectOptions, The.CallbackPath.ToString());
 
@@ -445,9 +446,11 @@ public class BffBuilderTests
         services.AddBff().LoadConfiguration(configuration);
         var provider = services.BuildServiceProvider();
 
-        var options = provider.GetRequiredService<IOptions<OpenIdConnectOptions>>();
+        var factory = provider.GetRequiredService<IOptionsFactory<OpenIdConnectOptions>>();
 
-        ValidateOpenIdConnectOptions(options.Value, The.CallbackPath.ToString());
+        var options = factory.Create(BffAuthenticationSchemes.BffOpenIdConnect);
+
+        ValidateOpenIdConnectOptions(options, The.CallbackPath.ToString());
     }
 
     [Fact]

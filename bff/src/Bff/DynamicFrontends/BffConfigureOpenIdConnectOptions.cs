@@ -1,7 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
+using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
 
@@ -10,6 +12,7 @@ namespace Duende.Bff.DynamicFrontends;
 internal class BffConfigureOpenIdConnectOptions(
     TimeProvider timeProvider,
     CurrentFrontendAccessor currentFrontendAccessor,
+    ActiveOpenIdConnectAuthenticationScheme activeOpenIdConnectScheme,
     IOptions<BffConfiguration> bffConfiguration,
     IOptions<BffOptions> bffOptions
     ) : IConfigureNamedOptions<OpenIdConnectOptions>
@@ -18,6 +21,11 @@ internal class BffConfigureOpenIdConnectOptions(
 
     public void Configure(string? name, OpenIdConnectOptions options)
     {
+        if (!activeOpenIdConnectScheme.ShouldConfigureScheme(Scheme.ParseOrDefault(name)))
+        {
+            return;
+        }
+
         // Normally, this is added by AuthenticationBuilder.PostConfigureAuthenticationSchemeOptions
         // but this is private API, so we need to do it ourselves.
         options.TimeProvider = timeProvider;
