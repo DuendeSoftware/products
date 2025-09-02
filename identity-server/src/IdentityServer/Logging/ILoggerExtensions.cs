@@ -115,15 +115,24 @@ internal static class ILoggerDevExtensions
             return value;
         }
 
+        s = s.ReplaceLineEndings(string.Empty);
         var builder = new System.Text.StringBuilder(s.Length);
         foreach (var c in s)
         {
-            if (!char.IsControl(c))
+            if (!IsUnsafeLogChar(c))
             {
                 builder.Append(c);
             }
         }
 
         return builder.ToString();
+
+        static bool IsUnsafeLogChar(char c)
+        {
+            return char.IsControl(c)
+                   || c == '\u0085'  // NEXT LINE
+                   || c == '\u2028'  // LINE SEPARATOR
+                   || c == '\u2029'; // PARAGRAPH SEPARATOR
+        }
     }
 }
