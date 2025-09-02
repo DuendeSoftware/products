@@ -5,11 +5,11 @@ using System.Net;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
+using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Endpoints;
 
@@ -19,7 +19,7 @@ internal class OAuthMetadataEndpoint(
     IServerUrls serverUrls,
     IIssuerNameService issuerNameService,
     IDiscoveryResponseGenerator discoveryResponseGenerator,
-    ILogger<OAuthMetadataEndpoint> logger) : BaseDiscoveryEndpoint(options, discoveryResponseGenerator), IEndpointHandler
+    SanitizedLogger<OAuthMetadataEndpoint> logger) : BaseDiscoveryEndpoint(options, discoveryResponseGenerator), IEndpointHandler
 {
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
@@ -67,14 +67,12 @@ internal class OAuthMetadataEndpoint(
 
         if (!issuerUri.Equals($"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}", StringComparison.Ordinal))
         {
-            logger.LogWarning("Issuer URI does not match the request URL. Issuer: {issuer}, Request: {request}",
-                issuerUri.SanitizeLogParameter(), $"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}".SanitizeLogParameter());
+            logger.LogWarning("Issuer URI does not match the request URL. Issuer: {issuer}, Request: {request}", issuerUri, $"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}");
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
         // generate response
-        logger.LogTrace("Calling into discovery response generator: {type}",
-            ResponseGenerator.GetType().FullName);
+        logger.LogTrace("Calling into discovery response generator: {type}", ResponseGenerator.GetType().FullName);
 
         return await GetDiscoveryDocument(context, baseUrl, issuerUri);
     }

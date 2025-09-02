@@ -108,5 +108,22 @@ internal static class ILoggerDevExtensions
         }
     }
 
-    public static object SanitizeLogParameter(this object value) => value?.GetType() == typeof(string) ? value.ToString()?.ReplaceLineEndings(string.Empty) : value;
+    public static object SanitizeLogParameter(this object value)
+    {
+        if (value is not string s || string.IsNullOrEmpty(s))
+        {
+            return value;
+        }
+
+        var builder = new System.Text.StringBuilder(s.Length);
+        foreach (var c in s)
+        {
+            if (!char.IsControl(c))
+            {
+                builder.Append(c);
+            }
+        }
+
+        return builder.ToString();
+    }
 }
