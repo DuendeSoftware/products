@@ -67,7 +67,7 @@ internal class OAuthMetadataEndpoint(
 
         if (!issuerUri.Equals($"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}", StringComparison.Ordinal))
         {
-            logger.LogDebug("Request for OAuth discovery document contains an issuer URI does not match the request URL. Returning 404. Issuer: {issuer}, Request: {request}", issuerUri, $"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}");
+            logger.LogDebug("Request for OAuth discovery document with a request URL that does not match the issuer URI. Returning 404. Issuer: {issuer}, Request: {request}", issuerUri, $"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}");
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
