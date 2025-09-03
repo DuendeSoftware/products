@@ -94,8 +94,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
             .Select(c => new ClaimRecord
             {
                 Type = c.Type,
-                Value = c.Value?.ToString() ?? string.Empty,
-                ValueType = c.ValueType == ClaimValueTypes.String ? null : c.ValueType
+                Value = c.Value?.ToString() ?? string.Empty
             }).ToList();
 
 

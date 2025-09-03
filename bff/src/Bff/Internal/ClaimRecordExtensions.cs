@@ -12,7 +12,7 @@ internal static class ClaimRecordExtensions
     /// </summary>
     public static ClaimsPrincipal ToClaimsPrincipal(this ClaimsPrincipalRecord principal)
     {
-        var claims = principal.Claims.Select(x => new Claim(x.Type, x.Value.ToString() ?? string.Empty, x.ValueType ?? ClaimValueTypes.String))
+        var claims = principal.Claims.Select(x => new Claim(x.Type, x.Value.ToString() ?? string.Empty))
             .ToArray();
         var id = new ClaimsIdentity(claims, principal.AuthenticationType, principal.NameClaimType,
             principal.RoleClaimType);
@@ -29,8 +29,7 @@ internal static class ClaimRecordExtensions
             x => new ClaimRecord
             {
                 Type = x.Type,
-                Value = x.Value,
-                ValueType = x.ValueType == ClaimValueTypes.String ? null : x.ValueType
+                Value = x.Value
             }).ToArray();
 
         return new ClaimsPrincipalRecord
