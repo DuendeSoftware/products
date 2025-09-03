@@ -5,7 +5,7 @@ using System.Security.Claims;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 
-namespace IdentityServerHost.Extensions;
+namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 public class HostProfileService(TestUserStore users, ILogger<TestUserProfileService> logger) : TestUserProfileService(users, logger)
 {

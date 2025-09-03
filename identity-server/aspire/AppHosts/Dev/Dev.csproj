@@ -18,8 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
-    <ProjectReference Include="..\..\..\hosts\EntityFramework-dotnet9\Host.EntityFramework.dotnet9.csproj" />
-    <ProjectReference Include="..\..\..\migrations\IdentityServerDb\IdentityServerDb.csproj" />
+    <ProjectReference Include="..\..\..\hosts\Main\Main9\Host.Main9.csproj" />
   </ItemGroup>
 
 </Project>

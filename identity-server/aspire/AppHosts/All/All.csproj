@@ -52,13 +52,14 @@
     <ProjectReference Include="..\..\..\clients\src\MvcJarUriJwt\MvcJarUriJwt.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\..\clients\src\WindowsConsoleSystemBrowser\WindowsConsoleSystemBrowser.csproj" />
-    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\Host.AspNetIdentity.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\hosts\EntityFramework\Host.EntityFramework.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\hosts\EntityFramework-dotnet9\Host.EntityFramework.dotnet9.csproj" />
-    <ProjectReference Include="..\..\..\hosts\main\Host.Main.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\AspNetIdentity8\Host.AspNetIdentity8.csproj" />
+    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\AspNetIdentity9\Host.AspNetIdentity9.csproj" />
+    <ProjectReference Include="..\..\..\hosts\EntityFramework\EntityFramework8\Host.EntityFramework8.csproj" />
+    <ProjectReference Include="..\..\..\hosts\EntityFramework\EntityFramework9\Host.EntityFramework9.csproj" />
+    <ProjectReference Include="..\..\..\hosts\Main\Main8\Host.Main8.csproj" />
+    <ProjectReference Include="..\..\..\hosts\Main\Main9\Host.Main9.csproj" />
     <ProjectReference Include="..\..\..\migrations\AspNetIdentityDb\AspNetIdentityDb.csproj" />
     <ProjectReference Include="..\..\..\migrations\IdentityServerDb\IdentityServerDb.csproj" />
-
   </ItemGroup>
 
 </Project>

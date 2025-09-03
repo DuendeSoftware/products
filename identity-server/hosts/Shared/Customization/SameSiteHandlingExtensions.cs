@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace IdentityServerHost.Extensions;
+namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 // copied from https://devblogs.microsoft.com/aspnet/upcoming-samesite-cookie-changes-in-asp-net-and-asp-net-core/
 public static class SameSiteHandlingExtensions
@@ -56,9 +56,9 @@ public static class SameSiteHandlingExtensions
             return true;
         }
 
-        // Cover Chrome 50-69, because some versions are broken by SameSite=None, 
+        // Cover Chrome 50-69, because some versions are broken by SameSite=None,
         // and none in this range require it.
-        // Note: this covers some pre-Chromium Edge versions, 
+        // Note: this covers some pre-Chromium Edge versions,
         // but pre-Chromium Edge does not require SameSite=None.
         if (userAgent.Contains("Chrome/5", StringComparison.InvariantCulture) ||
             userAgent.Contains("Chrome/6", StringComparison.InvariantCulture))
