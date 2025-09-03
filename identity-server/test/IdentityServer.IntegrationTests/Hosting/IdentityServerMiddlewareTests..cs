@@ -68,4 +68,33 @@ public class IdentityServerMiddlewareTests
         await notCanceledRequest.ShouldThrowAsync<Exception>();
         _pipeline.MockLogger.LogMessages.ShouldContain(m => m.StartsWith("Unhandled exception: "));
     }
+
+
+    public static readonly TheoryData<string, bool> ActivityDisplayNameTestCases = new TheoryData<string, bool>
+    {
+        { "/.well-known/openid-configuration", true },
+        { "/connect/token", true },
+        { "/connect/garbage", false },
+        { Constants.UIConstants.DefaultRoutePaths.Login.EnsureLeadingSlash(), false}
+    };
+
+    [Theory]
+    [MemberData(nameof(ActivityDisplayNameTestCases))]
+    public async Task routed_requests_should_set_http_activity_display_name(string path, bool displayNameShouldBeSet)
+    {
+        // Build a separate pipeline for this test, because we're going to capture
+        // the activity in middleware. A distinct pipeline ensures that we don't share
+        // the middleware that captures the activity with other tests running in parallel.
+        var pipeline = new IdentityServerPipeline();
+        var testActivityMiddleware = new MockTestActivityMiddleware();
+        pipeline.OnPreConfigure += builder => builder.Use(next => context => testActivityMiddleware.Handle(context, next));
+        pipeline.Initialize();
+
+        await pipeline.BackChannelClient.GetAsync($"https://server{path}");
+
+        if (displayNameShouldBeSet)
+        {
+            testActivityMiddleware.CapturedActivity.DisplayName.ShouldBe($"GET {path}");
+        }
+    }
 }

@@ -16,6 +16,8 @@
   - The default implementation, `DefaultUiLocalsService.cs`, delegates to the `CookieRequestCultureProvider` if it is present and any of the values passed in the
 `ui_locales` parameter match a supported UI culture.
   - If the default implementation does not meet your needs, `IUiLocalesService` can be implemented and registered with DI.
+- Set the DisplayName of the activity associated with the incoming HttpRequest when IdentityServer routes are matched by @josephdecock
+  This makes the IdentityServer route names appear in OTel traces.
 
 ## Bug Fixes
 - Reject Pushed Authorization Requests with parameters duplicated in a JAR by @wcabus

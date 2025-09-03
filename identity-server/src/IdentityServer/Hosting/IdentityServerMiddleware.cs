@@ -10,6 +10,7 @@ using Duende.IdentityServer.Logging;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -101,6 +102,12 @@ public class IdentityServerMiddleware
                 Telemetry.Metrics.IncreaseActiveRequests(endpointType, requestPath);
                 try
                 {
+                    var httpActivity = context.Features.Get<IHttpActivityFeature>();
+                    if (httpActivity != null)
+                    {
+                        httpActivity.Activity.DisplayName = $"{context.Request.Method} {requestPath}";
+                    }
+
                     using var activity = Tracing.BasicActivitySource.StartActivity("IdentityServerProtocolRequest");
                     activity?.SetTag(Tracing.Properties.EndpointType, endpointType);
 
