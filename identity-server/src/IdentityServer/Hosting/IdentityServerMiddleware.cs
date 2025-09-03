@@ -97,7 +97,9 @@ public class IdentityServerMiddleware
             if (endpoint != null)
             {
                 var endpointType = endpoint.GetType().FullName;
-                var requestPath = context.Request.Path.ToString();
+                var requestPath = context.Items.TryGetValue(MutualTlsEndpointMiddleware.OriginalPath, out var item) ?
+                    item?.ToString() :
+                    context.Request.Path.ToString();
 
                 Telemetry.Metrics.IncreaseActiveRequests(endpointType, requestPath);
                 try

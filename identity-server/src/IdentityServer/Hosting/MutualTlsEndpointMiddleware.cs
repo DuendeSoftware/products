@@ -17,6 +17,8 @@ namespace Duende.IdentityServer.Hosting;
 /// </summary>
 public class MutualTlsEndpointMiddleware
 {
+    public const string OriginalPath = "Duende.IdentityServer.MutualTlsEndpointMiddleware.OriginalPath";
+
     private readonly SanitizedLogger<MutualTlsEndpointMiddleware> _sanitizedLogger;
     private readonly RequestDelegate _next;
     private readonly IdentityServerOptions _options;
@@ -111,6 +113,11 @@ public class MutualTlsEndpointMiddleware
 
                 _sanitizedLogger.LogDebug("Rewriting MTLS request from: {oldPath} to: {newPath}",
                     context.Request.Path.ToString(), path);
+
+                // Capture the original path before any modifications. This is useful in other parts of the
+                // pipeline, that may want to include this context.
+                context.Items[OriginalPath] = context.Request.Path;
+
                 context.Request.Path = path;
             }
         }
