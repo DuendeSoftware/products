@@ -180,6 +180,7 @@
   </Folder>
   <Folder Name="/shared/">
     <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
+    <Project Path="shared/Xunit.Playwright/Duende.Xunit.Playwright.csproj" />
   </Folder>
   <Folder Name="/templates/">
     <Project Path="templates/build/build.csproj" />

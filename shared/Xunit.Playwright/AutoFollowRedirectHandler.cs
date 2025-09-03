@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Hosts.Tests.TestInfra;
+namespace Duende.Xunit.Playwright;
 
 public class AutoFollowRedirectHandler(ILogger<AutoFollowRedirectHandler> logger) : DelegatingHandler
 {

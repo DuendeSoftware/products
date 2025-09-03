@@ -32,7 +32,9 @@
       "bff\\templates\\src\\BffLocalApi\\BffLocalApi.csproj",
       "bff\\templates\\src\\BffRemoteApi\\BffRemoteApi.csproj",
       "bff\\test\\Bff.Tests\\Bff.Tests.csproj",
-      "bff\\test\\Hosts.Tests\\Hosts.Tests.csproj"
+      "bff\\test\\Hosts.Tests\\Hosts.Tests.csproj",
+      "shared\\Xunit.Playwright\\Duende.Xunit.Playwright.csproj",
+      "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj"
     ]
   }
 }

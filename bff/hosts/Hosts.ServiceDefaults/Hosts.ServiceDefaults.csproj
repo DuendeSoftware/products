@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Duende.Xunit.Playwright.csproj" />
     <ProjectReference Include="..\..\src\Bff\Bff.csproj" />
   </ItemGroup>
 

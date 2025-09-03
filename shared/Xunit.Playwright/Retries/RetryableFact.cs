@@ -3,7 +3,7 @@
 
 using Xunit.Sdk;
 
-namespace Duende.Hosts.Tests.TestInfra.Retries;
+namespace Duende.Xunit.Playwright.Retries;
 
 [XunitTestCaseDiscoverer(
     typeName: "Duende.Hosts.Tests.TestInfra.Retries.RetryableTestDiscoverer",

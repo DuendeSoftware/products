@@ -3,7 +3,7 @@
 
 using System.Text;
 
-namespace Hosts.Tests.TestInfra;
+namespace Duende.Xunit.Playwright;
 
 public class DelegateTextWriter : TextWriter
 {
