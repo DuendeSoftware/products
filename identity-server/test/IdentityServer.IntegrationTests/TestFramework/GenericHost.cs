@@ -7,10 +7,8 @@ using System.Reflection;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.IntegrationTests.TestFramework;
@@ -44,9 +42,8 @@ public class GenericHost
         // not calling dispose on scope on purpose
         _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
 
-    public string Url(string path = null)
+    public string Url(string path = "")
     {
-        path = path ?? string.Empty;
         if (!path.StartsWith('/'))
         {
             path = '/' + path;
@@ -57,42 +54,31 @@ public class GenericHost
 
     public async Task InitializeAsync()
     {
-        var hostBuilder = new HostBuilder()
-            .ConfigureWebHost(builder =>
-            {
-                builder.UseTestServer();
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+        {
+            EnvironmentName = IsDevelopment ? "Development" : "Production"
+        });
+        builder.WebHost.UseTestServer();
 
-                builder.ConfigureAppConfiguration((context, b) =>
-                {
-                    if (HostAssembly != null)
-                    {
-                        context.HostingEnvironment.ApplicationName = HostAssembly.GetName().Name;
-                    }
-                });
+        if (HostAssembly != null)
+        {
+            builder.Environment.ApplicationName = HostAssembly.GetName().Name;
+        }
 
-                if (IsDevelopment)
-                {
-                    builder.UseSetting("Environment", "Development");
-                }
-                else
-                {
-                    builder.UseSetting("Environment", "Production");
-                }
-
-                builder.ConfigureServices(ConfigureServices);
-                builder.Configure(ConfigureApp);
-            });
+        ConfigureServices(builder.Services);
+        var app = builder.Build();
+        ConfigureApp(app);
 
         // Build and start the IHost
-        var host = await hostBuilder.StartAsync();
+        await app.StartAsync();
 
-        Server = host.GetTestServer();
+        Server = app.GetTestServer();
         BrowserClient = new TestBrowserClient(Server.CreateHandler());
         HttpClient = Server.CreateClient();
     }
 
     public event Action<IServiceCollection> OnConfigureServices = services => { };
-    public event Action<IApplicationBuilder> OnConfigure = app => { };
+    public event Action<WebApplication> OnConfigure = app => { };
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -105,9 +91,9 @@ public class GenericHost
         OnConfigureServices(services);
     }
 
-    private void ConfigureApp(IApplicationBuilder app)
+    private void ConfigureApp(WebApplication app)
     {
-        _appServices = app.ApplicationServices;
+        _appServices = app.Services;
 
         OnConfigure(app);
 
@@ -116,7 +102,7 @@ public class GenericHost
     }
 
 
-    private void ConfigureSignout(IApplicationBuilder app) => app.Use(async (ctx, next) =>
+    private void ConfigureSignout(WebApplication app) => app.Use(async (ctx, next) =>
                                                                    {
                                                                        if (ctx.Request.Path == "/__signout")
                                                                        {
@@ -134,7 +120,7 @@ public class GenericHost
     }
 
 
-    private void ConfigureSignin(IApplicationBuilder app) => app.Use(async (ctx, next) =>
+    private void ConfigureSignin(WebApplication app) => app.Use(async (ctx, next) =>
                                                                   {
                                                                       if (ctx.Request.Path == "/__signin")
                                                                       {
