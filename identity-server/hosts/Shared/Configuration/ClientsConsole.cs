@@ -357,13 +357,13 @@ public static class ClientsConsole
         // For ease during development, we just go get the thumbprint off the certificate on the filesystem.
         // In a deployed application, you would want to either rely on PKI or have some other mechanism for
         // getting the thumbprint into your configuration.
-        if (!File.Exists("../../clients/src/ConsoleMTLSClient/localhost-client.p12"))
+        if (!File.Exists("../../../clients/src/ConsoleMTLSClient/localhost-client.p12"))
         {
             return string.Empty;
         }
 #pragma warning disable SYSLIB0057
         // Only obsolete in .NET 9, keeping while we support .NET 8.
-        var cert = new X509Certificate2("../../clients/src/ConsoleMTLSClient/localhost-client.p12", "changeit");
+        var cert = new X509Certificate2("../../../clients/src/ConsoleMTLSClient/localhost-client.p12", "changeit");
 #pragma warning restore SYSLIB0057
         return cert.Thumbprint;
     }
