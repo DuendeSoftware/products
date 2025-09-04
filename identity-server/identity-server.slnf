@@ -65,7 +65,6 @@
       "identity-server\\templates\\src\\IdentityServerInMem\\IdentityServerInMem.csproj",
       "identity-server\\templates\\src\\IdentityServer\\IdentityServerTemplate.csproj",
       "identity-server\\templates\\src\\WebApp\\TemplateWebApp.csproj",
-      "identity-server\\test\\EntityFramework.Storage.UnitTests\\EntityFramework.Storage.UnitTests.csproj",
       "identity-server\\test\\IdentityServer.IntegrationTests\\IdentityServer.IntegrationTests.csproj",
       "identity-server\\test\\IdentityServer.UnitTests\\IdentityServer.UnitTests.csproj",
       "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj"

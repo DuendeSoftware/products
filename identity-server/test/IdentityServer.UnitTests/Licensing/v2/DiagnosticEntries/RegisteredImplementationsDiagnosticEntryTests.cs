@@ -109,9 +109,9 @@ public class RegisteredImplementationsDiagnosticEntryTests
     {
         var interfaces = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(assembly => assembly.GetExportedTypes())
-            .Where(type => type.IsInterface && type.IsPublic && type.Namespace != null &&
-                           type.Namespace.StartsWith(
-                               "Duende.IdentityServer"))
+            .Where(type => type.IsInterface && type.IsPublic && type.Namespace != null
+                            && type.Namespace.StartsWith("Duende.IdentityServer")
+                            && !type.Namespace.StartsWith("Duende.IdentityServer.EntityFramework"))
             .Select(type => type);
         var subject = new RegisteredImplementationsDiagnosticEntry(new ServiceCollectionAccessor(new ServiceCollection()));
         var typesTrackedField = typeof(RegisteredImplementationsDiagnosticEntry)

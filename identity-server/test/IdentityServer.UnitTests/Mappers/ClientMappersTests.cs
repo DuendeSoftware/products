@@ -7,7 +7,7 @@ using Duende.IdentityServer.Models;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
 using Models = Duende.IdentityServer.Models;
 
-namespace EntityFramework.Storage.UnitTests.Mappers;
+namespace IdentityServer.UnitTests.Mappers;
 
 public class ClientMappersTests
 {

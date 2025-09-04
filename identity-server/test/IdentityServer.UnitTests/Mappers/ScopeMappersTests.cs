@@ -6,7 +6,7 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
 using Models = Duende.IdentityServer.Models;
 
-namespace EntityFramework.Storage.UnitTests.Mappers;
+namespace IdentityServer.UnitTests.Mappers;
 
 public class ScopesMappersTests
 {

@@ -6,23 +6,16 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
 using Models = Duende.IdentityServer.Models;
 
-namespace EntityFramework.Storage.UnitTests.Mappers;
+namespace IdentityServer.UnitTests.Mappers;
 
-public class PersistedGrantMappersTests
+public class PushedAuthorizationRequestMappersTests
 {
     [Fact]
-    public void CanMap()
+    public void CanMapPushedAuthorizationRequest()
     {
-        var model = new Duende.IdentityServer.Models.PersistedGrant()
-        {
-            ConsumedTime = new System.DateTime(2020, 02, 03, 4, 5, 6)
-        };
-
+        var model = new Models.PushedAuthorizationRequest();
         var mappedEntity = model.ToEntity();
-        mappedEntity.ConsumedTime.Value.ShouldBe(new System.DateTime(2020, 02, 03, 4, 5, 6));
-
         var mappedModel = mappedEntity.ToModel();
-        mappedModel.ConsumedTime.Value.ShouldBe(new System.DateTime(2020, 02, 03, 4, 5, 6));
 
         mappedModel.ShouldNotBeNull();
         mappedEntity.ShouldNotBeNull();
@@ -34,19 +27,15 @@ public class PersistedGrantMappersTests
         var excludedProperties = new string[]
         {
             "Id",
-            "Updated",
-            "Created",
-            "LastAccessed",
-            "NonEditable"
         };
 
         MapperTestHelpers
-            .AllPropertiesAreMapped<Models.PersistedGrant, Entities.PersistedGrant>(source => source.ToEntity(), excludedProperties, out var unmappedMembers)
+            .AllPropertiesAreMapped<Models.PushedAuthorizationRequest, Entities.PushedAuthorizationRequest>(source => source.ToEntity(), excludedProperties, out var unmappedMembers)
             .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
     }
 
     [Fact]
     public void mapping_entity_to_model_maps_all_properties() => MapperTestHelpers
-            .AllPropertiesAreMapped<Entities.PersistedGrant, Models.PersistedGrant>(source => source.ToModel(), out var unmappedMembers)
+            .AllPropertiesAreMapped<Entities.PushedAuthorizationRequest, Models.PushedAuthorizationRequest>(source => source.ToModel(), out var unmappedMembers)
             .ShouldBeTrue($"{string.Join(',', unmappedMembers)} should be mapped");
 }
