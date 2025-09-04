@@ -322,23 +322,18 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.ResponseModesSupported, Constants.SupportedResponseModes.ToArray());
         }
 
+        var supportedAuthMethods = GetSupportedAuthMethods();
         // misc
         if (Options.Discovery.ShowTokenEndpointAuthenticationMethods)
         {
-            var types = SecretParsers.GetAvailableAuthenticationMethods().ToList();
-            if (Options.MutualTls.Enabled)
-            {
-                types.Add(OidcConstants.EndpointAuthenticationMethods.TlsClientAuth);
-                types.Add(OidcConstants.EndpointAuthenticationMethods.SelfSignedTlsClientAuth);
-            }
-            entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, types);
+            entries.Add(OidcConstants.Discovery.TokenEndpointAuthenticationMethodsSupported, supportedAuthMethods);
+            AddSigningAlgorithmsForEndpointIfNeeded(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported, entries, supportedAuthMethods);
+        }
 
-            if (types.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt) &&
-                !IEnumerableExtensions.IsNullOrEmpty(Options.SupportedClientAssertionSigningAlgorithms))
-            {
-                entries.Add(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported,
-                    Options.SupportedClientAssertionSigningAlgorithms);
-            }
+        if (Options.Discovery.ShowRevocationEndpointAuthenticationMethods)
+        {
+            entries.Add(OidcConstants.Discovery.RevocationEndpointAuthenticationMethodsSupported, supportedAuthMethods);
+            AddSigningAlgorithmsForEndpointIfNeeded(OidcConstants.Discovery.RevocationEndpointAuthSigningAlgorithmsSupported, entries, supportedAuthMethods);
         }
 
         var signingCredentials = await Keys.GetAllSigningCredentialsAsync();
@@ -540,5 +535,25 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         }
 
         return webKeys;
+    }
+
+    private List<string> GetSupportedAuthMethods()
+    {
+        var types = SecretParsers.GetAvailableAuthenticationMethods().ToList();
+        if (Options.MutualTls.Enabled)
+        {
+            types.Add(OidcConstants.EndpointAuthenticationMethods.TlsClientAuth);
+            types.Add(OidcConstants.EndpointAuthenticationMethods.SelfSignedTlsClientAuth);
+        }
+
+        return types;
+    }
+
+    private void AddSigningAlgorithmsForEndpointIfNeeded(string key, Dictionary<string, object> entries, IEnumerable<string> supportedAuthMethods)
+    {
+        if (supportedAuthMethods.Contains(OidcConstants.EndpointAuthenticationMethods.PrivateKeyJwt) && !IEnumerableExtensions.IsNullOrEmpty(Options.SupportedClientAssertionSigningAlgorithms))
+        {
+            entries.Add(key, Options.SupportedClientAssertionSigningAlgorithms);
+        }
     }
 }

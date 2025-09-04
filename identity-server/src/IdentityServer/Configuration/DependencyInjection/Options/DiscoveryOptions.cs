@@ -63,6 +63,11 @@ public class DiscoveryOptions
     public bool ShowTokenEndpointAuthenticationMethods { get; set; } = true;
 
     /// <summary>
+    /// Show revocation endpoint authentication methods
+    /// </summary>
+    public bool ShowRevocationEndpointAuthenticationMethods { get; set; } = true;
+
+    /// <summary>
     /// Turns relative paths that start with ~/ into absolute paths
     /// </summary>
     public bool ExpandRelativePathsInCustomEntries { get; set; } = true;

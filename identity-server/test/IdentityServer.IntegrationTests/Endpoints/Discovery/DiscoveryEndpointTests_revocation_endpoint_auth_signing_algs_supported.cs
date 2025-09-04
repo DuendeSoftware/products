@@ -9,13 +9,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
-public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_supported : DiscoveryEndpointTestsBase
+public class DiscoveryEndpointTests_revocation_endpoint_auth_signing_algs_supported : DiscoveryEndpointTestsBase
 {
-    private const string Category = "Discovery endpoint - token_endpoint_auth_signing_alg_values_supported";
+    private const string Category = "Discovery endpoint - revocation_endpoint_auth_signing_alg_values_supported";
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task token_endpoint_auth_signing_alg_values_supported_should_match_configuration()
+    public async Task revocation_endpoint_auth_signing_alg_values_supported_should_match_configuration()
     {
         var pipeline = CreatePipelineWithJwtBearer();
         pipeline.Options.SupportedClientAssertionSigningAlgorithms =
@@ -28,7 +28,7 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
             .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
         disco.IsError.ShouldBeFalse();
 
-        var algorithmsSupported = disco.TokenEndpointAuthenticationSigningAlgorithmsSupported;
+        var algorithmsSupported = disco.RevocationEndpointAuthenticationSigningAlgorithmsSupported;
 
         algorithmsSupported.Count().ShouldBe(2);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
@@ -37,16 +37,17 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task token_endpoint_auth_signing_alg_values_supported_should_default_to_rs_ps_es()
+    public async Task revocation_endpoint_auth_signing_alg_values_supported_should_default_to_rs_ps_es()
     {
         var pipeline = CreatePipelineWithJwtBearer();
+        pipeline.Initialize();
 
         var result =
             await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
                 "https://server/.well-known/openid-configuration");
 
         result.IsError.ShouldBeFalse();
-        var algorithmsSupported = result.TokenEndpointAuthenticationSigningAlgorithmsSupported;
+        var algorithmsSupported = result.RevocationEndpointAuthenticationSigningAlgorithmsSupported;
 
         algorithmsSupported.ShouldBe([
             SecurityAlgorithms.RsaSha256,
@@ -63,7 +64,7 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task token_endpoint_auth_signing_alg_values_supported_should_not_be_present_if_private_key_jwt_is_not_configured()
+    public async Task revocation_endpoint_auth_signing_alg_values_supported_should_not_be_present_if_private_key_jwt_is_not_configured()
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
@@ -72,20 +73,16 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
         var disco = await pipeline.BackChannelClient
             .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
 
-        // Verify assumptions
         disco.IsError.ShouldBeFalse();
-        disco.TokenEndpointAuthenticationMethodsSupported.ShouldNotContain("private_key_jwt");
-        // we don't even support client_secret_jwt, but per spec, if you DO, you must include the algs supported
-        disco.TokenEndpointAuthenticationMethodsSupported.ShouldNotContain("client_secret_jwt");
-
-        // Assert that we got no signing algs.
-        disco.TokenEndpointAuthenticationSigningAlgorithmsSupported.ShouldBeEmpty();
+        disco.RevocationEndpointAuthenticationMethodsSupported.ShouldNotContain("private_key_jwt");
+        disco.RevocationEndpointAuthenticationMethodsSupported.ShouldNotContain("client_secret_jwt");
+        disco.RevocationEndpointAuthenticationSigningAlgorithmsSupported.ShouldBeEmpty();
     }
 
     [Theory]
     [MemberData(nameof(NullOrEmptySupportedAlgorithms))]
     [Trait("Category", Category)]
-    public async Task token_endpoint_auth_signing_alg_values_supported_should_not_be_present_if_option_is_null_or_empty(
+    public async Task revocation_endpoint_auth_signing_alg_values_supported_should_not_be_present_if_option_is_null_or_empty(
         ICollection<string> algorithms)
     {
         var pipeline = CreatePipelineWithJwtBearer();
@@ -96,6 +93,6 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
-        data.ShouldNotContainKey(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported);
+        data.ShouldNotContainKey(OidcConstants.Discovery.RevocationEndpointAuthSigningAlgorithmsSupported);
     }
 }
