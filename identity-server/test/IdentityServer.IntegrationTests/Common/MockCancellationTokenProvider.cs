@@ -4,7 +4,7 @@
 
 using Duende.IdentityServer.Services;
 
-namespace IntegrationTests.TestFramework;
+namespace IdentityServer.IntegrationTests.Common;
 
 public class MockCancellationTokenProvider : ICancellationTokenProvider
 {

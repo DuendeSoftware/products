@@ -5,8 +5,8 @@
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Storage;
 using Duende.IdentityServer.EntityFramework.Stores;
+using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
-using IntegrationTests.TestFramework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -62,8 +62,7 @@ public class IdentityServerHost : GenericHost
 
     public async Task<Client> GetClientAsync(string clientId)
     {
-        var store = _appServices?.GetRequiredService<ClientStore>()
-            ?? throw new Exception("Failed to resolve ClientStore in test");
+        var store = Resolve<ClientStore>();
         return await store.FindClientByIdAsync(clientId);
     }
 }

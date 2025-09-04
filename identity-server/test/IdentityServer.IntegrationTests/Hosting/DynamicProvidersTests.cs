@@ -78,19 +78,17 @@ public class DynamicProvidersTests
             app.UseIdentityServer();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.MapGet("/signin", async ctx =>
             {
-                endpoints.MapGet("/signin", async ctx =>
-                {
-                    await ctx.SignInAsync(new IdentityServerUser("1").CreatePrincipal());
-                });
-                endpoints.MapGet("/account/logout", async ctx =>
-                {
-                    var isis = ctx.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
-                    var logoutCtx = await isis.GetLogoutContextAsync(ctx.Request.Query["logoutId"]);
-                    Idp1FrontChannelLogoutUri = logoutCtx.SignOutIFrameUrl;
-                    await ctx.SignOutAsync();
-                });
+                await ctx.SignInAsync(new IdentityServerUser("1").CreatePrincipal());
+            });
+
+            app.MapGet("/account/logout", async ctx =>
+            {
+                var isis = ctx.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
+                var logoutCtx = await isis.GetLogoutContextAsync(ctx.Request.Query["logoutId"]);
+                Idp1FrontChannelLogoutUri = logoutCtx.SignOutIFrameUrl;
+                await ctx.SignOutAsync();
             });
         };
         _idp1.InitializeAsync().Wait();
@@ -131,12 +129,9 @@ public class DynamicProvidersTests
             app.UseIdentityServer();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.MapGet("/signin", async ctx =>
             {
-                endpoints.MapGet("/signin", async ctx =>
-                {
-                    await ctx.SignInAsync(new IdentityServerUser("2").CreatePrincipal());
-                });
+                await ctx.SignInAsync(new IdentityServerUser("2").CreatePrincipal());
             });
         };
         _idp2.InitializeAsync().Wait();
@@ -189,44 +184,44 @@ public class DynamicProvidersTests
             app.UseIdentityServer();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            app.MapGet("/user", async ctx =>
             {
-                endpoints.MapGet("/user", async ctx =>
+                var session = await ctx.AuthenticateAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme);
+                if (session.Succeeded)
                 {
-                    var session = await ctx.AuthenticateAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme);
-                    if (session.Succeeded)
-                    {
-                        await ctx.Response.WriteAsync(session.Principal.FindFirst("sub").Value);
-                    }
-                    else
-                    {
-                        ctx.Response.StatusCode = 401;
-                    }
-                });
-                endpoints.MapGet("/callback", async ctx =>
+                    await ctx.Response.WriteAsync(session.Principal.FindFirst("sub").Value);
+                }
+                else
                 {
-                    var session = await ctx.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
-                    if (session.Succeeded)
-                    {
-                        await ctx.SignInAsync(session.Principal, session.Properties);
-                        await ctx.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+                    ctx.Response.StatusCode = 401;
+                }
+            });
 
-                        await ctx.Response.WriteAsync(session.Principal.FindFirst("sub").Value);
-                    }
-                    else
-                    {
-                        ctx.Response.StatusCode = 401;
-                    }
-                });
-                endpoints.MapGet("/challenge", async ctx =>
+            app.MapGet("/callback", async ctx =>
+            {
+                var session = await ctx.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+                if (session.Succeeded)
                 {
-                    await ctx.ChallengeAsync(ctx.Request.Query["scheme"],
-                        new AuthenticationProperties { RedirectUri = "/callback" });
-                });
-                endpoints.MapGet("/logout", async ctx =>
+                    await ctx.SignInAsync(session.Principal, session.Properties);
+                    await ctx.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+
+                    await ctx.Response.WriteAsync(session.Principal.FindFirst("sub").Value);
+                }
+                else
                 {
-                    await ctx.SignOutAsync(ctx.Request.Query["scheme"]);
-                });
+                    ctx.Response.StatusCode = 401;
+                }
+            });
+
+            app.MapGet("/challenge", async ctx =>
+            {
+                await ctx.ChallengeAsync(ctx.Request.Query["scheme"],
+                    new AuthenticationProperties { RedirectUri = "/callback" });
+            });
+
+            app.MapGet("/logout", async ctx =>
+            {
+                await ctx.SignOutAsync(ctx.Request.Query["scheme"]);
             });
         };
     }
