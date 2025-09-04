@@ -1,6 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer;
+using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Http;
@@ -67,5 +69,54 @@ public class IdentityServerMiddlewareTests
         var notCanceledRequest = async () => await _pipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryKeysEndpoint, CancellationToken.None);
         await notCanceledRequest.ShouldThrowAsync<Exception>();
         _pipeline.MockLogger.LogMessages.ShouldContain(m => m.StartsWith("Unhandled exception: "));
+    }
+
+
+    public static readonly TheoryData<string, bool> ActivityDisplayNameTestCases = new TheoryData<string, bool>
+    {
+        { "/.well-known/openid-configuration", true },
+        { "/connect/token", true },
+        { "/connect/garbage", false },
+        { Constants.UIConstants.DefaultRoutePaths.Login.EnsureLeadingSlash(), false}
+    };
+
+    [Theory]
+    [MemberData(nameof(ActivityDisplayNameTestCases))]
+    public async Task routed_requests_should_set_http_activity_display_name(string path, bool displayNameShouldBeSet)
+    {
+        // Build a separate pipeline for this test, because we're going to capture
+        // the activity in middleware. A distinct pipeline ensures that we don't share
+        // the middleware that captures the activity with other tests running in parallel.
+        var pipeline = new IdentityServerPipeline();
+        var testActivityMiddleware = new MockTestActivityMiddleware();
+        pipeline.OnPreConfigure += builder => builder.Use(next => context => testActivityMiddleware.Handle(context, next));
+        pipeline.Initialize();
+
+        await pipeline.BackChannelClient.GetAsync($"https://server{path}");
+
+        if (displayNameShouldBeSet)
+        {
+            testActivityMiddleware.CapturedActivity.DisplayName.ShouldBe($"GET {path}");
+        }
+    }
+
+    [Fact]
+    public async Task routed_mtls_requests_should_set_http_activity_display_name()
+    {
+        // Build a separate pipeline for this test, because we're going to capture
+        // the activity in middleware. A distinct pipeline ensures that we don't share
+        // the middleware that captures the activity with other tests running in parallel.
+        var pipeline = new IdentityServerPipeline();
+        var testActivityMiddleware = new MockTestActivityMiddleware();
+        pipeline.OnPreConfigure += builder => builder.Use(next => context => testActivityMiddleware.Handle(context, next));
+        pipeline.Initialize();
+
+        var clientCert = TestCert.Load();
+        pipeline.SetClientCertificate(clientCert);
+
+        await pipeline.MtlsBackChannelClient.GetAsync(IdentityServerPipeline.TokenMtlsEndpoint);
+
+        var path = IdentityServerPipeline.TokenMtlsEndpoint.Substring(14); // trim off "https://server"
+        testActivityMiddleware.CapturedActivity.DisplayName.ShouldBe($"GET {path}");
     }
 }
