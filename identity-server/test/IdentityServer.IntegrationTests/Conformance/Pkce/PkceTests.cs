@@ -6,12 +6,11 @@ using System.Security.Claims;
 using System.Text;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
-using Duende.IdentityServer;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 
-namespace IntegrationTests.Conformance.Pkce;
+namespace Duende.IdentityServer.IntegrationTests.Conformance.Pkce;
 
 public class PkceTests
 {

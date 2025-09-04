@@ -6,10 +6,10 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using IntegrationTests.Common;
 
-namespace IntegrationTests.Endpoints.DeviceAuthorization;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.DeviceAuthorization;
 
 public class DeviceAuthorizationTests
 {

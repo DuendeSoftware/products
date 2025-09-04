@@ -5,13 +5,12 @@
 using System.Net;
 using System.Security.Claims;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 
-namespace IntegrationTests.Hosting;
+namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class FederatedSignoutTests
 {

@@ -3,8 +3,8 @@
 
 using System.Net;
 using System.Text.Json;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Licensing;
-using IntegrationTests.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 

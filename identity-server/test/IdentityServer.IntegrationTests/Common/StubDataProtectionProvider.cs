@@ -4,7 +4,7 @@
 
 using Microsoft.AspNetCore.DataProtection;
 
-namespace IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 internal class StubDataProtectionProvider : IDataProtectionProvider, IDataProtector
 {

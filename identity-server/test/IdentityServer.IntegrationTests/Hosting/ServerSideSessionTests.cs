@@ -4,13 +4,12 @@
 
 using System.Security.Claims;
 using Duende.IdentityModel.Client;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -18,7 +17,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace IntegrationTests.Hosting;
+namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class ServerSideSessionTests
 {

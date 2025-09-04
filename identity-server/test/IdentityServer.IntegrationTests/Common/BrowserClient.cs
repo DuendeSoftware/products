@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-namespace IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 public class BrowserClient : HttpClient
 {

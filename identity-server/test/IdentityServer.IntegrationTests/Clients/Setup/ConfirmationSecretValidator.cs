@@ -6,7 +6,7 @@ using System.Text.Json;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 
-namespace IntegrationTests.Clients.Setup;
+namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class ConfirmationSecretValidator : ISecretValidator
 {

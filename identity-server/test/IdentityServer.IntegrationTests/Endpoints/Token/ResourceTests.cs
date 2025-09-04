@@ -5,11 +5,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Duende.IdentityModel.Client;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 
-namespace IntegrationTests.Endpoints.Token;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
 public class ResourceTests
 {

@@ -6,11 +6,11 @@ using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 
-namespace IntegrationTests.Endpoints.Token;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
 public class RefreshTokenTests
 {

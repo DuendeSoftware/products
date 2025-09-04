@@ -3,9 +3,9 @@
 
 
 using System.Net;
-using IntegrationTests.Common;
+using Duende.IdentityServer.IntegrationTests.Common;
 
-namespace IntegrationTests.Endpoints.CheckSession;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.CheckSession;
 
 public class CheckSessionTests
 {

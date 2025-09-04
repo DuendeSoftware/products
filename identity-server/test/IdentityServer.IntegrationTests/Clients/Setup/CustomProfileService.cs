@@ -6,7 +6,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
 using Microsoft.Extensions.Logging;
 
-namespace IntegrationTests.Clients.Setup;
+namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 internal class CustomProfileService : TestUserProfileService
 {

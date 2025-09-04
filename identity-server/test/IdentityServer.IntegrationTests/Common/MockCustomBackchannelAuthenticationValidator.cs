@@ -4,7 +4,7 @@
 
 using Duende.IdentityServer.Validation;
 
-namespace IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 internal class MockCustomBackchannelAuthenticationValidator : ICustomBackchannelAuthenticationValidator
 {

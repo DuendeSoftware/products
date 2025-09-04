@@ -6,11 +6,11 @@ using System.Net;
 using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 
-namespace IntegrationTests.Conformance.Basic;
+namespace Duende.IdentityServer.IntegrationTests.Conformance.Basic;
 
 public class ResponseTypeResponseModeTests
 {

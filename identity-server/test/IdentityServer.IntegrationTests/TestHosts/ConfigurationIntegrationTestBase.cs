@@ -4,7 +4,7 @@
 
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace IntegrationTests.TestHosts;
+namespace Duende.IdentityServer.IntegrationTests.TestHosts;
 
 public class ConfigurationIntegrationTestBase
 {

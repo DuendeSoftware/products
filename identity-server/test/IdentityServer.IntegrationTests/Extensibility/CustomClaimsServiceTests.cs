@@ -7,14 +7,14 @@ using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
-using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace IntegrationTests.Extensibility;
+namespace Duende.IdentityServer.IntegrationTests.Extensibility;
 
 public class CustomClaimsServiceTests
 {

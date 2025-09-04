@@ -1,12 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Models;
-using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.Hosting;
+namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class LicenseTests : IDisposable
 {

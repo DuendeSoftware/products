@@ -12,14 +12,14 @@ using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Hosting.LocalApiAuthentication;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using IntegrationTests.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace IntegrationTests.Hosting.LocalApiAuthentication;
+namespace Duende.IdentityServer.IntegrationTests.Hosting.LocalApiAuthentication;
 
 public class LocalApiAuthenticationTests
 {

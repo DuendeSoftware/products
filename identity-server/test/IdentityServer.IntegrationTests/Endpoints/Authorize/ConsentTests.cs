@@ -6,16 +6,16 @@ using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Duende.IdentityServer;
+
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Default;
 using Duende.IdentityServer.Stores.Serialization;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.Endpoints.Authorize;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class ConsentTests
 {

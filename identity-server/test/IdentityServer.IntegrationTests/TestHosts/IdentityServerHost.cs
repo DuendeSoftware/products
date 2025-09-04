@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.TestHosts;
+namespace Duende.IdentityServer.IntegrationTests.TestHosts;
 
 public class IdentityServerHost : GenericHost
 {

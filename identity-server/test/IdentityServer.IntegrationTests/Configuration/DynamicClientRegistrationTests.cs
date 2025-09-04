@@ -4,10 +4,10 @@
 
 using System.Net.Http.Json;
 using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
+using Duende.IdentityServer.IntegrationTests.TestHosts;
 using Duende.IdentityServer.Models;
-using IntegrationTests.TestHosts;
 
-namespace IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.Configuration;
 
 public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
 {
