@@ -5,7 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityFramework.IntegrationTests.DI;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework.DI;
 
 public class DITests
 {

@@ -6,7 +6,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
-using Duende.IdentityServer;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -16,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using static Duende.IdentityServer.IdentityServerConstants;
 
-namespace IdentityServer.IntegrationTests.Endpoints.Ciba;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Ciba;
 
 public class CibaTests
 {

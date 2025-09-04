@@ -5,6 +5,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
+
 namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 internal class Clients

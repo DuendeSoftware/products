@@ -16,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Client = Duende.IdentityServer.Models.Client;
 
-namespace EntityFramework.IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 
 public class EntityFrameworkBasedLogoutTests
 {

@@ -4,7 +4,7 @@
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace EntityFramework.IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 
 public class NetworkDelaySimulationInterceptor(TimeSpan delay) : DbCommandInterceptor
 {

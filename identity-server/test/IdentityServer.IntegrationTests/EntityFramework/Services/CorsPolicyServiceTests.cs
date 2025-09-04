@@ -11,7 +11,7 @@ using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace EntityFramework.IntegrationTests.Services;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Services;
 
 public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {

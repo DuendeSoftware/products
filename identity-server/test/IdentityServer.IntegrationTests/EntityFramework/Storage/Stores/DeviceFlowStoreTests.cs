@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.InMemory.Infrastructure.Internal;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace EntityFramework.IntegrationTests.Storage.Stores;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, PersistedGrantDbContext, OperationalStoreOptions>
 {

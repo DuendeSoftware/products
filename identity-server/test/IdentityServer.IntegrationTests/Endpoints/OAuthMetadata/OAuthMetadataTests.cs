@@ -8,7 +8,7 @@ using Duende.IdentityServer.Licensing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IdentityServer.IntegrationTests.Endpoints.OAuthMetadata;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.OAuthMetadata;
 
 public class OAuthMetadataTests
 {
