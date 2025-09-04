@@ -1,9 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Security.Claims;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
+using Duende.Bff.Licensing;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Duende.Bff.Yarp.Internal;
@@ -351,8 +353,8 @@ public class BffBuilderTests
             }
         });
 
-        var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configFile.Configuration);
+        var services = BuildServiceCollectionWithBff(configFile);
+
         var provider = services.BuildServiceProvider();
         var frontends = provider.GetRequiredService<FrontendCollection>();
         frontends.Count.ShouldBe(2);
@@ -382,6 +384,17 @@ public class BffBuilderTests
         ]);
     }
 
+    private ServiceCollection BuildServiceCollectionWithBff(ConfigFile configFile)
+    {
+        var services = new ServiceCollection();
+        services.AddBff().LoadConfiguration(configFile.Configuration);
+        services.AddSingleton<LicenseValidator>(sp => new LicenseValidator(
+            logger: sp.GetRequiredService<ILogger<LicenseValidator>>(),
+            claims: new ClaimsPrincipal(new ClaimsIdentity(Some.AllowAllLicenseClaims())),
+            timeProvider: The.Clock));
+        return services;
+    }
+
 
     [Fact]
     public void When_updating_frontends_in_config_then_are_removed_from_Oidc_cache()
@@ -397,9 +410,10 @@ public class BffBuilderTests
             }
         });
 
-        var services = new ServiceCollection();
-        services.AddBff().LoadConfiguration(configFile.Configuration);
+        var services = BuildServiceCollectionWithBff(configFile);
+
         var provider = services.BuildServiceProvider();
+
         var optionsCache = provider.GetRequiredService<IOptionsMonitorCache<OpenIdConnectOptions>>();
 
         optionsCache.TryAdd("to_be_removed", new OpenIdConnectOptions());

@@ -19,19 +19,12 @@ public static class BenchmarkTests
         public class Fixture : SingleFrontendBenchmarks, IAsyncLifetime;
     }
 
-    //public class Yarp(Yarp.Fixture fixture)
-    //    : TestBase<Yarp.Fixture, YarpBenchmarks>(fixture)
-    //{
-    //    public class Fixture : YarpBenchmarks, IAsyncLifetime;
-    //}
-
     public abstract class TestBase<TFixture, TBenchmarks>(TFixture fixture)
         : IClassFixture<TFixture>
         where TFixture : TBenchmarks, IAsyncLifetime
         where TBenchmarks : BenchmarkBase
 
     {
-
         [Theory]
         [MemberData(nameof(GetBenchmarksInFixture))]
         public async Task InvokeBenchmarksAsTests(string benchmark, string testName)
