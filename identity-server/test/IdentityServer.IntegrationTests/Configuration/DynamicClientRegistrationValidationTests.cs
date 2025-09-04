@@ -6,9 +6,9 @@ using System.Net;
 using System.Net.Http.Json;
 using Duende.IdentityServer.Configuration.Models;
 using Duende.IdentityServer.Configuration.Models.DynamicClientRegistration;
-using IntegrationTests.TestHosts;
+using Duende.IdentityServer.IntegrationTests.TestHosts;
 
-namespace IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.Configuration;
 
 public class DynamicClientRegistrationValidationTests : ConfigurationIntegrationTestBase
 {

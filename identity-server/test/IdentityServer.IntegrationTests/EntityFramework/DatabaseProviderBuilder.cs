@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityFramework.IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 
 /// <summary>
 /// Helper methods to initialize DbContextOptions for the specified database provider and context.

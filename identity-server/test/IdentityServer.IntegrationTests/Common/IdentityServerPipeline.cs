@@ -8,13 +8,11 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using Duende.IdentityModel.Client;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
-using IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,7 +24,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
-namespace IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 public class IdentityServerPipeline
 {

@@ -11,7 +11,7 @@ using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace EntityFramework.IntegrationTests.Storage.Stores;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {

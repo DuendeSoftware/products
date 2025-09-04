@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
-namespace IntegrationTests.Clients.Setup;
+namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 public class CustomResponseDto
 {

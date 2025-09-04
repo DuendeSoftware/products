@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit.Sdk;
 
-namespace EntityFramework.IntegrationTests.Storage.Stores;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {

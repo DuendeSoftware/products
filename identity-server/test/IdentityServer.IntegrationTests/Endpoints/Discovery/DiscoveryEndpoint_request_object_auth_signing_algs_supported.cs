@@ -3,10 +3,10 @@
 
 using System.Text.Json;
 using Duende.IdentityModel.Client;
-using IntegrationTests.Common;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Microsoft.IdentityModel.Tokens;
 
-namespace IntegrationTests.Endpoints.Discovery;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
 public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests
 {

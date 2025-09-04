@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer.IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 public class MockLogger : ILogger
 {

@@ -6,20 +6,19 @@ using System.Globalization;
 using System.Net;
 using System.Security.Claims;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Stores.Default;
 using Duende.IdentityServer.Test;
 using Duende.IdentityServer.Validation;
-using IntegrationTests.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.Endpoints.Authorize;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class AuthorizeTests
 {

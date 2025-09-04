@@ -4,13 +4,11 @@
 
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
-using Duende.IdentityServer;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using IntegrationTests.Common;
-using IntegrationTests.Endpoints.Token;
 using PushedAuthorizationRequest = Duende.IdentityModel.Client.PushedAuthorizationRequest;
 
-namespace IntegrationTests.Endpoints.PushedAuthorization;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
 /// <summary>
 /// This class contains tests of the DPoP support at the PAR endpoint, exercising behavior that is specific to PAR.

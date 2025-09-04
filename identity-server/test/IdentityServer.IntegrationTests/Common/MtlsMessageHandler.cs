@@ -4,7 +4,7 @@
 
 using System.Security.Cryptography.X509Certificates;
 
-namespace IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 /// <summary>
 /// Message handler that injects a client certificate into the HTTP request for testing mTLS scenarios

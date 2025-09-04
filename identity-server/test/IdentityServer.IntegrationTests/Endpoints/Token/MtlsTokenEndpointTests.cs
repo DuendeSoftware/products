@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using IntegrationTests.Common;
 
-namespace IntegrationTests.Endpoints.Token;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
 public class MtlsTokenEndpointTests
 {

@@ -4,11 +4,12 @@
 
 using System.Text.Json;
 using Duende.IdentityModel.Client;
-using IntegrationTests.Clients.Setup;
+using Duende.IdentityServer.IntegrationTests.Clients.Setup;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 
-namespace IntegrationTests.Clients;
+namespace Duende.IdentityServer.IntegrationTests.Clients;
 
 public class CustomTokenRequestValidatorClient
 {

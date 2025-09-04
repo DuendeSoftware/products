@@ -12,7 +12,7 @@ using Duende.IdentityServer.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace EntityFramework.IntegrationTests.Storage.Stores;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests, PersistedGrantDbContext, OperationalStoreOptions>
 {

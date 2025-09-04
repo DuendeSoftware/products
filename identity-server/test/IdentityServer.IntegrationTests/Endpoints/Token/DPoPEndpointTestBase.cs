@@ -9,14 +9,14 @@ using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace IntegrationTests.Endpoints.Token;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
 [ShouldlyMethods]
 public static class DPoPAssertions

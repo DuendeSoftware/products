@@ -4,7 +4,7 @@
 
 using Duende.IdentityServer.Models;
 
-namespace IntegrationTests.Endpoints.Introspection.Setup;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Introspection.Setup;
 
 internal class Scopes
 {

@@ -8,12 +8,12 @@ using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
-using Duende.IdentityServer;
-using IntegrationTests.Endpoints.Introspection.Setup;
+using Duende.IdentityServer.IntegrationTests.Common;
+using Duende.IdentityServer.IntegrationTests.Endpoints.Introspection.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 
-namespace IntegrationTests.Endpoints.Introspection;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Introspection;
 
 public class IntrospectionTests
 {

@@ -4,7 +4,7 @@
 
 using System.Text.Json;
 
-namespace IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 public static class JsonElementExtensions
 {

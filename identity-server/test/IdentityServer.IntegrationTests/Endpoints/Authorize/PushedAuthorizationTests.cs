@@ -6,16 +6,15 @@ using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Microsoft.IdentityModel.Tokens;
 using JsonWebKey = Duende.IdentityServer.Models.JsonWebKey;
 using WilsonJsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
-namespace IntegrationTests.Endpoints.Authorize;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class PushedAuthorizationTests
 {

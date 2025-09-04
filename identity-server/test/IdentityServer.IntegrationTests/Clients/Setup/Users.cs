@@ -4,10 +4,9 @@
 
 using System.Security.Claims;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Test;
 
-namespace IntegrationTests.Clients.Setup;
+namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 internal static class Users
 {

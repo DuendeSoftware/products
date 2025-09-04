@@ -4,7 +4,7 @@
 
 using System.Net;
 
-namespace IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 public class NetworkHandler : HttpMessageHandler
 {

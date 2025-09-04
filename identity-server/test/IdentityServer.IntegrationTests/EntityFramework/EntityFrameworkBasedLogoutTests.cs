@@ -5,18 +5,18 @@ using Duende.IdentityModel.Client;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Services.KeyManagement;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Client = Duende.IdentityServer.Models.Client;
 
-namespace EntityFramework.IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 
 public class EntityFrameworkBasedLogoutTests
 {

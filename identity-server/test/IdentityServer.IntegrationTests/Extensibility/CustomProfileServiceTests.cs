@@ -7,12 +7,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.Extensibility;
+namespace Duende.IdentityServer.IntegrationTests.Extensibility;
 
 public class CustomProfileServiceTests
 {

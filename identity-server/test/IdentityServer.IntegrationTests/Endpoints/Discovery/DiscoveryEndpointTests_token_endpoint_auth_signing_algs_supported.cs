@@ -4,11 +4,11 @@
 using System.Text.Json;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
-using IntegrationTests.Common;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace IntegrationTests.Endpoints.Discovery;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
 public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_supported
 {

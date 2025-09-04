@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace EntityFramework.IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 
 /// <summary>
 /// Base class for integration tests, responsible for initializing test database providers and an xUnit class fixture

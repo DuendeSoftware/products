@@ -6,15 +6,15 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.EntityFramework;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Storage;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Services;
-using IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.TestHosts;
+namespace Duende.IdentityServer.IntegrationTests.TestHosts;
 
 public class ConfigurationHost : GenericHost
 {

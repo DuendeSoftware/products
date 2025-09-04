@@ -9,16 +9,15 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Test;
-using IntegrationTests.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IntegrationTests.Endpoints.EndSession;
+namespace Duende.IdentityServer.IntegrationTests.Endpoints.EndSession;
 
 public class EndSessionTests
 {

@@ -3,7 +3,6 @@
 
 
 using System.Net;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
@@ -16,7 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer.IntegrationTests.Hosting;
+namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class DynamicProvidersTests
 {

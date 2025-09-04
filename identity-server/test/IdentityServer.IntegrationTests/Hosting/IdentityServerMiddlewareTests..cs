@@ -2,12 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.Hosting;
-using IntegrationTests.Common;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 
-namespace IntegrationTests.Hosting;
+namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class FailRouter : IEndpointRouter
 {

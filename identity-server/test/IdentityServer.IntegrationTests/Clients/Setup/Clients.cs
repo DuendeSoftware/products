@@ -3,11 +3,10 @@
 
 
 using System.Security.Cryptography.X509Certificates;
-using Duende.IdentityServer;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
-using IntegrationTests.Common;
 
-namespace IntegrationTests.Clients.Setup;
+namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 internal class Clients
 {

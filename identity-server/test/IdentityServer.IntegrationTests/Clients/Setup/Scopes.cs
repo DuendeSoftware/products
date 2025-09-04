@@ -4,7 +4,7 @@
 
 using Duende.IdentityServer.Models;
 
-namespace IntegrationTests.Clients.Setup;
+namespace Duende.IdentityServer.IntegrationTests.Clients.Setup;
 
 internal class Scopes
 {

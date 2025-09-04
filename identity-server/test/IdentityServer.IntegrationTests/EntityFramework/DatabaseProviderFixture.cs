@@ -4,7 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace EntityFramework.IntegrationTests;
+namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 
 /// <summary>
 /// xUnit ClassFixture for creating and deleting integration test databases.
