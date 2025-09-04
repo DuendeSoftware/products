@@ -22,7 +22,7 @@ internal static partial class LicensingLogMessages
         Message = """
                     Your license for Duende BFF Security Framework has expired on {ExpirationDate}. 
                     Please contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,
-                    or start a conversation with us: https://duendesoftware.com/contact.
+                    or start a conversation with us: https://duende.link/l/bff/contact
                     
                     See https://duende.link/l/bff/expired for more information.
                     """)]
@@ -34,7 +34,7 @@ internal static partial class LicensingLogMessages
                    You do not have a valid license key for the Duende BFF Security Framework.
                    When unlicensed, BFF will run in trial mode. It will limit the number of active sessions to 5.
                    If you are running in production you are required to have a licensed version.
-                   Please start a conversation with us: https://duendesoftware.com/contact
+                   Please start a conversation with us: https://duende.link/l/bff/contact
                    
                    See https://duende.link/l/bff/trial for more information.
                    """)]
@@ -45,14 +45,16 @@ internal static partial class LicensingLogMessages
                    Your license key does not include the BFF feature.
                    BFF will run in trial mode. It will limit the number of active sessions to 5. 
                    Please contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,
-                   or start a conversation with us: https://duendesoftware.com/contact.
+                   or start a conversation with us: https://duende.link/l/bff/contact
+                   
+                   See https://duende.link/l/bff/trial for more information.
                    """)]
     public static partial void NotLicensedForBff(this ILogger logger, LogLevel logLevel, string licenseContact, string licenseCompany);
 
     [LoggerMessage(
         message: "Error validating the license key." +
                  "If you are running in production you are required to have a licensed version. " +
-                 "Please start a conversation with us: https://duendesoftware.com/contact")]
+                 "Please start a conversation with us: https://duende.link/l/bff/contact")]
     public static partial void ErrorValidatingLicenseKey(this ILogger logger, LogLevel logLevel, Exception ex);
 
     [LoggerMessage(
@@ -82,7 +84,7 @@ internal static partial class LicensingLogMessages
         message: """
                  Frontend {FrontendName} was added. However, your current license does not support multiple frontends.
                  If you are running in production you are required to have a license for each frontend.
-                 Please start a conversation with us: https://duendesoftware.com/contact
+                 Please start a conversation with us: https://duende.link/l/bff/contact
                  
                  See https://duende.link/l/bff/threshold for more information.
                  """)]
