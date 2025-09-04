@@ -20,7 +20,7 @@ var products = new Product[]
     new("identity-server",
         "identity-server.slnf",
         "is",
-        ["EntityFramework.Storage.UnitTests", "IdentityServer.IntegrationTests", "IdentityServer.UnitTests"],
+        ["IdentityServer.IntegrationTests", "IdentityServer.UnitTests"],
         [])
 };
 foreach (var product in products)

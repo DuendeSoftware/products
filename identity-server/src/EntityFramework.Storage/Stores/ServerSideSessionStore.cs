@@ -500,7 +500,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         return query;
     }
 
-    private class SessionPaginationContext
+    private sealed class SessionPaginationContext
     {
         public int TotalCount { get; set; }
         public int CountRequested { get; set; }

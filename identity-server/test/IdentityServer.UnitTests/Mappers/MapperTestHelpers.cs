@@ -4,6 +4,8 @@
 
 using System.Reflection;
 
+namespace IdentityServer.UnitTests.Mappers;
+
 public static class MapperTestHelpers
 {
     public static bool AllPropertiesAreMapped<TSource, TDestination>(

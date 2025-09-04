@@ -1,12 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Entities = Duende.IdentityServer.EntityFramework.Entities;
 using Models = Duende.IdentityServer.Models;
 
-namespace EntityFramework.Storage.UnitTests.Mappers;
+namespace IdentityServer.UnitTests.Mappers;
 
 public class IdentityProviderMappersTests
 {

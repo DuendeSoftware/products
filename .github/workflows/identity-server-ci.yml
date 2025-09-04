@@ -90,20 +90,6 @@ jobs:
       run: dotnet build identity-server.slnf --no-restore -c Release
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
-    - name: Test - test/EntityFramework.Storage.UnitTests
-      run: dotnet test test/EntityFramework.Storage.UnitTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/EntityFramework.Storage.UnitTests-tests.trx" --collect:"XPlat Code Coverage"
-    - id: test-report-test-EntityFramework-Storage-UnitTests
-      name: Test report - test/EntityFramework.Storage.UnitTests
-      if: github.event_name == 'push' && (success() || failure())
-      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
-      with:
-        name: Test Report - test/EntityFramework.Storage.UnitTests
-        path: '**/test/EntityFramework.Storage.UnitTests-tests.trx'
-        reporter: dotnet-trx
-        fail-on-error: true
-        fail-on-empty: true
-    - name: Publish test report link
-      run: echo "[Test Results - test/EntityFramework.Storage.UnitTests](${{ steps.test-report-test-EntityFramework-Storage-UnitTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
     - name: Test - test/IdentityServer.IntegrationTests
       run: dotnet test test/IdentityServer.IntegrationTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/IdentityServer.IntegrationTests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-IdentityServer-IntegrationTests
