@@ -335,6 +335,11 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.RevocationEndpointAuthenticationMethodsSupported, supportedAuthMethods);
             AddSigningAlgorithmsForEndpointIfNeeded(OidcConstants.Discovery.RevocationEndpointAuthSigningAlgorithmsSupported, entries, supportedAuthMethods);
         }
+        if (Options.Discovery.ShowIntrospectionEndpointAuthenticationMethods)
+        {
+            entries.Add(OidcConstants.Discovery.IntrospectionEndpointAuthenticationMethodsSupported, supportedAuthMethods);
+            AddSigningAlgorithmsForEndpointIfNeeded(OidcConstants.Discovery.IntrospectionEndpointAuthSigningAlgorithmsSupported, entries, supportedAuthMethods);
+        }
 
         var signingCredentials = await Keys.GetAllSigningCredentialsAsync();
         if (signingCredentials.Any())
