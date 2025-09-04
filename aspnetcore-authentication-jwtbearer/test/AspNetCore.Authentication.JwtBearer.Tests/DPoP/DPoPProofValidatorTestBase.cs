@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,7 +20,7 @@ public abstract class DPoPProofValidatorTestBase
     {
         ProofValidator = CreateProofValidator();
         var jtiBytes = Encoding.UTF8.GetBytes(TokenId);
-        TokenIdHash = Base64Url.Encode(SHA256.HashData(jtiBytes));
+        TokenIdHash = Base64Url.EncodeToString(SHA256.HashData(jtiBytes));
         Context = new()
         {
             Options = Options,
@@ -52,7 +53,7 @@ public abstract class DPoPProofValidatorTestBase
 
     protected DPoPProofValidationResult Result = new();
 
-    // This is just an arbitrary date that we're going to do all our date arithmetic relative to. 
+    // This is just an arbitrary date that we're going to do all our date arithmetic relative to.
     // It was chosen because it is convenient to use - it is well within the range of DateTime
     protected const long IssuedAt = 1704088800; // Mon Jan 01 2024 06:00:00 GMT+0000
     protected const long ValidFor = 100;
