@@ -6,6 +6,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Stores;
+using Duende.Private.Licensing;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -90,7 +91,7 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
                 if (providerType != null)
                 {
                     IdentityServerLicenseValidator.Instance.ValidateDynamicProviders();
-                    _licenseUsageTracker.FeatureUsed(LicenseFeature.DynamicProviders);
+                    _licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.DynamicProviders);
                     dynamicScheme = new DynamicAuthenticationScheme(idp, providerType.HandlerType);
                     cache.Add(name, dynamicScheme);
                 }
