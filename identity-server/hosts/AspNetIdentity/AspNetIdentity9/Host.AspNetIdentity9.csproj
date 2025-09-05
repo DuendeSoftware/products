@@ -22,16 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- This is a transitive dependency of Microsoft.EntityFrameworkCore.SqlServer.
-Without pinning a version of this package, the sql server package would bring in
-an older version that in turn depends on vulnerable packages. Someday, it would
-be nice if we could update Microsoft.EntityFrameworkCore.SqlServer and remove
-this explicit dependency (assuming that future versions of
-Microsoft.EntityFrameworkCore.SqlServer that don't have this problem exist). -->
-    <PackageReference Include="Microsoft.Data.SqlClient" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
     <ProjectReference Include="..\..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
