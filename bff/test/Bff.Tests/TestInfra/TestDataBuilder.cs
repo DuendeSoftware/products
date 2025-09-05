@@ -47,7 +47,7 @@ public class TestDataBuilder(TestData the)
 
     public RemoteApi RemoteApi() => new()
     {
-        LocalPath = The.Path,
+        PathMatch = The.Path,
         TargetUri = The.Url,
         RequiredTokenType = The.RequiredTokenType,
         Parameters = BffUserAccessTokenParameters(),
@@ -114,7 +114,7 @@ public class TestDataBuilder(TestData the)
 
     internal RemoteApiConfiguration RemoteApiConfiguration() => new()
     {
-        LocalPath = The.Path,
+        PathMatch = The.Path,
         TargetUri = The.Url,
         RequiredTokenType = The.RequiredTokenType,
         TokenRetrieverTypeName = typeof(TestTokenRetriever).AssemblyQualifiedName,

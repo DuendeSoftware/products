@@ -7,6 +7,7 @@ using Duende.Bff.Builder;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Yarp.ReverseProxy.Forwarder;
 
@@ -87,10 +88,10 @@ public class BffHost : Host
         .AddOrUpdate(new BffFrontend(BffFrontendName.Parse(uri.Host + "-" + uri.Port))
             .MappedToOrigin(Origin.Parse(uri)));
 
-    public void AddFrontend(LocalPath path) =>
+    public void AddFrontend(PathString matchingPath) =>
         GetService<IFrontendCollection>()
-            .AddOrUpdate(new BffFrontend(BffFrontendName.Parse(path.ToString().Replace("/", "")))
-                .MappedToPath(path));
+            .AddOrUpdate(new BffFrontend(BffFrontendName.Parse(matchingPath.ToString().Replace("/", "")))
+                .MappedToPath(matchingPath));
 }
 
 internal class SimulatedInternetYarpForwarderFactory(SimulatedInternet simulatedInternet)

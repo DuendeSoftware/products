@@ -11,7 +11,7 @@ internal class OTelParameters
     public const string Detail = "Detail";
     public const string Error = "Error";
     public const string Expiration = "Expiration";
-    public const string LocalPath = "LocalPath";
+    public const string Path = "Path";
     public const string RouteId = "RouteId";
     public const string Sid = "Sid";
     public const string StatusCode = "StatusCode";

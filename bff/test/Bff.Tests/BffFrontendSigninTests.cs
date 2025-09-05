@@ -323,7 +323,7 @@ public class BffFrontendSigninTests : BffTestBase
         IdentityServer.AddClient("differnet_client_id", Bff.Url());
         await InitializeAsync();
 
-        var bffFrontend = Some.BffFrontend().WithRemoteApis(new RemoteApi(LocalPath.Parse("/test"), Api.Url()).WithAccessToken(RequiredTokenType.Client));
+        var bffFrontend = Some.BffFrontend().WithRemoteApis(new RemoteApi("/test", Api.Url()).WithAccessToken(RequiredTokenType.Client));
         AddOrUpdateFrontend(bffFrontend);
 
         await Bff.BrowserClient.Login()

@@ -4,7 +4,7 @@
   "frontends": {
     "from_config": {
       "indexHtmlUrl": "https://localhost:5005/static/index.html",
-      "matchingPath": "/from-config",
+      "pathMatch": "/from-config",
       "oidc": {
         "clientId": "bff.multi-frontend.config"
       },

@@ -28,7 +28,7 @@ public class MultiFrontendBffService(IConfiguration config, IOptions<BffSettings
         {
             bff.AddFrontends(
                 new BffFrontend(BffFrontendName.Parse("bff-with-path-" + i))
-                    .MappedToPath(LocalPath.Parse("/path" + i)));
+                    .MappedToPath("/path" + i));
         }
 
     }

@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.DynamicFrontends;
 
@@ -47,14 +48,14 @@ public static class BffFrontendExtensions
         };
     }
 
-    public static BffFrontend MappedToPath(this BffFrontend frontend, LocalPath path)
+    public static BffFrontend MappedToPath(this BffFrontend frontend, PathString pathMatch)
     {
         ArgumentNullException.ThrowIfNull(frontend);
         return frontend with
         {
             SelectionCriteria = frontend.SelectionCriteria with
             {
-                MatchingPath = path
+                MatchingPath = pathMatch
             }
         };
     }

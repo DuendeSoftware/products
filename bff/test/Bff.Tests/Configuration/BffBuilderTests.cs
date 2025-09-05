@@ -292,7 +292,7 @@ public class BffBuilderTests
                 ["frontends:_FrontendName_:Oidc:callbackPath"] = "", // ev: todo
                 ["frontends:_FrontendName_:Oidc:authority"] = The.Authority.ToString(),
                 ["frontends:_FrontendName_:Oidc:mapInboundClaims"] = "False",
-                ["frontends:_FrontendName_:RemoteApis:0:localPath"] = The.Path,
+                ["frontends:_FrontendName_:RemoteApis:0:pathMatch"] = The.Path,
                 ["frontends:_FrontendName_:RemoteApis:0:targetUri"] = The.Url.ToString(),
                 ["frontends:_FrontendName_:RemoteApis:0:activityTimeout"] = TimeSpan.FromSeconds(987).ToString(),
                 ["frontends:_FrontendName_:RemoteApis:0:allowResponseBuffering"] = true.ToString(),
