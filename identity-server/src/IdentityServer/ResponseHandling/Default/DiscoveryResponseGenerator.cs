@@ -335,6 +335,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.RevocationEndpointAuthenticationMethodsSupported, supportedAuthMethods);
             AddSigningAlgorithmsForEndpointIfNeeded(OidcConstants.Discovery.RevocationEndpointAuthSigningAlgorithmsSupported, entries, supportedAuthMethods);
         }
+
         if (Options.Discovery.ShowIntrospectionEndpointAuthenticationMethods)
         {
             entries.Add(OidcConstants.Discovery.IntrospectionEndpointAuthenticationMethodsSupported, supportedAuthMethods);
@@ -346,6 +347,16 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         {
             var signingAlgorithms = signingCredentials.Select(c => c.Algorithm).Distinct();
             entries.Add(OidcConstants.Discovery.IdTokenSigningAlgorithmsSupported, signingAlgorithms);
+
+            if (Options.Endpoints.EnableUserInfoEndpoint)
+            {
+                entries.Add(OidcConstants.Discovery.UserInfoSigningAlgorithmsSupported, signingAlgorithms);
+            }
+
+            if (Options.Endpoints.EnableIntrospectionEndpoint)
+            {
+                entries.Add(OidcConstants.Discovery.IntrospectionSigningAlgorithmsSupported, signingAlgorithms);
+            }
         }
 
         entries.Add(OidcConstants.Discovery.SubjectTypesSupported, SubjectTypesSupported);
