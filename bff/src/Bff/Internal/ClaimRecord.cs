@@ -10,11 +10,6 @@ namespace Duende.Bff.Internal;
 /// </summary>
 internal class ClaimRecord()
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="value"></param>
     public ClaimRecord(string type, object value) : this()
     {
         Type = type;
@@ -33,9 +28,4 @@ internal class ClaimRecord()
     [JsonPropertyName("value")]
     public object Value { get; init; } = default!;
 
-    /// <summary>
-    /// The value type
-    /// </summary>
-    [JsonPropertyName("valueType")]
-    public string? ValueType { get; init; }
 }
