@@ -395,6 +395,12 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.BackchannelTokenDeliveryModesSupported,
                 new[] { OidcConstants.BackchannelTokenDeliveryModes.Poll });
             entries.Add(OidcConstants.Discovery.BackchannelUserCodeParameterSupported, true);
+
+            if (!IEnumerableExtensions.IsNullOrEmpty(Options.SupportedRequestObjectSigningAlgorithms))
+            {
+                entries.Add(OidcConstants.Discovery.BackchannelAuthenticationRequestSigningAlgValuesSupported,
+                    Options.SupportedRequestObjectSigningAlgorithms);
+            }
         }
 
         if (Options.Endpoints.EnableTokenEndpoint &&

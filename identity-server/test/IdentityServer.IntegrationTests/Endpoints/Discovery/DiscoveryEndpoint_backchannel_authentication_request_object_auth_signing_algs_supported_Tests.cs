@@ -8,13 +8,13 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
-public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests : DiscoveryEndpointTestsBase
+public class DiscoveryEndpoint_backchannel_authentication_request_object_auth_signing_algs_supported_Tests : DiscoveryEndpointTestsBase
 {
-    private const string Category = "Discovery endpoint - request_object_signing_algs_supported";
+    private const string Category = "Discovery endpoint - backchannel_authentication_request_signing_alg_values_supported";
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task request_object_signing_alg_values_supported_should_match_configuration()
+    public async Task backchannel_authentication_request_signing_alg_values_supported_should_match_configuration()
     {
         var pipeline = new IdentityServerPipeline();
 
@@ -28,7 +28,8 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests 
         var result =
             await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
                 "https://server/.well-known/openid-configuration");
-        var algorithmsSupported = result.TryGetStringArray("request_object_signing_alg_values_supported");
+
+        var algorithmsSupported = result.BackchannelAuthenticationRequestSigningAlgValuesSupported;
 
         algorithmsSupported.Count().ShouldBe(2);
         algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSsaPssSha256);
@@ -38,7 +39,7 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests 
     [Theory]
     [MemberData(nameof(NullOrEmptySupportedAlgorithms))]
     [Trait("Category", Category)]
-    public async Task request_object_signing_alg_values_supported_should_not_be_present_if_option_is_null_or_empty(
+    public async Task backchannel_authentication_request_signing_alg_values_supported_should_not_be_present_if_option_is_null_or_empty(
         ICollection<string> algorithms)
     {
         var pipeline = new IdentityServerPipeline();
@@ -47,15 +48,34 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests 
 
         var result = await pipeline.BackChannelClient
             .GetAsync("https://server/.well-known/openid-configuration");
+
         var json = await result.Content.ReadAsStringAsync();
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
-        data.ShouldNotContainKey("request_object_signing_alg_values_supported");
+        data.ShouldNotContainKey("backchannel_authentication_request_signing_alg_values_supported");
     }
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task request_object_signing_alg_values_supported_should_default_to_rs_ps_es()
+    public async Task
+        backchannel_authentication_request_signing_alg_values_supported_should_be_present_if_ciba_is_disabled()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Endpoints.EnableBackchannelAuthenticationEndpoint = false;
+
+        var result = await pipeline.BackChannelClient
+            .GetAsync("https://server/.well-known/openid-configuration");
+
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+
+        data.ShouldNotContainKey("backchannel_authentication_request_signing_alg_values_supported");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task backchannel_authentication_request_signing_alg_values_supported_should_default_to_rs_ps_es()
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
@@ -63,7 +83,8 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests 
         var result =
             await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
                 "https://server/.well-known/openid-configuration");
-        var algorithmsSupported = result.TryGetStringArray("request_object_signing_alg_values_supported");
+
+        var algorithmsSupported = result.BackchannelAuthenticationRequestSigningAlgValuesSupported;
 
         algorithmsSupported.ShouldBe([
             SecurityAlgorithms.RsaSha256,
