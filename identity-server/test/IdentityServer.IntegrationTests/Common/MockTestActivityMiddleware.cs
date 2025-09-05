@@ -2,10 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics;
+using IntegrationTests.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace IntegrationTests.Common;
+namespace Duende.IdentityServer.IntegrationTests.Common;
 
 /// <summary>
 /// A middleware that adds a <see cref="MockHttpActivityFeature"/> to the pipeline and makes it available for
