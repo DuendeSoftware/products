@@ -21,11 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Net.Http" />
-    <PackageReference Include="System.Text.RegularExpressions" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="identityserver_testing.cer">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

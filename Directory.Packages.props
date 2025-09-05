@@ -27,9 +27,6 @@
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Condition="'$(TargetFramework)' == 'net10.0'" Version="10.0.0-preview.7.25380.108" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Condition="'$(TargetFramework)' == 'net10.0'" Version="10.0.0-preview.7.25380.108" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Condition="'$(TargetFramework)' == 'net10.0'" Version="10.0.0-preview.7.25380.108" />
@@ -57,7 +54,6 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Condition="'$(TargetFramework)' == 'net10.0'" Version="10.0.0-preview.7.25380.108" />
-    <PackageVersion Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Condition="'$(TargetFramework)' == 'net10.0'" Version="10.0.0-preview.7.25380.108" />
