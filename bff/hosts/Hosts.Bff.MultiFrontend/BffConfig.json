@@ -4,33 +4,33 @@
   "frontends": {
     "from_config": {
       "indexHtmlUrl": "https://localhost:5005/static/index.html",
-      "matchingPath": "/from-config",
+      "pathMatch": "/from-config",
       "oidc": {
         "clientId": "bff.multi-frontend.config"
       },
-      "remoteApis": [ 
+      "remoteApis": [
         {
-          "localPath": "/api/client-token",
+          "pathMatch": "/api/client-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "Client"
         },
         {
-          "localPath": "/api/user-or-client-token",
+          "pathMatch": "/api/user-or-client-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "OptionalUserOrClient"
         },
         {
-          "localPath": "/api/anonymous",
+          "pathMatch": "/api/anonymous",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "None"
         },
         {
-          "localPath": "/api/optional-user-token",
+          "pathMatch": "/api/optional-user-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "OptionalUserOrNone"
         },
         {
-          "localPath": "/api/user-token",
+          "pathMatch": "/api/user-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "User"
         }

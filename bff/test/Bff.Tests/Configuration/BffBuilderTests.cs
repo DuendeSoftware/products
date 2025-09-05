@@ -176,7 +176,7 @@ public class BffBuilderTests
                 {
                     [The.FrontendName] = new()
                     {
-                        CdnIndexHtmlUrl = The.Url,
+                        IndexHtmlUrl = The.Url,
                         MatchingOrigin = The.Origin.ToString(),
                         MatchingPath = The.Path,
                         Oidc = Some.OidcConfiguration(),
@@ -202,7 +202,7 @@ public class BffBuilderTests
         found.ShouldBe(new BffFrontend
         {
             Name = The.FrontendName,
-            CdnIndexHtmlUrl = The.Url,
+            IndexHtmlUrl = The.Url,
             SelectionCriteria = Some.FrontendSelectionCriteria()
         });
 
@@ -326,8 +326,7 @@ public class BffBuilderTests
         var expected = new BffFrontend
         {
             Name = The.FrontendName,
-            CdnIndexHtmlUrl = cdnIndexHtmlUrl,
-            StaticAssetsUrl = staticAssetsUrl,
+            IndexHtmlUrl = The.Url,
             SelectionCriteria = Some.FrontendSelectionCriteria(),
             DataExtensions = found.DataExtensions
         };

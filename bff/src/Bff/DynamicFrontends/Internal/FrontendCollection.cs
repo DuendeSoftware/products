@@ -143,9 +143,9 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                     {
                         frontendConfiguration.Cookies?.ApplyTo(opt);
                     },
-                SelectionCriteria = new FrontendSelectionCriteria()
+                MatchingCriteria = new FrontendMatchingCriteria()
                 {
-                    MatchingOrigin = Origin.ParseOrDefault(frontendConfiguration.MatchingOrigin),
+                    MatchingHostHeader = HostHeaderValue.ParseOrDefault(frontendConfiguration.MatchingOrigin),
                     MatchingPath = string.IsNullOrEmpty(frontendConfiguration.MatchingPath) ? null : frontendConfiguration.MatchingPath,
                 },
                 DataExtensions = extensions

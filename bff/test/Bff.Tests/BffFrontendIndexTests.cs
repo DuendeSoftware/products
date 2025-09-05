@@ -56,7 +56,7 @@ public class BffFrontendIndexTests : BffTestBase
             .WithRemoteApis(new RemoteApi()
             {
                 TargetUri = Api.Url(),
-                LocalPath = The.Path,
+                PathMatch = The.Path,
                 RequiredTokenType = RequiredTokenType.Client,
             })
         );

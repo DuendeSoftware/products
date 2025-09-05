@@ -20,7 +20,7 @@ public static class RouteBuilderExtensions
     /// Adds a remote BFF API endpoint
     /// </summary>
     /// <param name="endpoints">The endpoint route builder to add the endpoint to.</param>
-    /// <param name="localPath">The local path pattern for the BFF API endpoint.</param>
+    /// <param name="pathMatch">The local path pattern for the BFF API endpoint.</param>
     /// <param name="apiAddress">The remote API address to which requests will be forwarded.</param>
     /// <param name="yarpTransformBuilder">
     /// Optional. An action to configure YARP transforms for this proxy request. 
@@ -33,7 +33,7 @@ public static class RouteBuilderExtensions
     /// <returns>An <see cref="IEndpointConventionBuilder"/> for further configuration of the endpoint.</returns>
     public static IEndpointConventionBuilder MapRemoteBffApiEndpoint(
         this IEndpointRouteBuilder endpoints,
-        PathString localPath,
+        PathString pathMatch,
         Uri apiAddress,
         Action<TransformBuilderContext>? yarpTransformBuilder = null,
         ForwarderRequestConfig? requestConfig = null
@@ -55,7 +55,7 @@ public static class RouteBuilderExtensions
                 ?? DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken;
 
             // invoke the default transform builder
-            defaultYarpTransformBuilder(localPath, context);
+            defaultYarpTransformBuilder(pathMatch, context);
         };
 
         // Try to resolve the ITransformBuilder from DI. If it is not registered,
@@ -64,7 +64,7 @@ public static class RouteBuilderExtensions
             ?? throw new InvalidOperationException("No ITransformBuilder has been registered. Have you called BffBuilder.AddRemoteApis()");
 
         return endpoints.MapForwarder(
-                pattern: localPath.Add("/{**catch-all}").Value!,
+                pattern: pathMatch.Add("/{**catch-all}").Value!,
                 destinationPrefix: apiAddress.ToString(),
                 configureTransform: context =>
                 {

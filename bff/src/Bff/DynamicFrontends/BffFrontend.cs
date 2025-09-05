@@ -23,7 +23,7 @@ public sealed record BffFrontend
 
     /// <summary>
     /// There's an equals override on record types, but it can't compare the ConfigureOpenIdConnectOptions and ConfigureCookieOptions
-    /// since they are actions. 
+    /// since they are actions.
     /// </summary>
     /// <param name="other"></param>
     /// <returns></returns>
@@ -40,13 +40,13 @@ public sealed record BffFrontend
         }
 
         return Name.Equals(other.Name)
-               && SelectionCriteria.Equals(other.SelectionCriteria)
+               && MatchingCriteria.Equals(other.MatchingCriteria)
                && Equals(CdnIndexHtmlUrl, other.CdnIndexHtmlUrl)
                && Equals(StaticAssetsUrl, other.StaticAssetsUrl)
                && DataExtensions.SequenceEqual(other.DataExtensions);
     }
 
-    public override int GetHashCode() => HashCode.Combine(Name, SelectionCriteria, CdnIndexHtmlUrl, DataExtensions);
+    public override int GetHashCode() => HashCode.Combine(Name, MatchingCriteria, CdnIndexHtmlUrl, DataExtensions);
 
     public required BffFrontendName Name { get; init; }
 
@@ -57,7 +57,10 @@ public sealed record BffFrontend
 
     public Action<CookieAuthenticationOptions>? ConfigureCookieOptions { get; init; }
 
-    public FrontendSelectionCriteria SelectionCriteria { get; init; } = new();
+    /// <summary>
+    /// The criteria on which this frontend will be matched for a request.
+    /// </summary>
+    public FrontendMatchingCriteria MatchingCriteria { get; init; } = new();
 
     /// <summary>
     /// Setting this value indicates that an index.html file should be proxied through the BFF. When this value is set, any
@@ -65,8 +68,8 @@ public sealed record BffFrontend
     ///
     /// Any unmatched request will be forwarded to this URL. This allows for SPAs that use client side routing.
     ///
-    /// See https://duende.link/d/bff/ui-hosting for more information. 
-    /// 
+    /// See https://duende.link/d/bff/ui-hosting for more information.
+    ///
     /// </summary>
     public Uri? CdnIndexHtmlUrl
     {
@@ -85,14 +88,14 @@ public sealed record BffFrontend
     /// Setting this value indicates that static assets (js, css, images etc) should be proxied through the BFF
     /// from the given URL. When this value is set, any unmatched request will be forwarded to this URL. Should the response
     /// be 404, then another attempt to forward this request to '/' is done. This allows for SPAs that use client side routing.
-    /// 
+    ///
     /// This setting is usually used during development in combination with development webserver.
     ///
     /// Note, this is less than ideal for production scenarios, as it adds additional load to the BFF server.
     /// Consider deploying your assets to a CDN and use the <see cref="CdnIndexHtmlUrl"/>. If you want to switch this value
     /// depending on environment, consider using the <see cref="BffFrontendExtensions.WithBffStaticAssets"/> extension method.
     ///
-    /// See https://duende.link/d/bff/ui-hosting for more information. 
+    /// See https://duende.link/d/bff/ui-hosting for more information.
     /// </summary>
     public Uri? StaticAssetsUrl
     {
@@ -108,7 +111,7 @@ public sealed record BffFrontend
 
             // Make sure the path provided ends with a trailing "/".
             // Technically, users should not be allowed to add a URL without a trailing '/', but
-            // this is such a common mistake that it would probably be very annoying for our users. 
+            // this is such a common mistake that it would probably be very annoying for our users.
             if (_staticAssetsUrl != null && !_staticAssetsUrl.AbsolutePath.EndsWith('/'))
             {
                 _staticAssetsUrl = new UriBuilder(_staticAssetsUrl.Scheme, _staticAssetsUrl.Host,

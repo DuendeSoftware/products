@@ -31,7 +31,7 @@ public sealed record AccessTokenRetrievalContext
     /// <summary>
     /// The locally requested path.
     /// </summary>
-    public required LocalPath LocalPath { get; init; }
+    public required PathString PathMatch { get; init; }
 
     /// <summary>
     /// The remote address of the API.

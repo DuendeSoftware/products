@@ -16,10 +16,10 @@ public static class DefaultBffYarpTransformerBuilders
     /// and adds an access token to the request. The type of access token is determined by the <see cref="BffRemoteApiEndpointMetadata"/>.
     /// </summary>
     public static readonly BffYarpTransformBuilder DirectProxyWithAccessToken =
-        (localPath, context) =>
+        (pathMatch, context) =>
         {
             context.AddRequestHeaderRemove("Cookie");
-            context.AddPathRemovePrefix(localPath);
-            context.AddBffAccessToken(localPath);
+            context.AddPathRemovePrefix(pathMatch);
+            context.AddBffAccessToken(pathMatch);
         };
 }

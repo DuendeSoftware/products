@@ -9,7 +9,7 @@ internal static class PathMapper
 {
     public static void MapPath(HttpContext context, BffFrontend frontend)
     {
-        var path = frontend.SelectionCriteria.MatchingPath;
+        var path = frontend.MatchingCriteria.MatchingPath;
 
         if (path == null)
         {

@@ -14,12 +14,12 @@ internal static partial class LogMessages
 {
     [LoggerMessage(
         Message = $$"""
-                    Management URL request {{{OTelParameters.LocalPath}}} blocked with 404 response, because the implicit frontend is disabled.
+                    Management URL request {{{OTelParameters.Path}}} blocked with 404 response, because the implicit frontend is disabled.
                     
                     When you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,
                     Add one without Host or Path mapping. 
                     """)]
-    public static partial void ImplicitFrontendDisabled(this ILogger logger, LogLevel level, PathString localPath);
+    public static partial void ImplicitFrontendDisabled(this ILogger logger, LogLevel level, PathString path);
 
 
     [LoggerMessage(
@@ -36,6 +36,10 @@ internal static partial class LogMessages
     public static partial void DuplicateDefaultRouteConfigured(this ILogger logger, LogLevel level);
 
     [LoggerMessage(
+        Message = $"Duplicate Frontend matching criteria registered. Frontend '{{{OTelParameters.Frontend}}}' will be ignored because it collides with frontend '{{duplicate}}'.")]
+    public static partial void FrontendWithSimilarMatchingCriteriaAlreadyRegistered(this ILogger logger, LogLevel level, BffFrontendName frontend, BffFrontendName duplicate);
+
+    [LoggerMessage(
         Message = $"Failed to apply yarp access token request transform.")]
     public static partial void FailedToApplyYarpAccessTokenRequestTransform(this ILogger logger, Exception ex, LogLevel level);
 
@@ -49,8 +53,8 @@ internal static partial class LogMessages
 
 
     [LoggerMessage(
-        Message = $"Proxy response error. local path: '{{{OTelParameters.LocalPath}}}', error: '{{{OTelParameters.Error}}}'")]
-    public static partial void ProxyResponseError(this ILogger logger, LogLevel level, string localPath, string error);
+        Message = $"Proxy response error. Path: '{{{OTelParameters.Path}}}', error: '{{{OTelParameters.Error}}}'")]
+    public static partial void ProxyResponseError(this ILogger logger, LogLevel level, string path, string error);
 
     [LoggerMessage(
         message:
@@ -112,8 +116,8 @@ internal static partial class LogMessages
 
     [LoggerMessage(
         LogLevel.Error,
-        $"Anti-forgery validation failed. local path: '{{{OTelParameters.LocalPath}}}'")]
-    public static partial void AntiForgeryValidationFailed(this ILogger logger, string localPath);
+        $"Anti-forgery validation failed. Path: '{{{OTelParameters.Path}}}'")]
+    public static partial void AntiForgeryValidationFailed(this ILogger logger, string path);
 
     [LoggerMessage(
         message: $"Back-channel logout. sub: '{{{OTelParameters.Sub}}}', sid: '{{{OTelParameters.Sid}}}'")]
@@ -122,9 +126,9 @@ internal static partial class LogMessages
 
     [LoggerMessage(
         message:
-        $"Access token is missing. token type: '{{{OTelParameters.TokenType}}}', local path: '{{{OTelParameters.LocalPath}}}', detail: '{{{OTelParameters.Detail}}}'")]
+        $"Access token is missing. token type: '{{{OTelParameters.TokenType}}}', Path: '{{{OTelParameters.Path}}}', detail: '{{{OTelParameters.Detail}}}'")]
     public static partial void AccessTokenMissing(this ILogger logger, LogLevel logLevel, string tokenType,
-        string localPath, string detail);
+        string path, string detail);
 
     [LoggerMessage(
         message:
@@ -265,9 +269,9 @@ internal static partial class LogMessages
 
     [LoggerMessage(
         message:
-        $"Frontend selected via path mapping '{{{OTelParameters.PathMapping}}}', but request path '{{{OTelParameters.LocalPath}}}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.")]
+        $"Frontend selected via path mapping '{{{OTelParameters.PathMapping}}}', but request path '{{{OTelParameters.Path}}}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.")]
     public static partial void FrontendSelectedWithPathCasingIssue(this ILogger logger, LogLevel logLevel,
-        string pathMapping, LocalPath localPath);
+        string pathMapping, PathString path);
 
     [LoggerMessage(
         message:
