@@ -65,10 +65,15 @@ public static class BffApplicationBuilderExtensions
         }
         app.UseEndpoints(endpoints =>
         {
-            if (!endpoints.AlreadyMappedManagementEndpoint(bffOptions.LoginPath, "Login"))
-            {
-                endpoints.MapBffManagementEndpoints();
-            }
+            // Mapping the management endpoints. 
+            endpoints.MapBffManagementLoginEndpoint();
+#pragma warning disable CS0618 // Type or member is obsolete
+            endpoints.MapBffManagementSilentLoginEndpoints();
+#pragma warning restore CS0618 // Type or member is obsolete
+            endpoints.MapBffManagementLogoutEndpoint();
+            endpoints.MapBffManagementUserEndpoint();
+            endpoints.MapBffManagementBackchannelEndpoint();
+            endpoints.MapBffDiagnosticsEndpoint();
         });
         app.UseBffIndexPages();
         return app;

@@ -5,6 +5,7 @@ using System.Net;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
+using Duende.Bff.Endpoints;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
@@ -44,6 +45,62 @@ public class BffFrontendSigninTests : BffTestBase
             .CheckResponseContent(Bff.DefaultRootResponse);
     }
 
+    [Theory]
+    [InlineData(Constants.ManagementEndpoints.Login)]
+    [InlineData(Constants.ManagementEndpoints.Logout)]
+    [InlineData(Constants.ManagementEndpoints.BackChannelLogout)]
+    [InlineData(Constants.ManagementEndpoints.Diagnostics)]
+    [InlineData(Constants.ManagementEndpoints.SilentLoginCallback)]
+    [InlineData(Constants.ManagementEndpoints.User)]
+#pragma warning disable CS0618 // Type or member is obsolete
+    [InlineData(Constants.ManagementEndpoints.SilentLogin)]
+#pragma warning restore CS0618 // Type or member is obsolete
+    public async Task Can_hijack_management_endpoints(string endpoint)
+    {
+        var pathString = "/bff" + endpoint;
+
+        Bff.OnConfigureApp += app =>
+        {
+            app.MapGet(pathString, (HttpContext c, CancellationToken ct) => "ok");
+        };
+
+        await InitializeAsync();
+
+        await Bff.BrowserClient.GetAsync(pathString)
+            .CheckHttpStatusCode()
+            .CheckResponseContent("ok");
+    }
+
+    [Fact]
+    public async Task Can_hijack_login_and_logout_endpoints_and_call_default()
+    {
+        var loginCalled = false;
+        var logoutCalled = false;
+        Bff.OnConfigureApp += app =>
+        {
+            app.MapGet(Bff.BffOptions.LoginPath, c =>
+            {
+                loginCalled = true;
+                return c.RequestServices.GetRequiredService<ILoginEndpoint>().ProcessRequestAsync(c);
+            });
+
+            app.MapGet(Bff.BffOptions.LogoutPath, c =>
+            {
+                logoutCalled = true;
+                return c.RequestServices.GetRequiredService<ILogoutEndpoint>().ProcessRequestAsync(c);
+            });
+        };
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend());
+
+        await Bff.BrowserClient.Login()
+            .CheckResponseContent(Bff.DefaultRootResponse);
+
+        await Bff.BrowserClient.Logout();
+        loginCalled.ShouldBeTrue();
+        logoutCalled.ShouldBeTrue();
+    }
 
     [Fact]
     public async Task cannot_access_secret_page_without_logging_in()
