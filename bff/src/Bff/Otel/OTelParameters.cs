@@ -25,7 +25,7 @@ internal class OTelParameters
     public const string PathMapping = "PathMapping";
     public const string Name = "Name";
     public const string Claims = "Claims";
-    public const string Origin = "Origin";
+    public const string Host = "Host";
     public const string IsLoggedIn = "IsLoggedIn";
     public const string Referer = "Referer";
 }

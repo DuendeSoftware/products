@@ -88,7 +88,7 @@ bffBuilder
                 opt.ClientSecret = "secret";
             })
             .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-            .MappedToPath("/with-path"),
+            .MapToPath("/with-path"),
 
         new BffFrontend(BffFrontendName.Parse("with-domain"))
                 .WithOpenIdConnectOptions(opt =>
@@ -97,7 +97,7 @@ bffBuilder
                     opt.ClientSecret = "secret";
                 })
                 .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-                .MappedToOrigin(Origin.Parse("https://app1.localhost:5005"))
+                .MapToHost(HostHeaderValue.Parse("https://app1.localhost:5005"))
                 .WithRemoteApis(
                     new RemoteApi("/api/user-token", new Uri("https://localhost:5010")),
                     new RemoteApi("/api/client-token", new Uri("https://localhost:5010"))
@@ -251,7 +251,7 @@ public class CustomIndexHtmlClient(HttpClient client, CurrentFrontendAccessor cu
         var html = await client.GetStringAsync(indexHtmlUrl, ct);
 
         html = html.Replace("[FrontendName]", frontend.Name);
-        html = html.Replace("[Path]", frontend.SelectionCriteria.MatchingPath + "/"); // Note, the path must end with a slash
+        html = html.Replace("[Path]", frontend.MatchingCriteria.MatchingPath + "/"); // Note, the path must end with a slash
 
 
         return html;

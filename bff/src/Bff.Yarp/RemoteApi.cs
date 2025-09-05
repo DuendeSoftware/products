@@ -40,6 +40,16 @@ public sealed record RemoteApi
     [SetsRequiredMembers]
     public RemoteApi(PathString pathMatch, Uri targetUri)
     {
+        if (pathMatch.Value != null && !pathMatch.Value.StartsWith('/'))
+        {
+            throw new ArgumentException("Path must start with '/'", nameof(pathMatch));
+        }
+
+        if (!targetUri.IsAbsoluteUri)
+        {
+            throw new ArgumentException("Target must be absolute Uri", nameof(targetUri));
+        }
+
         PathMatch = pathMatch;
         TargetUri = targetUri;
         RequiredTokenType = RequiredTokenType.User;

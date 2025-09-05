@@ -71,7 +71,7 @@ public class BffFrontendMatchingTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = The.Path
             }
@@ -103,9 +103,9 @@ public class BffFrontendMatchingTests : BffTestBase
         await InitializeAsync();
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
-                MatchingOrigin = Origin.Parse(The.DomainName)
+                MatchingHostHeader = HostHeaderValue.Parse(The.DomainName)
             }
         });
 
@@ -130,9 +130,9 @@ public class BffFrontendMatchingTests : BffTestBase
         await InitializeAsync();
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
-                MatchingOrigin = Origin.Parse(The.DomainName)
+                MatchingHostHeader = HostHeaderValue.Parse(The.DomainName)
             }
         });
 

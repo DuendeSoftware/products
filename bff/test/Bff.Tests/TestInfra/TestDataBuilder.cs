@@ -35,7 +35,7 @@ public class TestDataBuilder(TestData the)
             Name = The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
             IndexHtmlUrl = The.Url,
-            SelectionCriteria = FrontendSelectionCriteria()
+            MatchingCriteria = FrontendSelectionCriteria()
         };
 
     internal ProxyBffPlugin ProxyDataExtension() =>
@@ -58,9 +58,9 @@ public class TestDataBuilder(TestData the)
         new()
         {
             Name = BffFrontendName.Parse("should_not_be_found"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
-                MatchingOrigin = Origin.Parse("https://will-not-be-found"),
+                MatchingHostHeader = HostHeaderValue.Parse("https://will-not-be-found"),
                 MatchingPath = "/will_not_be_found",
             }
         };
@@ -106,7 +106,7 @@ public class TestDataBuilder(TestData the)
         new()
         {
             IndexHtmlUrl = The.Url,
-            MatchingOrigin = The.Origin.ToString(),
+            MatchingOrigin = The.HostHeaderValue.ToString(),
             MatchingPath = The.Path,
             Oidc = OidcConfiguration(),
             Cookies = CookieConfiguration()
@@ -140,9 +140,9 @@ public class TestDataBuilder(TestData the)
             Resource = The.Resource
         };
 
-    public FrontendSelectionCriteria FrontendSelectionCriteria() => new()
+    public FrontendMatchingCriteria FrontendSelectionCriteria() => new()
     {
-        MatchingOrigin = The.Origin,
+        MatchingHostHeader = The.HostHeaderValue,
         MatchingPath = The.Path,
     };
 

@@ -38,13 +38,13 @@ namespace Duende.Bff.Yarp
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public RemoteApi() { }
         [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        public RemoteApi(Duende.Bff.PathString localPath, System.Uri targetUri) { }
+        public RemoteApi(Microsoft.AspNetCore.Http.PathString pathMatch, System.Uri targetUri) { }
         public System.Type? AccessTokenRetrieverType { get; init; }
         public System.TimeSpan? ActivityTimeout { get; init; }
         public bool? AllowResponseBuffering { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.PathString PathString { get; init; }
         public Duende.Bff.Configuration.BffUserAccessTokenParameters? Parameters { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Microsoft.AspNetCore.Http.PathString PathMatch { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public Duende.Bff.AccessTokenManagement.RequiredTokenType RequiredTokenType { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]

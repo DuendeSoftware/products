@@ -143,7 +143,7 @@ public class IdentityServerTestHost : TestHost
         callbackPath ??= options.CallbackPath;
 
         var redirectUris = baseUris
-            .Select(baseUri => new Uri(baseUri, (frontend.SelectionCriteria.MatchingPath ?? string.Empty) + callbackPath).ToString())
+            .Select(baseUri => new Uri(baseUri, (frontend.MatchingCriteria.MatchingPath ?? string.Empty) + callbackPath).ToString())
             .ToList();
 
         var postLogoutRedirectUris = baseUris

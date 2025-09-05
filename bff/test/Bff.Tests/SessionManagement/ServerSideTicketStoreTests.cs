@@ -40,7 +40,7 @@ public class ServerSideTicketStoreTests : BffTestBase
         Internet.AddCustomHandler(map: The.DomainName, to: Bff);
         var frontendWithOrigin = new BffFrontend(BffFrontendName.Parse("frontend-with-origin"))
             .WithOpenIdConnectOptions(The.DefaultOpenIdConnectConfiguration)
-            .MappedToOrigin(Origin.Parse(The.DomainName));
+            .MapToHost(HostHeaderValue.Parse(The.DomainName));
         AddOrUpdateFrontend(frontendWithOrigin);
 
         await Bff.BrowserClient.Login();
@@ -70,7 +70,7 @@ public class ServerSideTicketStoreTests : BffTestBase
         Internet.AddCustomHandler(map: The.DomainName, to: Bff);
         var frontendWithOrigin = new BffFrontend(BffFrontendName.Parse("frontend-with-origin"))
             .WithOpenIdConnectOptions(The.DefaultOpenIdConnectConfiguration)
-            .MappedToOrigin(Origin.Parse(The.DomainName));
+            .MapToHost(HostHeaderValue.Parse(The.DomainName));
         AddOrUpdateFrontend(frontendWithOrigin);
 
         await Bff.BrowserClient.Login();

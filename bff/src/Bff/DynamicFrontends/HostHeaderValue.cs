@@ -6,11 +6,15 @@ using Microsoft.AspNetCore.Http;
 namespace Duende.Bff.DynamicFrontends;
 
 /// <summary>
-/// Describes the origin of a request. 
+/// Describes a host header value (scheme, host, port) and can be used to compare against an HttpRequest.
+///
+/// Note, normally host header values do not include the scheme, but we need this to be able to match
+/// on default ports as well. Technically, this class is an "Origin", but due to conflicts with the concepts
+/// of origins in CORS HostHeaderValue.
 /// </summary>
-public sealed record Origin : IEquatable<HttpRequest>
+public sealed record HostHeaderValue : IEquatable<HttpRequest>
 {
-    public static Origin Parse(string origin)
+    public static HostHeaderValue Parse(string origin)
     {
         if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
         {
@@ -20,7 +24,7 @@ public sealed record Origin : IEquatable<HttpRequest>
         return Parse(uri);
     }
 
-    public static Origin? ParseOrDefault(string? origin)
+    public static HostHeaderValue? ParseOrDefault(string? origin)
     {
         if (string.IsNullOrEmpty(origin))
         {
@@ -36,9 +40,15 @@ public sealed record Origin : IEquatable<HttpRequest>
         }
     }
 
-    public static Origin Parse(Uri uri)
+    public static HostHeaderValue Parse(Uri uri)
     {
         ArgumentNullException.ThrowIfNull(uri);
+
+        if (!uri.IsAbsoluteUri)
+        {
+            throw new InvalidOperationException("Uri must be an absolute URI.");
+        }
+
         return new()
         {
             Scheme = uri.Scheme,
@@ -49,10 +59,19 @@ public sealed record Origin : IEquatable<HttpRequest>
 
     internal HostString ToHostString() => new(Host, Port);
 
+    /// <summary>
+    /// the scheme of a http request. Usually "http" or "https".
+    /// </summary>
     public required string Scheme { get; init; }
 
+    /// <summary>
+    /// The hostname of the host. 
+    /// </summary>
     public required string Host { get; init; }
 
+    /// <summary>
+    /// The port number. When using default ports, this will be 80 for http and 443 for https.
+    /// </summary>
     public int Port { get; init; } = 443;
 
     public bool Equals(HttpRequest? request)

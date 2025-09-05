@@ -26,8 +26,8 @@ internal class BffIndex
 
     public void AddFrontend(BffFrontend frontend)
     {
-        var frontendSelectionCriteria = frontend.SelectionCriteria;
-        if (frontendSelectionCriteria.MatchingOrigin == null)
+        var frontendSelectionCriteria = frontend.MatchingCriteria;
+        if (frontendSelectionCriteria.MatchingHostHeader == null)
         {
             if (frontendSelectionCriteria.MatchingPath == null)
             {
@@ -46,10 +46,10 @@ internal class BffIndex
         }
         else
         {
-            if (!_perOrigin.TryGetValue(frontendSelectionCriteria.MatchingOrigin.ToHostString(), out var trie))
+            if (!_perOrigin.TryGetValue(frontendSelectionCriteria.MatchingHostHeader.ToHostString(), out var trie))
             {
                 trie = new PathTrie<BffFrontend>();
-                _perOrigin[frontendSelectionCriteria.MatchingOrigin.ToHostString()] = trie;
+                _perOrigin[frontendSelectionCriteria.MatchingHostHeader.ToHostString()] = trie;
             }
 
             var matchingPath = frontendSelectionCriteria.MatchingPath;

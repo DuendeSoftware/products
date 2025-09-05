@@ -6,7 +6,7 @@ namespace Duende.Bff.DynamicFrontends;
 /// <summary>
 /// Determines how a front-end should be matched. 
 /// </summary>
-public sealed record FrontendSelectionCriteria
+public sealed record FrontendMatchingCriteria
 {
     private readonly string? _matchingPath;
 
@@ -21,11 +21,17 @@ public sealed record FrontendSelectionCriteria
             if (string.IsNullOrEmpty(value))
             {
                 _matchingPath = null;
-            }
+                return;
+            } 
 
-            if (value == ("/"))
+            if (value == "/")
             {
                 throw new InvalidOperationException("Path matching on '/' is not allowed");
+            }
+
+            if (!value.StartsWith("/"))
+            {
+                throw new InvalidOperationException("Matching path must start with a '/'");
             }
 
             _matchingPath = value;
@@ -35,6 +41,7 @@ public sealed record FrontendSelectionCriteria
     /// <summary>
     /// If any matching origins are provided, the frontend will only be selected if the request matches one of the provided origins
     /// </summary>
-    public Origin? MatchingOrigin { get; init; }
+    public HostHeaderValue? MatchingHostHeader { get; init; }
 
+    internal bool HasValue => MatchingHostHeader != null || MatchingPath != null;
 }

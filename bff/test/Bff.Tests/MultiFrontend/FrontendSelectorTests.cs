@@ -6,6 +6,7 @@ using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Tests.TestInfra;
+using Microsoft.Diagnostics.Tracing.Parsers;
 using TestLoggerProvider = Duende.Bff.Tests.TestFramework.TestLoggerProvider;
 
 namespace Duende.Bff.Tests.MultiFrontend;
@@ -37,9 +38,9 @@ public class FrontendSelectorTests
     private BffFrontend NeverMatchingFrontEnd() => new BffFrontend
     {
         Name = BffFrontendName.Parse("should_not_be_found"),
-        SelectionCriteria = new FrontendSelectionCriteria()
+        MatchingCriteria = new FrontendMatchingCriteria()
         {
-            MatchingOrigin = Origin.Parse("https://will-not-be-found"),
+            MatchingHostHeader = HostHeaderValue.Parse("https://will-not-be-found"),
             MatchingPath = "/will_not_be_found",
         }
     };
@@ -73,11 +74,11 @@ public class FrontendSelectorTests
     }
 
     [Fact]
-    public void TryMapFrontend_MatchesByOrigin_ReturnsTrue()
+    public void TryMapFrontend_MatchesByHost_ReturnsTrue()
     {
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
-            origin: Origin.Parse("https://test.com"));
+            host: HostHeaderValue.Parse("https://test.com"));
         _frontendCollection.AddOrUpdate(frontend);
 
         // Act
@@ -89,7 +90,23 @@ public class FrontendSelectorTests
         selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
+    [Fact]
+    public void TryMapFrontend_MatchesByHostUri_ReturnsTrue()
+    {
+        // Arrange
+        var frontend = CreateFrontend(The.FrontendName,
+            uri: new Uri("https://test.com"));
+        _frontendCollection.AddOrUpdate(frontend);
 
+        // Act
+        var httpRequest = CreateHttpRequest("https://test.com");
+        var result = _selector.TrySelectFrontend(httpRequest, out var selectedFrontend);
+
+        // Assert
+        result.ShouldBeTrue();
+        selectedFrontend.ShouldNotBeNull();
+        selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
+    }
     [Fact]
     public void TryMapFrontend_MatchesByPath_ReturnsTrue()
     {
@@ -129,11 +146,11 @@ public class FrontendSelectorTests
     }
 
     [Fact]
-    public void TryMapFrontend_MatchesByOriginAndPath_ReturnsTrue()
+    public void TryMapFrontend_MatchesByHostAndPath_ReturnsTrue()
     {
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
-            origin: Origin.Parse("https://test.com"),
+            host: HostHeaderValue.Parse("https://test.com"),
             path: "/path1");
         _frontendCollection.AddOrUpdate(frontend);
 
@@ -146,9 +163,29 @@ public class FrontendSelectorTests
         selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
     }
+    [Fact]
+    public void TryMapFrontend_MatchesByHostAndPathUri_ReturnsTrue()
+    {
+        // Arrange
+        var frontend = CreateFrontend(The.FrontendName,
+            uri: new Uri("https://test.com/path1"));
+        _frontendCollection.AddOrUpdate(frontend);
+        _frontendCollection.AddOrUpdate(CreateNonMatching().MapTo(new Uri("https://test.com/")));
+        _frontendCollection.AddOrUpdate(CreateNonMatching().MapToPath("/path1"));
+
+        // Act
+        var request = CreateHttpRequest("https://test.com/path1/subpath");
+        var result = _selector.TrySelectFrontend(request, out var selectedFrontend);
+
+        // Assert
+        result.ShouldBeTrue();
+        selectedFrontend.ShouldNotBeNull();
+        selectedFrontend.Name.ToString().ShouldBe(The.FrontendName);
+    }
+
 
     [Fact]
-    public void TryMapFrontend_NoOriginSpecified_MatchesByPath()
+    public void TryMapFrontend_NoHostSpecified_MatchesByPath()
     {
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
@@ -166,14 +203,14 @@ public class FrontendSelectorTests
     }
 
     [Fact]
-    public void TryMapFrontend_MultipleOrigins_MatchesMostSpecific()
+    public void TryMapFrontend_MultipleHosts_MatchesMostSpecific()
     {
         // Arrange
         var frontendGeneral = CreateFrontend(BffFrontendName.Parse("general-frontend"),
-            origin: Origin.Parse("https://test.com"));
+            host: HostHeaderValue.Parse("https://test.com"));
 
         var frontendSpecific = CreateFrontend(BffFrontendName.Parse("specific-frontend"),
-            origin: Origin.Parse("https://test.com"),
+            host: HostHeaderValue.Parse("https://test.com"),
             path: "/path1");
 
         _frontendCollection.AddOrUpdate(frontendGeneral);
@@ -217,7 +254,7 @@ public class FrontendSelectorTests
     {
         // Arrange
         var frontend = CreateFrontend(The.FrontendName,
-            origin: Origin.Parse("https://test.com"),
+            host: HostHeaderValue.Parse("https://test.com"),
             path: "/path1");
 
         _frontendCollection.AddOrUpdate(frontend);
@@ -233,17 +270,17 @@ public class FrontendSelectorTests
 
 
     [Fact]
-    public void Origin_takes_precedence_over_path()
+    public void Host_takes_precedence_over_path()
     {
-        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("path_and_origin"),
-            origin: Origin.Parse("https://test.com"),
+        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("path_and_Host"),
+            host: HostHeaderValue.Parse("https://test.com"),
             path: "/path"));
-        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("path_subpath_and_origin"),
-            origin: Origin.Parse("https://test.com"),
+        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("path_subpath_and_Host"),
+            host: HostHeaderValue.Parse("https://test.com"),
             path: "/path/subpath"));
 
-        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("origin"),
-            origin: Origin.Parse("https://test.com")));
+        _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("Host"),
+            host: HostHeaderValue.Parse("https://test.com")));
 
         _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("path"),
             path: "/path"));
@@ -254,13 +291,13 @@ public class FrontendSelectorTests
         selectedFrontend!.Name.ToString().ShouldBe("path");
 
         _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/otherpath"), out selectedFrontend);
-        selectedFrontend!.Name.ToString().ShouldBe("origin");
+        selectedFrontend!.Name.ToString().ShouldBe("Host");
 
         _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/path/otherSubPath"), out selectedFrontend);
-        selectedFrontend!.Name.ToString().ShouldBe("path_and_origin");
+        selectedFrontend!.Name.ToString().ShouldBe("path_and_Host");
 
         _selector.TrySelectFrontend(CreateHttpRequest("https://test.com/path/subpath"), out selectedFrontend);
-        selectedFrontend!.Name.ToString().ShouldBe("path_subpath_and_origin");
+        selectedFrontend!.Name.ToString().ShouldBe("path_subpath_and_Host");
     }
 
     [Fact]
@@ -268,7 +305,7 @@ public class FrontendSelectorTests
     {
         // Arrange
         var specificFrontend = CreateFrontend(BffFrontendName.Parse("specific-frontend"),
-            origin: Origin.Parse("https://specific.com"));
+            host: HostHeaderValue.Parse("https://specific.com"));
 
         var defaultFrontend = CreateFrontend(BffFrontendName.Parse("default-frontend"));
 
@@ -301,21 +338,38 @@ public class FrontendSelectorTests
 
     private static BffFrontend CreateFrontend(
         BffFrontendName name,
-        Origin? origin = null,
+        HostHeaderValue? host = null,
         string? path = null
         )
     {
-        var selectionCriteria = new FrontendSelectionCriteria
+        var selectionCriteria = new FrontendMatchingCriteria
         {
-            MatchingOrigin = origin,
+            MatchingHostHeader = host,
             MatchingPath = path,
         };
 
         return new BffFrontend
         {
             Name = name,
-            SelectionCriteria = selectionCriteria
+            MatchingCriteria = selectionCriteria
         };
+    }
+
+    private int seed = 0;
+    private BffFrontend CreateNonMatching()
+    {
+        return new BffFrontend(BffFrontendName.Parse("wrong" + seed++));
+    }
+
+    private static BffFrontend CreateFrontend(
+        BffFrontendName name,
+        Uri uri
+    )
+    {
+        return new BffFrontend
+        {
+            Name = name,
+        }.MapTo(uri);
     }
 }
 

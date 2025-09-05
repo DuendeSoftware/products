@@ -40,15 +40,15 @@ internal class SimulatedInternet : DelegatingHandler
         AddHandler(url, host.Server.CreateHandler());
     }
 
-    public void AddHandler(Origin origin, HttpMessageHandler handler)
+    public void AddHandler(HostHeaderValue hostHeaderValue, HttpMessageHandler handler)
     {
         if (!UseKestrel)
         {
-            _routingHandler.AddHandler(origin, handler);
+            _routingHandler.AddHandler(hostHeaderValue, handler);
         }
     }
 
-    public void AddHandler(Uri url, HttpMessageHandler handler) => AddHandler(Origin.Parse(url), handler);
+    public void AddHandler(Uri url, HttpMessageHandler handler) => AddHandler(HostHeaderValue.Parse(url), handler);
 
 
     public HttpClient BuildHttpClient(Uri baseUrl)

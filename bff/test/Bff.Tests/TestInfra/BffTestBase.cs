@@ -189,9 +189,9 @@ public abstract class BffTestBase : IAsyncDisposable
 
         Bff.AddOrUpdateFrontend(frontend);
         List<Uri> baseUris = [Bff.Url()];
-        if (frontend.SelectionCriteria.MatchingOrigin != null)
+        if (frontend.MatchingCriteria.MatchingHostHeader != null)
         {
-            baseUris.Add(frontend.SelectionCriteria.MatchingOrigin.ToUri());
+            baseUris.Add(frontend.MatchingCriteria.MatchingHostHeader.ToUri());
         }
         IdentityServer.AddClientFor(frontend, baseUris);
     }
