@@ -11,6 +11,7 @@ using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Duende.IdentityServer.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
@@ -516,5 +517,71 @@ public class BffFrontendSigninTests : BffTestBase
         });
 
         onTokenValidatedInvoked.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task When_only_providing_config_then_can_still_log_in()
+    {
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddJson(new BffConfiguration()
+            {
+                DefaultOidcSettings = new OidcConfiguration()
+                {
+                    ClientId = The.ClientId,
+                    ClientSecret = The.ClientSecret,
+                    ResponseMode = OpenIdConnectResponseMode.Query,
+                    ResponseType = "code",
+                    Scope = ["openid", "profile", "offline_access"],
+                    Authority = IdentityServer.Url(),
+                    GetClaimsFromUserInfoEndpoint = true,
+                    SaveTokens = true
+                }
+            })
+            .Build();
+
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.LoadConfiguration(configuration);
+        };
+        await InitializeAsync();
+        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        await Bff.BrowserClient.Login();
+    }
+
+    [Fact]
+    public async Task When_only_providing_config_with_unmatched_frontend_then_can_still_log_in()
+    {
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddJson(new BffConfiguration()
+            {
+                DefaultOidcSettings = new OidcConfiguration()
+                {
+                    ClientId = The.ClientId,
+                    ClientSecret = The.ClientSecret,
+                    ResponseMode = OpenIdConnectResponseMode.Query,
+                    ResponseType = "code",
+                    Scope = ["openid", "profile", "offline_access"],
+                    Authority = IdentityServer.Url(),
+                    GetClaimsFromUserInfoEndpoint = true,
+                    SaveTokens = true
+                }
+            })
+            .Build();
+
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.LoadConfiguration(configuration);
+        };
+
+        await InitializeAsync();
+        Bff.AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            SelectionCriteria = new FrontendSelectionCriteria()
+            {
+                MatchingPath = "/somepath"
+            }
+        });
+        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        await Bff.BrowserClient.Login();
     }
 }

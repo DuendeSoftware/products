@@ -51,6 +51,7 @@ public static class BffBuilderExtensions
         builder.Services.AddSingleton<BffLicense>(sp => sp.GetRequiredService<LicenseAccessor<BffLicense>>().Current);
         builder.Services.TryAddSingleton<LicenseValidator>();
         builder.Services.AddDistributedMemoryCache();
+
         // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
         // AddOpenIdConnectAccessTokenManagement because both configure the same options
         // The AddOpenIdConnectAccessTokenManagement adds OR wraps the BackchannelHttpHandler

@@ -89,8 +89,12 @@ internal static partial class LogMessages
         Scheme scheme);
 
     [LoggerMessage(
-        $"No frontend selected.")]
+        $"None of the configured frontends matched the selection criteria.")]
     public static partial void NoFrontendSelected(this ILogger logger, LogLevel logLevel);
+
+    [LoggerMessage(
+        $"BFF is not configured to work with multiple frontends.")]
+    public static partial void MultiFrontendDisabled(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
         $"Selected frontend '{{{OTelParameters.Frontend}}}'")]
