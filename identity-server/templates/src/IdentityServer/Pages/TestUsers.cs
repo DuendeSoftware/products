@@ -36,7 +36,7 @@ public static class TestUsers
                         new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
                         new Claim(JwtClaimTypes.WebSite, "http://alice.example.com"),
                         new Claim(JwtClaimTypes.Address, JsonSerializer.Serialize(address), IdentityServerConstants.ClaimValueTypes.Json),
-                        new Claim(JwtClaimTypes.Picture, "https://localhost:5001/img/avatar_default.png")
+                        new Claim(JwtClaimTypes.Picture, "/img/avatar_default.png")
                     }
                 },
                 new TestUser
@@ -53,7 +53,7 @@ public static class TestUsers
                         new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
                         new Claim(JwtClaimTypes.WebSite, "http://bob.example.com"),
                         new Claim(JwtClaimTypes.Address, JsonSerializer.Serialize(address), IdentityServerConstants.ClaimValueTypes.Json),
-                        new Claim(JwtClaimTypes.Picture, "https://localhost:5001/img/avatar_default.png")
+                        new Claim(JwtClaimTypes.Picture, "/img/avatar_default.png")
                     }
                 },
                 new TestUser
@@ -70,7 +70,7 @@ public static class TestUsers
                         new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
                         new Claim(JwtClaimTypes.WebSite, "http://charles.example.com"),
                         new Claim(JwtClaimTypes.Address, JsonSerializer.Serialize(address), IdentityServerConstants.ClaimValueTypes.Json),
-                        new Claim(JwtClaimTypes.Picture, "https://localhost:5001/img/avatar_default.png"),
+                        new Claim(JwtClaimTypes.Picture, "/img/avatar_default.png"),
 
                         // Adding a role claim for admin user
                         new Claim(JwtClaimTypes.Role, "admin")
