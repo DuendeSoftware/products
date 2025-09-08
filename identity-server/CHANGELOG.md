@@ -18,6 +18,8 @@
   - If the default implementation does not meet your needs, `IUiLocalesService` can be implemented and registered with DI.
 - Set the DisplayName of the activity associated with the incoming HttpRequest when IdentityServer routes are matched by @josephdecock
   This makes the IdentityServer route names appear in OTel traces.
+- Support for custom parameters in the Authorize Redirect Uri by @bhazen
+  - Adds a new `CustomParameters` property to `AuthorizeResponse` to support adding custom query parameters to the redirect uri. This will typically be used in conjunction with a custom `IAuthorizeResponseGenerator`.
 
 ## Bug Fixes
 - Reject Pushed Authorization Requests with parameters duplicated in a JAR by @wcabus
