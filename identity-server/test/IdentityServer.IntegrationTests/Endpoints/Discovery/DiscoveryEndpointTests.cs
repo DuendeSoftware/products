@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
@@ -465,6 +466,51 @@ public class DiscoveryEndpointTests
 
         var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
         result.MtlsEndpointAliases.PushedAuthorizationRequestEndpoint.ShouldNotBeNull();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task registration_endpoint_should_be_custom_when_static_type_and_custom_endpoint_set()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointType = RegistrationEndpointType.Static;
+        pipeline.Options.Discovery.DynamicClientRegistration.CustomRegistrationEndpoint = new Uri("https://custom.example.com/register");
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        data.ShouldContainKey(OidcConstants.Discovery.RegistrationEndpoint);
+        data[OidcConstants.Discovery.RegistrationEndpoint].GetString().ShouldBe("https://custom.example.com/register");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task registration_endpoint_should_be_default_when_dynamic_type()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointType = RegistrationEndpointType.Dynamic;
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        data.ShouldContainKey(OidcConstants.Discovery.RegistrationEndpoint);
+        data[OidcConstants.Discovery.RegistrationEndpoint].GetString().ShouldBe("https://server/connect/dcr");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task registration_endpoint_should_not_be_present_when_none_type()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointType = RegistrationEndpointType.None;
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        data.ShouldNotContainKey(OidcConstants.Discovery.RegistrationEndpoint);
     }
 }
 

@@ -409,6 +409,22 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             entries.Add(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported, Options.DPoP.SupportedDPoPSigningAlgorithms);
         }
 
+        switch (Options.Discovery.DynamicClientRegistration.RegistrationEndpointType)
+        {
+            case RegistrationEndpointType.Static:
+                if (Options.Discovery.DynamicClientRegistration.CustomRegistrationEndpoint != null)
+                {
+                    entries.Add(OidcConstants.Discovery.RegistrationEndpoint, Options.Discovery.DynamicClientRegistration.CustomRegistrationEndpoint.ToString());
+                }
+                break;
+            case RegistrationEndpointType.Dynamic:
+                entries.Add(OidcConstants.Discovery.RegistrationEndpoint, baseUrl + ProtocolRoutePaths.DynamicClientRegistration);
+                break;
+            case RegistrationEndpointType.None:
+            default:
+                break;
+        }
+
         // custom entries
         if (!IEnumerableExtensions.IsNullOrEmpty(Options.Discovery.CustomEntries))
         {
