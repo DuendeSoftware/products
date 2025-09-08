@@ -33,7 +33,7 @@ internal class FrontendSelectionMiddleware(
         {
             if (frontends.Count > 0)
             {
-                logger.NoFrontendSelected(LogLevel.Debug);
+                logger.NoFrontendSelected(LogLevel.Information);
             }
             else
             {

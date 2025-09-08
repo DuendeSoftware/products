@@ -70,7 +70,8 @@ public static class BffEndpointRouteBuilderExtensions
         {
             return;
         }
-        endpoints.MapGet(options.LoginPath.Value!, ProcessWith<ILoginEndpoint>)
+
+        endpoints.Map(options.LoginPath.Value!, ProcessWith<ILoginEndpoint>)
             .WithMetadata(new BffUiEndpointAttribute())
             .AllowAnonymous();
     }

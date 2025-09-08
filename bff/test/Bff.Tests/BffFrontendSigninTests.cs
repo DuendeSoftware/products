@@ -522,22 +522,7 @@ public class BffFrontendSigninTests : BffTestBase
     [Fact]
     public async Task When_only_providing_config_then_can_still_log_in()
     {
-        IConfiguration configuration = new ConfigurationBuilder()
-            .AddJson(new BffConfiguration()
-            {
-                DefaultOidcSettings = new OidcConfiguration()
-                {
-                    ClientId = The.ClientId,
-                    ClientSecret = The.ClientSecret,
-                    ResponseMode = OpenIdConnectResponseMode.Query,
-                    ResponseType = "code",
-                    Scope = ["openid", "profile", "offline_access"],
-                    Authority = IdentityServer.Url(),
-                    GetClaimsFromUserInfoEndpoint = true,
-                    SaveTokens = true
-                }
-            })
-            .Build();
+        var configuration = BuildValidBffOidcConfig();
 
         Bff.OnConfigureBff += bff =>
         {
@@ -549,7 +534,51 @@ public class BffFrontendSigninTests : BffTestBase
     }
 
     [Fact]
-    public async Task When_only_providing_config_with_unmatched_frontend_then_can_still_log_in()
+    public async Task When_only_providing_config_then_cannot_login_to_unmatched_frontend()
+    {
+        var configuration = BuildValidBffOidcConfig();
+
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.LoadConfiguration(configuration);
+        };
+
+        await InitializeAsync();
+        Bff.AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            SelectionCriteria = new FrontendSelectionCriteria()
+            {
+                MatchingPath = "/not_matched"
+            }
+        });
+        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task When_providing_oidc_config_this_is_used_for_matched_frontend()
+    {
+        var configuration = BuildValidBffOidcConfig();
+
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.LoadConfiguration(configuration);
+        };
+
+        await InitializeAsync();
+        Bff.AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            ConfigureOpenIdConnectOptions = null,
+            SelectionCriteria = new FrontendSelectionCriteria()
+            {
+                MatchingPath = The.Path
+            }
+        });
+        IdentityServer.AddClient(The.ClientId, Bff.Url(The.Path + "/"));
+        await Bff.BrowserClient.Login(The.Path);
+    }
+
+    private IConfiguration BuildValidBffOidcConfig()
     {
         IConfiguration configuration = new ConfigurationBuilder()
             .AddJson(new BffConfiguration()
@@ -567,21 +596,6 @@ public class BffFrontendSigninTests : BffTestBase
                 }
             })
             .Build();
-
-        Bff.OnConfigureBff += bff =>
-        {
-            bff.LoadConfiguration(configuration);
-        };
-
-        await InitializeAsync();
-        Bff.AddOrUpdateFrontend(Some.BffFrontend() with
-        {
-            SelectionCriteria = new FrontendSelectionCriteria()
-            {
-                MatchingPath = "/somepath"
-            }
-        });
-        IdentityServer.AddClient(The.ClientId, Bff.Url());
-        await Bff.BrowserClient.Login();
+        return configuration;
     }
 }
