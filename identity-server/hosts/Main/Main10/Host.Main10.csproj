@@ -11,9 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
@@ -53,13 +52,100 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Index.nb-NO.resx</DependentUpon>
     </Compile>
+    <Compile Remove="Pages\Telemetry.cs" />
+    <Compile Remove="Pages\ServerSideSessions\Index.cshtml.cs" />
+    <Compile Remove="Pages\SecurityHeadersAttribute.cs" />
+    <Compile Remove="Pages\Redirect\Index.cshtml.cs" />
+    <Compile Remove="Pages\Log.cs" />
+    <Compile Remove="Pages\Index.cshtml.cs" />
+    <Compile Remove="Pages\IdentityServerSuppressions.cs" />
+    <Compile Remove="Pages\Home\Error\ViewModel.cs" />
+    <Compile Remove="Pages\Home\Error\Index.cshtml.cs" />
+    <Compile Remove="Pages\Grants\ViewModel.cs" />
+    <Compile Remove="Pages\Grants\Index.cshtml.cs" />
+    <Compile Remove="Pages\ExternalLogin\Challenge.cshtml.cs" />
+    <Compile Remove="Pages\ExternalLogin\Callback.cshtml.cs" />
+    <Compile Remove="Pages\Extensions.cs" />
+    <Compile Remove="Pages\Diagnostics\ViewModel.cs" />
+    <Compile Remove="Pages\Diagnostics\Index.cshtml.cs" />
+    <Compile Remove="Pages\Device\ViewModel.cs" />
+    <Compile Remove="Pages\Device\Success.cshtml.cs" />
+    <Compile Remove="Pages\Device\InputModel.cs" />
+    <Compile Remove="Pages\Device\Index.cshtml.cs" />
+    <Compile Remove="Pages\Consent\ViewModel.cs" />
+    <Compile Remove="Pages\Consent\InputModel.cs" />
+    <Compile Remove="Pages\Consent\Index.cshtml.cs" />
+    <Compile Remove="Pages\Ciba\ViewModel.cs" />
+    <Compile Remove="Pages\Ciba\InputModel.cs" />
+    <Compile Remove="Pages\Ciba\Index.cshtml.cs" />
+    <Compile Remove="Pages\Ciba\ConsentOptions.cs" />
+    <Compile Remove="Pages\Ciba\Consent.cshtml.cs" />
+    <Compile Remove="Pages\Ciba\All.cshtml.cs" />
+    <Compile Remove="Pages\Account\Logout\LogoutOptions.cs" />
+    <Compile Remove="Pages\Account\Logout\LoggedOutViewModel.cs" />
+    <Compile Remove="Pages\Account\Logout\LoggedOut.cshtml.cs" />
+    <Compile Remove="Pages\Account\Logout\Index.cshtml.cs" />
+    <Compile Remove="Pages\Account\Login\ViewModel.cs" />
+    <Compile Remove="Pages\Account\Login\LoginOptions.cs" />
+    <Compile Remove="Pages\Account\Login\InputModel.cs" />
+    <Compile Remove="Pages\Account\Login\Index.cshtml.cs" />
+    <Compile Remove="Pages\Account\Create\InputModel.cs" />
+    <Compile Remove="Pages\Account\Create\Index.cshtml.cs" />
+    <Compile Remove="Pages\Account\AccessDenied.cshtml.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Pages\ServerSideSessions\Index.cshtml">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
+    <Content Remove="wwwroot\lib\jquery\dist\jquery.slim.min.js" />
+    <Content Remove="wwwroot\lib\jquery\dist\jquery.slim.js" />
+    <Content Remove="wwwroot\lib\jquery\dist\jquery.min.map" />
+    <Content Remove="wwwroot\lib\jquery\dist\jquery.min.js" />
+    <Content Remove="wwwroot\lib\jquery\README.md" />
+    <Content Remove="wwwroot\lib\jquery\LICENSE.txt" />
+    <Content Remove="wwwroot\lib\bootstrap4-glyphicons\maps\glyphicons-fontawesome.min.css" />
+    <Content Remove="wwwroot\lib\bootstrap4-glyphicons\maps\glyphicons-fontawesome.css" />
+    <Content Remove="wwwroot\lib\bootstrap4-glyphicons\fonts\glyphicons\glyphicons-halflings-regular.woff2" />
+    <Content Remove="wwwroot\lib\bootstrap4-glyphicons\fonts\glyphicons\glyphicons-halflings-regular.ttf" />
+    <Content Remove="wwwroot\lib\bootstrap4-glyphicons\fonts\glyphicons\glyphicons-halflings-regular.svg" />
+    <Content Remove="wwwroot\lib\bootstrap4-glyphicons\css\bootstrap-glyphicons.min.css" />
+    <Content Remove="wwwroot\lib\bootstrap4-glyphicons\LICENSE" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
+    <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+    <Content Remove="wwwroot\lib\bootstrap\README.md" />
+    <Content Remove="wwwroot\lib\bootstrap\LICENSE" />
+    <Content Remove="wwwroot\js\signout-redirect.js" />
+    <Content Remove="wwwroot\favicon.ico" />
+    <Content Remove="wwwroot\duende-logo.svg" />
+    <Content Remove="wwwroot\css\site.css" />
+    <Content Remove="wwwroot\css\site.min.css" />
+    <Content Remove="Pages\_ViewImports.cshtml" />
+    <Content Remove="Pages\Shared\_Nav.cshtml" />
+    <Content Remove="Pages\Index.cshtml" />
+    <Content Remove="Pages\ExternalLogin\Challenge.cshtml" />
+    <Content Remove="Pages\Device\_ScopeListItem.cshtml" />
+    <Content Remove="Pages\Device\Success.cshtml" />
+    <Content Remove="Pages\Device\Index.cshtml" />
+    <Content Remove="Pages\Consent\_ScopeListItem.cshtml" />
+    <Content Remove="Pages\Consent\Index.cshtml" />
+    <Content Remove="Pages\Ciba\_ScopeListItem.cshtml" />
+    <Content Remove="Pages\Ciba\Index.cshtml" />
+    <Content Remove="Pages\Ciba\Consent.cshtml" />
+    <Content Remove="Pages\Account\AccessDenied.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -79,5 +165,29 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Index.nb-NO.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Pages\Account\Create\" />
+    <Folder Include="Pages\Account\Login\" />
+    <Folder Include="Pages\Account\Logout\" />
+    <Folder Include="Pages\Ciba\" />
+    <Folder Include="Pages\Consent\" />
+    <Folder Include="Pages\Device\" />
+    <Folder Include="Pages\Diagnostics\" />
+    <Folder Include="Pages\ExternalLogin\" />
+    <Folder Include="Pages\Grants\" />
+    <Folder Include="Pages\Home\Error\" />
+    <Folder Include="Pages\Redirect\" />
+    <Folder Include="Pages\ServerSideSessions\" />
+    <Folder Include="Pages\Shared\" />
+    <Folder Include="wwwroot\css\" />
+    <Folder Include="wwwroot\js\" />
+    <Folder Include="wwwroot\lib\bootstrap4-glyphicons\css\" />
+    <Folder Include="wwwroot\lib\bootstrap4-glyphicons\fonts\glyphicons\" />
+    <Folder Include="wwwroot\lib\bootstrap4-glyphicons\maps\" />
+    <Folder Include="wwwroot\lib\bootstrap\dist\css\" />
+    <Folder Include="wwwroot\lib\bootstrap\dist\js\" />
+    <Folder Include="wwwroot\lib\jquery\dist\" />
   </ItemGroup>
 </Project>
