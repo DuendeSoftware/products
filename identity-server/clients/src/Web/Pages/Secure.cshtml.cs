@@ -18,7 +18,7 @@ public class SecureModel : PageModel
 
     public async Task<IActionResult> OnPostRenewTokensAsync()
     {
-        await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { ForceTokenRenewal = new ForceTokenRenewal(true) });
+        await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { ForceTokenRenewal = true });
         return RedirectToPage();
     }
 }
