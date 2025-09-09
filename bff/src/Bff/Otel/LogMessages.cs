@@ -14,12 +14,12 @@ internal static partial class LogMessages
 {
     [LoggerMessage(
         Message = $$"""
-                    Management URL request {{{OTelParameters.LocalPath}}} blocked with 404 response, because the implicit frontend is disabled.
+                    Management URL request {{{OTelParameters.Path}}} blocked with 404 response, because the implicit frontend is disabled.
                     
                     When you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,
                     Add one without Host or Path mapping. 
                     """)]
-    public static partial void ImplicitFrontendDisabled(this ILogger logger, LogLevel level, PathString localPath);
+    public static partial void ImplicitFrontendDisabled(this ILogger logger, LogLevel level, PathString path);
 
 
     [LoggerMessage(

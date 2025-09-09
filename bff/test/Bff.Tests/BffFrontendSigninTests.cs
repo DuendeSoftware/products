@@ -546,7 +546,7 @@ public class BffFrontendSigninTests : BffTestBase
         await InitializeAsync();
         Bff.AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/not_matched"
             }
@@ -569,7 +569,7 @@ public class BffFrontendSigninTests : BffTestBase
         Bff.AddOrUpdateFrontend(Some.BffFrontend() with
         {
             ConfigureOpenIdConnectOptions = null,
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = The.Path
             }
@@ -599,22 +599,5 @@ public class BffFrontendSigninTests : BffTestBase
 
         return configuration;
 
-
-//         Bff.OnConfigureBff += bff =>
-//         {
-//             bff.LoadConfiguration(configuration);
-//         };
-
-//         await InitializeAsync();
-//         Bff.AddOrUpdateFrontend(Some.BffFrontend() with
-//         {
-//             MatchingCriteria = new FrontendMatchingCriteria()
-//             {
-//                 MatchingPath = "/somepath"
-//             }
-//         });
-//         IdentityServer.AddClient(The.ClientId, Bff.Url());
-//         await Bff.BrowserClient.Login();
-// >>>>>>> a053bb1c3 (hosts)
     }
 }

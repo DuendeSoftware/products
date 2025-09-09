@@ -55,7 +55,7 @@ public class BffFrontendMatchingTests : BffTestBase
         Bff.OnConfigureBff += bff => bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
         IdentityServer.AddClient(The.ClientId, Bff.Url("not_matched/"));
         await InitializeAsync();
-        Bff.AddOrUpdateFrontend(Some.BffFrontend().MappedToPath(LocalPath.Parse("not_matched")));
+        Bff.AddOrUpdateFrontend(Some.BffFrontend().MapToPath("/not_matched"));
 
         Bff.BrowserClient.DefaultRequestHeaders.Add("x-csrf", "1");
         await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);

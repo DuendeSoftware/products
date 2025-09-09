@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff.AccessTokenManagement;
-using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.Yarp.Internal;
 

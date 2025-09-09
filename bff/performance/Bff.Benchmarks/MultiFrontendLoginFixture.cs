@@ -2,9 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Bff.Benchmarks.Hosts;
-using Duende.Bff;
 using Duende.Bff.DynamicFrontends;
-using Microsoft.AspNetCore.Http;
 
 namespace Bff.Benchmarks;
 

@@ -6,7 +6,6 @@ using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Tests.TestInfra;
-using Microsoft.Diagnostics.Tracing.Parsers;
 using TestLoggerProvider = Duende.Bff.Tests.TestFramework.TestLoggerProvider;
 
 namespace Duende.Bff.Tests.MultiFrontend;
@@ -356,20 +355,14 @@ public class FrontendSelectorTests
     }
 
     private int seed = 0;
-    private BffFrontend CreateNonMatching()
-    {
-        return new BffFrontend(BffFrontendName.Parse("wrong" + seed++));
-    }
+    private BffFrontend CreateNonMatching() => new BffFrontend(BffFrontendName.Parse("wrong" + seed++));
 
     private static BffFrontend CreateFrontend(
         BffFrontendName name,
         Uri uri
-    )
+    ) => new BffFrontend
     {
-        return new BffFrontend
-        {
-            Name = name,
-        }.MapTo(uri);
-    }
+        Name = name,
+    }.MapTo(uri);
 }
 

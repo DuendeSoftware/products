@@ -54,24 +54,25 @@ public static class BffFrontendExtensions
     public static BffFrontend MapTo(this BffFrontend frontend, Uri uri, bool force = false)
     {
         ArgumentNullException.ThrowIfNull(frontend);
+        ArgumentNullException.ThrowIfNull(uri);
 
         GuardOverrideSelectionCriteria(frontend, force);
 
         PathString? path = null;
-        
+
         if (!string.IsNullOrEmpty(uri.AbsolutePath) && uri.AbsolutePath != "/")
         {
             path = uri.AbsolutePath;
         }
-        
+
         return frontend with
+        {
+            MatchingCriteria = frontend.MatchingCriteria with
             {
-                MatchingCriteria = frontend.MatchingCriteria with
-                {
-                    MatchingHostHeader = HostHeaderValue.Parse(new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri),
-                    MatchingPath = path
-                }
-            };
+                MatchingHostHeader = HostHeaderValue.Parse(new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri),
+                MatchingPath = path
+            }
+        };
     }
 
     private static void GuardOverrideSelectionCriteria(BffFrontend frontend, bool force)

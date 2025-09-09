@@ -22,14 +22,14 @@ public sealed record FrontendMatchingCriteria
             {
                 _matchingPath = null;
                 return;
-            } 
+            }
 
             if (value == "/")
             {
                 throw new InvalidOperationException("Path matching on '/' is not allowed");
             }
 
-            if (!value.StartsWith("/"))
+            if (!value.StartsWith('/'))
             {
                 throw new InvalidOperationException("Matching path must start with a '/'");
             }
