@@ -474,8 +474,8 @@ public class DiscoveryEndpointTests
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
-        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointType = RegistrationEndpointType.Static;
-        pipeline.Options.Discovery.DynamicClientRegistration.CustomRegistrationEndpoint = new Uri("https://custom.example.com/register");
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointMode = RegistrationEndpointMode.Static;
+        pipeline.Options.Discovery.DynamicClientRegistration.StaticRegistrationEndpoint = new Uri("https://custom.example.com/register");
 
         var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
         var json = await result.Content.ReadAsStringAsync();
@@ -490,7 +490,7 @@ public class DiscoveryEndpointTests
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
-        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointType = RegistrationEndpointType.Dynamic;
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointMode = RegistrationEndpointMode.Inferred;
 
         var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
         var json = await result.Content.ReadAsStringAsync();
@@ -505,7 +505,7 @@ public class DiscoveryEndpointTests
     {
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
-        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointType = RegistrationEndpointType.None;
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointMode = RegistrationEndpointMode.None;
 
         var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
         var json = await result.Content.ReadAsStringAsync();

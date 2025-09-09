@@ -4,7 +4,7 @@
 #nullable enable
 namespace Duende.IdentityServer.Configuration;
 
-public enum RegistrationEndpointType
+public enum RegistrationEndpointMode
 {
     /// <summary>
     /// Will not show a registration endpoint in the discovery document
@@ -12,14 +12,14 @@ public enum RegistrationEndpointType
     None,
 
     /// <summary>
-    /// Will use the static URL from <see cref="DynamicClientRegistrationDiscoveryOptions.CustomRegistrationEndpoint"/>
+    /// Will use the static URL from <see cref="DynamicClientRegistrationDiscoveryOptions.StaticRegistrationEndpoint"/>
     /// </summary>
     Static,
 
     /// <summary>
-    /// Will generate the URL dynamically based on the host
+    /// Will infer the URL dynamically based on the host
     /// </summary>
-    Dynamic
+    Inferred
 }
 
 public class DynamicClientRegistrationDiscoveryOptions
@@ -30,13 +30,13 @@ public class DynamicClientRegistrationDiscoveryOptions
     /// <value>
     /// The type of the registration endpoint.
     /// </value>
-    public RegistrationEndpointType RegistrationEndpointType { get; set; } = RegistrationEndpointType.None;
+    public RegistrationEndpointMode RegistrationEndpointMode { get; set; } = RegistrationEndpointMode.None;
 
     /// <summary>
     /// Gets or sets the custom registration endpoint
     /// </summary>
     /// <value>
-    /// The URL of the authorization endpoint to use in the discovery document if <see cref="RegistrationEndpointType"/> is set to <see cref="RegistrationEndpointType.Static"/>.
+    /// The URL of the authorization endpoint to use in the discovery document if <see cref="RegistrationEndpointMode"/> is set to <see cref="RegistrationEndpointMode.Static"/>.
     /// </value>
-    public Uri? CustomRegistrationEndpoint { get; set; }
+    public Uri? StaticRegistrationEndpoint { get; set; }
 }
