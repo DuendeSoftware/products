@@ -70,6 +70,14 @@ internal static class AuthorizeResponseExtensions
             }
         }
 
+        if (response.CustomParameters != null)
+        {
+            foreach (var entry in response.CustomParameters)
+            {
+                collection.Add(entry.Key, entry.Value);
+            }
+        }
+
         return collection;
     }
 }

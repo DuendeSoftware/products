@@ -22,6 +22,7 @@ public class AuthorizeResponse
     public string Code { get; set; }
     public string SessionState { get; set; }
     public string Issuer { get; set; }
+    public Dictionary<string, string> CustomParameters { get; set; } = new();
 
     public string Error { get; set; }
     public string ErrorDescription { get; set; }
