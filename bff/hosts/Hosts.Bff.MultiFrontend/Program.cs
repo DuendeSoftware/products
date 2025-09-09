@@ -23,7 +23,7 @@ var bffConfig = new ConfigurationBuilder()
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IIndexHtmlClient, CustomIndexHtmlClient>();
+//builder.Services.AddSingleton<IStaticFilesClient, CustomStaticFilesClient>();
 
 builder.Services.AddUserAccessTokenHttpClient("api",
     configureClient: client =>
@@ -79,7 +79,8 @@ bffBuilder
     .AddRemoteApis()
     .AddFrontends(
         new BffFrontend(BffFrontendName.Parse("default-frontend"))
-            .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
+            .WithProxiedStaticAssets(new Uri("https://localhost:5173/"))
+//.WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
 ,
         new BffFrontend(BffFrontendName.Parse("with-path"))
             .WithOpenIdConnectOptions(opt =>
@@ -232,7 +233,7 @@ RouteConfig[] BuildYarpRoutes()
 }
 
 
-public class CustomIndexHtmlClient(HttpClient client, CurrentFrontendAccessor currentFrontendAccessor) : IIndexHtmlClient
+public class CustomStaticFilesClient(HttpClient client, CurrentFrontendAccessor currentFrontendAccessor) : IStaticFilesClient
 {
     public async Task<string?> GetIndexHtmlAsync(CancellationToken ct)
     {
@@ -256,4 +257,6 @@ public class CustomIndexHtmlClient(HttpClient client, CurrentFrontendAccessor cu
 
         return html;
     }
+
+    public async Task ProxyStaticAssetsAsync(HttpContext context, CancellationToken ct = default) => throw new NotImplementedException();
 }

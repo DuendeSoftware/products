@@ -4,28 +4,29 @@
 using System.Net;
 using Duende.Bff.Configuration;
 using Duende.Bff.Otel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
+internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
 {
     private readonly IOptions<BffOptions> _options;
     private readonly IHttpClientFactory _clientFactory;
     private readonly CurrentFrontendAccessor _currentFrontendAccessor;
     private readonly HybridCache _cache;
-    private readonly ILogger<IndexHtmlHttpClient> _logger;
+    private readonly ILogger<StaticFilesHttpClient> _logger;
     private readonly IIndexHtmlTransformer? _transformer;
     private readonly CancellationTokenSource _stopping = new();
 
-    public IndexHtmlHttpClient(IOptions<BffOptions> options,
+    public StaticFilesHttpClient(IOptions<BffOptions> options,
         IHttpClientFactory clientFactory,
         CurrentFrontendAccessor currentFrontendAccessor,
         HybridCache cache,
-        FrontendCollection frontendCollection,
-        ILogger<IndexHtmlHttpClient> logger,
+        ILogger<StaticFilesHttpClient> logger,
         IIndexHtmlTransformer? transformer = null)
     {
         _options = options;
@@ -46,8 +47,8 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         {
             return await _cache.GetOrCreateAsync(cacheKey, async (ct1) =>
                 {
-                    var client = _clientFactory.CreateClient(_options.Value.IndexHtmlClientName ??
-                                                             Constants.HttpClientNames.IndexHtmlHttpClient);
+                    var client = _clientFactory.CreateClient(_options.Value.StaticAssetsClientName ??
+                                                             Constants.HttpClientNames.StaticAssetsClientName);
 
                     var response = await client.GetAsync(frontend.IndexHtmlUrl, ct1);
                     if (response.StatusCode != HttpStatusCode.OK)
@@ -71,7 +72,7 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
                 },
                 options: new HybridCacheEntryOptions()
                 {
-                    Expiration = TimeSpan.FromMinutes(5)
+                    Expiration = TimeSpan.FromMinutes(5) // Todo: to setting
                 },
                 cancellationToken: ct);
         }
@@ -79,6 +80,42 @@ internal class IndexHtmlHttpClient : IIndexHtmlClient, IAsyncDisposable
         {
             return null;
         }
+    }
+
+    public async Task ProxyStaticAssetsAsync(HttpContext context, CT ct = default)
+    {
+        var frontend = _currentFrontendAccessor.Get();
+
+        var client = _clientFactory.CreateClient(_options.Value.StaticAssetsClientName ??
+                                                 Constants.HttpClientNames.StaticAssetsClientName);
+
+        var path = context.Request.GetEncodedPathAndQuery();
+        if (path == "/")
+        {
+            path = _options.Value.IndexHtmlFileName;
+        }
+
+        var response = await client.GetAsync(new Uri(frontend.StaticAssetsUrl, path), ct);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            path = _options.Value.IndexHtmlFileName;
+            response = await client.GetAsync(new Uri(frontend.StaticAssetsUrl, path), ct);
+        }
+
+        context.Response.StatusCode = (int)response.StatusCode;
+        foreach (var header in response.Headers)
+        {
+            context.Response.Headers[header.Key] = header.Value.ToArray();
+        }
+        foreach (var header in response.Content.Headers)
+        {
+            context.Response.Headers[header.Key] = header.Value.ToArray();
+        }
+
+        var responseStream = await response.Content.ReadAsStreamAsync(ct);
+        await responseStream.CopyToAsync(context.Response.Body, ct);
+
     }
 
     internal static string BuildCacheKey(BffFrontend frontend) => "Duende.Bff.IndexHtml:" + frontend.Name;

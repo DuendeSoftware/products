@@ -38,4 +38,16 @@ public static class ResponseExtensions
         return response;
     }
 
+    public static async Task<HttpResponseMessage> CheckResponseContent(this Task<HttpResponseMessage> getResponse,
+        byte[] value)
+    {
+        var response = await getResponse;
+        var content = await response.Content.ReadAsByteArrayAsync();
+        if (!content.SequenceEqual(value))
+        {
+            throw new InvalidOperationException("Response content does not match expected value.");
+        }
+
+        return response;
+    }
 }

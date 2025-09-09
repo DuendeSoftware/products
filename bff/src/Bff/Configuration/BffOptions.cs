@@ -150,7 +150,10 @@ public sealed class BffOptions
 
     public HttpMessageHandler? BackchannelHttpHandler { get; set; }
 
-    public string? IndexHtmlClientName { get; set; }
+    public string? StaticAssetsClientName { get; set; }
+
+    public string IndexHtmlFileName { get; set; } = "/index.html";
+    public TimeSpan IndexHtmlDefaultCacheDuration { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
     /// Indicates if we should automatically register the BFF middleware in the pipeline.
@@ -168,4 +171,5 @@ public sealed class BffOptions
     /// https://en.wikipedia.org/wiki/HTTP_referer
     /// </summary>
     public Collection<string> AllowedSilentLoginReferers { get; } = new();
+
 }

@@ -28,6 +28,14 @@ public class BffFrontendIndexTests : BffTestBase
 
         await Bff.BrowserClient.Login()
                .CheckResponseContent(Cdn.IndexHtml);
+
+        // A non-existing page should also return the index.html
+        await Bff.BrowserClient.GetAsync("/not-found")
+            .CheckResponseContent(Cdn.IndexHtml);
+
+        // The existing image.png should also return 
+        await Bff.BrowserClient.GetAsync("/image.png")
+            .CheckResponseContent(Cdn.IndexHtml);
     }
 
     [Fact]
@@ -163,6 +171,33 @@ public class BffFrontendIndexTests : BffTestBase
         private int count = 1;
 
         public Task<string?> Transform(string html, CT ct = default) => Task.FromResult<string?>($"{html} - transformed {count++}");
+    }
+
+    [Fact]
+    public async Task Can_also_proxy_all_static_assets()
+    {
+        Bff.OnConfigureApp += app => app.MapGet("/test", () => "test");
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            StaticAssetsUrl = Cdn.Url("/")
+        });
+
+        await Bff.BrowserClient.Login()
+            .CheckResponseContent(Cdn.IndexHtml);
+
+        await Bff.BrowserClient.GetAsync("/test")
+            .CheckResponseContent("test");
+
+        // A non-existing page should also return the index.html
+        await Bff.BrowserClient.GetAsync("/not-found")
+            .CheckResponseContent(Cdn.IndexHtml);
+
+        // The existing image.png should also return 
+        await Bff.BrowserClient.GetAsync("/image.png")
+            .CheckResponseContent(Cdn.ImageBytes);
+
     }
 
 }

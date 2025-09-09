@@ -47,6 +47,7 @@ public sealed record BffFrontend
     public FrontendSelectionCriteria SelectionCriteria { get; init; } = new();
 
     public Uri? IndexHtmlUrl { get; init; }
+    public Uri? StaticAssetsUrl { get; init; }
 
     internal IBffPlugin[] DataExtensions { get; init; } = [];
 

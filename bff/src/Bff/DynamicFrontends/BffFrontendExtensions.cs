@@ -8,12 +8,38 @@ namespace Duende.Bff.DynamicFrontends;
 
 public static class BffFrontendExtensions
 {
+    /// <summary>
+    /// Configures an index html URL for the frontend. Any uncaught request will be handled by this
+    /// </summary>
+    /// <param name="frontend"></param>
+    /// <param name="url"></param>
+    /// <returns></returns>
     public static BffFrontend WithIndexHtmlUrl(this BffFrontend frontend, Uri? url)
     {
         ArgumentNullException.ThrowIfNull(frontend);
         return frontend with
         {
             IndexHtmlUrl = url
+        };
+    }
+
+    public static BffFrontend WithStaticAssets(this BffFrontend frontend, Uri uri, Func<bool> indexOnly)
+    {
+        ArgumentNullException.ThrowIfNull(frontend);
+        if (indexOnly())
+        {
+            return frontend.WithIndexHtmlUrl(uri);
+        }
+
+        return frontend.WithProxiedStaticAssets(uri);
+    }
+
+    public static BffFrontend WithProxiedStaticAssets(this BffFrontend frontend, Uri url)
+    {
+        ArgumentNullException.ThrowIfNull(frontend);
+        return frontend with
+        {
+            StaticAssetsUrl = url
         };
     }
 
