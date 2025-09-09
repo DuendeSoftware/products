@@ -216,8 +216,8 @@ public static class IdentityServerApplicationBuilderExtensions
             throw new InvalidOperationException("CorsPolicyName is not configured");
         }
 
-        if (options.Discovery.DynamicClientRegistration.RegistrationEndpointType == RegistrationEndpointType.Static
-            && options.Discovery.DynamicClientRegistration.CustomRegistrationEndpoint == null)
+        if (options.Discovery.DynamicClientRegistration.RegistrationEndpointMode == RegistrationEndpointMode.Static
+            && options.Discovery.DynamicClientRegistration.StaticRegistrationEndpoint == null)
         {
             throw new InvalidOperationException("DynamicClientRegistration.CustomRegistrationEndpoint must be set when using static registration endpoint type.");
         }
