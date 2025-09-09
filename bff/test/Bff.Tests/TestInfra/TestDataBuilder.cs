@@ -34,7 +34,7 @@ public class TestDataBuilder(TestData the)
         {
             Name = The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
-            IndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = The.Url,
             SelectionCriteria = FrontendSelectionCriteria()
         };
 

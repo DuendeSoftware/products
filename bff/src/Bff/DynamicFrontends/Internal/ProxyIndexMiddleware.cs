@@ -42,7 +42,7 @@ internal class ProxyIndexMiddleware(RequestDelegate next,
             return false;
         }
 
-        return (frontend.IndexHtmlUrl != null);
+        return (frontend.CdnIndexHtmlUrl != null);
     }
 
     private bool ShouldProxyStaticContent()

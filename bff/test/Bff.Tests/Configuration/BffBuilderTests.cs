@@ -81,7 +81,7 @@ public class BffBuilderTests
         var expected = Some.BffFrontend() with
         {
             Name = The.FrontendName,
-            IndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = The.Url,
             SelectionCriteria = new FrontendSelectionCriteria()
             {
                 MatchingOrigin = The.Origin,
@@ -202,7 +202,7 @@ public class BffBuilderTests
         found.ShouldBe(new BffFrontend
         {
             Name = The.FrontendName,
-            IndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = The.Url,
             SelectionCriteria = Some.FrontendSelectionCriteria()
         });
 
@@ -318,7 +318,7 @@ public class BffBuilderTests
         var expected = new BffFrontend
         {
             Name = The.FrontendName,
-            IndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = The.Url,
             SelectionCriteria = Some.FrontendSelectionCriteria(),
             DataExtensions = found.DataExtensions
         };

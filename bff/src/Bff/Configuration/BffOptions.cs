@@ -150,9 +150,14 @@ public sealed class BffOptions
 
     public HttpMessageHandler? BackchannelHttpHandler { get; set; }
 
-    public string? StaticAssetsClientName { get; set; }
+    /// <summary>
+    /// The name of the http client that's used to retrieve the Index
+    /// </summary>
+    public string StaticAssetsClientName { get; set; } = Constants.HttpClientNames.StaticAssetsClientName;
 
-    public string IndexHtmlFileName { get; set; } = "/index.html";
+    /// <summary>
+    /// How long should index html be cached? 
+    /// </summary>
     public TimeSpan IndexHtmlDefaultCacheDuration { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>

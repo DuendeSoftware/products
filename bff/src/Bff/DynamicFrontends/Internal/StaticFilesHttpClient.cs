@@ -50,7 +50,7 @@ internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
                     var client = _clientFactory.CreateClient(_options.Value.StaticAssetsClientName ??
                                                              Constants.HttpClientNames.StaticAssetsClientName);
 
-                    var response = await client.GetAsync(frontend.IndexHtmlUrl, ct1);
+                    var response = await client.GetAsync(frontend.CdnIndexHtmlUrl, ct1);
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
                         _logger.IndexHtmlRetrievalFailed(LogLevel.Information, frontend.Name,
@@ -72,7 +72,7 @@ internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
                 },
                 options: new HybridCacheEntryOptions()
                 {
-                    Expiration = TimeSpan.FromMinutes(5) // Todo: to setting
+                    Expiration = _options.Value.IndexHtmlDefaultCacheDuration
                 },
                 cancellationToken: ct);
         }
@@ -90,17 +90,19 @@ internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
                                                  Constants.HttpClientNames.StaticAssetsClientName);
 
         var path = context.Request.GetEncodedPathAndQuery();
-        if (path == "/")
-        {
-            path = _options.Value.IndexHtmlFileName;
-        }
+        //if (path == "/")
+        //{
+        //    path = _options.Value.IndexHtmlFileName;
+        //}
 
-        var response = await client.GetAsync(new Uri(frontend.StaticAssetsUrl, path), ct);
+        var frontendStaticAssetsUrl = frontend.StaticAssetsUrl ??
+                                      throw new InvalidOperationException("Static assets can't be proxied without the static assets url.");
+        var response = await client.GetAsync(new Uri(frontendStaticAssetsUrl, path), ct);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            path = _options.Value.IndexHtmlFileName;
-            response = await client.GetAsync(new Uri(frontend.StaticAssetsUrl, path), ct);
+            path = "/";
+            response = await client.GetAsync(new Uri(frontendStaticAssetsUrl, path), ct);
         }
 
         context.Response.StatusCode = (int)response.StatusCode;

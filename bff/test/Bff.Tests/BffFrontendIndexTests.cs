@@ -23,7 +23,7 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            IndexHtmlUrl = Cdn.Url("index.html")
+            CdnIndexHtmlUrl = Cdn.Url("index.html")
         });
 
         await Bff.BrowserClient.Login()
@@ -49,7 +49,7 @@ public class BffFrontendIndexTests : BffTestBase
         await InitializeAsync();
 
         AddOrUpdateFrontend(Some.BffFrontend()
-            .WithIndexHtmlUrl(Cdn.Url("index.html"))
+            .WithCdnIndexHtmlUrl(Cdn.Url("index.html"))
             .WithRemoteApis(new RemoteApi()
             {
                 TargetUri = Api.Url(),
@@ -75,7 +75,7 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            IndexHtmlUrl = Cdn.Url("index.html")
+            CdnIndexHtmlUrl = Cdn.Url("index.html")
         });
 
         await Bff.BrowserClient.Login()
@@ -92,7 +92,7 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            IndexHtmlUrl = Cdn.Url("index.html")
+            CdnIndexHtmlUrl = Cdn.Url("index.html")
         });
 
         // get a random path. The index.html should be registered as fallback route
@@ -113,7 +113,7 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            IndexHtmlUrl = Cdn.Url("index.html")
+            CdnIndexHtmlUrl = Cdn.Url("index.html")
         });
 
         var html = await GetIndexHtml();
@@ -144,7 +144,7 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            IndexHtmlUrl = Cdn.Url("index.html")
+            CdnIndexHtmlUrl = Cdn.Url("index.html")
         });
 
         var html = await GetIndexHtml();
@@ -155,7 +155,7 @@ public class BffFrontendIndexTests : BffTestBase
 
         AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            IndexHtmlUrl = Cdn.Url("index2.html")
+            CdnIndexHtmlUrl = Cdn.Url("index2.html")
         });
         var cache = (TestHybridCache)Bff.Resolve<HybridCache>();
         cache.WaitUntilRemoveAsyncCalled(TimeSpan.FromSeconds(5));

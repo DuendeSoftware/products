@@ -166,7 +166,7 @@ public class FrontendCollectionTests
         addedCount.ShouldBe(1);
         updateCount.ShouldBe(0);
 
-        var updatedFrontend = bffFrontend with { IndexHtmlUrl = new Uri("https://different") };
+        var updatedFrontend = bffFrontend with { CdnIndexHtmlUrl = new Uri("https://different") };
         cache.AddOrUpdate(updatedFrontend);
 
         updateCount.ShouldBe(1);

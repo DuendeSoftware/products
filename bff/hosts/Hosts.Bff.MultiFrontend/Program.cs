@@ -88,7 +88,7 @@ bffBuilder
                 opt.ClientId = "bff.multi-frontend.with-path";
                 opt.ClientSecret = "secret";
             })
-            .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
+            .WithCdnIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
             .MappedToPath(LocalPath.Parse("/with-path")),
 
         new BffFrontend(BffFrontendName.Parse("with-domain"))
@@ -97,7 +97,7 @@ bffBuilder
                     opt.ClientId = "bff.multi-frontend.with-domain";
                     opt.ClientSecret = "secret";
                 })
-                .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
+                .WithCdnIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
                 .MappedToOrigin(Origin.Parse("https://app1.localhost:5005"))
                 .WithRemoteApis(
                     new RemoteApi(LocalPath.Parse("/api/user-token"), new Uri("https://localhost:5010")),
@@ -242,7 +242,7 @@ public class CustomStaticFilesClient(HttpClient client, CurrentFrontendAccessor 
             return null;
         }
 
-        var indexHtmlUrl = frontend.IndexHtmlUrl;
+        var indexHtmlUrl = frontend.CdnIndexHtmlUrl;
 
         if (indexHtmlUrl is null)
         {

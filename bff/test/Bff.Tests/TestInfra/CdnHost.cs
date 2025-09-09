@@ -28,6 +28,7 @@ public class CdnHost(TestHostContext context) : TestHost(context, new Uri("https
             // adds authorization for local and remote API endpoints
             app.UseAuthorization();
 
+            app.MapGet("/", () => IndexHtml);
             app.MapGet("/index.html", () => IndexHtml);
             app.MapGet("/index2.html", () => IndexHtml);
             app.MapGet("/image.png", () => Results.File(ImageBytes, "image/png"));
