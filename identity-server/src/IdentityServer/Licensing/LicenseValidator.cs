@@ -78,7 +78,7 @@ internal class LicenseValidator<T>
             var message = "You do not have a valid license key for the Duende software. " +
                           "This is allowed for development and testing scenarios. " +
                           "If you are running in production you are required to have a licensed version. " +
-                          "Please start a conversation with us: https://duendesoftware.com/contact";
+                          "Please start a conversation with us: https://duende.link/l/contact";
 
             // we're not using our _warningLog because we always want this emitted regardless of the context
 #pragma warning disable CA2254 // Structured logging is not needed for this message
