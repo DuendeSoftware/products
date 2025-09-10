@@ -68,7 +68,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-preview.6.25358.103
+          10.0.100-rc.1.25451.107
     - name: Pack bff.slnf
       run: dotnet pack -c Release bff.slnf -o artifacts
     - name: Tool restore
@@ -110,7 +110,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-preview.6.25358.103
+          10.0.100-rc.1.25451.107
     - name: List files
       run: tree
       shell: bash
