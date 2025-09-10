@@ -22,10 +22,10 @@ public class TestDataBuilder(TestData the)
     internal LicenseValidator LicenseValidator =>
         new LicenseValidator(new NullLogger<LicenseValidator>(), new ClaimsPrincipal(), The.Clock);
 
-    public BffFrontend BffFrontend() =>
+    public BffFrontend BffFrontend(BffFrontendName? name = null) =>
         new()
         {
-            Name = The.FrontendName,
+            Name = name ?? The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
         };
 

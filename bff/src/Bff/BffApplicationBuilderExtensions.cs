@@ -30,7 +30,7 @@ public static class BffApplicationBuilderExtensions
     public static IApplicationBuilder UseBffOpenIdCallbacks(this IApplicationBuilder app) => app.UseMiddleware<OpenIdConnectCallbackMiddleware>();
 
 
-    public static IApplicationBuilder UseBffIndexPages(this IApplicationBuilder app) => app.UseMiddleware<ProxyIndexMiddleware>();
+    public static IApplicationBuilder UseBffStaticFileHandling(this IApplicationBuilder app) => app.UseMiddleware<ProxyStaticFilesMiddleware>();
 
     /// <summary>
     /// If you have disabled automatic middleware registration using <see cref="BffOptions.AutomaticallyRegisterBffMiddleware"/>
@@ -75,7 +75,7 @@ public static class BffApplicationBuilderExtensions
             endpoints.MapBffManagementBackchannelEndpoint();
             endpoints.MapBffDiagnosticsEndpoint();
         });
-        app.UseBffIndexPages();
+        app.UseBffStaticFileHandling();
         return app;
 
     }

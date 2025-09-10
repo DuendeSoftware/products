@@ -205,12 +205,13 @@ public abstract class BffTestBase : IAsyncDisposable
         ManuallyConfiguredBff,
 
         /// <summary>
-        /// The BFF is configured using a frontend (V4 style).
+        /// The BFF is configured using an explicit frontend (V4 style).
         /// </summary>
         BffWithFrontend,
 
         /// <summary>
-        /// The BFF is configured using v4 style setup
+        /// The BFF is configured using v4 style setup, but without a frontend
+        /// This creates an implicit frontend. 
         /// </summary>
         V4Bff
     }

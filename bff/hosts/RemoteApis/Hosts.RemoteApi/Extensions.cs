@@ -60,13 +60,13 @@ internal static class Extensions
             app.UseDeveloperExceptionPage();
         }
 
-        
+
         app.Map("/static", inner =>
         {
             inner.UseDefaultFiles();
             inner.UseStaticFiles();
         });
-        
+
 
         app.UseRouting();
         app.UseAuthentication();

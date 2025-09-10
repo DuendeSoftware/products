@@ -1,10 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Text.Encodings.Web;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Hybrid;
 using Xunit.Abstractions;
 
@@ -33,7 +35,8 @@ public class BffFrontendIndexTests : BffTestBase
         await Bff.BrowserClient.GetAsync("/not-found")
             .CheckResponseContent(Cdn.IndexHtml);
 
-        // The existing image.png should also return 
+        // The existing image.png should also return index html, because
+        // we're not doing proxying of static assets here. 
         await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.IndexHtml);
     }
@@ -194,10 +197,102 @@ public class BffFrontendIndexTests : BffTestBase
         await Bff.BrowserClient.GetAsync("/not-found")
             .CheckResponseContent(Cdn.IndexHtml);
 
-        // The existing image.png should also return 
+        // The existing image.png should be proxied through the BFF. 
         await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
+    }
 
+    [Fact]
+    public async Task static_assets_proxying_also_allows_query_strings()
+    {
+        Cdn.OnConfigureApp += app => app.MapGet("/withQuery",
+            ([FromQuery] string? q) => q ?? "no_query");
+
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            StaticAssetsUrl = Cdn.Url()
+        });
+
+        // Verifying that querystring parameters are passed correctly to the proxied endpoint
+        // This is important, because vite dev server adds a querystring parameters to get
+        // partial files
+        await Bff.BrowserClient.GetAsync("/withQuery?q=abc")
+            .CheckResponseContent("abc");
+
+        // Just a quick check to verify encoding works as expected
+        await Bff.BrowserClient.GetAsync("/withQuery?q=" + UrlEncoder.Default.Encode("?@%^&*()"))
+            .CheckResponseContent("?@%^&*()");
+    }
+
+    [Fact]
+    public async Task Proxying_static_assets_works_with_path_based_routing()
+    {
+        Cdn.OnConfigureApp += app => app.MapGet("/some_static", () => "default_frontend");
+
+        await InitializeAsync();
+
+        // Creating a frontend that is mapped to a path. 
+        AddOrUpdateFrontend(
+            Some.BffFrontend(BffFrontendName.Parse("mapped_to_path"))
+                .WithProxiedStaticAssets(Cdn.Url())
+                .MappedToPath(The.Path));
+
+        // Also a default frontend, that has different static content registered
+        AddOrUpdateFrontend(Some.BffFrontend()
+            .WithCdnIndexHtmlUrl(Cdn.Url("/some_static")));
+
+        // When getting the root of the path-mapped frontend, then we should get the static content
+        // from the cdn
+        await Bff.BrowserClient.GetAsync(The.Path)
+            .CheckResponseContent(Cdn.IndexHtml);
+
+        // It should also work for sub-paths and client side routing (The /test path doesn't exist on the cdn)
+        // so the index.html should be returned
+        await Bff.BrowserClient.GetAsync(The.Path + "/test")
+            .CheckResponseContent(Cdn.IndexHtml);
+
+        // It should also work for static assets that exist on the cdn, such as the image. 
+        await Bff.BrowserClient.GetAsync(The.Path + "/image.png")
+            .CheckResponseContent(Cdn.ImageBytes);
+
+        // Now, if you go to the default frontend, it should return
+        // the different static content that's only registered for the default frontend
+        await Bff.BrowserClient.GetAsync("/")
+            .CheckResponseContent("default_frontend");
+
+        // The image should not be registered (we only proxy the index.html for the default frontend)
+        await Bff.BrowserClient.GetAsync("/image.png")
+            .CheckResponseContent("default_frontend");
+    }
+
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task When_using_StaticAssets_func_controls(bool indexHtmlOnly)
+    {
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend().WithStaticAssets(Cdn.Url("/"), () => indexHtmlOnly));
+
+        await Bff.BrowserClient.Login()
+            .CheckResponseContent(Cdn.IndexHtml);
+
+        if (indexHtmlOnly)
+        {
+            // If we only proxy the index html, then any unmatched route (including the image.png)
+            // should return the index.html content (for client side routing purposes)
+            await Bff.BrowserClient.GetAsync("/image.png")
+                .CheckResponseContent(Cdn.IndexHtml);
+        }
+        else
+        {
+            // If we proxy all static assets for this frontend, then the image.png should be proxied
+            await Bff.BrowserClient.GetAsync("/image.png")
+                .CheckResponseContent(Cdn.ImageBytes);
+        }
     }
 
 }

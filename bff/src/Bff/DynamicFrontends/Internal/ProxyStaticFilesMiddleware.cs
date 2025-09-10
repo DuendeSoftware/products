@@ -1,13 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Diagnostics;
-using System.Net;
 using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class ProxyIndexMiddleware(RequestDelegate next,
+internal class ProxyStaticFilesMiddleware(RequestDelegate next,
     IStaticFilesClient staticFilesClient,
     CurrentFrontendAccessor currentFrontendAccessor)
 {

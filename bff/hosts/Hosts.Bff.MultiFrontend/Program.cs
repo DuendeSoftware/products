@@ -12,7 +12,6 @@ using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Yarp;
 using Hosts.ServiceDefaults;
 using Yarp.ReverseProxy.Configuration;
-using EnvironmentName = Microsoft.AspNetCore.Hosting.EnvironmentName;
 
 var bffConfig = new ConfigurationBuilder()
 #if DEBUG
@@ -24,7 +23,7 @@ var bffConfig = new ConfigurationBuilder()
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddSingleton<IStaticFilesClient, CustomStaticFilesClient>();
+builder.Services.AddTransient<IIndexHtmlTransformer, FrontendAwareIndexHtmlTransformer>();
 
 builder.Services.AddUserAccessTokenHttpClient("api",
     configureClient: client =>
@@ -235,30 +234,19 @@ RouteConfig[] BuildYarpRoutes()
 }
 
 
-public class CustomStaticFilesClient(HttpClient client, CurrentFrontendAccessor currentFrontendAccessor) : IStaticFilesClient
+public class FrontendAwareIndexHtmlTransformer(CurrentFrontendAccessor currentFrontendAccessor) : IIndexHtmlTransformer
 {
-    public async Task<string?> GetIndexHtmlAsync(CancellationToken ct)
+    public Task<string?> Transform(string indexHtml, CancellationToken ct = default)
     {
         if (!currentFrontendAccessor.TryGet(out var frontend))
         {
-            return null;
+            return Task.FromResult<string?>(null);
         }
 
-        var indexHtmlUrl = frontend.CdnIndexHtmlUrl;
-
-        if (indexHtmlUrl is null)
-        {
-            return null;
-        }
-
-        var html = await client.GetStringAsync(indexHtmlUrl, ct);
-
-        html = html.Replace("[FrontendName]", frontend.Name);
-        html = html.Replace("[Path]", frontend.SelectionCriteria.MatchingPath + "/"); // Note, the path must end with a slash
+        indexHtml = indexHtml.Replace("[FrontendName]", frontend.Name);
+        indexHtml = indexHtml.Replace("[Path]", frontend.SelectionCriteria.MatchingPath + "/"); // Note, the path must end with a slash
 
 
-        return html;
+        return Task.FromResult<string?>(indexHtml);
     }
-
-    public async Task ProxyStaticAssetsAsync(HttpContext context, CancellationToken ct = default) => throw new NotImplementedException();
 }

@@ -5,74 +5,59 @@ using System.Net;
 using Duende.Bff.Configuration;
 using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
-internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
+internal class StaticFilesHttpClient(
+    IOptions<BffOptions> options,
+    IHttpClientFactory clientFactory,
+    CurrentFrontendAccessor currentFrontendAccessor,
+    HybridCache cache,
+    ILogger<StaticFilesHttpClient> logger,
+    IIndexHtmlTransformer? transformer = null)
+    : IStaticFilesClient, IAsyncDisposable
 {
-    private readonly IOptions<BffOptions> _options;
-    private readonly IHttpClientFactory _clientFactory;
-    private readonly CurrentFrontendAccessor _currentFrontendAccessor;
-    private readonly HybridCache _cache;
-    private readonly ILogger<StaticFilesHttpClient> _logger;
-    private readonly IIndexHtmlTransformer? _transformer;
     private readonly CancellationTokenSource _stopping = new();
-
-    public StaticFilesHttpClient(IOptions<BffOptions> options,
-        IHttpClientFactory clientFactory,
-        CurrentFrontendAccessor currentFrontendAccessor,
-        HybridCache cache,
-        ILogger<StaticFilesHttpClient> logger,
-        IIndexHtmlTransformer? transformer = null)
-    {
-        _options = options;
-        _clientFactory = clientFactory;
-        _currentFrontendAccessor = currentFrontendAccessor;
-        _cache = cache;
-        _logger = logger;
-        _transformer = transformer;
-    }
 
     public async Task<string?> GetIndexHtmlAsync(CT ct = default)
     {
-        var frontend = _currentFrontendAccessor.Get();
+        var frontend = currentFrontendAccessor.Get();
 
         var cacheKey = BuildCacheKey(frontend);
 
         try
         {
-            return await _cache.GetOrCreateAsync(cacheKey, async (ct1) =>
+            return await cache.GetOrCreateAsync(cacheKey, async (ct1) =>
                 {
-                    var client = _clientFactory.CreateClient(_options.Value.StaticAssetsClientName ??
+                    var client = clientFactory.CreateClient(options.Value.StaticAssetsClientName ??
                                                              Constants.HttpClientNames.StaticAssetsClientName);
 
                     var response = await client.GetAsync(frontend.CdnIndexHtmlUrl, ct1);
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        _logger.IndexHtmlRetrievalFailed(LogLevel.Information, frontend.Name,
+                        logger.IndexHtmlRetrievalFailed(LogLevel.Information, frontend.Name,
                             response.StatusCode);
                         throw new PreventCacheException();
                     }
 
                     var html = await response.Content.ReadAsStringAsync(ct1);
 
-                    if (_transformer == null)
+                    if (transformer == null)
                     {
                         return html;
                     }
 
-                    _logger.RetrievedIndexHTML(LogLevel.Information, frontend.Name, response.StatusCode);
+                    logger.RetrievedIndexHTML(LogLevel.Information, frontend.Name, response.StatusCode);
 
-                    var transformed = await _transformer.Transform(html, ct1);
+                    var transformed = await transformer.Transform(html, ct1);
                     return transformed;
                 },
                 options: new HybridCacheEntryOptions()
                 {
-                    Expiration = _options.Value.IndexHtmlDefaultCacheDuration
+                    Expiration = options.Value.IndexHtmlDefaultCacheDuration
                 },
                 cancellationToken: ct);
         }
@@ -84,12 +69,12 @@ internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
 
     public async Task ProxyStaticAssetsAsync(HttpContext context, CT ct = default)
     {
-        var frontend = _currentFrontendAccessor.Get();
+        var frontend = currentFrontendAccessor.Get();
 
-        var client = _clientFactory.CreateClient(_options.Value.StaticAssetsClientName ??
+        var client = clientFactory.CreateClient(options.Value.StaticAssetsClientName ??
                                                  Constants.HttpClientNames.StaticAssetsClientName);
 
-        var path = context.Request.GetEncodedPathAndQuery();
+        var path = context.Request.Path.ToString() + context.Request.QueryString;
 
         var frontendStaticAssetsUrl = frontend.StaticAssetsUrl ??
                                       throw new InvalidOperationException("Static assets can't be proxied without the static assets url.");
@@ -102,12 +87,12 @@ internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
                 .Uri;
         }
 
-        var response = await client.GetAsync(new Uri(frontendStaticAssetsUrl, path.TrimStart('/')), ct);
+        var requestUri = new Uri(frontendStaticAssetsUrl, path.TrimStart('/'));
+        var response = await client.GetAsync(requestUri, ct);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            path = "/";
-            response = await client.GetAsync(new Uri(frontendStaticAssetsUrl, path), ct);
+            response = await client.GetAsync(frontendStaticAssetsUrl, ct);
         }
 
         context.Response.StatusCode = (int)response.StatusCode;
