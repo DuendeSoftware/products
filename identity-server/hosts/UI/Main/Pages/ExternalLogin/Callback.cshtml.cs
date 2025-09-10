@@ -73,10 +73,10 @@ public class Callback : PageModel
             // in this sample we don't show how that would be done, as our sample implementation
             // simply auto-provisions new external user
             //
-            // remove the user id claim so we don't include it as an extra claim if/when we provision the user
+            // remove the user id and name identifier claims so we don't include it as an extra claim if/when we provision the user
             var claims = externalUser.Claims.ToList();
-            claims.Remove(userIdClaim);
-            user = _users.AutoProvisionUser(provider, providerUserId, claims.ToList());
+            claims.RemoveAll(c => c.Type is JwtClaimTypes.Subject or ClaimTypes.NameIdentifier);
+            user = _users.AutoProvisionUser(provider, providerUserId, claims);
         }
 
         // this allows us to collect any additional claims or properties
