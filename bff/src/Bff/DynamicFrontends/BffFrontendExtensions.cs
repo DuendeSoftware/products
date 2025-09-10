@@ -34,14 +34,14 @@ public static class BffFrontendExtensions
     /// </summary>
     /// <param name="frontend"></param>
     /// <param name="uri"></param>
-    /// <param name="indexOnly"></param>
+    /// <param name="useCdnWhen">Func that sets if the CDN URL should be used or if all products should be proxied. True for the <see cref="WithCdnIndexHtmlUrl"/>, false for <see cref="WithProxiedStaticAssets"/></param>
     /// <returns></returns>
-    public static BffFrontend WithStaticAssets(this BffFrontend frontend, Uri uri, Func<bool> indexOnly)
+    public static BffFrontend WithStaticAssets(this BffFrontend frontend, Uri uri, Func<bool> useCdnWhen)
     {
         ArgumentNullException.ThrowIfNull(frontend);
-        ArgumentNullException.ThrowIfNull(indexOnly);
+        ArgumentNullException.ThrowIfNull(useCdnWhen);
 
-        if (indexOnly())
+        if (useCdnWhen())
         {
             return frontend.WithCdnIndexHtmlUrl(uri);
         }

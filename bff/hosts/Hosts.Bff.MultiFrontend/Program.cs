@@ -12,6 +12,7 @@ using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Yarp;
 using Hosts.ServiceDefaults;
 using Yarp.ReverseProxy.Configuration;
+using EnvironmentName = Microsoft.AspNetCore.Hosting.EnvironmentName;
 
 var bffConfig = new ConfigurationBuilder()
 #if DEBUG
@@ -36,6 +37,8 @@ builder.AddServiceDefaults();
 
 var bffBuilder = builder.Services
     .AddBff();
+
+var runningInProduction = () => builder.Environment.EnvironmentName == Environments.Production;
 
 bffBuilder
     .ConfigureOpenIdConnect(options =>
@@ -79,8 +82,7 @@ bffBuilder
     .AddRemoteApis()
     .AddFrontends(
         new BffFrontend(BffFrontendName.Parse("default-frontend"))
-            .WithProxiedStaticAssets(new Uri("https://localhost:5173/"))
-//.WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
+            .WithStaticAssets(new Uri("https://localhost:5010/static"), useCdnWhen: runningInProduction)
 ,
         new BffFrontend(BffFrontendName.Parse("with-path"))
             .WithOpenIdConnectOptions(opt =>

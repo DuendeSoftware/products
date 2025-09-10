@@ -90,14 +90,19 @@ internal class StaticFilesHttpClient : IStaticFilesClient, IAsyncDisposable
                                                  Constants.HttpClientNames.StaticAssetsClientName);
 
         var path = context.Request.GetEncodedPathAndQuery();
-        //if (path == "/")
-        //{
-        //    path = _options.Value.IndexHtmlFileName;
-        //}
 
         var frontendStaticAssetsUrl = frontend.StaticAssetsUrl ??
                                       throw new InvalidOperationException("Static assets can't be proxied without the static assets url.");
-        var response = await client.GetAsync(new Uri(frontendStaticAssetsUrl, path), ct);
+
+        if (!frontendStaticAssetsUrl.AbsolutePath.EndsWith('/'))
+        {
+            frontendStaticAssetsUrl = new UriBuilder(frontendStaticAssetsUrl.Scheme, frontendStaticAssetsUrl.Host,
+                    frontendStaticAssetsUrl.Port, frontendStaticAssetsUrl.AbsolutePath + "/",
+                    frontendStaticAssetsUrl.Query)
+                .Uri;
+        }
+
+        var response = await client.GetAsync(new Uri(frontendStaticAssetsUrl, path.TrimStart('/')), ct);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
