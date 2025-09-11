@@ -598,6 +598,5 @@ public class BffFrontendSigninTests : BffTestBase
             .Build();
 
         return configuration;
-
     }
 }
