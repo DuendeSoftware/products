@@ -31,7 +31,7 @@ public static class ConfigurationEndpointExtensions
 
     internal static void CheckLicense(this IEndpointRouteBuilder endpoints)
     {
-        if (_licenseChecked == false)
+        if (!_licenseChecked)
         {
             var loggerFactory = endpoints.ServiceProvider.GetRequiredService<ILoggerFactory>();
             var options = endpoints.ServiceProvider.GetRequiredService<IOptions<IdentityServerConfigurationOptions>>().Value;

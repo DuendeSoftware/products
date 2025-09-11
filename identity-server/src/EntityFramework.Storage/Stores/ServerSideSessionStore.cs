@@ -494,7 +494,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             query = query.Where(x =>
                 (filter.SubjectId == null || x.SubjectId.Contains(filter.SubjectId)) &&
                 (filter.SessionId == null || x.SessionId.Contains(filter.SessionId)) &&
-                (filter.DisplayName == null || (x.DisplayName != null && x.DisplayName.Contains(filter.DisplayName) == true))
+                (filter.DisplayName == null || (x.DisplayName != null && x.DisplayName.Contains(filter.DisplayName)))
             );
         }
         return query;
@@ -510,6 +510,6 @@ public class ServerSideSessionStore : IServerSideSessionStore
         public int CurrentPage { get; set; } = 1;
         public bool HasNext { get; set; }
         public bool HasPrev { get; set; }
-        public Entities.ServerSideSession[] Items { get; set; } = Array.Empty<Entities.ServerSideSession>();
+        public Entities.ServerSideSession[] Items { get; set; } = [];
     }
 }
