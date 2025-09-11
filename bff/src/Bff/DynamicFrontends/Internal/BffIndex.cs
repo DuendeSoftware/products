@@ -14,7 +14,7 @@ internal class BffIndex
     private readonly Dictionary<HostString, PathTrie<BffFrontend>> _perOrigin = new();
     private readonly PathTrie<BffFrontend> _perPath = new();
     private BffFrontend? _defaultFrontend;
-
+    private readonly Dictionary<FrontendMatchingCriteria, BffFrontendName> _registeredCriteria = new();
     public BffIndex(ILogger logger, FrontendCollection frontends)
     {
         _logger = logger;
@@ -27,12 +27,24 @@ internal class BffIndex
     public void AddFrontend(BffFrontend frontend)
     {
         var frontendSelectionCriteria = frontend.MatchingCriteria;
+
+        if (!_registeredCriteria.TryAdd(frontendSelectionCriteria, frontend.Name))
+        {
+            _registeredCriteria.TryGetValue(frontendSelectionCriteria, out var collidesWith);
+            _logger.FrontendWithSimilarMatchingCriteriaAlreadyRegistered(LogLevel.Warning,
+                frontend.Name,
+                collidesWith
+            );
+            return;
+        }
+
         if (frontendSelectionCriteria.MatchingHostHeader == null)
         {
-            if (frontendSelectionCriteria.MatchingPath == null || frontendSelectionCriteria.MatchingPath == "/")
+            if (frontendSelectionCriteria.MatchingPath == null)
             {
                 if (_defaultFrontend != null)
                 {
+                    // This should no longer happen.
                     _logger.DuplicateDefaultRouteConfigured(LogLevel.Warning);
                     return;
                 }

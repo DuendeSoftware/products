@@ -14,6 +14,32 @@ namespace Duende.Bff.DynamicFrontends;
 /// </summary>
 public sealed record HostHeaderValue : IEquatable<HttpRequest>
 {
+    public bool Equals(HostHeaderValue? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return string.Equals(Scheme, other.Scheme, StringComparison.OrdinalIgnoreCase)
+               && string.Equals(Host, other.Host, StringComparison.OrdinalIgnoreCase)
+               && Port == other.Port;
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(Scheme, StringComparer.InvariantCultureIgnoreCase);
+        hashCode.Add(Host, StringComparer.InvariantCultureIgnoreCase);
+        hashCode.Add(Port);
+        return hashCode.ToHashCode();
+    }
+
     public static HostHeaderValue Parse(string origin)
     {
         if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))

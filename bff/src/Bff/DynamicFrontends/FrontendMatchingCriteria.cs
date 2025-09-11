@@ -18,8 +18,9 @@ public sealed record FrontendMatchingCriteria
         get => _matchingPath;
         init
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value) || value == "/")
             {
+                // a "/" path is considered the default. So, we'll set it to null to indicate no special matching
                 _matchingPath = null;
                 return;
             }
@@ -39,4 +40,28 @@ public sealed record FrontendMatchingCriteria
     public HostHeaderValue? MatchingHostHeader { get; init; }
 
     internal bool HasValue => MatchingHostHeader != null || MatchingPath != null;
+
+    public bool Equals(FrontendMatchingCriteria? other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return string.Equals(_matchingPath, other._matchingPath, StringComparison.OrdinalIgnoreCase)
+               && Equals(MatchingHostHeader, other.MatchingHostHeader);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(_matchingPath, StringComparer.OrdinalIgnoreCase);
+        hashCode.Add(MatchingHostHeader);
+        return hashCode.ToHashCode();
+    }
 }

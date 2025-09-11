@@ -402,6 +402,8 @@ namespace Duende.Bff.DynamicFrontends
         public FrontendMatchingCriteria() { }
         public Duende.Bff.DynamicFrontends.HostHeaderValue? MatchingHostHeader { get; init; }
         public string? MatchingPath { get; init; }
+        public bool Equals(Duende.Bff.DynamicFrontends.FrontendMatchingCriteria? other) { }
+        public override int GetHashCode() { }
     }
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class HostHeaderValue : System.IEquatable<Duende.Bff.DynamicFrontends.HostHeaderValue>, System.IEquatable<Microsoft.AspNetCore.Http.HttpRequest>
@@ -415,7 +417,9 @@ namespace Duende.Bff.DynamicFrontends
         public int Port { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public string Scheme { get; init; }
+        public bool Equals(Duende.Bff.DynamicFrontends.HostHeaderValue? other) { }
         public bool Equals(Microsoft.AspNetCore.Http.HttpRequest? request) { }
+        public override int GetHashCode() { }
         public override string ToString() { }
         public System.Uri ToUri() { }
         public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(string origin) { }

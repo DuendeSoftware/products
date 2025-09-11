@@ -6,6 +6,7 @@ using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Tests.TestInfra;
+using Xunit.Abstractions;
 using TestLoggerProvider = Duende.Bff.Tests.TestFramework.TestLoggerProvider;
 
 namespace Duende.Bff.Tests.MultiFrontend;
@@ -19,14 +20,17 @@ public class FrontendSelectorTests
     internal TestDataBuilder Some => new(The);
     private readonly StringBuilder _logMessages = new();
 
-    public FrontendSelectorTests()
+    public FrontendSelectorTests(ITestOutputHelper output)
     {
         _frontendCollection = new(plugins: [],
             bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration()),
             licenseValidator: Some.LicenseValidator
         );
         var testLoggerProvider = new TestLoggerProvider((s) =>
-            _logMessages.AppendLine(s), "", forceToWriteOutput: true);
+        {
+            output.WriteLine(s);
+            _logMessages.AppendLine(s);
+        }, "", forceToWriteOutput: true);
         var loggerFactory = new LoggerFactory([testLoggerProvider]);
 
 
@@ -342,6 +346,50 @@ public class FrontendSelectorTests
         selectedFrontend.ShouldNotBeNull();
         selectedFrontend.Name.ToString().ShouldBe("default-frontend");
     }
+
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData("/", null)]
+    [InlineData("/some_path", null)]
+    [InlineData(null, "https://some-url")]
+    [InlineData("/some_path", "https://some-url")]
+    public void When_mapping_duplicate_then_warning_is_written(string? path, string? uri)
+    {
+        var f1 = CreateFrontend(BffFrontendName.Parse("f1"));
+
+        var f2 = CreateFrontend(BffFrontendName.Parse("f2"));
+
+        if (path != null && uri != null)
+        {
+            // Also, test that the combined map equals the same as individual ones
+            // Also, verify that it's case insensitive
+            f1 = f1.MapTo(HostHeaderValue.Parse(new Uri(uri)), path);
+            f2 = f2.MapTo(new Uri(new Uri(uri.ToUpper()), path.ToUpper()));
+        }
+        else if (path != null)
+        {
+            f1 = f1.MapToPath(path);
+            f2 = f2.MapToPath(path.ToUpper());
+        }
+        else if (uri != null)
+        {
+            f1 = f1.MapTo(new Uri(uri));
+            f2 = f2.MapTo(new Uri(uri.ToUpper()));
+        }
+        _frontendCollection.AddOrUpdate(f1);
+        _frontendCollection.AddOrUpdate(f2);
+
+        // Act
+        var request = CreateHttpRequest("https://some-url/some_path");
+        var result = _selector.TrySelectFrontend(request, out var selectedFrontend);
+        result.ShouldBe(true);
+        selectedFrontend!.Name.ShouldBe(f1.Name);
+        var expectedWarning = "Duplicate Frontend matching criteria registered. Frontend 'f2'";
+
+        _logMessages.ToString().ShouldContain(expectedWarning);
+
+    }
+
 
 
     // Helper methods

@@ -36,6 +36,10 @@ internal static partial class LogMessages
     public static partial void DuplicateDefaultRouteConfigured(this ILogger logger, LogLevel level);
 
     [LoggerMessage(
+        Message = $"Duplicate Frontend matching criteria registered. Frontend '{{{OTelParameters.Frontend}}}' will be ignored because it collides with frontend '{{duplicate}}'.")]
+    public static partial void FrontendWithSimilarMatchingCriteriaAlreadyRegistered(this ILogger logger, LogLevel level, BffFrontendName frontend, BffFrontendName duplicate);
+
+    [LoggerMessage(
         Message = $"Failed to apply yarp access token request transform.")]
     public static partial void FailedToApplyYarpAccessTokenRequestTransform(this ILogger logger, Exception ex, LogLevel level);
 
