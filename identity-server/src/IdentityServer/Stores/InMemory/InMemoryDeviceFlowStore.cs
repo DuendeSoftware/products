@@ -82,10 +82,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
         {
             var foundData = _repository.FirstOrDefault(x => x.UserCode == userCode);
 
-            if (foundData != null)
-            {
-                _ = foundData.Data = data;
-            }
+            foundData?.Data = data;
         }
 
         return Task.CompletedTask;

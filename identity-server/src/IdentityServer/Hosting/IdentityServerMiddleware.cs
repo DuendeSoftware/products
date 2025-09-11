@@ -105,10 +105,7 @@ public class IdentityServerMiddleware
                 try
                 {
                     var httpActivity = context.Features.Get<IHttpActivityFeature>();
-                    if (httpActivity != null)
-                    {
-                        _ = httpActivity.Activity.DisplayName = $"{context.Request.Method} {requestPath}";
-                    }
+                    httpActivity?.Activity.DisplayName = $"{context.Request.Method} {requestPath}";
 
                     using var activity = Tracing.BasicActivitySource.StartActivity("IdentityServerProtocolRequest");
                     _ = (activity?.SetTag(Tracing.Properties.EndpointType, endpointType));
