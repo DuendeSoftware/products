@@ -32,7 +32,7 @@ public sealed record BffUserAccessTokenParameters
     {
         SignInScheme = SignInScheme,
         ChallengeScheme = ChallengeScheme,
-        ForceTokenRenewal = new ForceTokenRenewal(ForceRenewal),
+        ForceTokenRenewal = ForceRenewal,
         Resource = Resource.HasValue ? AtmResource.Parse(Resource.Value.ToString()) : null
     };
 }
