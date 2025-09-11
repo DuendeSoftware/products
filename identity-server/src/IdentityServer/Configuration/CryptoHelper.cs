@@ -165,9 +165,10 @@ public static class CryptoHelper
 
         return true;
     }
-    internal static bool IsValidCrvValueForAlgorithm(string crv) => crv == JsonWebKeyECTypes.P256 ||
-               crv == JsonWebKeyECTypes.P384 ||
-               crv == JsonWebKeyECTypes.P521;
+    internal static bool IsValidCrvValueForAlgorithm(string crv) => crv is
+        JsonWebKeyECTypes.P256 or
+        JsonWebKeyECTypes.P384 or
+        JsonWebKeyECTypes.P521;
 
     internal static string GetRsaSigningAlgorithmValue(IdentityServerConstants.RsaSigningAlgorithm value) => value switch
     {

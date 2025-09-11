@@ -340,7 +340,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         // check if PKCE is required and validate parameters
         //////////////////////////////////////////////////////////
-        if (request.GrantType == GrantType.AuthorizationCode || request.GrantType == GrantType.Hybrid)
+        if (request.GrantType is GrantType.AuthorizationCode or GrantType.Hybrid)
         {
             _sanitizedLogger.LogDebug("Checking for PKCE parameters");
 
@@ -495,8 +495,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         // check scope vs response_type plausability
         //////////////////////////////////////////////////////////
         var requirement = Constants.ResponseTypeToScopeRequirement[request.ResponseType];
-        if (requirement == Constants.ScopeRequirement.Identity ||
-            requirement == Constants.ScopeRequirement.IdentityOnly)
+        if (requirement is Constants.ScopeRequirement.Identity or Constants.ScopeRequirement.IdentityOnly)
         {
             if (!request.IsOpenIdRequest)
             {

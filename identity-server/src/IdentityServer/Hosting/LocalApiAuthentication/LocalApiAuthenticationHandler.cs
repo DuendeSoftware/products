@@ -198,7 +198,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
         var sb = new StringBuilder();
 
-        if (Options.TokenMode == LocalApiTokenMode.BearerOnly || Options.TokenMode == LocalApiTokenMode.DPoPAndBearer)
+        if (Options.TokenMode is LocalApiTokenMode.BearerOnly or LocalApiTokenMode.DPoPAndBearer)
         {
             _ = sb.Append("Bearer");
 
@@ -217,7 +217,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
             }
         }
 
-        if (Options.TokenMode == LocalApiTokenMode.DPoPOnly || Options.TokenMode == LocalApiTokenMode.DPoPAndBearer)
+        if (Options.TokenMode is LocalApiTokenMode.DPoPOnly or LocalApiTokenMode.DPoPAndBearer)
         {
             if (sb.Length > 0)
             {

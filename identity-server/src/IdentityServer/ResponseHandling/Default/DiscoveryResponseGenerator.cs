@@ -284,7 +284,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
                 OidcConstants.GrantTypes.Implicit
             };
 
-            if (!(ResourceOwnerValidator is NotSupportedResourceOwnerPasswordValidator))
+            if (ResourceOwnerValidator is not NotSupportedResourceOwnerPasswordValidator)
             {
                 standardGrantTypes.Add(OidcConstants.GrantTypes.Password);
             }

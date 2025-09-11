@@ -116,7 +116,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
         // Valid port range is 0 through 65535.
         if (int.TryParse(portAsString, out var port))
         {
-            if (port >= 0 && port < 65536)
+            if (port is >= 0 and < 65536)
             {
                 return true;
             }
