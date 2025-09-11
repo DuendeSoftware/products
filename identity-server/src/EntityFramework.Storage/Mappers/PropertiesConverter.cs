@@ -14,7 +14,7 @@ internal static class PropertiesConverter
     {
         if (string.IsNullOrWhiteSpace(sourceMember))
         {
-            return new Dictionary<string, string>();
+            return [];
         }
         return JsonSerializer.Deserialize<Dictionary<string, string>>(sourceMember);
     }

@@ -186,14 +186,13 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
         if (filter.RequestPriorResults)
         {
             // sets query at the prior record from the last results, but in reverse order
-            items = query.OrderByDescending(x => x.Key)
+            items = [.. query.OrderByDescending(x => x.Key)
                 .Where(x => string.Compare(x.Key, first, StringComparison.Ordinal) < 0)
                 // and we +1 to see if there's a prev page
-                .Take(countRequested + 1)
-                .ToArray();
+                .Take(countRequested + 1)];
 
             // put them back into ID order
-            items = items.OrderBy(x => x.Key).ToArray();
+            items = [.. items.OrderBy(x => x.Key)];
 
             // if we have the one extra, we have a prev page
             hasPrev = items.Length > countRequested;
@@ -201,7 +200,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             if (hasPrev)
             {
                 // omit prev results entry
-                items = items.Skip(1).ToArray();
+                items = [.. items.Skip(1)];
             }
 
             // how many are to the right of these results?
@@ -224,12 +223,11 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
         }
         else
         {
-            items = query.OrderBy(x => x.Key)
+            items = [.. query.OrderBy(x => x.Key)
                 // if last is "", then this will just start at beginning
                 .Where(x => string.Compare(x.Key, last, StringComparison.Ordinal) > 0)
                 // and we +1 to see if there's a next page
-                .Take(countRequested + 1)
-                .ToArray();
+                .Take(countRequested + 1)];
 
             // if we have the one extra, we have a next page
             hasNext = items.Length > countRequested;
@@ -237,7 +235,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             if (hasNext)
             {
                 // omit next results entry
-                items = items.SkipLast(1).ToArray();
+                items = [.. items.SkipLast(1)];
             }
 
             // how many are to the left of these results?

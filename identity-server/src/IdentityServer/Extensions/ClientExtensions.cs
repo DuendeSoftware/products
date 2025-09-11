@@ -47,12 +47,11 @@ public static class ClientExtensions
     private static List<X509Certificate2> GetCertificates(IEnumerable<Secret> secrets) =>
 #pragma warning disable SYSLIB0057 // Type or member is obsolete
         // TODO - Use X509CertificateLoader in a future release (when we drop NET8 support)
-        secrets
+        [.. secrets
             .Where(s => s.Type == IdentityServerConstants.SecretTypes.X509CertificateBase64)
             .Select(s =>
                 new X509Certificate2(Convert.FromBase64String(s.Value)))
-            .Where(c => c != null)
-            .ToList();
+            .Where(c => c != null)];
 #pragma warning restore SYSLIB0057 // Type or member is obsolete
 
 }

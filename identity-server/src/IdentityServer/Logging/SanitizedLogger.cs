@@ -27,7 +27,7 @@ internal class SanitizedLogger<T>
         if (_logger.IsEnabled(LogLevel.Debug))
         {
 #pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
-            LoggerExtensions.LogDebug(_logger, message, args.Select(ILoggerDevExtensions.SanitizeLogParameter).ToArray());
+            LoggerExtensions.LogDebug(_logger, message, [.. args.Select(ILoggerDevExtensions.SanitizeLogParameter)]);
 #pragma warning restore CA2254
         }
     }
@@ -37,7 +37,7 @@ internal class SanitizedLogger<T>
         if (_logger.IsEnabled(LogLevel.Information))
         {
 #pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
-            _logger.LogInformation(message, args.Select(ILoggerDevExtensions.SanitizeLogParameter).ToArray());
+            _logger.LogInformation(message, [.. args.Select(ILoggerDevExtensions.SanitizeLogParameter)]);
 #pragma warning restore CA2254
         }
     }
@@ -47,7 +47,7 @@ internal class SanitizedLogger<T>
         if (_logger.IsEnabled(LogLevel.Warning))
         {
 #pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
-            _logger.LogWarning(message, args.Select(ILoggerDevExtensions.SanitizeLogParameter).ToArray());
+            _logger.LogWarning(message, [.. args.Select(ILoggerDevExtensions.SanitizeLogParameter)]);
 #pragma warning restore CA2254
         }
     }
@@ -57,7 +57,7 @@ internal class SanitizedLogger<T>
         if (_logger.IsEnabled(LogLevel.Error))
         {
 #pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
-            _logger.LogError(message, args.Select(ILoggerDevExtensions.SanitizeLogParameter).ToArray());
+            _logger.LogError(message, [.. args.Select(ILoggerDevExtensions.SanitizeLogParameter)]);
 #pragma warning restore CA2254
         }
     }
@@ -67,7 +67,7 @@ internal class SanitizedLogger<T>
         if (_logger.IsEnabled(LogLevel.Critical))
         {
 #pragma warning disable CA2254 // Both the message template and any properties for the template are parameters here
-            _logger.LogCritical(exception, message, args.Select(ILoggerDevExtensions.SanitizeLogParameter).ToArray());
+            _logger.LogCritical(exception, message, [.. args.Select(ILoggerDevExtensions.SanitizeLogParameter)]);
 #pragma warning restore CA2254
         }
     }

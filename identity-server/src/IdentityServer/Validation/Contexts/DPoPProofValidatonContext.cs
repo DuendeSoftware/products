@@ -56,5 +56,5 @@ public class DPoPProofValidatonContext
     /// This is included separately from the <see cref="AccessToken"/> because getting the claims 
     /// might be an expensive operation (especially if the token is a reference token).
     /// </summary>
-    public IEnumerable<Claim> AccessTokenClaims { get; set; } = Enumerable.Empty<Claim>();
+    public IEnumerable<Claim> AccessTokenClaims { get; set; } = [];
 }

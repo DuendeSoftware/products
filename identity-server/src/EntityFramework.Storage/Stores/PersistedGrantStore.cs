@@ -103,7 +103,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
 
         var persistedGrants = await Filter(Context.PersistedGrants.AsQueryable(), filter)
             .ToArrayAsync(CancellationTokenProvider.CancellationToken);
-        persistedGrants = Filter(persistedGrants.AsQueryable(), filter).ToArray();
+        persistedGrants = [.. Filter(persistedGrants.AsQueryable(), filter)];
 
         var model = persistedGrants.Select(x => x.ToModel());
 
@@ -150,7 +150,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
 
         var persistedGrants = await Filter(Context.PersistedGrants.AsQueryable(), filter)
             .ToArrayAsync(CancellationTokenProvider.CancellationToken);
-        persistedGrants = Filter(persistedGrants.AsQueryable(), filter).ToArray();
+        persistedGrants = [.. Filter(persistedGrants.AsQueryable(), filter)];
 
         Logger.LogDebug("removing {persistedGrantCount} persisted grants from database for {@filter}", persistedGrants.Length, filter);
 

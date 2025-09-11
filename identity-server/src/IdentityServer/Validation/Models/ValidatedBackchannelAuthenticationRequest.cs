@@ -90,5 +90,5 @@ public class ValidatedBackchannelAuthenticationRequest : ValidatedRequest
     /// properties are persisted to the store and made available in the
     /// backchannel authentication UI and notification services.
     /// </summary>
-    public Dictionary<string, object> Properties { get; set; } = new();
+    public Dictionary<string, object> Properties { get; set; } = [];
 }

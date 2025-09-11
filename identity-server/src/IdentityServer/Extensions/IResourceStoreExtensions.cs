@@ -80,7 +80,7 @@ public static class IResourceStoreExtensions
             .Where(g => g.Count() > 1)
             .Select(y => y.Key)
             .ToArray();
-        return duplicates.ToArray();
+        return [.. duplicates];
     }
 
     /// <summary>

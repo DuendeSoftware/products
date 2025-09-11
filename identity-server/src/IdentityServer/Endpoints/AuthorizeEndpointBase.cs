@@ -78,7 +78,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         {
             var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
             var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId);
-            parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
+            parameters = entry?.Data.FromFullDictionary() ?? [];
 
             await _authorizationParametersMessageStore.DeleteAsync(messageStoreId);
         }

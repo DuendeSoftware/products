@@ -123,7 +123,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest, "Invalid scope");
         }
 
-        _validatedRequest.RequestedScopes = scope.FromSpaceSeparatedString().Distinct().ToList();
+        _validatedRequest.RequestedScopes = [.. scope.FromSpaceSeparatedString().Distinct()];
 
         //////////////////////////////////////////////////////////
         // openid scope required
@@ -230,7 +230,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest, "Invalid acr_values");
             }
 
-            _validatedRequest.AuthenticationContextReferenceClasses = acrValues.FromSpaceSeparatedString().Distinct().ToList();
+            _validatedRequest.AuthenticationContextReferenceClasses = [.. acrValues.FromSpaceSeparatedString().Distinct()];
 
             //////////////////////////////////////////////////////////
             // check custom acr_values: idp and tenant

@@ -488,7 +488,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             return Invalid(request, description: "Invalid scope");
         }
 
-        request.RequestedScopes = scope.FromSpaceSeparatedString().Distinct().ToList();
+        request.RequestedScopes = [.. scope.FromSpaceSeparatedString().Distinct()];
         request.IsOpenIdRequest = request.RequestedScopes.Contains(IdentityServerConstants.StandardScopes.OpenId);
 
         //////////////////////////////////////////////////////////
@@ -768,7 +768,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
                 return Invalid(request, description: "Invalid acr_values");
             }
 
-            request.AuthenticationContextReferenceClasses = acrValues.FromSpaceSeparatedString().Distinct().ToList();
+            request.AuthenticationContextReferenceClasses = [.. acrValues.FromSpaceSeparatedString().Distinct()];
         }
 
         //////////////////////////////////////////////////////////

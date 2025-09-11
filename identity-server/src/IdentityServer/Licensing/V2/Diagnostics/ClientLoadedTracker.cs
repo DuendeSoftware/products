@@ -57,12 +57,12 @@ internal class ClientLoadedTracker : IDisposable
                     .Distinct()
                     .Select(secret => JsonValue.Create(secret))
                     .Cast<JsonNode>();
-                clientDiagnosticData["SecretTypes"] = new JsonArray(secrets.ToArray());
+                clientDiagnosticData["SecretTypes"] = new JsonArray([.. secrets]);
             }
             else if (defaultValue.ValueKind == JsonValueKind.Array && clientValue.ValueKind == JsonValueKind.Array && clientValue.GetArrayLength() > 0)
             {
                 var arrayEntries = clientValue.EnumerateArray().Take(ArrayMaxSize).Select(CreateJsonValue).Cast<JsonNode>();
-                clientDiagnosticData[property.Name] = new JsonArray(arrayEntries.ToArray());
+                clientDiagnosticData[property.Name] = new JsonArray([.. arrayEntries]);
             }
             else
             {

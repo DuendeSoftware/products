@@ -34,5 +34,5 @@ public class CorsOptions
     /// <value>
     /// The cors paths.
     /// </value>
-    public ICollection<PathString> CorsPaths { get; set; } = ProtocolRoutePaths.CorsPaths.Select(x => new PathString(x.EnsureLeadingSlash())).ToList();
+    public ICollection<PathString> CorsPaths { get; set; } = [.. ProtocolRoutePaths.CorsPaths.Select(x => new PathString(x.EnsureLeadingSlash()))];
 }

@@ -73,12 +73,12 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     /// <summary>
     /// The persisted grants that are token types.
     /// </summary>
-    protected static readonly string[] PersistedGrantTokenTypes = new[] {
+    protected static readonly string[] PersistedGrantTokenTypes = [
         IdentityServerConstants.PersistedGrantTypes.RefreshToken,
         IdentityServerConstants.PersistedGrantTypes.ReferenceToken,
         IdentityServerConstants.PersistedGrantTypes.AuthorizationCode,
         IdentityServerConstants.PersistedGrantTypes.BackChannelAuthenticationRequest,
-    };
+    ];
 
     /// <inheritdoc/>
     public virtual async Task ProcessLogoutAsync(UserSession session)

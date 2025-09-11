@@ -24,7 +24,7 @@ public static class ProfileDataRequestContextExtensions
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(claims);
 
-        return claims.Where(x => context.RequestedClaimTypes.Contains(x.Type)).ToList();
+        return [.. claims.Where(x => context.RequestedClaimTypes.Contains(x.Type))];
     }
 
     /// <summary>

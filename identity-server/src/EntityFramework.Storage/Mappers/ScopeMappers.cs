@@ -24,8 +24,8 @@ public static class ScopeMappers
                 DisplayName = entity.DisplayName,
                 Description = entity.Description,
                 ShowInDiscoveryDocument = entity.ShowInDiscoveryDocument,
-                UserClaims = entity.UserClaims?.Select(c => c.Type).ToList() ?? new List<string>(),
-                Properties = entity.Properties?.ToDictionary(p => p.Key, p => p.Value) ?? new Dictionary<string, string>(),
+                UserClaims = entity.UserClaims?.Select(c => c.Type).ToList() ?? [],
+                Properties = entity.Properties?.ToDictionary(p => p.Key, p => p.Value) ?? [],
 
                 Required = entity.Required,
                 Emphasize = entity.Emphasize
@@ -47,12 +47,12 @@ public static class ScopeMappers
                 UserClaims = model.UserClaims?.Select(c => new Entities.ApiScopeClaim
                 {
                     Type = c,
-                }).ToList() ?? new List<ApiScopeClaim>(),
+                }).ToList() ?? [],
                 Properties = model.Properties?.Select(p => new Entities.ApiScopeProperty
                 {
                     Key = p.Key,
                     Value = p.Value
-                }).ToList() ?? new List<ApiScopeProperty>(),
+                }).ToList() ?? [],
 
                 Required = model.Required,
                 Emphasize = model.Emphasize

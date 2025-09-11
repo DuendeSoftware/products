@@ -61,7 +61,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
         //// Redirect Uris
         if (client.RedirectUris.Count > 0)
         {
-            RedirectUris = client.RedirectUris.Select(s => new Uri(s)).ToList();
+            RedirectUris = [.. client.RedirectUris.Select(s => new Uri(s))];
         }
 
         //// Scopes
@@ -80,7 +80,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
         if (GrantTypes.Contains(GrantType.AuthorizationCode))
         {
             //// Logout Parameters
-            PostLogoutRedirectUris = client.PostLogoutRedirectUris.Select(s => new Uri(s)).ToList();
+            PostLogoutRedirectUris = [.. client.PostLogoutRedirectUris.Select(s => new Uri(s))];
 
             FrontChannelLogoutUri = ToUri(client.FrontChannelLogoutUri);
             // If there is no FrontChannelLogoutUri, then we hide the session required flag because it would be confusing
@@ -97,7 +97,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
             LogoUri = ToUri(client.LogoUri);
             InitiateLoginUri = ToUri(client.InitiateLoginUri);
             EnableLocalLogin = client.EnableLocalLogin;
-            IdentityProviderRestrictions = client.IdentityProviderRestrictions.ToHashSet();
+            IdentityProviderRestrictions = [.. client.IdentityProviderRestrictions];
             RequireConsent = client.RequireConsent;
             ClientUri = ToUri(client.ClientUri);
             if (RequireConsent == true)
@@ -109,7 +109,7 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
 
         //// Public Clients
         AllowedCorsOrigins = InteractiveFlowsEnabled(client) ?
-            client.AllowedCorsOrigins.ToHashSet() :
+            [.. client.AllowedCorsOrigins] :
             null;
 
         RequireClientSecret = client.RequireClientSecret;

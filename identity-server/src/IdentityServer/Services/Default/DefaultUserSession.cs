@@ -338,7 +338,7 @@ public class DefaultUserSession : IUserSession
             }
         }
 
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     // client list helpers

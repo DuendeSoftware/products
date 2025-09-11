@@ -46,7 +46,7 @@ public static class IdentityResources
             DisplayName = "User profile";
             Description = "Your user profile information (first name, last name, etc.)";
             Emphasize = true;
-            UserClaims = Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Profile].ToList();
+            UserClaims = [.. Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Profile]];
         }
     }
 
@@ -64,7 +64,7 @@ public static class IdentityResources
             Name = IdentityServerConstants.StandardScopes.Email;
             DisplayName = "Your email address";
             Emphasize = true;
-            UserClaims = (Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Email].ToList());
+            UserClaims = ([.. Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Email]]);
         }
     }
 
@@ -82,7 +82,7 @@ public static class IdentityResources
             Name = IdentityServerConstants.StandardScopes.Phone;
             DisplayName = "Your phone number";
             Emphasize = true;
-            UserClaims = Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Phone].ToList();
+            UserClaims = [.. Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Phone]];
         }
     }
 
@@ -100,7 +100,7 @@ public static class IdentityResources
             Name = IdentityServerConstants.StandardScopes.Address;
             DisplayName = "Your postal address";
             Emphasize = true;
-            UserClaims = Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Address].ToList();
+            UserClaims = [.. Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Address]];
         }
     }
 }

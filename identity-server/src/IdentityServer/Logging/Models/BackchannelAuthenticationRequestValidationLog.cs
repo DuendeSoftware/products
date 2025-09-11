@@ -21,7 +21,7 @@ internal class BackchannelAuthenticationRequestValidationLog
 
     public BackchannelAuthenticationRequestValidationLog(ValidatedBackchannelAuthenticationRequest request, IEnumerable<string> sensitiveValuesFilter)
     {
-        Raw = request.Raw.ToScrubbedDictionary(sensitiveValuesFilter.ToArray());
+        Raw = request.Raw.ToScrubbedDictionary([.. sensitiveValuesFilter]);
 
         if (request.Client != null)
         {

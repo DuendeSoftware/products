@@ -49,7 +49,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
             {
                 var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
                 var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId);
-                parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
+                parameters = entry?.Data.FromFullDictionary() ?? [];
             }
 
             var user = await _userSession.GetUserAsync();

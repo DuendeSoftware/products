@@ -273,7 +273,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
 
             if (scopes.Contains("offline_access"))
             {
-                scopes = scopes.Where(s => s != "offline_access").ToArray();
+                scopes = [.. scopes.Where(s => s != "offline_access")];
                 Logger.LogDebug("offline_access should not be passed as a scope to dynamic client registration. Use the refresh_token grant_type instead.");
             }
 
@@ -415,7 +415,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// represents that this step succeeded or failed.</returns>
     protected virtual Task<IStepResult> SetLogoutParametersAsync(DynamicClientRegistrationContext context)
     {
-        context.Client.PostLogoutRedirectUris = context.Request.PostLogoutRedirectUris?.Select(uri => uri.ToString()).ToList() ?? new List<string>();
+        context.Client.PostLogoutRedirectUris = context.Request.PostLogoutRedirectUris?.Select(uri => uri.ToString()).ToList() ?? [];
         context.Client.FrontChannelLogoutUri = context.Request.FrontChannelLogoutUri?.AbsoluteUri;
         context.Client.FrontChannelLogoutSessionRequired = context.Request.FrontChannelLogoutSessionRequired ?? true;
         context.Client.BackChannelLogoutUri = context.Request.BackChannelLogoutUri?.AbsoluteUri;
@@ -477,7 +477,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
     /// represents that this step succeeded or failed.</returns>
     protected virtual Task<IStepResult> SetPublicClientProperties(DynamicClientRegistrationContext context)
     {
-        context.Client.AllowedCorsOrigins = context.Request.AllowedCorsOrigins ?? new();
+        context.Client.AllowedCorsOrigins = context.Request.AllowedCorsOrigins ?? [];
         if (context.Request.RequireClientSecret.HasValue)
         {
             context.Client.RequireClientSecret = context.Request.RequireClientSecret.Value;
@@ -591,7 +591,7 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         {
             context.Client.EnableLocalLogin = context.Request.EnableLocalLogin.Value;
         }
-        context.Client.IdentityProviderRestrictions = context.Request.IdentityProviderRestrictions ?? new();
+        context.Client.IdentityProviderRestrictions = context.Request.IdentityProviderRestrictions ?? [];
 
         // Consent
         if (context.Request.RequireConsent.HasValue)

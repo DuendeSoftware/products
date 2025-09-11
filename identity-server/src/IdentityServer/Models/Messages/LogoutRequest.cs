@@ -171,7 +171,7 @@ public class LogoutRequest
     /// <summary>
     /// Gets the entire parameter collection.
     /// </summary>
-    public NameValueCollection Parameters { get; } = new NameValueCollection();
+    public NameValueCollection Parameters { get; } = [];
 
     /// <summary>
     /// Gets or sets the sign out iframe URL.

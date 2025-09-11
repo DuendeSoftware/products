@@ -39,9 +39,9 @@ public class InMemoryResourcesStore : IResourceStore
             throw new ArgumentException("Scopes must not contain duplicate names");
         }
 
-        _identityResources = identityResources ?? Enumerable.Empty<IdentityResource>();
-        _apiResources = apiResources ?? Enumerable.Empty<ApiResource>();
-        _apiScopes = apiScopes ?? Enumerable.Empty<ApiScope>();
+        _identityResources = identityResources ?? [];
+        _apiResources = apiResources ?? [];
+        _apiScopes = apiScopes ?? [];
     }
 
     /// <inheritdoc/>

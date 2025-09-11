@@ -150,7 +150,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// The collection of prompt modes, which changes as the request is
     /// processed and various prompts are displayed.
     /// </value>
-    public IEnumerable<string> PromptModes { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> PromptModes { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the collection of original prompt modes.
@@ -172,7 +172,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// <value>
     /// The collection of original prompt modes.
     /// </value>
-    public IEnumerable<string> OriginalPromptModes { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> OriginalPromptModes { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the collection of previously processed prompt modes.
@@ -194,7 +194,7 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// <value>
     /// The collection of processed prompt modes.
     /// </value>
-    public IEnumerable<string> ProcessedPromptModes { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> ProcessedPromptModes { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the maximum age.
@@ -283,8 +283,8 @@ public class ValidatedAuthorizeRequest : ValidatedRequest
     /// </summary>
     public ValidatedAuthorizeRequest()
     {
-        RequestedScopes = new List<string>();
-        AuthenticationContextReferenceClasses = new List<string>();
+        RequestedScopes = [];
+        AuthenticationContextReferenceClasses = [];
     }
 }
 

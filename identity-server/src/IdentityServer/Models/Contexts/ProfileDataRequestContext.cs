@@ -57,7 +57,7 @@ public class ProfileDataRequestContext
     /// <value>
     /// The requested claim types.
     /// </value>
-    public IEnumerable<string> RequestedClaimTypes { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> RequestedClaimTypes { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the client id.
@@ -89,5 +89,5 @@ public class ProfileDataRequestContext
     /// <value>
     /// The issued claims.
     /// </value>
-    public List<Claim> IssuedClaims { get; set; } = new List<Claim>();
+    public List<Claim> IssuedClaims { get; set; } = [];
 }

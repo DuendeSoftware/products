@@ -150,7 +150,7 @@ public class DefaultTokenService : ITokenService
             Audiences = { request.ValidatedRequest.Client.ClientId },
             Issuer = issuer,
             Lifetime = request.ValidatedRequest.Client.IdentityTokenLifetime,
-            Claims = claims.Distinct(new ClaimComparer()).ToList(),
+            Claims = [.. claims.Distinct(new ClaimComparer())],
             ClientId = request.ValidatedRequest.Client.ClientId,
             AccessTokenType = request.ValidatedRequest.AccessTokenType,
             AllowedSigningAlgorithms = request.ValidatedRequest.Client.AllowedIdentityTokenSigningAlgorithms
@@ -191,7 +191,7 @@ public class DefaultTokenService : ITokenService
             Issuer = issuer,
             Lifetime = request.ValidatedRequest.AccessTokenLifetime,
             IncludeJwtId = request.ValidatedRequest.Client.IncludeJwtId,
-            Claims = claims.Distinct(new ClaimComparer()).ToList(),
+            Claims = [.. claims.Distinct(new ClaimComparer())],
             ClientId = request.ValidatedRequest.Client.ClientId,
             Description = request.Description,
             AccessTokenType = request.ValidatedRequest.AccessTokenType,

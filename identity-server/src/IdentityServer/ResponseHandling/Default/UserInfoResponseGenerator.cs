@@ -123,7 +123,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
         // if we ever parameterized identity scopes, then we would need to invoke the resource validator's parse API here
         var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes);
 
-        var resources = new Resources(identityResources, Enumerable.Empty<ApiResource>(), Enumerable.Empty<ApiScope>());
+        var resources = new Resources(identityResources, [], []);
         var result = new ResourceValidationResult(resources);
 
         return result;
@@ -140,7 +140,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
 
         if (resourceValidationResult == null)
         {
-            result = Enumerable.Empty<string>();
+            result = [];
         }
         else
         {

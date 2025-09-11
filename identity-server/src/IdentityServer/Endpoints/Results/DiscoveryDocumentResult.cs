@@ -14,7 +14,7 @@ namespace Duende.IdentityServer.Endpoints.Results;
 /// <seealso cref="IEndpointResult" />
 public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
 {
-    private Dictionary<string, object> _entries = new();
+    private Dictionary<string, object> _entries = [];
     private readonly bool _isUsingPreviewFeature;
 
     /// <summary>

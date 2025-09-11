@@ -197,7 +197,7 @@ internal class TokenValidator : ITokenValidator
         var subClaim = result.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
         if (subClaim != null)
         {
-            var principal = Principal.Create("tokenvalidator", result.Claims.ToArray());
+            var principal = Principal.Create("tokenvalidator", [.. result.Claims]);
 
             if (result.ReferenceTokenId.IsPresent())
             {

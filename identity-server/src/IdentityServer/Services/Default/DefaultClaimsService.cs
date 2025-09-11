@@ -73,7 +73,7 @@ public class DefaultClaimsService : IClaimsService
             }
 
             // filter so we don't ask for claim types that we will eventually filter out
-            additionalClaimTypes = FilterRequestedClaimTypes(additionalClaimTypes).ToList();
+            additionalClaimTypes = [.. FilterRequestedClaimTypes(additionalClaimTypes)];
 
             var context = new ProfileDataRequestContext(
                 subject,
@@ -194,7 +194,7 @@ public class DefaultClaimsService : IClaimsService
             }
 
             // filter so we don't ask for claim types that we will eventually filter out
-            additionalClaimTypes = FilterRequestedClaimTypes(additionalClaimTypes).ToList();
+            additionalClaimTypes = [.. FilterRequestedClaimTypes(additionalClaimTypes)];
 
             var context = new ProfileDataRequestContext(
                 subject,

@@ -266,12 +266,12 @@ public static class IdentityServerConstants
         public const string MtlsDeviceAuthorization = MtlsPathPrefix + "/deviceauthorization";
 
         public static readonly string[] CorsPaths =
-        {
+        [
             DiscoveryConfiguration,
             DiscoveryWebKeys,
             Token,
             UserInfo,
             Revocation
-        };
+        ];
     }
 }

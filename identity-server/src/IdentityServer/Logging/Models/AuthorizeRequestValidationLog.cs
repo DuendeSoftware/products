@@ -35,7 +35,7 @@ internal class AuthorizeRequestValidationLog
 
     public AuthorizeRequestValidationLog(ValidatedAuthorizeRequest request, IEnumerable<string> sensitiveValuesFilter)
     {
-        Raw = request.Raw.ToScrubbedDictionary(sensitiveValuesFilter.ToArray());
+        Raw = request.Raw.ToScrubbedDictionary([.. sensitiveValuesFilter]);
 
         if (request.Client != null)
         {

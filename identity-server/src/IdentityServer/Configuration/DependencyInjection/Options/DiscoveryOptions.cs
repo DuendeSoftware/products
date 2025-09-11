@@ -78,5 +78,5 @@ public class DiscoveryOptions
     /// <summary>
     /// Adds custom entries to the discovery document
     /// </summary>
-    public Dictionary<string, object> CustomEntries { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object> CustomEntries { get; set; } = [];
 }

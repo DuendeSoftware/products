@@ -26,7 +26,7 @@ public class GrantValidationResult : ValidationResult
     /// <summary>
     /// Custom fields for the token response
     /// </summary>
-    public Dictionary<string, object> CustomResponse { get; set; } = new Dictionary<string, object>();
+    public Dictionary<string, object> CustomResponse { get; set; } = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GrantValidationResult"/> class with no subject.
