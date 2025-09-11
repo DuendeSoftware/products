@@ -94,10 +94,10 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         //////////////////////////////////////////////////////////
         // validate request object
         //////////////////////////////////////////////////////////
-        var roValidationResult = await TryValidateRequestObjectAsync();
-        if (!roValidationResult.Success)
+        var (roValidationSuccess, roErrorResult) = await TryValidateRequestObjectAsync();
+        if (!roValidationSuccess)
         {
-            return roValidationResult.ErrorResult;
+            return roErrorResult;
         }
 
         if (_validatedRequest.Client.RequireRequestObject &&
