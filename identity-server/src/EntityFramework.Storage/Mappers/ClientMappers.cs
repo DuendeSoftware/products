@@ -3,7 +3,6 @@
 
 
 using System.Security.Claims;
-using Duende.IdentityServer.EntityFramework.Entities;
 using Duende.IdentityServer.Models;
 
 namespace Duende.IdentityServer.EntityFramework.Mappers;
