@@ -72,48 +72,32 @@ internal static class StringExtensions
     public static bool IsPresent([NotNullWhen(true)] this string? value) => !string.IsNullOrWhiteSpace(value);
 
     [DebuggerStepThrough]
-    [return: NotNullIfNotNull("url")]
-    public static string? EnsureLeadingSlash(this string? url)
-    {
-        if (url != null && !url.StartsWith('/'))
-        {
-            return '/' + url;
-        }
-
-        return url;
-    }
+    [return: NotNullIfNotNull(nameof(url))]
+    public static string? EnsureLeadingSlash(this string? url) => url != null && !url.StartsWith('/') ? '/' + url : url;
 
     [DebuggerStepThrough]
-    [return: NotNullIfNotNull("url")]
-    public static string? EnsureTrailingSlash(this string? url)
-    {
-        if (url != null && !url.EndsWith('/'))
-        {
-            return url + '/';
-        }
-
-        return url;
-    }
+    [return: NotNullIfNotNull(nameof(url))]
+    public static string? EnsureTrailingSlash(this string? url) => url != null && !url.EndsWith('/') ? url + '/' : url;
 
     [DebuggerStepThrough]
-    [return: NotNullIfNotNull("url")]
+    [return: NotNullIfNotNull(nameof(url))]
     public static string? RemoveLeadingSlash(this string? url)
     {
         if (url != null && url.StartsWith('/'))
         {
-            url = url.Substring(1);
+            url = url[1..];
         }
 
         return url;
     }
 
     [DebuggerStepThrough]
-    [return: NotNullIfNotNull("url")]
+    [return: NotNullIfNotNull(nameof(url))]
     public static string? RemoveTrailingSlash(this string? url)
     {
         if (url != null && url.EndsWith('/'))
         {
-            url = url.Substring(0, url.Length - 1);
+            url = url[..^1];
         }
 
         return url;
@@ -129,7 +113,7 @@ internal static class StringExtensions
 
         if (url != "/" && url.EndsWith('/'))
         {
-            url = url.Substring(0, url.Length - 1);
+            url = url[..^1];
         }
 
         return url;
@@ -155,7 +139,7 @@ internal static class StringExtensions
             }
 
             // url doesn't start with "//" or "/\"
-            if (url[1] != '/' && url[1] != '\\')
+            if (url[1] is not '/' and not '\\')
             {
                 return !HasControlCharacter(url.AsSpan(1));
             }
@@ -173,7 +157,7 @@ internal static class StringExtensions
             }
 
             // url doesn't start with "~//" or "~/\"
-            if (url[2] != '/' && url[2] != '\\')
+            if (url[2] is not '/' and not '\\')
             {
                 return !HasControlCharacter(url.AsSpan(2));
             }
@@ -274,13 +258,13 @@ internal static class StringExtensions
         var queryStringStart = url.IndexOf('?', StringComparison.InvariantCulture);
         if (queryStringStart >= 0)
         {
-            return url.Substring(queryStringStart + 1);
+            return url[(queryStringStart + 1)..];
         }
 
         var uri = new Uri(url, UriKind.RelativeOrAbsolute);
         if (uri.IsAbsoluteUri)
         {
-            return uri.Query.IsPresent() ? uri.Query.Substring(1) : null;
+            return uri.Query.IsPresent() ? uri.Query[1..] : null;
         }
         else
         {
@@ -313,7 +297,7 @@ internal static class StringExtensions
         var last4Chars = "****";
         if (value.IsPresent() && value.Length > 4)
         {
-            last4Chars = value.Substring(value.Length - 4);
+            last4Chars = value[^4..];
         }
 
         return "****" + last4Chars;

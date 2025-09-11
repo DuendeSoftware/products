@@ -85,8 +85,8 @@ public class Secret
         unchecked
         {
             var hash = 17;
-            hash = hash * 23 + (Value?.GetHashCode(StringComparison.InvariantCulture) ?? 0);
-            hash = hash * 23 + (Type?.GetHashCode(StringComparison.InvariantCulture) ?? 0);
+            hash = (hash * 23) + (Value?.GetHashCode(StringComparison.InvariantCulture) ?? 0);
+            hash = (hash * 23) + (Type?.GetHashCode(StringComparison.InvariantCulture) ?? 0);
 
             return hash;
         }
@@ -106,8 +106,7 @@ public class Secret
             return false;
         }
 
-        var other = obj as Secret;
-        if (other == null)
+        if (obj is not Secret other)
         {
             return false;
         }

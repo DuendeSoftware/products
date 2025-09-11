@@ -14,9 +14,6 @@ namespace Duende.IdentityServer.Models;
 [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
 public class Client
 {
-    // setting grant types should be atomic
-    private ICollection<string> _allowedGrantTypes = new GrantTypeValidatingHashSet();
-
     private string DebuggerDisplay => ClientId ?? $"{{{typeof(Client)}}}";
 
     /// <summary>
@@ -82,13 +79,13 @@ public class Client
     /// </summary>
     public ICollection<string> AllowedGrantTypes
     {
-        get => _allowedGrantTypes;
+        get;
         set
         {
             ValidateGrantTypes(value);
-            _allowedGrantTypes = new GrantTypeValidatingHashSet(value);
+            field = new GrantTypeValidatingHashSet(value);
         }
-    }
+    } = new GrantTypeValidatingHashSet();
 
     /// <summary>
     /// Specifies whether a proof key is required for authorization code based token requests (defaults to <c>true</c>).
@@ -437,14 +434,14 @@ public class Client
 
         public GrantTypeValidatingHashSet(IEnumerable<string> values) => _inner = new HashSet<string>(values);
 
-        private HashSet<string> Clone() => new HashSet<string>(this);
+        private HashSet<string> Clone() => [.. this];
 
         private HashSet<string> CloneWith(params string[] values)
         {
             var clone = Clone();
             foreach (var item in values)
             {
-                clone.Add(item);
+                _ = clone.Add(item);
             }
 
             return clone;

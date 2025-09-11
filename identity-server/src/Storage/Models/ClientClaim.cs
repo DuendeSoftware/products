@@ -66,9 +66,9 @@ public class ClientClaim
         {
             var hash = 17;
 
-            hash = hash * 23 + Value.GetHashCode(StringComparison.InvariantCulture);
-            hash = hash * 23 + Type.GetHashCode(StringComparison.InvariantCulture);
-            hash = hash * 23 + ValueType.GetHashCode(StringComparison.InvariantCulture);
+            hash = (hash * 23) + Value.GetHashCode(StringComparison.InvariantCulture);
+            hash = (hash * 23) + Type.GetHashCode(StringComparison.InvariantCulture);
+            hash = (hash * 23) + ValueType.GetHashCode(StringComparison.InvariantCulture);
             return hash;
         }
     }
@@ -83,9 +83,9 @@ public class ClientClaim
 
         if (obj is ClientClaim c)
         {
-            return (string.Equals(Type, c.Type, StringComparison.Ordinal) &&
-                    string.Equals(Value, c.Value, StringComparison.Ordinal) &&
-                    string.Equals(ValueType, c.ValueType, StringComparison.Ordinal));
+            return string.Equals(Type, c.Type, StringComparison.Ordinal) &&
+                   string.Equals(Value, c.Value, StringComparison.Ordinal) &&
+                   string.Equals(ValueType, c.ValueType, StringComparison.Ordinal);
         }
 
         return false;

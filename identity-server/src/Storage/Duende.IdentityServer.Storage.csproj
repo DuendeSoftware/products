@@ -5,6 +5,7 @@
 
     <PackageId>Duende.IdentityServer.Storage</PackageId>
     <Description>Storage interfaces and models for Duende IdentityServer</Description>
+    <RootNamespace>Duende.IdentityServer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

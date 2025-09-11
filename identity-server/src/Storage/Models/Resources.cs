@@ -36,9 +36,9 @@ public class Resources
     /// <param name="apiScopes">The API scopes.</param>
     public Resources(IEnumerable<IdentityResource>? identityResources, IEnumerable<ApiResource>? apiResources, IEnumerable<ApiScope>? apiScopes)
     {
-        IdentityResources = identityResources?.ToHashSet() ?? new HashSet<IdentityResource>();
-        ApiResources = apiResources?.ToHashSet() ?? new HashSet<ApiResource>();
-        ApiScopes = apiScopes?.ToHashSet() ?? new HashSet<ApiScope>();
+        IdentityResources = identityResources?.ToHashSet() ?? [];
+        ApiResources = apiResources?.ToHashSet() ?? [];
+        ApiScopes = apiScopes?.ToHashSet() ?? [];
     }
 
     /// <summary>

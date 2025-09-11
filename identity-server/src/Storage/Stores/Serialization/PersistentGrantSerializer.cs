@@ -13,7 +13,12 @@ namespace Duende.IdentityServer.Stores.Serialization;
 /// JSON-based persisted grant serializer
 /// </summary>
 /// <seealso cref="IPersistentGrantSerializer" />
-public class PersistentGrantSerializer : IPersistentGrantSerializer
+/// <remarks>
+/// Ctor.
+/// </remarks>
+/// <param name="options"></param>
+/// <param name="dataProtectionProvider"></param>
+public class PersistentGrantSerializer(PersistentGrantOptions options = null, IDataProtectionProvider dataProtectionProvider = null) : IPersistentGrantSerializer
 {
     private static readonly JsonSerializerOptions Settings = new()
     {
@@ -27,19 +32,8 @@ public class PersistentGrantSerializer : IPersistentGrantSerializer
         }
     };
 
-    private readonly PersistentGrantOptions _options;
-    private readonly IDataProtector _provider;
-
-    /// <summary>
-    /// Ctor.
-    /// </summary>
-    /// <param name="options"></param>
-    /// <param name="dataProtectionProvider"></param>
-    public PersistentGrantSerializer(PersistentGrantOptions options = null, IDataProtectionProvider dataProtectionProvider = null)
-    {
-        _options = options;
-        _provider = dataProtectionProvider?.CreateProtector(nameof(PersistentGrantSerializer));
-    }
+    private readonly PersistentGrantOptions _options = options;
+    private readonly IDataProtector _provider = dataProtectionProvider?.CreateProtector(nameof(PersistentGrantSerializer));
 
     private bool ShouldDataProtect => _options?.DataProtectData == true && _provider != null;
 
