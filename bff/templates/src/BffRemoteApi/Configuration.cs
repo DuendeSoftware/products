@@ -23,7 +23,7 @@ public class Configuration
 
 public class Api
 {
-    public string? LocalPath { get; set; }
+    public string? PathString { get; set; }
     public string? RemoteUrl { get; set; }
     public TokenType RequiredToken { get; set; }
 }

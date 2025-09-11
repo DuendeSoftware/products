@@ -137,7 +137,7 @@ public class BffFrontendSigninTests : BffTestBase
         var frontEnd = (Some.BffFrontend() with
         {
             Name = BffFrontendName.Parse("with_somepath"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/somepath"
             },
@@ -162,7 +162,7 @@ public class BffFrontendSigninTests : BffTestBase
         var frontEnd = (Some.BffFrontend() with
         {
             Name = BffFrontendName.Parse("with_somepath"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/somepath"
             },
@@ -194,7 +194,7 @@ public class BffFrontendSigninTests : BffTestBase
         var frontEnd = (Some.BffFrontend() with
         {
             Name = BffFrontendName.Parse("with_somepath"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/somepath"
             },
@@ -220,7 +220,7 @@ public class BffFrontendSigninTests : BffTestBase
         var frontEnd = (Some.BffFrontend() with
         {
             Name = BffFrontendName.Parse("with_somepath"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/somepath"
             },
@@ -244,7 +244,7 @@ public class BffFrontendSigninTests : BffTestBase
         var frontEnd = (Some.BffFrontend() with
         {
             Name = BffFrontendName.Parse("with_somepath"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/somepath"
             },
@@ -323,7 +323,7 @@ public class BffFrontendSigninTests : BffTestBase
         IdentityServer.AddClient("differnet_client_id", Bff.Url());
         await InitializeAsync();
 
-        var bffFrontend = Some.BffFrontend().WithRemoteApis(new RemoteApi(LocalPath.Parse("/test"), Api.Url()).WithAccessToken(RequiredTokenType.Client));
+        var bffFrontend = Some.BffFrontend().WithRemoteApis(new RemoteApi("/test", Api.Url()).WithAccessToken(RequiredTokenType.Client));
         AddOrUpdateFrontend(bffFrontend);
 
         await Bff.BrowserClient.Login()
@@ -546,7 +546,7 @@ public class BffFrontendSigninTests : BffTestBase
         await InitializeAsync();
         Bff.AddOrUpdateFrontend(Some.BffFrontend() with
         {
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/not_matched"
             }
@@ -569,7 +569,7 @@ public class BffFrontendSigninTests : BffTestBase
         Bff.AddOrUpdateFrontend(Some.BffFrontend() with
         {
             ConfigureOpenIdConnectOptions = null,
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = The.Path
             }
@@ -596,6 +596,7 @@ public class BffFrontendSigninTests : BffTestBase
                 }
             })
             .Build();
+
         return configuration;
     }
 }

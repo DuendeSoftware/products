@@ -31,7 +31,7 @@ public class BffRemoteApiTests : BffTestBase
             .WithRemoteApis(
                     new RemoteApi()
                     {
-                        LocalPath = The.Path,
+                        PathMatch = The.Path,
                         TargetUri = Api.Url(),
                         RequiredTokenType = requiredTokenType
                     })
@@ -55,7 +55,7 @@ public class BffRemoteApiTests : BffTestBase
             .WithRemoteApis(
                 new RemoteApi()
                 {
-                    LocalPath = The.Path,
+                    PathMatch = The.Path,
                     TargetUri = Api.Url(),
                     RequiredTokenType = requiredTokenType
                 })
@@ -124,7 +124,7 @@ public class BffRemoteApiTests : BffTestBase
             .WithRemoteApis(
                 new RemoteApi()
                 {
-                    LocalPath = The.Path,
+                    PathMatch = The.Path,
                     TargetUri = Api.Url(),
                     RequiredTokenType = RequiredTokenType.User
                 })

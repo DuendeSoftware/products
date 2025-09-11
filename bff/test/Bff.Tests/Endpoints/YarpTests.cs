@@ -273,7 +273,7 @@ public class YarpTests : BffTestBase
         var frontEnd = (Some.BffFrontend() with
         {
             Name = BffFrontendName.Parse("with_somepath"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
                 MatchingPath = "/somepath"
             },

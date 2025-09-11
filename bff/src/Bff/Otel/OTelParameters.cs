@@ -11,7 +11,7 @@ internal class OTelParameters
     public const string Detail = "Detail";
     public const string Error = "Error";
     public const string Expiration = "Expiration";
-    public const string LocalPath = "LocalPath";
+    public const string Path = "Path";
     public const string RouteId = "RouteId";
     public const string Sid = "Sid";
     public const string StatusCode = "StatusCode";
@@ -25,7 +25,7 @@ internal class OTelParameters
     public const string PathMapping = "PathMapping";
     public const string Name = "Name";
     public const string Claims = "Claims";
-    public const string Origin = "Origin";
+    public const string Host = "Host";
     public const string IsLoggedIn = "IsLoggedIn";
     public const string Referer = "Referer";
 }

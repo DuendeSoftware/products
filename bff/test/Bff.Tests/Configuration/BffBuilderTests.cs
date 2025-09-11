@@ -82,9 +82,9 @@ public class BffBuilderTests
         {
             Name = The.FrontendName,
             IndexHtmlUrl = The.Url,
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
-                MatchingOrigin = The.Origin,
+                MatchingHostHeader = The.HostHeaderValue,
                 MatchingPath = The.Path,
             },
         };
@@ -177,7 +177,7 @@ public class BffBuilderTests
                     [The.FrontendName] = new()
                     {
                         IndexHtmlUrl = The.Url,
-                        MatchingOrigin = The.Origin.ToString(),
+                        MatchingOrigin = The.HostHeaderValue.ToString(),
                         MatchingPath = The.Path,
                         Oidc = Some.OidcConfiguration(),
                         Cookies = Some.CookieConfiguration()
@@ -203,7 +203,7 @@ public class BffBuilderTests
         {
             Name = The.FrontendName,
             IndexHtmlUrl = The.Url,
-            SelectionCriteria = Some.FrontendSelectionCriteria()
+            MatchingCriteria = Some.FrontendSelectionCriteria()
         });
 
         var openIdConnectOptions = new OpenIdConnectOptions();
@@ -280,7 +280,7 @@ public class BffBuilderTests
             .AddInMemoryCollection(new Dictionary<string, string?>()
             {
                 ["frontends:_FrontendName_:matchingPath"] = The.Path,
-                ["frontends:_FrontendName_:matchingOrigin"] = The.Origin.ToString(),
+                ["frontends:_FrontendName_:matchingOrigin"] = The.HostHeaderValue.ToString(),
                 ["frontends:_FrontendName_:indexHtmlUrl"] = The.Url.ToString(),
                 ["frontends:_FrontendName_:Oidc:scope:0"] = The.Scope,
                 ["frontends:_FrontendName_:Oidc:saveTokens"] = "True",
@@ -292,7 +292,7 @@ public class BffBuilderTests
                 ["frontends:_FrontendName_:Oidc:callbackPath"] = "", // ev: todo
                 ["frontends:_FrontendName_:Oidc:authority"] = The.Authority.ToString(),
                 ["frontends:_FrontendName_:Oidc:mapInboundClaims"] = "False",
-                ["frontends:_FrontendName_:RemoteApis:0:localPath"] = The.Path,
+                ["frontends:_FrontendName_:RemoteApis:0:pathMatch"] = The.Path,
                 ["frontends:_FrontendName_:RemoteApis:0:targetUri"] = The.Url.ToString(),
                 ["frontends:_FrontendName_:RemoteApis:0:activityTimeout"] = TimeSpan.FromSeconds(987).ToString(),
                 ["frontends:_FrontendName_:RemoteApis:0:allowResponseBuffering"] = true.ToString(),
@@ -319,7 +319,7 @@ public class BffBuilderTests
         {
             Name = The.FrontendName,
             IndexHtmlUrl = The.Url,
-            SelectionCriteria = Some.FrontendSelectionCriteria(),
+            MatchingCriteria = Some.FrontendSelectionCriteria(),
             DataExtensions = found.DataExtensions
         };
         found.ShouldBe(expected);

@@ -28,7 +28,7 @@ public class TestData
 
     public Uri DomainName = new Uri($"https://{PropertyName()}");
     public Uri Url = new Uri($"https://{PropertyName()}");
-    public Origin Origin = Origin.Parse($"https://{PropertyName()}:1234");
+    public HostHeaderValue HostHeaderValue = HostHeaderValue.Parse($"https://{PropertyName()}:1234");
     public int Port = 1234;
     public PathString Path = new PathString($"/{PropertyName()}");
     public PathString SubPath = new PathString($"/{PropertyName()}");

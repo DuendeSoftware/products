@@ -20,7 +20,7 @@ public static class YarpTransformExtensions
     /// <summary>
     /// Adds the transform which will request an access token for the proxied request. 
     /// </summary>
-    public static TransformBuilderContext AddBffAccessToken(this TransformBuilderContext context, PathString localPath)
+    public static TransformBuilderContext AddBffAccessToken(this TransformBuilderContext context, PathString pathMatch)
     {
         ArgumentNullException.ThrowIfNull(context);
         var proofService = context.Services.GetRequiredService<IDPoPProofService>();

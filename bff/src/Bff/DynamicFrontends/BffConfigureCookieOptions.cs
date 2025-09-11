@@ -26,10 +26,10 @@ internal class BffConfigureCookieOptions(
         options.TimeProvider = timeProvider;
         if (currentFrontendAccessor.TryGet(out var frontEnd))
         {
-            if (frontEnd.SelectionCriteria.MatchingPath != null)
+            if (frontEnd.MatchingCriteria.MatchingPath != null)
             {
                 options.Cookie.Name = Constants.Cookies.SecurePrefix + "_" + frontEnd.Name;
-                options.Cookie.Path = frontEnd.SelectionCriteria.MatchingPath;
+                options.Cookie.Path = frontEnd.MatchingCriteria.MatchingPath;
             }
             else
             {

@@ -110,7 +110,7 @@ public class PathMapperTests
     private static BffFrontend CreateFrontendWithPath(string? path = null) => new BffFrontend
     {
         Name = BffFrontendName.Parse("test-frontend"),
-        SelectionCriteria = new FrontendSelectionCriteria
+        MatchingCriteria = new FrontendMatchingCriteria
         {
             MatchingPath = path
         }

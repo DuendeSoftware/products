@@ -30,10 +30,10 @@ public sealed record BffFrontend
             return true;
         }
 
-        return Name.Equals(other.Name) && SelectionCriteria.Equals(other.SelectionCriteria) && Equals(IndexHtmlUrl, other.IndexHtmlUrl) & DataExtensions.SequenceEqual(other.DataExtensions);
+        return Name.Equals(other.Name) && MatchingCriteria.Equals(other.MatchingCriteria) && Equals(IndexHtmlUrl, other.IndexHtmlUrl) & DataExtensions.SequenceEqual(other.DataExtensions);
     }
 
-    public override int GetHashCode() => HashCode.Combine(Name, SelectionCriteria, IndexHtmlUrl, DataExtensions);
+    public override int GetHashCode() => HashCode.Combine(Name, MatchingCriteria, IndexHtmlUrl, DataExtensions);
 
     public required BffFrontendName Name { get; init; }
 
@@ -44,7 +44,10 @@ public sealed record BffFrontend
 
     public Action<CookieAuthenticationOptions>? ConfigureCookieOptions { get; init; }
 
-    public FrontendSelectionCriteria SelectionCriteria { get; init; } = new();
+    /// <summary>
+    /// The criteria on which this frontend will be matched for a request.
+    /// </summary>
+    public FrontendMatchingCriteria MatchingCriteria { get; init; } = new();
 
     public Uri? IndexHtmlUrl { get; init; }
 

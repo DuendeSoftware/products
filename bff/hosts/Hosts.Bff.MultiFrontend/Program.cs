@@ -88,7 +88,7 @@ bffBuilder
                 opt.ClientSecret = "secret";
             })
             .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-            .MappedToPath(LocalPath.Parse("/with-path")),
+            .MapToPath("/with-path"),
 
         new BffFrontend(BffFrontendName.Parse("with-domain"))
                 .WithOpenIdConnectOptions(opt =>
@@ -97,20 +97,20 @@ bffBuilder
                     opt.ClientSecret = "secret";
                 })
                 .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-                .MappedToOrigin(Origin.Parse("https://app1.localhost:5005"))
+                .MapToHost(HostHeaderValue.Parse("https://app1.localhost:5005"))
                 .WithRemoteApis(
-                    new RemoteApi(LocalPath.Parse("/api/user-token"), new Uri("https://localhost:5010")),
-                    new RemoteApi(LocalPath.Parse("/api/client-token"), new Uri("https://localhost:5010"))
+                    new RemoteApi("/api/user-token", new Uri("https://localhost:5010")),
+                    new RemoteApi("/api/client-token", new Uri("https://localhost:5010"))
                         .WithAccessToken(RequiredTokenType.Client),
-                    new RemoteApi(LocalPath.Parse("/api/user-or-client-token"), new Uri("https://localhost:5010"))
+                    new RemoteApi("/api/user-or-client-token", new Uri("https://localhost:5010"))
                         .WithAccessToken(RequiredTokenType.UserOrClient),
-                    new RemoteApi(LocalPath.Parse("/api/anonymous"), new Uri("https://localhost:5010"))
+                    new RemoteApi("/api/anonymous", new Uri("https://localhost:5010"))
                         .WithAccessToken(RequiredTokenType.None),
-                    new RemoteApi(LocalPath.Parse("/api/optional-user-token"), new Uri("https://localhost:5010"))
+                    new RemoteApi("/api/optional-user-token", new Uri("https://localhost:5010"))
                         .WithAccessToken(RequiredTokenType.UserOrNone),
-                    new RemoteApi(LocalPath.Parse("/api/impersonation"), new Uri("https://localhost:5010"))
+                    new RemoteApi("/api/impersonation", new Uri("https://localhost:5010"))
                         .WithAccessTokenRetriever<ImpersonationAccessTokenRetriever>(),
-                    new RemoteApi(LocalPath.Parse("/api/audience-constrained"), new Uri("https://localhost:5010"))
+                    new RemoteApi("/api/audience-constrained", new Uri("https://localhost:5010"))
                         .WithUserAccessTokenParameters(new BffUserAccessTokenParameters { Resource = Resource.Parse("urn:isolated-api") }))
         )
     .AddYarpConfig(BuildYarpRoutes(), [
@@ -251,7 +251,7 @@ public class CustomIndexHtmlClient(HttpClient client, CurrentFrontendAccessor cu
         var html = await client.GetStringAsync(indexHtmlUrl, ct);
 
         html = html.Replace("[FrontendName]", frontend.Name);
-        html = html.Replace("[Path]", frontend.SelectionCriteria.MatchingPath + "/"); // Note, the path must end with a slash
+        html = html.Replace("[Path]", frontend.MatchingCriteria.MatchingPath + "/"); // Note, the path must end with a slash
 
 
         return html;

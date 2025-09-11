@@ -24,11 +24,11 @@ public class SimulatedInternet : DelegatingHandler
         AddHandler(url, host.Server.CreateHandler());
     }
 
-    public void AddHandler(Origin origin, HttpMessageHandler handler) => _routingHandler.AddHandler(origin, handler);
+    public void AddHandler(HostHeaderValue hostHeaderValue, HttpMessageHandler handler) => _routingHandler.AddHandler(hostHeaderValue, handler);
 
-    public void AddHandler(Uri url, HttpMessageHandler handler) => AddHandler(Origin.Parse(url), handler);
+    public void AddHandler(Uri url, HttpMessageHandler handler) => AddHandler(HostHeaderValue.Parse(url), handler);
 
-    public void AddCustomHandler(Uri map, TestHost to) => AddHandler(Origin.Parse(map), to.Server.CreateHandler());
+    public void AddCustomHandler(Uri map, TestHost to) => AddHandler(HostHeaderValue.Parse(map), to.Server.CreateHandler());
 
 
     public T BuildHttpClient<T>(Uri baseUrl) where T : HttpClient, IHttpClient<T>

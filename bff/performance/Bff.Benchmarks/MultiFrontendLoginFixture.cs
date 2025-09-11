@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Bff.Benchmarks.Hosts;
-using Duende.Bff;
 using Duende.Bff.DynamicFrontends;
 
 namespace Bff.Benchmarks;
@@ -34,7 +33,7 @@ public class MultiFrontendLoginFixture : IAsyncDisposable
         for (var i = 0; i < 500; i++)
         {
             var path = BenchmarkBase.GetPath(i);
-            Bff.AddFrontend(LocalPath.Parse(path));
+            Bff.AddFrontend(path);
             var item = Bff.Url(path + "/");
             bffUrls.Add(item);
         }
