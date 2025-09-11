@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer.Tests</AssemblyName>
     <RootNameSpace>Duende.AspNetCore.Authentication.JwtBearer</RootNameSpace>
@@ -15,7 +15,7 @@
     <PackageReference Include="Duende.IdentityServer" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Meziantou.Extensions.Logging.Xunit" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <PackageReference Include="NSubstitute" />
