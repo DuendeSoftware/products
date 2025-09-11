@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-#nullable disable
-
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
