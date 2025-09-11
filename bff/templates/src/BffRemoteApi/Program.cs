@@ -1,4 +1,5 @@
 using BffRemoteApi;
+using Duende.Bff;
 using Duende.Bff.Yarp;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,8 +62,8 @@ if (config.Apis.Any())
 {
     foreach (var api in config.Apis)
     {
-        app.MapRemoteBffApiEndpoint(api.LocalPath, api.RemoteUrl!)
-            .RequireAccessToken(api.RequiredToken);
+        app.MapRemoteBffApiEndpoint(api.LocalPath, new Uri(api.RemoteUrl!))
+            .WithAccessToken(api.RequiredToken);
     }
 }
 
