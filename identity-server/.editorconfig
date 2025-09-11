@@ -1,2 +1,3 @@
 [*.cs]
+dotnet_diagnostic.IDE0290.severity = suggestion # Use primary constructor
 dotnet_style_namespace_match_folder = false   # Disabled because changing namespaces is a breaking change
