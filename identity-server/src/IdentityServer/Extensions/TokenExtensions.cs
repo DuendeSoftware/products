@@ -173,7 +173,7 @@ public static class TokenExtensions
     {
         // get distinct list of conf values first to avoid parsing same cnf multiple times
         var cnfs = refresh.AccessTokens.Select(x => x.Value.Confirmation).Distinct();
-        return [.. cnfs.Select(x => GetProofKeyThumbprint(x))];
+        return [.. cnfs.Select(GetProofKeyThumbprint)];
     }
 
     private static ProofKeyThumbprint GetProofKeyThumbprint(string cnf)

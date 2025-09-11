@@ -88,7 +88,7 @@ public class CachingResourceStore<T> : IResourceStore
 
         var all = await _allCache.GetOrAddAsync(key,
             _options.Caching.ResourceStoreExpiration,
-            async () => await _inner.GetAllResourcesAsync());
+            _inner.GetAllResourcesAsync);
 
         return all;
     }

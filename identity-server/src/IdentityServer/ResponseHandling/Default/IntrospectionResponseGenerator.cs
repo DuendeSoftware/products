@@ -83,7 +83,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
 
             // calculate scopes the API is allowed to see
             var allowedScopes = validationResult.Api.Scopes;
-            scopes = scopes.Where(x => allowedScopes.Contains(x));
+            scopes = scopes.Where(allowedScopes.Contains);
         }
 
         Logger.LogDebug("Creating introspection response for active token.");

@@ -57,7 +57,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
 
         var result = await _allCache.GetOrAddAsync("__all__",
             _options.Caching.IdentityProviderCacheDuration,
-            async () => await _inner.GetAllSchemeNamesAsync());
+            _inner.GetAllSchemeNamesAsync);
         return result;
     }
 

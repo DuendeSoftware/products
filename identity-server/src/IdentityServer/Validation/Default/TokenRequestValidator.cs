@@ -1104,7 +1104,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 if (!ignoreImplicitIdentityScopes)
                 {
                     var resources = await _resourceStore.FindResourcesByScopeAsync(_validatedRequest.Client.AllowedScopes);
-                    clientAllowedScopes.AddRange(resources.ToScopeNames().Where(x => _validatedRequest.Client.AllowedScopes.Contains(x)));
+                    clientAllowedScopes.AddRange(resources.ToScopeNames().Where(_validatedRequest.Client.AllowedScopes.Contains));
                 }
                 else
                 {

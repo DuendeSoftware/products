@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class NameValueCollectionExtensions
 {
-    public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source) => source.AllKeys.ToDictionary(k => k, k => source.GetValues(k));
+    public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source) => source.AllKeys.ToDictionary(k => k, source.GetValues);
 
     public static NameValueCollection FromFullDictionary(this IDictionary<string, string[]> source)
     {
