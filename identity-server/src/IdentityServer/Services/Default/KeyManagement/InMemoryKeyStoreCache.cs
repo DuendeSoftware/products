@@ -11,7 +11,7 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
 {
     private readonly IClock _clock;
 
-    private object _lock = new();
+    private readonly object _lock = new();
 
     private DateTime _expires = DateTime.MinValue;
     private IEnumerable<KeyContainer> _cache;

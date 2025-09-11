@@ -15,7 +15,7 @@ namespace Duende.IdentityServer.Configuration;
 /// </summary>
 public class DynamicProviderOptions
 {
-    private Dictionary<string, DynamicProviderType> _providers = [];
+    private readonly Dictionary<string, DynamicProviderType> _providers = [];
 
     /// <summary>
     /// Prefix in the pipeline for callbacks from external providers. Defaults to "/federation".

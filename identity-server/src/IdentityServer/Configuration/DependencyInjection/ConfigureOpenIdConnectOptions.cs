@@ -13,7 +13,7 @@ namespace Duende.IdentityServer.Configuration;
 
 internal class ConfigureOpenIdConnectOptions : IPostConfigureOptions<OpenIdConnectOptions>
 {
-    private string[] _schemes;
+    private readonly string[] _schemes;
     private readonly IServiceProvider _serviceProvider;
 
     public ConfigureOpenIdConnectOptions(string[] schemes, IServiceProvider serviceProvider)

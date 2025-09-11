@@ -48,10 +48,10 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
         _localesService = localesService;
     }
 
-    private IdentityServerOptions _options;
-    private IClock _clock;
-    private IServerUrls _urls;
-    private IMessageStore<LogoutMessage> _logoutMessageStore;
+    private readonly IdentityServerOptions _options;
+    private readonly IClock _clock;
+    private readonly IServerUrls _urls;
+    private readonly IMessageStore<LogoutMessage> _logoutMessageStore;
     private readonly IUiLocalesService _localesService;
 
     public async Task WriteHttpResponse(EndSessionResult result, HttpContext context)

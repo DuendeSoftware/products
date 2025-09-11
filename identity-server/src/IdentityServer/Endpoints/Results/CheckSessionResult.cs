@@ -21,7 +21,7 @@ internal class CheckSessionHttpWriter : IHttpResponseWriter<CheckSessionResult>
 {
     public CheckSessionHttpWriter(IdentityServerOptions options) => _options = options;
 
-    private IdentityServerOptions _options;
+    private readonly IdentityServerOptions _options;
     private static volatile string FormattedHtml;
     private static readonly object Lock = new();
     private static volatile string LastCheckSessionCookieName;

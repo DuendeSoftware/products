@@ -36,7 +36,7 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
 {
     public EndSessionCallbackHttpWriter(IdentityServerOptions options) => _options = options;
 
-    private IdentityServerOptions _options;
+    private readonly IdentityServerOptions _options;
 
     public async Task WriteHttpResponse(EndSessionCallbackResult result, HttpContext context)
     {
