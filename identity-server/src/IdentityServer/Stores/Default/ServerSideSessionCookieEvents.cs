@@ -14,7 +14,7 @@ internal static class ServerSideSessionCookieEvents
             (context.Properties.ExpiresUtc == null || DateTimeOffset.UtcNow < context.Properties.ExpiresUtc))
         {
             context.ShouldRenew = true;
-            context.Properties.Items.Remove(IdentityServerConstants.ForceCookieRenewalFlag);
+            _ = context.Properties.Items.Remove(IdentityServerConstants.ForceCookieRenewalFlag);
         }
 
         return Task.CompletedTask;

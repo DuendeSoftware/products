@@ -80,7 +80,7 @@ internal class ClientLoadedTracker : IDisposable
 
         if (_clients.TryAdd(client.ClientId, clientDiagnosticData))
         {
-            Interlocked.Increment(ref _clientCount);
+            _ = Interlocked.Increment(ref _clientCount);
         }
     }
 

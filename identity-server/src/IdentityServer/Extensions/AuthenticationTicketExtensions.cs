@@ -46,7 +46,7 @@ public static class AuthenticationTicketExtensions
     /// </summary>
     public static string GetIssuer(this AuthenticationTicket ticket)
     {
-        ticket.Properties.Items.TryGetValue(JwtClaimTypes.Issuer, out var value);
+        _ = ticket.Properties.Items.TryGetValue(JwtClaimTypes.Issuer, out var value);
         return value;
     }
 

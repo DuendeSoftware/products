@@ -114,9 +114,9 @@ public static class TokenExtensions
 
             if (token.Type == JwtClaimTypes.JwtTypes.IntrospectionJwtResponse)
             {
-                payload.Remove(JwtClaimTypes.Expiration);
-                payload.Remove(JwtClaimTypes.NotBefore);
-                payload.Remove(JwtClaimTypes.Subject);
+                _ = payload.Remove(JwtClaimTypes.Expiration);
+                _ = payload.Remove(JwtClaimTypes.NotBefore);
+                _ = payload.Remove(JwtClaimTypes.Subject);
             }
 
             return payload;

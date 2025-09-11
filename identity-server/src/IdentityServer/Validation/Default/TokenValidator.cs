@@ -347,7 +347,7 @@ internal class TokenValidator : ITokenValidator
         {
             if (scope.Value.Contains(' ', StringComparison.InvariantCulture))
             {
-                claims.Remove(scope);
+                _ = claims.Remove(scope);
                 var values = scope.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var value in values)
                 {

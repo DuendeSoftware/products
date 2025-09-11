@@ -32,7 +32,7 @@ public static class IdentityServerServiceCollectionExtensions
     {
         var builder = services.AddIdentityServerBuilder();
 
-        builder
+        _ = builder
             .AddRequiredPlatformServices()
             .AddCookieAuthentication()
             .AddCoreServices()
@@ -47,8 +47,8 @@ public static class IdentityServerServiceCollectionExtensions
             .AddDefaultSecretValidators();
 
         // provide default in-memory implementations, not suitable for most production scenarios
-        builder.AddInMemoryPersistedGrants();
-        builder.AddInMemoryPushedAuthorizationRequests();
+        _ = builder.AddInMemoryPersistedGrants();
+        _ = builder.AddInMemoryPushedAuthorizationRequests();
 
         return builder;
     }
@@ -61,7 +61,7 @@ public static class IdentityServerServiceCollectionExtensions
     /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services, Action<IdentityServerOptions> setupAction)
     {
-        services.Configure(setupAction);
+        _ = services.Configure(setupAction);
         return services.AddIdentityServer();
     }
 
@@ -73,7 +73,7 @@ public static class IdentityServerServiceCollectionExtensions
     /// <returns></returns>
     public static IIdentityServerBuilder AddIdentityServer(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<IdentityServerOptions>(configuration);
+        _ = services.Configure<IdentityServerOptions>(configuration);
         return services.AddIdentityServer();
     }
 
@@ -84,7 +84,7 @@ public static class IdentityServerServiceCollectionExtensions
     /// <param name="schemes">The schemes to configure. If none provided, then all OpenIdConnect schemes will use the cache.</param>
     public static IServiceCollection AddOidcStateDataFormatterCache(this IServiceCollection services, params string[] schemes)
     {
-        services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>>(
+        _ = services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>>(
             svcs => new ConfigureOpenIdConnectOptions(
                 schemes,
                 svcs)

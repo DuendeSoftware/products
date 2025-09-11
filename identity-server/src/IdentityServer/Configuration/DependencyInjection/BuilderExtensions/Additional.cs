@@ -30,7 +30,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddExtensionGrantValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IExtensionGrantValidator
     {
-        builder.Services.AddTransient<IExtensionGrantValidator, T>();
+        _ = builder.Services.AddTransient<IExtensionGrantValidator, T>();
 
         return builder;
     }
@@ -44,7 +44,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddRedirectUriValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IRedirectUriValidator
     {
-        builder.Services.AddTransient<IRedirectUriValidator, T>();
+        _ = builder.Services.AddTransient<IRedirectUriValidator, T>();
 
         return builder;
     }
@@ -65,7 +65,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddResourceOwnerValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IResourceOwnerPasswordValidator
     {
-        builder.Services.AddTransient<IResourceOwnerPasswordValidator, T>();
+        _ = builder.Services.AddTransient<IResourceOwnerPasswordValidator, T>();
 
         return builder;
     }
@@ -79,7 +79,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddProfileService<T>(this IIdentityServerBuilder builder)
         where T : class, IProfileService
     {
-        builder.Services.AddTransient<IProfileService, T>();
+        _ = builder.Services.AddTransient<IProfileService, T>();
 
         return builder;
     }
@@ -93,7 +93,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddResourceValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IResourceValidator
     {
-        builder.Services.AddTransient<IResourceValidator, T>();
+        _ = builder.Services.AddTransient<IResourceValidator, T>();
 
         return builder;
     }
@@ -107,7 +107,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddScopeParser<T>(this IIdentityServerBuilder builder)
         where T : class, IScopeParser
     {
-        builder.Services.AddTransient<IScopeParser, T>();
+        _ = builder.Services.AddTransient<IScopeParser, T>();
 
         return builder;
     }
@@ -122,7 +122,7 @@ public static class IdentityServerBuilderExtensionsAdditional
         where T : class, IClientStore
     {
         builder.Services.TryAddTransient<T>();
-        builder.Services.AddTransient<IClientStore, ValidatingClientStore<T>>();
+        _ = builder.Services.AddTransient<IClientStore, ValidatingClientStore<T>>();
 
         return builder;
     }
@@ -136,7 +136,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddResourceStore<T>(this IIdentityServerBuilder builder)
         where T : class, IResourceStore
     {
-        builder.Services.AddTransient<IResourceStore, T>();
+        _ = builder.Services.AddTransient<IResourceStore, T>();
 
         return builder;
     }
@@ -149,7 +149,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddDeviceFlowStore<T>(this IIdentityServerBuilder builder)
         where T : class, IDeviceFlowStore
     {
-        builder.Services.AddTransient<IDeviceFlowStore, T>();
+        _ = builder.Services.AddTransient<IDeviceFlowStore, T>();
 
         return builder;
     }
@@ -163,7 +163,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddPersistedGrantStore<T>(this IIdentityServerBuilder builder)
         where T : class, IPersistedGrantStore
     {
-        builder.Services.AddTransient<IPersistedGrantStore, T>();
+        _ = builder.Services.AddTransient<IPersistedGrantStore, T>();
 
         return builder;
     }
@@ -177,7 +177,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddSigningKeyStore<T>(this IIdentityServerBuilder builder)
         where T : class, ISigningKeyStore
     {
-        builder.Services.AddTransient<ISigningKeyStore, T>();
+        _ = builder.Services.AddTransient<ISigningKeyStore, T>();
 
         return builder;
     }
@@ -191,7 +191,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddPushedAuthorizationRequestStore<T>(this IIdentityServerBuilder builder)
         where T : class, IPushedAuthorizationRequestStore
     {
-        builder.Services.AddTransient<IPushedAuthorizationRequestStore, T>();
+        _ = builder.Services.AddTransient<IPushedAuthorizationRequestStore, T>();
 
         return builder;
     }
@@ -205,7 +205,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddCorsPolicyService<T>(this IIdentityServerBuilder builder)
         where T : class, ICorsPolicyService
     {
-        builder.Services.AddTransient<ICorsPolicyService, T>();
+        _ = builder.Services.AddTransient<ICorsPolicyService, T>();
         return builder;
     }
 
@@ -219,7 +219,7 @@ public static class IdentityServerBuilderExtensionsAdditional
         where T : class, ICorsPolicyService
     {
         builder.Services.TryAddTransient<T>();
-        builder.Services.AddTransient<ICorsPolicyService, CachingCorsPolicyService<T>>();
+        _ = builder.Services.AddTransient<ICorsPolicyService, CachingCorsPolicyService<T>>();
         return builder;
     }
 
@@ -232,7 +232,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddSecretParser<T>(this IIdentityServerBuilder builder)
         where T : class, ISecretParser
     {
-        builder.Services.AddTransient<ISecretParser, T>();
+        _ = builder.Services.AddTransient<ISecretParser, T>();
 
         return builder;
     }
@@ -246,7 +246,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddSecretValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ISecretValidator
     {
-        builder.Services.AddTransient<ISecretValidator, T>();
+        _ = builder.Services.AddTransient<ISecretValidator, T>();
 
         return builder;
     }
@@ -261,8 +261,8 @@ public static class IdentityServerBuilderExtensionsAdditional
         where T : IClientStore
     {
         builder.Services.TryAddTransient(typeof(T));
-        builder.Services.AddTransient<ValidatingClientStore<T>>();
-        builder.Services.AddTransient<IClientStore, CachingClientStore<ValidatingClientStore<T>>>();
+        _ = builder.Services.AddTransient<ValidatingClientStore<T>>();
+        _ = builder.Services.AddTransient<IClientStore, CachingClientStore<ValidatingClientStore<T>>>();
 
         return builder;
     }
@@ -277,7 +277,7 @@ public static class IdentityServerBuilderExtensionsAdditional
         where T : IResourceStore
     {
         builder.Services.TryAddTransient(typeof(T));
-        builder.Services.AddTransient<IResourceStore, CachingResourceStore<T>>();
+        _ = builder.Services.AddTransient<IResourceStore, CachingResourceStore<T>>();
         return builder;
     }
 
@@ -290,8 +290,8 @@ public static class IdentityServerBuilderExtensionsAdditional
         where T : IIdentityProviderStore
     {
         builder.Services.TryAddTransient(typeof(T));
-        builder.Services.AddTransient<ValidatingIdentityProviderStore<T>>();
-        builder.Services.AddTransient<IIdentityProviderStore, CachingIdentityProviderStore<ValidatingIdentityProviderStore<T>>>();
+        _ = builder.Services.AddTransient<ValidatingIdentityProviderStore<T>>();
+        _ = builder.Services.AddTransient<IIdentityProviderStore, CachingIdentityProviderStore<ValidatingIdentityProviderStore<T>>>();
 
         return builder;
     }
@@ -307,7 +307,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddAuthorizeInteractionResponseGenerator<T>(this IIdentityServerBuilder builder)
         where T : class, IAuthorizeInteractionResponseGenerator
     {
-        builder.Services.AddTransient<IAuthorizeInteractionResponseGenerator, T>();
+        _ = builder.Services.AddTransient<IAuthorizeInteractionResponseGenerator, T>();
 
         return builder;
     }
@@ -321,7 +321,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddCustomAuthorizeRequestValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ICustomAuthorizeRequestValidator
     {
-        builder.Services.AddTransient<ICustomAuthorizeRequestValidator, T>();
+        _ = builder.Services.AddTransient<ICustomAuthorizeRequestValidator, T>();
 
         return builder;
     }
@@ -335,7 +335,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddCustomTokenRequestValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ICustomTokenRequestValidator
     {
-        builder.Services.AddTransient<ICustomTokenRequestValidator, T>();
+        _ = builder.Services.AddTransient<ICustomTokenRequestValidator, T>();
 
         return builder;
     }
@@ -349,7 +349,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddCustomBackchannelAuthenticationRequestValidator<T>(this IIdentityServerBuilder builder)
         where T : class, ICustomBackchannelAuthenticationValidator
     {
-        builder.Services.AddTransient<ICustomBackchannelAuthenticationValidator, T>();
+        _ = builder.Services.AddTransient<ICustomBackchannelAuthenticationValidator, T>();
 
         return builder;
     }
@@ -361,8 +361,8 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// <returns></returns>
     public static IIdentityServerBuilder AddJwtBearerClientAuthentication(this IIdentityServerBuilder builder)
     {
-        builder.AddSecretParser<JwtBearerClientAssertionSecretParser>();
-        builder.AddSecretValidator<PrivateKeyJwtSecretValidator>();
+        _ = builder.AddSecretParser<JwtBearerClientAssertionSecretParser>();
+        _ = builder.AddSecretValidator<PrivateKeyJwtSecretValidator>();
 
         return builder;
     }
@@ -376,7 +376,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddClientConfigurationValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IClientConfigurationValidator
     {
-        builder.Services.AddTransient<IClientConfigurationValidator, T>();
+        _ = builder.Services.AddTransient<IClientConfigurationValidator, T>();
 
         return builder;
     }
@@ -391,7 +391,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddIdentityProviderConfigurationValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IIdentityProviderConfigurationValidator
     {
-        builder.Services.AddTransient<IIdentityProviderConfigurationValidator, T>();
+        _ = builder.Services.AddTransient<IIdentityProviderConfigurationValidator, T>();
 
         return builder;
     }
@@ -403,9 +403,9 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// <returns></returns>
     public static IIdentityServerBuilder AddMutualTlsSecretValidators(this IIdentityServerBuilder builder)
     {
-        builder.AddSecretParser<MutualTlsSecretParser>();
-        builder.AddSecretValidator<X509ThumbprintSecretValidator>();
-        builder.AddSecretValidator<X509NameSecretValidator>();
+        _ = builder.AddSecretParser<MutualTlsSecretParser>();
+        _ = builder.AddSecretValidator<X509ThumbprintSecretValidator>();
+        _ = builder.AddSecretValidator<X509NameSecretValidator>();
 
         return builder;
     }
@@ -419,7 +419,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddBackChannelLogoutService<T>(this IIdentityServerBuilder builder)
         where T : class, IBackChannelLogoutService
     {
-        builder.Services.AddTransient<IBackChannelLogoutService, T>();
+        _ = builder.Services.AddTransient<IBackChannelLogoutService, T>();
 
         return builder;
     }
@@ -448,7 +448,7 @@ public static class IdentityServerBuilderExtensionsAdditional
                 });
         }
 
-        builder.Services.AddTransient<IBackChannelLogoutHttpClient>(s =>
+        _ = builder.Services.AddTransient<IBackChannelLogoutHttpClient>(s =>
         {
             var httpClientFactory = s.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient(name);
@@ -484,7 +484,7 @@ public static class IdentityServerBuilderExtensionsAdditional
                 });
         }
 
-        builder.Services.AddTransient<IJwtRequestUriHttpClient, DefaultJwtRequestUriHttpClient>(s =>
+        _ = builder.Services.AddTransient<IJwtRequestUriHttpClient, DefaultJwtRequestUriHttpClient>(s =>
         {
             var httpClientFactory = s.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient(name);
@@ -507,7 +507,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddAuthorizationParametersMessageStore<T>(this IIdentityServerBuilder builder)
         where T : class, IAuthorizationParametersMessageStore
     {
-        builder.Services.AddTransient<IAuthorizationParametersMessageStore, T>();
+        _ = builder.Services.AddTransient<IAuthorizationParametersMessageStore, T>();
 
         return builder;
     }
@@ -523,7 +523,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     {
         // This is added as scoped due to the note regarding the AuthenticateAsync
         // method in the Duende.Services.DefaultUserSession implementation.
-        builder.Services.AddScoped<IUserSession, T>();
+        _ = builder.Services.AddScoped<IUserSession, T>();
 
         return builder;
     }
@@ -540,7 +540,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     {
         builder.Services.TryAddTransient<T>();
         builder.Services.TryAddTransient<ValidatingIdentityProviderStore<T>>();
-        builder.Services.AddTransient<IIdentityProviderStore, NonCachingIdentityProviderStore<ValidatingIdentityProviderStore<T>>>();
+        _ = builder.Services.AddTransient<IIdentityProviderStore, NonCachingIdentityProviderStore<ValidatingIdentityProviderStore<T>>>();
 
         return builder;
     }
@@ -555,7 +555,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddBackchannelAuthenticationUserValidator<T>(this IIdentityServerBuilder builder)
         where T : class, IBackchannelAuthenticationUserValidator
     {
-        builder.Services.AddTransient<IBackchannelAuthenticationUserValidator, T>();
+        _ = builder.Services.AddTransient<IBackchannelAuthenticationUserValidator, T>();
 
         return builder;
     }
@@ -569,7 +569,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     public static IIdentityServerBuilder AddBackchannelAuthenticationUserNotificationService<T>(this IIdentityServerBuilder builder)
         where T : class, IBackchannelAuthenticationUserNotificationService
     {
-        builder.Services.AddTransient<IBackchannelAuthenticationUserNotificationService, T>();
+        _ = builder.Services.AddTransient<IBackchannelAuthenticationUserNotificationService, T>();
 
         return builder;
     }
@@ -581,7 +581,7 @@ public static class IdentityServerBuilderExtensionsAdditional
     /// <returns></returns>
     public static IIdentityServerBuilder AddLegacyClock(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddTransient<IClock, LegacyClock>();
+        _ = builder.Services.AddTransient<IClock, LegacyClock>();
 
         return builder;
     }

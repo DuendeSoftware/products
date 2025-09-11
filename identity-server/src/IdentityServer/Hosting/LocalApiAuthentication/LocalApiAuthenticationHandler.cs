@@ -200,19 +200,19 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
         if (Options.TokenMode == LocalApiTokenMode.BearerOnly || Options.TokenMode == LocalApiTokenMode.DPoPAndBearer)
         {
-            sb.Append("Bearer");
+            _ = sb.Append("Bearer");
 
             if (Context.Items.ContainsKey("Bearer-Error"))
             {
-                sb.Append(" error=\"");
-                sb.Append(Context.Items["Bearer-Error"] as string);
-                sb.Append('\"');
+                _ = sb.Append(" error=\"");
+                _ = sb.Append(Context.Items["Bearer-Error"] as string);
+                _ = sb.Append('\"');
 
                 if (Context.Items.ContainsKey("Bearer-ErrorDescription"))
                 {
-                    sb.Append(", error_description=\"");
-                    sb.Append(Context.Items["Bearer-ErrorDescription"] as string);
-                    sb.Append('\"');
+                    _ = sb.Append(", error_description=\"");
+                    _ = sb.Append(Context.Items["Bearer-ErrorDescription"] as string);
+                    _ = sb.Append('\"');
                 }
             }
         }
@@ -221,22 +221,22 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
         {
             if (sb.Length > 0)
             {
-                sb.Append(", ");
+                _ = sb.Append(", ");
             }
 
-            sb.Append("DPoP");
+            _ = sb.Append("DPoP");
 
             if (Context.Items.ContainsKey("DPoP-Error"))
             {
-                sb.Append(" error=\"");
-                sb.Append(Context.Items["DPoP-Error"] as string);
-                sb.Append('\"');
+                _ = sb.Append(" error=\"");
+                _ = sb.Append(Context.Items["DPoP-Error"] as string);
+                _ = sb.Append('\"');
 
                 if (Context.Items.ContainsKey("DPoP-ErrorDescription"))
                 {
-                    sb.Append(", error_description=\"");
-                    sb.Append(Context.Items["DPoP-ErrorDescription"] as string);
-                    sb.Append('\"');
+                    _ = sb.Append(", error_description=\"");
+                    _ = sb.Append(Context.Items["DPoP-ErrorDescription"] as string);
+                    _ = sb.Append('\"');
                 }
             }
 

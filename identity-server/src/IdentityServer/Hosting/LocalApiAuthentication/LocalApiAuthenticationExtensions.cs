@@ -24,7 +24,7 @@ public static class LocalApiAuthenticationExtensions
     /// <returns></returns>
     public static IServiceCollection AddLocalApiAuthentication(this IServiceCollection services, Func<ClaimsPrincipal, Task<ClaimsPrincipal>>? transformationFunc = null)
     {
-        services.AddAuthentication()
+        _ = services.AddAuthentication()
             .AddLocalApi(options =>
             {
                 options.ExpectedScope = IdentityServerConstants.LocalApi.ScopeName;
@@ -41,12 +41,12 @@ public static class LocalApiAuthenticationExtensions
                 }
             });
 
-        services.AddAuthorization(options =>
+        _ = services.AddAuthorization(options =>
         {
             options.AddPolicy(IdentityServerConstants.LocalApi.PolicyName, policy =>
             {
-                policy.AddAuthenticationSchemes(IdentityServerConstants.LocalApi.AuthenticationScheme);
-                policy.RequireAuthenticatedUser();
+                _ = policy.AddAuthenticationSchemes(IdentityServerConstants.LocalApi.AuthenticationScheme);
+                _ = policy.RequireAuthenticatedUser();
             });
         });
 

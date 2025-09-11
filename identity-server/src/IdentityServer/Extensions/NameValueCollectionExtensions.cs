@@ -66,7 +66,7 @@ internal static class NameValueCollectionExtensions
             var values = collection.GetValues(name);
             var value = values.First();
             value = HtmlEncoder.Default.Encode(value);
-            builder.AppendFormat(CultureInfo.InvariantCulture, inputFieldFormat, name, value);
+            _ = builder.AppendFormat(CultureInfo.InvariantCulture, inputFieldFormat, name, value);
         }
 
         return builder.ToString();
@@ -144,14 +144,14 @@ internal static class NameValueCollectionExtensions
         }
         else
         {
-            builder.Append('&');
+            _ = builder.Append('&');
         }
 
-        builder.Append(encodedName);
+        _ = builder.Append(encodedName);
         if (!string.IsNullOrEmpty(encodedValue))
         {
-            builder.Append('=');
-            builder.Append(encodedValue);
+            _ = builder.Append('=');
+            _ = builder.Append(encodedValue);
         }
         return first;
     }

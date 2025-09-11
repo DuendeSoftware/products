@@ -64,10 +64,10 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
             {
                 foreach (var origin in origins.Distinct())
                 {
-                    sb.Append(origin);
+                    _ = sb.Append(origin);
                     if (sb.Length > 0)
                     {
-                        sb.Append(' ');
+                        _ = sb.Append(' ');
                     }
                 }
             }
@@ -80,14 +80,14 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
     private static string GetHtml(EndSessionCallbackResult result)
     {
         var sb = new StringBuilder();
-        sb.Append("<!DOCTYPE html><html><style>iframe{{display:none;width:0;height:0;}}</style><body>");
+        _ = sb.Append("<!DOCTYPE html><html><style>iframe{{display:none;width:0;height:0;}}</style><body>");
 
         if (result.Result.FrontChannelLogoutUrls != null)
         {
             foreach (var url in result.Result.FrontChannelLogoutUrls)
             {
-                sb.AppendFormat(CultureInfo.InvariantCulture, "<iframe loading='eager' allow='' src='{0}'></iframe>", HtmlEncoder.Default.Encode(url));
-                sb.AppendLine();
+                _ = sb.AppendFormat(CultureInfo.InvariantCulture, "<iframe loading='eager' allow='' src='{0}'></iframe>", HtmlEncoder.Default.Encode(url));
+                _ = sb.AppendLine();
             }
         }
 

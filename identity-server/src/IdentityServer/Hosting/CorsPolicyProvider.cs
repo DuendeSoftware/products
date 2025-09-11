@@ -88,7 +88,7 @@ internal class CorsPolicyProvider : ICorsPolicyProvider
 
         if (_options.Cors.PreflightCacheDuration.HasValue)
         {
-            policyBuilder.SetPreflightMaxAge(_options.Cors.PreflightCacheDuration.Value);
+            _ = policyBuilder.SetPreflightMaxAge(_options.Cors.PreflightCacheDuration.Value);
         }
 
         return policyBuilder.Build();

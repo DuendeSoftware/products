@@ -121,7 +121,7 @@ internal static class ILoggerDevExtensions
         {
             if (!IsUnsafeLogChar(c))
             {
-                builder.Append(c);
+                _ = builder.Append(c);
             }
         }
 

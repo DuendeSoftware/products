@@ -53,7 +53,7 @@ internal class ResourceLoadedTracker
 
         if (_resources.TryAdd($"ApiResource:{apiResource.Name}", resource))
         {
-            Interlocked.Increment(ref _resourceCount);
+            _ = Interlocked.Increment(ref _resourceCount);
         }
     }
 
@@ -76,7 +76,7 @@ internal class ResourceLoadedTracker
 
         if (_resources.TryAdd($"IdentityResource:{identityResource.Name}", resource))
         {
-            Interlocked.Increment(ref _resourceCount);
+            _ = Interlocked.Increment(ref _resourceCount);
         }
     }
 
@@ -99,7 +99,7 @@ internal class ResourceLoadedTracker
 
         if (_resources.TryAdd($"ApiScope:{apiScope.Name}", resource))
         {
-            Interlocked.Increment(ref _resourceCount);
+            _ = Interlocked.Increment(ref _resourceCount);
         }
     }
 }

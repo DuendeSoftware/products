@@ -40,7 +40,7 @@ internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandl
             // given that this runs prior to the authentication middleware running
             // we need to explicitly trigger authentication so we can have our
             // session service populated with the current user info
-            await _context.AuthenticateAsync();
+            _ = await _context.AuthenticateAsync();
 
             // now we can do our processing to render the iframe (if needed)
             await ProcessFederatedSignOutRequestAsync();

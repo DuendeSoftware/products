@@ -106,7 +106,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
 
             if (foundData != null)
             {
-                _repository.Remove(foundData);
+                _ = _repository.Remove(foundData);
             }
         }
 

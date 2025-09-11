@@ -58,7 +58,7 @@ public class InMemoryResourcesStore : IResourceStore
     {
         ArgumentNullException.ThrowIfNull(apiResourceNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindApiResourcesByName");
-        activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString()));
 
         var query = from a in _apiResources
                     where apiResourceNames.Contains(a.Name)
@@ -71,7 +71,7 @@ public class InMemoryResourcesStore : IResourceStore
     {
         ArgumentNullException.ThrowIfNull(scopeNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindIdentityResourcesByScopeName");
-        activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString()));
 
         var identity = from i in _identityResources
                        where scopeNames.Contains(i.Name)
@@ -85,7 +85,7 @@ public class InMemoryResourcesStore : IResourceStore
     {
         ArgumentNullException.ThrowIfNull(scopeNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindApiResourcesByScopeName");
-        activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString()));
 
         var query = from a in _apiResources
                     where a.Scopes.Any(x => scopeNames.Contains(x))
@@ -99,7 +99,7 @@ public class InMemoryResourcesStore : IResourceStore
     {
         ArgumentNullException.ThrowIfNull(scopeNames);
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryResourceStore.FindApiScopesByName");
-        activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString()));
 
         var query =
             from x in _apiScopes

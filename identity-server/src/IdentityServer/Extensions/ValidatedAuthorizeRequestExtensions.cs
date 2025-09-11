@@ -20,23 +20,23 @@ public static class ValidatedAuthorizeRequestExtensions
         var suppress = new StringBuilder();
         if (request.PromptModes.Contains(OidcConstants.PromptModes.Login))
         {
-            suppress.Append(OidcConstants.PromptModes.Login);
+            _ = suppress.Append(OidcConstants.PromptModes.Login);
         }
         if (request.PromptModes.Contains(OidcConstants.PromptModes.SelectAccount))
         {
             if (suppress.Length > 0)
             {
-                suppress.Append(' ');
+                _ = suppress.Append(' ');
             }
-            suppress.Append(OidcConstants.PromptModes.SelectAccount);
+            _ = suppress.Append(OidcConstants.PromptModes.SelectAccount);
         }
         if (request.PromptModes.Contains(OidcConstants.PromptModes.Create))
         {
             if (suppress.Length > 0)
             {
-                suppress.Append(' ');
+                _ = suppress.Append(' ');
             }
-            suppress.Append(OidcConstants.PromptModes.Create);
+            _ = suppress.Append(OidcConstants.PromptModes.Create);
         }
 
         request.Raw.Add(Constants.ProcessedPrompt, suppress.ToString());
@@ -71,7 +71,7 @@ public static class ValidatedAuthorizeRequestExtensions
 
     public static void RemovePrefixedAcrValue(this ValidatedAuthorizeRequest request, string prefix)
     {
-        request.AuthenticationContextReferenceClasses.RemoveAll(acr => acr.StartsWith(prefix, StringComparison.Ordinal));
+        _ = request.AuthenticationContextReferenceClasses.RemoveAll(acr => acr.StartsWith(prefix, StringComparison.Ordinal));
         var acr_values = request.AuthenticationContextReferenceClasses.ToSpaceSeparatedString();
         if (acr_values.IsPresent())
         {
@@ -97,7 +97,7 @@ public static class ValidatedAuthorizeRequestExtensions
 
     public static void RemoveAcrValue(this ValidatedAuthorizeRequest request, string value)
     {
-        request.AuthenticationContextReferenceClasses.RemoveAll(x => x.Equals(value, StringComparison.Ordinal));
+        _ = request.AuthenticationContextReferenceClasses.RemoveAll(x => x.Equals(value, StringComparison.Ordinal));
         var acr_values = request.AuthenticationContextReferenceClasses.ToSpaceSeparatedString();
         if (acr_values.IsPresent())
         {

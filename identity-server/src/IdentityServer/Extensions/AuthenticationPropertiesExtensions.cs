@@ -62,7 +62,7 @@ public static class AuthenticationPropertiesExtensions
         var value = EncodeList(clientIds);
         if (value == null)
         {
-            properties.Items.Remove(ClientListKey);
+            _ = properties.Items.Remove(ClientListKey);
         }
         else
         {

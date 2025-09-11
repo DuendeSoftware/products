@@ -241,7 +241,7 @@ public class DefaultTokenService : ITokenService
             {
                 if (currentJwtId != null)
                 {
-                    token.Claims.Remove(currentJwtId);
+                    _ = token.Claims.Remove(currentJwtId);
                 }
                 token.Claims.Add(new Claim(JwtClaimTypes.JwtId, CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)));
             }

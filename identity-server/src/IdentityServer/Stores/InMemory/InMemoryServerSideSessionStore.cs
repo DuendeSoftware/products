@@ -34,7 +34,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.GetSession");
 
-        _store.TryGetValue(key, out var item);
+        _ = _store.TryGetValue(key, out var item);
         return Task.FromResult(item?.Clone());
     }
 
@@ -52,7 +52,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.DeleteSession");
 
-        _store.TryRemove(key, out _);
+        _ = _store.TryRemove(key, out _);
         return Task.CompletedTask;
     }
 
@@ -100,7 +100,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         foreach (var key in keys)
         {
-            _store.TryRemove(key, out _);
+            _ = _store.TryRemove(key, out _);
         }
 
         return Task.CompletedTask;
@@ -120,7 +120,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
         foreach (var item in results)
         {
-            _store.Remove(item.Key, out _);
+            _ = _store.Remove(item.Key, out _);
         }
 
         return Task.FromResult((IReadOnlyCollection<ServerSideSession>)results);

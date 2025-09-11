@@ -159,23 +159,23 @@ public class IdentityServerTools : IIdentityServerTools
         {
             foreach (var claim in additionalClaims)
             {
-                claims.Add(claim);
+                _ = claims.Add(claim);
             }
         }
 
-        claims.Add(new Claim(JwtClaimTypes.ClientId, clientId));
+        _ = claims.Add(new Claim(JwtClaimTypes.ClientId, clientId));
 
         if (!IEnumerableExtensions.IsNullOrEmpty(scopes))
         {
             foreach (var scope in scopes)
             {
-                claims.Add(new Claim(JwtClaimTypes.Scope, scope));
+                _ = claims.Add(new Claim(JwtClaimTypes.Scope, scope));
             }
         }
 
         if (_options.EmitStaticAudienceClaim)
         {
-            claims.Add(new Claim(
+            _ = claims.Add(new Claim(
                 JwtClaimTypes.Audience,
 #pragma warning disable CA1863 // Would require changing a public const on a public class and be a breaking change
                 string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync()).EnsureTrailingSlash())));
@@ -186,7 +186,7 @@ public class IdentityServerTools : IIdentityServerTools
         {
             foreach (var audience in audiences)
             {
-                claims.Add(new Claim(JwtClaimTypes.Audience, audience));
+                _ = claims.Add(new Claim(JwtClaimTypes.Audience, audience));
             }
         }
 

@@ -122,7 +122,7 @@ public class ResourceValidationResult
             var parsedScopesToKeepList = ParsedScopes.Where(x => scopeNamesToKeep.Contains(x.ParsedName)).ToHashSet();
             if (Resources.OfflineAccess)
             {
-                parsedScopesToKeepList.Add(new ParsedScopeValue(IdentityServerConstants.StandardScopes.OfflineAccess));
+                _ = parsedScopesToKeepList.Add(new ParsedScopeValue(IdentityServerConstants.StandardScopes.OfflineAccess));
             }
             parsedScopesToKeep = parsedScopesToKeepList;
         }

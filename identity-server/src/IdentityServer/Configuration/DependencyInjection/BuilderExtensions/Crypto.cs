@@ -51,7 +51,7 @@ public static class IdentityServerBuilderExtensionsCrypto
             }
         }
 
-        builder.Services.AddSingleton<ISigningCredentialStore>(new InMemorySigningCredentialsStore(credential));
+        _ = builder.Services.AddSingleton<ISigningCredentialStore>(new InMemorySigningCredentialsStore(credential));
 
         var keyInfo = new SecurityKeyInfo
         {
@@ -59,7 +59,7 @@ public static class IdentityServerBuilderExtensionsCrypto
             SigningAlgorithm = credential.Algorithm
         };
 
-        builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(new[] { keyInfo }));
+        _ = builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(new[] { keyInfo }));
 
         return builder;
     }
@@ -203,7 +203,7 @@ public static class IdentityServerBuilderExtensionsCrypto
     /// <returns></returns>
     public static IIdentityServerBuilder AddValidationKey(this IIdentityServerBuilder builder, params SecurityKeyInfo[] keys)
     {
-        builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(keys));
+        _ = builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(keys));
 
         return builder;
     }

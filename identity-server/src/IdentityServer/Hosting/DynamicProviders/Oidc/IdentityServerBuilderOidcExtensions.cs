@@ -25,7 +25,7 @@ public static class IdentityServerBuilderOidcExtensions
     /// <returns></returns>
     public static IIdentityServerBuilder AddOidcDynamicProvider(this IIdentityServerBuilder builder)
     {
-        builder.Services.Configure<IdentityServerOptions>(options =>
+        _ = builder.Services.Configure<IdentityServerOptions>(options =>
         {
             // this associates the OIDC auth handler (OpenIdConnectHandler) and options (OpenIdConnectOptions) classes
             // to the idp class (OidcProvider) and type value ("oidc") from the identity provider store
@@ -33,7 +33,7 @@ public static class IdentityServerBuilderOidcExtensions
         });
 
         // this registers the OidcConfigureOptions to build the OpenIdConnectOptions from the OidcProvider data
-        builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, OidcConfigureOptions>();
+        _ = builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, OidcConfigureOptions>();
 
         // these are services from ASP.NET Core and are added manually since we're not using the 
         // AddOpenIdConnect helper that we'd normally use statically on the AddAuthentication.

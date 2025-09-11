@@ -96,53 +96,53 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
         switch (endpointName.RemoveLeadingSlash())
         {
             case IdentityServerConstants.ProtocolRoutePaths.AuthorizeCallback:
-                Interlocked.Increment(ref _authorizeCallback);
+                _ = Interlocked.Increment(ref _authorizeCallback);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.Authorize:
-                Interlocked.Increment(ref _authorize);
+                _ = Interlocked.Increment(ref _authorize);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.BackchannelAuthentication:
-                Interlocked.Increment(ref _backChannelAuthentication);
+                _ = Interlocked.Increment(ref _backChannelAuthentication);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.CheckSession:
-                Interlocked.Increment(ref _checkSession);
+                _ = Interlocked.Increment(ref _checkSession);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.DeviceAuthorization:
-                Interlocked.Increment(ref _deviceAuthorization);
+                _ = Interlocked.Increment(ref _deviceAuthorization);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.DiscoveryWebKeys:
-                Interlocked.Increment(ref _discoveryKey);
+                _ = Interlocked.Increment(ref _discoveryKey);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.DiscoveryConfiguration:
-                Interlocked.Increment(ref _discovery);
+                _ = Interlocked.Increment(ref _discovery);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.EndSessionCallback:
-                Interlocked.Increment(ref _endSessionCallback);
+                _ = Interlocked.Increment(ref _endSessionCallback);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.EndSession:
-                Interlocked.Increment(ref _endSession);
+                _ = Interlocked.Increment(ref _endSession);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.Introspection:
-                Interlocked.Increment(ref _introspection);
+                _ = Interlocked.Increment(ref _introspection);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.PushedAuthorization:
-                Interlocked.Increment(ref _par);
+                _ = Interlocked.Increment(ref _par);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.Revocation:
-                Interlocked.Increment(ref _tokenRevocation);
+                _ = Interlocked.Increment(ref _tokenRevocation);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.Token:
-                Interlocked.Increment(ref _token);
+                _ = Interlocked.Increment(ref _token);
                 break;
             case IdentityServerConstants.ProtocolRoutePaths.UserInfo:
-                Interlocked.Increment(ref _userInfo);
+                _ = Interlocked.Increment(ref _userInfo);
                 break;
             //NOTE: need to use StartsWith because this route can have additional segments
             case { } s when s.StartsWith(IdentityServerConstants.ProtocolRoutePaths.OAuthMetadata, StringComparison.OrdinalIgnoreCase):
-                Interlocked.Increment(ref _oAuthMetadata);
+                _ = Interlocked.Increment(ref _oAuthMetadata);
                 break;
             default:
-                Interlocked.Increment(ref _other);
+                _ = Interlocked.Increment(ref _other);
                 break;
         }
     }

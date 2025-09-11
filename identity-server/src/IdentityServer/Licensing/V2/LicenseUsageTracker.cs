@@ -29,17 +29,17 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFacto
             case LicenseFeature.DynamicProviders:
             case LicenseFeature.CIBA:
             case LicenseFeature.DPoP:
-                _enterpriseFeatures.Add(feature);
+                _ = _enterpriseFeatures.Add(feature);
                 break;
             case LicenseFeature.KeyManagement:
             case LicenseFeature.PAR:
             case LicenseFeature.ServerSideSessions:
             case LicenseFeature.DCR:
-                _businessFeatures.Add(feature);
+                _ = _businessFeatures.Add(feature);
                 break;
             case LicenseFeature.ISV:
             case LicenseFeature.Redistribution:
-                _otherFeatures.Add(feature);
+                _ = _otherFeatures.Add(feature);
                 break;
         }
     }
@@ -48,7 +48,7 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFacto
     {
         var initialClientCount = _clientsUsed.Values.Count;
 
-        _clientsUsed.Add(clientId);
+        _ = _clientsUsed.Add(clientId);
 
         if (initialClientCount == _clientsUsed.Values.Count)
         {
@@ -88,7 +88,7 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFacto
     {
         var initialIssuerCount = _issuersUsed.Values.Count;
 
-        _issuersUsed.Add(issuer);
+        _ = _issuersUsed.Add(issuer);
 
         if (initialIssuerCount == _issuersUsed.Values.Count)
         {

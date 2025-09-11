@@ -111,7 +111,7 @@ public class IdentityServerMiddleware
                     }
 
                     using var activity = Tracing.BasicActivitySource.StartActivity("IdentityServerProtocolRequest");
-                    activity?.SetTag(Tracing.Properties.EndpointType, endpointType);
+                    _ = (activity?.SetTag(Tracing.Properties.EndpointType, endpointType));
 
                     var issuer = await issuerNameService.GetCurrentAsync();
                     var licenseUsage = context.RequestServices.GetRequiredService<LicenseUsageTracker>();

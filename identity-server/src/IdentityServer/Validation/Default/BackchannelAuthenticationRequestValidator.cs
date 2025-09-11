@@ -238,7 +238,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             var tenant = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.Tenant, StringComparison.Ordinal));
             if (tenant != null)
             {
-                _validatedRequest.AuthenticationContextReferenceClasses.Remove(tenant);
+                _ = _validatedRequest.AuthenticationContextReferenceClasses.Remove(tenant);
                 tenant = tenant.Substring(KnownAcrValues.Tenant.Length);
                 _validatedRequest.Tenant = tenant;
             }
@@ -246,7 +246,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             var idp = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.HomeRealm, StringComparison.Ordinal));
             if (idp != null)
             {
-                _validatedRequest.AuthenticationContextReferenceClasses.Remove(idp);
+                _ = _validatedRequest.AuthenticationContextReferenceClasses.Remove(idp);
                 idp = idp.Substring(KnownAcrValues.HomeRealm.Length);
 
                 // check if idp is present but client does not allow it, and then ignore it

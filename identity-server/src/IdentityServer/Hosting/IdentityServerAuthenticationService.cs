@@ -54,7 +54,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
             AugmentPrincipal(principal);
 
             properties ??= new AuthenticationProperties();
-            await _session.CreateSessionIdAsync(principal, properties);
+            _ = await _session.CreateSessionIdAsync(principal, properties);
         }
 
         await _inner.SignInAsync(context, scheme, principal, properties);

@@ -35,7 +35,7 @@ internal static class ClaimsExtensions
                 }
                 else
                 {
-                    d.Remove(claim.Type);
+                    _ = d.Remove(claim.Type);
                     d.Add(claim.Type, new List<object> { value, GetValue(claim) });
                 }
             }

@@ -30,7 +30,7 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     public Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Get");
-        _repository.TryGetValue(referenceValueHash, out var request);
+        _ = _repository.TryGetValue(referenceValueHash, out var request);
 
         return Task.FromResult(request);
     }
@@ -39,7 +39,7 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     public Task ConsumeByHashAsync(string referenceValueHash)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Remove");
-        _repository.TryRemove(referenceValueHash, out _);
+        _ = _repository.TryRemove(referenceValueHash, out _);
         return Task.CompletedTask;
     }
 }
