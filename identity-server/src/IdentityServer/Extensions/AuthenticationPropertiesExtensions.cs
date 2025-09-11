@@ -87,7 +87,7 @@ public static class AuthenticationPropertiesExtensions
     }
 
 
-    private static IEnumerable<string> DecodeList(string value)
+    private static string[] DecodeList(string value)
     {
         if (value.IsPresent())
         {
