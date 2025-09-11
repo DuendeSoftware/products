@@ -19,7 +19,9 @@ public class DeviceAuthorizationSuccessEvent : Event
     /// </summary>
     /// <param name="response">The response.</param>
     /// <param name="request">The request.</param>
+#pragma warning disable IDE0060 // Remove unused parameter
     public DeviceAuthorizationSuccessEvent(DeviceAuthorizationResponse response, DeviceAuthorizationRequestValidationResult request)
+#pragma warning restore IDE0060 // Remove unused parameter
         : this()
     {
         ClientId = request.ValidatedRequest.Client?.ClientId;

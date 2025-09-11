@@ -93,7 +93,9 @@ public class MutualTlsEndpointMiddleware
     }
 
     /// <inheritdoc />
+#pragma warning disable IDE0060 // Remove unused parameter
     public async Task Invoke(HttpContext context, IAuthenticationSchemeProvider schemes)
+#pragma warning restore IDE0060 // Remove unused parameter
     {
         var mtlsConfigurationStyle = DetermineMtlsEndpointType(context, out var subPath);
 
