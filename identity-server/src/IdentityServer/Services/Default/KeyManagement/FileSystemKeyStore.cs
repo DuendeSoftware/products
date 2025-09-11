@@ -60,12 +60,10 @@ public class FileSystemKeyStore : ISigningKeyStore
             var id = file.Name[4..];
             try
             {
-                using (var reader = new StreamReader(file.OpenRead()))
-                {
-                    var json = await reader.ReadToEndAsync();
-                    var item = KeySerializer.Deserialize<SerializedKey>(json);
-                    list.Add(item);
-                }
+                using var reader = new StreamReader(file.OpenRead());
+                var json = await reader.ReadToEndAsync();
+                var item = KeySerializer.Deserialize<SerializedKey>(json);
+                list.Add(item);
             }
             catch (Exception ex)
             {

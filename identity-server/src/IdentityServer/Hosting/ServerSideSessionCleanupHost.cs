@@ -131,28 +131,26 @@ public class ServerSideSessionCleanupHost : IHostedService
 
         try
         {
-            await using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope())
+            await using var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+            var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<ServerSideSessionCleanupHost>>();
+            var options = serviceScope.ServiceProvider.GetRequiredService<IdentityServerOptions>();
+            var serverSideTicketStore = serviceScope.ServiceProvider.GetRequiredService<IServerSideTicketStore>();
+            var sessionCoordinationService = serviceScope.ServiceProvider.GetRequiredService<ISessionCoordinationService>();
+
+            var found = int.MaxValue;
+
+            while (found > 0)
             {
-                var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<ServerSideSessionCleanupHost>>();
-                var options = serviceScope.ServiceProvider.GetRequiredService<IdentityServerOptions>();
-                var serverSideTicketStore = serviceScope.ServiceProvider.GetRequiredService<IServerSideTicketStore>();
-                var sessionCoordinationService = serviceScope.ServiceProvider.GetRequiredService<ISessionCoordinationService>();
+                var sessions = await serverSideTicketStore.GetAndRemoveExpiredSessionsAsync(options.ServerSideSessions.RemoveExpiredSessionsBatchSize, cancellationToken);
+                found = sessions.Count;
 
-                var found = int.MaxValue;
-
-                while (found > 0)
+                if (found > 0)
                 {
-                    var sessions = await serverSideTicketStore.GetAndRemoveExpiredSessionsAsync(options.ServerSideSessions.RemoveExpiredSessionsBatchSize, cancellationToken);
-                    found = sessions.Count;
+                    logger.LogDebug("Processing expiration for {count} expired server-side sessions.", found);
 
-                    if (found > 0)
+                    foreach (var session in sessions)
                     {
-                        logger.LogDebug("Processing expiration for {count} expired server-side sessions.", found);
-
-                        foreach (var session in sessions)
-                        {
-                            await sessionCoordinationService.ProcessExpirationAsync(session);
-                        }
+                        await sessionCoordinationService.ProcessExpirationAsync(session);
                     }
                 }
             }

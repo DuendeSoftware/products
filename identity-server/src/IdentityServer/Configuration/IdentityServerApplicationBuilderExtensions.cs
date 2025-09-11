@@ -69,37 +69,35 @@ public static class IdentityServerApplicationBuilderExtensions
 
         var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
 
-        using (var scope = scopeFactory.CreateScope())
+        using var scope = scopeFactory.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
+
+        var options = serviceProvider.GetRequiredService<IdentityServerOptions>();
+        var env = serviceProvider.GetRequiredService<IHostEnvironment>();
+        IdentityServerLicenseValidator.Instance.Initialize(loggerFactory, options, env.IsDevelopment());
+
+        var licenseExpirationChecker = serviceProvider.GetRequiredService<LicenseExpirationChecker>();
+        licenseExpirationChecker.CheckExpiration();
+
+        if (options.KeyManagement.Enabled)
         {
-            var serviceProvider = scope.ServiceProvider;
-
-            var options = serviceProvider.GetRequiredService<IdentityServerOptions>();
-            var env = serviceProvider.GetRequiredService<IHostEnvironment>();
-            IdentityServerLicenseValidator.Instance.Initialize(loggerFactory, options, env.IsDevelopment());
-
-            var licenseExpirationChecker = serviceProvider.GetRequiredService<LicenseExpirationChecker>();
-            licenseExpirationChecker.CheckExpiration();
-
-            if (options.KeyManagement.Enabled)
-            {
-                var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();
-                licenseUsage.FeatureUsed(LicenseFeature.KeyManagement);
-            }
-
-            _ = TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");
-            _ = TestService(serviceProvider, typeof(IClientStore), logger, "No storage mechanism for clients specified. Use the 'AddInMemoryClients' extension method to register a development version.");
-            _ = TestService(serviceProvider, typeof(IResourceStore), logger, "No storage mechanism for resources specified. Use the 'AddInMemoryIdentityResources' or 'AddInMemoryApiResources' extension method to register a development version.");
-
-            var persistedGrants = serviceProvider.GetRequiredService(typeof(IPersistedGrantStore));
-            if (persistedGrants.GetType().FullName == typeof(InMemoryPersistedGrantStore).FullName)
-            {
-                logger.LogInformation("You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.");
-            }
-
-            ValidateOptions(options, logger);
-
-            ValidateAsync(serviceProvider, logger).GetAwaiter().GetResult();
+            var licenseUsage = serviceProvider.GetRequiredService<LicenseUsageTracker>();
+            licenseUsage.FeatureUsed(LicenseFeature.KeyManagement);
         }
+
+        _ = TestService(serviceProvider, typeof(IPersistedGrantStore), logger, "No storage mechanism for grants specified. Use the 'AddInMemoryPersistedGrants' extension method to register a development version.");
+        _ = TestService(serviceProvider, typeof(IClientStore), logger, "No storage mechanism for clients specified. Use the 'AddInMemoryClients' extension method to register a development version.");
+        _ = TestService(serviceProvider, typeof(IResourceStore), logger, "No storage mechanism for resources specified. Use the 'AddInMemoryIdentityResources' or 'AddInMemoryApiResources' extension method to register a development version.");
+
+        var persistedGrants = serviceProvider.GetRequiredService(typeof(IPersistedGrantStore));
+        if (persistedGrants.GetType().FullName == typeof(InMemoryPersistedGrantStore).FullName)
+        {
+            logger.LogInformation("You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.");
+        }
+
+        ValidateOptions(options, logger);
+
+        ValidateAsync(serviceProvider, logger).GetAwaiter().GetResult();
     }
 
     private static async Task ValidateAsync(IServiceProvider services, ILogger logger)
