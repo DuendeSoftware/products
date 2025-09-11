@@ -206,7 +206,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
             // how many are to the right of these results?
             if (items.Length > 0)
             {
-                var postCountId = items[items.Length - 1].Key;
+                var postCountId = items[^1].Key;
                 var postCount = query.Where(x => string.Compare(x.Key, postCountId, StringComparison.Ordinal) > 0).Count();
                 hasNext = postCount > 0;
                 currPage = totalPages - (int)Math.Ceiling(1.0 * postCount / countRequested);
@@ -258,7 +258,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
         string resultsToken = null;
         if (items.Length > 0)
         {
-            resultsToken = $"{items[0].Key},{items[items.Length - 1].Key}";
+            resultsToken = $"{items[0].Key},{items[^1].Key}";
         }
         else
         {

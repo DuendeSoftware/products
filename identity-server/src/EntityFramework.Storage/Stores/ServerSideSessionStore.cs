@@ -356,7 +356,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         string resultsToken = null;
         if (pagination.Items.Length > 0)
         {
-            resultsToken = $"{pagination.Items[0].Id},{pagination.Items[pagination.Items.Length - 1].Id}";
+            resultsToken = $"{pagination.Items[0].Id},{pagination.Items[^1].Id}";
         }
         else
         {
@@ -453,7 +453,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         // how many are to the right of these results?
         if (pagination.Items.Length > 0)
         {
-            var postCountId = pagination.Items[pagination.Items.Length - 1].Id;
+            var postCountId = pagination.Items[^1].Id;
             var postCount = await query.CountAsync(x => x.Id > postCountId, cancellationToken);
             pagination.HasNext = postCount > 0;
             pagination.CurrentPage = pagination.TotalPages - (int)Math.Ceiling(1.0 * postCount / pagination.CountRequested);
