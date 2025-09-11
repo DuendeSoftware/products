@@ -79,7 +79,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         Logger.LogTrace("ProcessInteractionAsync");
 
         // handle the scenario where user choose to deny prior to even logging in
-        if (consent != null && consent.Granted == false && consent.Error.HasValue)
+        if (consent != null && !consent.Granted && consent.Error.HasValue)
         {
             // special case when anonymous user has issued an error prior to authenticating
             Logger.LogInformation("Error: User consent result: {error}", consent.Error);
@@ -351,7 +351,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                 Logger.LogTrace("Consent was shown to user");
 
                 // user was shown consent -- did they say yes or no
-                if (consent.Granted == false)
+                if (!consent.Granted)
                 {
                     // no need to show consent screen again
                     // build error to return to client
@@ -376,7 +376,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                     // double check that required scopes are in the list of consented scopes
                     var requiredScopes = request.ValidatedResources.GetRequiredScopeValues();
                     var valid = requiredScopes.All(x => consent.ScopesValuesConsented.Contains(x));
-                    if (valid == false)
+                    if (!valid)
                     {
                         response.Error = OidcConstants.AuthorizeErrors.AccessDenied;
                         Logger.LogInformation("Error: User denied consent to required scopes");

@@ -126,7 +126,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         /////////////////////////////////////////////
         if (refreshToken.ConsumedTime.HasValue)
         {
-            if ((await AcceptConsumedTokenAsync(refreshToken)) == false)
+            if (!await AcceptConsumedTokenAsync(refreshToken))
             {
                 Logger.LogWarning("Rejecting refresh token because it has been consumed already.");
                 return invalidGrant;
@@ -143,7 +143,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
 
         await Profile.IsActiveAsync(isActiveCtx);
 
-        if (isActiveCtx.IsActive == false)
+        if (!isActiveCtx.IsActive)
         {
             Logger.LogError("{subjectId} has been disabled", refreshToken.Subject.GetSubjectId());
             return invalidGrant;

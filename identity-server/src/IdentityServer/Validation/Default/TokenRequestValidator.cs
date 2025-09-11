@@ -428,7 +428,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.UnauthorizedClient);
         }
 
-        if (redirectUri.Equals(_validatedRequest.AuthorizationCode.RedirectUri, StringComparison.Ordinal) == false)
+        if (!redirectUri.Equals(_validatedRequest.AuthorizationCode.RedirectUri, StringComparison.Ordinal))
         {
             LogError("Invalid redirect_uri", new { redirectUri, expectedRedirectUri = _validatedRequest.AuthorizationCode.RedirectUri });
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);
@@ -512,7 +512,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         var isActiveCtx = new IsActiveContext(_validatedRequest.AuthorizationCode.Subject, _validatedRequest.Client, IdentityServerConstants.ProfileIsActiveCallers.AuthorizationCodeValidation);
         await _profile.IsActiveAsync(isActiveCtx);
 
-        if (isActiveCtx.IsActive == false)
+        if (!isActiveCtx.IsActive)
         {
             LogError("User has been disabled", new { subjectId = _validatedRequest.AuthorizationCode.Subject.GetSubjectId() });
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);
@@ -662,7 +662,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         var isActiveCtx = new IsActiveContext(resourceOwnerContext.Result.Subject, _validatedRequest.Client, IdentityServerConstants.ProfileIsActiveCallers.ResourceOwnerValidation);
         await _profile.IsActiveAsync(isActiveCtx);
 
-        if (isActiveCtx.IsActive == false)
+        if (!isActiveCtx.IsActive)
         {
             LogError("User has been disabled", new { subjectId = resourceOwnerContext.Result.Subject.GetSubjectId() });
             await RaiseFailedResourceOwnerAuthenticationEventAsync(userName, "user is inactive", resourceOwnerContext.Request.Client.ClientId);
@@ -1073,7 +1073,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
             await _profile.IsActiveAsync(isActiveCtx);
 
-            if (isActiveCtx.IsActive == false)
+            if (!isActiveCtx.IsActive)
             {
                 // todo: raise event (or an OTEL metric event)?
 
@@ -1207,13 +1207,13 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);
         }
 
-        if (Constants.SupportedCodeChallengeMethods.Contains(authZcode.CodeChallengeMethod) == false)
+        if (!Constants.SupportedCodeChallengeMethods.Contains(authZcode.CodeChallengeMethod))
         {
             LogError("Unsupported code challenge method", new { codeChallengeMethod = authZcode.CodeChallengeMethod });
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);
         }
 
-        if (ValidateCodeVerifierAgainstCodeChallenge(codeVerifier, authZcode.CodeChallenge, authZcode.CodeChallengeMethod) == false)
+        if (!ValidateCodeVerifierAgainstCodeChallenge(codeVerifier, authZcode.CodeChallenge, authZcode.CodeChallengeMethod))
         {
             LogError("Transformed code verifier does not match code challenge");
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);

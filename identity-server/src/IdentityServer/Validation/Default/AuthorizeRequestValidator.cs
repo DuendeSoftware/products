@@ -267,7 +267,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         // check if redirect_uri is valid
         //////////////////////////////////////////////////////////
         var uriContext = new RedirectUriValidationContext(redirectUri, request);
-        if (await _uriValidator.IsRedirectUriValidAsync(uriContext) == false)
+        if (!await _uriValidator.IsRedirectUriValidAsync(uriContext))
         {
             LogError("Invalid redirect_uri", redirectUri, request);
             return Invalid(request, OidcConstants.AuthorizeErrors.InvalidRequest, "Invalid redirect_uri");
@@ -498,7 +498,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         if (requirement == Constants.ScopeRequirement.Identity ||
             requirement == Constants.ScopeRequirement.IdentityOnly)
         {
-            if (request.IsOpenIdRequest == false)
+            if (!request.IsOpenIdRequest)
             {
                 LogError("response_type requires the openid scope", request);
                 return Invalid(request, description: "Missing openid scope");

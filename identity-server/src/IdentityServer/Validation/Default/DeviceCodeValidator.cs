@@ -86,7 +86,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
 
         // denied
         if (deviceCode.IsAuthorized
-            && (deviceCode.AuthorizedScopes == null || deviceCode.AuthorizedScopes.Any() == false))
+            && (deviceCode.AuthorizedScopes == null || !deviceCode.AuthorizedScopes.Any()))
         {
             _logger.LogError("No scopes authorized for device authorization. Access denied");
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.AccessDenied);
@@ -104,7 +104,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         var isActiveCtx = new IsActiveContext(deviceCode.Subject, context.Request.Client, IdentityServerConstants.ProfileIsActiveCallers.DeviceCodeValidation);
         await _profile.IsActiveAsync(isActiveCtx);
 
-        if (isActiveCtx.IsActive == false)
+        if (!isActiveCtx.IsActive)
         {
             _logger.LogError("User has been disabled: {subjectId}", deviceCode.Subject.GetSubjectId());
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);

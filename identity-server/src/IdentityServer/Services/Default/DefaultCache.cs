@@ -106,7 +106,7 @@ public class DefaultCache<T> : ICache<T>
 
         if (item == null)
         {
-            if (false == await ConcurrencyLock.LockAsync((int)IdentityServerOptions.Caching.CacheLockTimeout.TotalMilliseconds))
+            if (!await ConcurrencyLock.LockAsync((int)IdentityServerOptions.Caching.CacheLockTimeout.TotalMilliseconds))
             {
                 throw new Exception($"Failed to obtain cache lock for: '{GetType()}'");
             }

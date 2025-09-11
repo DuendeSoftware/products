@@ -209,7 +209,7 @@ internal class TokenValidator : ITokenValidator
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
             await _profile.IsActiveAsync(isActiveCtx);
 
-            if (isActiveCtx.IsActive == false)
+            if (!isActiveCtx.IsActive)
             {
                 _logger.LogError("User marked as not active: {subject}", subClaim.Value);
 

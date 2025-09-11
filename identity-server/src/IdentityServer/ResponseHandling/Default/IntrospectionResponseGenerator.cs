@@ -61,7 +61,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         var callerName = validationResult.Api?.Name ?? validationResult.Client.ClientId;
 
         // token is invalid
-        if (validationResult.IsActive == false)
+        if (!validationResult.IsActive)
         {
             Logger.LogDebug("Creating introspection response for inactive token.");
             Telemetry.Metrics.Introspection(callerName, false);
@@ -76,7 +76,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         if (validationResult.Api != null)
         {
             // expected scope not present
-            if (await AreExpectedScopesPresentAsync(validationResult) == false)
+            if (!await AreExpectedScopesPresentAsync(validationResult))
             {
                 return response;
             }

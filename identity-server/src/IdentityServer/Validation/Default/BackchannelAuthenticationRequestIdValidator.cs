@@ -75,7 +75,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
 
         // denied
         if (request.IsComplete
-            && (request.AuthorizedScopes == null || request.AuthorizedScopes.Any() == false))
+            && (request.AuthorizedScopes == null || !request.AuthorizedScopes.Any()))
         {
             _logger.LogError("No scopes authorized for backchannel authentication request. Access denied");
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.AccessDenied);
@@ -94,7 +94,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
         var isActiveCtx = new IsActiveContext(request.Subject, context.Request.Client, IdentityServerConstants.ProfileIsActiveCallers.BackchannelAuthenticationRequestIdValidation);
         await _profile.IsActiveAsync(isActiveCtx);
 
-        if (isActiveCtx.IsActive == false)
+        if (!isActiveCtx.IsActive)
         {
             _logger.LogError("User has been disabled: {subjectId}", request.Subject.GetSubjectId());
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.InvalidGrant);

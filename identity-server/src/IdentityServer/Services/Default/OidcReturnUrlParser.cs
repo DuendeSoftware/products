@@ -72,7 +72,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
         if (_options.UserInteraction.AllowOriginInReturnUrl && returnUrl.IsUri())
         {
             var host = _urls.Origin;
-            if (returnUrl.StartsWith(host, StringComparison.OrdinalIgnoreCase) == true)
+            if (returnUrl.StartsWith(host, StringComparison.OrdinalIgnoreCase))
             {
                 returnUrl = returnUrl.Substring(host.Length);
             }

@@ -170,7 +170,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         if (Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout || clientsToCoordinate.Count > 0)
         {
             var clientsToContact = session.ClientIds;
-            if (Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout == false)
+            if (!Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout)
             {
                 // the global setting is not enabled, so filter on those specific clients configured
                 clientsToContact = clientsToContact.Intersect(clientsToCoordinate).ToList();
