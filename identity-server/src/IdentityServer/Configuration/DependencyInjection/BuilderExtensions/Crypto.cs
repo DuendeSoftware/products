@@ -167,10 +167,7 @@ public static class IdentityServerBuilderExtensionsCrypto
         string? filename = null,
         IdentityServerConstants.RsaSigningAlgorithm signingAlgorithm = IdentityServerConstants.RsaSigningAlgorithm.RS256)
     {
-        if (filename == null)
-        {
-            filename = Path.Combine(Directory.GetCurrentDirectory(), "tempkey.jwk");
-        }
+        filename ??= Path.Combine(Directory.GetCurrentDirectory(), "tempkey.jwk");
 
         if (File.Exists(filename))
         {

@@ -47,10 +47,7 @@ public static class IdentityServerApplicationBuilderExtensions
         // handler, which just re-assigns the user on the context. claims transformation
         // will run twice, since that's not cached (whereas the authN handler result is)
         // related: https://github.com/aspnet/Security/issues/1399
-        if (options == null)
-        {
-            options = new IdentityServerMiddlewareOptions();
-        }
+        options ??= new IdentityServerMiddlewareOptions();
 
         options.AuthenticationMiddleware(app);
 

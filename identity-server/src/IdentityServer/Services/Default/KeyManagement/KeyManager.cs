@@ -106,8 +106,7 @@ public class KeyManager : IKeyManager
         }
 
         // ensure we have all of our active signing keys
-        IEnumerable<KeyContainer> signingKeys;
-        var signingKeysSuccess = TryGetAllCurrentSigningKeys(keys, out signingKeys);
+        var signingKeysSuccess = TryGetAllCurrentSigningKeys(keys, out var signingKeys);
 
         // if we loaded from cache, see if DB has updated key
         if (!signingKeysSuccess && cached)

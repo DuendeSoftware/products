@@ -159,7 +159,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
                     match.Expiration = other.Expiration;
                 }
 
-                match.Description = match.Description ?? other.Description;
+                match.Description ??= other.Description;
             }
             else
             {
