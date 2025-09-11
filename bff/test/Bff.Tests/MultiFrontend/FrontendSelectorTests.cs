@@ -300,6 +300,28 @@ public class FrontendSelectorTests
     }
 
     [Fact]
+    public void Slash_also_functions_as_default_frontend()
+    {
+        // Arrange
+        var specificFrontend = CreateFrontend(BffFrontendName.Parse("specific-frontend"),
+            host: HostHeaderValue.Parse("https://specific.com"));
+
+        var defaultFrontend = CreateFrontend(BffFrontendName.Parse("default-frontend")).MapToPath("/");
+
+        _frontendCollection.AddOrUpdate(specificFrontend);
+        _frontendCollection.AddOrUpdate(defaultFrontend);
+
+        // Act
+        var request = CreateHttpRequest("https://different.com");
+        var result = _selector.TrySelectFrontend(request, out var selectedFrontend);
+
+        // Assert
+        result.ShouldBeTrue();
+        selectedFrontend.ShouldNotBeNull();
+        selectedFrontend.Name.ToString().ShouldBe("default-frontend");
+    }
+
+    [Fact]
     public void TryMapFrontend_FallbackToDefaultFrontend_ReturnsTrue()
     {
         // Arrange

@@ -29,7 +29,7 @@ internal class BffIndex
         var frontendSelectionCriteria = frontend.MatchingCriteria;
         if (frontendSelectionCriteria.MatchingHostHeader == null)
         {
-            if (frontendSelectionCriteria.MatchingPath == null)
+            if (frontendSelectionCriteria.MatchingPath == null || frontendSelectionCriteria.MatchingPath == "/")
             {
                 if (_defaultFrontend != null)
                 {
