@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 internal static class KeySerializer
 {
     private static JsonSerializerOptions _settings =
-        new JsonSerializerOptions
+        new()
         {
             IncludeFields = true
         };

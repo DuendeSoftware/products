@@ -88,7 +88,7 @@ public static class Telemetry
         /// <summary>
         /// Meter for IdentityServer
         /// </summary>
-        public static readonly Meter Meter = new Meter(ServiceName, ServiceVersion);
+        public static readonly Meter Meter = new(ServiceName, ServiceVersion);
 
         /// <summary>
         /// Counter for active requests.

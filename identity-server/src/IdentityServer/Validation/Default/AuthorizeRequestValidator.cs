@@ -34,7 +34,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly SanitizedLogger<AuthorizeRequestValidator> _sanitizedLogger;
 
     private readonly ResponseTypeEqualityComparer
-        _responseTypeEqualityComparer = new ResponseTypeEqualityComparer();
+        _responseTypeEqualityComparer = new();
 
 
     public AuthorizeRequestValidator(
@@ -837,9 +837,9 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return true;
     }
 
-    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new AuthorizeRequestValidationResult(request, error, description);
+    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new(request, error, description);
 
-    private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
+    private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new(request);
 
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {

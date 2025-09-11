@@ -178,9 +178,9 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
 
         var claims = new List<Claim>
         {
-            new Claim(JwtClaimTypes.Audience, request.ClientId),
-            new Claim(JwtClaimTypes.JwtId, CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)),
-            new Claim(JwtClaimTypes.Events, json, IdentityServerConstants.ClaimValueTypes.Json)
+            new(JwtClaimTypes.Audience, request.ClientId),
+            new(JwtClaimTypes.JwtId, CryptoRandom.CreateUniqueId(16, CryptoRandom.OutputFormat.Hex)),
+            new(JwtClaimTypes.Events, json, IdentityServerConstants.ClaimValueTypes.Json)
         };
 
         if (request.SubjectId != null)

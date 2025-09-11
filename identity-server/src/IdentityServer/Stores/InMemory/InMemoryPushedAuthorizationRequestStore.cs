@@ -14,7 +14,7 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
 {
-    private readonly ConcurrentDictionary<string, PushedAuthorizationRequest> _repository = new ConcurrentDictionary<string, PushedAuthorizationRequest>();
+    private readonly ConcurrentDictionary<string, PushedAuthorizationRequest> _repository = new();
 
     /// <inheritdoc/>
     public Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest)

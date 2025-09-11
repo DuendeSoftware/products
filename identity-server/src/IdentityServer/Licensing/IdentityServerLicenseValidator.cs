@@ -12,7 +12,7 @@ namespace Duende.IdentityServer;
 // APIs needed for IdentityServer specific license validation
 internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerLicense>
 {
-    internal readonly static IdentityServerLicenseValidator Instance = new IdentityServerLicenseValidator();
+    internal readonly static IdentityServerLicenseValidator Instance = new();
 
     private IdentityServerOptions _options;
 

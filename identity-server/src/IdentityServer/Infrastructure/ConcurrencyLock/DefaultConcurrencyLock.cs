@@ -10,7 +10,7 @@ namespace Duende.IdentityServer.Internal;
 public class DefaultConcurrencyLock<T> : IConcurrencyLock<T>, IDisposable
 {
     private bool _isDisposed;
-    private readonly SemaphoreSlim Lock = new SemaphoreSlim(1);
+    private readonly SemaphoreSlim Lock = new(1);
 
     /// <inheritdoc/>
     public Task<bool> LockAsync(int millisecondsTimeout)

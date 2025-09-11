@@ -335,9 +335,9 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return Valid(request);
     }
 
-    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null) => new AuthorizeRequestValidationResult(request, error, description);
+    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string? description = null) => new(request, error, description);
 
-    private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
+    private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new(request);
 
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {

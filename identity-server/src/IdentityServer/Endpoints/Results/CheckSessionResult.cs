@@ -23,7 +23,7 @@ internal class CheckSessionHttpWriter : IHttpResponseWriter<CheckSessionResult>
 
     private IdentityServerOptions _options;
     private static volatile string FormattedHtml;
-    private static readonly object Lock = new object();
+    private static readonly object Lock = new();
     private static volatile string LastCheckSessionCookieName;
 
     public async Task WriteHttpResponse(CheckSessionResult result, HttpContext context)

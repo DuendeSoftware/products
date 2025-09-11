@@ -415,12 +415,12 @@ internal class TokenValidator : ITokenValidator
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtClaimTypes.Issuer, token.Issuer),
-            new Claim(JwtClaimTypes.NotBefore,
+            new(JwtClaimTypes.Issuer, token.Issuer),
+            new(JwtClaimTypes.NotBefore,
                 new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
-            new Claim(JwtClaimTypes.IssuedAt, new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
+            new(JwtClaimTypes.IssuedAt, new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64),
-            new Claim(JwtClaimTypes.Expiration,
+            new(JwtClaimTypes.Expiration,
                 new DateTimeOffset(token.CreationTime).AddSeconds(token.Lifetime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64)
         };
@@ -460,7 +460,7 @@ internal class TokenValidator : ITokenValidator
         }
     }
 
-    private static TokenValidationResult Invalid(string error) => new TokenValidationResult
+    private static TokenValidationResult Invalid(string error) => new()
     {
         IsError = true,
         Error = error

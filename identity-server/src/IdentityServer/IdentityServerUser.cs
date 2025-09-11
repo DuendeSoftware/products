@@ -77,7 +77,7 @@ public class IdentityServerUser
             throw new ArgumentException("SubjectId is mandatory", nameof(SubjectId));
         }
 
-        var claims = new List<Claim> { new Claim(JwtClaimTypes.Subject, SubjectId) };
+        var claims = new List<Claim> { new(JwtClaimTypes.Subject, SubjectId) };
 
         if (DisplayName.IsPresent())
         {

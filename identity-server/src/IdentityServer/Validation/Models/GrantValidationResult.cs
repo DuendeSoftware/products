@@ -129,10 +129,10 @@ public class GrantValidationResult : ValidationResult
 
         var resultClaims = new List<Claim>
         {
-            new Claim(JwtClaimTypes.Subject, subject),
-            new Claim(JwtClaimTypes.AuthenticationMethod, authenticationMethod),
-            new Claim(JwtClaimTypes.IdentityProvider, identityProvider),
-            new Claim(JwtClaimTypes.AuthenticationTime, new DateTimeOffset(authTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
+            new(JwtClaimTypes.Subject, subject),
+            new(JwtClaimTypes.AuthenticationMethod, authenticationMethod),
+            new(JwtClaimTypes.IdentityProvider, identityProvider),
+            new(JwtClaimTypes.AuthenticationTime, new DateTimeOffset(authTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
         };
 
         if (!IEnumerableExtensions.IsNullOrEmpty(claims))

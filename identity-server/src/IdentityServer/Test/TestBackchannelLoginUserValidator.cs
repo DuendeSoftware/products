@@ -41,7 +41,7 @@ public class TestBackchannelLoginUserValidator : IBackchannelAuthenticationUserV
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtClaimTypes.Subject, user.SubjectId)
+                new(JwtClaimTypes.Subject, user.SubjectId)
             };
             var ci = new ClaimsIdentity(claims, "ciba");
             result.Subject = new ClaimsPrincipal(ci);

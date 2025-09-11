@@ -1236,9 +1236,9 @@ internal class TokenRequestValidator : ITokenRequestValidator
         return TimeConstantComparer.IsEqual(transformedCodeVerifier.Sha256(), codeChallenge);
     }
 
-    private TokenRequestValidationResult Valid(Dictionary<string, object> customResponse = null) => new TokenRequestValidationResult(_validatedRequest, customResponse);
+    private TokenRequestValidationResult Valid(Dictionary<string, object> customResponse = null) => new(_validatedRequest, customResponse);
 
-    private TokenRequestValidationResult Invalid(string error, string errorDescription = null, Dictionary<string, object> customResponse = null) => new TokenRequestValidationResult(_validatedRequest, error, errorDescription, customResponse);
+    private TokenRequestValidationResult Invalid(string error, string errorDescription = null, Dictionary<string, object> customResponse = null) => new(_validatedRequest, error, errorDescription, customResponse);
 
     private void LogError(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Error, message, values);
 

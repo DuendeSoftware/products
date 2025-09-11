@@ -17,7 +17,7 @@ internal static class Constants
     public static readonly TimeSpan DefaultCookieTimeSpan = TimeSpan.FromHours(10);
     public static readonly TimeSpan DefaultCacheDuration = TimeSpan.FromMinutes(60);
 
-    public static readonly List<string> SupportedResponseTypes = new List<string>
+    public static readonly List<string> SupportedResponseTypes = new()
     {
         OidcConstants.ResponseTypes.Code,
         OidcConstants.ResponseTypes.Token,
@@ -28,7 +28,7 @@ internal static class Constants
         OidcConstants.ResponseTypes.CodeIdTokenToken
     };
 
-    public static readonly Dictionary<string, string> ResponseTypeToGrantTypeMapping = new Dictionary<string, string>
+    public static readonly Dictionary<string, string> ResponseTypeToGrantTypeMapping = new()
     {
         { OidcConstants.ResponseTypes.Code, GrantType.AuthorizationCode },
         { OidcConstants.ResponseTypes.Token, GrantType.Implicit },
@@ -39,14 +39,14 @@ internal static class Constants
         { OidcConstants.ResponseTypes.CodeIdTokenToken, GrantType.Hybrid }
     };
 
-    public static readonly List<string> AllowedGrantTypesForAuthorizeEndpoint = new List<string>
+    public static readonly List<string> AllowedGrantTypesForAuthorizeEndpoint = new()
     {
         GrantType.AuthorizationCode,
         GrantType.Implicit,
         GrantType.Hybrid
     };
 
-    public static readonly List<string> SupportedCodeChallengeMethods = new List<string>
+    public static readonly List<string> SupportedCodeChallengeMethods = new()
     {
         OidcConstants.CodeChallengeMethods.Plain,
         OidcConstants.CodeChallengeMethods.Sha256
@@ -60,7 +60,7 @@ internal static class Constants
         Identity
     }
 
-    public static readonly Dictionary<string, ScopeRequirement> ResponseTypeToScopeRequirement = new Dictionary<string, ScopeRequirement>
+    public static readonly Dictionary<string, ScopeRequirement> ResponseTypeToScopeRequirement = new()
     {
         { OidcConstants.ResponseTypes.Code, ScopeRequirement.None },
         { OidcConstants.ResponseTypes.Token, ScopeRequirement.ResourceOnly },
@@ -71,14 +71,14 @@ internal static class Constants
         { OidcConstants.ResponseTypes.CodeIdTokenToken, ScopeRequirement.Identity }
     };
 
-    public static readonly Dictionary<string, IEnumerable<string>> AllowedResponseModesForGrantType = new Dictionary<string, IEnumerable<string>>
+    public static readonly Dictionary<string, IEnumerable<string>> AllowedResponseModesForGrantType = new()
     {
         { GrantType.AuthorizationCode, new[] { OidcConstants.ResponseModes.Query, OidcConstants.ResponseModes.FormPost, OidcConstants.ResponseModes.Fragment } },
         { GrantType.Hybrid, new[] { OidcConstants.ResponseModes.Fragment, OidcConstants.ResponseModes.FormPost }},
         { GrantType.Implicit, new[] { OidcConstants.ResponseModes.Fragment, OidcConstants.ResponseModes.FormPost }}
     };
 
-    public static readonly List<string> SupportedResponseModes = new List<string>
+    public static readonly List<string> SupportedResponseModes = new()
     {
         OidcConstants.ResponseModes.FormPost,
         OidcConstants.ResponseModes.Query,
@@ -95,7 +95,7 @@ internal static class Constants
         public const string RSA_SHA_256 = "RS256";
     }
 
-    public static readonly List<string> SupportedDisplayModes = new List<string>
+    public static readonly List<string> SupportedDisplayModes = new()
     {
         OidcConstants.DisplayModes.Page,
         OidcConstants.DisplayModes.Popup,
@@ -103,7 +103,7 @@ internal static class Constants
         OidcConstants.DisplayModes.Wap
     };
 
-    public static readonly List<string> SupportedPromptModes = new List<string>
+    public static readonly List<string> SupportedPromptModes = new()
     {
         OidcConstants.PromptModes.None,
         OidcConstants.PromptModes.Login,
@@ -143,7 +143,7 @@ internal static class Constants
         public static readonly string[] All = { HomeRealm, Tenant };
     }
 
-    public static Dictionary<string, int> ProtectedResourceErrorStatusCodes = new Dictionary<string, int>
+    public static Dictionary<string, int> ProtectedResourceErrorStatusCodes = new()
     {
         { OidcConstants.ProtectedResourceErrors.InvalidToken,      401 },
         { OidcConstants.ProtectedResourceErrors.ExpiredToken,      401 },
@@ -151,7 +151,7 @@ internal static class Constants
         { OidcConstants.ProtectedResourceErrors.InsufficientScope, 403 }
     };
 
-    public static readonly Dictionary<string, IEnumerable<string>> ScopeToClaimsMapping = new Dictionary<string, IEnumerable<string>>
+    public static readonly Dictionary<string, IEnumerable<string>> ScopeToClaimsMapping = new()
     {
         { IdentityServerConstants.StandardScopes.Profile, new[]
         {
@@ -230,7 +230,7 @@ internal static class Constants
         public const string AccessToken = "access_token";
     }
 
-    public static List<string> SupportedTokenTypeHints = new List<string>
+    public static List<string> SupportedTokenTypeHints = new()
     {
         TokenTypeHints.RefreshToken,
         TokenTypeHints.AccessToken

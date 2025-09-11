@@ -13,7 +13,7 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public class InMemoryPersistedGrantStore : IPersistedGrantStore
 {
-    private readonly ConcurrentDictionary<string, PersistedGrant> _repository = new ConcurrentDictionary<string, PersistedGrant>();
+    private readonly ConcurrentDictionary<string, PersistedGrant> _repository = new();
 
     /// <inheritdoc/>
     public Task StoreAsync(PersistedGrant grant)

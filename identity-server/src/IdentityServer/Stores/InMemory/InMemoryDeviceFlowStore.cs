@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Stores;
 /// <seealso cref="IdentityServer.Stores.IDeviceFlowStore" />
 public class InMemoryDeviceFlowStore : IDeviceFlowStore
 {
-    private readonly List<InMemoryDeviceAuthorization> _repository = new List<InMemoryDeviceAuthorization>();
+    private readonly List<InMemoryDeviceAuthorization> _repository = new();
 
     /// <summary>
     /// Stores the device authorization request.

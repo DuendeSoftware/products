@@ -514,7 +514,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
 
 
-    private BackchannelAuthenticationRequestValidationResult Invalid(string error, string errorDescription = null) => new BackchannelAuthenticationRequestValidationResult(_validatedRequest, error, errorDescription);
+    private BackchannelAuthenticationRequestValidationResult Invalid(string error, string errorDescription = null) => new(_validatedRequest, error, errorDescription);
 
     private void LogError(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Error, message, values);
 
