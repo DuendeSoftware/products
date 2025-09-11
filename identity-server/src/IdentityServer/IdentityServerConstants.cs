@@ -102,7 +102,7 @@ public static class IdentityServerConstants
     }
 
 
-    public readonly static IEnumerable<string> SupportedSigningAlgorithms = new List<string>
+    public static readonly IEnumerable<string> SupportedSigningAlgorithms = new List<string>
     {
         SecurityAlgorithms.RsaSha256,
         SecurityAlgorithms.RsaSha384,
