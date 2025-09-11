@@ -7,5 +7,5 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics;
 
 internal interface IDiagnosticEntry
 {
-    public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer);
+    Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer);
 }
