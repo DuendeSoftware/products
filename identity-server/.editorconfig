@@ -1,6 +1,7 @@
 [*.cs]
 dotnet_diagnostic.IDE0029.severity = suggestion # Null check can be simplified (ternary conditional check)
 dotnet_diagnostic.IDE0030.severity = suggestion # Null check can be simplified (nullable ternary conditional check)
+dotnet_diagnostic.IDE0045.severity = suggestion # 'if' statement can be simplified
 dotnet_diagnostic.IDE0270.severity = suggestion # Null check can be simplified (if null check)
 dotnet_diagnostic.IDE0290.severity = suggestion # Use primary constructor
 dotnet_diagnostic.IDE1006.severity = suggestion # Naming Styles
