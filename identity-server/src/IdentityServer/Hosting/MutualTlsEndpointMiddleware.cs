@@ -170,7 +170,7 @@ public class MutualTlsEndpointMiddleware
         return x509AuthResult;
     }
 
-    class MtlsErrorResponse
+    private class MtlsErrorResponse
     {
         public string error { get; set; }
         public string error_description { get; set; }
