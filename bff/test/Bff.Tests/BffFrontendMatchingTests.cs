@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Net;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -30,6 +31,37 @@ public class BffFrontendMatchingTests : BffTestBase
                     return NoFrontendSelected.ToString();
                 });
         };
+    }
+
+    [Fact]
+    public async Task When_no_frontend_but_openid_config_then_all_endpoints_are_present()
+    {
+        Bff.OnConfigureBff += bff => bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
+        IdentityServer.AddClient(The.ClientId, Bff.Url());
+        await InitializeAsync();
+
+        // Remove the never-matching frontend so the default frontend is used
+        Bff.Resolve<IFrontendCollection>().Remove(Some.NeverMatchingFrontEnd().Name);
+
+        await Bff.BrowserClient.Login();
+        var user = await Bff.BrowserClient.CallUserEndpointAsync();
+        user.ShouldNotBeEmpty();
+        await Bff.BrowserClient.Logout();
+    }
+
+    [Fact]
+    public async Task Given_unmatched_frontend_then_default_frontend_is_disabled()
+    {
+        Bff.OnConfigureBff += bff => bff.ConfigureOpenIdConnect(The.DefaultOpenIdConnectConfiguration);
+        IdentityServer.AddClient(The.ClientId, Bff.Url("not_matched/"));
+        await InitializeAsync();
+        Bff.AddOrUpdateFrontend(Some.BffFrontend().MappedToPath(LocalPath.Parse("not_matched")));
+
+        Bff.BrowserClient.DefaultRequestHeaders.Add("x-csrf", "1");
+        await Bff.BrowserClient.Login(expectedStatusCode: HttpStatusCode.NotFound);
+        await Bff.BrowserClient.GetAsync("/bff/diagnostics").CheckHttpStatusCode(HttpStatusCode.NotFound);
+        await Bff.BrowserClient.GetAsync("/bff/logout").CheckHttpStatusCode(HttpStatusCode.NotFound);
+        await Bff.BrowserClient.GetAsync("/bff/user").CheckHttpStatusCode(HttpStatusCode.NotFound);
     }
 
     [Fact]

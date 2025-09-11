@@ -13,6 +13,16 @@ namespace Duende.Bff.Otel;
 internal static partial class LogMessages
 {
     [LoggerMessage(
+        Message = $$"""
+                    Management URL request {{{OTelParameters.LocalPath}}} blocked with 404 response, because the implicit frontend is disabled.
+                    
+                    When you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,
+                    Add one without Host or Path mapping. 
+                    """)]
+    public static partial void ImplicitFrontendDisabled(this ILogger logger, LogLevel level, PathString localPath);
+
+
+    [LoggerMessage(
         Message = $"Retrieved IndexHTML for {{{OTelParameters.Frontend}}}. Statuscode was {{{OTelParameters.StatusCode}}}")]
     public static partial void RetrievedIndexHTML(this ILogger logger, LogLevel level, BffFrontendName frontend, HttpStatusCode statusCode);
 
@@ -89,11 +99,11 @@ internal static partial class LogMessages
         Scheme scheme);
 
     [LoggerMessage(
-        $"None of the configured frontends matched the selection criteria.")]
+        $"No frontend selected: None of the configured frontends matched the selection criteria.")]
     public static partial void NoFrontendSelected(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
-        $"BFF is not configured to work with multiple frontends.")]
+        $"BFF is not configured to work with multiple frontends. No frontend is currently selected. ")]
     public static partial void MultiFrontendDisabled(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(
