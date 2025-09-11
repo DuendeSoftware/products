@@ -91,7 +91,7 @@ public class ResponseTypeEqualityComparer : IEqualityComparer<string>
         foreach (var element in values)
         {
             // changed to use StringComparer.Ordinal, rather than StringComparer.InvariantCulture
-            hash = hash * 31 + StringComparer.Ordinal.GetHashCode(element);
+            hash = (hash * 31) + StringComparer.Ordinal.GetHashCode(element);
         }
         return hash;
     }

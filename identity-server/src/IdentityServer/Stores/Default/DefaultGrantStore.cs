@@ -89,7 +89,7 @@ public class DefaultGrantStore<T>
     /// <returns></returns>
     protected virtual string GetHashedKey(string value)
     {
-        var key = (value + KeySeparator + GrantType);
+        var key = value + KeySeparator + GrantType;
 
         if (value.EndsWith(HexEncodingFormatSuffix, StringComparison.Ordinal))
         {

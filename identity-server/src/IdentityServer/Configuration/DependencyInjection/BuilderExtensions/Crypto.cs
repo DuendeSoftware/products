@@ -27,8 +27,7 @@ public static class IdentityServerBuilderExtensionsCrypto
     /// <returns></returns>
     public static IIdentityServerBuilder AddSigningCredential(this IIdentityServerBuilder builder, SigningCredentials credential)
     {
-        if (!(credential.Key is AsymmetricSecurityKey
-              || credential.Key is IdentityModel.Tokens.JsonWebKey && ((IdentityModel.Tokens.JsonWebKey)credential.Key).HasPrivateKey))
+        if (credential.Key is not AsymmetricSecurityKey and not JsonWebKey { HasPrivateKey: true })
         {
             throw new InvalidOperationException("Signing key is not asymmetric");
         }

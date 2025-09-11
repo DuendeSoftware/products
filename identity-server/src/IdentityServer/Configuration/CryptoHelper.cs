@@ -70,7 +70,7 @@ public static class CryptoHelper
         var encodedBytes = Encoding.ASCII.GetBytes(value);
         var hash = hashFunction(encodedBytes);
 
-        var size = (hashLength / 8) / 2;
+        var size = hashLength / 8 / 2;
 
         var leftPart = new byte[size];
         Array.Copy(hash, leftPart, size);
@@ -156,9 +156,9 @@ public static class CryptoHelper
     {
         var parameters = key.ECDsa.ExportParameters(false);
 
-        if (algorithm == SecurityAlgorithms.EcdsaSha256 && parameters.Curve.Oid.Value != Constants.CurveOids.P256
-            || algorithm == SecurityAlgorithms.EcdsaSha384 && parameters.Curve.Oid.Value != Constants.CurveOids.P384
-            || algorithm == SecurityAlgorithms.EcdsaSha512 && parameters.Curve.Oid.Value != Constants.CurveOids.P521)
+        if ((algorithm == SecurityAlgorithms.EcdsaSha256 && parameters.Curve.Oid.Value != Constants.CurveOids.P256) ||
+            (algorithm == SecurityAlgorithms.EcdsaSha384 && parameters.Curve.Oid.Value != Constants.CurveOids.P384) ||
+            (algorithm == SecurityAlgorithms.EcdsaSha512 && parameters.Curve.Oid.Value != Constants.CurveOids.P521))
         {
             return false;
         }

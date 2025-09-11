@@ -249,7 +249,7 @@ public class KeyManager : IKeyManager
             // and see if that's within the window of activation delay.
             var age = _clock.GetAge(activeKey.Created);
             var diff = _options.KeyManagement.RotationInterval.Subtract(age);
-            var needed = (diff <= _options.KeyManagement.PropagationTime);
+            var needed = diff <= _options.KeyManagement.PropagationTime;
 
             if (!needed)
             {

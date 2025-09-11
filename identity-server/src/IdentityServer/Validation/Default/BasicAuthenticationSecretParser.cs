@@ -77,7 +77,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
         // = (InputLengthRestrictions.ClientId + InputLengthRestrictions.ClientSecret) * 4 + 10
 
         var idAndSecret = _options.InputLengthRestrictions.ClientId + _options.InputLengthRestrictions.ClientSecret; // *3 for the URL encoding
-        var authorizationHeaderHeaderMaxLength = 4 * idAndSecret + 10;
+        var authorizationHeaderHeaderMaxLength = (4 * idAndSecret) + 10;
 
         if (authorizationHeader.Length > authorizationHeaderHeaderMaxLength)
         {

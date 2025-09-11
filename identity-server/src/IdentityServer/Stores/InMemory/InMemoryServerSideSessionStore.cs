@@ -209,7 +209,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
                 var postCountId = items[items.Length - 1].Key;
                 var postCount = query.Where(x => string.Compare(x.Key, postCountId, StringComparison.Ordinal) > 0).Count();
                 hasNext = postCount > 0;
-                currPage = totalPages - (int)Math.Ceiling((1.0 * postCount) / countRequested);
+                currPage = totalPages - (int)Math.Ceiling(1.0 * postCount / countRequested);
             }
 
             if (currPage == 1 && hasNext && items.Length < countRequested)
@@ -244,7 +244,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
                 var priorCountId = items[0].Key;
                 var priorCount = query.Where(x => string.Compare(x.Key, priorCountId, StringComparison.Ordinal) < 0).Count();
                 hasPrev = priorCount > 0;
-                currPage = 1 + (int)Math.Ceiling((1.0 * priorCount) / countRequested);
+                currPage = 1 + (int)Math.Ceiling(1.0 * priorCount / countRequested);
             }
         }
 

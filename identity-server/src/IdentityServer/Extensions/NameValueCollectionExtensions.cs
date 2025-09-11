@@ -122,7 +122,7 @@ internal static class NameValueCollectionExtensions
 
     internal static string ConvertFormUrlEncodedSpacesToUrlEncodedSpaces(string str)
     {
-        if ((str != null) && (str.Contains('+', StringComparison.InvariantCulture)))
+        if ((str != null) && str.Contains('+', StringComparison.InvariantCulture))
         {
             str = str.Replace("+", "%20", StringComparison.InvariantCulture);
         }

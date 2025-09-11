@@ -64,7 +64,7 @@ public static class IdentityResources
             Name = IdentityServerConstants.StandardScopes.Email;
             DisplayName = "Your email address";
             Emphasize = true;
-            UserClaims = ([.. Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Email]]);
+            UserClaims = [.. Constants.ScopeToClaimsMapping[IdentityServerConstants.StandardScopes.Email]];
         }
     }
 

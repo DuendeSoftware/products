@@ -425,7 +425,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             var priorCountId = pagination.Items[0].Id;
             var priorCount = await query.CountAsync(x => x.Id < last, cancellationToken);
             pagination.HasPrev = priorCount > 0;
-            pagination.CurrentPage = 1 + (int)Math.Ceiling((1.0 * priorCount) / pagination.CountRequested);
+            pagination.CurrentPage = 1 + (int)Math.Ceiling(1.0 * priorCount / pagination.CountRequested);
         }
     }
 
@@ -456,7 +456,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             var postCountId = pagination.Items[pagination.Items.Length - 1].Id;
             var postCount = await query.CountAsync(x => x.Id > postCountId, cancellationToken);
             pagination.HasNext = postCount > 0;
-            pagination.CurrentPage = pagination.TotalPages - (int)Math.Ceiling((1.0 * postCount) / pagination.CountRequested);
+            pagination.CurrentPage = pagination.TotalPages - (int)Math.Ceiling(1.0 * postCount / pagination.CountRequested);
         }
     }
 
