@@ -34,13 +34,13 @@ internal class DynamicSchemeAuthenticationMiddleware
             var startIndex = _options.PathPrefix.ToString().Length;
             if (context.Request.Path.Value?.Length > startIndex)
             {
-                scheme = context.Request.Path.Value.Substring(startIndex + 1);
+                scheme = context.Request.Path.Value[(startIndex + 1)..];
                 var idx = scheme.IndexOf('/', StringComparison.InvariantCulture);
                 if (idx > 0)
                 {
                     // this assumes the path is: /<PathPrefix>/<scheme>/<extra>
                     // e.g.: /federation/my-oidc-provider/signin
-                    scheme = scheme.Substring(0, idx);
+                    scheme = scheme[..idx];
                 }
             }
         }

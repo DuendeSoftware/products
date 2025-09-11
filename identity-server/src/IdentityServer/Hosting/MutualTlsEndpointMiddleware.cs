@@ -135,7 +135,7 @@ public class MutualTlsEndpointMiddleware
         var colonIndex = configuredDomain.IndexOf(':', StringComparison.InvariantCulture);
         if (colonIndex >= 0)
         {
-            configuredHostname = configuredDomain.Substring(0, colonIndex);
+            configuredHostname = configuredDomain[..colonIndex];
             if (int.TryParse(configuredDomain.AsSpan(colonIndex + 1), out var port))
             {
                 configuredPort = port;

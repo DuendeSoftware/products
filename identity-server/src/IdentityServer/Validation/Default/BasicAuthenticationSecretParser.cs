@@ -85,7 +85,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
             return notfound;
         }
 
-        var parameter = authorizationHeader.Substring(schemeLength);
+        var parameter = authorizationHeader[schemeLength..];
 
         string pair;
         try
@@ -112,8 +112,8 @@ public class BasicAuthenticationSecretParser : ISecretParser
         }
 
         // RFC6749 says individual values must be application/x-www-form-urlencoded
-        var clientId = UrlDecode(pair.Substring(0, ix));
-        var secret = UrlDecode(pair.Substring(ix + 1));
+        var clientId = UrlDecode(pair[..ix]);
+        var secret = UrlDecode(pair[(ix + 1)..]);
 
         if (clientId.IsPresent())
         {

@@ -74,7 +74,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
             var host = _urls.Origin;
             if (returnUrl.StartsWith(host, StringComparison.OrdinalIgnoreCase))
             {
-                returnUrl = returnUrl.Substring(host.Length);
+                returnUrl = returnUrl[host.Length..];
             }
         }
 
@@ -84,14 +84,14 @@ internal class OidcReturnUrlParser : IReturnUrlParser
                 var index = returnUrl.IndexOf('?', StringComparison.InvariantCulture);
                 if (index >= 0)
                 {
-                    returnUrl = returnUrl.Substring(0, index);
+                    returnUrl = returnUrl[..index];
                 }
             }
             {
                 var index = returnUrl.IndexOf('#', StringComparison.InvariantCulture);
                 if (index >= 0)
                 {
-                    returnUrl = returnUrl.Substring(0, index);
+                    returnUrl = returnUrl[..index];
                 }
             }
 

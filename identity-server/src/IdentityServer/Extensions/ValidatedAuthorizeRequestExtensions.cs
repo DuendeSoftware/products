@@ -63,7 +63,7 @@ public static class ValidatedAuthorizeRequestExtensions
 
         if (value != null)
         {
-            value = value.Substring(prefix.Length);
+            value = value[prefix.Length..];
         }
 
         return value;

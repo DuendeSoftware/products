@@ -57,7 +57,7 @@ public class FileSystemKeyStore : ISigningKeyStore
         var files = _directory.GetFiles(KeyFilePrefix + "*" + KeyFileExtension);
         foreach (var file in files)
         {
-            var id = file.Name.Substring(4);
+            var id = file.Name[4..];
             try
             {
                 using (var reader = new StreamReader(file.OpenRead()))

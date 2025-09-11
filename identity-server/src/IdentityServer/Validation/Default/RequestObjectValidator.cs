@@ -211,7 +211,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
             var index = IdentityServerConstants.PushedAuthorizationRequestUri.Length + 1;// +1 for the separator ':'
             if (requestUri.Length > index)
             {
-                return requestUri.Substring(index);
+                return requestUri[index..];
             }
         }
         return null;

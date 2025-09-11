@@ -79,7 +79,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
                 return AuthenticateResult.NoResult();
             }
 
-            token = authorization.Substring("Bearer ".Length).Trim();
+            token = authorization["Bearer ".Length..].Trim();
         }
         else if (authorization.StartsWith("DPoP ", StringComparison.OrdinalIgnoreCase))
         {
@@ -90,7 +90,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
             }
 
             wasDPoPToken = true;
-            token = authorization.Substring("DPoP ".Length).Trim();
+            token = authorization["DPoP ".Length..].Trim();
         }
 
         if (string.IsNullOrEmpty(token))

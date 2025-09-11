@@ -239,7 +239,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             if (tenant != null)
             {
                 _ = _validatedRequest.AuthenticationContextReferenceClasses.Remove(tenant);
-                tenant = tenant.Substring(KnownAcrValues.Tenant.Length);
+                tenant = tenant[KnownAcrValues.Tenant.Length..];
                 _validatedRequest.Tenant = tenant;
             }
 
@@ -247,7 +247,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             if (idp != null)
             {
                 _ = _validatedRequest.AuthenticationContextReferenceClasses.Remove(idp);
-                idp = idp.Substring(KnownAcrValues.HomeRealm.Length);
+                idp = idp[KnownAcrValues.HomeRealm.Length..];
 
                 // check if idp is present but client does not allow it, and then ignore it
                 if (_validatedRequest.Client.IdentityProviderRestrictions != null &&
