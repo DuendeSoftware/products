@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using System.Net.Mime;
 using Duende.Bff.Configuration;
 using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -30,29 +32,28 @@ internal class StaticFilesHttpClient(
 
         try
         {
-            return await cache.GetOrCreateAsync(cacheKey, async (ct1) =>
+            return await cache.GetOrCreateAsync(cacheKey, async (ctInner) =>
                 {
-                    var client = clientFactory.CreateClient(options.Value.StaticAssetsClientName ??
-                                                             Constants.HttpClientNames.StaticAssetsClientName);
+                    var client = clientFactory.CreateClient(options.Value.StaticAssetsClientName);
 
-                    var response = await client.GetAsync(frontend.CdnIndexHtmlUrl, ct1);
+                    var response = await client.GetAsync(frontend.CdnIndexHtmlUrl, ctInner);
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        logger.IndexHtmlRetrievalFailed(LogLevel.Information, frontend.Name,
+                        logger.IndexHtmlRetrievalFailed(LogLevel.Warning, frontend.Name,
                             response.StatusCode);
                         throw new PreventCacheException();
                     }
 
-                    var html = await response.Content.ReadAsStringAsync(ct1);
+                    var html = await response.Content.ReadAsStringAsync(ctInner);
 
                     if (transformer == null)
                     {
                         return html;
                     }
 
-                    logger.RetrievedIndexHTML(LogLevel.Information, frontend.Name, response.StatusCode);
+                    logger.RetrievedIndexHTML(LogLevel.Debug, frontend.Name, response.StatusCode);
 
-                    var transformed = await transformer.Transform(html, ct1);
+                    var transformed = await transformer.Transform(html, ctInner);
                     return transformed;
                 },
                 options: new HybridCacheEntryOptions()
@@ -71,29 +72,22 @@ internal class StaticFilesHttpClient(
     {
         var frontend = currentFrontendAccessor.Get();
 
-        var client = clientFactory.CreateClient(options.Value.StaticAssetsClientName ??
-                                                 Constants.HttpClientNames.StaticAssetsClientName);
+        var client = clientFactory.CreateClient(options.Value.StaticAssetsClientName);
 
         var path = context.Request.Path.ToString() + context.Request.QueryString;
 
         var frontendStaticAssetsUrl = frontend.StaticAssetsUrl ??
                                       throw new InvalidOperationException("Static assets can't be proxied without the static assets url.");
 
-        if (!frontendStaticAssetsUrl.AbsolutePath.EndsWith('/'))
-        {
-            frontendStaticAssetsUrl = new UriBuilder(frontendStaticAssetsUrl.Scheme, frontendStaticAssetsUrl.Host,
-                    frontendStaticAssetsUrl.Port, frontendStaticAssetsUrl.AbsolutePath + "/",
-                    frontendStaticAssetsUrl.Query)
-                .Uri;
-        }
-
         var requestUri = new Uri(frontendStaticAssetsUrl, path.TrimStart('/'));
         var response = await client.GetAsync(requestUri, ct);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
+            // If we can't find the file, try to request the root (this allows for SPAs with client side routing)
             response = await client.GetAsync(frontendStaticAssetsUrl, ct);
         }
+
 
         context.Response.StatusCode = (int)response.StatusCode;
         foreach (var header in response.Headers)
@@ -103,6 +97,18 @@ internal class StaticFilesHttpClient(
         foreach (var header in response.Content.Headers)
         {
             context.Response.Headers[header.Key] = header.Value.ToArray();
+        }
+
+        if (response.RequestMessage?.RequestUri == frontendStaticAssetsUrl
+            && response.StatusCode == HttpStatusCode.OK
+            && response.Content.Headers.ContentType?.MediaType == MediaTypeNames.Text.Html
+            && transformer != null)
+        {
+            var html = await response.Content.ReadAsStringAsync(ct);
+            
+            html = await transformer.Transform(html, ct);
+            await context.Response.WriteAsync(html ?? string.Empty, ct);
+            return;
         }
 
         var responseStream = await response.Content.ReadAsStreamAsync(ct);

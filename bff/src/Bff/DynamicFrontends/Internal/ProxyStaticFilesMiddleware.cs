@@ -13,7 +13,16 @@ internal class ProxyStaticFilesMiddleware(RequestDelegate next,
     {
         var ct = context.RequestAborted;
 
-        if (ShouldProxyIndexRoutes())
+        // What about 'head' requests?
+        if (context.Request.Method != HttpMethods.Get)
+        {
+            await next(context);
+            return;
+        }
+
+        // At this point in the HTTP Pipeline, all matched routes have already been processed
+        // So, it's effectively an unmatched route. 
+        if (ShouldProxyIndexHtml())
         {
             var indexHtml = await staticFilesClient.GetIndexHtmlAsync(ct);
             if (indexHtml != null)
@@ -24,8 +33,7 @@ internal class ProxyStaticFilesMiddleware(RequestDelegate next,
                 return;
             }
         }
-
-        if (ShouldProxyStaticContent())
+        else if (ShouldProxyStaticContent())
         {
             await staticFilesClient.ProxyStaticAssetsAsync(context, ct);
             return;
@@ -33,7 +41,7 @@ internal class ProxyStaticFilesMiddleware(RequestDelegate next,
         await next(context);
     }
 
-    private bool ShouldProxyIndexRoutes()
+    private bool ShouldProxyIndexHtml()
     {
         if (!currentFrontendAccessor.TryGet(out var frontend))
         {

@@ -21,6 +21,12 @@ public sealed record BffFrontend
     [SetsRequiredMembers]
     public BffFrontend(BffFrontendName name) => Name = name;
 
+    /// <summary>
+    /// There's an equals override on record types, but it can't compare the ConfigureOpenIdConnectOptions and ConfigureCookieOptions
+    /// since they are actions. 
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
     public bool Equals(BffFrontend? other)
     {
         if (other is null)
@@ -33,7 +39,11 @@ public sealed record BffFrontend
             return true;
         }
 
-        return Name.Equals(other.Name) && SelectionCriteria.Equals(other.SelectionCriteria) && Equals(CdnIndexHtmlUrl, other.CdnIndexHtmlUrl) & DataExtensions.SequenceEqual(other.DataExtensions);
+        return Name.Equals(other.Name)
+               && SelectionCriteria.Equals(other.SelectionCriteria)
+               && Equals(CdnIndexHtmlUrl, other.CdnIndexHtmlUrl)
+               && Equals(StaticAssetsUrl, other.StaticAssetsUrl)
+               && DataExtensions.SequenceEqual(other.DataExtensions);
     }
 
     public override int GetHashCode() => HashCode.Combine(Name, SelectionCriteria, CdnIndexHtmlUrl, DataExtensions);
@@ -54,6 +64,9 @@ public sealed record BffFrontend
     /// unmatched request will be forwarded to this URL. Usually, this file resides in a CDN.
     ///
     /// Any unmatched request will be forwarded to this URL. This allows for SPAs that use client side routing.
+    ///
+    /// See https://duende.link/d/bff/ui-hosting for more information. 
+    /// 
     /// </summary>
     public Uri? CdnIndexHtmlUrl
     {
@@ -77,7 +90,9 @@ public sealed record BffFrontend
     ///
     /// Note, this is less than ideal for production scenarios, as it adds additional load to the BFF server.
     /// Consider deploying your assets to a CDN and use the <see cref="CdnIndexHtmlUrl"/>. If you want to switch this value
-    /// depending on environment, consider using the <see cref="BffFrontendExtensions.WithStaticAssets"/> extension method.
+    /// depending on environment, consider using the <see cref="BffFrontendExtensions.WithBffStaticAssets"/> extension method.
+    ///
+    /// See https://duende.link/d/bff/ui-hosting for more information. 
     /// </summary>
     public Uri? StaticAssetsUrl
     {
@@ -90,6 +105,17 @@ public sealed record BffFrontend
             }
 
             _staticAssetsUrl = value;
+
+            // Make sure the path provided ends with a trailing "/".
+            // Technically, users should not be allowed to add a url without a trailing '/', but
+            // this is such a common mistake that it would probably be very annoying for our users. 
+            if (_staticAssetsUrl != null && !_staticAssetsUrl.AbsolutePath.EndsWith('/'))
+            {
+                _staticAssetsUrl = new UriBuilder(_staticAssetsUrl.Scheme, _staticAssetsUrl.Host,
+                    _staticAssetsUrl.Port, _staticAssetsUrl.AbsolutePath + "/",
+                    _staticAssetsUrl.Query).Uri;
+            }
+
         }
     }
 

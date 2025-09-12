@@ -81,7 +81,7 @@ bffBuilder
     .AddRemoteApis()
     .AddFrontends(
         new BffFrontend(BffFrontendName.Parse("default-frontend"))
-            .WithStaticAssets(new Uri("https://localhost:5010/static"), useCdnWhen: runningInProduction)
+            .WithBffStaticAssets(new Uri("https://localhost:5010/static"), useCdnWhen: runningInProduction)
 ,
         new BffFrontend(BffFrontendName.Parse("with-path"))
             .WithOpenIdConnectOptions(opt =>

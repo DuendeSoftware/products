@@ -3,6 +3,7 @@
 
 using System.Collections.ObjectModel;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -151,12 +152,13 @@ public sealed class BffOptions
     public HttpMessageHandler? BackchannelHttpHandler { get; set; }
 
     /// <summary>
-    /// The name of the http client that's used to retrieve the Index
+    /// The name of the http client that's used to proxy static files using the <see cref="IStaticFilesClient"/>.
     /// </summary>
     public string StaticAssetsClientName { get; set; } = Constants.HttpClientNames.StaticAssetsClientName;
 
     /// <summary>
-    /// How long should index html be cached? 
+    /// If you use CDN Index HTML proxying, using <see cref="BffFrontend.CdnIndexHtmlUrl"/>, then this
+    /// property controls how long the index html should be cached. Defaults to 5 minutes.
     /// </summary>
     public TimeSpan IndexHtmlDefaultCacheDuration { get; set; } = TimeSpan.FromMinutes(5);
 

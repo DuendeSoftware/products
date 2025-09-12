@@ -177,6 +177,37 @@ public class BffFrontendIndexTests : BffTestBase
     }
 
     [Fact]
+    public async Task When_proxying_static_assets_then_index_html_is_also_transformed()
+    {
+        Bff.OnConfigureServices += services =>
+        {
+            services.AddSingleton<IIndexHtmlTransformer, TestIndexHtmlTransformer>();
+        };
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend() with
+        {
+            StaticAssetsUrl = Cdn.Url("/")
+        });
+
+        await Bff.BrowserClient.GetAsync("/")
+            .CheckResponseContent(Cdn.IndexHtml + " - transformed 1");
+
+        // When you get an explicit HTML file, it's not the index.html file, so we're
+        // not transforming it
+        await Bff.BrowserClient.GetAsync("/index2.html")
+            .CheckResponseContent(Cdn.IndexHtml);
+
+        // A non-existing page should also return the index.html and it should go through the transformer
+        await Bff.BrowserClient.GetAsync("/not-found")
+            .CheckResponseContent(Cdn.IndexHtml + " - transformed 2");
+
+        // The existing image.png should be proxied through the BFF. and should not be transformed 
+        await Bff.BrowserClient.GetAsync("/image.png")
+            .CheckResponseContent(Cdn.ImageBytes);
+    }
+
+    [Fact]
     public async Task Can_also_proxy_all_static_assets()
     {
         Bff.OnConfigureApp += app => app.MapGet("/test", () => "test");
@@ -275,7 +306,7 @@ public class BffFrontendIndexTests : BffTestBase
     {
         await InitializeAsync();
 
-        AddOrUpdateFrontend(Some.BffFrontend().WithStaticAssets(Cdn.Url("/"), () => indexHtmlOnly));
+        AddOrUpdateFrontend(Some.BffFrontend().WithBffStaticAssets(Cdn.Url("/"), () => indexHtmlOnly));
 
         await Bff.BrowserClient.Login()
             .CheckResponseContent(Cdn.IndexHtml);
