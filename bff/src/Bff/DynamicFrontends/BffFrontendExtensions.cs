@@ -68,7 +68,7 @@ public static class BffFrontendExtensions
     /// </summary>
     /// <param name="frontend"></param>
     /// <param name="uri"></param>
-    /// <param name="useCdnWhen">Func that sets if the CDN URL should be used or if all products should be proxied. True for the <see cref="WithCdnIndexHtmlUrl"/>, false for <see cref="WithProxiedStaticAssets"/></param>
+    /// <param name="useCdnWhen">Func that sets if the CDN URL should be used or if all assets should be proxied. True for the <see cref="WithCdnIndexHtmlUrl"/>, false for <see cref="WithProxiedStaticAssets"/></param>
     /// <returns></returns>
     public static BffFrontend WithBffStaticAssets(this BffFrontend frontend, Uri uri, Func<bool> useCdnWhen)
     {

@@ -107,7 +107,7 @@ public sealed record BffFrontend
             _staticAssetsUrl = value;
 
             // Make sure the path provided ends with a trailing "/".
-            // Technically, users should not be allowed to add a url without a trailing '/', but
+            // Technically, users should not be allowed to add a URL without a trailing '/', but
             // this is such a common mistake that it would probably be very annoying for our users. 
             if (_staticAssetsUrl != null && !_staticAssetsUrl.AbsolutePath.EndsWith('/'))
             {
