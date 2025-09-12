@@ -150,11 +150,11 @@ namespace Duende.Bff
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBff(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffAntiForgery(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffFrontendSelection(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffIndexPages(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffOpenIdCallbacks(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPathMapping(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPostProcessing(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPreProcessing(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffStaticFileProxying(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
     public static class BffBuilderExtensions
     {
@@ -213,7 +213,7 @@ namespace Duende.Bff
         }
         public static class HttpClientNames
         {
-            public const string IndexHtmlHttpClient = "Duende.Bff.IndexHtmlClient";
+            public const string StaticAssetsClientName = "Duende.Bff.IndexHtmlClient";
         }
         public static class ManagementEndpoints
         {
@@ -325,7 +325,7 @@ namespace Duende.Bff.Configuration
         public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
         public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
         public bool EnforceBffMiddleware { get; set; }
-        public string? IndexHtmlClientName { get; set; }
+        public System.TimeSpan IndexHtmlDefaultCacheDuration { get; set; }
         public string? LicenseKey { get; set; }
         public Microsoft.AspNetCore.Http.PathString LoginPath { get; }
         public Microsoft.AspNetCore.Http.PathString LogoutPath { get; }
@@ -338,6 +338,7 @@ namespace Duende.Bff.Configuration
         [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
             "w handled by passing the prompt=none parameter to the login endpoint."))]
         public Microsoft.AspNetCore.Http.PathString SilentLoginPath { get; }
+        public string StaticAssetsClientName { get; set; }
         public Microsoft.AspNetCore.Http.PathString UserPath { get; }
     }
     public sealed class BffRemoteApiEndpointMetadata : Duende.Bff.Endpoints.IBffApiMetadata
@@ -375,12 +376,13 @@ namespace Duende.Bff.DynamicFrontends
         public BffFrontend(Duende.Bff.DynamicFrontends.BffFrontendName name) { }
         public Duende.Bff.AccessTokenManagement.Scheme CookieSchemeName { get; }
         public Duende.Bff.AccessTokenManagement.Scheme OidcSchemeName { get; }
+        public System.Uri? CdnIndexHtmlUrl { get; init; }
         public System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>? ConfigureCookieOptions { get; init; }
         public System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions>? ConfigureOpenIdConnectOptions { get; init; }
-        public System.Uri? IndexHtmlUrl { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public Duende.Bff.DynamicFrontends.BffFrontendName Name { get; init; }
         public Duende.Bff.DynamicFrontends.FrontendSelectionCriteria SelectionCriteria { get; init; }
+        public System.Uri? StaticAssetsUrl { get; init; }
         public bool Equals(Duende.Bff.DynamicFrontends.BffFrontend? other) { }
         public override int GetHashCode() { }
     }
@@ -388,9 +390,11 @@ namespace Duende.Bff.DynamicFrontends
     {
         public static Duende.Bff.DynamicFrontends.BffFrontend MappedToOrigin(this Duende.Bff.DynamicFrontends.BffFrontend frontend, Duende.Bff.DynamicFrontends.Origin origin) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend MappedToPath(this Duende.Bff.DynamicFrontends.BffFrontend frontend, Duende.Bff.LocalPath path) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithBffStaticAssets(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri uri, System.Func<bool> useCdnWhen) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithCdnIndexHtmlUrl(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri? url) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend WithCookieOptions(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> options) { }
-        public static Duende.Bff.DynamicFrontends.BffFrontend WithIndexHtmlUrl(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri? url) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend WithOpenIdConnectOptions(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> options) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithProxiedStaticAssets(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri url) { }
     }
     [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.DynamicFrontends.BffFrontendName>))]
     public readonly struct BffFrontendName : System.IEquatable<Duende.Bff.DynamicFrontends.BffFrontendName>
@@ -419,13 +423,14 @@ namespace Duende.Bff.DynamicFrontends
         void AddOrUpdate(Duende.Bff.DynamicFrontends.BffFrontend frontend);
         void Remove(Duende.Bff.DynamicFrontends.BffFrontendName frontendName);
     }
-    public interface IIndexHtmlClient
-    {
-        System.Threading.Tasks.Task<string?> GetIndexHtmlAsync(System.Threading.CancellationToken ct = default);
-    }
     public interface IIndexHtmlTransformer
     {
-        System.Threading.Tasks.Task<string?> Transform(string indexHtml, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task<string?> Transform(string indexHtml, Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Threading.CancellationToken ct = default);
+    }
+    public interface IStaticFilesClient
+    {
+        System.Threading.Tasks.Task<string?> GetIndexHtmlAsync(System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task ProxyStaticAssetsAsync(Microsoft.AspNetCore.Http.HttpContext context, System.Threading.CancellationToken ct = default);
     }
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class Origin : System.IEquatable<Duende.Bff.DynamicFrontends.Origin>, System.IEquatable<Microsoft.AspNetCore.Http.HttpRequest>

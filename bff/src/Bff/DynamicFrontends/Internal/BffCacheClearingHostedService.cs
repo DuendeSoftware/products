@@ -89,7 +89,7 @@ internal class BffCacheClearingHostedService(
             await hybridCache.RemoveByTagAsync(clientCredentialsClientName, cancellationToken);
 
             // Also clear the index.html cache for the frontend
-            await hybridCache.RemoveAsync(IndexHtmlHttpClient.BuildCacheKey(changedFrontend), cancellationToken);
+            await hybridCache.RemoveAsync(StaticFilesHttpClient.BuildCacheKey(changedFrontend), cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

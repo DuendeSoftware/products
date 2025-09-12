@@ -5,7 +5,8 @@ namespace Duende.Bff.Configuration;
 
 internal sealed record BffFrontendConfiguration
 {
-    public Uri? IndexHtmlUrl { get; init; }
+    public Uri? CdnIndexHtmlUrl { get; init; }
+    public Uri? StaticAssetsUrl { get; init; }
 
     public string? MatchingPath { get; init; }
 

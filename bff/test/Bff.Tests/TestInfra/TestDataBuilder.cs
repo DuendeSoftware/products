@@ -22,10 +22,10 @@ public class TestDataBuilder(TestData the)
     internal LicenseValidator LicenseValidator =>
         new LicenseValidator(new NullLogger<LicenseValidator>(), new ClaimsPrincipal(), The.Clock);
 
-    public BffFrontend BffFrontend() =>
+    public BffFrontend BffFrontend(BffFrontendName? name = null) =>
         new()
         {
-            Name = The.FrontendName,
+            Name = name ?? The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
         };
 
@@ -34,7 +34,7 @@ public class TestDataBuilder(TestData the)
         {
             Name = The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
-            IndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = The.Url,
             SelectionCriteria = FrontendSelectionCriteria()
         };
 
@@ -105,7 +105,7 @@ public class TestDataBuilder(TestData the)
     internal BffFrontendConfiguration BffFrontendConfiguration() =>
         new()
         {
-            IndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = The.Url,
             MatchingOrigin = The.Origin.ToString(),
             MatchingPath = The.Path,
             Oidc = OidcConfiguration(),

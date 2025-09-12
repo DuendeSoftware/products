@@ -6,9 +6,9 @@ namespace Duende.Bff.DynamicFrontends;
 /// <summary>
 /// Extension point to transform the index html before it is returned to the client.
 ///
-/// You can use this to inject (frontend specific) custom HTML
+/// You can use this to inject (frontend specific) custom HTML when using <see cref="BffFrontend.CdnIndexHtmlUrl"/>
 /// </summary>
 public interface IIndexHtmlTransformer
 {
-    Task<string?> Transform(string indexHtml, CT ct = default);
+    Task<string?> Transform(string indexHtml, BffFrontend frontend, CT ct = default);
 }

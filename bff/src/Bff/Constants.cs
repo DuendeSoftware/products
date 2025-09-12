@@ -133,7 +133,7 @@ public static class Constants
 
     public static class HttpClientNames
     {
-        public const string IndexHtmlHttpClient = "Duende.Bff.IndexHtmlClient";
+        public const string StaticAssetsClientName = "Duende.Bff.IndexHtmlClient";
 
     }
 

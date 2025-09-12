@@ -136,7 +136,7 @@ public static class BffBuilderExtensions
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
 
-        builder.Services.TryAddSingleton<IIndexHtmlClient, IndexHtmlHttpClient>();
+        builder.Services.TryAddSingleton<IStaticFilesClient, StaticFilesHttpClient>();
 
         builder.Services.ApplyBackchannelHttpHandlerFromOptions();
 
@@ -149,7 +149,7 @@ public static class BffBuilderExtensions
     /// <param name="services"></param>
     internal static void ApplyBackchannelHttpHandlerFromOptions(this IServiceCollection services)
     {
-        var indexHtmlClientBuilder = services.AddHttpClient(Constants.HttpClientNames.IndexHtmlHttpClient);
+        var indexHtmlClientBuilder = services.AddHttpClient(Constants.HttpClientNames.StaticAssetsClientName);
 
         services.Configure<HttpClientFactoryOptions>(indexHtmlClientBuilder.Name, options =>
         {
