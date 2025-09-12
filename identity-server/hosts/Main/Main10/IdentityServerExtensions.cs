@@ -50,7 +50,7 @@ internal static class IdentityServerExtensions
 
                 options.MutualTls.Enabled = true;
 
-                options.Diagnostics.ChunkSize = 1024 * 1000 - 32; // 1 MB minus some formatting space;
+                options.Diagnostics.ChunkSize = (1024 * 1000) - 32; // 1 MB minus some formatting space;
             })
             .AddServerSideSessions()
             .AddInMemoryClients([.. TestClients.Get()])
@@ -102,7 +102,9 @@ internal static class IdentityServerExtensions
     //    mkcert -pkcs12 identityserver.test.rsa
     //    mkcert -pkcs12 -ecdsa identityserver.test.ecdsa
     // Then import the keys into the certificate manager. This code expect keys in the personal store of the current user.
+#pragma warning disable IDE0051 // Remove unused private members
     private static IIdentityServerBuilder AddStaticSigningCredential(this IIdentityServerBuilder builder)
+#pragma warning restore IDE0051 // Remove unused private members
     {
         var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
         try
