@@ -67,7 +67,7 @@ internal class UserInfoEndpoint : IEndpointHandler
 
         // userinfo requires an access token on the request
         var tokenUsageResult = await _tokenUsageValidator.ValidateAsync(context);
-        if (tokenUsageResult.TokenFound == false)
+        if (!tokenUsageResult.TokenFound)
         {
             var error = "No access token found.";
 
@@ -95,5 +95,5 @@ internal class UserInfoEndpoint : IEndpointHandler
         return new UserInfoResult(response);
     }
 
-    private static ProtectedResourceErrorResult Error(string error, string description = null) => new ProtectedResourceErrorResult(error, description);
+    private static ProtectedResourceErrorResult Error(string error, string description = null) => new(error, description);
 }

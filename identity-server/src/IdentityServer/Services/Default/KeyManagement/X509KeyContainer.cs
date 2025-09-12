@@ -41,7 +41,7 @@ public class X509KeyContainer : KeyContainer
 
         request.CertificateExtensions.Add(
             new X509EnhancedKeyUsageExtension(
-                new OidCollection { new Oid(ServerAuthenticationOid) }, false));
+                [new Oid(ServerAuthenticationOid)], false));
 
         _cert = request.CreateSelfSigned(
             new DateTimeOffset(created, TimeSpan.Zero),
@@ -68,7 +68,7 @@ public class X509KeyContainer : KeyContainer
 
         request.CertificateExtensions.Add(
             new X509EnhancedKeyUsageExtension(
-                new OidCollection { new Oid(ServerAuthenticationOid) }, false));
+                [new Oid(ServerAuthenticationOid)], false));
 
         _cert = request.CreateSelfSigned(
             new DateTimeOffset(created, TimeSpan.Zero),

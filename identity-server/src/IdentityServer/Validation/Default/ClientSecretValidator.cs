@@ -85,7 +85,7 @@ public class ClientSecretValidator : IClientSecretValidator
         else
         {
             secretValidationResult = await _validator.ValidateAsync(client.ClientSecrets, parsedSecret);
-            if (secretValidationResult.Success == false)
+            if (!secretValidationResult.Success)
             {
                 await RaiseFailureEventAsync(client.ClientId, "Invalid client secret");
                 _logger.LogError("Client secret validation failed for client: {clientId}.", client.ClientId);

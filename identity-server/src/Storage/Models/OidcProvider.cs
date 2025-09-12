@@ -89,7 +89,7 @@ public class OidcProvider : IdentityProvider
     {
         get
         {
-            var scopes = Scope?.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList() ?? new List<string>();
+            var scopes = Scope?.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList() ?? [];
             return scopes;
         }
     }

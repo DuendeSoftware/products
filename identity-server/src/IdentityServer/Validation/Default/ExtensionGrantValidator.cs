@@ -24,7 +24,7 @@ public class ExtensionGrantValidator
     {
         if (validators == null)
         {
-            _validators = Enumerable.Empty<IExtensionGrantValidator>();
+            _validators = [];
         }
         else
         {

@@ -56,12 +56,9 @@ public class DefaultIssuerNameService : IIssuerNameService
                 }
             }
 
-            if (origin == null)
-            {
-                // no MTLS, so use the current origin for the issuer
-                // this also means we emit the issuer value in unicode
-                origin = _urls.GetUnicodeOrigin();
-            }
+            // no MTLS, so use the current origin for the issuer
+            // this also means we emit the issuer value in unicode
+            origin ??= _urls.GetUnicodeOrigin();
 
             issuer = origin + _urls.BasePath;
 

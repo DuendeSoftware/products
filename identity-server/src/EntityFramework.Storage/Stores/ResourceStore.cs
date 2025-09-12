@@ -56,7 +56,7 @@ public class ResourceStore : IResourceStore
     public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByName");
-        activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString()));
 
         ArgumentNullException.ThrowIfNull(apiResourceNames);
 
@@ -96,7 +96,7 @@ public class ResourceStore : IResourceStore
     public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByScopeName");
-        activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString()));
 
         var names = scopeNames.ToArray();
 
@@ -129,7 +129,7 @@ public class ResourceStore : IResourceStore
     public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindIdentityResourcesByScopeName");
-        activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString()));
 
         var scopes = scopeNames.ToArray();
 
@@ -159,7 +159,7 @@ public class ResourceStore : IResourceStore
     public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiScopesByName");
-        activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString()));
 
         var scopes = scopeNames.ToArray();
 

@@ -54,12 +54,12 @@ public static class IdentityServerBuilderExtensionsCore
     public static IIdentityServerBuilder AddRequiredPlatformServices(this IIdentityServerBuilder builder)
     {
         builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        builder.Services.AddOptions();
-        builder.Services.AddSingleton(
+        _ = builder.Services.AddOptions();
+        _ = builder.Services.AddSingleton(
             resolver => resolver.GetRequiredService<IOptions<IdentityServerOptions>>().Value);
-        builder.Services.AddTransient(
+        _ = builder.Services.AddTransient(
             resolver => resolver.GetRequiredService<IOptions<IdentityServerOptions>>().Value.PersistentGrants);
-        builder.Services.AddHttpClient();
+        _ = builder.Services.AddHttpClient();
 
         return builder;
     }
@@ -80,10 +80,10 @@ public static class IdentityServerBuilderExtensionsCore
     /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultCookieHandlers(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme)
+        _ = builder.Services.AddAuthentication(IdentityServerConstants.DefaultCookieAuthenticationScheme)
             .AddCookie(IdentityServerConstants.DefaultCookieAuthenticationScheme)
             .AddCookie(IdentityServerConstants.ExternalCookieAuthenticationScheme);
-        builder.Services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, ConfigureInternalCookieOptions>();
+        _ = builder.Services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, ConfigureInternalCookieOptions>();
 
         return builder;
     }
@@ -95,7 +95,7 @@ public static class IdentityServerBuilderExtensionsCore
     /// <returns></returns>
     public static IIdentityServerBuilder AddCookieAuthenticationExtensions(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureInternalCookieOptions>();
+        _ = builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureInternalCookieOptions>();
         builder.Services.AddTransientDecorator<IAuthenticationService, IdentityServerAuthenticationService>();
         builder.Services.AddTransientDecorator<IAuthenticationHandlerProvider, FederatedSignoutAuthenticationHandlerProvider>();
 
@@ -109,43 +109,43 @@ public static class IdentityServerBuilderExtensionsCore
     /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultEndpoints(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddTransient<IEndpointRouter, EndpointRouter>();
+        _ = builder.Services.AddTransient<IEndpointRouter, EndpointRouter>();
 
-        builder.AddEndpoint<AuthorizeCallbackEndpoint>(EndpointNames.Authorize, ProtocolRoutePaths.AuthorizeCallback.EnsureLeadingSlash());
-        builder.AddEndpoint<AuthorizeEndpoint>(EndpointNames.Authorize, ProtocolRoutePaths.Authorize.EnsureLeadingSlash());
-        builder.AddEndpoint<BackchannelAuthenticationEndpoint>(EndpointNames.BackchannelAuthentication, ProtocolRoutePaths.BackchannelAuthentication.EnsureLeadingSlash());
-        builder.AddEndpoint<CheckSessionEndpoint>(EndpointNames.CheckSession, ProtocolRoutePaths.CheckSession.EnsureLeadingSlash());
-        builder.AddEndpoint<DeviceAuthorizationEndpoint>(EndpointNames.DeviceAuthorization, ProtocolRoutePaths.DeviceAuthorization.EnsureLeadingSlash());
-        builder.AddEndpoint<DiscoveryKeyEndpoint>(EndpointNames.Jwks, ProtocolRoutePaths.DiscoveryWebKeys.EnsureLeadingSlash());
-        builder.AddEndpoint<DiscoveryEndpoint>(EndpointNames.Discovery, ProtocolRoutePaths.DiscoveryConfiguration.EnsureLeadingSlash());
-        builder.AddEndpoint<OAuthMetadataEndpoint>(EndpointNames.OAuthMetadata, ProtocolRoutePaths.OAuthMetadata.EnsureLeadingSlash(), EndpointHelpers.OAuthMetadataHelpers.IsMatch);
-        builder.AddEndpoint<EndSessionCallbackEndpoint>(EndpointNames.EndSession, ProtocolRoutePaths.EndSessionCallback.EnsureLeadingSlash());
-        builder.AddEndpoint<EndSessionEndpoint>(EndpointNames.EndSession, ProtocolRoutePaths.EndSession.EnsureLeadingSlash());
-        builder.AddEndpoint<IntrospectionEndpoint>(EndpointNames.Introspection, ProtocolRoutePaths.Introspection.EnsureLeadingSlash());
-        builder.AddEndpoint<PushedAuthorizationEndpoint>(EndpointNames.PushedAuthorization, ProtocolRoutePaths.PushedAuthorization.EnsureLeadingSlash());
-        builder.AddEndpoint<TokenRevocationEndpoint>(EndpointNames.Revocation, ProtocolRoutePaths.Revocation.EnsureLeadingSlash());
-        builder.AddEndpoint<TokenEndpoint>(EndpointNames.Token, ProtocolRoutePaths.Token.EnsureLeadingSlash());
-        builder.AddEndpoint<UserInfoEndpoint>(EndpointNames.UserInfo, ProtocolRoutePaths.UserInfo.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<AuthorizeCallbackEndpoint>(EndpointNames.Authorize, ProtocolRoutePaths.AuthorizeCallback.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<AuthorizeEndpoint>(EndpointNames.Authorize, ProtocolRoutePaths.Authorize.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<BackchannelAuthenticationEndpoint>(EndpointNames.BackchannelAuthentication, ProtocolRoutePaths.BackchannelAuthentication.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<CheckSessionEndpoint>(EndpointNames.CheckSession, ProtocolRoutePaths.CheckSession.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<DeviceAuthorizationEndpoint>(EndpointNames.DeviceAuthorization, ProtocolRoutePaths.DeviceAuthorization.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<DiscoveryKeyEndpoint>(EndpointNames.Jwks, ProtocolRoutePaths.DiscoveryWebKeys.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<DiscoveryEndpoint>(EndpointNames.Discovery, ProtocolRoutePaths.DiscoveryConfiguration.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<OAuthMetadataEndpoint>(EndpointNames.OAuthMetadata, ProtocolRoutePaths.OAuthMetadata.EnsureLeadingSlash(), EndpointHelpers.OAuthMetadataHelpers.IsMatch);
+        _ = builder.AddEndpoint<EndSessionCallbackEndpoint>(EndpointNames.EndSession, ProtocolRoutePaths.EndSessionCallback.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<EndSessionEndpoint>(EndpointNames.EndSession, ProtocolRoutePaths.EndSession.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<IntrospectionEndpoint>(EndpointNames.Introspection, ProtocolRoutePaths.Introspection.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<PushedAuthorizationEndpoint>(EndpointNames.PushedAuthorization, ProtocolRoutePaths.PushedAuthorization.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<TokenRevocationEndpoint>(EndpointNames.Revocation, ProtocolRoutePaths.Revocation.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<TokenEndpoint>(EndpointNames.Token, ProtocolRoutePaths.Token.EnsureLeadingSlash());
+        _ = builder.AddEndpoint<UserInfoEndpoint>(EndpointNames.UserInfo, ProtocolRoutePaths.UserInfo.EnsureLeadingSlash());
 
-        builder.AddHttpWriter<AuthorizeInteractionPageResult, AuthorizeInteractionPageHttpWriter>();
-        builder.AddHttpWriter<AuthorizeResult, AuthorizeHttpWriter>();
-        builder.AddHttpWriter<BackchannelAuthenticationResult, BackchannelAuthenticationHttpWriter>();
-        builder.AddHttpWriter<BadRequestResult, BadRequestHttpWriter>();
-        builder.AddHttpWriter<CheckSessionResult, CheckSessionHttpWriter>();
-        builder.AddHttpWriter<DeviceAuthorizationResult, DeviceAuthorizationHttpWriter>();
-        builder.AddHttpWriter<DiscoveryDocumentResult, DiscoveryDocumentHttpWriter>();
-        builder.AddHttpWriter<EndSessionCallbackResult, EndSessionCallbackHttpWriter>();
-        builder.AddHttpWriter<EndSessionResult, EndSessionHttpWriter>();
-        builder.AddHttpWriter<IntrospectionResult, IntrospectionHttpWriter>();
-        builder.AddHttpWriter<JsonWebKeysResult, JsonWebKeysHttpWriter>();
-        builder.AddHttpWriter<ProtectedResourceErrorResult, ProtectedResourceErrorHttpWriter>();
-        builder.AddHttpWriter<PushedAuthorizationResult, PushedAuthorizationHttpWriter>();
-        builder.AddHttpWriter<PushedAuthorizationErrorResult, PushedAuthorizationErrorHttpWriter>();
-        builder.AddHttpWriter<StatusCodeResult, StatusCodeHttpWriter>();
-        builder.AddHttpWriter<TokenErrorResult, TokenErrorHttpWriter>();
-        builder.AddHttpWriter<TokenResult, TokenHttpWriter>();
-        builder.AddHttpWriter<TokenRevocationErrorResult, TokenRevocationErrorHttpWriter>();
-        builder.AddHttpWriter<UserInfoResult, UserInfoHttpWriter>();
+        _ = builder.AddHttpWriter<AuthorizeInteractionPageResult, AuthorizeInteractionPageHttpWriter>();
+        _ = builder.AddHttpWriter<AuthorizeResult, AuthorizeHttpWriter>();
+        _ = builder.AddHttpWriter<BackchannelAuthenticationResult, BackchannelAuthenticationHttpWriter>();
+        _ = builder.AddHttpWriter<BadRequestResult, BadRequestHttpWriter>();
+        _ = builder.AddHttpWriter<CheckSessionResult, CheckSessionHttpWriter>();
+        _ = builder.AddHttpWriter<DeviceAuthorizationResult, DeviceAuthorizationHttpWriter>();
+        _ = builder.AddHttpWriter<DiscoveryDocumentResult, DiscoveryDocumentHttpWriter>();
+        _ = builder.AddHttpWriter<EndSessionCallbackResult, EndSessionCallbackHttpWriter>();
+        _ = builder.AddHttpWriter<EndSessionResult, EndSessionHttpWriter>();
+        _ = builder.AddHttpWriter<IntrospectionResult, IntrospectionHttpWriter>();
+        _ = builder.AddHttpWriter<JsonWebKeysResult, JsonWebKeysHttpWriter>();
+        _ = builder.AddHttpWriter<ProtectedResourceErrorResult, ProtectedResourceErrorHttpWriter>();
+        _ = builder.AddHttpWriter<PushedAuthorizationResult, PushedAuthorizationHttpWriter>();
+        _ = builder.AddHttpWriter<PushedAuthorizationErrorResult, PushedAuthorizationErrorHttpWriter>();
+        _ = builder.AddHttpWriter<StatusCodeResult, StatusCodeHttpWriter>();
+        _ = builder.AddHttpWriter<TokenErrorResult, TokenErrorHttpWriter>();
+        _ = builder.AddHttpWriter<TokenResult, TokenHttpWriter>();
+        _ = builder.AddHttpWriter<TokenRevocationErrorResult, TokenRevocationErrorHttpWriter>();
+        _ = builder.AddHttpWriter<UserInfoResult, UserInfoHttpWriter>();
 
         return builder;
     }
@@ -161,14 +161,14 @@ public static class IdentityServerBuilderExtensionsCore
     public static IIdentityServerBuilder AddEndpoint<TEndpoint>(this IIdentityServerBuilder builder, string name, PathString path, Func<HttpContext, bool>? isMatch = null)
         where TEndpoint : class, IEndpointHandler
     {
-        builder.Services.AddTransient<TEndpoint>();
+        _ = builder.Services.AddTransient<TEndpoint>();
         var endpoint = new Duende.IdentityServer.Hosting.Endpoint(name, path, typeof(TEndpoint));
         if (isMatch is not null)
         {
             endpoint.IsMatch = isMatch;
         }
 
-        builder.Services.AddSingleton(endpoint);
+        _ = builder.Services.AddSingleton(endpoint);
 
         return builder;
     }
@@ -180,7 +180,7 @@ public static class IdentityServerBuilderExtensionsCore
         where TResult : class, IEndpointResult
         where TWriter : class, IHttpResponseWriter<TResult>
     {
-        builder.Services.AddTransient<IHttpResponseWriter<TResult>, TWriter>();
+        _ = builder.Services.AddTransient<IHttpResponseWriter<TResult>, TWriter>();
         return builder;
     }
 
@@ -190,22 +190,22 @@ public static class IdentityServerBuilderExtensionsCore
     /// <param name="builder">The builder.</param>
     public static IIdentityServerBuilder AddCoreServices(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddTransient<IServerUrls, DefaultServerUrls>();
-        builder.Services.AddTransient<IMtlsEndpointGenerator, DefaultMtlsEndpointGenerator>();
-        builder.Services.AddTransient<IIssuerNameService, DefaultIssuerNameService>();
-        builder.Services.AddTransient<ISecretsListParser, SecretParser>();
-        builder.Services.AddTransient<ISecretsListValidator, SecretValidator>();
-        builder.Services.AddTransient<ExtensionGrantValidator>();
-        builder.Services.AddTransient<BearerTokenUsageValidator>();
-        builder.Services.AddTransient<IJwtRequestValidator, JwtRequestValidator>();
-        builder.Services.AddTransient<ReturnUrlParser>();
-        builder.Services.AddTransient<IIdentityServerTools, IdentityServerTools>();
-        builder.Services.AddTransient<IReturnUrlParser, OidcReturnUrlParser>();
-        builder.Services.AddScoped<IUserSession, DefaultUserSession>();
-        builder.Services.AddTransient(typeof(MessageCookie<>));
-        builder.Services.AddTransient(typeof(SanitizedLogger<>));
+        _ = builder.Services.AddTransient<IServerUrls, DefaultServerUrls>();
+        _ = builder.Services.AddTransient<IMtlsEndpointGenerator, DefaultMtlsEndpointGenerator>();
+        _ = builder.Services.AddTransient<IIssuerNameService, DefaultIssuerNameService>();
+        _ = builder.Services.AddTransient<ISecretsListParser, SecretParser>();
+        _ = builder.Services.AddTransient<ISecretsListValidator, SecretValidator>();
+        _ = builder.Services.AddTransient<ExtensionGrantValidator>();
+        _ = builder.Services.AddTransient<BearerTokenUsageValidator>();
+        _ = builder.Services.AddTransient<IJwtRequestValidator, JwtRequestValidator>();
+        _ = builder.Services.AddTransient<ReturnUrlParser>();
+        _ = builder.Services.AddTransient<IIdentityServerTools, IdentityServerTools>();
+        _ = builder.Services.AddTransient<IReturnUrlParser, OidcReturnUrlParser>();
+        _ = builder.Services.AddScoped<IUserSession, DefaultUserSession>();
+        _ = builder.Services.AddTransient(typeof(MessageCookie<>));
+        _ = builder.Services.AddTransient(typeof(SanitizedLogger<>));
 
-        builder.Services.AddCors();
+        _ = builder.Services.AddCors();
         builder.Services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
         builder.Services.TryAddTransient<IBackchannelAuthenticationUserValidator, NopBackchannelAuthenticationUserValidator>();
@@ -215,33 +215,33 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<IClientStore, EmptyClientStore>();
         builder.Services.TryAddTransient<IResourceStore, EmptyResourceStore>();
 
-        builder.Services.AddTransient(services => IdentityServerLicenseValidator.Instance.GetLicense());
+        _ = builder.Services.AddTransient(services => IdentityServerLicenseValidator.Instance.GetLicense());
 
-        builder.Services.AddSingleton<LicenseAccessor>();
-        builder.Services.AddSingleton<ProtocolRequestCounter>();
-        builder.Services.AddSingleton<LicenseUsageTracker>();
-        builder.Services.AddSingleton<LicenseExpirationChecker>();
+        _ = builder.Services.AddSingleton<LicenseAccessor>();
+        _ = builder.Services.AddSingleton<ProtocolRequestCounter>();
+        _ = builder.Services.AddSingleton<LicenseUsageTracker>();
+        _ = builder.Services.AddSingleton<LicenseExpirationChecker>();
 
-        builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry, AuthSchemeInfoDiagnosticEntry>();
-        builder.Services.AddSingleton(new ServiceCollectionAccessor(builder.Services));
-        builder.Services.AddSingleton<IDiagnosticEntry, RegisteredImplementationsDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry, IdentityServerOptionsDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry, DataProtectionDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry, TokenIssueCountDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry, LicenseUsageDiagnosticEntry>();
-        builder.Services.AddSingleton<IDiagnosticEntry>(new BasicServerInfoDiagnosticEntry(Dns.GetHostName));
-        builder.Services.AddSingleton<IDiagnosticEntry, EndpointUsageDiagnosticEntry>();
-        builder.Services.AddSingleton<ClientLoadedTracker>();
-        builder.Services.AddSingleton<IDiagnosticEntry, ClientInfoDiagnosticEntry>();
-        builder.Services.AddSingleton<ResourceLoadedTracker>();
-        builder.Services.AddSingleton<IDiagnosticEntry, ResourceInfoDiagnosticEntry>();
-        builder.Services.AddSingleton(serviceProvider => new DiagnosticSummary(
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, AuthSchemeInfoDiagnosticEntry>();
+        _ = builder.Services.AddSingleton(new ServiceCollectionAccessor(builder.Services));
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, RegisteredImplementationsDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, IdentityServerOptionsDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, DataProtectionDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, TokenIssueCountDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, LicenseUsageDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry>(new BasicServerInfoDiagnosticEntry(Dns.GetHostName));
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, EndpointUsageDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<ClientLoadedTracker>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, ClientInfoDiagnosticEntry>();
+        _ = builder.Services.AddSingleton<ResourceLoadedTracker>();
+        _ = builder.Services.AddSingleton<IDiagnosticEntry, ResourceInfoDiagnosticEntry>();
+        _ = builder.Services.AddSingleton(serviceProvider => new DiagnosticSummary(
             DateTime.UtcNow,
             serviceProvider.GetServices<IDiagnosticEntry>(),
             serviceProvider.GetRequiredService<IdentityServerOptions>(),
             serviceProvider.GetRequiredService<ILoggerFactory>()));
-        builder.Services.AddHostedService<DiagnosticHostedService>();
+        _ = builder.Services.AddHostedService<DiagnosticHostedService>();
 
         return builder;
     }
@@ -295,14 +295,14 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.TryAddTransient<IBackchannelAuthenticationThrottlingService, DistributedBackchannelAuthenticationThrottlingService>();
         builder.Services.TryAddTransient<IBackchannelAuthenticationUserNotificationService, NopBackchannelAuthenticationUserNotificationService>();
 
-        builder.AddJwtRequestUriHttpClient();
-        builder.AddBackChannelLogoutHttpClient();
+        _ = builder.AddJwtRequestUriHttpClient();
+        _ = builder.AddBackChannelLogoutHttpClient();
 
-        builder.Services.AddTransient<IClientSecretValidator, ClientSecretValidator>();
-        builder.Services.AddTransient<IApiSecretValidator, ApiSecretValidator>();
+        _ = builder.Services.AddTransient<IClientSecretValidator, ClientSecretValidator>();
+        _ = builder.Services.AddTransient<IApiSecretValidator, ApiSecretValidator>();
 
         builder.Services.TryAddTransient<IDeviceFlowThrottlingService, DistributedDeviceFlowThrottlingService>();
-        builder.Services.AddDistributedMemoryCache();
+        _ = builder.Services.AddDistributedMemoryCache();
 
         return builder;
     }
@@ -336,13 +336,13 @@ public static class IdentityServerBuilderExtensionsCore
     /// <returns></returns>
     public static IIdentityServerBuilder AddDynamicProvidersCore(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddTransient(svcs => svcs.GetRequiredService<IdentityServerOptions>().DynamicProviders);
+        _ = builder.Services.AddTransient(svcs => svcs.GetRequiredService<IdentityServerOptions>().DynamicProviders);
         builder.Services.AddTransientDecorator<IAuthenticationSchemeProvider, DynamicAuthenticationSchemeProvider>();
         builder.Services.TryAddSingleton<IIdentityProviderStore, NopIdentityProviderStore>();
         // the per-request cache is to ensure that a scheme loaded from the cache is still available later in the
         // request and made available anywhere else during this request (in case the static cache times out across
         // 2 calls within the same request)
-        builder.Services.AddScoped<DynamicAuthenticationSchemeCache>();
+        _ = builder.Services.AddScoped<DynamicAuthenticationSchemeCache>();
 
         return builder;
     }
@@ -413,8 +413,8 @@ public static class IdentityServerBuilderExtensionsCore
     /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultSecretParsers(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddTransient<ISecretParser, BasicAuthenticationSecretParser>();
-        builder.Services.AddTransient<ISecretParser, PostBodySecretParser>();
+        _ = builder.Services.AddTransient<ISecretParser, BasicAuthenticationSecretParser>();
+        _ = builder.Services.AddTransient<ISecretParser, PostBodySecretParser>();
 
         return builder;
     }
@@ -426,7 +426,7 @@ public static class IdentityServerBuilderExtensionsCore
     /// <returns></returns>
     public static IIdentityServerBuilder AddDefaultSecretValidators(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddTransient<ISecretValidator, HashedSharedSecretValidator>();
+        _ = builder.Services.AddTransient<ISecretValidator, HashedSharedSecretValidator>();
 
         return builder;
     }
@@ -436,7 +436,7 @@ public static class IdentityServerBuilderExtensionsCore
     /// </summary>
     public static IIdentityServerBuilder AddLicenseSummary(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddTransient<LicenseUsageSummary>(services => services.GetRequiredService<LicenseUsageTracker>().GetSummary());
+        _ = builder.Services.AddTransient<LicenseUsageSummary>(services => services.GetRequiredService<LicenseUsageTracker>().GetSummary());
         return builder;
     }
 
@@ -445,7 +445,7 @@ public static class IdentityServerBuilderExtensionsCore
         where TImplementation : class, TService
     {
         services.AddDecorator<TService>();
-        services.AddTransient<TService, TImplementation>();
+        _ = services.AddTransient<TService, TImplementation>();
     }
 
     internal static void AddDecorator<TService>(this IServiceCollection services)
@@ -460,7 +460,7 @@ public static class IdentityServerBuilderExtensionsCore
             throw new InvalidOperationException("Decorator already registered for type: " + typeof(TService).Name + ".");
         }
 
-        services.Remove(registration);
+        _ = services.Remove(registration);
 
         if (registration.ImplementationInstance != null)
         {

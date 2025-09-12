@@ -47,5 +47,5 @@ public class DynamicClientRegistrationContext
     /// is intended as a place to pass additional custom state between
     /// validation steps.
     /// </summary>
-    public Dictionary<string, object> Items { get; set; } = new();
+    public Dictionary<string, object> Items { get; set; } = [];
 }

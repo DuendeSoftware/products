@@ -22,8 +22,8 @@ public static class IdentityServerBuilderDynamicSchemesExtensions
     public static IIdentityServerBuilder AddInMemoryIdentityProviders(
         this IIdentityServerBuilder builder, IEnumerable<IdentityProvider> providers)
     {
-        builder.Services.AddSingleton(providers);
-        builder.AddIdentityProviderStore<InMemoryIdentityProviderStore>();
+        _ = builder.Services.AddSingleton(providers);
+        _ = builder.AddIdentityProviderStore<InMemoryIdentityProviderStore>();
 
         return builder;
     }

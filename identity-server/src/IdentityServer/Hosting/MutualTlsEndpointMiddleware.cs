@@ -58,7 +58,7 @@ public class MutualTlsEndpointMiddleware
         {
             if (_options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
             {
-                var requestedHost = HostString.FromUriComponent(_options.MutualTls.DomainName);
+                _ = HostString.FromUriComponent(_options.MutualTls.DomainName);
                 // Separate domain
                 if (RequestedHostMatches(context.Request.Host, _options.MutualTls.DomainName))
                 {
@@ -93,7 +93,9 @@ public class MutualTlsEndpointMiddleware
     }
 
     /// <inheritdoc />
+#pragma warning disable IDE0060 // Remove unused parameter
     public async Task Invoke(HttpContext context, IAuthenticationSchemeProvider schemes)
+#pragma warning restore IDE0060 // Remove unused parameter
     {
         var mtlsConfigurationStyle = DetermineMtlsEndpointType(context, out var subPath);
 
@@ -135,7 +137,7 @@ public class MutualTlsEndpointMiddleware
         var colonIndex = configuredDomain.IndexOf(':', StringComparison.InvariantCulture);
         if (colonIndex >= 0)
         {
-            configuredHostname = configuredDomain.Substring(0, colonIndex);
+            configuredHostname = configuredDomain[..colonIndex];
             if (int.TryParse(configuredDomain.AsSpan(colonIndex + 1), out var port))
             {
                 configuredPort = port;
@@ -170,7 +172,7 @@ public class MutualTlsEndpointMiddleware
         return x509AuthResult;
     }
 
-    class MtlsErrorResponse
+    private class MtlsErrorResponse
     {
         public string error { get; set; }
         public string error_description { get; set; }

@@ -68,11 +68,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
             Expires = session.Expires,
             Data = session.Ticket,
         };
-        Context.ServerSideSessions.Add(entity);
+        _ = Context.ServerSideSessions.Add(entity);
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Created new server-side session {serverSideSessionKey} in database", session.Key);
         }
         catch (DbUpdateException ex)
@@ -142,7 +142,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Updated server-side session {serverSideSessionKey} in database", session.Key);
         }
         catch (DbUpdateException ex)
@@ -168,11 +168,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
             return;
         }
 
-        Context.ServerSideSessions.Remove(entity);
+        _ = Context.ServerSideSessions.Remove(entity);
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Deleted server-side session {serverSideSessionKey} in database", key);
         }
         catch (DbUpdateException ex)
@@ -194,7 +194,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         var entities = await Filter(Context.ServerSideSessions.AsNoTracking().AsQueryable(), filter)
             .ToArrayAsync(cancellationToken);
-        entities = Filter(entities.AsQueryable(), filter).ToArray();
+        entities = [.. Filter(entities.AsQueryable(), filter)];
 
         var results = entities.Select(entity => new ServerSideSession
         {
@@ -225,13 +225,13 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         var entities = await Filter(Context.ServerSideSessions.AsQueryable(), filter)
             .ToArrayAsync(cancellationToken);
-        entities = Filter(entities.AsQueryable(), filter).ToArray();
+        entities = [.. Filter(entities.AsQueryable(), filter)];
 
         Context.ServerSideSessions.RemoveRange(entities);
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Removed {serverSideSessionCount} server-side sessions from database for {@filter}", entities.Length, filter);
         }
         catch (DbUpdateException ex)
@@ -273,7 +273,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             Context.ServerSideSessions.RemoveRange(entities);
 
             var list = await Context.SaveChangesWithConcurrencyCheckAsync<Entities.ServerSideSession>(Logger, cancellationToken);
-            entities = entities.Except(list).ToArray();
+            entities = [.. entities.Except(list)];
 
             Logger.LogDebug("Found and removed {serverSideSessionCount} expired server-side sessions", entities.Length);
         }
@@ -356,7 +356,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         string resultsToken = null;
         if (pagination.Items.Length > 0)
         {
-            resultsToken = $"{pagination.Items[0].Id},{pagination.Items[pagination.Items.Length - 1].Id}";
+            resultsToken = $"{pagination.Items[0].Id},{pagination.Items[^1].Id}";
         }
         else
         {
@@ -388,7 +388,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
     private static bool AtStartWithDeletedItems(SessionPaginationContext pagination) => pagination.CurrentPage == 1 && pagination.HasNext && pagination.Items.Length < pagination.CountRequested;
 
-    private static ServerSideSession[] MapEntitiesToModels(Entities.ServerSideSession[] items) => items.Select(entity => new ServerSideSession
+    private static ServerSideSession[] MapEntitiesToModels(Entities.ServerSideSession[] items) => [.. items.Select(entity => new ServerSideSession
     {
         Key = entity.Key,
         Scheme = entity.Scheme,
@@ -399,7 +399,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         Renewed = entity.Renewed,
         Expires = entity.Expires,
         Ticket = entity.Data,
-    }).ToArray();
+    })];
 
     private static async Task NextPage(IQueryable<Entities.ServerSideSession> query, int last, SessionPaginationContext pagination, CancellationToken cancellationToken)
     {
@@ -416,7 +416,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
         if (pagination.HasNext)
         {
             // omit next results entry
-            pagination.Items = pagination.Items.SkipLast(1).ToArray();
+            pagination.Items = [.. pagination.Items.SkipLast(1)];
         }
 
         // how many are to the left of these results?
@@ -425,7 +425,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             var priorCountId = pagination.Items[0].Id;
             var priorCount = await query.CountAsync(x => x.Id < last, cancellationToken);
             pagination.HasPrev = priorCount > 0;
-            pagination.CurrentPage = 1 + (int)Math.Ceiling((1.0 * priorCount) / pagination.CountRequested);
+            pagination.CurrentPage = 1 + (int)Math.Ceiling(1.0 * priorCount / pagination.CountRequested);
         }
     }
 
@@ -439,7 +439,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             .ToArrayAsync(cancellationToken);
 
         // put them back into ID order
-        pagination.Items = pagination.Items.OrderBy(x => x.Id).ToArray();
+        pagination.Items = [.. pagination.Items.OrderBy(x => x.Id)];
 
         // if we have the one extra, we have a prev page
         pagination.HasPrev = pagination.Items.Length > pagination.CountRequested;
@@ -447,16 +447,16 @@ public class ServerSideSessionStore : IServerSideSessionStore
         if (pagination.HasPrev)
         {
             // omit prev results entry
-            pagination.Items = pagination.Items.Skip(1).ToArray();
+            pagination.Items = [.. pagination.Items.Skip(1)];
         }
 
         // how many are to the right of these results?
         if (pagination.Items.Length > 0)
         {
-            var postCountId = pagination.Items[pagination.Items.Length - 1].Id;
+            var postCountId = pagination.Items[^1].Id;
             var postCount = await query.CountAsync(x => x.Id > postCountId, cancellationToken);
             pagination.HasNext = postCount > 0;
-            pagination.CurrentPage = pagination.TotalPages - (int)Math.Ceiling((1.0 * postCount) / pagination.CountRequested);
+            pagination.CurrentPage = pagination.TotalPages - (int)Math.Ceiling(1.0 * postCount / pagination.CountRequested);
         }
     }
 
@@ -494,7 +494,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
             query = query.Where(x =>
                 (filter.SubjectId == null || x.SubjectId.Contains(filter.SubjectId)) &&
                 (filter.SessionId == null || x.SessionId.Contains(filter.SessionId)) &&
-                (filter.DisplayName == null || (x.DisplayName != null && x.DisplayName.Contains(filter.DisplayName) == true))
+                (filter.DisplayName == null || (x.DisplayName != null && x.DisplayName.Contains(filter.DisplayName)))
             );
         }
         return query;
@@ -510,6 +510,6 @@ public class ServerSideSessionStore : IServerSideSessionStore
         public int CurrentPage { get; set; } = 1;
         public bool HasNext { get; set; }
         public bool HasPrev { get; set; }
-        public Entities.ServerSideSession[] Items { get; set; } = Array.Empty<Entities.ServerSideSession>();
+        public Entities.ServerSideSession[] Items { get; set; } = [];
     }
 }

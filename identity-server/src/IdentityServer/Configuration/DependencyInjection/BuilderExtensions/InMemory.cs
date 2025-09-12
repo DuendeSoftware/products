@@ -39,8 +39,8 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryIdentityResources(this IIdentityServerBuilder builder, IEnumerable<IdentityResource> identityResources)
     {
-        builder.Services.AddSingleton(identityResources);
-        builder.AddResourceStore<InMemoryResourcesStore>();
+        _ = builder.Services.AddSingleton(identityResources);
+        _ = builder.AddResourceStore<InMemoryResourcesStore>();
 
         return builder;
     }
@@ -67,8 +67,8 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryApiResources(this IIdentityServerBuilder builder, IEnumerable<ApiResource> apiResources)
     {
-        builder.Services.AddSingleton(apiResources);
-        builder.AddResourceStore<InMemoryResourcesStore>();
+        _ = builder.Services.AddSingleton(apiResources);
+        _ = builder.AddResourceStore<InMemoryResourcesStore>();
 
         return builder;
     }
@@ -95,8 +95,8 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryApiScopes(this IIdentityServerBuilder builder, IEnumerable<ApiScope> apiScopes)
     {
-        builder.Services.AddSingleton(apiScopes);
-        builder.AddResourceStore<InMemoryResourcesStore>();
+        _ = builder.Services.AddSingleton(apiScopes);
+        _ = builder.AddResourceStore<InMemoryResourcesStore>();
 
         return builder;
     }
@@ -123,7 +123,7 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// <param name="clients">The clients.</param>
     public static IIdentityServerBuilder AddInMemoryClients(this IIdentityServerBuilder builder, ICollection<Client> clients)
     {
-        builder.Services.AddSingleton(clients);
+        _ = builder.Services.AddSingleton(clients);
         return AddInMemoryClients(builder, (IEnumerable<Client>)clients);
     }
 
@@ -135,9 +135,9 @@ public static class IdentityServerBuilderExtensionsInMemory
     /// <returns></returns>
     public static IIdentityServerBuilder AddInMemoryClients(this IIdentityServerBuilder builder, IEnumerable<Client> clients)
     {
-        builder.Services.AddSingleton(clients);
+        _ = builder.Services.AddSingleton(clients);
 
-        builder.AddClientStore<InMemoryClientStore>();
+        _ = builder.AddClientStore<InMemoryClientStore>();
 
         var existingCors = builder.Services.LastOrDefault(x => x.ServiceType == typeof(ICorsPolicyService));
         if (existingCors != null &&
@@ -146,7 +146,7 @@ public static class IdentityServerBuilderExtensionsInMemory
         {
             // if our default is registered, then overwrite with the InMemoryCorsPolicyService
             // otherwise don't overwrite with the InMemoryCorsPolicyService, which uses the custom one registered by the host
-            builder.Services.AddTransient<ICorsPolicyService, InMemoryCorsPolicyService>();
+            _ = builder.Services.AddTransient<ICorsPolicyService, InMemoryCorsPolicyService>();
         }
 
         return builder;

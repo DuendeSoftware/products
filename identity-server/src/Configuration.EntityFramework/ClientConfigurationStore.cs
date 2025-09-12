@@ -49,7 +49,7 @@ public class ClientConfigurationStore : IClientConfigurationStore
     public async Task AddAsync(Client client)
     {
         Logger.LogDebug("Adding client {ClientId} to configuration store", client.ClientId);
-        DbContext.Clients.Add(client.ToEntity());
-        await DbContext.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+        _ = DbContext.Clients.Add(client.ToEntity());
+        _ = await DbContext.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
     }
 }

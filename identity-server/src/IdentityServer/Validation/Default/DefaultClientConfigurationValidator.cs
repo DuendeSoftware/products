@@ -33,43 +33,43 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
         if (context.Client.ProtocolType == IdentityServerConstants.ProtocolTypes.OpenIdConnect)
         {
             await ValidateGrantTypesAsync(context);
-            if (context.IsValid == false)
+            if (!context.IsValid)
             {
                 return;
             }
 
             await ValidateLifetimesAsync(context);
-            if (context.IsValid == false)
+            if (!context.IsValid)
             {
                 return;
             }
 
             await ValidateRedirectUriAsync(context);
-            if (context.IsValid == false)
+            if (!context.IsValid)
             {
                 return;
             }
 
             await ValidateAllowedCorsOriginsAsync(context);
-            if (context.IsValid == false)
+            if (!context.IsValid)
             {
                 return;
             }
 
             await ValidateUriSchemesAsync(context);
-            if (context.IsValid == false)
+            if (!context.IsValid)
             {
                 return;
             }
 
             await ValidateSecretsAsync(context);
-            if (context.IsValid == false)
+            if (!context.IsValid)
             {
                 return;
             }
 
             await ValidatePropertiesAsync(context);
-            if (context.IsValid == false)
+            if (!context.IsValid)
             {
                 return;
             }

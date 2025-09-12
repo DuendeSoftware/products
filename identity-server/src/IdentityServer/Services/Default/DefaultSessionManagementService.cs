@@ -40,12 +40,12 @@ public class DefaultSessionManagementService : ISessionManagementService
         return _serverSideTicketStore.QuerySessionsAsync(filter, cancellationToken);
     }
 
-    private static readonly string[] OnlyTokenTypes = new[] {
+    private static readonly string[] OnlyTokenTypes = [
         IdentityServerConstants.PersistedGrantTypes.RefreshToken,
         IdentityServerConstants.PersistedGrantTypes.ReferenceToken,
         IdentityServerConstants.PersistedGrantTypes.AuthorizationCode,
         IdentityServerConstants.PersistedGrantTypes.BackChannelAuthenticationRequest,
-    };
+    ];
 
     /// <inheritdoc/>
     public async Task RemoveSessionsAsync(RemoveSessionsContext context, CancellationToken cancellationToken = default)

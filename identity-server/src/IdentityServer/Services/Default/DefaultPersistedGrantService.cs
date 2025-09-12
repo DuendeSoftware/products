@@ -128,7 +128,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
             _logger.LogError(ex, "Failed processing results from grant store.");
         }
 
-        return Enumerable.Empty<Grant>();
+        return [];
     }
 
     private static List<Grant> Join(IEnumerable<Grant> first, IEnumerable<Grant> second)
@@ -159,7 +159,7 @@ public class DefaultPersistedGrantService : IPersistedGrantService
                     match.Expiration = other.Expiration;
                 }
 
-                match.Description = match.Description ?? other.Description;
+                match.Description ??= other.Description;
             }
             else
             {

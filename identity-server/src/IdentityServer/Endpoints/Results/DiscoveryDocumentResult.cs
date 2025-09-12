@@ -14,7 +14,7 @@ namespace Duende.IdentityServer.Endpoints.Results;
 /// <seealso cref="IEndpointResult" />
 public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
 {
-    private Dictionary<string, object> _entries = new();
+    private Dictionary<string, object> _entries = [];
     private readonly bool _isUsingPreviewFeature;
 
     /// <summary>
@@ -97,7 +97,9 @@ public class DiscoveryDocumentResult : EndpointResult<DiscoveryDocumentResult>
     /// <param name="isUsingPreviewFeature">Enable preview feature</param>
     /// <param name="maxAge">The maximum age.</param>
     /// <exception cref="System.ArgumentNullException">entries</exception>
+#pragma warning disable IDE0060 // Remove unused parameter
     internal DiscoveryDocumentResult(Dictionary<string, object> entries, bool isUsingPreviewFeature, int? maxAge)
+#pragma warning restore IDE0060 // Remove unused parameter
         : this(entries, maxAge) => _isUsingPreviewFeature = true;
 }
 

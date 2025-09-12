@@ -108,14 +108,14 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
             _logger.LogDebug("Loading subject claims from access token");
             // this falls back to prior behavior which provides the best we can for the subject based on claims from the access token
             var claims = tokenResult.Claims.Where(x => !Constants.Filters.ProtocolClaimsFilter.Contains(x.Type));
-            subject = Principal.Create("UserInfo", claims.ToArray());
+            subject = Principal.Create("UserInfo", [.. claims]);
         }
 
         // make sure user is still active
         var isActiveContext = new IsActiveContext(subject, tokenResult.Client!, IdentityServerConstants.ProfileIsActiveCallers.UserInfoRequestValidation);
         await _profile.IsActiveAsync(isActiveContext);
 
-        if (isActiveContext.IsActive == false)
+        if (!isActiveContext.IsActive)
         {
             _logger.LogError("User is not active: {sub}", subject.GetSubjectId());
 

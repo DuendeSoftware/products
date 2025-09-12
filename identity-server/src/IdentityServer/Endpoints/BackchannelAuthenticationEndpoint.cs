@@ -3,7 +3,6 @@
 
 
 using Duende.IdentityModel;
-using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
@@ -23,22 +22,19 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
     private readonly IBackchannelAuthenticationResponseGenerator _responseGenerator;
     private readonly IEventService _events;
     private readonly ILogger<BackchannelAuthenticationEndpoint> _logger;
-    private readonly IdentityServerOptions _options;
 
     public BackchannelAuthenticationEndpoint(
         IClientSecretValidator clientValidator,
         IBackchannelAuthenticationRequestValidator requestValidator,
         IBackchannelAuthenticationResponseGenerator responseGenerator,
         IEventService events,
-        ILogger<BackchannelAuthenticationEndpoint> logger,
-        IdentityServerOptions options)
+        ILogger<BackchannelAuthenticationEndpoint> logger)
     {
         _clientValidator = clientValidator;
         _requestValidator = requestValidator;
         _responseGenerator = responseGenerator;
         _events = events;
         _logger = logger;
-        _options = options;
     }
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
@@ -106,5 +102,5 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
 
     private void LogResponse(BackchannelAuthenticationResponse response, BackchannelAuthenticationRequestValidationResult requestResult) => _logger.LogTrace("BackchannelAuthenticationResponse: {@response} for subject {subjectId}", response, requestResult.ValidatedRequest.Subject.GetSubjectId());
 
-    private static BackchannelAuthenticationResult Error(string error, string errorDescription = null) => new BackchannelAuthenticationResult(new BackchannelAuthenticationResponse(error, errorDescription));
+    private static BackchannelAuthenticationResult Error(string error, string errorDescription = null) => new(new BackchannelAuthenticationResponse(error, errorDescription));
 }

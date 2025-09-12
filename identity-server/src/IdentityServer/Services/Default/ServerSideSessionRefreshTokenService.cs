@@ -35,7 +35,7 @@ internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
         SessionCoordinationService = sessionCoordinationService;
     }
 
-    private static readonly TokenValidationResult TokenValidationError = new TokenValidationResult
+    private static readonly TokenValidationResult TokenValidationError = new()
     {
         IsError = true,
         Error = OidcConstants.TokenErrors.InvalidGrant

@@ -37,10 +37,10 @@ public class LogoutMessage
             }
 
             // optimize params sent to logout page, since we'd like to send them in URL (not as cookie)
-            Parameters.Remove(OidcConstants.EndSessionRequest.IdTokenHint);
-            Parameters.Remove(OidcConstants.EndSessionRequest.PostLogoutRedirectUri);
-            Parameters.Remove(OidcConstants.EndSessionRequest.State);
-            Parameters.Remove(OidcConstants.AuthorizeRequest.UiLocales);
+            _ = Parameters.Remove(OidcConstants.EndSessionRequest.IdTokenHint);
+            _ = Parameters.Remove(OidcConstants.EndSessionRequest.PostLogoutRedirectUri);
+            _ = Parameters.Remove(OidcConstants.EndSessionRequest.State);
+            _ = Parameters.Remove(OidcConstants.AuthorizeRequest.UiLocales);
 
             ClientId = request.Client?.ClientId;
             ClientName = request.Client?.ClientName;
@@ -171,7 +171,7 @@ public class LogoutRequest
     /// <summary>
     /// Gets the entire parameter collection.
     /// </summary>
-    public NameValueCollection Parameters { get; } = new NameValueCollection();
+    public NameValueCollection Parameters { get; } = [];
 
     /// <summary>
     /// Gets or sets the sign out iframe URL.

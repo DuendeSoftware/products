@@ -29,7 +29,7 @@ public static class DbContextExtensions
         {
             try
             {
-                await context.SaveChangesAsync(cancellationToken);
+                _ = await context.SaveChangesAsync(cancellationToken);
                 return list;
             }
             catch (DbUpdateConcurrencyException ex)

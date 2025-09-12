@@ -62,7 +62,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             return fail;
         }
 
-        if (!(parsedSecret.Credential is string jwtTokenString))
+        if (parsedSecret.Credential is not string jwtTokenString)
         {
             _logger.LogError("ParsedSecret.Credential is not a string.");
             return fail;

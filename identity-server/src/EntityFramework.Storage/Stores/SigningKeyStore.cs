@@ -92,8 +92,8 @@ public class SigningKeyStore : ISigningKeyStore
             DataProtected = key.DataProtected,
             IsX509Certificate = key.IsX509Certificate
         };
-        Context.Keys.Add(entity);
-        await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+        _ = Context.Keys.Add(entity);
+        _ = await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
     }
 
     /// <summary>
@@ -111,8 +111,8 @@ public class SigningKeyStore : ISigningKeyStore
         {
             try
             {
-                Context.Keys.Remove(item);
-                await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+                _ = Context.Keys.Remove(item);
+                _ = await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
             }
             catch (DbUpdateConcurrencyException ex)
             {

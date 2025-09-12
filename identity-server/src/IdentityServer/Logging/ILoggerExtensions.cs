@@ -121,18 +121,15 @@ internal static class ILoggerDevExtensions
         {
             if (!IsUnsafeLogChar(c))
             {
-                builder.Append(c);
+                _ = builder.Append(c);
             }
         }
 
         return builder.ToString();
 
-        static bool IsUnsafeLogChar(char c)
-        {
-            return char.IsControl(c)
+        static bool IsUnsafeLogChar(char c) => char.IsControl(c)
                    || c == '\u0085'  // NEXT LINE
                    || c == '\u2028'  // LINE SEPARATOR
                    || c == '\u2029'; // PARAGRAPH SEPARATOR
-        }
     }
 }

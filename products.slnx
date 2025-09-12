@@ -118,14 +118,17 @@
   <Folder Name="/identity-server/hosts/AspNetIdentity/">
     <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity8/Host.AspNetIdentity8.csproj" />
     <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity9/Host.AspNetIdentity9.csproj" />
+    <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity10/Host.AspNetIdentity10.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/EntityFramework/">
     <Project Path="identity-server/hosts/EntityFramework/EntityFramework8/Host.EntityFramework8.csproj" />
     <Project Path="identity-server/hosts/EntityFramework/EntityFramework9/Host.EntityFramework9.csproj" />
+    <Project Path="identity-server/hosts/EntityFramework/EntityFramework10/Host.EntityFramework10.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/Main/">
     <Project Path="identity-server/hosts/Main/Main8/Host.Main8.csproj" />
     <Project Path="identity-server/hosts/Main/Main9/Host.Main9.csproj" />
+    <Project Path="identity-server/hosts/Main/Main10/Host.Main10.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/UI/">
     <Project Path="identity-server/hosts/UI/Main/UI.Main.csproj" />

@@ -13,7 +13,7 @@ namespace Duende.IdentityServer.Stores;
 /// </summary>
 public class InMemoryPersistedGrantStore : IPersistedGrantStore
 {
-    private readonly ConcurrentDictionary<string, PersistedGrant> _repository = new ConcurrentDictionary<string, PersistedGrant>();
+    private readonly ConcurrentDictionary<string, PersistedGrant> _repository = new();
 
     /// <inheritdoc/>
     public Task StoreAsync(PersistedGrant grant)
@@ -55,7 +55,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPersistedGrantStoreResponseGenerator.Remove");
 
-        _repository.TryRemove(key, out _);
+        _ = _repository.TryRemove(key, out _);
 
         return Task.CompletedTask;
     }
@@ -71,7 +71,7 @@ public class InMemoryPersistedGrantStore : IPersistedGrantStore
 
         foreach (var item in items)
         {
-            _repository.TryRemove(item.Key, out _);
+            _ = _repository.TryRemove(item.Key, out _);
         }
 
         return Task.CompletedTask;

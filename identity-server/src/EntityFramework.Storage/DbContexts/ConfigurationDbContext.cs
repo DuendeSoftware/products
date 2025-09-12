@@ -9,7 +9,6 @@ using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.EntityFramework.DbContexts;
 
@@ -140,7 +139,7 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
         base.OnConfiguring(optionsBuilder);
         if (!optionsBuilder.Options.IsFrozen)
         {
-            optionsBuilder.ConfigureWarnings(w => w.Ignore(new EventId[] { RelationalEventId.MultipleCollectionIncludeWarning }));
+            _ = optionsBuilder.ConfigureWarnings(w => w.Ignore([RelationalEventId.MultipleCollectionIncludeWarning]));
         }
     }
 }

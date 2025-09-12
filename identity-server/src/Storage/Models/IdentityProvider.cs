@@ -83,7 +83,7 @@ public class IdentityProvider
     /// <summary>
     /// Protocol specific properties for the provider.
     /// </summary>
-    public Dictionary<string, string> Properties { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, string> Properties { get; set; } = [];
 
     /// <summary>
     /// Properties indexer
@@ -94,7 +94,7 @@ public class IdentityProvider
     {
         get
         {
-            Properties.TryGetValue(name, out var result);
+            _ = Properties.TryGetValue(name, out var result);
             return result;
         }
         set => Properties[name] = value!;

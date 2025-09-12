@@ -105,13 +105,10 @@ public class IdentityServerMiddleware
                 try
                 {
                     var httpActivity = context.Features.Get<IHttpActivityFeature>();
-                    if (httpActivity != null)
-                    {
-                        httpActivity.Activity.DisplayName = $"{context.Request.Method} {requestPath}";
-                    }
+                    _ = httpActivity?.Activity.DisplayName = $"{context.Request.Method} {requestPath}";
 
                     using var activity = Tracing.BasicActivitySource.StartActivity("IdentityServerProtocolRequest");
-                    activity?.SetTag(Tracing.Properties.EndpointType, endpointType);
+                    _ = (activity?.SetTag(Tracing.Properties.EndpointType, endpointType));
 
                     var issuer = await issuerNameService.GetCurrentAsync();
                     var licenseUsage = context.RequestServices.GetRequiredService<LicenseUsageTracker>();

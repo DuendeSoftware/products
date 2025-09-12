@@ -73,12 +73,12 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     /// <summary>
     /// The persisted grants that are token types.
     /// </summary>
-    protected static readonly string[] PersistedGrantTokenTypes = new[] {
+    protected static readonly string[] PersistedGrantTokenTypes = [
         IdentityServerConstants.PersistedGrantTypes.RefreshToken,
         IdentityServerConstants.PersistedGrantTypes.ReferenceToken,
         IdentityServerConstants.PersistedGrantTypes.AuthorizationCode,
         IdentityServerConstants.PersistedGrantTypes.BackChannelAuthenticationRequest,
-    };
+    ];
 
     /// <inheritdoc/>
     public virtual async Task ProcessLogoutAsync(UserSession session)
@@ -170,7 +170,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
         if (Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout || clientsToCoordinate.Count > 0)
         {
             var clientsToContact = session.ClientIds;
-            if (Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout == false)
+            if (!Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout)
             {
                 // the global setting is not enabled, so filter on those specific clients configured
                 clientsToContact = clientsToContact.Intersect(clientsToCoordinate).ToList();

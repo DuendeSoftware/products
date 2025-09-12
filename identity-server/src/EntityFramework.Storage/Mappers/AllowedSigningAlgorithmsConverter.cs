@@ -23,7 +23,7 @@ internal static class AllowedSigningAlgorithmsConverter
             sourceMember = sourceMember.Trim();
             foreach (var item in sourceMember.Split(',', StringSplitOptions.RemoveEmptyEntries).Distinct())
             {
-                list.Add(item);
+                _ = list.Add(item);
             }
         }
         return list;

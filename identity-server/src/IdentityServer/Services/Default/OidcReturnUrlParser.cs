@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using System.Collections.Specialized;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -49,7 +48,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
             {
                 var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
                 var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId);
-                parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
+                parameters = entry?.Data.FromFullDictionary() ?? [];
             }
 
             var user = await _userSession.GetUserAsync();
@@ -72,9 +71,9 @@ internal class OidcReturnUrlParser : IReturnUrlParser
         if (_options.UserInteraction.AllowOriginInReturnUrl && returnUrl.IsUri())
         {
             var host = _urls.Origin;
-            if (returnUrl.StartsWith(host, StringComparison.OrdinalIgnoreCase) == true)
+            if (returnUrl.StartsWith(host, StringComparison.OrdinalIgnoreCase))
             {
-                returnUrl = returnUrl.Substring(host.Length);
+                returnUrl = returnUrl[host.Length..];
             }
         }
 
@@ -84,14 +83,14 @@ internal class OidcReturnUrlParser : IReturnUrlParser
                 var index = returnUrl.IndexOf('?', StringComparison.InvariantCulture);
                 if (index >= 0)
                 {
-                    returnUrl = returnUrl.Substring(0, index);
+                    returnUrl = returnUrl[..index];
                 }
             }
             {
                 var index = returnUrl.IndexOf('#', StringComparison.InvariantCulture);
                 if (index >= 0)
                 {
-                    returnUrl = returnUrl.Substring(0, index);
+                    returnUrl = returnUrl[..index];
                 }
             }
 

@@ -16,10 +16,10 @@ internal class DeviceAuthorizationRequestValidationLog
 
     public Dictionary<string, string> Raw { get; set; }
 
-    private static readonly string[] SensitiveValuesFilter = {
+    private static readonly string[] SensitiveValuesFilter = [
         OidcConstants.TokenRequest.ClientSecret,
         OidcConstants.TokenRequest.ClientAssertion
-    };
+    ];
 
     public DeviceAuthorizationRequestValidationLog(ValidatedDeviceAuthorizationRequest request)
     {

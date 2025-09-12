@@ -94,10 +94,10 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
         //////////////////////////////////////////////////////////
         // validate request object
         //////////////////////////////////////////////////////////
-        var roValidationResult = await TryValidateRequestObjectAsync();
-        if (!roValidationResult.Success)
+        var (roValidationSuccess, roErrorResult) = await TryValidateRequestObjectAsync();
+        if (!roValidationSuccess)
         {
-            return roValidationResult.ErrorResult;
+            return roErrorResult;
         }
 
         if (_validatedRequest.Client.RequireRequestObject &&
@@ -123,7 +123,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest, "Invalid scope");
         }
 
-        _validatedRequest.RequestedScopes = scope.FromSpaceSeparatedString().Distinct().ToList();
+        _validatedRequest.RequestedScopes = [.. scope.FromSpaceSeparatedString().Distinct()];
 
         //////////////////////////////////////////////////////////
         // openid scope required
@@ -230,7 +230,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
                 return Invalid(OidcConstants.BackchannelAuthenticationRequestErrors.InvalidRequest, "Invalid acr_values");
             }
 
-            _validatedRequest.AuthenticationContextReferenceClasses = acrValues.FromSpaceSeparatedString().Distinct().ToList();
+            _validatedRequest.AuthenticationContextReferenceClasses = [.. acrValues.FromSpaceSeparatedString().Distinct()];
 
             //////////////////////////////////////////////////////////
             // check custom acr_values: idp and tenant
@@ -238,16 +238,16 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
             var tenant = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.Tenant, StringComparison.Ordinal));
             if (tenant != null)
             {
-                _validatedRequest.AuthenticationContextReferenceClasses.Remove(tenant);
-                tenant = tenant.Substring(KnownAcrValues.Tenant.Length);
+                _ = _validatedRequest.AuthenticationContextReferenceClasses.Remove(tenant);
+                tenant = tenant[KnownAcrValues.Tenant.Length..];
                 _validatedRequest.Tenant = tenant;
             }
 
             var idp = _validatedRequest.AuthenticationContextReferenceClasses.FirstOrDefault(x => x.StartsWith(KnownAcrValues.HomeRealm, StringComparison.Ordinal));
             if (idp != null)
             {
-                _validatedRequest.AuthenticationContextReferenceClasses.Remove(idp);
-                idp = idp.Substring(KnownAcrValues.HomeRealm.Length);
+                _ = _validatedRequest.AuthenticationContextReferenceClasses.Remove(idp);
+                idp = idp[KnownAcrValues.HomeRealm.Length..];
 
                 // check if idp is present but client does not allow it, and then ignore it
                 if (_validatedRequest.Client.IdentityProviderRestrictions != null &&
@@ -514,7 +514,7 @@ internal class BackchannelAuthenticationRequestValidator : IBackchannelAuthentic
 
 
 
-    private BackchannelAuthenticationRequestValidationResult Invalid(string error, string errorDescription = null) => new BackchannelAuthenticationRequestValidationResult(_validatedRequest, error, errorDescription);
+    private BackchannelAuthenticationRequestValidationResult Invalid(string error, string errorDescription = null) => new(_validatedRequest, error, errorDescription);
 
     private void LogError(string message = null, object values = null) => LogWithRequestDetails(LogLevel.Error, message, values);
 

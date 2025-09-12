@@ -79,7 +79,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
                 return AuthenticateResult.NoResult();
             }
 
-            token = authorization.Substring("Bearer ".Length).Trim();
+            token = authorization["Bearer ".Length..].Trim();
         }
         else if (authorization.StartsWith("DPoP ", StringComparison.OrdinalIgnoreCase))
         {
@@ -90,7 +90,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
             }
 
             wasDPoPToken = true;
-            token = authorization.Substring("DPoP ".Length).Trim();
+            token = authorization["DPoP ".Length..].Trim();
         }
 
         if (string.IsNullOrEmpty(token))
@@ -198,45 +198,45 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
         var sb = new StringBuilder();
 
-        if (Options.TokenMode == LocalApiTokenMode.BearerOnly || Options.TokenMode == LocalApiTokenMode.DPoPAndBearer)
+        if (Options.TokenMode is LocalApiTokenMode.BearerOnly or LocalApiTokenMode.DPoPAndBearer)
         {
-            sb.Append("Bearer");
+            _ = sb.Append("Bearer");
 
             if (Context.Items.ContainsKey("Bearer-Error"))
             {
-                sb.Append(" error=\"");
-                sb.Append(Context.Items["Bearer-Error"] as string);
-                sb.Append('\"');
+                _ = sb.Append(" error=\"");
+                _ = sb.Append(Context.Items["Bearer-Error"] as string);
+                _ = sb.Append('\"');
 
                 if (Context.Items.ContainsKey("Bearer-ErrorDescription"))
                 {
-                    sb.Append(", error_description=\"");
-                    sb.Append(Context.Items["Bearer-ErrorDescription"] as string);
-                    sb.Append('\"');
+                    _ = sb.Append(", error_description=\"");
+                    _ = sb.Append(Context.Items["Bearer-ErrorDescription"] as string);
+                    _ = sb.Append('\"');
                 }
             }
         }
 
-        if (Options.TokenMode == LocalApiTokenMode.DPoPOnly || Options.TokenMode == LocalApiTokenMode.DPoPAndBearer)
+        if (Options.TokenMode is LocalApiTokenMode.DPoPOnly or LocalApiTokenMode.DPoPAndBearer)
         {
             if (sb.Length > 0)
             {
-                sb.Append(", ");
+                _ = sb.Append(", ");
             }
 
-            sb.Append("DPoP");
+            _ = sb.Append("DPoP");
 
             if (Context.Items.ContainsKey("DPoP-Error"))
             {
-                sb.Append(" error=\"");
-                sb.Append(Context.Items["DPoP-Error"] as string);
-                sb.Append('\"');
+                _ = sb.Append(" error=\"");
+                _ = sb.Append(Context.Items["DPoP-Error"] as string);
+                _ = sb.Append('\"');
 
                 if (Context.Items.ContainsKey("DPoP-ErrorDescription"))
                 {
-                    sb.Append(", error_description=\"");
-                    sb.Append(Context.Items["DPoP-ErrorDescription"] as string);
-                    sb.Append('\"');
+                    _ = sb.Append(", error_description=\"");
+                    _ = sb.Append(Context.Items["DPoP-ErrorDescription"] as string);
+                    _ = sb.Append('\"');
                 }
             }
 

@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-#nullable disable
-
 using Duende.IdentityServer.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +10,7 @@ namespace Duende.IdentityServer;
 // APIs needed for IdentityServer specific license validation
 internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerLicense>
 {
-    internal readonly static IdentityServerLicenseValidator Instance = new IdentityServerLicenseValidator();
+    internal static readonly IdentityServerLicenseValidator Instance = new();
 
     private IdentityServerOptions _options;
 
@@ -92,8 +90,8 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
 
     public void ValidateClient(string clientId) => ValidateClient(clientId, License);
 
-    private HashSet<string> _clientIds = new();
-    private object _clientIdLock = new();
+    private HashSet<string> _clientIds = [];
+    private readonly object _clientIdLock = new();
 
     // Internal method that takes license as parameter to allow testing
     internal void ValidateClient(string clientId, IdentityServerLicense license)
@@ -117,8 +115,8 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         }
     }
 
-    private HashSet<string> _issuers = new();
-    private object _issuerLock = new();
+    private HashSet<string> _issuers = [];
+    private readonly object _issuerLock = new();
 
     public void ValidateIssuer(string iss) => ValidateIssuer(iss, License);
 
@@ -193,7 +191,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
             else if (!ValidateResourceIndicatorsWarned)
             {
                 ValidateResourceIndicatorsWarned = true;
-                WarningLog?.Invoke("A request was made using a resource indicator, but you do not have a license. This feature requires the Enterprise Edition tier of license.", Array.Empty<object>());
+                WarningLog?.Invoke("A request was made using a resource indicator, but you do not have a license. This feature requires the Enterprise Edition tier of license.", []);
             }
         }
     }
@@ -211,7 +209,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
         else if (!ValidateParWarned)
         {
             ValidateParWarned = true;
-            WarningLog?.Invoke("A request was made to the pushed authorization endpoint, but you do not have a license. This feature requires the Business Edition or higher tier of license.", Array.Empty<object>());
+            WarningLog?.Invoke("A request was made to the pushed authorization endpoint, but you do not have a license. This feature requires the Business Edition or higher tier of license.", []);
         }
     }
 
@@ -229,7 +227,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
             else if (!ValidateResourceIndicatorsWarned)
             {
                 ValidateResourceIndicatorsWarned = true;
-                WarningLog?.Invoke("A request was made using a resource indicator, but you do not have a license. This feature requires the Enterprise Edition tier of license.", Array.Empty<object>());
+                WarningLog?.Invoke("A request was made using a resource indicator, but you do not have a license. This feature requires the Enterprise Edition tier of license.", []);
             }
         }
     }

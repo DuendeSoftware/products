@@ -29,7 +29,7 @@ public class KeyManagementOptions
     /// If none are specified, then "RS256" will be used as the default.
     /// The first in the collection will be used as the default.
     /// </summary>
-    public ICollection<SigningAlgorithmOptions> SigningAlgorithms { get; set; } = new List<SigningAlgorithmOptions>();
+    public ICollection<SigningAlgorithmOptions> SigningAlgorithms { get; set; } = [];
 
     internal string DefaultSigningAlgorithm => SigningAlgorithms.First().Name;
     internal IEnumerable<string> AllowedSigningAlgorithmNames => SigningAlgorithms.Select(x => x.Name);

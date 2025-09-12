@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Stores;
 /// <seealso cref="IdentityServer.Stores.IDeviceFlowStore" />
 public class InMemoryDeviceFlowStore : IDeviceFlowStore
 {
-    private readonly List<InMemoryDeviceAuthorization> _repository = new List<InMemoryDeviceAuthorization>();
+    private readonly List<InMemoryDeviceAuthorization> _repository = [];
 
     /// <summary>
     /// Stores the device authorization request.
@@ -82,10 +82,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
         {
             var foundData = _repository.FirstOrDefault(x => x.UserCode == userCode);
 
-            if (foundData != null)
-            {
-                foundData.Data = data;
-            }
+            _ = (foundData?.Data = data);
         }
 
         return Task.CompletedTask;
@@ -106,7 +103,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
 
             if (foundData != null)
             {
-                _repository.Remove(foundData);
+                _ = _repository.Remove(foundData);
             }
         }
 

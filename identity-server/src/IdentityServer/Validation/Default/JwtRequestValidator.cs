@@ -204,7 +204,7 @@ public class JwtRequestValidator : IJwtRequestValidator
         if (context.IncludeJti)
         {
             // don't filter out the jti claim
-            filter.Remove(JwtClaimTypes.JwtId);
+            _ = filter.Remove(JwtClaimTypes.JwtId);
         }
 
         var filtered = token.Claims.Where(claim => !filter.Contains(claim.Type));

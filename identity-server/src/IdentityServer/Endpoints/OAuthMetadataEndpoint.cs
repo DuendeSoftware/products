@@ -50,7 +50,7 @@ internal class OAuthMetadataEndpoint(
             return new StatusCodeResult(HttpStatusCode.NotFound);
         }
 
-        context.Request.Path.StartsWithSegments("/.well-known/oauth-authorization-server", StringComparison.OrdinalIgnoreCase, out var issuerSubPath);
+        _ = context.Request.Path.StartsWithSegments("/.well-known/oauth-authorization-server", StringComparison.OrdinalIgnoreCase, out var issuerSubPath);
         if (!await issuerPathValidator.ValidateAsync(issuerSubPath))
         {
             logger.LogDebug("Request for OAuth discovery document contains invalid sub-path. Returning 404");

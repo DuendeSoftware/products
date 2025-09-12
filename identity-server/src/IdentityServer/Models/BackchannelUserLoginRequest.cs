@@ -64,5 +64,5 @@ public class BackchannelUserLoginRequest
     /// request. These properties by default are copied from the validated
     /// custom request parameters.
     /// </summary>
-    public Dictionary<string, object> Properties { get; set; } = new();
+    public Dictionary<string, object> Properties { get; set; } = [];
 }

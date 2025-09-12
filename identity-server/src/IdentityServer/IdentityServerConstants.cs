@@ -102,7 +102,7 @@ public static class IdentityServerConstants
     }
 
 
-    public readonly static IEnumerable<string> SupportedSigningAlgorithms = new List<string>
+    public static readonly IEnumerable<string> SupportedSigningAlgorithms = new List<string>
     {
         SecurityAlgorithms.RsaSha256,
         SecurityAlgorithms.RsaSha384,
@@ -266,12 +266,12 @@ public static class IdentityServerConstants
         public const string MtlsDeviceAuthorization = MtlsPathPrefix + "/deviceauthorization";
 
         public static readonly string[] CorsPaths =
-        {
+        [
             DiscoveryConfiguration,
             DiscoveryWebKeys,
             Token,
             UserInfo,
             Revocation
-        };
+        ];
     }
 }

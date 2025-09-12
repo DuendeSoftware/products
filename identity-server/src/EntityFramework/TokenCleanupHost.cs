@@ -51,7 +51,7 @@ public class TokenCleanupHost : IHostedService
 
             _source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            Task.Factory.StartNew(() => StartInternalAsync(_source.Token), cancellationToken, TaskCreationOptions.None, TaskScheduler.Default);
+            _ = Task.Factory.StartNew(() => StartInternalAsync(_source.Token), cancellationToken, TaskCreationOptions.None, TaskScheduler.Default);
         }
 
         return Task.CompletedTask;
@@ -125,11 +125,9 @@ public class TokenCleanupHost : IHostedService
     {
         try
         {
-            await using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope())
-            {
-                var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<ITokenCleanupService>();
-                await tokenCleanupService.CleanupGrantsAsync(cancellationToken);
-            }
+            await using var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();
+            var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<ITokenCleanupService>();
+            await tokenCleanupService.CleanupGrantsAsync(cancellationToken);
         }
         catch (Exception ex)
         {

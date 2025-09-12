@@ -34,7 +34,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly SanitizedLogger<AuthorizeRequestValidator> _sanitizedLogger;
 
     private readonly ResponseTypeEqualityComparer
-        _responseTypeEqualityComparer = new ResponseTypeEqualityComparer();
+        _responseTypeEqualityComparer = new();
 
 
     public AuthorizeRequestValidator(
@@ -267,7 +267,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         // check if redirect_uri is valid
         //////////////////////////////////////////////////////////
         var uriContext = new RedirectUriValidationContext(redirectUri, request);
-        if (await _uriValidator.IsRedirectUriValidAsync(uriContext) == false)
+        if (!await _uriValidator.IsRedirectUriValidAsync(uriContext))
         {
             LogError("Invalid redirect_uri", redirectUri, request);
             return Invalid(request, OidcConstants.AuthorizeErrors.InvalidRequest, "Invalid redirect_uri");
@@ -340,7 +340,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         // check if PKCE is required and validate parameters
         //////////////////////////////////////////////////////////
-        if (request.GrantType == GrantType.AuthorizationCode || request.GrantType == GrantType.Hybrid)
+        if (request.GrantType is GrantType.AuthorizationCode or GrantType.Hybrid)
         {
             _sanitizedLogger.LogDebug("Checking for PKCE parameters");
 
@@ -488,17 +488,16 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             return Invalid(request, description: "Invalid scope");
         }
 
-        request.RequestedScopes = scope.FromSpaceSeparatedString().Distinct().ToList();
+        request.RequestedScopes = [.. scope.FromSpaceSeparatedString().Distinct()];
         request.IsOpenIdRequest = request.RequestedScopes.Contains(IdentityServerConstants.StandardScopes.OpenId);
 
         //////////////////////////////////////////////////////////
         // check scope vs response_type plausability
         //////////////////////////////////////////////////////////
         var requirement = Constants.ResponseTypeToScopeRequirement[request.ResponseType];
-        if (requirement == Constants.ScopeRequirement.Identity ||
-            requirement == Constants.ScopeRequirement.IdentityOnly)
+        if (requirement is Constants.ScopeRequirement.Identity or Constants.ScopeRequirement.IdentityOnly)
         {
-            if (request.IsOpenIdRequest == false)
+            if (!request.IsOpenIdRequest)
             {
                 LogError("response_type requires the openid scope", request);
                 return Invalid(request, description: "Missing openid scope");
@@ -768,7 +767,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
                 return Invalid(request, description: "Invalid acr_values");
             }
 
-            request.AuthenticationContextReferenceClasses = acrValues.FromSpaceSeparatedString().Distinct().ToList();
+            request.AuthenticationContextReferenceClasses = [.. acrValues.FromSpaceSeparatedString().Distinct()];
         }
 
         //////////////////////////////////////////////////////////
@@ -837,9 +836,9 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         return true;
     }
 
-    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new AuthorizeRequestValidationResult(request, error, description);
+    private static AuthorizeRequestValidationResult Invalid(ValidatedAuthorizeRequest request, string error = OidcConstants.AuthorizeErrors.InvalidRequest, string description = null) => new(request, error, description);
 
-    private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new AuthorizeRequestValidationResult(request);
+    private static AuthorizeRequestValidationResult Valid(ValidatedAuthorizeRequest request) => new(request);
 
     private void LogError(string message, ValidatedAuthorizeRequest request)
     {

@@ -33,7 +33,7 @@ public static class IdentityServerBuilderExtensions
     {
         builder.Services.AddTransientDecorator<IUserClaimsPrincipalFactory<TUser>, UserClaimsFactory<TUser>>();
 
-        builder.Services.Configure<IdentityOptions>(options =>
+        _ = builder.Services.Configure<IdentityOptions>(options =>
         {
             options.ClaimsIdentity.UserIdClaimType = JwtClaimTypes.Subject;
             options.ClaimsIdentity.UserNameClaimType = JwtClaimTypes.Name;
@@ -41,36 +41,36 @@ public static class IdentityServerBuilderExtensions
             options.ClaimsIdentity.EmailClaimType = JwtClaimTypes.Email;
         });
 
-        builder.Services.Configure<SecurityStampValidatorOptions>(opts =>
+        _ = builder.Services.Configure<SecurityStampValidatorOptions>(opts =>
         {
             opts.OnRefreshingPrincipal = SecurityStampValidatorCallback.UpdatePrincipal;
         });
 
-        builder.Services.ConfigureApplicationCookie(options =>
+        _ = builder.Services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.IsEssential = true;
             // we need to disable to allow iframe for authorize requests
             options.Cookie.SameSite = AspNetCore.Http.SameSiteMode.None;
         });
 
-        builder.Services.ConfigureExternalCookie(options =>
+        _ = builder.Services.ConfigureExternalCookie(options =>
         {
             options.Cookie.IsEssential = true;
             // https://github.com/IdentityServer/IdentityServer4/issues/2595
             options.Cookie.SameSite = AspNetCore.Http.SameSiteMode.None;
         });
 
-        builder.Services.Configure<CookieAuthenticationOptions>(IdentityConstants.TwoFactorRememberMeScheme, options =>
+        _ = builder.Services.Configure<CookieAuthenticationOptions>(IdentityConstants.TwoFactorRememberMeScheme, options =>
         {
             options.Cookie.IsEssential = true;
         });
 
-        builder.Services.Configure<CookieAuthenticationOptions>(IdentityConstants.TwoFactorUserIdScheme, options =>
+        _ = builder.Services.Configure<CookieAuthenticationOptions>(IdentityConstants.TwoFactorUserIdScheme, options =>
         {
             options.Cookie.IsEssential = true;
         });
 
-        builder.Services.AddAuthentication(options =>
+        _ = builder.Services.AddAuthentication(options =>
         {
             if (options.DefaultAuthenticateScheme == null &&
                 options.DefaultScheme == IdentityServerConstants.DefaultCookieAuthenticationScheme)
@@ -79,10 +79,10 @@ public static class IdentityServerBuilderExtensions
             }
         });
 
-        builder.AddResourceOwnerValidator<ResourceOwnerPasswordValidator<TUser>>();
-        builder.AddProfileService<ProfileService<TUser>>();
+        _ = builder.AddResourceOwnerValidator<ResourceOwnerPasswordValidator<TUser>>();
+        _ = builder.AddProfileService<ProfileService<TUser>>();
 
-        builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerOptions>, UseAspNetIdentityCookieScheme>();
+        _ = builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerOptions>, UseAspNetIdentityCookieScheme>();
 
         return builder;
     }
@@ -92,7 +92,7 @@ public static class IdentityServerBuilderExtensions
         where TImplementation : class, TService
     {
         services.AddDecorator<TService>();
-        services.AddTransient<TService, TImplementation>();
+        _ = services.AddTransient<TService, TImplementation>();
     }
 
     internal static void AddDecorator<TService>(this IServiceCollection services)
@@ -107,7 +107,7 @@ public static class IdentityServerBuilderExtensions
             throw new InvalidOperationException("Decorator already registered for type: " + typeof(TService).Name + ".");
         }
 
-        services.Remove(registration);
+        _ = services.Remove(registration);
 
         if (registration.ImplementationInstance != null)
         {

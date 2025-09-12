@@ -33,7 +33,7 @@ public class X509NameSecretValidator : ISecretValidator
             return fail;
         }
 
-        if (!(parsedSecret.Credential is X509Certificate2 cert))
+        if (parsedSecret.Credential is not X509Certificate2 cert)
         {
             throw new InvalidOperationException("Credential is not a x509 certificate.");
         }

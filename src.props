@@ -8,13 +8,14 @@
 
     <!-- TODO - This is different between foss and is/bff -->
     <!-- This is what foss does -->
-    <!-- <DebugType>full</DebugType> --> 
+    <!-- <DebugType>full</DebugType> -->
     <!-- This is what is/bff do -->
     <DebugType Condition="'$(GITHUB_ACTIONS)' == 'true'">embedded</DebugType>
-    
+
     <!-- TODO - we want to enable nullable everywhere eventually -->
     <!-- <Nullable>enable</Nullable> -->
-    <LangVersion>latest</LangVersion>
+    <!-- TODO - Change LangVersion back to latest when we upgrade to net10.0 GA -->
+    <LangVersion>preview</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>

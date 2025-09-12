@@ -77,7 +77,7 @@ public class DefaultCache<T> : ICache<T>
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Set");
 
         key = GetKey(key);
-        Cache.Set(key, item, expiration);
+        _ = Cache.Set(key, item, expiration);
         return Task.CompletedTask;
     }
 
@@ -106,7 +106,7 @@ public class DefaultCache<T> : ICache<T>
 
         if (item == null)
         {
-            if (false == await ConcurrencyLock.LockAsync((int)IdentityServerOptions.Caching.CacheLockTimeout.TotalMilliseconds))
+            if (!await ConcurrencyLock.LockAsync((int)IdentityServerOptions.Caching.CacheLockTimeout.TotalMilliseconds))
             {
                 throw new Exception($"Failed to obtain cache lock for: '{GetType()}'");
             }

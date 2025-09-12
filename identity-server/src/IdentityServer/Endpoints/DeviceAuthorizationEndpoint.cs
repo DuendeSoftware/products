@@ -123,26 +123,4 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
 
         return new TokenErrorResult(response);
     }
-
-    private void LogResponse(DeviceAuthorizationResponse response, DeviceAuthorizationRequestValidationResult requestResult)
-    {
-        var clientId = $"{requestResult.ValidatedRequest.Client.ClientId} ({requestResult.ValidatedRequest.Client?.ClientName ?? "no name set"})";
-
-        if (response.DeviceCode != null)
-        {
-            _logger.LogTrace("Device code issued for {clientId}: {deviceCode}", clientId, response.DeviceCode);
-        }
-        if (response.UserCode != null)
-        {
-            _logger.LogTrace("User code issued for {clientId}: {userCode}", clientId, response.UserCode);
-        }
-        if (response.VerificationUri != null)
-        {
-            _logger.LogTrace("Verification URI issued for {clientId}: {verificationUri}", clientId, response.VerificationUri);
-        }
-        if (response.VerificationUriComplete != null)
-        {
-            _logger.LogTrace("Verification URI (Complete) issued for {clientId}: {verificationUriComplete}", clientId, response.VerificationUriComplete);
-        }
-    }
 }

@@ -55,11 +55,11 @@ public class DistributedCacheStateDataFormatter : ISecureDataFormat<Authenticati
         var options = new DistributedCacheEntryOptions();
         if (data.ExpiresUtc.HasValue)
         {
-            options.SetAbsoluteExpiration(data.ExpiresUtc.Value);
+            _ = options.SetAbsoluteExpiration(data.ExpiresUtc.Value);
         }
         else
         {
-            options.SetSlidingExpiration(Constants.DefaultCacheDuration);
+            _ = options.SetSlidingExpiration(Constants.DefaultCacheDuration);
         }
 
         // Rather than encrypt the full AuthenticationProperties

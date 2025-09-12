@@ -73,7 +73,7 @@ public class DefaultClaimsService : IClaimsService
             }
 
             // filter so we don't ask for claim types that we will eventually filter out
-            additionalClaimTypes = FilterRequestedClaimTypes(additionalClaimTypes).ToList();
+            additionalClaimTypes = [.. FilterRequestedClaimTypes(additionalClaimTypes)];
 
             var context = new ProfileDataRequestContext(
                 subject,
@@ -118,7 +118,7 @@ public class DefaultClaimsService : IClaimsService
 
         var outputClaims = new List<Claim>
         {
-            new Claim(JwtClaimTypes.ClientId, request.ClientId)
+            new(JwtClaimTypes.ClientId, request.ClientId)
         };
 
         // log if client ID is overwritten
@@ -194,7 +194,7 @@ public class DefaultClaimsService : IClaimsService
             }
 
             // filter so we don't ask for claim types that we will eventually filter out
-            additionalClaimTypes = FilterRequestedClaimTypes(additionalClaimTypes).ToList();
+            additionalClaimTypes = [.. FilterRequestedClaimTypes(additionalClaimTypes)];
 
             var context = new ProfileDataRequestContext(
                 subject,
@@ -227,9 +227,9 @@ public class DefaultClaimsService : IClaimsService
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtClaimTypes.Subject, subject.GetSubjectId()),
-            new Claim(JwtClaimTypes.AuthenticationTime, subject.GetAuthenticationTimeEpoch().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
-            new Claim(JwtClaimTypes.IdentityProvider, subject.GetIdentityProvider())
+            new(JwtClaimTypes.Subject, subject.GetSubjectId()),
+            new(JwtClaimTypes.AuthenticationTime, subject.GetAuthenticationTimeEpoch().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
+            new(JwtClaimTypes.IdentityProvider, subject.GetIdentityProvider())
         };
 
         claims.AddRange(subject.GetAuthenticationMethods());

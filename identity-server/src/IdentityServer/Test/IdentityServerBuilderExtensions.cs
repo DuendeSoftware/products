@@ -19,11 +19,11 @@ public static class IdentityServerBuilderExtensions
     /// <returns></returns>
     public static IIdentityServerBuilder AddTestUsers(this IIdentityServerBuilder builder, List<TestUser> users)
     {
-        builder.Services.AddSingleton(new TestUserStore(users));
-        builder.AddProfileService<TestUserProfileService>();
-        builder.AddResourceOwnerValidator<TestUserResourceOwnerPasswordValidator>();
+        _ = builder.Services.AddSingleton(new TestUserStore(users));
+        _ = builder.AddProfileService<TestUserProfileService>();
+        _ = builder.AddResourceOwnerValidator<TestUserResourceOwnerPasswordValidator>();
 
-        builder.AddBackchannelAuthenticationUserValidator<TestBackchannelLoginUserValidator>();
+        _ = builder.AddBackchannelAuthenticationUserValidator<TestBackchannelLoginUserValidator>();
 
         return builder;
     }

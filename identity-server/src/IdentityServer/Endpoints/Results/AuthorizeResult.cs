@@ -93,14 +93,14 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
     {
         // these are the conditions where we can send a response
         // back directly to the client, otherwise we're only showing the error UI
-        var isSafeError =
-            response.Error == OidcConstants.AuthorizeErrors.AccessDenied ||
-            response.Error == OidcConstants.AuthorizeErrors.AccountSelectionRequired ||
-            response.Error == OidcConstants.AuthorizeErrors.LoginRequired ||
-            response.Error == OidcConstants.AuthorizeErrors.ConsentRequired ||
-            response.Error == OidcConstants.AuthorizeErrors.InteractionRequired ||
-            response.Error == OidcConstants.AuthorizeErrors.TemporarilyUnavailable ||
-            response.Error == OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements;
+        var isSafeError = response.Error is
+            OidcConstants.AuthorizeErrors.AccessDenied or
+            OidcConstants.AuthorizeErrors.AccountSelectionRequired or
+            OidcConstants.AuthorizeErrors.LoginRequired or
+            OidcConstants.AuthorizeErrors.ConsentRequired or
+            OidcConstants.AuthorizeErrors.InteractionRequired or
+            OidcConstants.AuthorizeErrors.TemporarilyUnavailable or
+            OidcConstants.AuthorizeErrors.UnmetAuthenticationRequirements;
         if (isSafeError)
         {
             // this scenario we can return back to the client
@@ -127,8 +127,8 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
     private async Task RenderAuthorizeResponseAsync(AuthorizeResponse response, HttpContext context)
     {
-        if (response.Request.ResponseMode == OidcConstants.ResponseModes.Query ||
-            response.Request.ResponseMode == OidcConstants.ResponseModes.Fragment)
+        if (response.Request.ResponseMode is OidcConstants.ResponseModes.Query or
+            OidcConstants.ResponseModes.Fragment)
         {
             context.Response.SetNoCache();
             context.Response.Redirect(BuildRedirectUri(response));

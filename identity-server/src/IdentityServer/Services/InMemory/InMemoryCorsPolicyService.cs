@@ -31,7 +31,7 @@ public class InMemoryCorsPolicyService : ICorsPolicyService
     public InMemoryCorsPolicyService(ILogger<InMemoryCorsPolicyService> logger, IEnumerable<Client> clients)
     {
         Logger = logger;
-        Clients = clients ?? Enumerable.Empty<Client>();
+        Clients = clients ?? [];
     }
 
     /// <summary>

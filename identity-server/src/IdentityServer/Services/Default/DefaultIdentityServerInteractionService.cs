@@ -180,7 +180,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
             return await _grants.GetAllGrantsAsync(subject);
         }
 
-        return Enumerable.Empty<Grant>();
+        return [];
     }
 
     public async Task RevokeUserConsentAsync(string clientId)

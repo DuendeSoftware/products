@@ -11,7 +11,7 @@ namespace Duende.IdentityServer.Extensions;
 
 internal static class NameValueCollectionExtensions
 {
-    public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source) => source.AllKeys.ToDictionary(k => k, k => source.GetValues(k));
+    public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source) => source.AllKeys.ToDictionary(k => k, source.GetValues);
 
     public static NameValueCollection FromFullDictionary(this IDictionary<string, string[]> source)
     {
@@ -66,7 +66,7 @@ internal static class NameValueCollectionExtensions
             var values = collection.GetValues(name);
             var value = values.First();
             value = HtmlEncoder.Default.Encode(value);
-            builder.AppendFormat(CultureInfo.InvariantCulture, inputFieldFormat, name, value);
+            _ = builder.AppendFormat(CultureInfo.InvariantCulture, inputFieldFormat, name, value);
         }
 
         return builder.ToString();
@@ -122,7 +122,7 @@ internal static class NameValueCollectionExtensions
 
     internal static string ConvertFormUrlEncodedSpacesToUrlEncodedSpaces(string str)
     {
-        if ((str != null) && (str.Contains('+', StringComparison.InvariantCulture)))
+        if ((str != null) && str.Contains('+', StringComparison.InvariantCulture))
         {
             str = str.Replace("+", "%20", StringComparison.InvariantCulture);
         }
@@ -144,14 +144,14 @@ internal static class NameValueCollectionExtensions
         }
         else
         {
-            builder.Append('&');
+            _ = builder.Append('&');
         }
 
-        builder.Append(encodedName);
+        _ = builder.Append(encodedName);
         if (!string.IsNullOrEmpty(encodedValue))
         {
-            builder.Append('=');
-            builder.Append(encodedValue);
+            _ = builder.Append('=');
+            _ = builder.Append(encodedValue);
         }
         return first;
     }

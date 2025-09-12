@@ -83,7 +83,7 @@ public class ApiSecretValidator : IApiSecretValidator
 
         var api = apis.Single();
 
-        if (api.Enabled == false)
+        if (!api.Enabled)
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "API resource not enabled");
 

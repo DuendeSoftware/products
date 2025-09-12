@@ -14,7 +14,7 @@ internal sealed class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUs
 #pragma warning restore CA1812
 {
     private readonly Decorator<IUserClaimsPrincipalFactory<TUser>> _inner;
-    private UserManager<TUser> _userManager;
+    private readonly UserManager<TUser> _userManager;
 
     public UserClaimsFactory(Decorator<IUserClaimsPrincipalFactory<TUser>> inner, UserManager<TUser> userManager)
     {

@@ -197,7 +197,7 @@ internal class TokenValidator : ITokenValidator
         var subClaim = result.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Subject);
         if (subClaim != null)
         {
-            var principal = Principal.Create("tokenvalidator", result.Claims.ToArray());
+            var principal = Principal.Create("tokenvalidator", [.. result.Claims]);
 
             if (result.ReferenceTokenId.IsPresent())
             {
@@ -209,7 +209,7 @@ internal class TokenValidator : ITokenValidator
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
             await _profile.IsActiveAsync(isActiveCtx);
 
-            if (isActiveCtx.IsActive == false)
+            if (!isActiveCtx.IsActive)
             {
                 _logger.LogError("User marked as not active: {subject}", subClaim.Value);
 
@@ -347,7 +347,7 @@ internal class TokenValidator : ITokenValidator
         {
             if (scope.Value.Contains(' ', StringComparison.InvariantCulture))
             {
-                claims.Remove(scope);
+                _ = claims.Remove(scope);
                 var values = scope.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var value in values)
                 {
@@ -415,12 +415,12 @@ internal class TokenValidator : ITokenValidator
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtClaimTypes.Issuer, token.Issuer),
-            new Claim(JwtClaimTypes.NotBefore,
+            new(JwtClaimTypes.Issuer, token.Issuer),
+            new(JwtClaimTypes.NotBefore,
                 new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
-            new Claim(JwtClaimTypes.IssuedAt, new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
+            new(JwtClaimTypes.IssuedAt, new DateTimeOffset(token.CreationTime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64),
-            new Claim(JwtClaimTypes.Expiration,
+            new(JwtClaimTypes.Expiration,
                 new DateTimeOffset(token.CreationTime).AddSeconds(token.Lifetime).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64)
         };
@@ -435,11 +435,11 @@ internal class TokenValidator : ITokenValidator
             claims.Add(new Claim(JwtClaimTypes.Audience, aud));
         }
 
-        claims.AddRange(token.Claims.Where(c =>
-            c.Type != JwtClaimTypes.IssuedAt &&
-            c.Type != JwtClaimTypes.Issuer &&
-            c.Type != JwtClaimTypes.NotBefore &&
-            c.Type != JwtClaimTypes.Expiration
+        claims.AddRange(token.Claims.Where(c => c.Type is
+            not JwtClaimTypes.IssuedAt and
+            not JwtClaimTypes.Issuer and
+            not JwtClaimTypes.NotBefore and
+            not JwtClaimTypes.Expiration
         ));
         return claims;
     }
@@ -460,7 +460,7 @@ internal class TokenValidator : ITokenValidator
         }
     }
 
-    private static TokenValidationResult Invalid(string error) => new TokenValidationResult
+    private static TokenValidationResult Invalid(string error) => new()
     {
         IsError = true,
         Error = error

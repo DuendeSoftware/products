@@ -66,7 +66,7 @@ public class IdentityProviderStore : IIdentityProviderStore
     public async Task<IdentityProvider> GetBySchemeAsync(string scheme)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetByScheme");
-        activity?.SetTag(Tracing.Properties.Scheme, scheme);
+        _ = (activity?.SetTag(Tracing.Properties.Scheme, scheme));
 
         var idp = (await Context.IdentityProviders.AsNoTracking().Where(x => x.Scheme == scheme)
                 .ToArrayAsync(CancellationTokenProvider.CancellationToken))

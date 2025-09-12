@@ -74,7 +74,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     {
         if (!_options.Enabled)
         {
-            return Enumerable.Empty<SigningCredentials>();
+            return [];
         }
 
         var keyContainers = await _keyManager.GetCurrentKeysAsync();
@@ -87,7 +87,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
     {
         if (!_options.Enabled)
         {
-            return Enumerable.Empty<SecurityKeyInfo>();
+            return [];
         }
 
         var containers = await _keyManager.GetAllKeysAsync();

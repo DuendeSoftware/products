@@ -16,11 +16,11 @@ namespace Duende;
 internal class LicenseValidator<T>
     where T : License, new()
 {
-    private static readonly string[] LicenseFileNames = new[]
-    {
+    private static readonly string[] LicenseFileNames =
+    [
         "Duende_License.key",
         "Duende_IdentityServer_License.key",
-    };
+    ];
 
     protected ILogger Logger;
     protected Action<string, object[]> ErrorLog;
@@ -86,7 +86,7 @@ internal class LicenseValidator<T>
             return;
         }
 
-        DebugLog.Invoke("The Duende license key details: {@license}", new object[] { License });
+        DebugLog.Invoke("The Duende license key details: {@license}", [License]);
 
         var errors = new List<string>();
 
@@ -97,25 +97,25 @@ internal class LicenseValidator<T>
         {
             foreach (var err in errors)
             {
-                ErrorLog.Invoke(err, Array.Empty<object>());
+                ErrorLog.Invoke(err, []);
             }
 
             ErrorLog.Invoke(
                 "Please contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software.",
-                new object[] { License.ContactInfo, License.CompanyName });
+                [License.ContactInfo, License.CompanyName]);
         }
         else
         {
             if (License.Expiration.HasValue)
             {
                 InformationLog.Invoke("You have a valid license key for the Duende software {edition} edition for use at {licenseCompany}. The license expires on {licenseExpiration}.",
-                    new object[] { License.Edition, License.CompanyName, License.Expiration.Value.ToLongDateString() });
+                    [License.Edition, License.CompanyName, License.Expiration.Value.ToLongDateString()]);
             }
             else
             {
                 InformationLog.Invoke(
                     "You have a valid license key for the Duende software {edition} edition for use at {licenseCompany}.",
-                    new object[] { License.Edition, License.CompanyName });
+                    [License.Edition, License.CompanyName]);
             }
         }
     }

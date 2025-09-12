@@ -62,7 +62,7 @@ public static class AuthenticationPropertiesExtensions
         var value = EncodeList(clientIds);
         if (value == null)
         {
-            properties.Items.Remove(ClientListKey);
+            _ = properties.Items.Remove(ClientListKey);
         }
         else
         {
@@ -87,7 +87,7 @@ public static class AuthenticationPropertiesExtensions
     }
 
 
-    private static IEnumerable<string> DecodeList(string value)
+    private static string[] DecodeList(string value)
     {
         if (value.IsPresent())
         {
@@ -96,7 +96,7 @@ public static class AuthenticationPropertiesExtensions
             return ObjectSerializer.FromString<string[]>(value);
         }
 
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private static string EncodeList(IEnumerable<string> list)

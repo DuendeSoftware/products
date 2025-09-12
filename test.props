@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <NoWarn>$(NoWarn);1591;ASPDEPR004;ASPDEPR008</NoWarn>
     <LangVersion>latest</LangVersion>
     <DebugType>full</DebugType>
     <IsPackable>false</IsPackable>

@@ -89,7 +89,7 @@ public static class TokenExtensions
             }
 
             var simpleClaimTypes = token.Claims.Where(c =>
-                    c.Type != JwtClaimTypes.AuthenticationMethod && c.Type != JwtClaimTypes.Scope)
+                    c.Type is not JwtClaimTypes.AuthenticationMethod and not JwtClaimTypes.Scope)
                 .Select(c => c.Type)
                 .Distinct();
 
@@ -114,9 +114,9 @@ public static class TokenExtensions
 
             if (token.Type == JwtClaimTypes.JwtTypes.IntrospectionJwtResponse)
             {
-                payload.Remove(JwtClaimTypes.Expiration);
-                payload.Remove(JwtClaimTypes.NotBefore);
-                payload.Remove(JwtClaimTypes.Subject);
+                _ = payload.Remove(JwtClaimTypes.Expiration);
+                _ = payload.Remove(JwtClaimTypes.NotBefore);
+                _ = payload.Remove(JwtClaimTypes.Subject);
             }
 
             return payload;
@@ -143,7 +143,7 @@ public static class TokenExtensions
             return bool.Parse(claim.Value);
         }
 
-        if (claim.ValueType == ClaimValueTypes.Integer || claim.ValueType == ClaimValueTypes.Integer32)
+        if (claim.ValueType is ClaimValueTypes.Integer or ClaimValueTypes.Integer32)
         {
             return int.Parse(claim.Value, CultureInfo.InvariantCulture);
         }
@@ -173,7 +173,7 @@ public static class TokenExtensions
     {
         // get distinct list of conf values first to avoid parsing same cnf multiple times
         var cnfs = refresh.AccessTokens.Select(x => x.Value.Confirmation).Distinct();
-        return cnfs.Select(x => GetProofKeyThumbprint(x)).ToArray();
+        return [.. cnfs.Select(GetProofKeyThumbprint)];
     }
 
     private static ProofKeyThumbprint GetProofKeyThumbprint(string cnf)

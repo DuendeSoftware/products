@@ -63,5 +63,5 @@ public class BackchannelAuthenticationResponse
     /// implement extensions to CIBA that defines additional response
     /// parameters.
     /// </summary>
-    public Dictionary<string, object> Custom { get; set; } = new();
+    public Dictionary<string, object> Custom { get; set; } = [];
 }

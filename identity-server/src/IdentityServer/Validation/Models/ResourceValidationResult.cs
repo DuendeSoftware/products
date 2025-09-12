@@ -27,7 +27,7 @@ public class ResourceValidationResult
     public ResourceValidationResult(Resources resources)
     {
         Resources = resources;
-        ParsedScopes = resources.ToScopeNames().Select(x => new ParsedScopeValue(x)).ToList();
+        ParsedScopes = [.. resources.ToScopeNames().Select(x => new ParsedScopeValue(x))];
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public class ResourceValidationResult
     public ResourceValidationResult(Resources resources, IEnumerable<ParsedScopeValue> parsedScopeValues)
     {
         Resources = resources;
-        ParsedScopes = parsedScopeValues.ToList();
+        ParsedScopes = [.. parsedScopeValues];
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public class ResourceValidationResult
     /// <returns></returns>
     public ResourceValidationResult Filter(IEnumerable<string> scopeValues)
     {
-        scopeValues ??= Enumerable.Empty<string>();
+        scopeValues ??= [];
 
         var offline = scopeValues.Contains(IdentityServerConstants.StandardScopes.OfflineAccess);
 
@@ -122,7 +122,7 @@ public class ResourceValidationResult
             var parsedScopesToKeepList = ParsedScopes.Where(x => scopeNamesToKeep.Contains(x.ParsedName)).ToHashSet();
             if (Resources.OfflineAccess)
             {
-                parsedScopesToKeepList.Add(new ParsedScopeValue(IdentityServerConstants.StandardScopes.OfflineAccess));
+                _ = parsedScopesToKeepList.Add(new ParsedScopeValue(IdentityServerConstants.StandardScopes.OfflineAccess));
             }
             parsedScopesToKeep = parsedScopesToKeepList;
         }

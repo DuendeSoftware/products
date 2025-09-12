@@ -189,11 +189,11 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
             var iat = ((DateTimeOffset)refreshValidationResult.RefreshToken.CreationTime).ToUnixTimeSeconds();
             var claims = new List<Claim>
             {
-                new Claim("client_id", client.ClientId),
-                new Claim("token_type", TokenTypeHints.RefreshToken),
-                new Claim("iat", iat.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer),
-                new Claim("exp", (iat + refreshValidationResult.RefreshToken.Lifetime).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer),
-                new Claim("sub", refreshValidationResult.RefreshToken.SubjectId),
+                new("client_id", client.ClientId),
+                new("token_type", TokenTypeHints.RefreshToken),
+                new("iat", iat.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer),
+                new("exp", (iat + refreshValidationResult.RefreshToken.Lifetime).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer),
+                new("sub", refreshValidationResult.RefreshToken.SubjectId),
             };
 
             foreach (var scope in refreshValidationResult.RefreshToken.AuthorizedScopes)

@@ -78,7 +78,7 @@ public class AuthorizationRequest
     /// <value>
     /// The collection of prompt modes.
     /// </value>
-    public IEnumerable<string> PromptModes { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> PromptModes { get; set; } = [];
 
     /// <summary>
     /// The acr values passed from the authorization request.
@@ -86,7 +86,7 @@ public class AuthorizationRequest
     /// <value>
     /// The acr values.
     /// </value>
-    public IEnumerable<string> AcrValues { get; set; } = Enumerable.Empty<string>();
+    public IEnumerable<string> AcrValues { get; set; } = [];
 
     /// <summary>
     /// The validated resources.
@@ -114,7 +114,7 @@ public class AuthorizationRequest
     /// </summary>
     public AuthorizationRequest() =>
         // public for testing
-        Parameters = new NameValueCollection();
+        Parameters = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthorizationRequest"/> class.

@@ -33,7 +33,7 @@ public static class ServerUrlExtensions
         {
             if (urlOrPath.StartsWith("~/", StringComparison.Ordinal))
             {
-                urlOrPath = urlOrPath.Substring(1);
+                urlOrPath = urlOrPath[1..];
             }
 
             urlOrPath = urls.BaseUrl + urlOrPath.EnsureLeadingSlash();
@@ -54,7 +54,7 @@ public static class ServerUrlExtensions
 
         if (path.StartsWith("~/", StringComparison.Ordinal))
         {
-            path = path.Substring(1);
+            path = path[1..];
         }
 
         path = urls.BaseUrl + path.EnsureLeadingSlash();

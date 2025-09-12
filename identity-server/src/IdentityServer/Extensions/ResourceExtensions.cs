@@ -108,7 +108,7 @@ public static class ResourceExtensions
 
         if (IEnumerableExtensions.IsNullOrEmpty(apis))
         {
-            return new List<string>();
+            return [];
         }
 
         // only one API resource request, forward the allowed signing algorithms (if any)
@@ -132,7 +132,7 @@ public static class ResourceExtensions
             throw new InvalidOperationException("Signing algorithms requirements for requested resources are not compatible.");
         }
 
-        return new List<string>();
+        return [];
     }
 
     private static IEnumerable<T> IntersectLists<T>(IEnumerable<IEnumerable<T>> lists) => lists.Aggregate((l1, l2) => l1.Intersect(l2));

@@ -16,7 +16,7 @@ public class DefaultScopeParser(ILogger<DefaultScopeParser> logger) : IScopePars
     public ParsedScopesResult ParseScopeValues(IEnumerable<string> scopeValues)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultScopeParser.ParseScopeValues");
-        activity?.SetTag(Tracing.Properties.Scope, scopeValues.ToSpaceSeparatedString());
+        _ = (activity?.SetTag(Tracing.Properties.Scope, scopeValues.ToSpaceSeparatedString()));
 
         var result = new ParsedScopesResult();
 

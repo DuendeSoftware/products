@@ -106,7 +106,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
         var indexOfPathSeparator = parts[2].IndexOfAny(PathSeparators);
         if (indexOfPathSeparator > 0)
         {
-            portAsString = parts[2].Substring(0, indexOfPathSeparator);
+            portAsString = parts[2][..indexOfPathSeparator];
         }
         else
         {
@@ -116,7 +116,7 @@ public class StrictRedirectUriValidatorAppAuth : StrictRedirectUriValidator
         // Valid port range is 0 through 65535.
         if (int.TryParse(portAsString, out var port))
         {
-            if (port >= 0 && port < 65536)
+            if (port is >= 0 and < 65536)
             {
                 return true;
             }

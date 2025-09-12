@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
+
 internal class FrontendSelector
 {
     private readonly FrontendCollection _frontends;

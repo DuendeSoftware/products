@@ -57,7 +57,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
 
         var result = await _allCache.GetOrAddAsync("__all__",
             _options.Caching.IdentityProviderCacheDuration,
-            async () => await _inner.GetAllSchemeNamesAsync());
+            _inner.GetAllSchemeNamesAsync);
         return result;
     }
 
@@ -105,7 +105,7 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
                     var mi = optionsMonitorType.GetMethod("TryRemove");
                     if (mi != null)
                     {
-                        mi.Invoke(optionsCache, new object[] { idp.Scheme });
+                        _ = mi.Invoke(optionsCache, [idp.Scheme]);
                     }
                 }
             }

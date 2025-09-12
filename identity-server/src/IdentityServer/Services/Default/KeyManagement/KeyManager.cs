@@ -106,8 +106,7 @@ public class KeyManager : IKeyManager
         }
 
         // ensure we have all of our active signing keys
-        IEnumerable<KeyContainer> signingKeys;
-        var signingKeysSuccess = TryGetAllCurrentSigningKeys(keys, out signingKeys);
+        var signingKeysSuccess = TryGetAllCurrentSigningKeys(keys, out var signingKeys);
 
         // if we loaded from cache, see if DB has updated key
         if (!signingKeysSuccess && cached)
@@ -132,7 +131,7 @@ public class KeyManager : IKeyManager
             _logger.LogTrace("Entering new key lock.");
 
             // need to create new key, but another thread might have already so acquiring lock.
-            if (false == await _newKeyLock.LockAsync((int)_options.Caching.CacheLockTimeout.TotalMilliseconds))
+            if (!await _newKeyLock.LockAsync((int)_options.Caching.CacheLockTimeout.TotalMilliseconds))
             {
                 throw new Exception($"Failed to obtain new key lock for: '{GetType()}'");
             }
@@ -249,7 +248,7 @@ public class KeyManager : IKeyManager
             // and see if that's within the window of activation delay.
             var age = _clock.GetAge(activeKey.Created);
             var diff = _options.KeyManagement.RotationInterval.Subtract(age);
-            var needed = (diff <= _options.KeyManagement.PropagationTime);
+            var needed = diff <= _options.KeyManagement.PropagationTime;
 
             if (!needed)
             {
@@ -312,7 +311,7 @@ public class KeyManager : IKeyManager
         }
 
         _logger.LogTrace("Cache miss when loading all keys.");
-        return Enumerable.Empty<KeyContainer>();
+        return [];
     }
 
     internal bool AreAllKeysWithinInitializationDuration(IEnumerable<KeyContainer> keys)
@@ -494,7 +493,7 @@ public class KeyManager : IKeyManager
 
         _logger.LogTrace("No keys returned from store.");
 
-        return Enumerable.Empty<KeyContainer>();
+        return [];
     }
 
 
@@ -503,7 +502,7 @@ public class KeyManager : IKeyManager
     internal async Task<(IEnumerable<KeyContainer> allKeys, IEnumerable<KeyContainer> activeKeys)> CreateNewKeysAndAddToCacheAsync()
     {
         var keys = new List<KeyContainer>();
-        keys.AddRange(await _cache.GetKeysAsync() ?? Enumerable.Empty<KeyContainer>());
+        keys.AddRange(await _cache.GetKeysAsync() ?? []);
 
         foreach (var alg in _options.KeyManagement.SigningAlgorithms)
         {
@@ -530,7 +529,7 @@ public class KeyManager : IKeyManager
             }
 
             // reload in case other new keys were recently created
-            keys = new List<KeyContainer>(await GetAllKeysFromStoreAsync(false));
+            keys = [.. await GetAllKeysFromStoreAsync(false)];
         }
 
         // explicitly cache here since we didn't when we loaded above
@@ -555,7 +554,7 @@ public class KeyManager : IKeyManager
     {
         if (allKeys == null || !allKeys.Any())
         {
-            return Enumerable.Empty<KeyContainer>();
+            return [];
         }
 
         _logger.LogTrace("Looking for active signing keys.");

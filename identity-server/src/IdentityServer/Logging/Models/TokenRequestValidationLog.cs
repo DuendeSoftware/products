@@ -27,7 +27,7 @@ internal class TokenRequestValidationLog
 
     public TokenRequestValidationLog(ValidatedTokenRequest request, IEnumerable<string> sensitiveValuesFilter)
     {
-        Raw = request.Raw.ToScrubbedDictionary(sensitiveValuesFilter.ToArray());
+        Raw = request.Raw.ToScrubbedDictionary([.. sensitiveValuesFilter]);
 
         if (request.Client != null)
         {

@@ -38,7 +38,7 @@ public class SecretValidator : ISecretsListValidator
     /// <returns></returns>
     public async Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
     {
-        var secretsArray = secrets as Secret[] ?? secrets.ToArray();
+        var secretsArray = secrets as Secret[] ?? [.. secrets];
 
         foreach (var expired in secretsArray.Where(s => s.Expiration.HasExpired(_clock.UtcNow.UtcDateTime)))
         {

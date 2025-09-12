@@ -22,8 +22,8 @@ public static class ApiResourceMappers
                 DisplayName = entity.DisplayName,
                 Description = entity.Description,
                 ShowInDiscoveryDocument = entity.ShowInDiscoveryDocument,
-                UserClaims = entity.UserClaims?.Select(c => c.Type).ToList() ?? new List<string>(),
-                Properties = entity.Properties?.ToDictionary(p => p.Key, p => p.Value) ?? new Dictionary<string, string>(),
+                UserClaims = entity.UserClaims?.Select(c => c.Type).ToList() ?? [],
+                Properties = entity.Properties?.ToDictionary(p => p.Key, p => p.Value) ?? [],
 
                 RequireResourceIndicator = entity.RequireResourceIndicator,
                 ApiSecrets = entity.Secrets?.Select(s => new Models.Secret
@@ -32,8 +32,8 @@ public static class ApiResourceMappers
                     Value = s.Value,
                     Description = s.Description,
                     Expiration = s.Expiration,
-                }).ToList() ?? new List<Models.Secret>(),
-                Scopes = entity.Scopes?.Select(s => s.Scope).ToList() ?? new List<string>(),
+                }).ToList() ?? [],
+                Scopes = entity.Scopes?.Select(s => s.Scope).ToList() ?? [],
                 AllowedAccessTokenSigningAlgorithms = AllowedSigningAlgorithmsConverter.Convert(entity.AllowedAccessTokenSigningAlgorithms),
             };
 
@@ -53,12 +53,12 @@ public static class ApiResourceMappers
                 UserClaims = model.UserClaims?.Select(c => new Entities.ApiResourceClaim
                 {
                     Type = c,
-                }).ToList() ?? new List<Entities.ApiResourceClaim>(),
+                }).ToList() ?? [],
                 Properties = model.Properties?.Select(p => new Entities.ApiResourceProperty
                 {
                     Key = p.Key,
                     Value = p.Value
-                }).ToList() ?? new List<Entities.ApiResourceProperty>(),
+                }).ToList() ?? [],
 
                 RequireResourceIndicator = model.RequireResourceIndicator,
                 Secrets = model.ApiSecrets?.Select(s => new Entities.ApiResourceSecret
@@ -67,11 +67,11 @@ public static class ApiResourceMappers
                     Value = s.Value,
                     Description = s.Description,
                     Expiration = s.Expiration,
-                }).ToList() ?? new List<Entities.ApiResourceSecret>(),
+                }).ToList() ?? [],
                 Scopes = model.Scopes?.Select(s => new Entities.ApiResourceScope
                 {
                     Scope = s
-                }).ToList() ?? new List<Entities.ApiResourceScope>(),
+                }).ToList() ?? [],
                 AllowedAccessTokenSigningAlgorithms = AllowedSigningAlgorithmsConverter.Convert(model.AllowedAccessTokenSigningAlgorithms),
             };
 }

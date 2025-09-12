@@ -53,7 +53,7 @@ public class RefreshToken
     /// <value>
     /// The access token.
     /// </value>
-    public Dictionary<string, Token> AccessTokens { get; set; } = new Dictionary<string, Token>();
+    public Dictionary<string, Token> AccessTokens { get; set; } = [];
 
     /// <summary>
     /// Returns the access token based on the resource indicator.
@@ -62,7 +62,7 @@ public class RefreshToken
     /// <returns></returns>
     public Token? GetAccessToken(string? resourceIndicator = null)
     {
-        AccessTokens.TryGetValue(resourceIndicator ?? string.Empty, out var token);
+        _ = AccessTokens.TryGetValue(resourceIndicator ?? string.Empty, out var token);
         return token;
     }
 

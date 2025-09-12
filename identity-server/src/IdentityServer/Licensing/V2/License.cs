@@ -50,7 +50,7 @@ internal class License
             Edition = editionValue;
         }
 
-        Features = claims.FindAll("feature").Select(f => f.Value).ToArray();
+        Features = [.. claims.FindAll("feature").Select(f => f.Value)];
 
         Extras = claims.FindFirst("extras")?.Value ?? string.Empty;
 

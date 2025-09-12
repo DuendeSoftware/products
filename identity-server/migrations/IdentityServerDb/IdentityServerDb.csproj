@@ -10,19 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- The packages in this ItemGroup are all transitive dependencies that
-             would otherwise resolve to a version with a security vulnerability. 
-             In future, we would like to update Microsoft.Data.SqlClient and
-             Microsoft.EntityFrameworkCore, and remove these explicit dependencies
-             (assuming that future versions of the intermediate dependencies that
-             don't have this problem exist someday). -->
-
-    <PackageReference Include="Azure.Identity" />
-    <PackageReference Include="System.Formats.Asn1" />
-    <PackageReference Include="Microsoft.Data.SqlClient" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference
       Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
     <ProjectReference

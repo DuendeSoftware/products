@@ -135,35 +135,35 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
             switch (accessTokenType)
             {
                 case AccessTokenType.Jwt:
-                    Interlocked.Increment(ref _jwtTokenIssued);
+                    _ = Interlocked.Increment(ref _jwtTokenIssued);
                     break;
                 case AccessTokenType.Reference:
-                    Interlocked.Increment(ref _referenceTokenIssued);
+                    _ = Interlocked.Increment(ref _referenceTokenIssued);
                     break;
             }
 
             switch (proofType)
             {
                 case ProofType.None:
-                    Interlocked.Increment(ref _tokensWithNoConstraint);
+                    _ = Interlocked.Increment(ref _tokensWithNoConstraint);
                     break;
                 case ProofType.ClientCertificate:
-                    Interlocked.Increment(ref _tokensWithMtlsConstraint);
+                    _ = Interlocked.Increment(ref _tokensWithMtlsConstraint);
                     break;
                 case ProofType.DPoP:
-                    Interlocked.Increment(ref _tokensWithDPoPConstraint);
+                    _ = Interlocked.Increment(ref _tokensWithDPoPConstraint);
                     break;
             }
         }
 
         if (refreshTokenIssued)
         {
-            Interlocked.Increment(ref _refreshTokenIssued);
+            _ = Interlocked.Increment(ref _refreshTokenIssued);
         }
 
         if (identityTokenIssued)
         {
-            Interlocked.Increment(ref _idTokenIssued);
+            _ = Interlocked.Increment(ref _idTokenIssued);
         }
 
         var tokenWasIssued = accessTokenIssued || refreshTokenIssued || identityTokenIssued;
@@ -175,28 +175,28 @@ internal class TokenIssueCountDiagnosticEntry : IDiagnosticEntry, IDisposable
         switch (grantType)
         {
             case GrantType.Implicit:
-                Interlocked.Increment(ref _implicitGrantTypeFlows);
+                _ = Interlocked.Increment(ref _implicitGrantTypeFlows);
                 break;
             case GrantType.Hybrid:
-                Interlocked.Increment(ref _hybridGrantTypeFlows);
+                _ = Interlocked.Increment(ref _hybridGrantTypeFlows);
                 break;
             case GrantType.AuthorizationCode:
-                Interlocked.Increment(ref _authorizationCodeGrantTypeFlows);
+                _ = Interlocked.Increment(ref _authorizationCodeGrantTypeFlows);
                 break;
             case GrantType.ClientCredentials:
-                Interlocked.Increment(ref _clientCredentialsGrantTypeFlows);
+                _ = Interlocked.Increment(ref _clientCredentialsGrantTypeFlows);
                 break;
             case GrantType.ResourceOwnerPassword:
-                Interlocked.Increment(ref _resourceOwnerPasswordGrantTypeFlows);
+                _ = Interlocked.Increment(ref _resourceOwnerPasswordGrantTypeFlows);
                 break;
             case GrantType.DeviceFlow:
-                Interlocked.Increment(ref _deviceFlowGrantTypeFlows);
+                _ = Interlocked.Increment(ref _deviceFlowGrantTypeFlows);
                 break;
             case GrantType.RefreshToken:
-                Interlocked.Increment(ref _refreshTokenGrantTypeFlows);
+                _ = Interlocked.Increment(ref _refreshTokenGrantTypeFlows);
                 break;
             default:
-                Interlocked.Increment(ref _otherGrantTypeFlows);
+                _ = Interlocked.Increment(ref _otherGrantTypeFlows);
                 break;
         }
     }

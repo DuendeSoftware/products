@@ -43,12 +43,12 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         Action<ConfigurationStoreOptions>? storeOptionsAction = null)
         where TContext : DbContext, IConfigurationDbContext
     {
-        builder.Services.AddConfigurationDbContext<TContext>(storeOptionsAction);
+        _ = builder.Services.AddConfigurationDbContext<TContext>(storeOptionsAction);
 
-        builder.AddClientStore<ClientStore>();
-        builder.AddResourceStore<ResourceStore>();
-        builder.AddCorsPolicyService<CorsPolicyService>();
-        builder.AddIdentityProviderStore<IdentityProviderStore>();
+        _ = builder.AddClientStore<ClientStore>();
+        _ = builder.AddResourceStore<ResourceStore>();
+        _ = builder.AddCorsPolicyService<CorsPolicyService>();
+        _ = builder.AddIdentityProviderStore<IdentityProviderStore>();
 
         return builder;
     }
@@ -61,13 +61,13 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
     public static IIdentityServerBuilder AddConfigurationStoreCache(
         this IIdentityServerBuilder builder)
     {
-        builder.AddInMemoryCaching();
+        _ = builder.AddInMemoryCaching();
 
         // add the caching decorators
-        builder.AddClientStoreCache<ClientStore>();
-        builder.AddResourceStoreCache<ResourceStore>();
-        builder.AddCorsPolicyCache<CorsPolicyService>();
-        builder.AddIdentityProviderStoreCache<IdentityProviderStore>();
+        _ = builder.AddClientStoreCache<ClientStore>();
+        _ = builder.AddResourceStoreCache<ResourceStore>();
+        _ = builder.AddCorsPolicyCache<CorsPolicyService>();
+        _ = builder.AddIdentityProviderStoreCache<IdentityProviderStore>();
 
         return builder;
     }
@@ -94,15 +94,15 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         Action<OperationalStoreOptions>? storeOptionsAction = null)
         where TContext : DbContext, IPersistedGrantDbContext
     {
-        builder.Services.AddOperationalDbContext<TContext>(storeOptionsAction);
+        _ = builder.Services.AddOperationalDbContext<TContext>(storeOptionsAction);
 
-        builder.AddSigningKeyStore<SigningKeyStore>();
-        builder.AddPersistedGrantStore<PersistedGrantStore>();
-        builder.AddDeviceFlowStore<DeviceFlowStore>();
-        builder.AddServerSideSessionStore<ServerSideSessionStore>();
-        builder.AddPushedAuthorizationRequestStore<PushedAuthorizationRequestStore>();
+        _ = builder.AddSigningKeyStore<SigningKeyStore>();
+        _ = builder.AddPersistedGrantStore<PersistedGrantStore>();
+        _ = builder.AddDeviceFlowStore<DeviceFlowStore>();
+        _ = builder.AddServerSideSessionStore<ServerSideSessionStore>();
+        _ = builder.AddPushedAuthorizationRequestStore<PushedAuthorizationRequestStore>();
 
-        builder.Services.AddSingleton<IHostedService, TokenCleanupHost>();
+        _ = builder.Services.AddSingleton<IHostedService, TokenCleanupHost>();
 
         return builder;
     }
@@ -117,7 +117,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         this IIdentityServerBuilder builder)
         where T : class, IOperationalStoreNotification
     {
-        builder.Services.AddOperationalStoreNotification<T>();
+        _ = builder.Services.AddOperationalStoreNotification<T>();
         return builder;
     }
 }

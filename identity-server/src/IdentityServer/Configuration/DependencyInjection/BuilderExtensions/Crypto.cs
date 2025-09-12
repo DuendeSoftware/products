@@ -27,8 +27,7 @@ public static class IdentityServerBuilderExtensionsCrypto
     /// <returns></returns>
     public static IIdentityServerBuilder AddSigningCredential(this IIdentityServerBuilder builder, SigningCredentials credential)
     {
-        if (!(credential.Key is AsymmetricSecurityKey
-              || credential.Key is IdentityModel.Tokens.JsonWebKey && ((IdentityModel.Tokens.JsonWebKey)credential.Key).HasPrivateKey))
+        if (credential.Key is not AsymmetricSecurityKey and not JsonWebKey { HasPrivateKey: true })
         {
             throw new InvalidOperationException("Signing key is not asymmetric");
         }
@@ -51,7 +50,7 @@ public static class IdentityServerBuilderExtensionsCrypto
             }
         }
 
-        builder.Services.AddSingleton<ISigningCredentialStore>(new InMemorySigningCredentialsStore(credential));
+        _ = builder.Services.AddSingleton<ISigningCredentialStore>(new InMemorySigningCredentialsStore(credential));
 
         var keyInfo = new SecurityKeyInfo
         {
@@ -59,7 +58,7 @@ public static class IdentityServerBuilderExtensionsCrypto
             SigningAlgorithm = credential.Algorithm
         };
 
-        builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(new[] { keyInfo }));
+        _ = builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(new[] { keyInfo }));
 
         return builder;
     }
@@ -168,10 +167,7 @@ public static class IdentityServerBuilderExtensionsCrypto
         string? filename = null,
         IdentityServerConstants.RsaSigningAlgorithm signingAlgorithm = IdentityServerConstants.RsaSigningAlgorithm.RS256)
     {
-        if (filename == null)
-        {
-            filename = Path.Combine(Directory.GetCurrentDirectory(), "tempkey.jwk");
-        }
+        filename ??= Path.Combine(Directory.GetCurrentDirectory(), "tempkey.jwk");
 
         if (File.Exists(filename))
         {
@@ -203,7 +199,7 @@ public static class IdentityServerBuilderExtensionsCrypto
     /// <returns></returns>
     public static IIdentityServerBuilder AddValidationKey(this IIdentityServerBuilder builder, params SecurityKeyInfo[] keys)
     {
-        builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(keys));
+        _ = builder.Services.AddSingleton<IValidationKeysStore>(new InMemoryValidationKeysStore(keys));
 
         return builder;
     }

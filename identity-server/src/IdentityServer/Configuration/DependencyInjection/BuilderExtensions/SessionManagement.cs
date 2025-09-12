@@ -36,15 +36,15 @@ public static class SessionManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IIdentityServerBuilder AddServerSideSessions(this IIdentityServerBuilder builder)
     {
-        builder.Services.AddSingleton<IServerSideSessionsMarker, NopIServerSideSessionsMarker>();
-        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
+        _ = builder.Services.AddSingleton<IServerSideSessionsMarker, NopIServerSideSessionsMarker>();
+        _ = builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
         builder.Services.TryAddTransient<ISessionManagementService, DefaultSessionManagementService>();
         builder.Services.TryAddTransient<IServerSideTicketStore, ServerSideTicketStore>();
 
         // wraps IRefreshTokenService to extend sessions
         builder.Services.AddTransientDecorator<IRefreshTokenService, ServerSideSessionRefreshTokenService>();
 
-        builder.Services.AddSingleton<IHostedService, ServerSideSessionCleanupHost>();
+        _ = builder.Services.AddSingleton<IHostedService, ServerSideSessionCleanupHost>();
 
         // only add if not already in DI
         builder.Services.TryAddSingleton<IServerSideSessionStore, InMemoryServerSideSessionStore>();
@@ -75,7 +75,7 @@ public static class SessionManagementServiceCollectionExtensions
     public static IIdentityServerBuilder AddServerSideSessionStore<T>(this IIdentityServerBuilder builder)
         where T : class, IServerSideSessionStore
     {
-        builder.Services.AddTransient<IServerSideSessionStore>(svcs =>
+        _ = builder.Services.AddTransient<IServerSideSessionStore>(svcs =>
         {
             // odd that this Func is marked as non-null return value, since it is allowed to return null here.
             if (svcs.GetService<IServerSideSessionsMarker>() == null)
@@ -86,7 +86,7 @@ public static class SessionManagementServiceCollectionExtensions
             return svcs.GetRequiredService<T>();
         });
 
-        builder.Services.AddTransient<T>();
+        _ = builder.Services.AddTransient<T>();
 
         return builder;
     }

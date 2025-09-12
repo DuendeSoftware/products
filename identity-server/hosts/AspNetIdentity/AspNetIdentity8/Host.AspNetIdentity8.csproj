@@ -9,8 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
@@ -19,16 +20,6 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
     <PackageReference Include="Serilog.AspNetCore" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- This is a transitive dependency of Microsoft.EntityFrameworkCore.SqlServer.
-Without pinning a version of this package, the sql server package would bring in
-an older version that in turn depends on vulnerable packages. Someday, it would
-be nice if we could update Microsoft.EntityFrameworkCore.SqlServer and remove
-this explicit dependency (assuming that future versions of
-Microsoft.EntityFrameworkCore.SqlServer that don't have this problem exist). -->
-    <PackageReference Include="Microsoft.Data.SqlClient" />
   </ItemGroup>
 
   <ItemGroup>

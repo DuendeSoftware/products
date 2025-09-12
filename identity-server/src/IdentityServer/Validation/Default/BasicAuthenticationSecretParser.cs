@@ -77,7 +77,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
         // = (InputLengthRestrictions.ClientId + InputLengthRestrictions.ClientSecret) * 4 + 10
 
         var idAndSecret = _options.InputLengthRestrictions.ClientId + _options.InputLengthRestrictions.ClientSecret; // *3 for the URL encoding
-        var authorizationHeaderHeaderMaxLength = 4 * idAndSecret + 10;
+        var authorizationHeaderHeaderMaxLength = (4 * idAndSecret) + 10;
 
         if (authorizationHeader.Length > authorizationHeaderHeaderMaxLength)
         {
@@ -85,7 +85,7 @@ public class BasicAuthenticationSecretParser : ISecretParser
             return notfound;
         }
 
-        var parameter = authorizationHeader.Substring(schemeLength);
+        var parameter = authorizationHeader[schemeLength..];
 
         string pair;
         try
@@ -112,8 +112,8 @@ public class BasicAuthenticationSecretParser : ISecretParser
         }
 
         // RFC6749 says individual values must be application/x-www-form-urlencoded
-        var clientId = UrlDecode(pair.Substring(0, ix));
-        var secret = UrlDecode(pair.Substring(ix + 1));
+        var clientId = UrlDecode(pair[..ix]);
+        var secret = UrlDecode(pair[(ix + 1)..]);
 
         if (clientId.IsPresent())
         {

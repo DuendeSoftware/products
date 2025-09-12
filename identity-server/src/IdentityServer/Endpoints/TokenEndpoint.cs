@@ -3,7 +3,6 @@
 
 
 using Duende.IdentityModel;
-using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
@@ -22,7 +21,6 @@ namespace Duende.IdentityServer.Endpoints;
 /// <seealso cref="IEndpointHandler" />
 internal class TokenEndpoint : IEndpointHandler
 {
-    private readonly IdentityServerOptions _identityServerOptions;
     private readonly IClientSecretValidator _clientValidator;
     private readonly ITokenRequestValidator _requestValidator;
     private readonly ITokenResponseGenerator _responseGenerator;
@@ -32,21 +30,18 @@ internal class TokenEndpoint : IEndpointHandler
     /// <summary>
     /// Initializes a new instance of the <see cref="TokenEndpoint" /> class.
     /// </summary>
-    /// <param name="identityServerOptions"></param>
     /// <param name="clientValidator">The client validator.</param>
     /// <param name="requestValidator">The request validator.</param>
     /// <param name="responseGenerator">The response generator.</param>
     /// <param name="events">The events.</param>
     /// <param name="logger">The logger.</param>
     public TokenEndpoint(
-        IdentityServerOptions identityServerOptions,
         IClientSecretValidator clientValidator,
         ITokenRequestValidator requestValidator,
         ITokenResponseGenerator responseGenerator,
         IEventService events,
         ILogger<TokenEndpoint> logger)
     {
-        _identityServerOptions = identityServerOptions;
         _clientValidator = clientValidator;
         _requestValidator = requestValidator;
         _responseGenerator = responseGenerator;
