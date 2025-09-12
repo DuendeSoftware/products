@@ -148,7 +148,7 @@ internal class LicenseUsageTracker(LicenseAccessor licenseAccessor, ILoggerFacto
         // ConcurrentDictionary's ContainsKey method is lock free, while TryAdd
         // always acquires a lock, so in the (by far more common) steady state,
         // the ContainsKey check is much faster.
-        public bool Add(T item) => _dictionary.ContainsKey(item) ? false : _dictionary.TryAdd(item, 0);
+        public bool Add(T item) => !_dictionary.ContainsKey(item) && _dictionary.TryAdd(item, 0);
 
         public IReadOnlyCollection<T> Values => _dictionary.Keys.ToList().AsReadOnly();
     }
