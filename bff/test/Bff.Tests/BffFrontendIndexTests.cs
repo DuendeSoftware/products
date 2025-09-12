@@ -173,7 +173,7 @@ public class BffFrontendIndexTests : BffTestBase
     {
         private int count = 1;
 
-        public Task<string?> Transform(string html, CT ct = default) => Task.FromResult<string?>($"{html} - transformed {count++}");
+        public Task<string?> Transform(string html, BffFrontend frontend, CT ct = default) => Task.FromResult<string?>($"{html} - transformed {count++}");
     }
 
     [Fact]

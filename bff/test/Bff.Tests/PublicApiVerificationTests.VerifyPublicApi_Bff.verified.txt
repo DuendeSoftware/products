@@ -425,7 +425,7 @@ namespace Duende.Bff.DynamicFrontends
     }
     public interface IIndexHtmlTransformer
     {
-        System.Threading.Tasks.Task<string?> Transform(string indexHtml, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task<string?> Transform(string indexHtml, Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Threading.CancellationToken ct = default);
     }
     public interface IStaticFilesClient
     {
