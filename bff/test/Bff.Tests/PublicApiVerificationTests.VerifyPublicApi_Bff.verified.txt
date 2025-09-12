@@ -154,7 +154,7 @@ namespace Duende.Bff
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPathMapping(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPostProcessing(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPreProcessing(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
-        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffStaticFileHandling(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffStaticFileProxying(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
     public static class BffBuilderExtensions
     {
@@ -390,11 +390,11 @@ namespace Duende.Bff.DynamicFrontends
     {
         public static Duende.Bff.DynamicFrontends.BffFrontend MappedToOrigin(this Duende.Bff.DynamicFrontends.BffFrontend frontend, Duende.Bff.DynamicFrontends.Origin origin) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend MappedToPath(this Duende.Bff.DynamicFrontends.BffFrontend frontend, Duende.Bff.LocalPath path) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithBffStaticAssets(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri uri, System.Func<bool> useCdnWhen) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend WithCdnIndexHtmlUrl(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri? url) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend WithCookieOptions(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> options) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend WithOpenIdConnectOptions(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> options) { }
         public static Duende.Bff.DynamicFrontends.BffFrontend WithProxiedStaticAssets(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri url) { }
-        public static Duende.Bff.DynamicFrontends.BffFrontend WithStaticAssets(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri uri, System.Func<bool> useCdnWhen) { }
     }
     [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.DynamicFrontends.BffFrontendName>))]
     public readonly struct BffFrontendName : System.IEquatable<Duende.Bff.DynamicFrontends.BffFrontendName>

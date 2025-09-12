@@ -105,7 +105,7 @@ public class TestDataBuilder(TestData the)
     internal BffFrontendConfiguration BffFrontendConfiguration() =>
         new()
         {
-            IndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = The.Url,
             MatchingOrigin = The.Origin.ToString(),
             MatchingPath = The.Path,
             Oidc = OidcConfiguration(),

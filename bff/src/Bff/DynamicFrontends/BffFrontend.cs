@@ -73,7 +73,7 @@ public sealed record BffFrontend
         get => _cdnIndexHtmlUrl;
         init
         {
-            if (StaticAssetsUrl != null)
+            if (StaticAssetsUrl != null && value != null)
             {
                 throw new InvalidOperationException("Cannot use both StaticAssetsUrl and CdnIndexHtmlUrl");
             }
@@ -99,7 +99,7 @@ public sealed record BffFrontend
         get => _staticAssetsUrl;
         init
         {
-            if (CdnIndexHtmlUrl != null)
+            if (CdnIndexHtmlUrl != null && value != null)
             {
                 throw new InvalidOperationException("Cannot use both StaticAssetsUrl and CdnIndexHtmlUrl");
             }

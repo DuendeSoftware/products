@@ -176,7 +176,7 @@ public class BffBuilderTests
                 {
                     [The.FrontendName] = new()
                     {
-                        IndexHtmlUrl = The.Url,
+                        CdnIndexHtmlUrl = The.Url,
                         MatchingOrigin = The.Origin.ToString(),
                         MatchingPath = The.Path,
                         Oidc = Some.OidcConfiguration(),
@@ -273,38 +273,46 @@ public class BffBuilderTests
         options.ClientId.ShouldBe(The.ClientId);
     }
 
-    [Fact]
-    public void Can_configure_frontends_in_configuration_as_string()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Can_configure_frontends_in_configuration_as_string(bool useCdnIndexUrl)
     {
+        var cdnIndexHtmlUrl = useCdnIndexUrl ? The.Url : null;
+        var staticAssetsUrl = useCdnIndexUrl ? null : The.Url;
+
+        var keyValuePairs = new Dictionary<string, string?>()
+        {
+            ["frontends:_FrontendName_:matchingPath"] = The.Path,
+            ["frontends:_FrontendName_:matchingOrigin"] = The.Origin.ToString(),
+            ["frontends:_FrontendName_:cdnIndexHtmlUrl"] = cdnIndexHtmlUrl?.ToString(),
+            ["frontends:_FrontendName_:staticAssetsUrl"] = staticAssetsUrl?.ToString(),
+            ["frontends:_FrontendName_:Oidc:scope:0"] = The.Scope,
+            ["frontends:_FrontendName_:Oidc:saveTokens"] = "True",
+            ["frontends:_FrontendName_:Oidc:responseType"] = The.ResponseType,
+            ["frontends:_FrontendName_:Oidc:responseMode"] = The.ResponseMode,
+            ["frontends:_FrontendName_:Oidc:getClaimsFromUserInfoEndpoint"] = "True",
+            ["frontends:_FrontendName_:Oidc:clientSecret"] = The.ClientSecret,
+            ["frontends:_FrontendName_:Oidc:clientId"] = The.ClientId,
+            ["frontends:_FrontendName_:Oidc:callbackPath"] = "", // ev: todo
+            ["frontends:_FrontendName_:Oidc:authority"] = The.Authority.ToString(),
+            ["frontends:_FrontendName_:Oidc:mapInboundClaims"] = "False",
+            ["frontends:_FrontendName_:RemoteApis:0:localPath"] = The.Path,
+            ["frontends:_FrontendName_:RemoteApis:0:targetUri"] = The.Url.ToString(),
+            ["frontends:_FrontendName_:RemoteApis:0:activityTimeout"] = TimeSpan.FromSeconds(987).ToString(),
+            ["frontends:_FrontendName_:RemoteApis:0:allowResponseBuffering"] = true.ToString(),
+            ["frontends:_FrontendName_:RemoteApis:0:requiredTokenType"] = The.RequiredTokenType.ToString(),
+            ["frontends:_FrontendName_:RemoteApis:0:tokenRetrieverTypeName"] =
+                The.TokenRetrieverType.AssemblyQualifiedName,
+            ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:signinScheme"] = The.Scheme,
+            ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:challengeScheme"] = The.Scheme,
+            ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:forceRenewal"] = true.ToString(),
+            ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:resource"] = The.Resource,
+        };
+
         IConfiguration configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>()
-            {
-                ["frontends:_FrontendName_:matchingPath"] = The.Path,
-                ["frontends:_FrontendName_:matchingOrigin"] = The.Origin.ToString(),
-                ["frontends:_FrontendName_:indexHtmlUrl"] = The.Url.ToString(),
-                ["frontends:_FrontendName_:Oidc:scope:0"] = The.Scope,
-                ["frontends:_FrontendName_:Oidc:saveTokens"] = "True",
-                ["frontends:_FrontendName_:Oidc:responseType"] = The.ResponseType,
-                ["frontends:_FrontendName_:Oidc:responseMode"] = The.ResponseMode,
-                ["frontends:_FrontendName_:Oidc:getClaimsFromUserInfoEndpoint"] = "True",
-                ["frontends:_FrontendName_:Oidc:clientSecret"] = The.ClientSecret,
-                ["frontends:_FrontendName_:Oidc:clientId"] = The.ClientId,
-                ["frontends:_FrontendName_:Oidc:callbackPath"] = "", // ev: todo
-                ["frontends:_FrontendName_:Oidc:authority"] = The.Authority.ToString(),
-                ["frontends:_FrontendName_:Oidc:mapInboundClaims"] = "False",
-                ["frontends:_FrontendName_:RemoteApis:0:localPath"] = The.Path,
-                ["frontends:_FrontendName_:RemoteApis:0:targetUri"] = The.Url.ToString(),
-                ["frontends:_FrontendName_:RemoteApis:0:activityTimeout"] = TimeSpan.FromSeconds(987).ToString(),
-                ["frontends:_FrontendName_:RemoteApis:0:allowResponseBuffering"] = true.ToString(),
-                ["frontends:_FrontendName_:RemoteApis:0:requiredTokenType"] = The.RequiredTokenType.ToString(),
-                ["frontends:_FrontendName_:RemoteApis:0:tokenRetrieverTypeName"] =
-                    The.TokenRetrieverType.AssemblyQualifiedName,
-                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:signinScheme"] = The.Scheme,
-                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:challengeScheme"] = The.Scheme,
-                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:forceRenewal"] = true.ToString(),
-                ["frontends:_FrontendName_:RemoteApis:0:userAccessTokenParameters:resource"] = The.Resource,
-            })
-            .Build();
+                .AddInMemoryCollection(keyValuePairs)
+                .Build();
 
         var services = new ServiceCollection();
         services.AddBff()
@@ -318,7 +326,8 @@ public class BffBuilderTests
         var expected = new BffFrontend
         {
             Name = The.FrontendName,
-            CdnIndexHtmlUrl = The.Url,
+            CdnIndexHtmlUrl = cdnIndexHtmlUrl,
+            StaticAssetsUrl = staticAssetsUrl,
             SelectionCriteria = Some.FrontendSelectionCriteria(),
             DataExtensions = found.DataExtensions
         };
