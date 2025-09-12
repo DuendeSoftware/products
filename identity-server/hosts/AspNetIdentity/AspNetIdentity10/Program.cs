@@ -7,6 +7,8 @@ using Duende.IdentityServer.Licensing;
 using IdentityServerHost;
 using Serilog;
 
+#pragma warning disable IDE0058 // Expression value is never used. Suppressed throughout the whole file, because there would be a lot of discards otherwise.
+
 SerilogDefaults.Bootstrap();
 
 try

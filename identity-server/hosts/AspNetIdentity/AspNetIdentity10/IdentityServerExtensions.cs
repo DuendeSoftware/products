@@ -10,7 +10,7 @@ internal static class IdentityServerExtensions
 {
     internal static WebApplicationBuilder ConfigureIdentityServer(this WebApplicationBuilder builder)
     {
-        builder.Services.AddIdentityServer(opt =>
+        _ = builder.Services.AddIdentityServer(opt =>
             {
                 // In load-balanced environments, synchronization delay is important.
                 // In development, we're never load balanced and can skip it to start up faster.

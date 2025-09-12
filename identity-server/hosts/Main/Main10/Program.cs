@@ -9,6 +9,8 @@ using IdentityServerHost;
 using Microsoft.Extensions.Localization;
 using Serilog;
 
+#pragma warning disable IDE0058 // Expression value is never used. Suppressed throughout the whole file, because there would be a lot of discards otherwise.
+
 // Note: This is necessary for localization to work correctly since our root namespace does
 // not match the assembly name.
 [assembly: RootNamespace("IdentityServerHost")]

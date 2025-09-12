@@ -12,6 +12,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
 
+#pragma warning disable IDE0058 // Expression value is never used. Disabled throughout the entire file, as all builder.Services or app.Use would need a discard
+
 internal static class IdentityServerExtensions
 {
     internal static WebApplicationBuilder ConfigureIdentityServer(this WebApplicationBuilder builder)

@@ -15,6 +15,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServerHost;
 
+#pragma warning disable IDE0058 // Expression value is never used. Suppressed throughout the whole file, because there would be a lot of discards otherwise.
+
 internal static class IdentityServerExtensions
 {
     internal static WebApplicationBuilder ConfigureIdentityServer(this WebApplicationBuilder builder)
@@ -57,7 +59,7 @@ internal static class IdentityServerExtensions
 
             options.MutualTls.Enabled = true;
 
-            options.Diagnostics.ChunkSize = 1024 * 1000 - 32; // 1 MB minus some formatting space;
+            options.Diagnostics.ChunkSize = (1024 * 1000) - 32; // 1 MB minus some formatting space;
         })
             .AddTestUsers(TestUsers.Users)
             // this adds the config data from DB (clients, resources, CORS)
@@ -114,7 +116,9 @@ internal static class IdentityServerExtensions
     //    mkcert -pkcs12 identityserver.test.rsa
     //    mkcert -pkcs12 -ecdsa identityserver.test.ecdsa
     // Then import the keys into the certificate manager. This code expects keys in the personal store of the current user.
+#pragma warning disable IDE0051 // Remove unused private members
     private static IIdentityServerBuilder AddStaticSigningCredential(this IIdentityServerBuilder builder)
+#pragma warning restore IDE0051 // Remove unused private members
     {
         var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
         try

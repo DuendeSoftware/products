@@ -12,6 +12,8 @@ using Serilog;
 
 namespace IdentityServerHost;
 
+#pragma warning disable IDE0058 // Expression value is never used. Suppressed throughout the whole file, because there would be a lot of discards otherwise.
+
 internal static class HostingExtensions
 {
     internal static WebApplication ConfigureServices(this WebApplicationBuilder builder)

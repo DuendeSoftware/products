@@ -9,6 +9,8 @@ using Serilog;
 
 SerilogDefaults.Bootstrap();
 
+#pragma warning disable IDE0058 // Expression value is never used. Suppressed throughout the whole file, because there would be a lot of discards otherwise.
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);
