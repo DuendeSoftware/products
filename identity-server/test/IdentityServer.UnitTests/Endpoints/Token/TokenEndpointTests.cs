@@ -69,7 +69,6 @@ public class TokenEndpointTests
         _context = new MockHttpContextAccessor().HttpContext;
 
         _subject = new TokenEndpoint(
-            _identityServerOptions,
             _stubClientSecretValidator,
             _stubTokenRequestValidator,
             _stubTokenResponseGenerator,
