@@ -41,7 +41,7 @@ public static class ConfigurationServiceCollectionExtensions
     /// </summary>
     public static IdentityServerConfigurationBuilder AddIdentityServerConfiguration(this IServiceCollection services, Action<IdentityServerConfigurationOptions> setupAction)
     {
-        services.Configure(setupAction);
+        _ = services.Configure(setupAction);
         return AddIdentityServerConfiguration(services);
     }
 
@@ -51,7 +51,7 @@ public static class ConfigurationServiceCollectionExtensions
     /// </summary>
     public static IdentityServerConfigurationBuilder AddIdentityServerConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<IdentityServerConfigurationOptions>(configuration);
+        _ = services.Configure<IdentityServerConfigurationOptions>(configuration);
         return services.AddIdentityServerConfiguration();
     }
 
@@ -59,8 +59,8 @@ public static class ConfigurationServiceCollectionExtensions
     {
         var builder = new IdentityServerConfigurationBuilder(services);
 
-        builder.Services.AddTransient<DynamicClientRegistrationEndpoint>();
-        builder.Services.AddTransient(
+        _ = builder.Services.AddTransient<DynamicClientRegistrationEndpoint>();
+        _ = builder.Services.AddTransient(
             resolver => resolver.GetRequiredService<IOptionsMonitor<IdentityServerConfigurationOptions>>().CurrentValue);
 
         builder.Services.TryAddTransient<IDynamicClientRegistrationValidator, DynamicClientRegistrationValidator>();

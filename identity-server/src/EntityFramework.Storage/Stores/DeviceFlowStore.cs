@@ -70,9 +70,9 @@ public class DeviceFlowStore : IDeviceFlowStore
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.StoreDeviceAuthorization");
 
-        Context.DeviceFlowCodes.Add(ToEntity(data, deviceCode, userCode));
+        _ = Context.DeviceFlowCodes.Add(ToEntity(data, deviceCode, userCode));
 
-        await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+        _ = await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
     }
 
     /// <summary>
@@ -141,7 +141,7 @@ public class DeviceFlowStore : IDeviceFlowStore
 
         try
         {
-            await Context.SaveChangesAsync();
+            _ = await Context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -166,11 +166,11 @@ public class DeviceFlowStore : IDeviceFlowStore
         {
             Logger.LogDebug("removing {deviceCode} device code from database", deviceCode);
 
-            Context.DeviceFlowCodes.Remove(deviceFlowCodes);
+            _ = Context.DeviceFlowCodes.Remove(deviceFlowCodes);
 
             try
             {
-                await Context.SaveChangesAsync();
+                _ = await Context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException ex)
             {

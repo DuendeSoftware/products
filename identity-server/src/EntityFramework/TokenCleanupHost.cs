@@ -51,7 +51,7 @@ public class TokenCleanupHost : IHostedService
 
             _source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            Task.Factory.StartNew(() => StartInternalAsync(_source.Token), cancellationToken, TaskCreationOptions.None, TaskScheduler.Default);
+            _ = Task.Factory.StartNew(() => StartInternalAsync(_source.Token), cancellationToken, TaskCreationOptions.None, TaskScheduler.Default);
         }
 
         return Task.CompletedTask;

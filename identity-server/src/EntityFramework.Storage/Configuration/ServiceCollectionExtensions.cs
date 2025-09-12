@@ -38,7 +38,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         where TContext : DbContext, IConfigurationDbContext
     {
         var options = new ConfigurationStoreOptions();
-        services.AddSingleton(options);
+        _ = services.AddSingleton(options);
         storeOptionsAction?.Invoke(options);
 
         if (options.ResolveDbContextOptions != null)
@@ -47,16 +47,16 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
             {
                 if (options.PoolSize.HasValue)
                 {
-                    services.AddDbContextPool<TContext>(options.ResolveDbContextOptions, options.PoolSize.Value);
+                    _ = services.AddDbContextPool<TContext>(options.ResolveDbContextOptions, options.PoolSize.Value);
                 }
                 else
                 {
-                    services.AddDbContextPool<TContext>(options.ResolveDbContextOptions);
+                    _ = services.AddDbContextPool<TContext>(options.ResolveDbContextOptions);
                 }
             }
             else
             {
-                services.AddDbContext<TContext>(options.ResolveDbContextOptions);
+                _ = services.AddDbContext<TContext>(options.ResolveDbContextOptions);
             }
         }
         else
@@ -65,25 +65,25 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
             {
                 if (options.PoolSize.HasValue)
                 {
-                    services.AddDbContextPool<TContext>(
+                    _ = services.AddDbContextPool<TContext>(
                         dbCtxBuilder => { options.ConfigureDbContext?.Invoke(dbCtxBuilder); }, options.PoolSize.Value);
                 }
                 else
                 {
-                    services.AddDbContextPool<TContext>(
+                    _ = services.AddDbContextPool<TContext>(
                         dbCtxBuilder => { options.ConfigureDbContext?.Invoke(dbCtxBuilder); });
                 }
             }
             else
             {
-                services.AddDbContext<TContext>(dbCtxBuilder =>
+                _ = services.AddDbContext<TContext>(dbCtxBuilder =>
                 {
                     options.ConfigureDbContext?.Invoke(dbCtxBuilder);
                 });
             }
         }
 
-        services.AddScoped<IConfigurationDbContext>(svcs => svcs.GetRequiredService<TContext>());
+        _ = services.AddScoped<IConfigurationDbContext>(svcs => svcs.GetRequiredService<TContext>());
 
         return services;
     }
@@ -109,7 +109,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
         where TContext : DbContext, IPersistedGrantDbContext
     {
         var storeOptions = new OperationalStoreOptions();
-        services.AddSingleton(storeOptions);
+        _ = services.AddSingleton(storeOptions);
         storeOptionsAction?.Invoke(storeOptions);
 
         if (storeOptions.ResolveDbContextOptions != null)
@@ -118,17 +118,17 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
             {
                 if (storeOptions.PoolSize.HasValue)
                 {
-                    services.AddDbContextPool<TContext>(storeOptions.ResolveDbContextOptions,
+                    _ = services.AddDbContextPool<TContext>(storeOptions.ResolveDbContextOptions,
                         storeOptions.PoolSize.Value);
                 }
                 else
                 {
-                    services.AddDbContextPool<TContext>(storeOptions.ResolveDbContextOptions);
+                    _ = services.AddDbContextPool<TContext>(storeOptions.ResolveDbContextOptions);
                 }
             }
             else
             {
-                services.AddDbContext<TContext>(storeOptions.ResolveDbContextOptions);
+                _ = services.AddDbContext<TContext>(storeOptions.ResolveDbContextOptions);
             }
         }
         else
@@ -137,27 +137,27 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
             {
                 if (storeOptions.PoolSize.HasValue)
                 {
-                    services.AddDbContextPool<TContext>(
+                    _ = services.AddDbContextPool<TContext>(
                         dbCtxBuilder => { storeOptions.ConfigureDbContext?.Invoke(dbCtxBuilder); },
                         storeOptions.PoolSize.Value);
                 }
                 else
                 {
-                    services.AddDbContextPool<TContext>(
+                    _ = services.AddDbContextPool<TContext>(
                         dbCtxBuilder => { storeOptions.ConfigureDbContext?.Invoke(dbCtxBuilder); });
                 }
             }
             else
             {
-                services.AddDbContext<TContext>(dbCtxBuilder =>
+                _ = services.AddDbContext<TContext>(dbCtxBuilder =>
                 {
                     storeOptions.ConfigureDbContext?.Invoke(dbCtxBuilder);
                 });
             }
         }
 
-        services.AddScoped<IPersistedGrantDbContext>(svcs => svcs.GetRequiredService<TContext>());
-        services.AddTransient<ITokenCleanupService, TokenCleanupService>();
+        _ = services.AddScoped<IPersistedGrantDbContext>(svcs => svcs.GetRequiredService<TContext>());
+        _ = services.AddTransient<ITokenCleanupService, TokenCleanupService>();
 
         return services;
     }
@@ -171,7 +171,7 @@ public static class IdentityServerEntityFrameworkBuilderExtensions
     public static IServiceCollection AddOperationalStoreNotification<T>(this IServiceCollection services)
         where T : class, IOperationalStoreNotification
     {
-        services.AddTransient<IOperationalStoreNotification, T>();
+        _ = services.AddTransient<IOperationalStoreNotification, T>();
         return services;
     }
 }

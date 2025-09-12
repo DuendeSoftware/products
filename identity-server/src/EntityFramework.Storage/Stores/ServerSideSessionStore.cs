@@ -68,11 +68,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
             Expires = session.Expires,
             Data = session.Ticket,
         };
-        Context.ServerSideSessions.Add(entity);
+        _ = Context.ServerSideSessions.Add(entity);
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Created new server-side session {serverSideSessionKey} in database", session.Key);
         }
         catch (DbUpdateException ex)
@@ -142,7 +142,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Updated server-side session {serverSideSessionKey} in database", session.Key);
         }
         catch (DbUpdateException ex)
@@ -168,11 +168,11 @@ public class ServerSideSessionStore : IServerSideSessionStore
             return;
         }
 
-        Context.ServerSideSessions.Remove(entity);
+        _ = Context.ServerSideSessions.Remove(entity);
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Deleted server-side session {serverSideSessionKey} in database", key);
         }
         catch (DbUpdateException ex)
@@ -231,7 +231,7 @@ public class ServerSideSessionStore : IServerSideSessionStore
 
         try
         {
-            await Context.SaveChangesAsync(cancellationToken);
+            _ = await Context.SaveChangesAsync(cancellationToken);
             Logger.LogDebug("Removed {serverSideSessionCount} server-side sessions from database for {@filter}", entities.Length, filter);
         }
         catch (DbUpdateException ex)

@@ -60,7 +60,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
             Logger.LogDebug("{persistedGrantKey} not found in database", token.Key);
 
             var persistedGrant = token.ToEntity();
-            Context.PersistedGrants.Add(persistedGrant);
+            _ = Context.PersistedGrants.Add(persistedGrant);
         }
         else
         {
@@ -71,7 +71,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
 
         try
         {
-            await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+            _ = await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -124,11 +124,11 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
         {
             Logger.LogDebug("removing {persistedGrantKey} persisted grant from database", key);
 
-            Context.PersistedGrants.Remove(persistedGrant);
+            _ = Context.PersistedGrants.Remove(persistedGrant);
 
             try
             {
-                await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+                _ = await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -158,7 +158,7 @@ public class PersistedGrantStore : Duende.IdentityServer.Stores.IPersistedGrantS
 
         try
         {
-            await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+            _ = await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
         }
         catch (DbUpdateConcurrencyException ex)
         {

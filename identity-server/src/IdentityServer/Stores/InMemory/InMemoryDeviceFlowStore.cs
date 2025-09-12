@@ -84,7 +84,7 @@ public class InMemoryDeviceFlowStore : IDeviceFlowStore
 
             if (foundData != null)
             {
-                foundData.Data = data;
+                _ = foundData.Data = data;
             }
         }
 

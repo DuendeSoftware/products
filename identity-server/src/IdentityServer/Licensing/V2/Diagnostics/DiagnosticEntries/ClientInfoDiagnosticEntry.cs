@@ -16,8 +16,7 @@ internal class ClientInfoDiagnosticEntry(ClientLoadedTracker clientLoadedTracker
     public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
     {
         writer.WriteStartArray("Clients");
-
-        foreach (var (clientId, client) in clientLoadedTracker.Clients)
+        foreach (var (_, client) in clientLoadedTracker.Clients)
         {
             JsonSerializer.Serialize(writer, client, _serializerOptions);
         }

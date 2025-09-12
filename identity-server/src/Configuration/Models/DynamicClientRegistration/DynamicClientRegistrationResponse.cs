@@ -166,9 +166,9 @@ public class DynamicClientRegistrationResponse : DynamicClientRegistrationReques
         // values from the Extensions that have specific properties in the
         // request object, because those values will get bound to the
         // properties, not the Extensions.
-        Extensions.Remove(OidcConstants.RegistrationResponse.ClientSecret);
-        Extensions.Remove(OidcConstants.RegistrationResponse.ClientSecretExpiresAt);
-        Extensions.Remove(OidcConstants.ClientMetadata.ResponseTypes);
+        _ = Extensions.Remove(OidcConstants.RegistrationResponse.ClientSecret);
+        _ = Extensions.Remove(OidcConstants.RegistrationResponse.ClientSecretExpiresAt);
+        _ = Extensions.Remove(OidcConstants.ClientMetadata.ResponseTypes);
     }
 
     private static Uri? ToUri(string? s) =>

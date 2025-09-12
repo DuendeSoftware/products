@@ -139,7 +139,7 @@ public class ConfigurationDbContext<TContext> : DbContext, IConfigurationDbConte
         base.OnConfiguring(optionsBuilder);
         if (!optionsBuilder.Options.IsFrozen)
         {
-            optionsBuilder.ConfigureWarnings(w => w.Ignore([RelationalEventId.MultipleCollectionIncludeWarning]));
+            _ = optionsBuilder.ConfigureWarnings(w => w.Ignore([RelationalEventId.MultipleCollectionIncludeWarning]));
         }
     }
 }

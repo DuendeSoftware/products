@@ -25,7 +25,7 @@ public class TestOperationalStoreNotification : IOperationalStoreNotification
     public Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(deviceCodes);
-        foreach (var deviceCode in deviceCodes)
+        foreach (var _ in deviceCodes)
         {
             Console.WriteLine("cleaned device code");
         }
@@ -35,7 +35,7 @@ public class TestOperationalStoreNotification : IOperationalStoreNotification
     public Task ServerSideSessionsRemovedAsync(IEnumerable<ServerSideSession> userSessions, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(userSessions);
-        foreach (var session in userSessions)
+        foreach (var _ in userSessions)
         {
             Console.WriteLine("cleaned user session");
         }

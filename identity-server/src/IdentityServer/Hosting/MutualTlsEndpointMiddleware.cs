@@ -58,7 +58,7 @@ public class MutualTlsEndpointMiddleware
         {
             if (_options.MutualTls.DomainName.Contains('.', StringComparison.InvariantCulture))
             {
-                var requestedHost = HostString.FromUriComponent(_options.MutualTls.DomainName);
+                _ = HostString.FromUriComponent(_options.MutualTls.DomainName);
                 // Separate domain
                 if (RequestedHostMatches(context.Request.Host, _options.MutualTls.DomainName))
                 {
