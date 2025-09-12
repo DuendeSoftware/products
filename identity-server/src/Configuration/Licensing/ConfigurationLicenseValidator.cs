@@ -13,7 +13,7 @@ namespace Duende.IdentityServer;
 // APIs needed for IdentityServer specific license validation
 internal sealed class ConfigurationLicenseValidator : LicenseValidator<ConfigurationLicense>
 {
-    internal readonly static ConfigurationLicenseValidator Instance = new();
+    internal static readonly ConfigurationLicenseValidator Instance = new();
 
     public void Initialize(ILoggerFactory loggerFactory, IdentityServerConfigurationOptions options)
     {
