@@ -32,7 +32,9 @@ public class TestOperationalStoreNotification : IOperationalStoreNotification
         return Task.CompletedTask;
     }
 
+#pragma warning disable IDE0060 // Remove unused parameter
     public Task ServerSideSessionsRemovedAsync(IEnumerable<ServerSideSession> userSessions, CancellationToken cancellationToken = default)
+#pragma warning restore IDE0060 // Remove unused parameter
     {
         ArgumentNullException.ThrowIfNull(userSessions);
         foreach (var _ in userSessions)
