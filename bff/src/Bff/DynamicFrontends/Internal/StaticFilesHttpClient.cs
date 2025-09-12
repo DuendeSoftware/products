@@ -52,7 +52,7 @@ internal class StaticFilesHttpClient(
 
                     logger.RetrievedIndexHTML(LogLevel.Debug, frontend.Name, response.StatusCode);
 
-                    var transformed = await transformer.Transform(html, ctInner);
+                    var transformed = await transformer.Transform(html, frontend, ctInner);
                     return transformed;
                 },
                 options: new HybridCacheEntryOptions()
@@ -105,7 +105,7 @@ internal class StaticFilesHttpClient(
         {
             var html = await response.Content.ReadAsStringAsync(ct);
 
-            html = await transformer.Transform(html, ct);
+            html = await transformer.Transform(html, frontend, ct);
             await context.Response.WriteAsync(html ?? string.Empty, ct);
             return;
         }

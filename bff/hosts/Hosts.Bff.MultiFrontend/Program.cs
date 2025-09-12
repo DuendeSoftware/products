@@ -15,11 +15,13 @@ using Yarp.ReverseProxy.Configuration;
 
 var bffConfig = new ConfigurationBuilder()
 #if DEBUG
-    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "BffConfig.json"), optional: false, reloadOnChange: true)
+    //.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "BffConfig.json"), optional: false, reloadOnChange: true)
 #else
     .AddJsonFile("BffConfig.json", optional: false, reloadOnChange: true)
 #endif
     .Build();
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,9 +82,9 @@ bffBuilder
     .LoadConfiguration(bffConfig)
     .AddRemoteApis()
     .AddFrontends(
-        new BffFrontend(BffFrontendName.Parse("default-frontend"))
-            .WithBffStaticAssets(new Uri("https://localhost:5010/static"), useCdnWhen: runningInProduction)
-,
+//        new BffFrontend(BffFrontendName.Parse("default-frontend"))
+//            .WithBffStaticAssets(new Uri("https://localhost:5010/static"), useCdnWhen: runningInProduction)
+//,
         new BffFrontend(BffFrontendName.Parse("with-path"))
             .WithOpenIdConnectOptions(opt =>
             {
@@ -234,19 +236,14 @@ RouteConfig[] BuildYarpRoutes()
 }
 
 
-public class FrontendAwareIndexHtmlTransformer(CurrentFrontendAccessor currentFrontendAccessor) : IIndexHtmlTransformer
+public class FrontendAwareIndexHtmlTransformer : IIndexHtmlTransformer
 {
-    public Task<string?> Transform(string indexHtml, CancellationToken ct = default)
+    public Task<string?> Transform(string indexHtml, BffFrontend frontend, CancellationToken ct = default)
     {
-        if (!currentFrontendAccessor.TryGet(out var frontend))
-        {
-            return Task.FromResult<string?>(null);
-        }
-
         indexHtml = indexHtml.Replace("[FrontendName]", frontend.Name);
         indexHtml = indexHtml.Replace("[Path]", frontend.SelectionCriteria.MatchingPath + "/"); // Note, the path must end with a slash
-
 
         return Task.FromResult<string?>(indexHtml);
     }
 }
+
