@@ -6,7 +6,6 @@ using System.Net.Mime;
 using Duende.Bff.Configuration;
 using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -105,7 +104,7 @@ internal class StaticFilesHttpClient(
             && transformer != null)
         {
             var html = await response.Content.ReadAsStringAsync(ct);
-            
+
             html = await transformer.Transform(html, ct);
             await context.Response.WriteAsync(html ?? string.Empty, ct);
             return;
