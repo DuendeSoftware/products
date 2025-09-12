@@ -10,3 +10,4 @@ dotnet_diagnostic.IDE0270.severity = suggestion # Null check can be simplified (
 dotnet_diagnostic.IDE0290.severity = suggestion # Use primary constructor
 dotnet_diagnostic.IDE1006.severity = suggestion # Naming Styles
 dotnet_style_namespace_match_folder = false   # Disabled because changing namespaces is a breaking change
+csharp_prefer_system_threading_lock = false   # Disabled because we need to support .net 8
