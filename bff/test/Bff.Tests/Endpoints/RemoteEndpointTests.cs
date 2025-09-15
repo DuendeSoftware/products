@@ -735,9 +735,14 @@ public class RemoteEndpointTests : BffTestBase
         // turn on delays. Now the timeout of 100 ms should kick in. 
         shouldDelay = true;
 
-        await Bff.BrowserClient.CallBffHostApi(
-            url: Bff.Url(The.PathAndSubPath),
-            expectedStatusCode: HttpStatusCode.BadGateway
-        );
+        Bff.BrowserClient.DefaultRequestHeaders.Add("x-csrf", "1");
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url(The.PathAndSubPath));
+
+        // Annoyingly enough, most of the times, yarp replaces the 504 Gateway Timeout with a 502 Bad Gateway.
+        // but not always. Both indicate that the request have been cancelled, so they are both acceptable.
+        response.StatusCode
+            .ShouldBeOneOf(HttpStatusCode.GatewayTimeout, HttpStatusCode.BadGateway);
+
+
     }
 }
