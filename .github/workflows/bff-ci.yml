@@ -138,13 +138,17 @@ jobs:
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
-      run: dotnet build bff.slnf --no-restore -c Release
+      # This build is using Debug config because of a known issue in net10.0 rc1
+      # https://github.com/dotnet/aspnetcore/issues/63364
+      # We do not intend to keep using Debug config after it is fixed in net10.0 rc2.
+      # Re-generating the workflows with workflow-gen will overwrite this.
+      run: dotnet build bff.slnf --no-restore -c Debug
     - name: Install Playwright
-      run: pwsh test/Hosts.Tests/bin/Release/net9.0/playwright.ps1 install --with-deps
+      run: pwsh test/Hosts.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test - test/Hosts.Tests
-      run: dotnet test test/Hosts.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Hosts.Tests-tests.trx" --collect:"XPlat Code Coverage"
+      run: dotnet test test/Hosts.Tests -c Debug --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Hosts.Tests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-Hosts-Tests
       name: Test report - test/Hosts.Tests
       if: github.event_name == 'push' && (success() || failure())
