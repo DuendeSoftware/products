@@ -419,14 +419,11 @@ namespace Duende.Bff.DynamicFrontends
         [System.Runtime.CompilerServices.RequiredMember]
         public string Host { get; init; }
         public int Port { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public string Scheme { get; init; }
         public bool Equals(Duende.Bff.DynamicFrontends.HostHeaderValue? other) { }
         public bool Equals(Microsoft.AspNetCore.Http.HttpRequest? request) { }
         public override int GetHashCode() { }
         public override string ToString() { }
-        public System.Uri ToUri() { }
-        public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(string origin) { }
+        public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(string hostHeaderValue) { }
         public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(System.Uri uri) { }
         public static Duende.Bff.DynamicFrontends.HostHeaderValue? ParseOrDefault(string? origin) { }
     }

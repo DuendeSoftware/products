@@ -17,7 +17,6 @@ public class HostHeaderValueTests
         var origin = HostHeaderValue.Parse(url);
 
         // Assert
-        origin.Scheme.ShouldBe("https");
         origin.Host.ShouldBe("example.com");
         origin.Port.ShouldBe(443); // Default HTTPS port
     }
@@ -45,7 +44,6 @@ public class HostHeaderValueTests
         var origin = HostHeaderValue.Parse(url);
 
         // Assert
-        origin.Scheme.ShouldBe("http");
         origin.Host.ShouldBe("example.com");
         origin.Port.ShouldBe(80); // Default HTTP port in Uri
     }
@@ -82,36 +80,6 @@ public class HostHeaderValueTests
     }
 
     [Fact]
-    public void Parse_WithPath_IgnoresPath()
-    {
-        // Arrange
-        var url = "https://example.com/some/path";
-
-        // Act
-        var origin = HostHeaderValue.Parse(url);
-
-        // Assert
-        origin.Scheme.ShouldBe("https");
-        origin.Host.ShouldBe("example.com");
-        origin.Port.ShouldBe(443);
-    }
-
-    [Fact]
-    public void Parse_WithQuery_IgnoresQuery()
-    {
-        // Arrange
-        var url = "https://example.com?param=value";
-
-        // Act
-        var origin = HostHeaderValue.Parse(url);
-
-        // Assert
-        origin.Scheme.ShouldBe("https");
-        origin.Host.ShouldBe("example.com");
-        origin.Port.ShouldBe(443);
-    }
-
-    [Fact]
     public void Parse_WithFragment_IgnoresFragment()
     {
         // Arrange
@@ -121,130 +89,40 @@ public class HostHeaderValueTests
         var origin = HostHeaderValue.Parse(url);
 
         // Assert
-        origin.Scheme.ShouldBe("https");
         origin.Host.ShouldBe("example.com");
         origin.Port.ShouldBe(443);
     }
 
-    [Fact]
-    public void Parse_WithInvalidUrl_ThrowsUriFormatException()
+
+    [Theory]
+    [InlineData("https://uri", "https://uri", true, "same uri")]
+    [InlineData("uri:443", "https://uri", true, "default https port")]
+    [InlineData("http://uri", "http://uri", true, "default https port")]
+    [InlineData("http://uri", "https://uri", false, "different scheme")]
+    [InlineData("https://uri:123", "https://uri:321", false, "different port")]
+    [InlineData("https://uri:123", "https://different:123", false, "different host, same port")]
+    [InlineData("https://uri", "https://different", false, "different host, no port")]
+    [InlineData("wss://uri", "wss://uri", true, "Uri with websockets")]
+    public void Can_compare_with_http_request(string input, string requestUri, bool matches, string reason)
     {
         // Arrange
-        var invalidUrl = "not-a-url";
-
-        // Act & Assert
-        Should.Throw<UriFormatException>(() => HostHeaderValue.Parse(invalidUrl));
-    }
-
-    [Fact]
-    public void Equals_WithMatchingHttpRequest_ReturnsTrue()
-    {
-        // Arrange
-        var origin = HostHeaderValue.Parse("https://example.com");
-        var request = CreateHttpRequest("https://example.com");
+        var origin = HostHeaderValue.Parse(input);
+        var request = CreateHttpRequest(requestUri);
 
         // Act
         var result = origin.Equals(request);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldBe(matches, reason);
     }
 
-    [Fact]
-    public void Equals_WithDifferentScheme_ReturnsFalse()
+    [Theory]
+    [InlineData("not:a", "not a valid host header")]
+    [InlineData("http:/not", "not a valid host header")]
+    public void Will_catch_invalid_hostheader(string input, string reason)
     {
-        // Arrange
-        var origin = HostHeaderValue.Parse("https://example.com");
-        var request = CreateHttpRequest("http://example.com");
-
-        // Act
-        var result = origin.Equals(request);
-
-        // Assert
-        result.ShouldBeFalse();
-    }
-
-    [Fact]
-    public void Equals_WithDifferentHost_ReturnsFalse()
-    {
-        // Arrange
-        var origin = HostHeaderValue.Parse("https://example.com");
-        var request = CreateHttpRequest("https://different.com");
-
-        // Act
-        var result = origin.Equals(request);
-
-        // Assert
-        result.ShouldBeFalse();
-    }
-
-    [Fact]
-    public void Equals_WithDifferentPort_ReturnsFalse()
-    {
-        // Arrange
-        var origin = HostHeaderValue.Parse("https://example.com:8443");
-        var request = CreateHttpRequest("https://example.com");
-
-        // Act
-        var result = origin.Equals(request);
-
-        // Assert
-        result.ShouldBeFalse();
-    }
-
-    [Fact]
-    public void Equals_WithNullRequest_ReturnsFalse()
-    {
-        // Arrange
-        var origin = HostHeaderValue.Parse("https://example.com");
-
-        // Act
-        var result = origin.Equals((HostHeaderValue?)null);
-
-        // Assert
-        result.ShouldBeFalse();
-    }
-
-    [Fact]
-    public void Equals_HostComparisonIsCaseInsensitive()
-    {
-        // Arrange
-        var origin = HostHeaderValue.Parse("https://EXAMPLE.com");
-        var request = CreateHttpRequest("https://example.COM");
-
-        // Act
-        var result = origin.Equals(request);
-
-        // Assert
-        result.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void Equals_SchemeComparisonIsCaseInsensitive()
-    {
-        // Arrange
-        var origin = HostHeaderValue.Parse("HTTPS://example.com");
-        var request = CreateHttpRequest("https://example.com");
-
-        // Act
-        var result = origin.Equals(request);
-
-        // Assert
-        result.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void Equals_IgnoresPathInRequest()
-    {
-        // Arrange
-        var origin = HostHeaderValue.Parse("https://example.com");
-        var request = CreateHttpRequest("https://example.com/some/path");
-
-        // Act
-        var result = origin.Equals(request);
-
-        // Assert
-        result.ShouldBeTrue();
+        var action= () => HostHeaderValue.Parse(input);
+        action.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -253,15 +131,30 @@ public class HostHeaderValueTests
         // Arrange & Act
         var origin = new HostHeaderValue
         {
-            Scheme = "https",
             Host = "example.com",
             Port = 8443
         };
 
         // Assert
-        origin.Scheme.ShouldBe("https");
         origin.Host.ShouldBe("example.com");
         origin.Port.ShouldBe(8443);
+    }
+
+    [Theory]
+    [InlineData("host.com", "host.com", 443)]
+    [InlineData("host.com:443", "host.com", 443)]
+    [InlineData("host.com:5000", "host.com", 5000)]
+    [InlineData("host.com:80", "host.com", 80)]
+    [InlineData("https://host.com:80", "host.com", 80)]
+    [InlineData("http://host.com:80", "host.com", 80)]
+    [InlineData("https://host.com", "host.com", 443)]
+    [InlineData("https://host.com:443", "host.com", 443)]
+    public void Can_parse_host_header(string input, string host, int port)
+    {
+        var parsed = HostHeaderValue.Parse(input);
+
+        parsed.Host.ShouldBe(host);
+        parsed.Port.ShouldBe(port);
     }
 
     // Helper method to create HttpRequest with specified URL

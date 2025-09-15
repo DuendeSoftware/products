@@ -191,10 +191,16 @@ public abstract class BffTestBase : IAsyncDisposable
         List<Uri> baseUris = [Bff.Url()];
         if (frontend.MatchingCriteria.MatchingHostHeader != null)
         {
-            baseUris.Add(frontend.MatchingCriteria.MatchingHostHeader.ToUri());
+            baseUris.Add(ToUri(frontend.MatchingCriteria.MatchingHostHeader));
         }
         IdentityServer.AddClientFor(frontend, baseUris);
     }
+
+    public Uri ToUri(HostHeaderValue value) => new UriBuilder
+    {
+        Scheme = "https",
+        Host = value.Host,
+    }.Uri;
 
 
     public enum BffSetupType

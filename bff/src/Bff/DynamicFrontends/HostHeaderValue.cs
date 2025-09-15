@@ -26,28 +26,62 @@ public sealed record HostHeaderValue : IEquatable<HttpRequest>
             return true;
         }
 
-        return string.Equals(Scheme, other.Scheme, StringComparison.OrdinalIgnoreCase)
-               && string.Equals(Host, other.Host, StringComparison.OrdinalIgnoreCase)
+        return string.Equals(Host, other.Host, StringComparison.OrdinalIgnoreCase)
                && Port == other.Port;
     }
 
     public override int GetHashCode()
     {
         var hashCode = new HashCode();
-        hashCode.Add(Scheme, StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(Host, StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(Port);
         return hashCode.ToHashCode();
     }
 
-    public static HostHeaderValue Parse(string origin)
+    public static HostHeaderValue Parse(string hostHeaderValue)
     {
-        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+        if (string.IsNullOrEmpty(hostHeaderValue))
         {
-            throw new UriFormatException($"Can't create origin from '{origin}'");
+            throw new ArgumentException("Not a valid host header");
         }
 
-        return Parse(uri);
+
+        if (hostHeaderValue.Contains("://", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!Uri.TryCreate(hostHeaderValue, UriKind.Absolute, out var uri))
+            {
+                throw new ArgumentException("Uri must be an absolute URI.", nameof(hostHeaderValue));
+            }
+
+            return Parse(uri);
+        }
+
+        if (!hostHeaderValue.Contains(':', StringComparison.OrdinalIgnoreCase))
+        {
+            return new HostHeaderValue
+            {
+                Host = hostHeaderValue,
+                Port = 443
+            };
+        }
+
+        var parts = hostHeaderValue.Split(':');
+        if (parts.Length == 2)
+        {
+            if (!int.TryParse(parts[1], out var port))
+            {
+                throw new ArgumentException(
+                    $"Not a valid host header value. The port number {parts[1]} was not an integer.");
+            }
+
+            return new HostHeaderValue
+            {
+                Host = parts[0],
+                Port = port
+            };
+        }
+
+        throw new ArgumentException($"Invalid host header value: {hostHeaderValue}", nameof(hostHeaderValue));
     }
 
     public static HostHeaderValue? ParseOrDefault(string? origin)
@@ -72,23 +106,27 @@ public sealed record HostHeaderValue : IEquatable<HttpRequest>
 
         if (!uri.IsAbsoluteUri)
         {
-            throw new ArgumentException("Uri must be an absolute URI.", nameof(uri));
+            throw new ArgumentException("Not a valid host header value. Uri must be an absolute URI.", nameof(uri));
+        }
+
+        if (uri.Host.Length == 0)
+        {
+            throw new ArgumentException("Not a valid host header value. Host is empty.", nameof(uri));
+        }
+
+        if (uri.PathAndQuery != "/" && uri.PathAndQuery.Length > 0)
+        {
+            throw new ArgumentException("Not a valid host header value. Uri cannot have a path or query.", nameof(uri));
         }
 
         return new()
         {
-            Scheme = uri.Scheme,
             Host = uri.Host,
             Port = uri.Port
         };
     }
 
     internal HostString ToHostString() => new(Host, Port);
-
-    /// <summary>
-    /// the scheme of a http request. Usually "http" or "https".
-    /// </summary>
-    public required string Scheme { get; init; }
 
     /// <summary>
     /// The hostname of the host.
@@ -107,17 +145,14 @@ public sealed record HostHeaderValue : IEquatable<HttpRequest>
             return false;
         }
 
+        var requestPort = request.Host.Port ??
+                   (string.Equals(request.Scheme, "http", StringComparison.OrdinalIgnoreCase) ? 80 : 443);
+
         return string.Equals(request.Host.Host, Host, StringComparison.OrdinalIgnoreCase)
-               && (request.Host.Port == null || request.Host.Port == Port)
-               && string.Equals(request.Scheme, Scheme, StringComparison.OrdinalIgnoreCase);
+               && (requestPort == Port);
     }
 
-    public override string ToString() => $"{Scheme}://{Host}:{Port}";
+    public override string ToString() => $"{Host}:{Port}";
 
-    public Uri ToUri() => new UriBuilder
-    {
-        Scheme = Scheme,
-        Host = Host,
-        Port = Port
-    }.Uri;
+
 }
