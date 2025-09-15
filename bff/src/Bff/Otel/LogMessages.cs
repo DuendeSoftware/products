@@ -103,7 +103,7 @@ internal static partial class LogMessages
         Scheme scheme);
 
     [LoggerMessage(
-        $"No frontend selected: None of the configured frontends matched the selection criteria.")]
+        $"No frontend selected: None of the configured frontends matched the matching criteria.")]
     public static partial void NoFrontendSelected(this ILogger logger, LogLevel logLevel);
 
     [LoggerMessage(

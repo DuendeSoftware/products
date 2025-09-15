@@ -135,7 +135,7 @@ public static class BffFrontendExtensions
         ArgumentNullException.ThrowIfNull(frontend);
         ArgumentNullException.ThrowIfNull(uri);
 
-        GuardOverrideSelectionCriteria(frontend, force);
+        GuardOverrideMatchingCriteria(frontend, force);
 
         PathString? path = null;
 
@@ -154,12 +154,12 @@ public static class BffFrontendExtensions
         };
     }
 
-    private static void GuardOverrideSelectionCriteria(BffFrontend frontend, bool force)
+    private static void GuardOverrideMatchingCriteria(BffFrontend frontend, bool force)
     {
         if (frontend.MatchingCriteria.HasValue && !force)
         {
             throw new InvalidOperationException(
-                $"Frontend {frontend.Name} already has selection criteria. Use the {nameof(force)} parameter to override this value.");
+                $"Frontend {frontend.Name} already has matching criteria. Use the {nameof(force)} parameter to override this value.");
         }
     }
 
@@ -180,7 +180,7 @@ public static class BffFrontendExtensions
     public static BffFrontend MapTo(this BffFrontend frontend, HostHeaderValue matchingHost, PathString path, bool force = false)
     {
         ArgumentNullException.ThrowIfNull(frontend);
-        GuardOverrideSelectionCriteria(frontend, force);
+        GuardOverrideMatchingCriteria(frontend, force);
 
         return frontend with
         {
@@ -208,7 +208,7 @@ public static class BffFrontendExtensions
     public static BffFrontend MapToHost(this BffFrontend frontend, HostHeaderValue matchingHost, bool force = false)
     {
         ArgumentNullException.ThrowIfNull(frontend);
-        GuardOverrideSelectionCriteria(frontend, force);
+        GuardOverrideMatchingCriteria(frontend, force);
 
         return frontend with
         {
@@ -236,7 +236,7 @@ public static class BffFrontendExtensions
     {
         ArgumentNullException.ThrowIfNull(frontend);
 
-        GuardOverrideSelectionCriteria(frontend, force);
+        GuardOverrideMatchingCriteria(frontend, force);
 
         return frontend with
         {
