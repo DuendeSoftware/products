@@ -46,7 +46,7 @@ internal class BffAntiForgeryMiddleware(
         var hasAntiForgeryHeader = context.CheckAntiForgeryHeader(options.Value);
         if (isBffEndpoint && requireAntiForgeryCheck && !hasAntiForgeryHeader)
         {
-            logger.AntiForgeryValidationFailed(LogLevel.Warning, context.Request.Path);
+            logger.AntiForgeryValidationFailed(LogLevel.Warning, context.Request.Path.Sanitize());
 
             context.Response.StatusCode = 401;
             return;

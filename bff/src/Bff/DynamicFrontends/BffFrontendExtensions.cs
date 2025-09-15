@@ -15,7 +15,7 @@ public static class BffFrontendExtensions
     ///
     /// Any unmatched request will be forwarded to this URL. This allows for SPAs that use client side routing.
     ///
-    /// See https://duende.link/d/bff/ui-hosting for more information. 
+    /// See https://duende.link/d/bff/ui-hosting for more information.
     /// </summary>
     /// <param name="frontend"></param>
     /// <param name="url">The URL where the BFF Frontend can retrieve the IndexHtml.</param>
@@ -34,14 +34,14 @@ public static class BffFrontendExtensions
     /// Setting this value indicates that static assets (js, css, images etc) should be proxied through the BFF
     /// from the given URL. When this value is set, any unmatched request will be forwarded to this URL. Should the response
     /// be 404, then another attempt to forward this request to '/' is done. This allows for SPAs that use client side routing.
-    /// 
+    ///
     /// This setting is usually used during development in combination with development webserver.
     ///
     /// Note, this is less than ideal for production scenarios, as it adds additional load to the BFF server.
     /// Consider deploying your assets to a CDN and use the <see cref="WithCdnIndexHtmlUrl"/>. If you want to switch this value
     /// depending on environment, consider using the <see cref="WithBffStaticAssets"/> extension method.
     ///
-    /// See https://duende.link/d/bff/ui-hosting for more information. 
+    /// See https://duende.link/d/bff/ui-hosting for more information.
     /// </summary>
     /// <param name="frontend"></param>
     /// <param name="url">The URL of your frontend development server, which serves the static assets.</param>
@@ -62,10 +62,10 @@ public static class BffFrontendExtensions
     /// The delegate could contain logic to determine the current environment.
     ///
     /// Important to note that this method will call the delegate during the configuration of the frontend. It's not
-    /// evaluated at runtime.  
+    /// evaluated at runtime.
     ///
-    /// See https://duende.link/d/bff/ui-hosting for more information. 
-    /// 
+    /// See https://duende.link/d/bff/ui-hosting for more information.
+    ///
     /// </summary>
     /// <param name="frontend"></param>
     /// <param name="uri"></param>
@@ -86,7 +86,7 @@ public static class BffFrontendExtensions
 
     /// <summary>
     /// Configures the OpenID Connect options for the frontend. Any setting configured in this delegate overrides
-    /// the defaults. 
+    /// the defaults.
     /// </summary>
     /// <param name="frontend"></param>
     /// <param name="options"></param>
@@ -120,9 +120,9 @@ public static class BffFrontendExtensions
     ///
     /// If you provide a url with a path, then it will only be selected if both the host header and path matches.
     /// Otherwise, it will be selected based on host header only.
-    /// 
+    ///
     /// Frontend selection happens from most specific to least specific.
-    /// 
+    ///
     /// Note, if you have previously configured selection criteria (host header or path) on the frontend, then this method will
     /// throw an exception, unless the <paramref name="force"/> parameter is set to true.
     /// </summary>
@@ -167,8 +167,8 @@ public static class BffFrontendExtensions
     /// Map this frontend to a given host header value and path.
     /// This means the frontend is only selected if both the host header and path matches.
     ///
-    /// Frontend selection happens from most specific to least specific. 
-    /// 
+    /// Frontend selection happens from most specific to least specific.
+    ///
     /// Note, if you have previously configured selection criteria (host header or path) on the frontend, then this method will
     /// throw an exception, unless the <paramref name="force"/> parameter is set to true.
     /// </summary>
@@ -195,8 +195,8 @@ public static class BffFrontendExtensions
     /// <summary>
     /// Maps a frontend to a given host header value. Paths will not be used to select this frontend.
     ///
-    /// Frontend selection happens from most specific to least specific. 
-    /// 
+    /// Frontend selection happens from most specific to least specific.
+    ///
     /// Note, if you have previously configured selection criteria (host header or path) on the frontend, then this method will
     /// throw an exception, unless the <paramref name="force"/> parameter is set to true.
     ///
@@ -222,9 +222,9 @@ public static class BffFrontendExtensions
 
     /// <summary>
     /// Maps a frontend to a given path. Host header will not be used to select this frontend.
-    ///     ///
-    /// Frontend selection happens from most specific to least specific. 
-    /// 
+    ///
+    /// Frontend selection happens from most specific to least specific.
+    ///
     /// Note, if you have previously configured selection criteria (host header or path) on the frontend, then this method will
     /// throw an exception, unless the <paramref name="force"/> parameter is set to true.
     /// </summary>
