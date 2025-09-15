@@ -3,7 +3,7 @@
 
 namespace Hosts.Tests.TestInfra;
 
-[CollectionDefinition(CollectionName, DisableParallelization = true)]
+[CollectionDefinition(CollectionName)]
 public class BffAppHostCollection : ICollectionFixture<BffHostTestFixture>
 {
     public const string CollectionName = "apphost collection";
