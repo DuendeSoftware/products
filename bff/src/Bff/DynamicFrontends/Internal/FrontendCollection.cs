@@ -128,7 +128,8 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
             var frontend = new BffFrontend
             {
                 Name = frontendName,
-                IndexHtmlUrl = frontendConfiguration.IndexHtmlUrl,
+                CdnIndexHtmlUrl = frontendConfiguration.CdnIndexHtmlUrl,
+                StaticAssetsUrl = frontendConfiguration.StaticAssetsUrl,
 
                 ConfigureOpenIdConnectOptions = frontendConfiguration.Oidc == null
                     ? null

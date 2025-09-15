@@ -15,15 +15,17 @@ using Yarp.ReverseProxy.Configuration;
 
 var bffConfig = new ConfigurationBuilder()
 #if DEBUG
-    .AddJsonFile(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "BffConfig.json"), optional: false, reloadOnChange: true)
+    //.AddJsonFile(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "BffConfig.json"), optional: false, reloadOnChange: true)
 #else
     .AddJsonFile("BffConfig.json", optional: false, reloadOnChange: true)
 #endif
     .Build();
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IIndexHtmlClient, CustomIndexHtmlClient>();
+builder.Services.AddTransient<IIndexHtmlTransformer, FrontendAwareIndexHtmlTransformer>();
 
 builder.Services.AddUserAccessTokenHttpClient("api",
     configureClient: client =>
@@ -36,6 +38,8 @@ builder.AddServiceDefaults();
 
 var bffBuilder = builder.Services
     .AddBff();
+
+var runningInProduction = () => builder.Environment.EnvironmentName == Environments.Production;
 
 bffBuilder
     .ConfigureOpenIdConnect(options =>
@@ -78,16 +82,16 @@ bffBuilder
     .LoadConfiguration(bffConfig)
     .AddRemoteApis()
     .AddFrontends(
-        new BffFrontend(BffFrontendName.Parse("default-frontend"))
-            .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
-,
+//        new BffFrontend(BffFrontendName.Parse("default-frontend"))
+//            .WithBffStaticAssets(new Uri("https://localhost:5010/static"), useCdnWhen: runningInProduction)
+//,
         new BffFrontend(BffFrontendName.Parse("with-path"))
             .WithOpenIdConnectOptions(opt =>
             {
                 opt.ClientId = "bff.multi-frontend.with-path";
                 opt.ClientSecret = "secret";
             })
-            .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
+            .WithCdnIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
             .MappedToPath(LocalPath.Parse("/with-path")),
 
         new BffFrontend(BffFrontendName.Parse("with-domain"))
@@ -96,7 +100,7 @@ bffBuilder
                     opt.ClientId = "bff.multi-frontend.with-domain";
                     opt.ClientSecret = "secret";
                 })
-                .WithIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
+                .WithCdnIndexHtmlUrl(new Uri("https://localhost:5005/static/index.html"))
                 .MappedToOrigin(Origin.Parse("https://app1.localhost:5005"))
                 .WithRemoteApis(
                     new RemoteApi(LocalPath.Parse("/api/user-token"), new Uri("https://localhost:5010")),
@@ -232,28 +236,14 @@ RouteConfig[] BuildYarpRoutes()
 }
 
 
-public class CustomIndexHtmlClient(HttpClient client, CurrentFrontendAccessor currentFrontendAccessor) : IIndexHtmlClient
+public class FrontendAwareIndexHtmlTransformer : IIndexHtmlTransformer
 {
-    public async Task<string?> GetIndexHtmlAsync(CancellationToken ct)
+    public Task<string?> Transform(string indexHtml, BffFrontend frontend, CancellationToken ct = default)
     {
-        if (!currentFrontendAccessor.TryGet(out var frontend))
-        {
-            return null;
-        }
+        indexHtml = indexHtml.Replace("[FrontendName]", frontend.Name);
+        indexHtml = indexHtml.Replace("[Path]", frontend.SelectionCriteria.MatchingPath + "/"); // Note, the path must end with a slash
 
-        var indexHtmlUrl = frontend.IndexHtmlUrl;
-
-        if (indexHtmlUrl is null)
-        {
-            return null;
-        }
-
-        var html = await client.GetStringAsync(indexHtmlUrl, ct);
-
-        html = html.Replace("[FrontendName]", frontend.Name);
-        html = html.Replace("[Path]", frontend.SelectionCriteria.MatchingPath + "/"); // Note, the path must end with a slash
-
-
-        return html;
+        return Task.FromResult<string?>(indexHtml);
     }
 }
+

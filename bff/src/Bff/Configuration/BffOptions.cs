@@ -3,6 +3,7 @@
 
 using System.Collections.ObjectModel;
 using Duende.Bff.AccessTokenManagement;
+using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -150,7 +151,16 @@ public sealed class BffOptions
 
     public HttpMessageHandler? BackchannelHttpHandler { get; set; }
 
-    public string? IndexHtmlClientName { get; set; }
+    /// <summary>
+    /// The name of the http client that's used to proxy static files using the <see cref="IStaticFilesClient"/>.
+    /// </summary>
+    public string StaticAssetsClientName { get; set; } = Constants.HttpClientNames.StaticAssetsClientName;
+
+    /// <summary>
+    /// If you use CDN Index HTML proxying, using <see cref="BffFrontend.CdnIndexHtmlUrl"/>, then this
+    /// property controls how long the index html should be cached. Defaults to 5 minutes.
+    /// </summary>
+    public TimeSpan IndexHtmlDefaultCacheDuration { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
     /// Indicates if we should automatically register the BFF middleware in the pipeline.
@@ -168,4 +178,5 @@ public sealed class BffOptions
     /// https://en.wikipedia.org/wiki/HTTP_referer
     /// </summary>
     public Collection<string> AllowedSilentLoginReferers { get; } = new();
+
 }

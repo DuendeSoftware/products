@@ -30,7 +30,16 @@ public static class BffApplicationBuilderExtensions
     public static IApplicationBuilder UseBffOpenIdCallbacks(this IApplicationBuilder app) => app.UseMiddleware<OpenIdConnectCallbackMiddleware>();
 
 
-    public static IApplicationBuilder UseBffIndexPages(this IApplicationBuilder app) => app.UseMiddleware<ProxyIndexMiddleware>();
+    /// <summary>
+    /// Registers the middleware that will proxy static file requests to the configured URLs for the current frontend.
+    ///
+    /// This is used to serve a frontend from a CDN or from a local development server. This middleware is automatically
+    /// if <see cref="BffOptions.AutomaticallyRegisterBffMiddleware"/> is true (the default).
+    /// 
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    public static IApplicationBuilder UseBffStaticFileProxying(this IApplicationBuilder app) => app.UseMiddleware<ProxyStaticFilesMiddleware>();
 
     /// <summary>
     /// If you have disabled automatic middleware registration using <see cref="BffOptions.AutomaticallyRegisterBffMiddleware"/>
@@ -75,7 +84,7 @@ public static class BffApplicationBuilderExtensions
             endpoints.MapBffManagementBackchannelEndpoint();
             endpoints.MapBffDiagnosticsEndpoint();
         });
-        app.UseBffIndexPages();
+        app.UseBffStaticFileProxying();
         return app;
 
     }
