@@ -61,7 +61,7 @@ if (config.Apis.Any())
 {
     foreach (var api in config.Apis)
     {
-        app.MapRemoteBffApiEndpoint(api.PathString, api.RemoteUrl!)
+        app.MapRemoteBffApiEndpoint(api.PathMatch, api.RemoteUrl!)
             .RequireAccessToken(api.RequiredToken);
     }
 }

@@ -273,7 +273,7 @@ public class FrontendSelectorTests
 
 
     [Fact]
-    public void Host_takes_precedence_over_path()
+    public void HostHeader_takes_precedence_over_path()
     {
         _frontendCollection.AddOrUpdate(CreateFrontend(BffFrontendName.Parse("path_and_Host"),
             host: HostHeaderValue.Parse("https://test.com"),
@@ -411,7 +411,7 @@ public class FrontendSelectorTests
         string? path = null
         )
     {
-        var selectionCriteria = new FrontendMatchingCriteria
+        var frontendMatchingCriteria = new FrontendMatchingCriteria
         {
             MatchingHostHeader = host,
             MatchingPath = path,
@@ -420,7 +420,7 @@ public class FrontendSelectorTests
         return new BffFrontend
         {
             Name = name,
-            MatchingCriteria = selectionCriteria
+            MatchingCriteria = frontendMatchingCriteria
         };
     }
 

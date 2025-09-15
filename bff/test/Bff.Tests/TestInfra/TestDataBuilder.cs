@@ -22,20 +22,20 @@ public class TestDataBuilder(TestData the)
     internal LicenseValidator LicenseValidator =>
         new LicenseValidator(new NullLogger<LicenseValidator>(), new ClaimsPrincipal(), The.Clock);
 
-    public BffFrontend BffFrontend() =>
+    public BffFrontend BffFrontend(BffFrontendName? name = null) =>
         new()
         {
-            Name = The.FrontendName,
+            Name = name ?? The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
         };
 
-    public BffFrontend BffFrontendWithSelectionCriteria() =>
+    public BffFrontend BffFrontendWithMatchingCriteria() =>
         new()
         {
             Name = The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
             CdnIndexHtmlUrl = The.Url,
-            MatchingCriteria = FrontendSelectionCriteria()
+            MatchingCriteria = FrontendMatchingCriteria()
         };
 
     internal ProxyBffPlugin ProxyDataExtension() =>
@@ -106,7 +106,7 @@ public class TestDataBuilder(TestData the)
         new()
         {
             CdnIndexHtmlUrl = The.Url,
-            MatchingOrigin = The.HostHeaderValue.ToString(),
+            MatchingHostHeader = The.HostHeaderValue.ToString(),
             MatchingPath = The.Path,
             Oidc = OidcConfiguration(),
             Cookies = CookieConfiguration()
@@ -140,7 +140,7 @@ public class TestDataBuilder(TestData the)
             Resource = The.Resource
         };
 
-    public FrontendMatchingCriteria FrontendSelectionCriteria() => new()
+    public FrontendMatchingCriteria FrontendMatchingCriteria() => new()
     {
         MatchingHostHeader = The.HostHeaderValue,
         MatchingPath = The.Path,

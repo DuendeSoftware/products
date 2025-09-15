@@ -72,7 +72,7 @@ public sealed record HostHeaderValue : IEquatable<HttpRequest>
 
         if (!uri.IsAbsoluteUri)
         {
-            throw new InvalidOperationException("Uri must be an absolute URI.");
+            throw new ArgumentException("Uri must be an absolute URI.", nameof(uri));
         }
 
         return new()
@@ -91,7 +91,7 @@ public sealed record HostHeaderValue : IEquatable<HttpRequest>
     public required string Scheme { get; init; }
 
     /// <summary>
-    /// The hostname of the host. 
+    /// The hostname of the host.
     /// </summary>
     public required string Host { get; init; }
 

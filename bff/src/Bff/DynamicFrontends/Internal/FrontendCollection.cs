@@ -145,7 +145,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                     },
                 MatchingCriteria = new FrontendMatchingCriteria()
                 {
-                    MatchingHostHeader = HostHeaderValue.ParseOrDefault(frontendConfiguration.MatchingOrigin),
+                    MatchingHostHeader = HostHeaderValue.ParseOrDefault(frontendConfiguration.MatchingHostHeader),
                     MatchingPath = string.IsNullOrEmpty(frontendConfiguration.MatchingPath) ? null : frontendConfiguration.MatchingPath,
                 },
                 DataExtensions = extensions

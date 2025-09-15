@@ -32,7 +32,7 @@ internal class BffAntiForgeryMiddleware(
             return;
         }
 
-        // inbound: add CSRF check for local APIs 
+        // inbound: add CSRF check for local APIs
 
         var endpoint = context.GetEndpoint();
         if (endpoint == null)
@@ -46,7 +46,7 @@ internal class BffAntiForgeryMiddleware(
         var hasAntiForgeryHeader = context.CheckAntiForgeryHeader(options.Value);
         if (isBffEndpoint && requireAntiForgeryCheck && !hasAntiForgeryHeader)
         {
-            logger.AntiForgeryValidationFailed(context.Request.Path);
+            logger.AntiForgeryValidationFailed(LogLevel.Warning, context.Request.Path);
 
             context.Response.StatusCode = 401;
             return;

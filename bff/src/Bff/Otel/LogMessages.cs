@@ -15,9 +15,9 @@ internal static partial class LogMessages
     [LoggerMessage(
         Message = $$"""
                     Management URL request {{{OTelParameters.Path}}} blocked with 404 response, because the implicit frontend is disabled.
-                    
+
                     When you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,
-                    Add one without Host or Path mapping. 
+                    Add one without Host or Path mapping.
                     """)]
     public static partial void ImplicitFrontendDisabled(this ILogger logger, LogLevel level, PathString path);
 
@@ -115,9 +115,8 @@ internal static partial class LogMessages
     public static partial void SelectedFrontend(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
 
     [LoggerMessage(
-        LogLevel.Error,
         $"Anti-forgery validation failed. Path: '{{{OTelParameters.Path}}}'")]
-    public static partial void AntiForgeryValidationFailed(this ILogger logger, string path);
+    public static partial void AntiForgeryValidationFailed(this ILogger logger, LogLevel logLevel, string path);
 
     [LoggerMessage(
         message: $"Back-channel logout. sub: '{{{OTelParameters.Sub}}}', sid: '{{{OTelParameters.Sid}}}'")]

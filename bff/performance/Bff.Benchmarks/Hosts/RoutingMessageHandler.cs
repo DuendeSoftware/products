@@ -14,10 +14,10 @@ internal class RoutingMessageHandler : HttpMessageHandler
     private readonly Dictionary<string, HostHandler> _hosts = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    ///     Adds a handler for a given Origin.
+    ///     Adds a handler for a given HostHeader.
     /// </summary>
-    /// <param name="hostHeaderValue">The origin to whom requests are routed to.</param>
-    /// <param name="handler">The handler for requests to the specified origin.</param>
+    /// <param name="hostHeaderValue">The hostHeader to whom requests are routed to.</param>
+    /// <param name="handler">The handler for requests to the specified hostHeader.</param>
     public void AddHandler(HostHeaderValue hostHeaderValue, HttpMessageHandler handler)
     {
         var endpoint = new HostHandler(handler);

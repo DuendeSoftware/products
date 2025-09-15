@@ -24,8 +24,8 @@ public class FrontendCollectionTests
     {
         _frontendsConfiguredDuringStartup =
         [
-            Some.BffFrontendWithSelectionCriteria(),
-            Some.BffFrontendWithSelectionCriteria() with { Name = BffFrontendName.Parse("different") }
+            Some.BffFrontendWithMatchingCriteria(),
+            Some.BffFrontendWithMatchingCriteria() with { Name = BffFrontendName.Parse("different") }
         ];
 
         var cache = BuildFrontendCollection();
@@ -61,8 +61,8 @@ public class FrontendCollectionTests
 
         result.ShouldBe(new[]
         {
-            Some.BffFrontendWithSelectionCriteria(),
-            Some.BffFrontendWithSelectionCriteria() with { Name = BffFrontendName.Parse("different") }
+            Some.BffFrontendWithMatchingCriteria(),
+            Some.BffFrontendWithMatchingCriteria() with { Name = BffFrontendName.Parse("different") }
         }.AsReadOnly());
     }
 
@@ -145,7 +145,7 @@ public class FrontendCollectionTests
     public void When_frontend_is_updated_then_event_is_raised()
     {
         var cache = BuildFrontendCollection();
-        var bffFrontend = Some.BffFrontendWithSelectionCriteria();
+        var bffFrontend = Some.BffFrontendWithMatchingCriteria();
 
         // Track event invocations
         BffFrontend? eventArg = null;
@@ -179,7 +179,7 @@ public class FrontendCollectionTests
     public void When_identical_frontend_is_updated_then_no_event_is_raised()
     {
         var cache = BuildFrontendCollection();
-        var bffFrontend = Some.BffFrontendWithSelectionCriteria() with
+        var bffFrontend = Some.BffFrontendWithMatchingCriteria() with
         {
             ConfigureOpenIdConnectOptions = null,
             ConfigureCookieOptions = null
@@ -217,7 +217,7 @@ public class FrontendCollectionTests
     public void When_frontend_is_removed_then_event_is_raised()
     {
         var cache = BuildFrontendCollection();
-        var bffFrontend = Some.BffFrontendWithSelectionCriteria();
+        var bffFrontend = Some.BffFrontendWithMatchingCriteria();
 
         // Track event invocations
         BffFrontend? eventArg = null;
