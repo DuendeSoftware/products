@@ -7,6 +7,7 @@ using Duende.Bff.Licensing;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
+
 internal class FrontendCollection : IDisposable, IFrontendCollection
 {
     private readonly LicenseValidator _licenseValidator;

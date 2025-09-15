@@ -17,6 +17,7 @@ using Duende.Bff.Yarp;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
+
 public class ConventionTests(ITestOutputHelper output)
 {
     public static readonly Assembly BffAssembly = typeof(BffBuilder).Assembly;
