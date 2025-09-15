@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Duende.Xunit.Playwright</RootNamespace>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_ncrunch|AnyCPU'">
