@@ -10,8 +10,19 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var host = CreateHostBuilder(args).Build();
-        using (var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+        var builder = WebApplication.CreateBuilder(args);
+
+        var cn = builder.Configuration.GetConnectionString("db");
+
+        builder.Services.AddDbContext<SessionDbContext>(options =>
+        {
+            //options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Program).Assembly.FullName));
+            options.UseSqlite(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Program).Assembly.FullName));
+        });
+
+        var app = builder.Build();
+
+        using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
         {
             using (var context = scope.ServiceProvider.GetService<SessionDbContext>())
             {
@@ -20,11 +31,4 @@ public class Program
             }
         }
     }
-
-    private static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
 }
