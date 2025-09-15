@@ -14,17 +14,32 @@ public class HostHeaderValueTests
         var url = "https://example.com";
 
         // Act
-        var origin = HostHeaderValue.Parse(url);
+        var hostHeaderValue = HostHeaderValue.Parse(url);
 
         // Assert
-        origin.Host.ShouldBe("example.com");
-        origin.Port.ShouldBe(443); // Default HTTPS port
+        hostHeaderValue.Host.ShouldBe("example.com");
+        hostHeaderValue.Port.ShouldBe(443); // Default HTTPS port
+    }
+
+    [Fact]
+    public void Parse_WithValidHttpUrl_SetsCorrectProperties()
+    {
+        // Arrange
+        var url = "http://example.com";
+
+        // Act
+        var hostHeaderValue = HostHeaderValue.Parse(url);
+
+        // Assert
+        hostHeaderValue.Host.ShouldBe("example.com");
+        hostHeaderValue.Port.ShouldBe(80); // Default HTTP port in Uri
     }
 
     [Theory]
     [InlineData("https://example.com:888", "example.com", 888)]
     [InlineData("https://example.com:443", "example.com", 443)]
     [InlineData("http://example.com", "example.com", 80)]
+    [InlineData("https://example.com", "example.com", 443)]
     [InlineData("http://example.com:80", "example.com", 80)]
     [InlineData("http://example.com:888", "example.com", 888)]
     public void ToHostStringHandlesDefaultPorts(string url, string hoststring, int port)
@@ -35,35 +50,21 @@ public class HostHeaderValueTests
     }
 
     [Fact]
-    public void Parse_WithValidHttpUrl_SetsCorrectProperties()
-    {
-        // Arrange
-        var url = "http://example.com";
-
-        // Act
-        var origin = HostHeaderValue.Parse(url);
-
-        // Assert
-        origin.Host.ShouldBe("example.com");
-        origin.Port.ShouldBe(80); // Default HTTP port in Uri
-    }
-
-    [Fact]
     public void Equals_can_handle_default_ports()
     {
         var request = CreateHttpRequest("https", "some_host");
-        var origin = HostHeaderValue.Parse("https://some_host");
+        var hostHeaderValue = HostHeaderValue.Parse("https://some_host");
 
-        origin.Equals(request).ShouldBeTrue();
+        hostHeaderValue.Equals(request).ShouldBeTrue();
     }
 
     [Fact]
     public void Equals_can_handle_explicit_ports()
     {
         var request = CreateHttpRequest("https", "some_host", 443);
-        var origin = HostHeaderValue.Parse("https://some_host");
+        var hostHeaderValue = HostHeaderValue.Parse("https://some_host");
 
-        origin.Equals(request).ShouldBeTrue();
+        hostHeaderValue.Equals(request).ShouldBeTrue();
     }
 
     [Fact]
@@ -73,10 +74,10 @@ public class HostHeaderValueTests
         var url = "https://example.com:8443";
 
         // Act
-        var origin = HostHeaderValue.Parse(url);
+        var hostHeaderValue = HostHeaderValue.Parse(url);
 
         // Assert
-        origin.Port.ShouldBe(8443);
+        hostHeaderValue.Port.ShouldBe(8443);
     }
 
     [Fact]
@@ -86,11 +87,11 @@ public class HostHeaderValueTests
         var url = "https://example.com#fragment";
 
         // Act
-        var origin = HostHeaderValue.Parse(url);
+        var hostHeaderValue = HostHeaderValue.Parse(url);
 
         // Assert
-        origin.Host.ShouldBe("example.com");
-        origin.Port.ShouldBe(443);
+        hostHeaderValue.Host.ShouldBe("example.com");
+        hostHeaderValue.Port.ShouldBe(443);
     }
 
 
@@ -106,11 +107,11 @@ public class HostHeaderValueTests
     public void Can_compare_with_http_request(string input, string requestUri, bool matches, string reason)
     {
         // Arrange
-        var origin = HostHeaderValue.Parse(input);
+        var hostHeaderValue = HostHeaderValue.Parse(input);
         var request = CreateHttpRequest(requestUri);
 
         // Act
-        var result = origin.Equals(request);
+        var result = hostHeaderValue.Equals(request);
 
         // Assert
         result.ShouldBe(matches, reason);
@@ -121,23 +122,23 @@ public class HostHeaderValueTests
     [InlineData("http:/not", "not a valid host header")]
     public void Will_catch_invalid_hostheader(string input, string reason)
     {
-        var action= () => HostHeaderValue.Parse(input);
+        var action = () => HostHeaderValue.Parse(input);
         action.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
-    public void Origin_WithExplicitInitialization_SetsProperties()
+    public void HostHeader_WithExplicitInitialization_SetsProperties()
     {
         // Arrange & Act
-        var origin = new HostHeaderValue
+        var hostHeaderValue = new HostHeaderValue
         {
             Host = "example.com",
             Port = 8443
         };
 
         // Assert
-        origin.Host.ShouldBe("example.com");
-        origin.Port.ShouldBe(8443);
+        hostHeaderValue.Host.ShouldBe("example.com");
+        hostHeaderValue.Port.ShouldBe(8443);
     }
 
     [Theory]
