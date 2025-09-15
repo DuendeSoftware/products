@@ -11,7 +11,7 @@ namespace Duende.Bff.DynamicFrontends.Internal;
 internal class BffIndex
 {
     private readonly ILogger _logger;
-    private readonly Dictionary<HostString, PathTrie<BffFrontend>> _perOrigin = new();
+    private readonly Dictionary<HostString, PathTrie<BffFrontend>> _perHostHeader = new();
     private readonly PathTrie<BffFrontend> _perPath = new();
     private BffFrontend? _defaultFrontend;
     private readonly Dictionary<FrontendMatchingCriteria, BffFrontendName> _registeredCriteria = new();
@@ -26,11 +26,11 @@ internal class BffIndex
 
     public void AddFrontend(BffFrontend frontend)
     {
-        var frontendSelectionCriteria = frontend.MatchingCriteria;
+        var frontendMatchingCriteria = frontend.MatchingCriteria;
 
-        if (!_registeredCriteria.TryAdd(frontendSelectionCriteria, frontend.Name))
+        if (!_registeredCriteria.TryAdd(frontendMatchingCriteria, frontend.Name))
         {
-            _registeredCriteria.TryGetValue(frontendSelectionCriteria, out var collidesWith);
+            _registeredCriteria.TryGetValue(frontendMatchingCriteria, out var collidesWith);
             _logger.FrontendWithSimilarMatchingCriteriaAlreadyRegistered(LogLevel.Warning,
                 frontend.Name,
                 collidesWith
@@ -38,9 +38,9 @@ internal class BffIndex
             return;
         }
 
-        if (frontendSelectionCriteria.MatchingHostHeader == null)
+        if (frontendMatchingCriteria.MatchingHostHeader == null)
         {
-            if (frontendSelectionCriteria.MatchingPath == null)
+            if (frontendMatchingCriteria.MatchingPath == null)
             {
                 if (_defaultFrontend != null)
                 {
@@ -53,18 +53,18 @@ internal class BffIndex
             }
             else
             {
-                _perPath.Add(frontendSelectionCriteria.MatchingPath, frontend);
+                _perPath.Add(frontendMatchingCriteria.MatchingPath, frontend);
             }
         }
         else
         {
-            if (!_perOrigin.TryGetValue(frontendSelectionCriteria.MatchingHostHeader.ToHostString(), out var trie))
+            if (!_perHostHeader.TryGetValue(frontendMatchingCriteria.MatchingHostHeader.ToHostString(), out var trie))
             {
                 trie = new PathTrie<BffFrontend>();
-                _perOrigin[frontendSelectionCriteria.MatchingHostHeader.ToHostString()] = trie;
+                _perHostHeader[frontendMatchingCriteria.MatchingHostHeader.ToHostString()] = trie;
             }
 
-            var matchingPath = frontendSelectionCriteria.MatchingPath;
+            var matchingPath = frontendMatchingCriteria.MatchingPath;
             if (matchingPath == null)
             {
                 matchingPath = "/";
@@ -83,7 +83,7 @@ internal class BffIndex
             requestHost = new HostString(requestHost.Host, request.IsHttps ? 443 : 80);
         }
 
-        var trie = _perOrigin
+        var trie = _perHostHeader
             .FirstOrDefault(x => x.Key.Equals(requestHost))
             .Value;
 
