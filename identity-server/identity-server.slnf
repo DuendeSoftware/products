@@ -69,8 +69,10 @@
       "identity-server\\templates\\src\\IdentityServer\\IdentityServerTemplate.csproj",
       "identity-server\\templates\\src\\WebApp\\TemplateWebApp.csproj",
       "identity-server\\test\\IdentityServer.IntegrationTests\\IdentityServer.IntegrationTests.csproj",
+      "identity-server\\test\\IdentityServer.EndToEndTests\\IdentityServer.EndToEndTests.csproj",
       "identity-server\\test\\IdentityServer.UnitTests\\IdentityServer.UnitTests.csproj",
-      "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj"
+      "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj",
+      "shared\\Xunit.Playwright\\Duende.Xunit.Playwright.csproj"
     ]
   }
 }

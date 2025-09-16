@@ -162,6 +162,7 @@
   </Folder>
   <Folder Name="/identity-server/test/">
     <Project Path="identity-server/test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
+    <Project Path="identity-server/test/IdentityServer.EndToEndTests/IdentityServer.EndToEndTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
   </Folder>
   <Folder Name="/identity-server/_solution-items/">
