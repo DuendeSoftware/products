@@ -8,10 +8,10 @@
 
     <!-- TODO - This is different between foss and is/bff -->
     <!-- This is what foss does -->
-    <!-- <DebugType>full</DebugType> --> 
+    <!-- <DebugType>full</DebugType> -->
     <!-- This is what is/bff do -->
     <DebugType Condition="'$(GITHUB_ACTIONS)' == 'true'">embedded</DebugType>
-    
+
     <!-- TODO - we want to enable nullable everywhere eventually -->
     <!-- <Nullable>enable</Nullable> -->
     <LangVersion>latest</LangVersion>
@@ -20,7 +20,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">True</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
-    <NoWarn>$(NoWarn);CS1591,NU1507</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;NU1507</NoWarn>
     <IsTestProject>false</IsTestProject>
     <IsPackable>true</IsPackable>
 

@@ -53,6 +53,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
+          10.0.100-rc.1.25451.107
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Verify Formatting
@@ -84,6 +85,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
+          10.0.100-rc.1.25451.107
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Build
@@ -153,6 +155,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
+          10.0.100-rc.1.25451.107
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Build
@@ -195,6 +198,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
+          10.0.100-rc.1.25451.107
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack aspnetcore-authentication-jwtbearer.slnf
