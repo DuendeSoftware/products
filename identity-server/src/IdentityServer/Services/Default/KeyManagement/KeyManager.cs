@@ -270,7 +270,6 @@ public class KeyManager : IKeyManager
         _logger.LogTrace("Creating new key.");
 
         var now = _clock.UtcNow.UtcDateTime;
-        var iss = await _issuerNameService.GetCurrentAsync();
 
         KeyContainer container;
 
@@ -278,9 +277,15 @@ public class KeyManager : IKeyManager
         {
             var rsa = CryptoHelper.CreateRsaSecurityKey(_options.KeyManagement.RsaKeySize);
 
-            container = alg.UseX509Certificate ?
-                new X509KeyContainer(rsa, alg.Name, now, _options.KeyManagement.KeyRetirementAge, iss) :
-                new RsaKeyContainer(rsa, alg.Name, now);
+            if (alg.UseX509Certificate)
+            {
+                var iss = await _issuerNameService.GetCurrentAsync();
+                container = new X509KeyContainer(rsa, alg.Name, now, _options.KeyManagement.KeyRetirementAge, iss);
+            }
+            else
+            {
+                container = new RsaKeyContainer(rsa, alg.Name, now);
+            }
         }
         else if (alg.IsEcKey)
         {
@@ -513,7 +518,7 @@ public class KeyManager : IKeyManager
 
         if (AreAllKeysWithinInitializationDuration(keys))
         {
-            // this is meant to allow multiple servers that all start at the same time to have some 
+            // this is meant to allow multiple servers that all start at the same time to have some
             // time to complete writing their newly created keys to the store. then when all load
             // each other's keys, they should all agree on the oldest key based on created time.
             // it's intended to address the scenario where two servers start, server1 creates a key whose
@@ -629,9 +634,9 @@ public class KeyManager : IKeyManager
 
         // we order by the created date, in essence loading the oldest key
         // this accommodates the scenario where 2 servers create keys at the same time
-        // but the first server only reloads the one key it created (and only has the one key for 
+        // but the first server only reloads the one key it created (and only has the one key for
         // discovery). we don't want the second server using a key that's not in the first server's
-        // discovery document. this will be somewhat mitigated by the initial duration where we 
+        // discovery document. this will be somewhat mitigated by the initial duration where we
         // deliberately ignore the cache.
         var result = keys.MinBy(x => x.Created);
         return result;
@@ -663,9 +668,9 @@ public class KeyManager : IKeyManager
         var start = key.Created;
         if (start > now)
         {
-            // if another server created the key in the future (meaning this server's clock is 
-            // behind the other), then we will just assume the other server's time for this key. 
-            // this is how we can deal with clock skew for recently created keys. 
+            // if another server created the key in the future (meaning this server's clock is
+            // behind the other), then we will just assume the other server's time for this key.
+            // this is how we can deal with clock skew for recently created keys.
             now = start;
         }
 
