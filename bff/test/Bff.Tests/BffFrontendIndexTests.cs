@@ -36,7 +36,7 @@ public class BffFrontendIndexTests : BffTestBase
             .CheckResponseContent(Cdn.IndexHtml);
 
         // The existing image.png should also return index html, because
-        // we're not doing proxying of static assets here. 
+        // we're not doing proxying of static assets here.
         await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.IndexHtml);
     }
@@ -56,7 +56,7 @@ public class BffFrontendIndexTests : BffTestBase
             .WithRemoteApis(new RemoteApi()
             {
                 TargetUri = Api.Url(),
-                LocalPath = The.Path,
+                PathMatch = The.Path,
                 RequiredTokenType = RequiredTokenType.Client,
             })
         );
@@ -164,7 +164,7 @@ public class BffFrontendIndexTests : BffTestBase
         cache.WaitUntilRemoveAsyncCalled(TimeSpan.FromSeconds(5));
         // Note, there is a possibility for a race condition because the cache is cleared executed using
         // asynchronously in the background. But because the cache is mocked it's all synchronous.
-        // Add synchronization to the test if it starts to become unstable. 
+        // Add synchronization to the test if it starts to become unstable.
         html = await GetIndexHtml();
         html.ShouldEndWith(" - transformed 2");
     }
@@ -202,7 +202,7 @@ public class BffFrontendIndexTests : BffTestBase
         await Bff.BrowserClient.GetAsync("/not-found")
             .CheckResponseContent(Cdn.IndexHtml + " - transformed 2");
 
-        // The existing image.png should be proxied through the BFF. and should not be transformed 
+        // The existing image.png should be proxied through the BFF. and should not be transformed
         await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
     }
@@ -228,7 +228,7 @@ public class BffFrontendIndexTests : BffTestBase
         await Bff.BrowserClient.GetAsync("/not-found")
             .CheckResponseContent(Cdn.IndexHtml);
 
-        // The existing image.png should be proxied through the BFF. 
+        // The existing image.png should be proxied through the BFF.
         await Bff.BrowserClient.GetAsync("/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
     }
@@ -264,11 +264,11 @@ public class BffFrontendIndexTests : BffTestBase
 
         await InitializeAsync();
 
-        // Creating a frontend that is mapped to a path. 
+        // Creating a frontend that is mapped to a path.
         AddOrUpdateFrontend(
             Some.BffFrontend(BffFrontendName.Parse("mapped_to_path"))
                 .WithProxiedStaticAssets(Cdn.Url())
-                .MappedToPath(The.Path));
+                .MapToPath(The.Path));
 
         // Also a default frontend, that has different static content registered
         AddOrUpdateFrontend(Some.BffFrontend()
@@ -284,7 +284,7 @@ public class BffFrontendIndexTests : BffTestBase
         await Bff.BrowserClient.GetAsync(The.Path + "/test")
             .CheckResponseContent(Cdn.IndexHtml);
 
-        // It should also work for static assets that exist on the cdn, such as the image. 
+        // It should also work for static assets that exist on the cdn, such as the image.
         await Bff.BrowserClient.GetAsync(The.Path + "/image.png")
             .CheckResponseContent(Cdn.ImageBytes);
 

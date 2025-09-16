@@ -10,7 +10,7 @@ internal sealed record BffFrontendConfiguration
 
     public string? MatchingPath { get; init; }
 
-    public string? MatchingOrigin { get; init; }
+    public string? MatchingHostHeader { get; init; }
 
     public OidcConfiguration? Oidc { get; init; }
 

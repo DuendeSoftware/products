@@ -10,7 +10,7 @@ internal sealed record RemoteApiConfiguration
     /// <summary>
     /// The local path that will be used to access the remote API.
     /// </summary>
-    public LocalPath? LocalPath { get; init; }
+    public string? PathMatch { get; init; }
 
     /// <summary>
     /// The target URI of the remote API.

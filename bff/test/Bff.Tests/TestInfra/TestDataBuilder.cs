@@ -29,13 +29,13 @@ public class TestDataBuilder(TestData the)
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
         };
 
-    public BffFrontend BffFrontendWithSelectionCriteria() =>
+    public BffFrontend BffFrontendWithMatchingCriteria() =>
         new()
         {
             Name = The.FrontendName,
             ConfigureOpenIdConnectOptions = The.DefaultOpenIdConnectConfiguration,
             CdnIndexHtmlUrl = The.Url,
-            SelectionCriteria = FrontendSelectionCriteria()
+            MatchingCriteria = FrontendMatchingCriteria()
         };
 
     internal ProxyBffPlugin ProxyDataExtension() =>
@@ -47,7 +47,7 @@ public class TestDataBuilder(TestData the)
 
     public RemoteApi RemoteApi() => new()
     {
-        LocalPath = The.Path,
+        PathMatch = The.Path,
         TargetUri = The.Url,
         RequiredTokenType = The.RequiredTokenType,
         Parameters = BffUserAccessTokenParameters(),
@@ -58,9 +58,9 @@ public class TestDataBuilder(TestData the)
         new()
         {
             Name = BffFrontendName.Parse("should_not_be_found"),
-            SelectionCriteria = new FrontendSelectionCriteria()
+            MatchingCriteria = new FrontendMatchingCriteria()
             {
-                MatchingOrigin = Origin.Parse("https://will-not-be-found"),
+                MatchingHostHeader = HostHeaderValue.Parse("https://will-not-be-found"),
                 MatchingPath = "/will_not_be_found",
             }
         };
@@ -106,7 +106,7 @@ public class TestDataBuilder(TestData the)
         new()
         {
             CdnIndexHtmlUrl = The.Url,
-            MatchingOrigin = The.Origin.ToString(),
+            MatchingHostHeader = The.HostHeaderValue.ToString(),
             MatchingPath = The.Path,
             Oidc = OidcConfiguration(),
             Cookies = CookieConfiguration()
@@ -114,7 +114,7 @@ public class TestDataBuilder(TestData the)
 
     internal RemoteApiConfiguration RemoteApiConfiguration() => new()
     {
-        LocalPath = The.Path,
+        PathMatch = The.Path,
         TargetUri = The.Url,
         RequiredTokenType = The.RequiredTokenType,
         TokenRetrieverTypeName = typeof(TestTokenRetriever).AssemblyQualifiedName,
@@ -140,9 +140,9 @@ public class TestDataBuilder(TestData the)
             Resource = The.Resource
         };
 
-    public FrontendSelectionCriteria FrontendSelectionCriteria() => new()
+    public FrontendMatchingCriteria FrontendMatchingCriteria() => new()
     {
-        MatchingOrigin = The.Origin,
+        MatchingHostHeader = The.HostHeaderValue,
         MatchingPath = The.Path,
     };
 

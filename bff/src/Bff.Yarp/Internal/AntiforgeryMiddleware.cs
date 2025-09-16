@@ -56,7 +56,7 @@ internal class AntiForgeryMiddleware
                     if (!context.CheckAntiForgeryHeader(_options))
                     {
                         context.Response.StatusCode = 401;
-                        _logger.AntiForgeryValidationFailed(route.Config.RouteId);
+                        _logger.AntiForgeryValidationFailed(LogLevel.Warning, route.Config.RouteId);
 
                         return;
                     }

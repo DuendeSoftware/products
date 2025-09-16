@@ -27,7 +27,6 @@ public class SingleFrontendFixture : IAsyncDisposable
         for (var i = 0; i < 500; i++)
         {
             var path = BenchmarkBase.GetPath(i);
-            //   Bff.AddFrontend(LocalPath.Parse(path));
             var item = Bff.Url(path + "/");
             bffUrls.Add(item);
         }

@@ -1,4 +1,4 @@
-﻿namespace Duende.Bff.Yarp
+namespace Duende.Bff.Yarp
 {
     public static class BffBuilderExtensions
     {
@@ -8,7 +8,7 @@
         public static Microsoft.Extensions.DependencyInjection.IReverseProxyBuilder AddYarpConfig(this Duende.Bff.Builder.IBffServicesBuilder builder, Yarp.ReverseProxy.Configuration.RouteConfig[] routes, Yarp.ReverseProxy.Configuration.ClusterConfig[] clusters) { }
         public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffRemoteRoutes(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
     }
-    public delegate void BffYarpTransformBuilder(string localPath, Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context);
+    public delegate void BffYarpTransformBuilder(string pathMatch, Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context);
     public static class DefaultBffYarpTransformerBuilders
     {
         public static readonly Duende.Bff.Yarp.BffYarpTransformBuilder DirectProxyWithAccessToken;
@@ -38,13 +38,13 @@
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public RemoteApi() { }
         [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        public RemoteApi(Duende.Bff.LocalPath localPath, System.Uri targetUri) { }
+        public RemoteApi(Microsoft.AspNetCore.Http.PathString pathMatch, System.Uri targetUri) { }
         public System.Type? AccessTokenRetrieverType { get; init; }
         public System.TimeSpan? ActivityTimeout { get; init; }
         public bool? AllowResponseBuffering { get; init; }
-        [System.Runtime.CompilerServices.RequiredMember]
-        public Duende.Bff.LocalPath LocalPath { get; init; }
         public Duende.Bff.Configuration.BffUserAccessTokenParameters? Parameters { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Microsoft.AspNetCore.Http.PathString PathMatch { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public Duende.Bff.AccessTokenManagement.RequiredTokenType RequiredTokenType { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
@@ -70,7 +70,7 @@
     }
     public static class RouteBuilderExtensions
     {
-        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapRemoteBffApiEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, Microsoft.AspNetCore.Http.PathString localPath, System.Uri apiAddress, System.Action<Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext>? yarpTransformBuilder = null, Yarp.ReverseProxy.Forwarder.ForwarderRequestConfig? requestConfig = null) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder MapRemoteBffApiEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints, Microsoft.AspNetCore.Http.PathString pathMatch, System.Uri apiAddress, System.Action<Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext>? yarpTransformBuilder = null, Yarp.ReverseProxy.Forwarder.ForwarderRequestConfig? requestConfig = null) { }
     }
     public sealed class UserAccessTokenParameters : System.IEquatable<Duende.Bff.Yarp.UserAccessTokenParameters>
     {
@@ -82,6 +82,6 @@
     }
     public static class YarpTransformExtensions
     {
-        public static Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext AddBffAccessToken(this Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context, Microsoft.AspNetCore.Http.PathString localPath) { }
+        public static Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext AddBffAccessToken(this Yarp.ReverseProxy.Transforms.Builder.TransformBuilderContext context, Microsoft.AspNetCore.Http.PathString pathMatch) { }
     }
 }

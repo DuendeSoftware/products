@@ -50,7 +50,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
         usedContext.Metadata.TokenType.ShouldBe(RequiredTokenType.User);
 
         usedContext.ApiAddress.ShouldBe(Api.Url("/some/path"));
-        usedContext.LocalPath.ToString().ShouldBe("/custom");
+        usedContext.PathMatch.ToString().ShouldBe("/custom");
 
     }
 
@@ -80,7 +80,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
         var usedContext = _customAccessTokenReceiver.UsedContext.ShouldNotBeNull();
 
         usedContext.ApiAddress.ShouldBe(Api.Url("/some/path"));
-        usedContext.LocalPath.ToString().ShouldBe("/custom_within_subpath");
+        usedContext.PathMatch.ToString().ShouldBe("/custom_within_subpath");
 
     }
 

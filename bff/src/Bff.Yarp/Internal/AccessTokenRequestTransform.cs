@@ -65,7 +65,7 @@ internal class AccessTokenRequestTransform(
                 Metadata = metadata,
                 UserTokenRequestParameters = userAccessTokenParameters,
                 ApiAddress = new Uri(context.DestinationPrefix),
-                LocalPath = context.HttpContext.Request.Path
+                PathMatch = context.HttpContext.Request.Path
             };
             var result = await accessTokenRetriever.GetAccessTokenAsync(accessTokenContext);
 

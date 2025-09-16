@@ -89,7 +89,6 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
         app.Use(async (c, n) =>
         {
             await n();
-            Console.WriteLine();
         });
         app.UseAuthorization();
 

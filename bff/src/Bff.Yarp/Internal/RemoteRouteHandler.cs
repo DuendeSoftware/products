@@ -15,7 +15,7 @@ internal class RemoteRouteHandler : IDisposable
 {
 
     // A cache of transformers for each frontend and local path.
-    private readonly ConcurrentDictionary<BffFrontendName, ConcurrentDictionary<LocalPath, HttpTransformer>> _cache = new();
+    private readonly ConcurrentDictionary<BffFrontendName, ConcurrentDictionary<PathString, HttpTransformer>> _cache = new();
 
     // In Yarp, the forwarder is created when you call 'map'. 
     private readonly HttpMessageInvoker _invoker;
@@ -62,7 +62,7 @@ internal class RemoteRouteHandler : IDisposable
             .GetOrAdd(frontend.Name, _ => new());
 
         return transformersForFrontend
-            .GetOrAdd(api.LocalPath, path => _transformBuilder.Create(c => _bffTransformBuilder(path, c)));
+            .GetOrAdd(api.PathMatch, path => _transformBuilder.Create(c => _bffTransformBuilder(path, c)));
     }
 
     public void ClearTransformerCacheFor(BffFrontend frontend) => _cache.TryRemove(frontend.Name, out _);
@@ -83,7 +83,7 @@ internal class RemoteRouteHandler : IDisposable
             };
 
             // Path matching must be case insensitive
-            if (context.Request.Path.StartsWithSegments(remoteApi.LocalPath.ToString(), StringComparison.OrdinalIgnoreCase))
+            if (context.Request.Path.StartsWithSegments(remoteApi.PathMatch.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 var bffRemoteApiEndpointMetadata = new BffRemoteApiEndpointMetadata()
                 {

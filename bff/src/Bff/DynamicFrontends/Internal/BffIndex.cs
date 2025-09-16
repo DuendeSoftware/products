@@ -11,10 +11,10 @@ namespace Duende.Bff.DynamicFrontends.Internal;
 internal class BffIndex
 {
     private readonly ILogger _logger;
-    private readonly Dictionary<HostString, PathTrie<BffFrontend>> _perOrigin = new();
+    private readonly Dictionary<HostString, PathTrie<BffFrontend>> _perHostHeader = new();
     private readonly PathTrie<BffFrontend> _perPath = new();
     private BffFrontend? _defaultFrontend;
-
+    private readonly Dictionary<FrontendMatchingCriteria, BffFrontendName> _registeredCriteria = new();
     public BffIndex(ILogger logger, FrontendCollection frontends)
     {
         _logger = logger;
@@ -26,13 +26,25 @@ internal class BffIndex
 
     public void AddFrontend(BffFrontend frontend)
     {
-        var frontendSelectionCriteria = frontend.SelectionCriteria;
-        if (frontendSelectionCriteria.MatchingOrigin == null)
+        var frontendMatchingCriteria = frontend.MatchingCriteria;
+
+        if (!_registeredCriteria.TryAdd(frontendMatchingCriteria, frontend.Name))
         {
-            if (frontendSelectionCriteria.MatchingPath == null)
+            _registeredCriteria.TryGetValue(frontendMatchingCriteria, out var collidesWith);
+            _logger.FrontendWithSimilarMatchingCriteriaAlreadyRegistered(LogLevel.Warning,
+                frontend.Name,
+                collidesWith
+            );
+            return;
+        }
+
+        if (frontendMatchingCriteria.MatchingHostHeader == null)
+        {
+            if (frontendMatchingCriteria.MatchingPath == null)
             {
                 if (_defaultFrontend != null)
                 {
+                    // This should no longer happen.
                     _logger.DuplicateDefaultRouteConfigured(LogLevel.Warning);
                     return;
                 }
@@ -41,18 +53,18 @@ internal class BffIndex
             }
             else
             {
-                _perPath.Add(frontendSelectionCriteria.MatchingPath, frontend);
+                _perPath.Add(frontendMatchingCriteria.MatchingPath, frontend);
             }
         }
         else
         {
-            if (!_perOrigin.TryGetValue(frontendSelectionCriteria.MatchingOrigin.ToHostString(), out var trie))
+            if (!_perHostHeader.TryGetValue(frontendMatchingCriteria.MatchingHostHeader.ToHostString(), out var trie))
             {
                 trie = new PathTrie<BffFrontend>();
-                _perOrigin[frontendSelectionCriteria.MatchingOrigin.ToHostString()] = trie;
+                _perHostHeader[frontendMatchingCriteria.MatchingHostHeader.ToHostString()] = trie;
             }
 
-            var matchingPath = frontendSelectionCriteria.MatchingPath;
+            var matchingPath = frontendMatchingCriteria.MatchingPath;
             if (matchingPath == null)
             {
                 matchingPath = "/";
@@ -71,7 +83,7 @@ internal class BffIndex
             requestHost = new HostString(requestHost.Host, request.IsHttps ? 443 : 80);
         }
 
-        var trie = _perOrigin
+        var trie = _perHostHeader
             .FirstOrDefault(x => x.Key.Equals(requestHost))
             .Value;
 

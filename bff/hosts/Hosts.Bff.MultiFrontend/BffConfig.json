@@ -8,29 +8,29 @@
       "oidc": {
         "clientId": "bff.multi-frontend.config"
       },
-      "remoteApis": [ 
+      "remoteApis": [
         {
-          "localPath": "/api/client-token",
+          "matchingPath": "/api/client-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "Client"
         },
         {
-          "localPath": "/api/user-or-client-token",
+          "matchingPath": "/api/user-or-client-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "OptionalUserOrClient"
         },
         {
-          "localPath": "/api/anonymous",
+          "matchingPath": "/api/anonymous",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "None"
         },
         {
-          "localPath": "/api/optional-user-token",
+          "matchingPath": "/api/optional-user-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "OptionalUserOrNone"
         },
         {
-          "localPath": "/api/user-token",
+          "matchingPath": "/api/user-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "User"
         }

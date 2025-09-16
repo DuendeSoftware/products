@@ -44,8 +44,8 @@ internal sealed class ProxyBffPluginLoader(IOptionsMonitor<ProxyConfiguration> p
 
         var api = new RemoteApi
         {
-            LocalPath = config.LocalPath ?? throw new InvalidOperationException("localpath cannot be empty"),
-            TargetUri = config.TargetUri ?? throw new InvalidOperationException("targeturi cannot be empty"),
+            PathMatch = config.PathMatch ?? throw new InvalidOperationException($"{nameof(config.PathMatch)} cannot be empty"),
+            TargetUri = config.TargetUri ?? throw new InvalidOperationException($"{nameof(config.TargetUri)} cannot be empty"),
             RequiredTokenType = config.RequiredTokenType,
             AccessTokenRetrieverType = type,
             ActivityTimeout = config.ActivityTimeout,

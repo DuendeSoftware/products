@@ -4,6 +4,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace Duende.Bff.Yarp;
 
@@ -25,7 +26,7 @@ public sealed record RemoteApi
             return true;
         }
 
-        return LocalPath.Equals(other.LocalPath)
+        return PathMatch == other.PathMatch
                && TargetUri.Equals(other.TargetUri)
                && RequiredTokenType == other.RequiredTokenType
                && ActivityTimeout == other.ActivityTimeout
@@ -34,17 +35,28 @@ public sealed record RemoteApi
                && Equals(Parameters, other.Parameters);
     }
 
-    public override int GetHashCode() => HashCode.Combine(LocalPath, TargetUri, (int)RequiredTokenType, AccessTokenRetrieverType, Parameters, ActivityTimeout, AllowResponseBuffering);
+    public override int GetHashCode() => HashCode.Combine(PathMatch, TargetUri, (int)RequiredTokenType, AccessTokenRetrieverType, Parameters, ActivityTimeout, AllowResponseBuffering);
 
     [SetsRequiredMembers]
-    public RemoteApi(LocalPath localPath, Uri targetUri)
+    public RemoteApi(PathString pathMatch, Uri targetUri)
     {
-        LocalPath = localPath;
+        ArgumentNullException.ThrowIfNull(targetUri);
+        if (pathMatch.Value != null && !pathMatch.Value.StartsWith('/'))
+        {
+            throw new ArgumentException("Path must start with '/'", nameof(pathMatch));
+        }
+
+        if (!targetUri.IsAbsoluteUri)
+        {
+            throw new ArgumentException("Target must be absolute Uri", nameof(targetUri));
+        }
+
+        PathMatch = pathMatch;
         TargetUri = targetUri;
         RequiredTokenType = RequiredTokenType.User;
     }
 
-    public required LocalPath LocalPath { get; init; }
+    public required PathString PathMatch { get; init; }
 
     public required Uri TargetUri { get; init; }
 

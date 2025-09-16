@@ -667,7 +667,7 @@ public class RemoteEndpointTests : BffTestBase
         Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(
-                    localPath: The.Path,
+                    pathMatch: The.Path,
                     apiAddress: Api.Url(The.Path))
                 .WithAccessToken();
         };
@@ -712,7 +712,7 @@ public class RemoteEndpointTests : BffTestBase
         Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint(
-                    localPath: The.Path,
+                    pathMatch: The.Path,
                     apiAddress: Api.Url(The.Path),
                     requestConfig: new ForwarderRequestConfig()
                     {
