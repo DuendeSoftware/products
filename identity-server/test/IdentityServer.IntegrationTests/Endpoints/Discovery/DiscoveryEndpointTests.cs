@@ -5,8 +5,11 @@ using System.Text.Json;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
+using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
@@ -318,6 +321,48 @@ public class DiscoveryEndpointTests
             result.Entries.Add("Joe", "Good Stuff"));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [Trait("Category", Category)]
+    public async Task discovery_can_be_configured_via_CustomEntries_option_regardless_of_caching(bool enableCache)
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Preview.EnableDiscoveryDocumentCache = enableCache;
+        pipeline.Options.Discovery.CustomEntries.Add("foo", "bar");
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        result.TryGetString("foo").ShouldBe("bar");
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [Trait("Category", Category)]
+    public async Task discovery_can_be_customized_via_modifying_entries_collection_only_if_caching_disabled(bool enableCache)
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            services.AddSingleton<IHttpResponseWriter<DiscoveryDocumentResult>, DiscoCustomizaztion>();
+        };
+        pipeline.Initialize();
+        pipeline.Options.Preview.EnableDiscoveryDocumentCache = enableCache;
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        if (enableCache)
+        {
+            result.IsError.ShouldBeTrue();
+        }
+        else
+        {
+            result.TryGetString("foo").ShouldBe("bar");
+        }
+    }
+
     [Fact]
     [Trait("Category", Category)]
     public async Task par_is_included_in_mtls_aliases()
@@ -330,5 +375,14 @@ public class DiscoveryEndpointTests
 
         var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
         result.MtlsEndpointAliases.PushedAuthorizationRequestEndpoint.ShouldNotBeNull();
+    }
+}
+
+class DiscoCustomizaztion : IHttpResponseWriter<DiscoveryDocumentResult>
+{
+    public Task WriteHttpResponse(DiscoveryDocumentResult result, HttpContext context)
+    {
+        result.Entries.Add("foo", "bar");
+        return context.Response.WriteJsonAsync(ObjectSerializer.ToString(result.Entries));
     }
 }
