@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using AtmResource = Duende.AccessTokenManagement.Resource;
 using Resource = Duende.Bff.AccessTokenManagement.Resource;
@@ -32,7 +31,7 @@ public sealed record BffUserAccessTokenParameters
     {
         SignInScheme = SignInScheme,
         ChallengeScheme = ChallengeScheme,
-        ForceTokenRenewal = new ForceTokenRenewal(ForceRenewal),
+        ForceTokenRenewal = ForceRenewal,
         Resource = Resource.HasValue ? AtmResource.Parse(Resource.Value.ToString()) : null
     };
 }

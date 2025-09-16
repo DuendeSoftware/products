@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Clients;
-using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +21,7 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Renew()
     {
-        await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { ForceTokenRenewal = new ForceTokenRenewal(true) });
+        await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { ForceTokenRenewal = true });
         return RedirectToAction(nameof(Secure));
     }
 
