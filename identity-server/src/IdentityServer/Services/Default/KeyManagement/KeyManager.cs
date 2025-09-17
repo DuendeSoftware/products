@@ -270,7 +270,6 @@ public class KeyManager : IKeyManager
         _logger.LogTrace("Creating new key.");
 
         var now = _clock.UtcNow.UtcDateTime;
-        var iss = await _issuerNameService.GetCurrentAsync();
 
         KeyContainer container;
 
@@ -278,9 +277,15 @@ public class KeyManager : IKeyManager
         {
             var rsa = CryptoHelper.CreateRsaSecurityKey(_options.KeyManagement.RsaKeySize);
 
-            container = alg.UseX509Certificate ?
-                new X509KeyContainer(rsa, alg.Name, now, _options.KeyManagement.KeyRetirementAge, iss) :
-                new RsaKeyContainer(rsa, alg.Name, now);
+            if (alg.UseX509Certificate)
+            {
+                var iss = await _issuerNameService.GetCurrentAsync();
+                container = new X509KeyContainer(rsa, alg.Name, now, _options.KeyManagement.KeyRetirementAge, iss);
+            }
+            else
+            {
+                container = new RsaKeyContainer(rsa, alg.Name, now);
+            }
         }
         else if (alg.IsEcKey)
         {
