@@ -104,7 +104,7 @@ public class IdentityServerHost : GenericHost
     {
         var props = new AuthenticationProperties();
 
-        if (!String.IsNullOrWhiteSpace(sid))
+        if (!string.IsNullOrWhiteSpace(sid))
         {
             props.Items.Add("session_id", sid);
         }

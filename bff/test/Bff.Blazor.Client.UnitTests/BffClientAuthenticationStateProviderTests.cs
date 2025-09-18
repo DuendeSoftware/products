@@ -143,7 +143,7 @@ public class BffClientAuthenticationStateProviderTests
 
         // Repeatedly advance time past the polling interval, and note that we make an additional call
         // each time.
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
             time.Advance(TimeSpan.FromSeconds(10));
             persistentUserService.Received(1).GetPersistedUser(out Arg.Any<ClaimsPrincipal?>());

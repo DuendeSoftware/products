@@ -14,10 +14,7 @@ public class BearerTokenResult : AccessTokenResult
     /// with the specified access token.
     /// </summary>
     /// <param name="accessToken">The access token.</param>
-    public BearerTokenResult(string accessToken)
-    {
-        AccessToken = accessToken;
-    }
+    public BearerTokenResult(string accessToken) => AccessToken = accessToken;
     /// <summary>
     /// The access token.
     /// </summary>

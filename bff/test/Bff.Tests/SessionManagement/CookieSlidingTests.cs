@@ -8,159 +8,152 @@ using Microsoft.Extensions.Time.Testing;
 using Xunit.Abstractions;
 
 
-namespace Duende.Bff.Tests.SessionManagement
+namespace Duende.Bff.Tests.SessionManagement;
+
+public class CookieSlidingTests : BffIntegrationTestBase
 {
-    public class CookieSlidingTests : BffIntegrationTestBase
+    readonly InMemoryUserSessionStore _sessionStore = new();
+    readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
+
+    public CookieSlidingTests(ITestOutputHelper output) : base(output) => BffHost.OnConfigureServices += services =>
+                                                                               {
+                                                                                   services.AddSingleton<IUserSessionStore>(_sessionStore);
+                                                                                   services.Configure<CookieAuthenticationOptions>("cookie", options =>
+                                                                                   {
+                                                                                       options.SlidingExpiration = true;
+                                                                                       options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                                                                                   });
+                                                                                   services.AddSingleton<TimeProvider>(_clock);
+                                                                               };
+
+    private void SetClock(TimeSpan t) => _clock.SetUtcNow(_clock.GetUtcNow().Add(t));
+
+    [Fact]
+    public async Task user_endpoint_cookie_should_slide()
     {
-        readonly InMemoryUserSessionStore _sessionStore = new();
-        readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
+        await BffHost.BffLoginAsync("alice");
 
-        public CookieSlidingTests(ITestOutputHelper output) : base(output)
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        sessions.Count().ShouldBe(1);
+
+        var session = sessions.Single();
+
+        var ticketStore = BffHost.Resolve<IServerTicketStore>();
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        firstTicket.ShouldNotBeNull();
+
+        SetClock(TimeSpan.FromMinutes(8));
+        (await BffHost.GetIsUserLoggedInAsync()).ShouldBeTrue();
+
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        secondTicket.ShouldNotBeNull();
+
+        (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
+        (secondTicket.Properties.ExpiresUtc > firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task user_endpoint_when_sliding_flag_is_passed_cookie_should_not_slide()
+    {
+        await BffHost.BffLoginAsync("alice");
+
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        sessions.Count().ShouldBe(1);
+
+        var session = sessions.Single();
+
+        var ticketStore = BffHost.Resolve<IServerTicketStore>();
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        firstTicket.ShouldNotBeNull();
+
+        SetClock(TimeSpan.FromMinutes(8));
+        (await BffHost.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
+
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        secondTicket.ShouldNotBeNull();
+
+        (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
+        (secondTicket.Properties.ExpiresUtc == firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task user_endpoint_when_uservalidate_renews_cookie_should_slide()
+    {
+        var shouldRenew = false;
+        BffHost.OnConfigureServices += services =>
         {
-            BffHost.OnConfigureServices += services =>
+            services.Configure<CookieAuthenticationOptions>("cookie", options =>
             {
-                services.AddSingleton<IUserSessionStore>(_sessionStore);
-                services.Configure<CookieAuthenticationOptions>("cookie", options =>
+                options.Events.OnValidatePrincipal = ctx =>
                 {
-                    options.SlidingExpiration = true;
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                });
-                services.AddSingleton<TimeProvider>(_clock);
-            };
-        }
+                    ctx.ShouldRenew = shouldRenew;
+                    return Task.CompletedTask;
+                };
+            });
+        };
+        await BffHost.InitializeAsync();
 
-        private void SetClock(TimeSpan t)
+
+        await BffHost.BffLoginAsync("alice");
+
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        sessions.Count().ShouldBe(1);
+
+        var session = sessions.Single();
+
+        var ticketStore = BffHost.Resolve<IServerTicketStore>();
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        firstTicket.ShouldNotBeNull();
+
+        shouldRenew = true;
+        SetClock(TimeSpan.FromSeconds(1));
+        (await BffHost.GetIsUserLoggedInAsync()).ShouldBeTrue();
+
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        secondTicket.ShouldNotBeNull();
+
+        (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
+        (secondTicket.Properties.ExpiresUtc > firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task user_endpoint_when_uservalidate_renews_and_sliding_flag_is_passed_cookie_should_not_slide()
+    {
+        var shouldRenew = false;
+
+        BffHost.OnConfigureServices += services =>
         {
-            _clock.SetUtcNow(_clock.GetUtcNow().Add(t));
-        }
-
-        [Fact]
-        public async Task user_endpoint_cookie_should_slide()
-        {
-            await BffHost.BffLoginAsync("alice");
-
-            var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
-            sessions.Count().ShouldBe(1);
-
-            var session = sessions.Single();
-
-            var ticketStore = BffHost.Resolve<IServerTicketStore>();
-            var firstTicket = await ticketStore.RetrieveAsync(session.Key);
-            firstTicket.ShouldNotBeNull();
-
-            SetClock(TimeSpan.FromMinutes(8));
-            (await BffHost.GetIsUserLoggedInAsync()).ShouldBeTrue();
-
-            var secondTicket = await ticketStore.RetrieveAsync(session.Key);
-            secondTicket.ShouldNotBeNull();
-
-            (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
-            (secondTicket.Properties.ExpiresUtc > firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
-        }
-
-        [Fact]
-        public async Task user_endpoint_when_sliding_flag_is_passed_cookie_should_not_slide()
-        {
-            await BffHost.BffLoginAsync("alice");
-
-            var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
-            sessions.Count().ShouldBe(1);
-
-            var session = sessions.Single();
-
-            var ticketStore = BffHost.Resolve<IServerTicketStore>();
-            var firstTicket = await ticketStore.RetrieveAsync(session.Key);
-            firstTicket.ShouldNotBeNull();
-
-            SetClock(TimeSpan.FromMinutes(8));
-            (await BffHost.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
-
-            var secondTicket = await ticketStore.RetrieveAsync(session.Key);
-            secondTicket.ShouldNotBeNull();
-
-            (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
-            (secondTicket.Properties.ExpiresUtc == firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
-        }
-
-        [Fact]
-        public async Task user_endpoint_when_uservalidate_renews_cookie_should_slide()
-        {
-            var shouldRenew = false;
-            BffHost.OnConfigureServices += services =>
+            services.Configure<CookieAuthenticationOptions>("cookie", options =>
             {
-                services.Configure<CookieAuthenticationOptions>("cookie", options =>
+                options.Events.OnCheckSlidingExpiration = ctx =>
                 {
-                    options.Events.OnValidatePrincipal = ctx =>
-                    {
-                        ctx.ShouldRenew = shouldRenew;
-                        return Task.CompletedTask;
-                    };
-                });
-            };
-            await BffHost.InitializeAsync();
+                    ctx.ShouldRenew = shouldRenew;
+                    return Task.CompletedTask;
+                };
+            });
+        };
 
+        await BffHost.InitializeAsync();
 
-            await BffHost.BffLoginAsync("alice");
+        await BffHost.BffLoginAsync("alice");
 
-            var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
-            sessions.Count().ShouldBe(1);
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        sessions.Count().ShouldBe(1);
 
-            var session = sessions.Single();
+        var session = sessions.Single();
 
-            var ticketStore = BffHost.Resolve<IServerTicketStore>();
-            var firstTicket = await ticketStore.RetrieveAsync(session.Key);
-            firstTicket.ShouldNotBeNull();
+        var ticketStore = BffHost.Resolve<IServerTicketStore>();
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        firstTicket.ShouldNotBeNull();
 
-            shouldRenew = true;
-            SetClock(TimeSpan.FromSeconds(1));
-            (await BffHost.GetIsUserLoggedInAsync()).ShouldBeTrue();
+        shouldRenew = true;
+        SetClock(TimeSpan.FromSeconds(1));
+        (await BffHost.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
-            var secondTicket = await ticketStore.RetrieveAsync(session.Key);
-            secondTicket.ShouldNotBeNull();
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        secondTicket.ShouldNotBeNull();
 
-            (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
-            (secondTicket.Properties.ExpiresUtc > firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
-        }
-
-        [Fact]
-        public async Task user_endpoint_when_uservalidate_renews_and_sliding_flag_is_passed_cookie_should_not_slide()
-        {
-            var shouldRenew = false;
-
-            BffHost.OnConfigureServices += services =>
-            {
-                services.Configure<CookieAuthenticationOptions>("cookie", options =>
-                {
-                    options.Events.OnCheckSlidingExpiration = ctx =>
-                    {
-                        ctx.ShouldRenew = shouldRenew;
-                        return Task.CompletedTask;
-                    };
-                });
-            };
-
-            await BffHost.InitializeAsync();
-
-            await BffHost.BffLoginAsync("alice");
-
-            var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
-            sessions.Count().ShouldBe(1);
-
-            var session = sessions.Single();
-
-            var ticketStore = BffHost.Resolve<IServerTicketStore>();
-            var firstTicket = await ticketStore.RetrieveAsync(session.Key);
-            firstTicket.ShouldNotBeNull();
-
-            shouldRenew = true;
-            SetClock(TimeSpan.FromSeconds(1));
-            (await BffHost.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
-
-            var secondTicket = await ticketStore.RetrieveAsync(session.Key);
-            secondTicket.ShouldNotBeNull();
-
-            (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
-            (secondTicket.Properties.ExpiresUtc == firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
-        }
+        (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
+        (secondTicket.Properties.ExpiresUtc == firstTicket.Properties.ExpiresUtc).ShouldBeTrue();
     }
 }

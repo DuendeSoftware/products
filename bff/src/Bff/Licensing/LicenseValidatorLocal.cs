@@ -11,10 +11,7 @@ namespace Duende;
 // APIs needed for IdentityServer specific license validation
 internal partial class LicenseValidator
 {
-    public static void Initalize(ILoggerFactory loggerFactory, BffOptions options)
-    {
-        Initalize(loggerFactory, "Bff", options.LicenseKey);
-    }
+    public static void Initalize(ILoggerFactory loggerFactory, BffOptions options) => Initalize(loggerFactory, "Bff", options.LicenseKey);
 
     // this should just add to the error list
     public static void ValidateProductFeaturesForLicense(IList<string> errors)

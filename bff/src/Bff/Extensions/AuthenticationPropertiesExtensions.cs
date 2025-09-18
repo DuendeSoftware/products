@@ -13,8 +13,5 @@ public static class AuthenticationPropertiesExtensions
     /// <summary>
     /// Determines if this AuthenticationProperties represents a BFF silent login.
     /// </summary>
-    public static bool IsSilentLogin(this AuthenticationProperties props)
-    {
-        return props.Items.ContainsKey(Constants.BffFlags.SilentLogin);
-    }
+    public static bool IsSilentLogin(this AuthenticationProperties props) => props.Items.ContainsKey(Constants.BffFlags.SilentLogin);
 }

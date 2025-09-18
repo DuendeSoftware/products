@@ -4,69 +4,68 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Api.Isolated
+namespace Api.Isolated;
+
+internal static class Extensions
 {
-    internal static class Extensions
+    public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
-        {
-            var services = builder.Services;
-            services.AddControllers();
+        var services = builder.Services;
+        services.AddControllers();
 
-            services.AddAuthentication("token")
-                .AddJwtBearer("token", options =>
-                {
-                    options.Authority = "https://localhost:5001";
-                    options.MapInboundClaims = false;
-
-                    options.TokenValidationParameters = new TokenValidationParameters()
-                    {
-                        ValidateAudience = true,
-                        ValidAudience = "urn:isolated-api",
-                        ValidTypes = new[] { "at+jwt" },
-
-                        NameClaimType = "name",
-                        RoleClaimType = "role"
-                    };
-                });
-
-            services.AddAuthorization(options =>
+        services.AddAuthentication("token")
+            .AddJwtBearer("token", options =>
             {
-                options.AddPolicy("ApiCaller", policy =>
-                {
-                    policy.RequireClaim("scope", "scope-for-isolated-api");
-                });
+                options.Authority = "https://localhost:5001";
+                options.MapInboundClaims = false;
 
-                options.AddPolicy("RequireInteractiveUser", policy =>
+                options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    policy.RequireClaim("sub");
-                });
-            });
-            return builder.Build();
-        }
+                    ValidateAudience = true,
+                    ValidAudience = "urn:isolated-api",
+                    ValidTypes = new[] { "at+jwt" },
 
-        public static WebApplication ConfigurePipeline(this WebApplication app)
-        {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost,
+                    NameClaimType = "name",
+                    RoleClaimType = "role"
+                };
             });
 
-            app.UseHttpLogging();
-
-            if (app.Environment.IsDevelopment())
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("ApiCaller", policy =>
             {
-                app.UseDeveloperExceptionPage();
-            }
+                policy.RequireClaim("scope", "scope-for-isolated-api");
+            });
 
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
+            options.AddPolicy("RequireInteractiveUser", policy =>
+            {
+                policy.RequireClaim("sub");
+            });
+        });
+        return builder.Build();
+    }
 
-            app.MapControllers()
-                .RequireAuthorization("ApiCaller");
-            return app;
+    public static WebApplication ConfigurePipeline(this WebApplication app)
+    {
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost,
+        });
 
+        app.UseHttpLogging();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
         }
+
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapControllers()
+            .RequireAuthorization("ApiCaller");
+        return app;
+
     }
 }

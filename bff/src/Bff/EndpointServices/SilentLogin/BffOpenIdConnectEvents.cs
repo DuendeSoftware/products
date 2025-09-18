@@ -20,10 +20,7 @@ public class BffOpenIdConnectEvents : OpenIdConnectEvents
     /// ctor
     /// </summary>
     /// <param name="logger"></param>
-    public BffOpenIdConnectEvents(ILogger<BffOpenIdConnectEvents> logger)
-    {
-        Logger = logger;
-    }
+    public BffOpenIdConnectEvents(ILogger<BffOpenIdConnectEvents> logger) => Logger = logger;
 
     /// <inheritdoc/>
     public override async Task RedirectToIdentityProvider(RedirectContext context)

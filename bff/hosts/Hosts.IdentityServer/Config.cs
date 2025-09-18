@@ -4,31 +4,30 @@
 
 using Duende.IdentityServer.Models;
 
-namespace IdentityServer
+namespace IdentityServer;
+
+public static class Config
 {
-    public static class Config
-    {
-        public static IEnumerable<IdentityResource> IdentityResources =>
-            [
-                new IdentityResources.OpenId(),
-                new IdentityResources.Profile(),
-            ];
+    public static IEnumerable<IdentityResource> IdentityResources =>
+        [
+            new IdentityResources.OpenId(),
+            new IdentityResources.Profile(),
+        ];
 
-        public static IEnumerable<ApiScope> ApiScopes =>
-            [
-                new("api", ["name"]),
-                new("scope-for-isolated-api", ["name"]),
-            ];
+    public static IEnumerable<ApiScope> ApiScopes =>
+        [
+            new("api", ["name"]),
+            new("scope-for-isolated-api", ["name"]),
+        ];
 
-        public static IEnumerable<ApiResource> ApiResources =>
-            [
-                new("urn:isolated-api", "isolated api")
-                {
-                    RequireResourceIndicator = true,
-                    Scopes = { "scope-for-isolated-api" }
-                }
-            ];
+    public static IEnumerable<ApiResource> ApiResources =>
+        [
+            new("urn:isolated-api", "isolated api")
+            {
+                RequireResourceIndicator = true,
+                Scopes = { "scope-for-isolated-api" }
+            }
+        ];
 
 
-    }
 }

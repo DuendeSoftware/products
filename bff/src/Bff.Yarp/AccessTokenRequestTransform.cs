@@ -118,7 +118,9 @@ public class AccessTokenRequestTransform(
     {
         var yarp = endpoint.Metadata.GetMetadata<RouteModel>();
         if (yarp == null)
+        {
             return null;
+        }
 
         TokenType? requiredTokenType = null;
         if (Enum.TryParse<TokenType>(yarp.Config?.Metadata?.GetValueOrDefault(Constants.Yarp.TokenTypeMetadata), true, out var type))
@@ -141,11 +143,8 @@ public class AccessTokenRequestTransform(
         logger.AccessTokenMissing(tokenType?.ToString() ?? "Unknown token type", context.HttpContext.Request.Path, tokenError.Error);
     }
 
-    private void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token)
-    {
-        context.ProxyRequest.Headers.Authorization =
+    private void ApplyBearerToken(RequestTransformContext context, BearerTokenResult token) => context.ProxyRequest.Headers.Authorization =
             new AuthenticationHeaderValue(OidcConstants.AuthenticationSchemes.AuthorizationHeaderBearer, token.AccessToken);
-    }
 
     private async Task ApplyDPoPToken(RequestTransformContext context, DPoPTokenResult token)
     {

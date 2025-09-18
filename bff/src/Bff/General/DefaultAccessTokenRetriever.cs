@@ -19,10 +19,7 @@ public class DefaultAccessTokenRetriever : IAccessTokenRetriever
     /// Creates new instances of DefaultAccessTokenRetriever. 
     /// </summary>
     /// <param name="logger"></param>
-    public DefaultAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger)
-    {
-        Logger = logger;
-    }
+    public DefaultAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger) => Logger = logger;
 
     /// <inheritdoc />
     public virtual async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)

@@ -130,11 +130,7 @@ public static class BffEndpointRouteBuilderExtensions
             .AllowAnonymous();
     }
 
-    internal static void CheckLicense(this IEndpointRouteBuilder endpoints)
-    {
-        endpoints.ServiceProvider.CheckLicense();
-
-    }
+    internal static void CheckLicense(this IEndpointRouteBuilder endpoints) => endpoints.ServiceProvider.CheckLicense();
 
     internal static void CheckLicense(this IServiceProvider serviceProvider)
     {

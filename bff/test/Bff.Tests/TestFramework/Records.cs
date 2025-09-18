@@ -4,14 +4,13 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Duende.Bff.Tests.TestFramework
-{
-    public record JsonRecord(string Type, JsonElement Value)
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; } = Type;
+namespace Duende.Bff.Tests.TestFramework;
 
-        [JsonPropertyName("value")]
-        public JsonElement Value { get; } = Value;
-    }
+public record JsonRecord(string Type, JsonElement Value)
+{
+    [JsonPropertyName("type")]
+    public string Type { get; } = Type;
+
+    [JsonPropertyName("value")]
+    public JsonElement Value { get; } = Value;
 }

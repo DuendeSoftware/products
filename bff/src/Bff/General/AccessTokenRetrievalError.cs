@@ -14,10 +14,7 @@ public class AccessTokenRetrievalError : AccessTokenResult
     /// message.
     /// </summary>
     /// <param name="error">The error message.</param>
-    public AccessTokenRetrievalError(string error)
-    {
-        Error = error;
-    }
+    public AccessTokenRetrievalError(string error) => Error = error;
 
     /// <summary>
     /// Gets or sets the error message.

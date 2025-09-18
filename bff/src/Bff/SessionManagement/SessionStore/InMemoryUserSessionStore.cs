@@ -51,11 +51,11 @@ public class InMemoryUserSessionStore : IUserSessionStore
         filter.Validate();
 
         var query = _store.Values.AsQueryable();
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
@@ -70,11 +70,11 @@ public class InMemoryUserSessionStore : IUserSessionStore
         filter.Validate();
 
         var query = _store.Values.AsQueryable();
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
         }

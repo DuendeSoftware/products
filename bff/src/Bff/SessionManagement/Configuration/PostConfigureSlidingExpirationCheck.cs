@@ -6,60 +6,59 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.Bff
+namespace Duende.Bff;
+
+/// <summary>
+/// Cookie configuration to suppress sliding the cookie on the ~/bff/user endpoint if requested.
+/// </summary>
+public class PostConfigureSlidingExpirationCheck : IPostConfigureOptions<CookieAuthenticationOptions>
 {
+    private readonly BffOptions _options;
+    private readonly string? _scheme;
+    private readonly ILogger<PostConfigureSlidingExpirationCheck> _logger;
+
     /// <summary>
-    /// Cookie configuration to suppress sliding the cookie on the ~/bff/user endpoint if requested.
+    /// ctor
     /// </summary>
-    public class PostConfigureSlidingExpirationCheck : IPostConfigureOptions<CookieAuthenticationOptions>
+    /// <param name="bffOptions"></param>
+    /// <param name="authOptions"></param>
+    /// <param name="logger"></param>
+    public PostConfigureSlidingExpirationCheck(IOptions<BffOptions> bffOptions, IOptions<AuthenticationOptions> authOptions, ILogger<PostConfigureSlidingExpirationCheck> logger)
     {
-        private readonly BffOptions _options;
-        private readonly string? _scheme;
-        private readonly ILogger<PostConfigureSlidingExpirationCheck> _logger;
+        _options = bffOptions.Value;
+        _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="bffOptions"></param>
-        /// <param name="authOptions"></param>
-        /// <param name="logger"></param>
-        public PostConfigureSlidingExpirationCheck(IOptions<BffOptions> bffOptions, IOptions<AuthenticationOptions> authOptions, ILogger<PostConfigureSlidingExpirationCheck> logger)
+    /// <inheritdoc />
+    public void PostConfigure(string? name, CookieAuthenticationOptions options)
+    {
+        if (name == _scheme)
         {
-            _options = bffOptions.Value;
-            _scheme = authOptions.Value.DefaultAuthenticateScheme ?? authOptions.Value.DefaultScheme;
-            _logger = logger;
+            options.Events.OnCheckSlidingExpiration = CreateCallback(options.Events.OnCheckSlidingExpiration);
         }
+    }
 
-        /// <inheritdoc />
-        public void PostConfigure(string? name, CookieAuthenticationOptions options)
+    private Func<CookieSlidingExpirationContext, Task> CreateCallback(Func<CookieSlidingExpirationContext, Task> inner)
+    {
+        Task Callback(CookieSlidingExpirationContext ctx)
         {
-            if (name == _scheme)
-            {
-                options.Events.OnCheckSlidingExpiration = CreateCallback(options.Events.OnCheckSlidingExpiration);
-            }
-        }
+            var result = inner?.Invoke(ctx) ?? Task.CompletedTask;
 
-        private Func<CookieSlidingExpirationContext, Task> CreateCallback(Func<CookieSlidingExpirationContext, Task> inner)
-        {
-            Task Callback(CookieSlidingExpirationContext ctx)
+            // disable sliding expiration
+            if (ctx.HttpContext.Request.Path == _options.UserPath)
             {
-                var result = inner?.Invoke(ctx) ?? Task.CompletedTask;
-
-                // disable sliding expiration
-                if (ctx.HttpContext.Request.Path == _options.UserPath)
+                var slide = ctx.Request.Query[Constants.RequestParameters.SlideCookie];
+                if (slide == "false")
                 {
-                    var slide = ctx.Request.Query[Constants.RequestParameters.SlideCookie];
-                    if (slide == "false")
-                    {
-                        _logger.LogDebug("Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.");
-                        ctx.ShouldRenew = false;
-                    }
+                    _logger.LogDebug("Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.");
+                    ctx.ShouldRenew = false;
                 }
-
-                return result;
             }
 
-            return Callback;
+            return result;
         }
+
+        return Callback;
     }
 }

@@ -19,10 +19,7 @@ public static class BffBuilderExtensions
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action)
-    {
-        return bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
-    }
+    public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<IServiceProvider, DbContextOptionsBuilder> action) => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
 
     /// <summary>
     /// Adds entity framework core support for user session store.
@@ -30,10 +27,7 @@ public static class BffBuilderExtensions
     /// <param name="bffBuilder"></param>
     /// <param name="action"></param>
     /// <returns></returns>
-    public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<DbContextOptionsBuilder> action)
-    {
-        return bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
-    }
+    public static BffBuilder AddEntityFrameworkServerSideSessions(this BffBuilder bffBuilder, Action<DbContextOptionsBuilder> action) => bffBuilder.AddEntityFrameworkServerSideSessions<SessionDbContext>(action);
 
     /// <summary>
     /// Adds entity framework core support for user session store.

@@ -6,10 +6,7 @@ namespace Duende.Bff;
 class LocalUrlReturnUrlValidator : IReturnUrlValidator
 {
     /// <inheritdoc/>
-    public Task<bool> IsValidAsync(string returnUrl)
-    {
-        return Task.FromResult(IsLocalUrl(returnUrl));
-    }
+    public Task<bool> IsValidAsync(string returnUrl) => Task.FromResult(IsLocalUrl(returnUrl));
 
     internal static bool IsLocalUrl(string url)
     {
@@ -18,21 +15,16 @@ class LocalUrlReturnUrlValidator : IReturnUrlValidator
             return false;
         }
 
-        switch (url[0])
+        return url[0] switch
         {
             // Allows "/" or "/foo" but not "//" or "/\".
             // url is exactly "/"
-            case '/' when url.Length == 1:
-                return true;
+            '/' when url.Length == 1 => true,
             // url doesn't start with "//" or "/\"
-            case '/' when url[1] != '/' && url[1] != '\\':
-                return !HasControlCharacter(url.AsSpan(1));
-            case '/':
-                return false;
-        }
-
-        return false;
-
+            '/' when url[1] != '/' && url[1] != '\\' => !HasControlCharacter(url.AsSpan(1)),
+            '/' => false,
+            _ => false,
+        };
 
         static bool HasControlCharacter(ReadOnlySpan<char> readOnlySpan)
         {

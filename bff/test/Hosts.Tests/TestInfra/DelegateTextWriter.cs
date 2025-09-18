@@ -48,7 +48,7 @@ public class DelegateTextWriter : TextWriter
 
         if (_currentLine.Contains(value: '\n'))
         {
-            string[] lines = _currentLine.Split(new[] { '\n' }, StringSplitOptions.None);
+            var lines = _currentLine.Split(new[] { '\n' }, StringSplitOptions.None);
 
             for (var i = 0; i < lines.Length - 1; i++)
             {

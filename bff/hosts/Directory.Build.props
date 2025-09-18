@@ -18,6 +18,7 @@
 
       -->
     <TargetFramework>net9.0</TargetFramework>
+    <IsBffProject>true</IsBffProject>
   </PropertyGroup>
   <Import Project="../../samples.props" />
 </Project>

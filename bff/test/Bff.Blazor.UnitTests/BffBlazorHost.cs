@@ -152,7 +152,10 @@ public class BffBlazorHost : GenericHost
 
     public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
     {
-        if (userQuery != null) userQuery = "?" + userQuery;
+        if (userQuery != null)
+        {
+            userQuery = "?" + userQuery;
+        }
 
         var req = new HttpRequestMessage(HttpMethod.Get, Url("/bff/user") + userQuery);
         req.Headers.Add("x-csrf", "1");
@@ -231,16 +234,10 @@ public class BffBlazorHost : GenericHost
 
     public class CallbackHttpMessageInvokerFactory : IForwarderHttpClientFactory
     {
-        public CallbackHttpMessageInvokerFactory(Func<HttpMessageInvoker> callback)
-        {
-            CreateInvoker = callback;
-        }
+        public CallbackHttpMessageInvokerFactory(Func<HttpMessageInvoker> callback) => CreateInvoker = callback;
 
         public Func<HttpMessageInvoker> CreateInvoker { get; set; }
 
-        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context)
-        {
-            return CreateInvoker.Invoke();
-        }
+        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => CreateInvoker.Invoke();
     }
 }

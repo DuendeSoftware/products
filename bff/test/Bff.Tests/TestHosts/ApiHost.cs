@@ -8,105 +8,104 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Duende.Bff.Tests.TestHosts
+namespace Duende.Bff.Tests.TestHosts;
+
+public class ApiHost : GenericHost
 {
-    public class ApiHost : GenericHost
+    public int? ApiStatusCodeToReturn { get; set; }
+
+    private readonly IdentityServerHost _identityServerHost;
+
+    public ApiHost(
+        WriteTestOutput output,
+        IdentityServerHost identityServerHost,
+        string scope,
+        string baseAddress = "https://api")
+        : base(output, baseAddress)
     {
-        public int? ApiStatusCodeToReturn { get; set; }
+        _identityServerHost = identityServerHost;
 
-        private readonly IdentityServerHost _identityServerHost;
+        _identityServerHost.ApiScopes.Add(new ApiScope(scope));
 
-        public ApiHost(
-            WriteTestOutput output,
-            IdentityServerHost identityServerHost,
-            string scope,
-            string baseAddress = "https://api")
-            : base(output, baseAddress)
-        {
-            _identityServerHost = identityServerHost;
+        OnConfigureServices += ConfigureServices;
+        OnConfigure += Configure;
+    }
 
-            _identityServerHost.ApiScopes.Add(new ApiScope(scope));
+    private void ConfigureServices(IServiceCollection services)
+    {
+        services.AddRouting();
+        services.AddAuthorization();
 
-            OnConfigureServices += ConfigureServices;
-            OnConfigure += Configure;
-        }
-
-        private void ConfigureServices(IServiceCollection services)
-        {
-            services.AddRouting();
-            services.AddAuthorization();
-
-            services.AddAuthentication("token")
-                .AddJwtBearer("token", options =>
-                {
-                    options.Authority = _identityServerHost.Url();
-                    options.Audience = _identityServerHost.Url("/resources");
-                    options.MapInboundClaims = false;
-                    options.BackchannelHttpHandler = _identityServerHost.Server.CreateHandler();
-                });
-        }
-
-        private void Configure(IApplicationBuilder app)
-        {
-            app.UseRouting();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
+        services.AddAuthentication("token")
+            .AddJwtBearer("token", options =>
             {
-                endpoints.Map("/return_unauthenticated",
-                    context =>
-                    {
-                        context.Response.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
-                        return Task.CompletedTask;
-                    });
-
-                endpoints.Map("/return_forbidden",
-                    context =>
-                    {
-                        context.Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
-                        return Task.CompletedTask;
-                    });
-
-                endpoints.Map("/{**catch-all}", async context =>
-                {
-                    // capture body if present
-                    var body = default(string);
-                    if (context.Request.HasJsonContentType())
-                    {
-                        using (var sr = new StreamReader(context.Request.Body))
-                        {
-                            body = await sr.ReadToEndAsync();
-                        }
-                    }
-
-                    // capture request headers
-                    var requestHeaders = new Dictionary<string, List<string>>();
-                    foreach (var header in context.Request.Headers)
-                    {
-                        var values = new List<string>(header.Value.Select(v => v ?? string.Empty));
-                        requestHeaders.Add(header.Key, values);
-                    }
-
-                    var response = new ApiResponse(
-                        Method: context.Request.Method,
-                        Path: context.Request.Path.Value ?? "/",
-                        Sub: context.User.FindFirst("sub")?.Value,
-                        ClientId: context.User.FindFirst("client_id")?.Value,
-                        Claims: context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
-                    {
-                        Body = body,
-                        RequestHeaders = requestHeaders
-                    };
-
-                    context.Response.StatusCode = ApiStatusCodeToReturn ?? 200;
-                    ApiStatusCodeToReturn = null;
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-                });
+                options.Authority = _identityServerHost.Url();
+                options.Audience = _identityServerHost.Url("/resources");
+                options.MapInboundClaims = false;
+                options.BackchannelHttpHandler = _identityServerHost.Server.CreateHandler();
             });
-        }
+    }
+
+    private void Configure(IApplicationBuilder app)
+    {
+        app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.Map("/return_unauthenticated",
+                context =>
+                {
+                    context.Response.StatusCode = (int)System.Net.HttpStatusCode.Unauthorized;
+                    return Task.CompletedTask;
+                });
+
+            endpoints.Map("/return_forbidden",
+                context =>
+                {
+                    context.Response.StatusCode = (int)System.Net.HttpStatusCode.Forbidden;
+                    return Task.CompletedTask;
+                });
+
+            endpoints.Map("/{**catch-all}", async context =>
+            {
+                // capture body if present
+                var body = default(string);
+                if (context.Request.HasJsonContentType())
+                {
+                    using (var sr = new StreamReader(context.Request.Body))
+                    {
+                        body = await sr.ReadToEndAsync();
+                    }
+                }
+
+                // capture request headers
+                var requestHeaders = new Dictionary<string, List<string>>();
+                foreach (var header in context.Request.Headers)
+                {
+                    var values = new List<string>(header.Value.Select(v => v ?? string.Empty));
+                    requestHeaders.Add(header.Key, values);
+                }
+
+                var response = new ApiResponse(
+                    Method: context.Request.Method,
+                    Path: context.Request.Path.Value ?? "/",
+                    Sub: context.User.FindFirst("sub")?.Value,
+                    ClientId: context.User.FindFirst("client_id")?.Value,
+                    Claims: context.User.Claims.Select(x => new ClaimRecord(x.Type, x.Value)).ToArray())
+                {
+                    Body = body,
+                    RequestHeaders = requestHeaders
+                };
+
+                context.Response.StatusCode = ApiStatusCodeToReturn ?? 200;
+                ApiStatusCodeToReturn = null;
+
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            });
+        });
     }
 }

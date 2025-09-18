@@ -37,16 +37,10 @@ public class TicketStoreShim : ITicketStore
     private IServerTicketStore Inner => _httpContextAccessor.HttpContext!.RequestServices.GetRequiredService<IServerTicketStore>();
 
     /// <inheritdoc />
-    public Task RemoveAsync(string key)
-    {
-        return Inner.RemoveAsync(key);
-    }
+    public Task RemoveAsync(string key) => Inner.RemoveAsync(key);
 
     /// <inheritdoc />
-    public Task RenewAsync(string key, AuthenticationTicket ticket)
-    {
-        return Inner.RenewAsync(key, ticket);
-    }
+    public Task RenewAsync(string key, AuthenticationTicket ticket) => Inner.RenewAsync(key, ticket);
 
     /// <inheritdoc />
     public async Task<AuthenticationTicket> RetrieveAsync(string key)
@@ -57,8 +51,5 @@ public class TicketStoreShim : ITicketStore
     }
 
     /// <inheritdoc />
-    public Task<string> StoreAsync(AuthenticationTicket ticket)
-    {
-        return Inner.StoreAsync(ticket);
-    }
+    public Task<string> StoreAsync(AuthenticationTicket ticket) => Inner.StoreAsync(ticket);
 }

@@ -16,10 +16,7 @@ public class NopSessionRevocationService : ISessionRevocationService
     /// ctor
     /// </summary>
     /// <param name="logger"></param>
-    public NopSessionRevocationService(ILogger<NopSessionRevocationService> logger)
-    {
-        _logger = logger;
-    }
+    public NopSessionRevocationService(ILogger<NopSessionRevocationService> logger) => _logger = logger;
 
     /// <inheritdoc />
     public Task RevokeSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)

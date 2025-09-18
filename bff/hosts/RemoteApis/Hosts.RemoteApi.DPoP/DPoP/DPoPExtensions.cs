@@ -34,15 +34,9 @@ static class DPoPExtensions
         return false;
     }
 
-    public static string GetAuthorizationScheme(this HttpRequest request)
-    {
-        return request.Headers.Authorization.FirstOrDefault()?.Split(' ', System.StringSplitOptions.RemoveEmptyEntries)[0];
-    }
+    public static string GetAuthorizationScheme(this HttpRequest request) => request.Headers.Authorization.FirstOrDefault()?.Split(' ', System.StringSplitOptions.RemoveEmptyEntries)[0];
 
-    public static string GetDPoPProofToken(this HttpRequest request)
-    {
-        return request.Headers[OidcConstants.HttpHeaders.DPoP].FirstOrDefault();
-    }
+    public static string GetDPoPProofToken(this HttpRequest request) => request.Headers[OidcConstants.HttpHeaders.DPoP].FirstOrDefault();
 
     public static string GetDPoPNonce(this AuthenticationProperties props)
     {
@@ -52,10 +46,7 @@ static class DPoPExtensions
         }
         return null;
     }
-    public static void SetDPoPNonce(this AuthenticationProperties props, string nonce)
-    {
-        props.Items["DPoP-Nonce"] = nonce;
-    }
+    public static void SetDPoPNonce(this AuthenticationProperties props, string nonce) => props.Items["DPoP-Nonce"] = nonce;
 
     /// <summary>
     /// Create the value of a thumbprint-based cnf claim

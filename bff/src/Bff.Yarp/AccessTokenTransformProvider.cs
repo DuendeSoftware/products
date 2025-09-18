@@ -60,8 +60,15 @@ public class AccessTokenTransformProvider : ITransformProvider
         }
 
         var values = new HashSet<string>();
-        if (!string.IsNullOrEmpty(routeValue)) values.Add(routeValue);
-        if (!string.IsNullOrEmpty(clusterValue)) values.Add(clusterValue);
+        if (!string.IsNullOrEmpty(routeValue))
+        {
+            values.Add(routeValue);
+        }
+
+        if (!string.IsNullOrEmpty(clusterValue))
+        {
+            values.Add(clusterValue);
+        }
 
         if (values.Count > 1)
         {

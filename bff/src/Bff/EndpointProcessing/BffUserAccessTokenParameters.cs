@@ -53,14 +53,11 @@ public class BffUserAccessTokenParameters
     /// Retrieve a UserAccessTokenParameters
     /// </summary>
     /// <returns></returns>
-    public UserTokenRequestParameters ToUserAccessTokenRequestParameters()
+    public UserTokenRequestParameters ToUserAccessTokenRequestParameters() => new UserTokenRequestParameters()
     {
-        return new UserTokenRequestParameters()
-        {
-            SignInScheme = this.SignInScheme,
-            ChallengeScheme = this.ChallengeScheme,
-            ForceRenewal = this.ForceRenewal,
-            Resource = this.Resource
-        };
-    }
+        SignInScheme = SignInScheme,
+        ChallengeScheme = ChallengeScheme,
+        ForceRenewal = ForceRenewal,
+        Resource = Resource
+    };
 }

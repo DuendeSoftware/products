@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 namespace Hosts.ServiceDefaults;
+
 public static class AppHostServices
 {
     public const string IdentityServer = "identity-server";

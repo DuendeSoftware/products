@@ -9,6 +9,7 @@
     <MinVerTagPrefix>bff-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>2.3</MinVerMinimumMajorMinor>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
+    <IsBffProject>true</IsBffProject>
   </PropertyGroup>
 
 </Project>

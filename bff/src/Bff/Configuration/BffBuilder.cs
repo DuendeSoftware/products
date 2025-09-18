@@ -19,10 +19,7 @@ public class BffBuilder
     /// ctor
     /// </summary>
     /// <param name="services"></param>
-    public BffBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
+    public BffBuilder(IServiceCollection services) => Services = services;
 
     /// <summary>
     /// The service collection

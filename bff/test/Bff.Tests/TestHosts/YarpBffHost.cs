@@ -315,14 +315,8 @@ public class YarpBffHost : GenericHost
     {
         public Func<ForwarderHttpClientContext, HttpMessageInvoker> CreateInvoker { get; set; }
 
-        public CallbackForwarderHttpClientFactory(Func<ForwarderHttpClientContext, HttpMessageInvoker> callback)
-        {
-            CreateInvoker = callback;
-        }
+        public CallbackForwarderHttpClientFactory(Func<ForwarderHttpClientContext, HttpMessageInvoker> callback) => CreateInvoker = callback;
 
-        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context)
-        {
-            return CreateInvoker.Invoke(context);
-        }
+        public HttpMessageInvoker CreateClient(ForwarderHttpClientContext context) => CreateInvoker.Invoke(context);
     }
 }

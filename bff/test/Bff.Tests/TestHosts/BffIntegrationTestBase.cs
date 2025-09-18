@@ -8,70 +8,66 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace Duende.Bff.Tests.TestHosts
+namespace Duende.Bff.Tests.TestHosts;
+
+public class BffIntegrationTestBase : OutputWritingTestBase
 {
-    public class BffIntegrationTestBase : OutputWritingTestBase
+    protected readonly IdentityServerHost IdentityServerHost;
+    protected ApiHost ApiHost;
+    protected BffHost BffHost;
+    protected BffHostUsingResourceNamedTokens BffHostWithNamedTokens;
+
+    public BffIntegrationTestBase(ITestOutputHelper output) : base(output)
     {
-        protected readonly IdentityServerHost IdentityServerHost;
-        protected ApiHost ApiHost;
-        protected BffHost BffHost;
-        protected BffHostUsingResourceNamedTokens BffHostWithNamedTokens;
+        IdentityServerHost = new IdentityServerHost(WriteLine);
+        ApiHost = new ApiHost(WriteLine, IdentityServerHost, "scope1");
+        BffHost = new BffHost(WriteLine, IdentityServerHost, ApiHost, "spa");
+        BffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(WriteLine, IdentityServerHost, ApiHost, "spa");
 
-        public BffIntegrationTestBase(ITestOutputHelper output) : base(output)
+        IdentityServerHost.Clients.Add(new Client
         {
-            IdentityServerHost = new IdentityServerHost(WriteLine);
-            ApiHost = new ApiHost(WriteLine, IdentityServerHost, "scope1");
-            BffHost = new BffHost(WriteLine, IdentityServerHost, ApiHost, "spa");
-            BffHostWithNamedTokens = new BffHostUsingResourceNamedTokens(WriteLine, IdentityServerHost, ApiHost, "spa");
-
-            IdentityServerHost.Clients.Add(new Client
-            {
-                ClientId = "spa",
-                ClientSecrets = { new Secret("secret".Sha256()) },
-                AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-                RedirectUris = { "https://app/signin-oidc" },
-                PostLogoutRedirectUris = { "https://app/signout-callback-oidc" },
-                BackChannelLogoutUri = "https://app/bff/backchannel",
-                AllowOfflineAccess = true,
-                AllowedScopes = { "openid", "profile", "scope1" }
-            });
+            ClientId = "spa",
+            ClientSecrets = { new Secret("secret".Sha256()) },
+            AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+            RedirectUris = { "https://app/signin-oidc" },
+            PostLogoutRedirectUris = { "https://app/signout-callback-oidc" },
+            BackChannelLogoutUri = "https://app/bff/backchannel",
+            AllowOfflineAccess = true,
+            AllowedScopes = { "openid", "profile", "scope1" }
+        });
 
 
-            IdentityServerHost.OnConfigureServices += services =>
-            {
-                services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
-                    new DefaultBackChannelLogoutHttpClient(
-                        BffHost!.HttpClient,
-                        provider.GetRequiredService<ILoggerFactory>(),
-                        provider.GetRequiredService<ICancellationTokenProvider>()));
-
-                services.AddSingleton<DefaultAccessTokenRetriever>();
-            };
-
-        }
-
-        public async Task Login(string sub)
+        IdentityServerHost.OnConfigureServices += services =>
         {
-            await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
-        }
+            services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
+                new DefaultBackChannelLogoutHttpClient(
+                    BffHost!.HttpClient,
+                    provider.GetRequiredService<ILoggerFactory>(),
+                    provider.GetRequiredService<ICancellationTokenProvider>()));
 
-        public override async Task InitializeAsync()
-        {
-            await IdentityServerHost.InitializeAsync();
-            await ApiHost.InitializeAsync();
-            await BffHost.InitializeAsync();
-            await BffHostWithNamedTokens.InitializeAsync();
-            await base.InitializeAsync();
-        }
+            services.AddSingleton<DefaultAccessTokenRetriever>();
+        };
 
-        public override async Task DisposeAsync()
-        {
-            await ApiHost.DisposeAsync();
-            await BffHost.DisposeAsync();
-            await BffHostWithNamedTokens.DisposeAsync();
-            await IdentityServerHost.DisposeAsync();
-            await base.DisposeAsync();
+    }
 
-        }
+    public async Task Login(string sub) => await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
+
+    public override async Task InitializeAsync()
+    {
+        await IdentityServerHost.InitializeAsync();
+        await ApiHost.InitializeAsync();
+        await BffHost.InitializeAsync();
+        await BffHostWithNamedTokens.InitializeAsync();
+        await base.InitializeAsync();
+    }
+
+    public override async Task DisposeAsync()
+    {
+        await ApiHost.DisposeAsync();
+        await BffHost.DisposeAsync();
+        await BffHostWithNamedTokens.DisposeAsync();
+        await IdentityServerHost.DisposeAsync();
+        await base.DisposeAsync();
+
     }
 }

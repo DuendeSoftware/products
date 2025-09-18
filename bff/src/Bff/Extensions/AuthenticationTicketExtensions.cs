@@ -24,38 +24,26 @@ public static class AuthenticationTicketExtensions
     /// <summary>
     /// Extracts a subject identifier
     /// </summary>
-    public static string GetSubjectId(this AuthenticationTicket ticket)
-    {
-        return ticket.Principal.FindFirst(JwtClaimTypes.Subject)?.Value ??
+    public static string GetSubjectId(this AuthenticationTicket ticket) => ticket.Principal.FindFirst(JwtClaimTypes.Subject)?.Value ??
                ticket.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
                // for the mfa remember me cookie, ASP.NET Identity uses the 'name' claim for the subject id (for some reason)
                ticket.Principal.FindFirst(ClaimTypes.Name)?.Value ??
                throw new InvalidOperationException("Missing 'sub' claim in AuthenticationTicket");
-    }
 
     /// <summary>
     /// Extracts the session ID
     /// </summary>
-    public static string? GetSessionId(this AuthenticationTicket ticket)
-    {
-        return ticket.Principal.FindFirst(JwtClaimTypes.SessionId)?.Value;
-    }
+    public static string? GetSessionId(this AuthenticationTicket ticket) => ticket.Principal.FindFirst(JwtClaimTypes.SessionId)?.Value;
 
     /// <summary>
     /// Extracts the issuance time
     /// </summary>
-    public static DateTime GetIssued(this AuthenticationTicket ticket)
-    {
-        return ticket.Properties.IssuedUtc?.UtcDateTime ?? DateTime.UtcNow;
-    }
+    public static DateTime GetIssued(this AuthenticationTicket ticket) => ticket.Properties.IssuedUtc?.UtcDateTime ?? DateTime.UtcNow;
 
     /// <summary>
     /// Extracts the expiration time
     /// </summary>
-    public static DateTime? GetExpiration(this AuthenticationTicket ticket)
-    {
-        return ticket.Properties.ExpiresUtc?.UtcDateTime;
-    }
+    public static DateTime? GetExpiration(this AuthenticationTicket ticket) => ticket.Properties.ExpiresUtc?.UtcDateTime;
 
     /// <summary>
     /// Serializes and AuthenticationTicket to a string

@@ -20,13 +20,7 @@ public class ConfigureUserTokenManagementOptions : IConfigureOptions<UserTokenMa
     /// class.
     /// </summary>
     /// <param name="bffOptions"></param>
-    public ConfigureUserTokenManagementOptions(IOptions<BffOptions> bffOptions)
-    {
-        _bffOptions = bffOptions.Value;
-    }
+    public ConfigureUserTokenManagementOptions(IOptions<BffOptions> bffOptions) => _bffOptions = bffOptions.Value;
     /// <inheritdoc/>
-    public void Configure(UserTokenManagementOptions options)
-    {
-        options.DPoPJsonWebKey = _bffOptions.DPoPJsonWebKey;
-    }
+    public void Configure(UserTokenManagementOptions options) => options.DPoPJsonWebKey = _bffOptions.DPoPJsonWebKey;
 }

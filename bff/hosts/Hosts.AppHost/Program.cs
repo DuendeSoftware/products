@@ -65,8 +65,5 @@ builder.Build().Run();
 public static class Extensions
 {
     public static IResourceBuilder<TDestination> WithAwaitedReference<TDestination>(this IResourceBuilder<TDestination> builder, IResourceBuilder<IResourceWithServiceDiscovery> source)
-        where TDestination : IResourceWithEnvironment, IResourceWithWaitSupport
-    {
-        return builder.WithReference(source).WaitFor(source);
-    }
+        where TDestination : IResourceWithEnvironment, IResourceWithWaitSupport => builder.WithReference(source).WaitFor(source);
 }

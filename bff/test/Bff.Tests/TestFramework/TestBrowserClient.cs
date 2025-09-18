@@ -50,14 +50,14 @@ public class TestBrowserClient : HttpClient
     }
 
     private TestBrowserClient(CookieHandler handler)
-        : base(handler)
-    {
-        _handler = handler;
-    }
+        : base(handler) => _handler = handler;
 
     public void RemoveCookie(string name)
     {
-        if (CurrentUri == null) throw new NullReferenceException("CurrentUri is null");
+        if (CurrentUri == null)
+        {
+            throw new NullReferenceException("CurrentUri is null");
+        }
 
         RemoveCookie(CurrentUri.ToString(), name);
     }

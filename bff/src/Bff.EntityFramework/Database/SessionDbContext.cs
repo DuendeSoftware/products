@@ -61,8 +61,5 @@ public class SessionDbContext<TContext> : DbContext, ISessionDbContext
     /// <summary>
     /// Allows controlling the schema.
     /// </summary>
-    protected virtual void ConfigureSchema(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ConfigureSessionContext(StoreOptions);
-    }
+    protected virtual void ConfigureSchema(ModelBuilder modelBuilder) => modelBuilder.ConfigureSessionContext(StoreOptions);
 }

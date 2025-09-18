@@ -149,10 +149,7 @@ public class ServiceDiscoveringClientStore(ServiceEndpointResolver resolver) : I
 
     }
 
-    private async Task<string> GetUrlAsync(string serviceName)
-    {
-        return (await resolver.GetEndpointsAsync("https://" + serviceName, CancellationToken.None)).Endpoints.First().EndPoint.ToString();
-    }
+    private async Task<string> GetUrlAsync(string serviceName) => (await resolver.GetEndpointsAsync("https://" + serviceName, CancellationToken.None)).Endpoints.First().EndPoint.ToString();
 
 
     public async Task<Client> FindClientByIdAsync(string clientId)
