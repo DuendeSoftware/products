@@ -1,132 +1,91 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
+using Duende.Bff.Otel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.SessionStore;
 
 /// <summary>
 /// Helper to cleanup expired sessions.
 /// </summary>
-public class SessionCleanupHost : IHostedService
+internal class SessionCleanupHost(
+    BffMetrics metrics,
+    IServiceProvider serviceProvider,
+    IOptions<BffOptions> options,
+    ILogger<SessionCleanupHost> logger) : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly BffOptions _options;
-    private readonly ILogger<SessionCleanupHost> _logger;
+    private readonly BffOptions _options = options.Value;
 
     private TimeSpan CleanupInterval => _options.SessionCleanupInterval;
 
-    private CancellationTokenSource? _source;
-
-    /// <summary>
-    /// Constructor for SessionCleanupHost.
-    /// </summary>
-    public SessionCleanupHost(IServiceProvider serviceProvider, IOptions<BffOptions> options, ILogger<SessionCleanupHost> logger)
+    protected override async Task ExecuteAsync(CT ct)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _options = options.Value;
-        _logger = logger;
-    }
-
-    /// <summary>
-    /// Starts the token cleanup polling.
-    /// </summary>
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        if (_options.EnableSessionCleanup)
+        if (!IsIUserSessionStoreCleanupRegistered())
         {
-            if (_source != null) throw new InvalidOperationException("Already started. Call Stop first.");
-
-            if (IsIUserSessionStoreCleanupRegistered())
-            {
-                _logger.LogDebug("Starting BFF session cleanup");
-
-                _source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-                Task.Factory.StartNew(() => StartInternalAsync(_source.Token));
-            }
-            else
-            {
-                _logger.LogWarning("BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.");
-            }
+            logger.SessionCleanupNotRegistered(LogLevel.Error);
+            throw new InvalidOperationException("No IUserSessionStoreCleanup is registered. Did you add session storage, such as EntityFramework?");
         }
 
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Stops the token cleanup polling.
-    /// </summary>
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        if (_options.EnableSessionCleanup && _source != null)
-        {
-            _logger.LogDebug("Stopping BFF session cleanup");
-
-            _source.Cancel();
-            _source = null;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private async Task StartInternalAsync(CancellationToken cancellationToken)
-    {
         while (true)
         {
-            if (cancellationToken.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
             {
-                _logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
             try
             {
-                await Task.Delay(CleanupInterval, cancellationToken);
+                await Task.Delay(CleanupInterval, ct);
             }
             catch (TaskCanceledException)
             {
-                _logger.LogDebug("TaskCanceledException. Exiting.");
                 break;
             }
+
+#pragma warning disable CA1031// Do not catch general exception types
+            // Catching general exceptions here to prevent the host from crashing if an exception occurs during the delay.
             catch (Exception ex)
+#pragma warning restore CA1031
             {
-                _logger.LogError("Task.Delay exception: {0}. Exiting.", ex.Message);
+                logger.FailedToCleanupSession(LogLevel.Error, ex);
                 break;
             }
 
-            if (cancellationToken.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
             {
-                _logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
-            await RunAsync(cancellationToken);
+            await RunAsync(ct);
         }
     }
 
-    async Task RunAsync(CancellationToken cancellationToken = default)
+    internal async Task RunAsync(CT ct = default)
     {
         try
         {
-            using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<IUserSessionStoreCleanup>();
-                await tokenCleanupService.DeleteExpiredSessionsAsync(cancellationToken);
-            }
+            using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<IUserSessionStoreCleanup>();
+            var removed = await tokenCleanupService.DeleteExpiredSessionsAsync(ct);
+            metrics.SessionsEnded(removed);
         }
+#pragma warning disable CA1031// Do not catch general exception types
+        // Catching general exceptions here to prevent the host from crashing if an exception occurs during the cleanup.
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            _logger.LogError("Exception deleting expired sessions: {exception}", ex.Message);
+            logger.FailedToCleanupExpiredSessions(LogLevel.Error, ex);
         }
     }
 
-    bool IsIUserSessionStoreCleanupRegistered()
+    private bool IsIUserSessionStoreCleanupRegistered()
     {
-        var isService = _serviceProvider.GetRequiredService<IServiceProviderIsService>();
+        var isService = serviceProvider.GetRequiredService<IServiceProviderIsService>();
         return isService.IsService(typeof(IUserSessionStoreCleanup));
     }
 }

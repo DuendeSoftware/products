@@ -1,0 +1,560 @@
+namespace Duende.Bff.AccessTokenManagement
+{
+    [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.AccessTokenManagement.AccessToken>))]
+    public readonly struct AccessToken : System.IEquatable<Duende.Bff.AccessTokenManagement.AccessToken>
+    {
+        public const int MaxLength = 32768;
+        public AccessToken() { }
+        public override string ToString() { }
+        public static Duende.Bff.AccessTokenManagement.AccessToken Parse(string value) { }
+        public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.AccessTokenManagement.AccessToken? parsed, out string[] errors) { }
+        public static string op_Implicit(Duende.Bff.AccessTokenManagement.AccessToken value) { }
+        public static Duende.AccessTokenManagement.AccessToken op_Implicit(Duende.Bff.AccessTokenManagement.AccessToken value) { }
+    }
+    public abstract class AccessTokenResult : System.IEquatable<Duende.Bff.AccessTokenManagement.AccessTokenResult>
+    {
+        protected AccessTokenResult() { }
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public sealed class AccessTokenRetrievalContext : System.IEquatable<Duende.Bff.AccessTokenManagement.AccessTokenRetrievalContext>
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public AccessTokenRetrievalContext() { }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public System.Uri ApiAddress { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Microsoft.AspNetCore.Http.HttpContext HttpContext { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.Configuration.BffRemoteApiEndpointMetadata Metadata { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Microsoft.AspNetCore.Http.PathString PathMatch { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.Configuration.BffUserAccessTokenParameters? UserTokenRequestParameters { get; init; }
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public class AccessTokenRetrievalError : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.AccessTokenRetrievalError>
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public AccessTokenRetrievalError() { }
+        public string? ErrorDescription { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public string Error { get; init; }
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public sealed class BearerTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.BearerTokenResult>
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public BearerTokenResult() { }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.AccessTokenManagement.AccessToken AccessToken { get; init; }
+    }
+    [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.AccessTokenManagement.DPoPProofKey>))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.AccessTokenManagement.DPoPProofKey>))]
+    public readonly struct DPoPProofKey : System.IEquatable<Duende.Bff.AccessTokenManagement.DPoPProofKey>
+    {
+        public DPoPProofKey() { }
+        public bool Equals(Duende.Bff.AccessTokenManagement.DPoPProofKey other) { }
+        public override int GetHashCode() { }
+        public Microsoft.IdentityModel.Tokens.JsonWebKey ToJsonWebKey() { }
+        public override string ToString() { }
+        public static Duende.Bff.AccessTokenManagement.DPoPProofKey Parse(string value) { }
+        public static Duende.Bff.AccessTokenManagement.DPoPProofKey? ParseOrDefault(string? value) { }
+        public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.AccessTokenManagement.DPoPProofKey? parsed, out string[] errors) { }
+        public static Duende.AccessTokenManagement.DPoP.DPoPProofKey op_Implicit(Duende.Bff.AccessTokenManagement.DPoPProofKey value) { }
+        public static string op_Implicit(Duende.Bff.AccessTokenManagement.DPoPProofKey value) { }
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public sealed class DPoPTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.DPoPTokenResult>
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public DPoPTokenResult() { }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.AccessTokenManagement.AccessToken AccessToken { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.AccessTokenManagement.DPoPProofKey DPoPJsonWebKey { get; init; }
+    }
+    public interface IAccessTokenRetriever
+    {
+        System.Threading.Tasks.Task<Duende.Bff.AccessTokenManagement.AccessTokenResult> GetAccessTokenAsync(Duende.Bff.AccessTokenManagement.AccessTokenRetrievalContext context, System.Threading.CancellationToken ct = default);
+    }
+    public sealed class NoAccessTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.NoAccessTokenResult>
+    {
+        public NoAccessTokenResult() { }
+    }
+    public enum RequiredTokenType
+    {
+        None = 0,
+        User = 1,
+        Client = 2,
+        UserOrClient = 3,
+        UserOrNone = 4,
+    }
+    [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.AccessTokenManagement.Resource>))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.AccessTokenManagement.Resource>))]
+    public readonly struct Resource : System.IEquatable<Duende.Bff.AccessTokenManagement.Resource>
+    {
+        public const int MaxLength = 1024;
+        public Resource() { }
+        public override string ToString() { }
+        public static Duende.Bff.AccessTokenManagement.Resource Parse(string value) { }
+        public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.AccessTokenManagement.Resource? parsed, out string[] errors) { }
+        public static string op_Implicit(Duende.Bff.AccessTokenManagement.Resource value) { }
+    }
+    [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.AccessTokenManagement.Scheme>))]
+    [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.AccessTokenManagement.Scheme>))]
+    public readonly struct Scheme : System.IEquatable<Duende.Bff.AccessTokenManagement.Scheme>
+    {
+        public const int MaxLength = 50;
+        public static readonly Duende.Bff.AccessTokenManagement.Scheme Bearer;
+        public Scheme() { }
+        public override string ToString() { }
+        public static Duende.Bff.AccessTokenManagement.Scheme Parse(string value) { }
+        public static Duende.Bff.AccessTokenManagement.Scheme? ParseOrDefault(string? value) { }
+        public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.AccessTokenManagement.Scheme? parsed, out string[] errors) { }
+        public static string op_Implicit(Duende.Bff.AccessTokenManagement.Scheme value) { }
+        public static Duende.AccessTokenManagement.Scheme op_Implicit(Duende.Bff.AccessTokenManagement.Scheme value) { }
+    }
+}
+namespace Duende.Bff
+{
+    public static class AuthenticationPropertiesExtensions
+    {
+        public static bool IsSilentLogin(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props) { }
+        public static bool TryGetPrompt(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? prompt) { }
+    }
+    public static class AuthenticationTicketExtensions
+    {
+        public static Microsoft.AspNetCore.Authentication.AuthenticationTicket? Deserialize(this Duende.Bff.SessionManagement.SessionStore.UserSession session, Microsoft.AspNetCore.DataProtection.IDataProtector protector, Microsoft.Extensions.Logging.ILogger logger) { }
+        public static System.DateTime? GetExpiration(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static System.DateTime GetIssued(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket, System.DateTimeOffset utcNow) { }
+        public static string? GetSessionId(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static string GetSubjectId(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static string Serialize(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket, Microsoft.AspNetCore.DataProtection.IDataProtector protector) { }
+        public class Envelope
+        {
+            public Envelope() { }
+            public string Payload { get; set; }
+            public int Version { get; set; }
+        }
+    }
+    public static class BffApplicationBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBff(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffAntiForgery(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffFrontendSelection(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffOpenIdCallbacks(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPathMapping(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPostProcessing(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffPreProcessing(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBffStaticFileProxying(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+    }
+    public static class BffBuilderExtensions
+    {
+        public static T AddFrontends<T>(this T builder, params Duende.Bff.DynamicFrontends.BffFrontend[] frontends)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static Duende.Bff.Builder.IBffBuilder AddServerSideSessions<T>(this Duende.Bff.Builder.IBffServicesBuilder builder)
+            where T :  class, Duende.Bff.SessionManagement.SessionStore.IUserSessionStore { }
+        public static T AddServerSideSessions<T>(this T builder)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T ConfigureCookies<T>(this T builder, System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> oidc)
+            where T : Duende.Bff.Builder.IBffBuilder { }
+        public static T ConfigureOpenIdConnect<T>(this T builder, System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> oidc)
+            where T : Duende.Bff.Builder.IBffBuilder { }
+    }
+    public static class BffEndpointRouteBuilderExtensions
+    {
+        public static void MapBffDiagnosticsEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementBackchannelEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementEndpoints(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementLoginEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementLogoutEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
+            "w handled by passing the prompt=none parameter to the login endpoint."))]
+        public static void MapBffManagementSilentLoginEndpoints(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementUserEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+    }
+    public static class BffRemoteApiEndpointExtensions
+    {
+        public static TBuilder WithAccessToken<TBuilder>(this TBuilder builder, Duende.Bff.AccessTokenManagement.RequiredTokenType type = 1)
+            where TBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder WithAccessTokenRetriever<TRetriever>(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder)
+            where TRetriever : Duende.Bff.AccessTokenManagement.IAccessTokenRetriever { }
+        [System.Obsolete("Use TokenType.UserOptional")]
+        public static TBuilder WithOptionalUserAccessToken<TBuilder>(this TBuilder builder)
+            where TBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder { }
+        public static TBuilder WithUserAccessTokenParameter<TBuilder>(this TBuilder builder, Duende.Bff.Configuration.BffUserAccessTokenParameters bffUserAccessTokenParameters)
+            where TBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder { }
+    }
+    public static class Constants
+    {
+        public static class BffFlags
+        {
+            public const string Prompt = "bff-prompt";
+        }
+        public static class ClaimTypes
+        {
+            public const string LogoutUrl = "bff:logout_url";
+            public const string SessionExpiresIn = "bff:session_expires_in";
+            public const string SessionState = "bff:session_state";
+        }
+        public static class Cookies
+        {
+            public const string DefaultCookieName = "__Host-bff-auth";
+            public const string HostPrefix = "__Host";
+            public const string SecurePrefix = "__Secure";
+        }
+        public static class HttpClientNames
+        {
+            public const string StaticAssetsClientName = "Duende.Bff.IndexHtmlClient";
+        }
+        public static class ManagementEndpoints
+        {
+            public const string BackChannelLogout = "/backchannel";
+            public const string Diagnostics = "/diagnostics";
+            public const string Login = "/login";
+            public const string Logout = "/logout";
+            [System.Obsolete("use /login?prompt=create")]
+            public const string SilentLogin = "/silent-login";
+            public const string SilentLoginCallback = "/silent-login-callback";
+            public const string User = "/user";
+        }
+        public static class RequestParameters
+        {
+            public const string Prompt = "prompt";
+            public const string ReturnUrl = "returnUrl";
+            public const string SlideCookie = "slide";
+        }
+        public static class Yarp
+        {
+            public const string AntiforgeryCheckMetadata = "Duende.Bff.Yarp.AntiforgeryCheck";
+            public const string TokenTypeMetadata = "Duende.Bff.Yarp.TokenType";
+        }
+    }
+    public static class EndpointConventionBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder AsBffApiEndpoint(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder SkipAntiforgery(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder SkipResponseHandling(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
+    }
+    public static class ServiceCollectionExtensions
+    {
+        public static Duende.Bff.Builder.IBffServicesBuilder AddBff(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Duende.Bff.Configuration.BffOptions>? configureAction = null) { }
+    }
+}
+namespace Duende.Bff.Builder
+{
+    public sealed class BffWebApplication : Microsoft.AspNetCore.Builder.IApplicationBuilder, Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
+    {
+        public System.IServiceProvider ApplicationServices { get; set; }
+        public System.Collections.Generic.ICollection<Microsoft.AspNetCore.Routing.EndpointDataSource> DataSources { get; }
+        public System.Collections.Generic.IDictionary<string, object?> Properties { get; }
+        public Microsoft.AspNetCore.Http.Features.IFeatureCollection ServerFeatures { get; }
+        public System.IServiceProvider ServiceProvider { get; }
+        public Microsoft.AspNetCore.Http.RequestDelegate Build() { }
+        public Microsoft.AspNetCore.Builder.IApplicationBuilder CreateApplicationBuilder() { }
+        public Microsoft.AspNetCore.Builder.IApplicationBuilder New() { }
+        public Microsoft.AspNetCore.Builder.IApplicationBuilder Use(System.Func<Microsoft.AspNetCore.Http.RequestDelegate, Microsoft.AspNetCore.Http.RequestDelegate> middleware) { }
+        [System.Obsolete(("Don\'t call UseEndpoints on WebApp. The WebApp directly implements IEndpointRouteB" +
+            "uilder."))]
+        public Duende.Bff.Builder.BffWebApplication UseEndpoints(System.Action<Microsoft.AspNetCore.Routing.IEndpointRouteBuilder> configure) { }
+    }
+    public interface IBffBuilder
+    {
+        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+    }
+    public interface IBffServicesBuilder : Duende.Bff.Builder.IBffBuilder
+    {
+        Duende.Bff.Builder.IBffServicesBuilder LoadConfiguration(Microsoft.Extensions.Configuration.IConfiguration section);
+    }
+}
+namespace Duende.Bff.Configuration
+{
+    public enum AnonymousSessionResponse
+    {
+        Response401 = 0,
+        Response200 = 1,
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public sealed class BffApiAttribute : System.Attribute, Duende.Bff.Endpoints.IBffApiMetadata
+    {
+        public BffApiAttribute() { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public sealed class BffApiSkipAntiforgeryAttribute : System.Attribute, Duende.Bff.Endpoints.IBffApiSkipAntiForgery
+    {
+        public BffApiSkipAntiforgeryAttribute() { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public sealed class BffApiSkipResponseHandlingAttribute : System.Attribute, Duende.Bff.Endpoints.IBffApiSkipResponseHandling
+    {
+        public BffApiSkipResponseHandlingAttribute() { }
+    }
+    public sealed class BffOptions
+    {
+        public BffOptions() { }
+        public System.Collections.ObjectModel.Collection<string> AllowedSilentLoginReferers { get; }
+        public Duende.Bff.Configuration.AnonymousSessionResponse AnonymousSessionResponse { get; set; }
+        public string AntiForgeryHeaderName { get; set; }
+        public string AntiForgeryHeaderValue { get; set; }
+        public bool AutomaticallyRegisterBffMiddleware { get; set; }
+        public Microsoft.AspNetCore.Http.PathString BackChannelLogoutPath { get; }
+        public System.Net.Http.HttpMessageHandler? BackchannelHttpHandler { get; set; }
+        public bool BackchannelLogoutAllUserSessions { get; set; }
+        public Duende.Bff.AccessTokenManagement.DPoPProofKey? DPoPJsonWebKey { get; set; }
+        public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; }
+        public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
+        public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
+        public bool EnforceBffMiddleware { get; set; }
+        public System.TimeSpan IndexHtmlDefaultCacheDuration { get; set; }
+        public string? LicenseKey { get; set; }
+        public Microsoft.AspNetCore.Http.PathString LoginPath { get; }
+        public Microsoft.AspNetCore.Http.PathString LogoutPath { get; }
+        public Microsoft.AspNetCore.Http.PathString ManagementBasePath { get; set; }
+        public bool RemoveSessionAfterRefreshTokenExpiration { get; set; }
+        public bool RequireLogoutSessionId { get; set; }
+        public bool RevokeRefreshTokenOnLogout { get; set; }
+        public System.TimeSpan SessionCleanupInterval { get; set; }
+        public Microsoft.AspNetCore.Http.PathString SilentLoginCallbackPath { get; }
+        [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
+            "w handled by passing the prompt=none parameter to the login endpoint."))]
+        public Microsoft.AspNetCore.Http.PathString SilentLoginPath { get; }
+        public string StaticAssetsClientName { get; set; }
+        public Microsoft.AspNetCore.Http.PathString UserPath { get; }
+    }
+    public sealed class BffRemoteApiEndpointMetadata : Duende.Bff.Endpoints.IBffApiMetadata
+    {
+        public BffRemoteApiEndpointMetadata() { }
+        public System.Type AccessTokenRetriever { get; set; }
+        public Duende.Bff.Configuration.BffUserAccessTokenParameters? BffUserAccessTokenParameters { get; set; }
+        public Duende.Bff.AccessTokenManagement.RequiredTokenType? TokenType { get; set; }
+    }
+    public sealed class BffUserAccessTokenParameters : System.IEquatable<Duende.Bff.Configuration.BffUserAccessTokenParameters>
+    {
+        public BffUserAccessTokenParameters() { }
+        public Duende.Bff.AccessTokenManagement.Scheme? ChallengeScheme { get; init; }
+        public bool ForceRenewal { get; init; }
+        public Duende.Bff.AccessTokenManagement.Resource? Resource { get; init; }
+        public Duende.Bff.AccessTokenManagement.Scheme? SignInScheme { get; init; }
+    }
+    public delegate bool DisableAntiForgeryCheck(Microsoft.AspNetCore.Http.HttpContext context);
+}
+namespace Duende.Bff.DynamicFrontends
+{
+    public static class BffAuthenticationSchemes
+    {
+        public static readonly Duende.Bff.AccessTokenManagement.Scheme BffCookie;
+        public static readonly Duende.Bff.AccessTokenManagement.Scheme BffOpenIdConnect;
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public sealed class BffFrontend : System.IEquatable<Duende.Bff.DynamicFrontends.BffFrontend>
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public BffFrontend() { }
+        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
+        public BffFrontend(Duende.Bff.DynamicFrontends.BffFrontendName name) { }
+        public Duende.Bff.AccessTokenManagement.Scheme CookieSchemeName { get; }
+        public Duende.Bff.AccessTokenManagement.Scheme OidcSchemeName { get; }
+        public System.Uri? CdnIndexHtmlUrl { get; init; }
+        public System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions>? ConfigureCookieOptions { get; init; }
+        public System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions>? ConfigureOpenIdConnectOptions { get; init; }
+        public Duende.Bff.DynamicFrontends.FrontendMatchingCriteria MatchingCriteria { get; init; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.DynamicFrontends.BffFrontendName Name { get; init; }
+        public System.Uri? StaticAssetsUrl { get; init; }
+        public bool Equals(Duende.Bff.DynamicFrontends.BffFrontend? other) { }
+        public override int GetHashCode() { }
+    }
+    public static class BffFrontendExtensions
+    {
+        public static Duende.Bff.DynamicFrontends.BffFrontend MapTo(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri uri, bool force = false) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend MapTo(this Duende.Bff.DynamicFrontends.BffFrontend frontend, Duende.Bff.DynamicFrontends.HostHeaderValue matchingHost, Microsoft.AspNetCore.Http.PathString path, bool force = false) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend MapToHost(this Duende.Bff.DynamicFrontends.BffFrontend frontend, Duende.Bff.DynamicFrontends.HostHeaderValue matchingHost, bool force = false) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend MapToPath(this Duende.Bff.DynamicFrontends.BffFrontend frontend, Microsoft.AspNetCore.Http.PathString pathMatch, bool force = false) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithBffStaticAssets(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri uri, System.Func<bool> useCdnWhen) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithCdnIndexHtmlUrl(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri? url) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithCookieOptions(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Action<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> options) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithOpenIdConnectOptions(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Action<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions> options) { }
+        public static Duende.Bff.DynamicFrontends.BffFrontend WithProxiedStaticAssets(this Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Uri url) { }
+    }
+    [System.ComponentModel.TypeConverter(typeof(Duende.Bff.Internal.StringValueConverter<Duende.Bff.DynamicFrontends.BffFrontendName>))]
+    public readonly struct BffFrontendName : System.IEquatable<Duende.Bff.DynamicFrontends.BffFrontendName>
+    {
+        public BffFrontendName() { }
+        public override string ToString() { }
+        public static Duende.Bff.DynamicFrontends.BffFrontendName Parse(string value) { }
+        public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.DynamicFrontends.BffFrontendName? parsed, out string[] errors) { }
+        public static string op_Implicit(Duende.Bff.DynamicFrontends.BffFrontendName value) { }
+    }
+    public sealed class CurrentFrontendAccessor
+    {
+        public CurrentFrontendAccessor(Microsoft.AspNetCore.Http.IHttpContextAccessor contextAccessor) { }
+        public Duende.Bff.DynamicFrontends.BffFrontend Get() { }
+        public bool TryGet([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.DynamicFrontends.BffFrontend? frontend) { }
+    }
+    public sealed class FrontendMatchingCriteria : System.IEquatable<Duende.Bff.DynamicFrontends.FrontendMatchingCriteria>
+    {
+        public FrontendMatchingCriteria() { }
+        public Duende.Bff.DynamicFrontends.HostHeaderValue? MatchingHostHeader { get; init; }
+        public string? MatchingPath { get; init; }
+        public bool Equals(Duende.Bff.DynamicFrontends.FrontendMatchingCriteria? other) { }
+        public override int GetHashCode() { }
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public sealed class HostHeaderValue : System.IEquatable<Duende.Bff.DynamicFrontends.HostHeaderValue>, System.IEquatable<Microsoft.AspNetCore.Http.HttpRequest>
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public HostHeaderValue() { }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public string Host { get; init; }
+        public int Port { get; init; }
+        public bool Equals(Duende.Bff.DynamicFrontends.HostHeaderValue? other) { }
+        public bool Equals(Microsoft.AspNetCore.Http.HttpRequest? request) { }
+        public override int GetHashCode() { }
+        public override string ToString() { }
+        public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(string hostHeaderValue) { }
+        public static Duende.Bff.DynamicFrontends.HostHeaderValue Parse(System.Uri uri) { }
+        public static Duende.Bff.DynamicFrontends.HostHeaderValue? ParseOrDefault(string? origin) { }
+    }
+    public interface IFrontendCollection : System.Collections.Generic.IEnumerable<Duende.Bff.DynamicFrontends.BffFrontend>, System.Collections.IEnumerable
+    {
+        int Count { get; }
+        void AddOrUpdate(Duende.Bff.DynamicFrontends.BffFrontend frontend);
+        void Remove(Duende.Bff.DynamicFrontends.BffFrontendName frontendName);
+    }
+    public interface IIndexHtmlTransformer
+    {
+        System.Threading.Tasks.Task<string?> Transform(string indexHtml, Duende.Bff.DynamicFrontends.BffFrontend frontend, System.Threading.CancellationToken ct = default);
+    }
+    public interface IStaticFilesClient
+    {
+        System.Threading.Tasks.Task<string?> GetIndexHtmlAsync(System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task ProxyStaticAssetsAsync(Microsoft.AspNetCore.Http.HttpContext context, System.Threading.CancellationToken ct = default);
+    }
+}
+namespace Duende.Bff.Endpoints
+{
+    public interface IBackchannelLogoutEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    public interface IBffApiMetadata { }
+    public interface IBffApiSkipAntiForgery { }
+    public interface IBffApiSkipResponseHandling { }
+    public interface IBffEndpoint
+    {
+        System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context, System.Threading.CancellationToken ct = default);
+    }
+    public interface IDiagnosticsEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    public interface ILoginEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    public interface ILogoutEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    public interface IReturnUrlValidator
+    {
+        bool IsValidAsync(System.Uri returnUrl);
+    }
+    public interface ISilentLoginCallbackEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
+        "w handled by passing the prompt=none parameter to the login endpoint."))]
+    public interface ISilentLoginEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    public interface IUserEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+}
+namespace Duende.Bff.Otel
+{
+    public sealed class BffMetrics : System.IDisposable
+    {
+        public const string MeterName = "Duende.Bff";
+        public BffMetrics(System.Diagnostics.Metrics.IMeterFactory meterFactory) { }
+        public void Dispose() { }
+        public void SessionEnded() { }
+        public void SessionStarted() { }
+        public void SessionsEnded(int count) { }
+    }
+}
+namespace Duende.Bff.SessionManagement.Revocation
+{
+    public interface ISessionRevocationService
+    {
+        System.Threading.Tasks.Task RevokeSessionsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
+    }
+}
+namespace Duende.Bff.SessionManagement.SessionStore
+{
+    public delegate Duende.Bff.SessionManagement.SessionStore.PartitionKey BuildUserSessionPartitionKey();
+    public interface IUserSessionStore
+    {
+        System.Threading.Tasks.Task CreateUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSession session, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task DeleteUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionKey key, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task DeleteUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.PartitionKey partitionKey, Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task<Duende.Bff.SessionManagement.SessionStore.UserSession?> GetUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionKey key, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Duende.Bff.SessionManagement.SessionStore.UserSession>> GetUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.PartitionKey partitionKey, Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
+        System.Threading.Tasks.Task UpdateUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionKey key, Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate session, System.Threading.CancellationToken ct = default);
+    }
+    public interface IUserSessionStoreCleanup
+    {
+        System.Threading.Tasks.Task<int> DeleteExpiredSessionsAsync(System.Threading.CancellationToken ct = default);
+    }
+    public readonly struct PartitionKey : System.IEquatable<Duende.Bff.SessionManagement.SessionStore.PartitionKey>
+    {
+        public const int MaxLength = 200;
+        public PartitionKey() { }
+        public override string ToString() { }
+        public static Duende.Bff.SessionManagement.SessionStore.PartitionKey Parse(string value) { }
+        public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.SessionManagement.SessionStore.PartitionKey? parsed, out string[] errors) { }
+    }
+    public readonly struct UserKey : System.IEquatable<Duende.Bff.SessionManagement.SessionStore.UserKey>
+    {
+        public const int MaxLength = 200;
+        public UserKey() { }
+        public override string ToString() { }
+        public static Duende.Bff.SessionManagement.SessionStore.UserKey Parse(string value) { }
+        public static bool TryParse(string value, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Duende.Bff.SessionManagement.SessionStore.UserKey? parsed, out string[] errors) { }
+    }
+    public class UserSession : Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate
+    {
+        public UserSession() { }
+        public Duende.Bff.SessionManagement.SessionStore.UserKey? Key { get; set; }
+        public Duende.Bff.SessionManagement.SessionStore.PartitionKey? PartitionKey { get; set; }
+        public Duende.Bff.SessionManagement.SessionStore.UserSession Clone() { }
+        public void CopyTo(Duende.Bff.SessionManagement.SessionStore.UserSession other) { }
+    }
+    public readonly struct UserSessionKey : System.IEquatable<Duende.Bff.SessionManagement.SessionStore.UserSessionKey>
+    {
+        public UserSessionKey(Duende.Bff.SessionManagement.SessionStore.PartitionKey PartitionKey, Duende.Bff.SessionManagement.SessionStore.UserKey UserKey) { }
+        public Duende.Bff.SessionManagement.SessionStore.PartitionKey PartitionKey { get; init; }
+        public Duende.Bff.SessionManagement.SessionStore.UserKey UserKey { get; init; }
+        public override string ToString() { }
+    }
+    public class UserSessionUpdate
+    {
+        public UserSessionUpdate() { }
+        public System.DateTime Created { get; set; }
+        public System.DateTime? Expires { get; set; }
+        public System.DateTime Renewed { get; set; }
+        public string? SessionId { get; set; }
+        public string SubjectId { get; set; }
+        public string Ticket { get; set; }
+        public void CopyTo(Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate other) { }
+    }
+    public sealed class UserSessionsFilter
+    {
+        public UserSessionsFilter() { }
+        public string? SessionId { get; set; }
+        public string? SubjectId { get; init; }
+        public void Validate() { }
+    }
+}
+namespace Duende.Bff.SessionManagement.TicketStore
+{
+    public interface IServerTicketStore : Microsoft.AspNetCore.Authentication.Cookies.ITicketStore
+    {
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Microsoft.AspNetCore.Authentication.AuthenticationTicket>> GetUserTicketsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken ct = default);
+    }
+}

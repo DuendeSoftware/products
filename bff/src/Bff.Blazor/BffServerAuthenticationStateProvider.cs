@@ -3,6 +3,10 @@
 
 using System.Diagnostics;
 using System.Security.Claims;
+using Duende.Bff.Configuration;
+using Duende.Bff.Internal;
+using Duende.Bff.Licensing;
+using Duende.Bff.SessionManagement.SessionStore;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -20,15 +24,17 @@ using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.Blazor;
 
-
-// This is a server-side AuthenticationStateProvider that uses
-// PersistentComponentState to flow the authentication state to the client which
-// is then used to initialize the authentication state in the WASM application. 
-public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAuthenticationStateProvider, IDisposable
+/// <summary>
+/// This is a server-side AuthenticationStateProvider that uses
+/// PersistentComponentState to flow the authentication state to the client which
+/// is then used to initialize the authentication state in the WASM application. 
+/// </summary>
+internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerAuthenticationStateProvider, IDisposable
 {
     private readonly IUserSessionStore _sessionStore;
     private readonly PersistentComponentState _state;
     private readonly NavigationManager _navigation;
+    private readonly BuildUserSessionPartitionKey _buildUserSessionPartitionKey;
     private readonly BffOptions _bffOptions;
     private readonly ILogger<BffServerAuthenticationStateProvider> _logger;
 
@@ -42,14 +48,17 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         IUserSessionStore sessionStore,
         PersistentComponentState persistentComponentState,
         NavigationManager navigation,
+        BuildUserSessionPartitionKey buildUserSessionPartitionKey,
         IOptions<BffBlazorServerOptions> blazorOptions,
         IOptions<BffOptions> bffOptions,
+        LicenseValidator licenseValidator,
         ILoggerFactory loggerFactory)
         : base(loggerFactory)
     {
         _sessionStore = sessionStore;
         _state = persistentComponentState;
         _navigation = navigation;
+        _buildUserSessionPartitionKey = buildUserSessionPartitionKey;
         _bffOptions = bffOptions.Value;
         _logger = loggerFactory.CreateLogger<BffServerAuthenticationStateProvider>();
 
@@ -58,26 +67,19 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
         AuthenticationStateChanged += OnAuthenticationStateChanged;
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
 
-        CheckLicense(loggerFactory, _bffOptions);
+        CheckLicense(licenseValidator);
     }
 
 
-    internal static bool LicenseChecked;
-    internal static void CheckLicense(ILoggerFactory loggerFactory, BffOptions options)
+    internal static void CheckLicense(LicenseValidator validator)
     {
-        if (LicenseChecked == false)
+        if (!validator.IsValid())
         {
-            LicenseValidator.Initalize(loggerFactory, options);
-            LicenseValidator.ValidateLicense();
+            // todo: license enforcement
         }
-
-        LicenseChecked = true;
     }
 
-    private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
-    {
-        _authenticationStateTask = task;
-    }
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> task) => _authenticationStateTask = task;
 
     private async Task OnPersistingAsync()
     {
@@ -113,7 +115,7 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
             Claims = claims.ToArray()
         };
 
-        _logger.LogDebug("Persisting Authentication State");
+        _logger.PersistingAuthenticationState(LogLevel.Debug);
 
         _state.PersistAsJson(nameof(ClaimsPrincipalRecord), principal);
     }
@@ -130,21 +132,21 @@ public sealed class BffServerAuthenticationStateProvider : RevalidatingServerAut
     /// Validates the current authentication state by checking if the user session exists in the session store.
     /// </summary>
     /// <param name="authenticationState">The current authentication state.</param>
-    /// <param name="cancellationToken">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns>A boolean indicating whether the authentication state is valid.</returns>
-    protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, CancellationToken cancellationToken)
+    protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, CT ct)
     {
         var sid = authenticationState.User.FindFirstValue(JwtClaimTypes.SessionId);
         var sub = authenticationState.User.FindFirstValue(JwtClaimTypes.Subject);
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter
+        var userSessionsFilter = new UserSessionsFilter
         {
             SessionId = sid,
             SubjectId = sub
-        },
-        cancellationToken);
+        };
+        var partitionKey = _buildUserSessionPartitionKey();
+
+        var sessions = await _sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter, ct);
         return sessions.Count != 0;
     }
-
-
 }

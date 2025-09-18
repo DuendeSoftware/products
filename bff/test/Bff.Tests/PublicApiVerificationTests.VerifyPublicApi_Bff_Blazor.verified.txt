@@ -1,0 +1,13 @@
+﻿namespace Duende.Bff.Blazor
+{
+    public sealed class BffBlazorServerOptions : System.IEquatable<Duende.Bff.Blazor.BffBlazorServerOptions>
+    {
+        public BffBlazorServerOptions() { }
+        public int ServerStateProviderPollingInterval { get; set; }
+    }
+    public static class BffBuilderExtensions
+    {
+        public static T AddBlazorServer<T>(this T builder, System.Action<Duende.Bff.Blazor.BffBlazorServerOptions>? configureOptions = null)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+    }
+}

@@ -21,10 +21,7 @@ public class PageModel
 
     }
 
-    protected virtual Task Verify()
-    {
-        return Task.CompletedTask;
-    }
+    protected virtual Task Verify() => Task.CompletedTask;
 
     public ILocatorAssertions Expect(ILocator locator) => Assertions.Expect(locator);
 

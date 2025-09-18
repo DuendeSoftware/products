@@ -3,7 +3,6 @@
 
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.Tests.TestFramework;
@@ -48,8 +47,5 @@ public class MockExternalAuthenticationHandler : RemoteAuthenticationHandler<Moc
 
 public class MockExternalAuthenticationOptions : RemoteAuthenticationOptions
 {
-    public MockExternalAuthenticationOptions()
-    {
-        CallbackPath = "/external-callback";
-    }
+    public MockExternalAuthenticationOptions() => CallbackPath = "/external-callback";
 }

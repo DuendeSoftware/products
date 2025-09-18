@@ -2,60 +2,93 @@
 // See LICENSE in the project root for license information.
 
 using System.Collections.Concurrent;
+using Duende.Bff.Otel;
+using Microsoft.Extensions.Logging;
 
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.SessionStore;
 
 /// <summary>
-/// In-memory user session store
+/// In-memory user session store partitioned by partition key
 /// </summary>
-public class InMemoryUserSessionStore : IUserSessionStore
+internal class InMemoryUserSessionStore(
+    ILogger<InMemoryUserSessionStore> logger) : IUserSessionStore
 {
-    private readonly ConcurrentDictionary<string, UserSession> _store = new();
+    // A shorthand for the concurrent dictionary of user sessions, keyed by session key.
+    private class UserSessionDictionary : ConcurrentDictionary<UserKey, UserSession>;
 
-    /// <inheritdoc />
-    public Task CreateUserSessionAsync(UserSession session, CancellationToken cancellationToken = default)
+    // A dictionary of dictionaries, where the outer dictionary is keyed by partition key
+    private readonly ConcurrentDictionary<PartitionKey, UserSessionDictionary> _store = new();
+
+    public Task CreateUserSessionAsync(UserSession session, CT ct = default)
     {
-        if (!_store.TryAdd(session.Key, session.Clone()))
+        if (!session.PartitionKey.HasValue)
         {
-            throw new Exception("Key already exists");
+            throw new InvalidOperationException(nameof(session.PartitionKey) + " cannot be null");
         }
+
+        if (!session.Key.HasValue)
+        {
+            throw new InvalidOperationException(nameof(session.Key));
+        }
+
+        var partition = GetPartition(session.PartitionKey.Value);
+        if (!partition.TryAdd(session.Key.Value, session.Clone()))
+        {
+            // There is a known race condition when two requests are trying to create a session at the same time.
+            logger.DuplicateSessionInsertDetected(LogLevel.Information);
+        }
+
         return Task.CompletedTask;
     }
 
-    /// <inheritdoc />
-    public Task<UserSession?> GetUserSessionAsync(string key, CancellationToken cancellationToken = default)
+    private UserSessionDictionary GetPartition(PartitionKey key)
     {
-        _store.TryGetValue(key, out var item);
+        var partition = _store.GetOrAdd(key, _ => new UserSessionDictionary());
+        return partition;
+    }
+
+    public Task<UserSession?> GetUserSessionAsync(UserSessionKey key, CT ct = default)
+    {
+        var partition = GetPartition(key.PartitionKey);
+        partition.TryGetValue(key.UserKey, out var item);
+
         return Task.FromResult(item?.Clone());
     }
 
-    /// <inheritdoc />
-    public Task UpdateUserSessionAsync(string key, UserSessionUpdate session, CancellationToken cancellationToken = default)
+    public Task UpdateUserSessionAsync(UserSessionKey key, UserSessionUpdate session, CT ct = default)
     {
-        var item = _store[key].Clone();
+        var partition = GetPartition(key.PartitionKey);
+        if (!partition.TryGetValue(key.UserKey, out var existing))
+        {
+            return Task.CompletedTask;
+        }
+
+        var item = existing.Clone();
         session.CopyTo(item);
-        _store[key] = item;
+        partition[key.UserKey] = item;
+
         return Task.CompletedTask;
     }
 
-    /// <inheritdoc />
-    public Task DeleteUserSessionAsync(string key, CancellationToken cancellationToken = default)
+    public Task DeleteUserSessionAsync(UserSessionKey key, CT ct = default)
     {
-        _store.TryRemove(key, out _);
+        var partition = GetPartition(key.PartitionKey);
+        partition.TryRemove(key.UserKey, out _);
         return Task.CompletedTask;
     }
 
-    /// <inheritdoc />
-    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyCollection<UserSession>> GetUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default)
     {
         filter.Validate();
+        var partition = GetPartition(partitionKey);
 
-        var query = _store.Values.AsQueryable();
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        var query = partition.Values.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
@@ -64,26 +97,27 @@ public class InMemoryUserSessionStore : IUserSessionStore
         return Task.FromResult((IReadOnlyCollection<UserSession>)results);
     }
 
-    /// <inheritdoc />
-    public Task DeleteUserSessionsAsync(UserSessionsFilter filter, CancellationToken cancellationToken = default)
+    public Task DeleteUserSessionsAsync(PartitionKey partitionKey, UserSessionsFilter filter, CT ct = default)
     {
         filter.Validate();
+        var partition = GetPartition(partitionKey);
 
-        var query = _store.Values.AsQueryable();
-        if (!String.IsNullOrWhiteSpace(filter.SubjectId))
+        var query = partition.Values.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(filter.SubjectId))
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-        if (!String.IsNullOrWhiteSpace(filter.SessionId))
+
+        if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
         }
 
-        var keys = query.Select(x => x.Key).ToArray();
-
+        var keys = query.Select(x => x.Key!.Value)
+            .ToArray();
         foreach (var key in keys)
         {
-            _store.TryRemove(key, out _);
+            partition.TryRemove(key, out _);
         }
 
         return Task.CompletedTask;
