@@ -12,6 +12,7 @@ using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.Endpoints.Introspection.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Hosting;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Introspection;
 
@@ -27,12 +28,17 @@ public class IntrospectionTests
 
     public IntrospectionTests()
     {
-        var builder = new WebHostBuilder()
-            .UseStartup<Startup>();
-        var server = new TestServer(builder);
+        var hostBuilder = new HostBuilder()
+            .ConfigureWebHost(webHost =>
+            {
+                webHost.UseTestServer();
+                webHost.UseStartup<Startup>();
+            });
 
-        _handler = server.CreateHandler();
-        _client = server.CreateClient();
+        var host = hostBuilder.Start();
+
+        _handler = host.GetTestServer().CreateHandler();
+        _client = host.GetTestClient();
     }
 
     [Fact]

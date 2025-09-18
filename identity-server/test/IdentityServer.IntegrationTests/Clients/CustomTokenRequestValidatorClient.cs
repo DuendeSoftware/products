@@ -8,6 +8,7 @@ using Duende.IdentityServer.IntegrationTests.Clients.Setup;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Hosting;
 
 namespace Duende.IdentityServer.IntegrationTests.Clients;
 
@@ -22,11 +23,16 @@ public class CustomTokenRequestValidatorClient
         var val = new TestCustomTokenRequestValidator();
         Startup.CustomTokenRequestValidator = val;
 
-        var builder = new WebHostBuilder()
-            .UseStartup<Startup>();
-        var server = new TestServer(builder);
+        var hostBuilder = new HostBuilder()
+            .ConfigureWebHost(webHost =>
+            {
+                webHost.UseTestServer();
+                webHost.UseStartup<Startup>();
+            });
 
-        _client = server.CreateClient();
+        var host = hostBuilder.Start();
+
+        _client = host.GetTestClient();
     }
 
     [Fact]

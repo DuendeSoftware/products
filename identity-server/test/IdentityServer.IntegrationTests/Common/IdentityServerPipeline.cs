@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
@@ -88,32 +89,37 @@ public class IdentityServerPipeline
 
     public void Initialize(string basePath = null, bool enableLogging = false)
     {
-        var builder = new WebHostBuilder();
-        builder.ConfigureServices(ConfigureServices);
-        builder.Configure(app =>
-        {
-            if (basePath != null)
+        var hostBuilder = new HostBuilder()
+            .ConfigureWebHost(webHost =>
             {
-                app.Map(basePath, map =>
+                webHost.UseTestServer();
+
+                webHost.ConfigureServices(ConfigureServices);
+
+                webHost.Configure(app =>
                 {
-                    ConfigureApp(map);
+                    if (basePath != null)
+                    {
+                        app.Map(basePath, ConfigureApp);
+                    }
+                    else
+                    {
+                        ConfigureApp(app);
+                    }
                 });
-            }
-            else
-            {
-                ConfigureApp(app);
-            }
-        });
 
-        if (enableLogging)
-        {
-            // Configure logging so that the logger provider will always use our mock logger
-            // The MockLogger allows us to verify that particular messages were logged.
-            builder.ConfigureLogging((ctx, b) =>
-                b.Services.AddSingleton<ILoggerProvider>(new MockLoggerProvider(MockLogger)));
-        }
+                if (enableLogging)
+                {
+                    // Configure logging so that the logger provider will always use our mock logger
+                    // The MockLogger allows us to verify that particular messages were logged.
+                    webHost.ConfigureLogging((ctx, b) =>
+                        b.Services.AddSingleton<ILoggerProvider>(new MockLoggerProvider(MockLogger)));
+                }
+            });
 
-        Server = new TestServer(builder);
+        var host = hostBuilder.Start();
+
+        Server = host.GetTestServer();
         Handler = Server.CreateHandler();
 
         BrowserClient = new BrowserClient(new BrowserHandler(Handler));

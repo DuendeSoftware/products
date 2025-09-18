@@ -4,6 +4,7 @@
 
 using System.Security.Claims;
 using Duende.IdentityModel.Client;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
@@ -60,11 +61,14 @@ public class ServerSideSessionTests
 
             s.AddSingleton<IServerUrls>(_urls);
             s.AddIdentityServerBuilder().AddServerSideSessions();
+
+            s.PostConfigure<IdentityServerOptions>(opts =>
+            {
+                opts.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMilliseconds(100);
+            });
         };
         _pipeline.OnPostConfigure += app =>
         {
-            _pipeline.Options.ServerSideSessions.RemoveExpiredSessionsFrequency = TimeSpan.FromMilliseconds(100);
-
             app.Map("/user", ep =>
             {
                 ep.Run(ctx =>
