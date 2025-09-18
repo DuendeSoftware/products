@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Yarp.ReverseProxy" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -14,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Bff.Tests" />
+    <InternalsVisibleTo Include="Duende.Bff.Tests" />
   </ItemGroup>
-
 </Project>

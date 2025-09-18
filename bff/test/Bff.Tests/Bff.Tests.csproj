@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
+    <ProjectReference Include="..\..\performance\Bff.Benchmarks\Bff.Benchmarks.csproj" />
+    <ProjectReference Include="..\..\src\Bff.Blazor\Bff.Blazor.csproj" />
+    <ProjectReference Include="..\..\src\Bff.EntityFramework\Bff.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\Bff\Bff.csproj" />
     <ProjectReference Include="..\..\src\Bff.Yarp\Bff.Yarp.csproj" />
   </ItemGroup>

@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace UserSessionDb.Migrations.UserSessions
 {
     [DbContext(typeof(SessionDbContext))]
@@ -13,18 +15,13 @@ namespace UserSessionDb.Migrations.UserSessions
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
             modelBuilder.Entity("Duende.Bff.EntityFramework.UserSessionEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ApplicationName")
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
@@ -34,6 +31,10 @@ namespace UserSessionDb.Migrations.UserSessions
 
                     b.Property<string>("Key")
                         .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartitionKey")
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
@@ -56,16 +57,16 @@ namespace UserSessionDb.Migrations.UserSessions
 
                     b.HasIndex("Expires");
 
-                    b.HasIndex("ApplicationName", "Key")
+                    b.HasIndex("PartitionKey", "Key")
                         .IsUnique();
 
-                    b.HasIndex("ApplicationName", "SessionId")
+                    b.HasIndex("PartitionKey", "SessionId")
                         .IsUnique();
 
-                    b.HasIndex("ApplicationName", "SubjectId", "SessionId")
+                    b.HasIndex("PartitionKey", "SubjectId", "SessionId")
                         .IsUnique();
 
-                    b.ToTable("UserSessions");
+                    b.ToTable("UserSessions", (string)null);
                 });
 #pragma warning restore 612, 618
         }

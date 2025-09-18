@@ -8,20 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Bff\Shared\ClaimRecordExtensions.cs" Link="Shared\ClaimRecordExtensions.cs" />
-    <Compile Include="..\Bff\Shared\ClaimsPrincipalRecord.cs" Link="Shared\ClaimsPrincipalRecord.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="Duende.Private.Licensing" />
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Bff.Blazor.Client.UnitTests" />
+    <InternalsVisibleTo Include="Duende.Bff.Tests" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+
   </ItemGroup>
 
 </Project>

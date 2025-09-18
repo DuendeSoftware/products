@@ -1,31 +1,120 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Tests.TestHosts;
-using Microsoft.Extensions.DependencyInjection;
+using Duende.Bff.DynamicFrontends;
+using Duende.Bff.SessionManagement.SessionStore;
+using Duende.Bff.Tests.TestInfra;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.SessionManagement;
 
-public class ServerSideTicketStoreTests : BffIntegrationTestBase
+public class ServerSideTicketStoreTests : BffTestBase
 {
-    readonly InMemoryUserSessionStore _sessionStore = new();
+    public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output) =>
+        Bff.OnConfigureBff += bff =>
+        {
+            bff.AddServerSideSessions();
+        };
 
-    public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output) => BffHost.OnConfigureServices += services =>
-                                                                                       {
-                                                                                           services.AddSingleton<IUserSessionStore>(_sessionStore);
-                                                                                       };
+    [Theory, MemberData(nameof(AllSetups))]
+    public async Task StoreAsync_should_remove_conflicting_entries_prior_to_creating_new_entry(BffSetupType setup)
+    {
+        Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
+        await ConfigureBff(setup);
+        await Bff.BrowserClient.Login();
+
+        Bff.BrowserClient.Cookies.Clear(Bff.Url());
+        (await GetUserSessions()).Count.ShouldBe(1);
+
+        await Bff.BrowserClient.Login();
+
+        (await GetUserSessions()).Count.ShouldBe(1);
+    }
 
     [Fact]
-    public async Task StoreAsync_should_remove_conflicting_entries_prior_to_creating_new_entry()
+    public async Task Given_multiple_frontends_each_frontend_gets_a_session()
     {
-        await BffHost.BffLoginAsync("alice");
+        await ConfigureBff(BffSetupType.BffWithFrontend, UseSlidingCookieExpiration);
 
-        BffHost.BrowserClient.RemoveCookie("bff");
-        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);
+        Internet.AddCustomHandler(map: The.DomainName, to: Bff);
+        var frontendWithOrigin = new BffFrontend(BffFrontendName.Parse("frontend-with-origin"))
+            .WithOpenIdConnectOptions(The.DefaultOpenIdConnectConfiguration)
+            .MapToHost(HostHeaderValue.Parse(The.DomainName));
+        AddOrUpdateFrontend(frontendWithOrigin);
 
-        await BffHost.BffOidcLoginAsync();
+        await Bff.BrowserClient.Login();
+        (await GetUserSessions()).Count.ShouldBe(1);
 
-        (await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" })).Count().ShouldBe(1);
+        var bffClientForOtherOrigin = Bff.BuildBrowserClient(The.DomainName, Bff.BrowserClient.Cookies);
+        await bffClientForOtherOrigin.Login();
+
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
+        (await bffClientForOtherOrigin.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
+
+        var defaultFrontendSessions = (await GetUserSessions());
+        defaultFrontendSessions.Count.ShouldBe(1);
+
+        var frontendWithOriginSessions = (await GetUserSessions(frontendWithOrigin));
+        frontendWithOriginSessions.Count.ShouldBe(1);
+
+        // Make sure it's a different session
+        frontendWithOriginSessions.Single().Key.ShouldNotBe(defaultFrontendSessions.Single().Key);
     }
+
+    [Fact]
+    public async Task Given_multiple_frontends_logout_only_affects_single_frontend()
+    {
+        await ConfigureBff(BffSetupType.BffWithFrontend, UseSlidingCookieExpiration);
+
+        Internet.AddCustomHandler(map: The.DomainName, to: Bff);
+        var frontendWithOrigin = new BffFrontend(BffFrontendName.Parse("frontend-with-origin"))
+            .WithOpenIdConnectOptions(The.DefaultOpenIdConnectConfiguration)
+            .MapToHost(HostHeaderValue.Parse(The.DomainName));
+        AddOrUpdateFrontend(frontendWithOrigin);
+
+        await Bff.BrowserClient.Login();
+        (await GetUserSessions()).Count.ShouldBe(1);
+
+        var bffClientForOtherOrigin = Bff.BuildBrowserClient(The.DomainName, Bff.BrowserClient.Cookies);
+        await bffClientForOtherOrigin.Login();
+
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
+        (await bffClientForOtherOrigin.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
+
+        await Bff.BrowserClient.Logout();
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync("slide=false")).ShouldBeFalse();
+
+        (await bffClientForOtherOrigin.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// Get's the user sessions, optionally for a specific frontend.
+    /// if not specified, the current frontend is used.
+    /// </summary>
+    private async Task<IReadOnlyCollection<UserSession>> GetUserSessions(BffFrontend? forFrontend = null)
+    {
+        using (var scope = Bff.ResolveForFrontend(forFrontend ?? CurrentFrontend))
+        {
+            var sessionStore = scope.Resolve<IUserSessionStore>();
+
+            var partitionKey = scope.Resolve<BuildUserSessionPartitionKey>()();
+            var userSessionsFilter = new UserSessionsFilter
+            {
+                SubjectId = The.Sub
+            };
+            return await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter);
+        }
+    }
+
+    private static void UseSlidingCookieExpiration(CookieAuthenticationOptions options)
+    {
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    }
+}
+
+public class DelegateDisposable(Action onDispose) : IDisposable
+{
+    public void Dispose() => onDispose();
 }

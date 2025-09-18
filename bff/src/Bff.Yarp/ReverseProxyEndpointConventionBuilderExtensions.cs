@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 
@@ -29,14 +30,10 @@ public static class ReverseProxyEndpointConventionBuilderExtensions
     public static ReverseProxyConventionBuilder MapBffReverseProxy(this IEndpointRouteBuilder endpoints) => endpoints.MapReverseProxy()
             .AsBffApiEndpoint();
 
-    // TODO: do we also need a SkipAntiforgery API?
-    // TODO: review the API comment below
-
     /// <summary>
     /// Adds anti-forgery protection to YARP
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
     public static ReverseProxyConventionBuilder AsBffApiEndpoint(this ReverseProxyConventionBuilder builder) => builder.WithMetadata(new BffApiAttribute());
-
 }

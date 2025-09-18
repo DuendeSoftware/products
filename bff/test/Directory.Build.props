@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <IsBffProject>true</IsBffProject>
+    <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+    <IsBffProject >true</IsBffProject >
   </PropertyGroup>
   <Import Project="../../test.props" />
 </Project>

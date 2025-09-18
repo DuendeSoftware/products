@@ -1,7 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.Bff;
+
+namespace Duende.Bff.SessionManagement.SessionStore;
 
 /// <summary>
 /// The data that can be updated for a user session
@@ -45,6 +46,7 @@ public class UserSessionUpdate
     /// <returns></returns>
     public void CopyTo(UserSessionUpdate other)
     {
+        ArgumentNullException.ThrowIfNull(other);
         other.SubjectId = SubjectId;
         other.SessionId = SessionId;
         other.Created = Created;

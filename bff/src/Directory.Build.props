@@ -4,12 +4,23 @@
   <Import Project="../../src.props" />
 
   <PropertyGroup>
+    <AnalysisMode>All</AnalysisMode>
+    <Nullable>enable</Nullable>
     <PackageTags>OAuth 2.0;OpenID Connect;Security;BFF;IdentityServer;ASP.NET Core;SPA;Blazor</PackageTags>
     <Product>Duende BFF</Product>
     <MinVerTagPrefix>bff-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>2.3</MinVerMinimumMajorMinor>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
     <IsBffProject>true</IsBffProject>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+    CA1034: Nested Types are OK
+    CA2007: ConfigureAwait() is not needed in library code
+     -->
+      <NoWarn>$(NoWarn);CA1034;CA2007</NoWarn>
   </PropertyGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,6 +10,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Bff\Bff.csproj" />
     <ProjectReference Include="..\Bff.Blazor.Client\Bff.Blazor.Client.csproj" />
+    
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Duende.Bff.Tests" />
+  </ItemGroup>
 </Project>

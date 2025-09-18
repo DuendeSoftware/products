@@ -1,0 +1,40 @@
+{
+  "defaultOidcSettings": null,
+  "defaultCookieSettings": null,
+  "frontends": {
+    "from_config": {
+      "indexHtmlUrl": "https://localhost:5005/static/index.html",
+      "matchingPath": "/from-config",
+      "oidc": {
+        "clientId": "bff.multi-frontend.config"
+      },
+      "remoteApis": [
+        {
+          "matchingPath": "/api/client-token",
+          "targetUri": "https://localhost:5010",
+          "tokenRequirement": "Client"
+        },
+        {
+          "matchingPath": "/api/user-or-client-token",
+          "targetUri": "https://localhost:5010",
+          "tokenRequirement": "OptionalUserOrClient"
+        },
+        {
+          "matchingPath": "/api/anonymous",
+          "targetUri": "https://localhost:5010",
+          "tokenRequirement": "None"
+        },
+        {
+          "matchingPath": "/api/optional-user-token",
+          "targetUri": "https://localhost:5010",
+          "tokenRequirement": "OptionalUserOrNone"
+        },
+        {
+          "matchingPath": "/api/user-token",
+          "targetUri": "https://localhost:5010",
+          "tokenRequirement": "User"
+        }
+      ]
+    }
+  }
+}

@@ -123,6 +123,10 @@ public class BffClient
         var response = await _client.GetAsync(url);
 
         response.StatusCode.ShouldBe(expectedResponse);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            response.Content.Headers.ContentType!.MediaType.ShouldBe("application/json");
+        }
     }
 
     public record UserClaim

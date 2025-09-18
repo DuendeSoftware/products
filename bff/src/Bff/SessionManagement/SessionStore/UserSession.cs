@@ -1,7 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.Bff;
+
+namespace Duende.Bff.SessionManagement.SessionStore;
 
 /// <summary>
 /// A user session
@@ -11,7 +12,24 @@ public class UserSession : UserSessionUpdate
     /// <summary>
     /// The key
     /// </summary>
-    public string Key { get; set; } = default!;
+    public UserKey? Key { get; set; }
+
+    public PartitionKey? PartitionKey { get; set; }
+
+    internal UserSessionKey GetUserSessionKey()
+    {
+        if (!PartitionKey.HasValue)
+        {
+            throw new ArgumentNullException(nameof(PartitionKey));
+        }
+
+        if (!Key.HasValue)
+        {
+            throw new ArgumentNullException(nameof(Key));
+        }
+
+        return new UserSessionKey(PartitionKey.Value, Key.Value);
+    }
 
     /// <summary>
     /// Clones the instance
@@ -31,7 +49,9 @@ public class UserSession : UserSessionUpdate
     /// <returns></returns>
     public void CopyTo(UserSession other)
     {
+        ArgumentNullException.ThrowIfNull(other);
         other.Key = Key;
+        other.PartitionKey = PartitionKey;
         base.CopyTo(other);
     }
 }
