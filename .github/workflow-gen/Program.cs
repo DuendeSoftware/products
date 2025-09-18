@@ -145,6 +145,8 @@ void GenerateCiWorkflow(Product product)
 
         playwrightJob.StepBuild(product.Solution);
 
+        playwrightJob.CachePlaywrightAssets();
+
         playwrightJob.StepInstallPlayWright();
 
         playwrightJob.StepDotNetDevCerts();
