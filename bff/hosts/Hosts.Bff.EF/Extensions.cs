@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Bff;
-using Duende.Bff.AccessTokenManagement;
-using Duende.Bff.EntityFramework;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -23,27 +21,27 @@ internal static class Extensions
         // Add BFF services to DI - also add server-side session management
         var cn = configuration.GetConnectionString("db");
         services.AddBff(options =>
-            {
-                options.BackchannelLogoutAllUserSessions = true;
-            })
+        {
+            options.BackchannelLogoutAllUserSessions = true;
+            options.EnableSessionCleanup = true;
+        })
             .AddRemoteApis()
             .AddEntityFrameworkServerSideSessions(options =>
             {
                 //options.UseSqlServer(cn);
                 options.UseSqlite(cn, opt => opt.MigrationsAssembly(typeof(UserSessions).Assembly.FullName));
-            })
-            .AddSessionCleanupBackgroundProcess();
+            });
 
         // local APIs
         services.AddControllers();
 
         // cookie options
         services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = "cookie";
-                options.DefaultChallengeScheme = "oidc";
-                options.DefaultSignOutScheme = "oidc";
-            })
+        {
+            options.DefaultScheme = "cookie";
+            options.DefaultChallengeScheme = "oidc";
+            options.DefaultSignOutScheme = "oidc";
+        })
             .AddCookie("cookie", options =>
             {
                 // host prefixed cookie name
@@ -100,13 +98,17 @@ internal static class Extensions
             .RequireAuthorization()
             .AsBffApiEndpoint();
 
+        // login, logout, user, backchannel logout...
+        app.MapBffManagementEndpoints();
+
         // proxy endpoint for cross-site APIs
         // all calls to /api/* will be forwarded to the remote API
         // user or client access token will be attached in API call
         // user access token will be managed automatically using the refresh token
-        app.MapRemoteBffApiEndpoint("/api", new Uri("https://localhost:5010"))
-            .WithAccessToken(RequiredTokenType.UserOrClient);
+        app.MapRemoteBffApiEndpoint("/api", "https://localhost:5010")
+            .RequireAccessToken(TokenType.UserOrClient);
 
         return app;
+
     }
 }

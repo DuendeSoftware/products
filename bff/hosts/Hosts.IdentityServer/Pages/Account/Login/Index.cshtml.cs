@@ -39,7 +39,7 @@ public class Index : PageModel
         TestUserStore users = null)
     {
         // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
-        _users = users ?? throw new InvalidOperationException("Please call 'AddTestUsers(TestUsers.Users)' on the IIdentityServerBuilder in Startup or remove the TestUserStore from the AccountController.");
+        _users = users ?? throw new Exception("Please call 'AddTestUsers(TestUsers.Users)' on the IIdentityServerBuilder in Startup or remove the TestUserStore from the AccountController.");
 
         _interaction = interaction;
         _clientStore = clientStore;
@@ -146,7 +146,7 @@ public class Index : PageModel
                 else
                 {
                     // user might have clicked on a malicious link - should be logged
-                    throw new InvalidOperationException("invalid return URL");
+                    throw new Exception("invalid return URL");
                 }
             }
 

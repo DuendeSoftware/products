@@ -18,11 +18,11 @@ public class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
         {
             if (options.EventsType != null && !typeof(DPoPJwtBearerEvents).IsAssignableFrom(options.EventsType))
             {
-                throw new InvalidOperationException("EventsType on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
+                throw new Exception("EventsType on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
             }
             if (options.Events != null && !typeof(DPoPJwtBearerEvents).IsAssignableFrom(options.Events.GetType()))
             {
-                throw new InvalidOperationException("Events on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
+                throw new Exception("Events on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
             }
 
             if (options.Events == null && options.EventsType == null)

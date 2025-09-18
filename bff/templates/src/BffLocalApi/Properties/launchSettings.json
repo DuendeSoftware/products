@@ -1,8 +1,8 @@
-{
+﻿{
   "profiles": {
     "BffJs": {
       "commandName": "Project",
-      "launchBrowser": false,
+      "launchBrowser": true,
       "applicationUrl": "https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

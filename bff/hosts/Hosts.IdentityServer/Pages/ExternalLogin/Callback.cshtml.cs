@@ -30,7 +30,7 @@ public class Callback : PageModel
         TestUserStore users = null)
     {
         // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
-        _users = users ?? throw new InvalidOperationException("Please call 'AddTestUsers(TestUsers.Users)' on the IIdentityServerBuilder in Startup or remove the TestUserStore from the AccountController.");
+        _users = users ?? throw new Exception("Please call 'AddTestUsers(TestUsers.Users)' on the IIdentityServerBuilder in Startup or remove the TestUserStore from the AccountController.");
 
         _interaction = interaction;
         _logger = logger;
@@ -43,7 +43,7 @@ public class Callback : PageModel
         var result = await HttpContext.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
         if (result?.Succeeded != true)
         {
-            throw new InvalidOperationException("External authentication error");
+            throw new Exception("External authentication error");
         }
 
         var externalUser = result.Principal;
@@ -60,7 +60,7 @@ public class Callback : PageModel
         // depending on the external provider, some other claim type might be used
         var userIdClaim = externalUser.FindFirst(JwtClaimTypes.Subject) ??
                           externalUser.FindFirst(ClaimTypes.NameIdentifier) ??
-                          throw new InvalidOperationException("Unknown userid");
+                          throw new Exception("Unknown userid");
 
         var provider = result.Properties.Items["scheme"];
         var providerUserId = userIdClaim.Value;

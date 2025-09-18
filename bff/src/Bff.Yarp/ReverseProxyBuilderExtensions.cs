@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Yarp.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Bff.Yarp;

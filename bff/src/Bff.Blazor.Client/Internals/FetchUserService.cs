@@ -3,7 +3,6 @@
 
 using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.Bff.Blazor.Client.Internals;
@@ -11,7 +10,7 @@ namespace Duende.Bff.Blazor.Client.Internals;
 /// <summary>
 /// Internal service that retrieves user info from the /bff/user endpoint.
 /// </summary>
-internal class FetchUserService : IDisposable
+internal class FetchUserService
 {
     private readonly HttpClient _client;
     private readonly ILogger<FetchUserService> _logger;
@@ -34,16 +33,14 @@ internal class FetchUserService : IDisposable
     internal FetchUserService()
     {
         _client = new HttpClient();
-#pragma warning disable CA2000 // This is a test-only ctor, so we don't want to dispose the client here.
         _logger = new Logger<FetchUserService>(new LoggerFactory());
-#pragma warning restore CA2000
     }
 
     public virtual async ValueTask<ClaimsPrincipal> FetchUserAsync()
     {
         try
         {
-            _logger.FetchingUserInformation();
+            _logger.LogInformation("Fetching user information.");
             var claims = await _client.GetFromJsonAsync<List<ClaimRecord>>("bff/user?slide=false");
 
             var identity = new ClaimsIdentity(
@@ -61,17 +58,10 @@ internal class FetchUserService : IDisposable
 
             return new ClaimsPrincipal(identity);
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            _logger.FetchingUserFailed(ex);
-            return new ClaimsPrincipal(new ClaimsIdentity());
-        }
-        catch (JsonException ex)
-        {
-            _logger.FetchingUserFailed(ex);
+            _logger.LogWarning(ex, "Fetching user failed.");
             return new ClaimsPrincipal(new ClaimsIdentity());
         }
     }
-
-    public void Dispose() => _client.Dispose();
 }

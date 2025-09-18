@@ -1,8 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
-namespace Duende.Bff.SessionManagement.SessionStore;
+namespace Duende.Bff;
 
 /// <summary>
 /// User session store cleanup
@@ -12,5 +11,5 @@ public interface IUserSessionStoreCleanup
     /// <summary>
     /// Deletes expired sessions
     /// </summary>
-    Task<int> DeleteExpiredSessionsAsync(CT ct = default);
+    Task DeleteExpiredSessionsAsync(CancellationToken cancellationToken = default);
 }

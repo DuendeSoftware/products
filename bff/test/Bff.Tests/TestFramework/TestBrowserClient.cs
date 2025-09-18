@@ -15,7 +15,7 @@ public class TestBrowserClient : HttpClient
         public HttpResponseMessage? LastResponse { get; private set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CT ct)
+            CancellationToken cancellationToken)
         {
             CurrentUri = request.RequestUri ?? throw new NullReferenceException("RequestUri is not set");
             var cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri);
@@ -24,7 +24,7 @@ public class TestBrowserClient : HttpClient
                 request.Headers.Add("Cookie", cookieHeader);
             }
 
-            var response = await base.SendAsync(request, ct);
+            var response = await base.SendAsync(request, cancellationToken);
 
             if (response.Headers.Contains("Set-Cookie"))
             {
@@ -80,10 +80,10 @@ public class TestBrowserClient : HttpClient
     /// <param name="expectedStatusCode">If specified, the system will verify that this reponse code was given</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>The specified api response</returns>
-    internal async Task<BffHostResponse> CallBffHostApi(
+    public async Task<BffHostResponse> CallBffHostApi(
         string url,
         HttpStatusCode? expectedStatusCode = null,
-        CT ct = default)
+        CancellationToken ct = default)
     {
         var req = new HttpRequestMessage(HttpMethod.Get, url);
         req.Headers.Add("x-csrf", "1");
@@ -94,9 +94,9 @@ public class TestBrowserClient : HttpClient
             response.IsSuccessStatusCode.ShouldBeTrue();
             response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
             var json = await response.Content.ReadAsStringAsync(ct);
-            var apiResult = JsonSerializer.Deserialize<ApiCallDetails>(json).ShouldNotBeNull();
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
-            apiResult.Method.ShouldBe(HttpMethod.Get);
+            apiResult.Method.ShouldBe("GET", StringCompareShould.IgnoreCase);
 
             return new(response, apiResult);
         }
@@ -105,21 +105,21 @@ public class TestBrowserClient : HttpClient
             response.StatusCode.ToString().ShouldBe(expectedStatusCode.ToString());
             return new(response, null!);
         }
+
     }
 
-    internal async Task<BffHostResponse> CallBffHostApi(
+    public async Task<BffHostResponse> CallBffHostApi(
         string url,
         HttpMethod method,
         HttpContent? content = null,
         HttpStatusCode? expectedStatusCode = null,
-        CT ct = default)
+        CancellationToken ct = default)
     {
         var req = new HttpRequestMessage(method, url);
         if (req.Content == null)
         {
             req.Content = content;
         }
-
         req.Headers.Add("x-csrf", "1");
         var response = await SendAsync(req, ct);
         if (expectedStatusCode == null)
@@ -127,9 +127,9 @@ public class TestBrowserClient : HttpClient
             response.IsSuccessStatusCode.ShouldBeTrue();
             response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
             var json = await response.Content.ReadAsStringAsync(ct);
-            var apiResult = JsonSerializer.Deserialize<ApiCallDetails>(json).ShouldNotBeNull();
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
-            apiResult.Method.ShouldBe(method);
+            apiResult.Method.ShouldBe(method.ToString(), StringCompareShould.IgnoreCase);
             return new(response, apiResult);
         }
         else
@@ -139,9 +139,11 @@ public class TestBrowserClient : HttpClient
         }
     }
 
-    internal record BffHostResponse(HttpResponseMessage HttpResponse, ApiCallDetails ApiResponse)
+    public record BffHostResponse(HttpResponseMessage HttpResponse, ApiResponse ApiResponse)
     {
         public static implicit operator HttpResponseMessage(BffHostResponse response) => response.HttpResponse;
-        public static implicit operator ApiCallDetails(BffHostResponse response) => response.ApiResponse;
+        public static implicit operator ApiResponse(BffHostResponse response) => response.ApiResponse;
     }
+
+
 }

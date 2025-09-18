@@ -6,7 +6,7 @@ namespace Duende.Bff.Blazor.Client;
 /// <summary>
 /// Options for Blazor BFF
 /// </summary>
-public sealed record BffBlazorClientOptions
+public class BffBlazorClientOptions
 {
     /// <summary>
     /// The base path to use for remote APIs.
@@ -17,14 +17,14 @@ public sealed record BffBlazorClientOptions
     /// The base address to use for remote APIs. If unset (the default), the
     /// blazor hosting environment's base address is used.
     /// </summary>
-    public string? RemoteApiBaseAddress { get; set; }
+    public string? RemoteApiBaseAddress { get; set; } = null;
 
     /// <summary>
     /// The base address to use for the state provider's calls to the /bff/user
     /// endpoint. If unset (the default), the blazor hosting environment's base
     /// address is used.
     /// </summary>
-    public string? StateProviderBaseAddress { get; set; }
+    public string? StateProviderBaseAddress { get; set; } = null;
 
     /// <summary>
     /// The delay, in milliseconds, before the BffClientAuthenticationStateProvider will

@@ -1,8 +1,0 @@
-@using Duende.Bff.Tests.TestInfra
-@using global::Bff.Tests.Blazor
-<Router AppAssembly="typeof(BffTestHost).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
-    </Found>
-</Router>

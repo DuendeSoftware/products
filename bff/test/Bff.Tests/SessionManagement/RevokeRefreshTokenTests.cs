@@ -1,164 +1,137 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Tests.TestInfra;
+using Duende.Bff.Tests.TestHosts;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.SessionManagement;
 
-public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffTestBase(output)
+public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffIntegrationTestBase(output)
 {
-    [Theory, MemberData(nameof(AllSetups))]
-    public async Task logout_should_revoke_refreshtoken(BffSetupType setup)
+    [Fact]
+    public async Task logout_should_revoke_refreshtoken()
     {
-        await ConfigureBff(setup, configureOpenIdConnect: options =>
-        {
-            The.DefaultOpenIdConnectConfiguration(options);
-            options.Scope.Add("offline_access");
-        });
-
-        await Bff.BrowserClient.Login();
+        await BffHost.BffLoginAsync("alice", "sid");
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
             rt.ShouldNotBeNull();
         }
 
-        await Bff.BrowserClient.Logout();
+        await BffHost.BffLogoutAsync("sid");
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             grants.ShouldBeEmpty();
         }
     }
 
-    [Theory, MemberData(nameof(AllSetups))]
-    public async Task when_setting_disabled_logout_should_not_revoke_refreshtoken(BffSetupType setup)
+    [Fact]
+    public async Task when_setting_disabled_logout_should_not_revoke_refreshtoken()
     {
-        await ConfigureBff(setup, configureOpenIdConnect: options =>
+        BffHost.OnConfigureServices += svcs =>
         {
-            The.DefaultOpenIdConnectConfiguration(options);
-            options.Scope.Add("offline_access");
-        });
+            svcs.Configure<BffOptions>(options =>
+            {
+                options.RevokeRefreshTokenOnLogout = false;
+            });
+        };
+        await BffHost.InitializeAsync();
 
-        Bff.BffOptions.RevokeRefreshTokenOnLogout = false;
-
-        await Bff.BrowserClient.Login();
+        await BffHost.BffLoginAsync("alice", "sid");
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
             rt.ShouldNotBeNull();
         }
 
-        await Bff.BrowserClient.Logout();
+        await BffHost.BffLogoutAsync("sid");
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
             rt.ShouldNotBeNull();
         }
     }
 
-    [Theory, MemberData(nameof(AllSetups))]
-    public async Task backchannel_logout_endpoint_should_revoke_refreshtoken(BffSetupType setup)
+    [Fact]
+    public async Task backchannel_logout_endpoint_should_revoke_refreshtoken()
     {
-        Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
-
-        await ConfigureBff(setup, configureOpenIdConnect: options =>
-        {
-            The.DefaultOpenIdConnectConfiguration(options);
-            options.Scope.Add("offline_access");
-        });
-
-        foreach (var client in IdentityServer.Clients)
-        {
-            client.BackChannelLogoutUri = Bff.Url("/bff/backchannel").ToString();
-            client.BackChannelLogoutSessionRequired = true;
-        }
-
-        await Bff.BrowserClient.Login();
+        await BffHost.BffLoginAsync("alice", "sid123");
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
             rt.ShouldNotBeNull();
         }
 
-        await Bff.BrowserClient.RevokeIdentityServerSession();
+        await IdentityServerHost.RevokeSessionCookieAsync();
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             grants.ShouldBeEmpty();
         }
     }
 
-    [Theory, MemberData(nameof(AllSetups))]
-    public async Task when_setting_disabled_backchannel_logout_endpoint_should_not_revoke_refreshtoken(
-        BffSetupType setup)
+    [Fact]
+    public async Task when_setting_disabled_backchannel_logout_endpoint_should_not_revoke_refreshtoken()
     {
-        await ConfigureBff(setup, configureOpenIdConnect: options =>
+        BffHost.OnConfigureServices += svcs =>
         {
-            The.DefaultOpenIdConnectConfiguration(options);
-            options.Scope.Add("offline_access");
-        });
+            svcs.Configure<BffOptions>(options =>
+            {
+                options.RevokeRefreshTokenOnLogout = false;
+            });
+        };
+        await BffHost.InitializeAsync();
 
-        Bff.OnConfigureBff += bff => bff.AddServerSideSessions();
-
-
-        Bff.BffOptions.RevokeRefreshTokenOnLogout = false;
-
-        foreach (var client in IdentityServer.Clients)
-        {
-            client.BackChannelLogoutUri = Bff.Url("/bff/backchannel").ToString();
-            client.BackChannelLogoutSessionRequired = true;
-        }
-
-        await Bff.BrowserClient.Login();
+        await BffHost.BffLoginAsync("alice", "sid123");
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
             rt.ShouldNotBeNull();
         }
 
-        await Bff.BrowserClient.RevokeIdentityServerSession();
+        await IdentityServerHost.RevokeSessionCookieAsync();
 
         {
-            var store = IdentityServer.Resolve<IPersistedGrantStore>();
+            var store = IdentityServerHost.Resolve<IPersistedGrantStore>();
             var grants = await store.GetAllAsync(new PersistedGrantFilter
             {
-                SubjectId = The.Sub
+                SubjectId = "alice"
             });
             var rt = grants.Single(x => x.Type == "refresh_token");
             rt.ShouldNotBeNull();

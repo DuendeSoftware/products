@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <Configurations>Debug;Release;Debug_ncrunch</Configurations>
-    <RootNamespace>Hosts.Tests</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_ncrunch|AnyCPU'">
@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Logging" />
@@ -22,9 +23,11 @@
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="Microsoft.Playwright.Xunit" />
+
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' != 'Debug_NCrunch'">
+
     <ProjectReference Include="..\..\hosts\Hosts.AppHost\Hosts.AppHost.csproj" />
     <Using Include="Aspire.Hosting.ApplicationModel" />
     <Using Include="Aspire.Hosting.Testing" />
@@ -35,10 +38,6 @@
     <Using Include="System.Net" />
     <Using Include="Microsoft.Extensions.DependencyInjection" />
     <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Duende.Xunit.Playwright.csproj" />
   </ItemGroup>
 
 </Project>

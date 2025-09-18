@@ -45,6 +45,7 @@ internal static class Extensions
             });
         });
         return builder.Build();
+
     }
 
     public static WebApplication ConfigurePipeline(this WebApplication app)
@@ -80,4 +81,3 @@ internal static class Extensions
         return app;
     }
 }
-

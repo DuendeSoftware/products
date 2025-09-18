@@ -88,8 +88,7 @@ public class ToDoController : ControllerBase
 
 public class ToDo
 {
-    private static int NextId = 1;
-
+    static int NextId = 1;
     public static int NewId() => NextId++;
 
     public int Id { get; set; }
