@@ -1,45 +1,48 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.AccessTokenManagement;
-using Duende.Bff.Endpoints;
-
-namespace Duende.Bff.Configuration;
+namespace Duende.Bff;
 
 /// <summary>
 /// Endpoint metadata for a remote BFF API endpoint
 /// </summary>
-public sealed class BffRemoteApiEndpointMetadata : IBffApiMetadata
+public class BffRemoteApiEndpointMetadata : IBffApiEndpoint
 {
     /// <summary>
     /// Required token type (if any)
     /// </summary>
-    public RequiredTokenType? TokenType { get; set; }
+    public TokenType? RequiredTokenType;
+
+    /// <summary>
+    /// Optionally send a user token if present
+    /// </summary>
+    public bool OptionalUserToken { get; set; }
 
     /// <summary>
     /// Maps to UserAccessTokenParameters and included if set
     /// </summary>
     public BffUserAccessTokenParameters? BffUserAccessTokenParameters { get; set; }
 
-    private Type _accessTokenRetriever = typeof(IAccessTokenRetriever);
+    private Type _accessTokenRetriever = typeof(DefaultAccessTokenRetriever);
 
     /// <summary>
     /// The type used to retrieve access tokens.
     /// </summary>
     public Type AccessTokenRetriever
     {
-        get => _accessTokenRetriever;
+        get
+        {
+            return _accessTokenRetriever;
+        }
         set
         {
-            ArgumentNullException.ThrowIfNull(value);
             if (value.IsAssignableTo(typeof(IAccessTokenRetriever)))
             {
                 _accessTokenRetriever = value;
             }
             else
             {
-                throw new InvalidOperationException(
-                    "Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
+                throw new Exception("Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
             }
         }
     }

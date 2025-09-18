@@ -48,10 +48,10 @@ services.AddSingleton<BffYarpTransformBuilder>(CustomDefaultYarpTransforms);
 //...
 
 // This is an example of how to add a response header to ALL invocations of MapRemoteBffApiEndpoint()
-private void CustomDefaultBffTransformBuilder(string pathMatch, TransformBuilderContext context)
+private void CustomDefaultBffTransformBuilder(string localpath, TransformBuilderContext context)
 {
     context.AddResponseHeader("added-by-custom-default-transform", "some-value");
-    DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken(pathMatch, context);
+    DefaultBffYarpTransformerBuilders.DirectProxyWithAccessToken(localpath, context);
 }
 ```
 
@@ -87,13 +87,13 @@ Now, there is an overload on the *endpoints.MapRemoteBffApiEndpoint()* that allo
 The Map method was no longer needed as most of the logic had been moved to either the MapRemoteBffApiEndpoint and the DefaultTransformers. The map method also wasn't very explicit about what it did and a number of test scenario's tried to verify if it wasn't called wrongly. You are now expected to call the method MapRemoteBffApiEndpoint. This method now has a nullable parameter that allows you to inject your own transformers. 
 
 ### AccessTokenRetrievalContext properties are now typed
-The PathMatch and ApiAddress properties are now typed. They used to be strings. If you rely on these, for example for implementing 
+The LocalPath and ApiAddress properties are now typed. They used to be strings. If you rely on these, for example for implementing 
 a custom IAccessTokenRetriever, then you should adjust their usage accordingly. 
 
     /// <summary>
     /// The locally requested path.
     /// </summary>
-    public required PathString PathMatch { get; set; }
+    public required PathString LocalPath { get; set; }
 
     /// <summary>
     /// The remote address of the API.

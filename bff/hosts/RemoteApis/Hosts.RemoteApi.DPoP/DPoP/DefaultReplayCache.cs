@@ -18,7 +18,10 @@ public class DefaultReplayCache : IReplayCache
     /// ctor
     /// </summary>
     /// <param name="cache"></param>
-    public DefaultReplayCache(IDistributedCache cache) => _cache = cache;
+    public DefaultReplayCache(IDistributedCache cache)
+    {
+        _cache = cache;
+    }
 
     /// <inheritdoc />
     public async Task AddAsync(string purpose, string handle, DateTimeOffset expiration)
@@ -32,5 +35,8 @@ public class DefaultReplayCache : IReplayCache
     }
 
     /// <inheritdoc />
-    public async Task<bool> ExistsAsync(string purpose, string handle) => (await _cache.GetAsync(Prefix + purpose + handle, default)) != null;
+    public async Task<bool> ExistsAsync(string purpose, string handle)
+    {
+        return (await _cache.GetAsync(Prefix + purpose + handle, default)) != null;
+    }
 }

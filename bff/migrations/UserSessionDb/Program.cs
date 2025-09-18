@@ -4,27 +4,28 @@
 using Duende.Bff.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 
-namespace UserSessionDb;
-
-public class Program
+namespace UserSessionDb
 {
-    public static void Main(string[] args)
+    public class Program
     {
-        var host = CreateHostBuilder(args).Build();
-        using (var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+        public static void Main(string[] args)
         {
-            using (var context = scope.ServiceProvider.GetService<SessionDbContext>())
+            var host = CreateHostBuilder(args).Build();
+            using (var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                Console.WriteLine("MIGRATING"); // TODO
-                context.Database.Migrate();
+                using (var context = scope.ServiceProvider.GetService<SessionDbContext>())
+                {
+                    Console.WriteLine("MIGRATING"); // TODO
+                    context.Database.Migrate();
+                }
             }
         }
-    }
 
-    private static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+    }
 }

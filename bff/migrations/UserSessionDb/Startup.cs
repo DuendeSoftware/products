@@ -4,26 +4,30 @@
 using Duende.Bff.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 
-namespace UserSessionDb;
-
-public class Startup
+namespace UserSessionDb
 {
-    public IConfiguration Configuration { get; }
-
-    public Startup(IConfiguration config) => Configuration = config;
-
-    public void ConfigureServices(IServiceCollection services)
+    public class Startup
     {
-        var cn = Configuration.GetConnectionString("db");
+        public IConfiguration Configuration { get; }
 
-        services.AddDbContext<SessionDbContext>(options =>
+        public Startup(IConfiguration config)
         {
-            //options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
-            options.UseSqlite(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
-        });
-    }
+            Configuration = config;
+        }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            var cn = Configuration.GetConnectionString("db");
+
+            services.AddDbContext<SessionDbContext>(options =>
+            {
+                //options.UseSqlServer(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
+                options.UseSqlite(cn, dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName));
+            });
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+        }
     }
 }

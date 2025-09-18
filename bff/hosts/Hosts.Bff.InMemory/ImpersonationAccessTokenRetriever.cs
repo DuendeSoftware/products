@@ -1,17 +1,21 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.AccessTokenManagement;
+using Duende.Bff;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 
 namespace Bff;
 
-public class ImpersonationAccessTokenRetriever(IAccessTokenRetriever inner) : IAccessTokenRetriever
+public class ImpersonationAccessTokenRetriever : DefaultAccessTokenRetriever
 {
-    public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CancellationToken ct = default)
+    public ImpersonationAccessTokenRetriever(ILogger<ImpersonationAccessTokenRetriever> logger) : base(logger)
     {
-        var result = await inner.GetAccessTokenAsync(context, ct);
+    }
+
+    public override async Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
+    {
+        var result = await base.GetAccessToken(context);
 
         if (result is BearerTokenResult bearerToken)
         {
@@ -26,28 +30,16 @@ public class ImpersonationAccessTokenRetriever(IAccessTokenRetriever inner) : IA
 
                 SubjectToken = bearerToken.AccessToken,
                 SubjectTokenType = OidcConstants.TokenTypeIdentifiers.AccessToken
-            }, cancellationToken: ct);
+            });
             if (exchangeResponse.AccessToken is null)
             {
-                return new AccessTokenRetrievalError
-                {
-                    Error = "Token exchanged failed. Access token is null"
-                };
+                return new NoAccessTokenReturnedError("Token exchanged failed. Access token is null");
             }
-
             if (exchangeResponse.IsError)
             {
-                return new AccessTokenRetrievalError
-                {
-                    Error = exchangeResponse.Error ?? "Failed to get access token",
-                    ErrorDescription = exchangeResponse.ErrorDescription
-                };
+                return new AccessTokenRetrievalError($"Token exchanged failed: {exchangeResponse.ErrorDescription}");
             }
-
-            return new BearerTokenResult
-            {
-                AccessToken = AccessToken.Parse(exchangeResponse.AccessToken)
-            };
+            return new BearerTokenResult(exchangeResponse.AccessToken);
         }
 
         return result;

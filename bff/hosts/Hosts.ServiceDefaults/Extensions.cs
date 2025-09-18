@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,8 +61,7 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation()
-                    .AddMeter(BffMetrics.MeterName);
+                    .AddRuntimeInstrumentation();
             })
             .WithTracing(tracing =>
             {

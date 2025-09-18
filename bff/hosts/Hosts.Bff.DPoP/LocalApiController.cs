@@ -5,13 +5,15 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bff.DPoP;
-
 [Route("local")]
 public class LocalApiController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public LocalApiController(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
+    public LocalApiController(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
 
     [Route("self-contained")]
     [HttpGet]

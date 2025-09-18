@@ -1,60 +1,49 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
-using Duende.Bff.Tests.TestInfra;
-using Duende.Bff.Yarp;
-using Microsoft.AspNetCore.HttpOverrides;
+using Duende.Bff.Tests.TestHosts;
 using Xunit.Abstractions;
 
-namespace Duende.Bff.Tests.Headers;
-
-public class ApiUseForwardedHeaders : BffTestBase
+namespace Duende.Bff.Tests.Headers
 {
-    public ApiUseForwardedHeaders(ITestOutputHelper output) : base(output)
+    public class ApiUseForwardedHeaders : BffIntegrationTestBase
     {
-        Bff.OnConfigureBff += bff => bff.AddRemoteApis();
-
-        Api.OnConfigureApp += app =>
+        public ApiUseForwardedHeaders(ITestOutputHelper output) : base(output)
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor |
-                                   ForwardedHeaders.XForwardedProto |
-                                   ForwardedHeaders.XForwardedHost
-            });
-        };
+            ApiHost.UseForwardedHeaders = true;
+        }
 
-        Bff.OnConfigureApp += app =>
+        [Fact]
+        public async Task bff_host_name_should_propagate_to_api()
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url());
-        };
-    }
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
+            req.Headers.Add("x-csrf", "1");
+            var response = await BffHost.BrowserClient.SendAsync(req);
 
-    [Fact]
-    public async Task bff_host_name_should_propagate_to_api()
-    {
-        await InitializeAsync();
+            response.IsSuccessStatusCode.ShouldBeTrue();
+            var json = await response.Content.ReadAsStringAsync();
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
-        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
+            var host = apiResult.RequestHeaders["Host"].Single();
+            host.ShouldBe("app");
+        }
 
-        var host = apiResult.RequestHeaders["Host"].Single();
-        host.ShouldBe(Bff.Url().Host);
-    }
+        [Fact]
+        public async Task forwarded_host_name_should_not_propagate_to_api()
+        {
+            var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
+            req.Headers.Add("x-csrf", "1");
+            req.Headers.Add("X-Forwarded-Host", "external");
+            var response = await BffHost.BrowserClient.SendAsync(req);
 
-    [Fact]
-    public async Task forwarded_host_name_should_not_propagate_to_api()
-    {
-        await InitializeAsync();
+            response.IsSuccessStatusCode.ShouldBeTrue();
+            var json = await response.Content.ReadAsStringAsync();
+            var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
-        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath,
-            headers: new()
-            {
-                ["x-csrf"] = "1",
-                ["X-Forwarded-Host"] = "external"
-            });
-
-        var host = apiResult.RequestHeaders["Host"].Single();
-        host.ShouldBe(Bff.Url().Host);
+            var host = apiResult.RequestHeaders["Host"].Single();
+            host.ShouldBe("app");
+        }
     }
 }

@@ -10,7 +10,10 @@ public class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
 {
     private readonly string _configScheme;
 
-    public ConfigureJwtBearerOptions(string configScheme) => _configScheme = configScheme;
+    public ConfigureJwtBearerOptions(string configScheme)
+    {
+        _configScheme = configScheme;
+    }
 
     public void PostConfigure(string name, JwtBearerOptions options)
     {
@@ -18,11 +21,11 @@ public class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
         {
             if (options.EventsType != null && !typeof(DPoPJwtBearerEvents).IsAssignableFrom(options.EventsType))
             {
-                throw new InvalidOperationException("EventsType on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
+                throw new Exception("EventsType on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
             }
             if (options.Events != null && !typeof(DPoPJwtBearerEvents).IsAssignableFrom(options.Events.GetType()))
             {
-                throw new InvalidOperationException("Events on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
+                throw new Exception("Events on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
             }
 
             if (options.Events == null && options.EventsType == null)

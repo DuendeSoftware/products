@@ -3,7 +3,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
-using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 
@@ -49,12 +48,12 @@ internal class PersistentUserService
     {
         if (!_state.TryTakeFromJson<ClaimsPrincipalRecord>(nameof(ClaimsPrincipalRecord), out var lite) || lite is null)
         {
-            _logger.FailedToLoadPersistedUser();
+            _logger.LogDebug("Failed to load persisted user.");
             user = null;
             return false;
         }
 
-        _logger.PersistedUserLoaded();
+        _logger.LogDebug("Persisted user loaded.");
 
         user = lite.ToClaimsPrincipal();
         return true;

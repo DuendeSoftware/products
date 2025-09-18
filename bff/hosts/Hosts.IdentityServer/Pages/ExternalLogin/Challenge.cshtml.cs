@@ -7,42 +7,43 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.ExternalLogin;
-
-[AllowAnonymous]
-[SecurityHeaders]
-public class Challenge : PageModel
+namespace IdentityServerHost.Pages.ExternalLogin
 {
-    private readonly IIdentityServerInteractionService _interactionService;
-
-    public Challenge(IIdentityServerInteractionService interactionService) => _interactionService = interactionService;
-
-    public IActionResult OnGet(string scheme, string returnUrl)
+    [AllowAnonymous]
+    [SecurityHeaders]
+    public class Challenge : PageModel
     {
-        if (string.IsNullOrEmpty(returnUrl))
+        private readonly IIdentityServerInteractionService _interactionService;
+
+        public Challenge(IIdentityServerInteractionService interactionService)
         {
-            returnUrl = "~/";
+            _interactionService = interactionService;
         }
 
-        // validate returnUrl - either it is a valid OIDC URL or back to a local page
-        if (Url.IsLocalUrl(returnUrl) == false && _interactionService.IsValidReturnUrl(returnUrl) == false)
+        public IActionResult OnGet(string scheme, string returnUrl)
         {
-            // user might have clicked on a malicious link - should be logged
-            throw new InvalidOperationException("invalid return URL");
-        }
+            if (string.IsNullOrEmpty(returnUrl)) returnUrl = "~/";
 
-        // start challenge and roundtrip the return URL and scheme 
-        var props = new AuthenticationProperties
-        {
-            RedirectUri = Url.Page("/externallogin/callback"),
-
-            Items =
+            // validate returnUrl - either it is a valid OIDC URL or back to a local page
+            if (Url.IsLocalUrl(returnUrl) == false && _interactionService.IsValidReturnUrl(returnUrl) == false)
             {
-                { "returnUrl", returnUrl },
-                { "scheme", scheme },
+                // user might have clicked on a malicious link - should be logged
+                throw new Exception("invalid return URL");
             }
-        };
 
-        return Challenge(props, scheme);
+            // start challenge and roundtrip the return URL and scheme 
+            var props = new AuthenticationProperties
+            {
+                RedirectUri = Url.Page("/externallogin/callback"),
+
+                Items =
+                {
+                    { "returnUrl", returnUrl },
+                    { "scheme", scheme },
+                }
+            };
+
+            return Challenge(props, scheme);
+        }
     }
 }

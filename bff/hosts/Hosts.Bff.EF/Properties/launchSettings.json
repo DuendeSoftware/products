@@ -1,9 +1,9 @@
-{
+﻿{
   "profiles": {
     "Bff.EntityFramework": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": false,
+      "launchBrowser": true,
       "applicationUrl": "https://localhost:5004",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

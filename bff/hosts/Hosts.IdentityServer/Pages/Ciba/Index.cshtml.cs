@@ -7,32 +7,33 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Ciba;
-
-[AllowAnonymous]
-[SecurityHeaders]
-public class IndexModel : PageModel
+namespace IdentityServerHost.Pages.Ciba
 {
-    public BackchannelUserLoginRequest LoginRequest { get; set; }
-
-    private readonly IBackchannelAuthenticationInteractionService _backchannelAuthenticationInteraction;
-    private readonly ILogger<IndexModel> _logger;
-
-    public IndexModel(IBackchannelAuthenticationInteractionService backchannelAuthenticationInteractionService, ILogger<IndexModel> logger)
+    [AllowAnonymous]
+    [SecurityHeaders]
+    public class IndexModel : PageModel
     {
-        _backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
-        _logger = logger;
-    }
+        public BackchannelUserLoginRequest LoginRequest { get; set; }
 
-    public async Task<IActionResult> OnGet(string id)
-    {
-        LoginRequest = await _backchannelAuthenticationInteraction.GetLoginRequestByInternalIdAsync(id);
-        if (LoginRequest == null)
+        private readonly IBackchannelAuthenticationInteractionService _backchannelAuthenticationInteraction;
+        private readonly ILogger<IndexModel> _logger;
+
+        public IndexModel(IBackchannelAuthenticationInteractionService backchannelAuthenticationInteractionService, ILogger<IndexModel> logger)
         {
-            _logger.LogWarning("Invalid backchannel login id {id}", id);
-            return RedirectToPage("/home/error/index");
+            _backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
+            _logger = logger;
         }
 
-        return Page();
+        public async Task<IActionResult> OnGet(string id)
+        {
+            LoginRequest = await _backchannelAuthenticationInteraction.GetLoginRequestByInternalIdAsync(id);
+            if (LoginRequest == null)
+            {
+                _logger.LogWarning("Invalid backchannel login id {id}", id);
+                return RedirectToPage("/home/error/index");
+            }
+
+            return Page();
+        }
     }
 }

@@ -8,10 +8,7 @@ namespace Duende.Bff;
 /// </summary>
 public static class Constants
 {
-    internal static class Middleware
-    {
-        internal const string AntiForgeryMarker = "Duende.Bff.AntiForgery";
-    }
+    internal const string BffMiddlewareMarker = "Duende.Bff.BffMiddlewareMarker";
 
     /// <summary>
     /// Constants used for YARP
@@ -27,15 +24,11 @@ public static class Constants
         /// Name of Anti-forgery check metadata
         /// </summary>
         public const string AntiforgeryCheckMetadata = "Duende.Bff.Yarp.AntiforgeryCheck";
-    }
 
-#pragma warning disable CA1724 // CA1724: Type names should not match namespaces
-    public static class Cookies
-#pragma warning restore CA1724
-    {
-        public const string HostPrefix = "__Host";
-        public const string SecurePrefix = "__Secure";
-        public const string DefaultCookieName = HostPrefix + "-bff-auth";
+        /// <summary>
+        /// Name of optional user token metadata
+        /// </summary>
+        public const string OptionalUserTokenMetadata = "Duende.Bff.Yarp.OptionalUserToken";
     }
 
     /// <summary>
@@ -72,7 +65,6 @@ public static class Constants
         /// <summary>
         /// Silent login path
         /// </summary>
-        [Obsolete("use /login?prompt=create")]
         public const string SilentLogin = "/silent-login";
 
         /// <summary>
@@ -115,11 +107,6 @@ public static class Constants
         /// Used to pass a return URL to login/logout
         /// </summary>
         public const string ReturnUrl = "returnUrl";
-
-        /// <summary>
-        /// Used to pass a prompt value to login
-        /// </summary>
-        public const string Prompt = "prompt";
     }
 
 
@@ -128,13 +115,9 @@ public static class Constants
     /// </summary>
     public static class BffFlags
     {
-        public const string Prompt = "bff-prompt";
+        /// <summary>
+        /// Used to indicate the OIDC request is a silent login
+        /// </summary>
+        public const string SilentLogin = "bff-silent-login";
     }
-
-    public static class HttpClientNames
-    {
-        public const string StaticAssetsClientName = "Duende.Bff.IndexHtmlClient";
-
-    }
-
 }

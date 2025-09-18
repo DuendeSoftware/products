@@ -24,7 +24,7 @@ internal static class Extensions
         // in-memory, code config
         isBuilder.AddInMemoryIdentityResources(Config.IdentityResources);
         isBuilder.AddInMemoryApiScopes(Config.ApiScopes);
-        isBuilder.AddInMemoryClients(Config.Clients);
+        isBuilder.AddClientStore<ServiceDiscoveringClientStore>();
         isBuilder.AddInMemoryApiResources(Config.ApiResources);
         isBuilder.AddExtensionGrantValidator<TokenExchangeGrantValidator>();
 

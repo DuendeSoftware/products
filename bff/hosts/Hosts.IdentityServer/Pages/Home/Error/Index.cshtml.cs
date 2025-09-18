@@ -5,37 +5,38 @@ using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Error;
-
-[AllowAnonymous]
-[SecurityHeaders]
-public class Index : PageModel
+namespace IdentityServerHost.Pages.Error
 {
-    private readonly IIdentityServerInteractionService _interaction;
-    private readonly IWebHostEnvironment _environment;
-
-    public ViewModel View { get; set; }
-
-    public Index(IIdentityServerInteractionService interaction, IWebHostEnvironment environment)
+    [AllowAnonymous]
+    [SecurityHeaders]
+    public class Index : PageModel
     {
-        _interaction = interaction;
-        _environment = environment;
-    }
+        private readonly IIdentityServerInteractionService _interaction;
+        private readonly IWebHostEnvironment _environment;
 
-    public async Task OnGet(string errorId)
-    {
-        View = new ViewModel();
+        public ViewModel View { get; set; }
 
-        // retrieve error details from identityserver
-        var message = await _interaction.GetErrorContextAsync(errorId);
-        if (message != null)
+        public Index(IIdentityServerInteractionService interaction, IWebHostEnvironment environment)
         {
-            View.Error = message;
+            _interaction = interaction;
+            _environment = environment;
+        }
 
-            if (!_environment.IsDevelopment())
+        public async Task OnGet(string errorId)
+        {
+            View = new ViewModel();
+
+            // retrieve error details from identityserver
+            var message = await _interaction.GetErrorContextAsync(errorId);
+            if (message != null)
             {
-                // only show in development
-                message.ErrorDescription = null;
+                View.Error = message;
+
+                if (!_environment.IsDevelopment())
+                {
+                    // only show in development
+                    message.ErrorDescription = null;
+                }
             }
         }
     }

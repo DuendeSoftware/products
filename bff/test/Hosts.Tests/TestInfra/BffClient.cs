@@ -58,20 +58,14 @@ public class BffClient
 
         // Find the first form on the page
         var form = document.QuerySelector("form");
-        if (form == null)
-        {
-            throw new InvalidOperationException("No form found in the provided HTML content.");
-        }
+        if (form == null) throw new InvalidOperationException("No form found in the provided HTML content.");
 
         // Extract all form fields and their values
         var formFields = new Dictionary<string, string>();
         foreach (var element in form.QuerySelectorAll("input"))
         {
             var name = element.GetAttribute("name") ?? throw new InvalidOperationException("input doesn't have a name");
-            if (string.IsNullOrEmpty(name))
-            {
-                continue; // Skip elements without a name attribute
-            }
+            if (string.IsNullOrEmpty(name)) continue; // Skip elements without a name attribute
 
             var value = element.GetAttribute("value") ?? string.Empty;
 
@@ -123,10 +117,6 @@ public class BffClient
         var response = await _client.GetAsync(url);
 
         response.StatusCode.ShouldBe(expectedResponse);
-        if (response.StatusCode == HttpStatusCode.OK)
-        {
-            response.Content.Headers.ContentType!.MediaType.ShouldBe("application/json");
-        }
     }
 
     public record UserClaim

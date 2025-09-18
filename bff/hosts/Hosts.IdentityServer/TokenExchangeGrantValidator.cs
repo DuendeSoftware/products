@@ -11,7 +11,10 @@ public class TokenExchangeGrantValidator : IExtensionGrantValidator
 {
     private readonly ITokenValidator _validator;
 
-    public TokenExchangeGrantValidator(ITokenValidator validator) => _validator = validator;
+    public TokenExchangeGrantValidator(ITokenValidator validator)
+    {
+        _validator = validator;
+    }
 
     // register for urn:ietf:params:oauth:grant-type:token-exchange
     public string GrantType => OidcConstants.GrantTypes.TokenExchange;

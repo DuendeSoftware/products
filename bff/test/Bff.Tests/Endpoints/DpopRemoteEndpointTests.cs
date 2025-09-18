@@ -1,50 +1,42 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.AccessTokenManagement;
+using System.Security.Cryptography;
+using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
-using Duende.Bff.Tests.TestInfra;
-using Duende.Bff.Yarp;
+using Duende.Bff.Tests.TestHosts;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 
-public class DpopRemoteEndpointTests(ITestOutputHelper output) : BffTestBase(output), IAsyncLifetime
+public class DpopRemoteEndpointTests : BffIntegrationTestBase
 {
-    public override async Task InitializeAsync()
+    public DpopRemoteEndpointTests(ITestOutputHelper output) : base(output)
     {
-        var idSrvClient = IdentityServer.AddClient(The.ClientId, Bff.Url());
+        var rsaKey = new RsaSecurityKey(RSA.Create(2048));
+        var jsonWebKey = JsonWebKeyConverter.ConvertFromRSASecurityKey(rsaKey);
+        jsonWebKey.Alg = "PS256";
+        var jwk = JsonSerializer.Serialize(jsonWebKey);
 
-        idSrvClient.RequireDPoP = true;
-
-        Bff.OnConfigureBff += bff => bff.AddRemoteApis();
-        Bff.OnConfigureApp += app =>
+        BffHost.OnConfigureServices += svcs =>
         {
-            app.MapRemoteBffApiEndpoint(The.Path, Api.Url())
-                .WithAccessToken(RequiredTokenType.Client);
-        };
-
-        await base.InitializeAsync();
-        Bff.BffOptions.DPoPJsonWebKey = The.DPoPJsonWebKey;
-        Bff.BffOptions.ConfigureOpenIdConnectDefaults = opt =>
-        {
-            opt.BackchannelHttpHandler = Internet;
-            The.DefaultOpenIdConnectConfiguration(opt);
+            svcs.PostConfigure<BffOptions>(opts =>
+            {
+                opts.DPoPJsonWebKey = jwk;
+            });
         };
     }
 
     [Fact]
-    public async Task Can_login_with_dpop_enabled() => await Bff.BrowserClient.Login()
-        .CheckHttpStatusCode();
-
-    [Fact]
-    public async Task When_calling_api_endpoint_with_dpop_enabled_then_dpop_headers_are_sent()
+    public async Task test_dpop()
     {
-        ApiCallDetails callToApi = await Bff.BrowserClient.CallBffHostApi(
-            url: Bff.Url(The.PathAndSubPath)
+        ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
+            url: BffHost.Url("/api_client/test")
         );
 
-        callToApi.RequestHeaders["DPoP"].First().ShouldNotBeNullOrEmpty();
-        callToApi.RequestHeaders["Authorization"].First().StartsWith("DPoP ").ShouldBeTrue();
+        apiResult.RequestHeaders["DPoP"].First().ShouldNotBeNullOrEmpty();
+        apiResult.RequestHeaders["Authorization"].First().StartsWith("DPoP ").ShouldBeTrue();
     }
 }

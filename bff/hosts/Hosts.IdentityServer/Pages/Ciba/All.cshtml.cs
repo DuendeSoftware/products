@@ -8,22 +8,29 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentityServerHost.Pages.Ciba;
-
-[SecurityHeaders]
-[Authorize]
-public class AllModel : PageModel
+namespace IdentityServerHost.Pages.Ciba
 {
-    public IEnumerable<BackchannelUserLoginRequest> Logins { get; set; }
+    [SecurityHeaders]
+    [Authorize]
+    public class AllModel : PageModel
+    {
+        public IEnumerable<BackchannelUserLoginRequest> Logins { get; set; }
 
-    [BindProperty, Required]
-    public string Id { get; set; }
-    [BindProperty, Required]
-    public string Button { get; set; }
+        [BindProperty, Required]
+        public string Id { get; set; }
+        [BindProperty, Required]
+        public string Button { get; set; }
 
-    private readonly IBackchannelAuthenticationInteractionService _backchannelAuthenticationInteraction;
+        private readonly IBackchannelAuthenticationInteractionService _backchannelAuthenticationInteraction;
 
-    public AllModel(IBackchannelAuthenticationInteractionService backchannelAuthenticationInteractionService) => _backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
+        public AllModel(IBackchannelAuthenticationInteractionService backchannelAuthenticationInteractionService)
+        {
+            _backchannelAuthenticationInteraction = backchannelAuthenticationInteractionService;
+        }
 
-    public async Task OnGet() => Logins = await _backchannelAuthenticationInteraction.GetPendingLoginRequestsForCurrentUserAsync();
+        public async Task OnGet()
+        {
+            Logins = await _backchannelAuthenticationInteraction.GetPendingLoginRequestsForCurrentUserAsync();
+        }
+    }
 }

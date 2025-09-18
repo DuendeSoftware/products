@@ -3,19 +3,20 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Bff.EF;
-
-[Route("local")]
-public class LocalApiController : ControllerBase
+namespace Bff.EF
 {
-    public IActionResult Get()
+    [Route("local")]
+    public class LocalApiController : ControllerBase
     {
-        var data = new
+        public IActionResult Get()
         {
-            Message = "Hello from local API",
-            User = User.FindFirst("name")?.Value ?? User.FindFirst("sub").Value
-        };
+            var data = new
+            {
+                Message = "Hello from local API",
+                User = User.FindFirst("name")?.Value ?? User.FindFirst("sub").Value
+            };
 
-        return Ok(data);
+            return Ok(data);
+        }
     }
 }

@@ -1,20 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
     <AssemblyName>Duende.BFF.Yarp</AssemblyName>
     <Description>Backend for frontend (BFF) host for ASP.NET Core (YARP integration)</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Yarp.ReverseProxy" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Bff\Bff.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <InternalsVisibleTo Include="Duende.Bff.Tests" />
-  </ItemGroup>
 </Project>

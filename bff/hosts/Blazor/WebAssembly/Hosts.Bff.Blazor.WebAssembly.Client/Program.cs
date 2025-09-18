@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-builder.Services.AddSingleton<WeatherHttpClient>();
 
 builder.Services
     .AddBffBlazorClient() // Provides auth state provider that polls the /bff/user endpoint
