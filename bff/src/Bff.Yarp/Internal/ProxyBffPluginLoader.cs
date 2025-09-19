@@ -4,13 +4,26 @@
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.Bff.Yarp.Internal;
 
-internal sealed class ProxyBffPluginLoader(IOptionsMonitor<ProxyConfiguration> proxyConfigMonitor) : IBffPluginLoader
+/// <summary>
+/// Loads the proxy configuration from the IConfiguration. 
+/// </summary>
+/// <param name="config"></param>
+internal sealed class ProxyBffPluginLoader(
+
+    // This line has been commented out for issue: https://github.com/dotnet/runtime/issues/119883
+    //IOptionsMonitor<ProxyConfiguration> proxyConfigMonitor
+
+    // Instead, we read directly from IConfiguration, which is updated when the config file changes.
+    [FromKeyedServices(ServiceProviderKeys.ProxyConfigurationKey)] IConfiguration? config = null
+    ) : IBffPluginLoader
 {
-    private ProxyConfiguration Current => proxyConfigMonitor.CurrentValue;
+    //private ProxyConfiguration Current => proxyConfigMonitor.CurrentValue;
+    private ProxyConfiguration Current => config?.Get<ProxyConfiguration>() ?? new ProxyConfiguration();
 
     public IBffPlugin? LoadExtension(BffFrontendName name)
     {

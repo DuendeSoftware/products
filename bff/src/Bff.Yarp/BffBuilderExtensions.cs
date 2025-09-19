@@ -11,6 +11,11 @@ using Yarp.ReverseProxy.Configuration;
 
 namespace Duende.Bff.Yarp;
 
+internal class ServiceProviderKeys
+{
+    internal const string ProxyConfigurationKey = "Duende.BFF.Configuration.ProxyConfiguration";
+}
+
 /// <summary>
 /// YARP related DI extension methods
 /// </summary>
@@ -27,7 +32,14 @@ public static class BffBuilderExtensions
 
         builder.RegisterConfigurationLoader((services, config) =>
         {
-            services.Configure<ProxyConfiguration>(config);
+            // This line is commented out because of issue:
+            // https://github.com/dotnet/runtime/issues/119883
+            //services.Configure<ProxyConfiguration>(config);
+
+            // As a workaround, we're registering the config as a singleton
+            // then loading the singleton when the config reloads. 
+            services.AddKeyedSingleton(ServiceProviderKeys.ProxyConfigurationKey, config);
+
         });
 
         builder.Services.Configure<BffOptions>(opt =>
