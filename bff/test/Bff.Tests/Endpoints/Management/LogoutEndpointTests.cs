@@ -44,8 +44,8 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
     {
         await BffHost.BffLoginAsync("alice", "sid123");
 
-        Func<Task> f = () => BffHost.BffLogoutAsync();
-        await f.ShouldThrowAsync<Exception>();
+        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout"));
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         (await BffHost.GetIsUserLoggedInAsync()).ShouldBeTrue();
     }
@@ -148,9 +148,7 @@ public class LogoutEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
     {
         await BffHost.BffLoginAsync("alice", "sid123");
 
-        Func<Task> f = () => BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout") + "?sid=sid123&returnUrl=https://foo");
-        var exception = await f.ShouldThrowAsync<Exception>();
-
-        exception.Message.ShouldContain("returnUrl");
+        var response = await BffHost.BrowserClient.GetAsync(BffHost.Url("/bff/logout") + "?sid=sid123&returnUrl=https://foo");
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }

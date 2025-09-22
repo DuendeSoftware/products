@@ -182,7 +182,7 @@ public class BffHost : GenericHost
                     }
                     else
                     {
-                        throw new Exception("Invalid LocalApiResponseStatus");
+                        throw new InvalidOperationException("Invalid LocalApiResponseStatus");
                     }
                 })
                 .AsBffApiEndpoint();
