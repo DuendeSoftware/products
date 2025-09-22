@@ -31,13 +31,13 @@ public class OptionsMonitorExplorationTests
         builder.Configuration.Sources.Add(customConfigurationSource);
 
         // Important: I'm binding two classes to the same IConfiguration instance
-        // The different classes are mapped to the same data. 
+        // The different classes are mapped to the same data.
         builder.Services.Configure<MyConfig>(builder.Configuration);
         builder.Services.Configure<MyConfig2>(builder.Configuration);
 
         using var host = builder.Build();
 
-        // Get a monitor for both classes. 
+        // Get a monitor for both classes.
         var monitor1 = host.Services.GetRequiredService<IOptionsMonitor<MyConfig>>();
         var monitor2 = host.Services.GetRequiredService<IOptionsMonitor<MyConfig2>>();
 
@@ -50,7 +50,7 @@ public class OptionsMonitorExplorationTests
             countMyConfig2 = monitor2.CurrentValue.Items.Count;
         });
 
-        // Now we load a single data item and trigger a (single) reload. 
+        // Now we load a single data item and trigger a (single) reload.
         provider.LoadDataWithOneItem();
         provider.Reload();
         Task.Delay(200);
@@ -73,12 +73,12 @@ public class OptionsMonitorExplorationTests
         // or the first reload (which also updates both IOptionsMonitors)
         countMyConfig2.ShouldBe(1, "I would have expected this to be 2");
 
-        // A second reload now causes both providers to be reloaded. 
+        // A second reload now causes both providers to be reloaded.
         customConfigurationSource.Provider.Reload();
 
         Task.Delay(200);
 
-        // and now the optionmontors for BOTH are updated. 
+        // and now the options monitors for BOTH are updated.
         countMyConfig1.ShouldBe(2);
         countMyConfig2.ShouldBe(2);
     }
@@ -147,11 +147,11 @@ public class ConfigBindingTests(ITestOutputHelper output) : BffTestBase(output)
     /// weren't loaded. After quite some investigation, I found that this is due to
     /// the IOptionsMonitor for the second frontend not being updated when the configuration
     /// changes. This is inconsistent behavior, because the first frontend's IOptionsMonitor
-    /// 
+    ///
     /// the underlying issue is this one:
     /// https://github.com/dotnet/runtime/issues/119883
     ///
-    /// A workaround is implemented, which means loading the data directly from a single configuration provider. 
+    /// A workaround is implemented, which means loading the data directly from a single configuration provider.
     /// </summary>
     /// <returns></returns>
     [Fact]
@@ -172,7 +172,7 @@ public class ConfigBindingTests(ITestOutputHelper output) : BffTestBase(output)
                                                                             "app1": {
                                                                               "StaticAssetsUrl": "https://localhost:5173/",
                                                                               "MatchingHostHeader": "app1.localhost:7255",
-                                                                              "remoteApis": [ 
+                                                                              "remoteApis": [
                                                                                 {
                                                                                   "pathMatch": "/api1",
                                                                                   "targetUri": "https://localhost:7200/",
@@ -195,7 +195,7 @@ public class ConfigBindingTests(ITestOutputHelper output) : BffTestBase(output)
                                                                             "app2": {
                                                                               "StaticAssetsUrl": "https://localhost:5173/",
                                                                               "MatchingHostHeader": "app1.localhost:7255",
-                                                                              "remoteApis": [ 
+                                                                              "remoteApis": [
                                                                                 {
                                                                                   "pathMatch": "/api1",
                                                                                   "targetUri": "https://localhost:7200/",
@@ -260,7 +260,7 @@ public class MergedJsonConfigurationSource : IConfigurationSource
 
     public IConfigurationProvider Build(IConfigurationBuilder builder) => new MergedJsonConfigurationProvider(this);
 }
-public class MergedJsonConfigurationProvider : ConfigurationProvider, IDisposable
+public class MergedJsonConfigurationProvider(ITestOutputHelper testOutputHelper) : ConfigurationProvider, IDisposable
 {
     private readonly MergedJsonConfigurationSource _source;
     private readonly FileSystemWatcher _watcher;
@@ -312,7 +312,7 @@ public class MergedJsonConfigurationProvider : ConfigurationProvider, IDisposabl
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[Warning] Could not read or parse config file '{Path.GetFileName(file)}'. Skipping. Error: {ex.Message}");
+                    testOutputHelper.WriteLine($"[Warning] Could not read or parse config file '{Path.GetFileName(file)}'. Skipping. Error: {ex.Message}");
                 }
             }
 
@@ -322,7 +322,7 @@ public class MergedJsonConfigurationProvider : ConfigurationProvider, IDisposabl
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Error] Could not load merged configuration. Error: {ex.Message}");
+            testOutputHelper.WriteLine($"[Error] Could not load merged configuration. Error: {ex.Message}");
             Data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         }
 
