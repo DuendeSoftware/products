@@ -135,6 +135,7 @@ public class OptionsMonitorExplorationTests
 
 public class ConfigBindingTests(ITestOutputHelper output) : BffTestBase(output)
 {
+    private readonly ITestOutputHelper _output = output;
 
 
     /// <summary>
@@ -164,7 +165,7 @@ public class ConfigBindingTests(ITestOutputHelper output) : BffTestBase(output)
 
 
         var config = new ConfigurationBuilder()
-            .Add(new MergedJsonConfigurationSource(folder))
+            .Add(new MergedJsonConfigurationSource(folder, _output))
             .Build();
         await File.WriteAllTextAsync(Path.Combine(folder, "app1.json_"), """
                                                                         {
@@ -252,21 +253,21 @@ public class ConfigBindingTests(ITestOutputHelper output) : BffTestBase(output)
 /// A custom configuration source that reads all .json files from a directory,
 /// merges them, and watches for changes.
 /// </summary>
-public class MergedJsonConfigurationSource : IConfigurationSource
+public class MergedJsonConfigurationSource(string directoryPath, ITestOutputHelper output) : IConfigurationSource
 {
-    public string DirectoryPath { get; }
+    public string DirectoryPath { get; } = directoryPath;
 
-    public MergedJsonConfigurationSource(string directoryPath) => DirectoryPath = directoryPath;
-
-    public IConfigurationProvider Build(IConfigurationBuilder builder) => new MergedJsonConfigurationProvider(this);
+    public IConfigurationProvider Build(IConfigurationBuilder builder) => new MergedJsonConfigurationProvider(output, this);
 }
-public class MergedJsonConfigurationProvider(ITestOutputHelper testOutputHelper) : ConfigurationProvider, IDisposable
+public class MergedJsonConfigurationProvider : ConfigurationProvider, IDisposable
 {
+    private readonly ITestOutputHelper _testOutputHelper;
     private readonly MergedJsonConfigurationSource _source;
     private readonly FileSystemWatcher _watcher;
 
-    public MergedJsonConfigurationProvider(MergedJsonConfigurationSource source)
+    public MergedJsonConfigurationProvider(ITestOutputHelper testOutputHelper, MergedJsonConfigurationSource source)
     {
+        _testOutputHelper = testOutputHelper;
         _source = source;
         _watcher = new FileSystemWatcher(_source.DirectoryPath)
         {
@@ -312,7 +313,7 @@ public class MergedJsonConfigurationProvider(ITestOutputHelper testOutputHelper)
                 }
                 catch (Exception ex)
                 {
-                    testOutputHelper.WriteLine($"[Warning] Could not read or parse config file '{Path.GetFileName(file)}'. Skipping. Error: {ex.Message}");
+                    _testOutputHelper.WriteLine($"[Warning] Could not read or parse config file '{Path.GetFileName(file)}'. Skipping. Error: {ex.Message}");
                 }
             }
 
@@ -322,7 +323,7 @@ public class MergedJsonConfigurationProvider(ITestOutputHelper testOutputHelper)
         }
         catch (Exception ex)
         {
-            testOutputHelper.WriteLine($"[Error] Could not load merged configuration. Error: {ex.Message}");
+            _testOutputHelper.WriteLine($"[Error] Could not load merged configuration. Error: {ex.Message}");
             Data = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         }
 
