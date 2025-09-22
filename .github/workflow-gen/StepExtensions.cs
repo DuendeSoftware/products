@@ -40,9 +40,19 @@ public static class StepExtensions
             .Name("Dotnet devcerts")
             .Run("dotnet dev-certs https --trust");
 
+    public static void CachePlaywrightAssets(this Job job)
+        => job.Step("playwright-cache")
+            .Name("Cache Playwright assets")
+            .Uses("actions/cache@v4")
+            .With(
+                ("path", "~/.cache/ms-playwright"),
+                ("key", "playwright-${{ runner.os }}-${{ hashFiles('**/Hosts.Tests.csproj') }}"),
+                ("restore-keys", "playwright-${{ runner.os }}-"));
+
     public static void StepInstallPlayWright(this Job job)
         => job.Step()
             .Name("Install Playwright")
+            .If("steps.playwright-cache.outputs.cache-hit != 'true'")
             .Run("pwsh test/Hosts.Tests/bin/Release/net9.0/playwright.ps1 install --with-deps");
 
     public static void StepToolRestore(this Job job)
