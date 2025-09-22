@@ -48,7 +48,7 @@ internal static partial class LogMessages
     public static partial void SilentLoginEndpointRefererHeaderMissing(this ILogger logger, LogLevel level);
 
     [LoggerMessage(
-        Message = $"Referer {OTelParameters.Referer} not in allowed referers: {{AllowedReferers}}")]
+        Message = $"Referer {{{OTelParameters.Referer}}} not in allowed referers: {{AllowedReferers}}")]
     public static partial void SilentLoginEndpointRefererNotAllowed(this ILogger logger, LogLevel level, string referer, string allowedReferers);
 
 
@@ -442,7 +442,7 @@ internal static partial class LogMessages
     public static partial void ErrorWhileProcessingFrontendChanges(this ILogger logger, LogLevel logLevel, Exception ex);
 
     [LoggerMessage(
-        message: $"Failed to add frontend change to queue")]
+        message: $"Failed to add frontend change to {{{OTelParameters.Frontend}}} to queue")]
     public static partial void FailedToAddFrontendToQueue(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
 
 
