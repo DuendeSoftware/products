@@ -14,13 +14,13 @@ public class LicenseUsageDiagnosticEntryTests
     [Fact]
     public async Task Handles_Single_Value_For_Each_Entry()
     {
-        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), new NullLogger<LicenseAccessor>());
+        var licenseAccessor = new LicenseAccessor(() => null, new NullLogger<LicenseAccessor>());
         var licenseUsageTracker = new LicenseUsageTracker(licenseAccessor, new NullLoggerFactory());
         var subject = new LicenseUsageDiagnosticEntry(licenseUsageTracker);
 
         licenseUsageTracker.ClientUsed("Client1");
         licenseUsageTracker.IssuerUsed("https://localhost:50001");
-        licenseUsageTracker.FeatureUsed(LicenseFeature.KeyManagement);
+        licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.KeyManagement);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
 
@@ -35,7 +35,7 @@ public class LicenseUsageDiagnosticEntryTests
     [Fact]
     public async Task Handles_Multiple_Values_For_Each_Entry()
     {
-        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), new NullLogger<LicenseAccessor>());
+        var licenseAccessor = new LicenseAccessor(() => null, new NullLogger<LicenseAccessor>());
         var licenseUsageTracker = new LicenseUsageTracker(licenseAccessor, new NullLoggerFactory());
         var subject = new LicenseUsageDiagnosticEntry(licenseUsageTracker);
 
@@ -43,8 +43,8 @@ public class LicenseUsageDiagnosticEntryTests
         licenseUsageTracker.ClientUsed("Client2");
         licenseUsageTracker.IssuerUsed("https://localhost:50001");
         licenseUsageTracker.IssuerUsed("https://localhost:50002");
-        licenseUsageTracker.FeatureUsed(LicenseFeature.KeyManagement);
-        licenseUsageTracker.FeatureUsed(LicenseFeature.ResourceIsolation);
+        licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.KeyManagement);
+        licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.ResourceIsolation);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
 
@@ -59,7 +59,7 @@ public class LicenseUsageDiagnosticEntryTests
     [Fact]
     public async Task EmptySummary_ContainsNoValues()
     {
-        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), new NullLogger<LicenseAccessor>());
+        var licenseAccessor = new LicenseAccessor(() => null, new NullLogger<LicenseAccessor>());
         var licenseUsageTracker = new LicenseUsageTracker(licenseAccessor, new NullLoggerFactory());
         var subject = new LicenseUsageDiagnosticEntry(licenseUsageTracker);
 
@@ -76,7 +76,7 @@ public class LicenseUsageDiagnosticEntryTests
     [Fact]
     public async Task Handles_Duplicate_Values()
     {
-        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), new NullLogger<LicenseAccessor>());
+        var licenseAccessor = new LicenseAccessor(() => null, new NullLogger<LicenseAccessor>());
         var licenseUsageTracker = new LicenseUsageTracker(licenseAccessor, new NullLoggerFactory());
         var subject = new LicenseUsageDiagnosticEntry(licenseUsageTracker);
 
@@ -84,8 +84,8 @@ public class LicenseUsageDiagnosticEntryTests
         licenseUsageTracker.ClientUsed("Client1");
         licenseUsageTracker.IssuerUsed("https://localhost:50001");
         licenseUsageTracker.IssuerUsed("https://localhost:50001");
-        licenseUsageTracker.FeatureUsed(LicenseFeature.KeyManagement);
-        licenseUsageTracker.FeatureUsed(LicenseFeature.KeyManagement);
+        licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.KeyManagement);
+        licenseUsageTracker.FeatureUsed(IdentityServerLicenseFeature.KeyManagement);
 
         var result = await DiagnosticEntryTestHelper.WriteEntryToJson(subject);
 
@@ -105,7 +105,7 @@ public class LicenseUsageDiagnosticEntryTests
         {
             LicenseKey = "eyJhbGciOiJQUzI1NiIsImtpZCI6IklkZW50aXR5U2VydmVyTGljZW5zZWtleS83Y2VhZGJiNzgxMzA0NjllODgwNjg5MTAyNTQxNGYxNiIsInR5cCI6ImxpY2Vuc2Urand0In0.eyJpc3MiOiJodHRwczovL2R1ZW5kZXNvZnR3YXJlLmNvbSIsImF1ZCI6IklkZW50aXR5U2VydmVyIiwiaWF0IjoxNzMwNDE5MjAwLCJleHAiOjE3MzE2Mjg4MDAsImNvbXBhbnlfbmFtZSI6Il90ZXN0IiwiY29udGFjdF9pbmZvIjoiam9lQGR1ZW5kZXNvZnR3YXJlLmNvbSIsImVkaXRpb24iOiJFbnRlcnByaXNlIiwiaWQiOiI2Njg1In0.UgguIFVBciR8lpTF5RuM3FNcIm8m8wGR4Mt0xOCgo-XknFwXBpxOfr0zVjciGboteOl9AFtrqZLopEjsYXGFh2dkl5AzRyq--Ai5y7aezszlMpq8SkjRRCeBUYLNnEO41_YnfjYhNrcmb0Jx9wMomCv74vU3f8Hulz1ppWtoL-MVcGq0fhv_KOCP49aImCgiawPJ6a_bfs2C1QLpj-GG411OhdyrO9QLIH_We4BEvRUyajraisljB1VQzC8Q6188Mm_BLwl4ZENPaoNE4egiqTAuoTS5tb1l732-CGZwpGuU80NSpJbrUc6jd3rVi_pNf_1rH-O4Xt0HRCWiNCDYgg"
         };
-        var licenseAccessor = new LicenseAccessor(options, new NullLogger<LicenseAccessor>());
+        var licenseAccessor = new LicenseAccessor(() => options.LicenseKey, new NullLogger<LicenseAccessor>());
         var licenseUsageTracker = new LicenseUsageTracker(licenseAccessor, new NullLoggerFactory());
         var subject = new LicenseUsageDiagnosticEntry(licenseUsageTracker);
 
