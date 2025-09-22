@@ -7,8 +7,8 @@
     [System.Runtime.CompilerServices.RequiredMember]
     public class AccessTokenRetrievalContext
     {
-        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
-            "your compiler.", true)]
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public AccessTokenRetrievalContext() { }
         [System.Runtime.CompilerServices.RequiredMember]
