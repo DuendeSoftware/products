@@ -10,6 +10,8 @@
     <MinVerMinimumMajorMinor>2.3</MinVerMinimumMajorMinor>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
     <IsBffProject>true</IsBffProject>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+
   </PropertyGroup>
 
 </Project>

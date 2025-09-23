@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AssemblyName>Duende.BFF</AssemblyName>
     <Description>Backend for frontend (BFF) host for ASP.NET Core</Description>
