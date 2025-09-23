@@ -78,7 +78,7 @@ internal static class HostingExtensions
                 }
             })
             .AddTestUsers(TestUsers.Users)
-            // this adds the config data from DB (clients, resources, CORS)
+            // this adds the config data from DB (clients, resources, CORS, dynamic providers)
             .AddConfigurationStore(options =>
             {
                 options.ConfigureDbContext = b =>
@@ -98,31 +98,8 @@ internal static class HostingExtensions
             .AddServerSideSessions()
             .AddLicenseSummary();
 
-        // Adds configuration to use Duende's Demo IdentityServer instance.
-        builder.Services.AddAuthentication()
-            .AddOpenIdConnect("oidc", "Duende Demo", options =>
-            {
-                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-                options.SignOutScheme = IdentityServerConstants.SignoutScheme;
-                options.SaveTokens = true;
-
-                options.Authority = "https://demo.duendesoftware.com";
-                options.ClientId = "interactive.confidential";
-                options.ClientSecret = "secret";
-                options.ResponseType = "code";
-
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    NameClaimType = "name",
-                    RoleClaimType = "role"
-                };
-
-                options.GetClaimsFromUserInfoEndpoint = true;
-
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-
-            });
+        // Add authentication
+        builder.Services.AddAuthentication();
 
         // this adds the necessary config for the simple admin/config pages
         {

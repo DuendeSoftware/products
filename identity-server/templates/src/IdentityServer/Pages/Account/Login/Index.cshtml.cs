@@ -197,7 +197,12 @@ public class Index : PageModel
 
                 if (!local)
                 {
-                    View.ExternalProviders = [new ViewModel.ExternalProvider(authenticationScheme: context.IdP, displayName: scheme.DisplayName)];
+                    View.ExternalProviders = [
+                        new ViewModel.ExternalProvider(
+                            authenticationScheme: context.IdP,
+                            displayName: scheme.DisplayName,
+                            iconUrl: null)
+                    ];
                 }
             }
 
@@ -211,7 +216,8 @@ public class Index : PageModel
             .Select(x => new ViewModel.ExternalProvider
             (
                 authenticationScheme: x.Name,
-                displayName: x.DisplayName ?? x.Name
+                displayName: x.DisplayName ?? x.Name,
+                iconUrl: null
             )).ToList();
 
         var dynamicSchemes = (await _identityProviderStore.GetAllSchemeNamesAsync())
@@ -219,8 +225,16 @@ public class Index : PageModel
             .Select(x => new ViewModel.ExternalProvider
             (
                 authenticationScheme: x.Scheme,
-                displayName: x.DisplayName ?? x.Scheme
-            ));
+                displayName: x.DisplayName ?? x.Scheme,
+                iconUrl: null
+            ))
+            .ToList();
+
+        foreach (var dynamicScheme in dynamicSchemes)
+        {
+            var identityProvider = await _identityProviderStore.GetBySchemeAsync(dynamicScheme.AuthenticationScheme);
+            dynamicScheme.IconUrl = identityProvider?.Properties["IconUrl"];
+        }
 
         providers.AddRange(dynamicSchemes);
 

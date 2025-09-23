@@ -13,13 +13,15 @@ public class ViewModel
 
     public class ExternalProvider
     {
-        public ExternalProvider(string authenticationScheme, string? displayName = null)
+        public ExternalProvider(string authenticationScheme, string? displayName = null, string? iconUrl = null)
         {
             AuthenticationScheme = authenticationScheme;
             DisplayName = displayName;
+            IconUrl = iconUrl;
         }
 
         public string? DisplayName { get; set; }
+        public string? IconUrl { get; set; }
         public string AuthenticationScheme { get; set; }
     }
 }

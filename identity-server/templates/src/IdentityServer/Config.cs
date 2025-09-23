@@ -17,5 +17,4 @@ public static class Config
             new IdentityResources.Phone(),
             new IdentityResources.Address(),
         ];
-
 }
