@@ -28,4 +28,8 @@
     <None Include="compilerconfig.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="Pages\Admin\Components\Federation\Default.cshtml" />
+  </ItemGroup>
+
 </Project>

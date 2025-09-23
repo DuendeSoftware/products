@@ -1,0 +1,119 @@
+@page
+@model IdentityServerTemplate.Pages.Admin.Federation.NewModel
+
+<div class="container-fluid mb-4 px-0">
+    <header class="pb-3 mb-4 border-bottom">
+        <h1 class=" fw-bold">
+            <i class="bi bi-laptop text-brand"></i>
+            Create New External Provider
+        </h1>
+        <span class="text-muted">
+            Setup the configuration for a new external provider.
+        </span>
+    </header>
+</div>
+
+<div class="clients-page">
+    @if (Model.Created)
+    {
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Success!</h4>
+            <p>
+                External provider `<code>@Model.InputModel.Scheme</code>` created!
+            </p>
+            <hr />
+            <p class="mb-0">Click here to <a asp-page="/Admin/Federation/Edit" asp-route-scheme="@Model.InputModel.Scheme">continue</a>.</p>
+        </div>
+    }
+    else
+    {
+        <partial name="_ValidationSummary" />
+        <form method="post">
+            <input type="hidden" asp-for="@Model.InputModel.Type" />
+
+            <div class="form-group mb-3 text-start">
+
+                <a class="btn btn-sm btn-outline-secondary" asp-page="/Admin/Federation/Index">
+                    <i class="bi bi-chevron-double-left"></i>
+                    Go Back
+                </a>
+
+                <button class="btn btn-sm btn-brand" type="submit">
+                    <i class="bi bi-floppy"></i>
+                    Create External Provider
+                </button>
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-md-6">
+
+                    <div class="card text-bg-light">
+                        <h5 class="card-header">
+                            <i class="bi bi-gear"></i>
+                            External Provider Settings
+                        </h5>
+                        <div class="card-body pt-2">
+
+                          <small class="mb-2 text-body-secondary d-block fst-italic">
+                            TODO
+                          </small>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.Scheme" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.Scheme" autofocus />
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.Name" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.Name" autofocus />
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label class="form-label">
+                              <input asp-for="@Model.InputModel.Enabled" type="checkbox" />
+
+                              Enabled?
+                            </label>
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.Authority" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.Authority" />
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.ClientId" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.ClientId" />
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.ClientSecret" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.ClientSecret" />
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.Scope" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.Scope" />
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.ResponseType" class="form-label"></label>
+                            <select class="form-control form-control-sm readonly disabled" asp-for="@Model.InputModel.ResponseType"d>
+                              <option value="code">code</option>
+                            </select>
+                          </div>
+
+                          <div class="form-group mb-3">
+                            <label asp-for="@Model.InputModel.IconUrl" class="form-label"></label>
+                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.IconUrl" autofocus />
+                          </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+    }
+</div>

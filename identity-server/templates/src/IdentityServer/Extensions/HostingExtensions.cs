@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Duende.IdentityServer;
 using IdentityServerTemplate.Pages.Admin.ApiScopes;
 using IdentityServerTemplate.Pages.Admin.Clients;
+using IdentityServerTemplate.Pages.Admin.Federation;
 using IdentityServerTemplate.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -112,6 +113,7 @@ internal static class HostingExtensions
             builder.Services.AddTransient<ClientRepository>();
             builder.Services.AddTransient<IdentityScopeRepository>();
             builder.Services.AddTransient<ApiScopeRepository>();
+            builder.Services.AddTransient<FederationRepository>();
         }
 
         // this adds the necessary config for the portal page

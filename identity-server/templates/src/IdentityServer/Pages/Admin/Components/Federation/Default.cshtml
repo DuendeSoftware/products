@@ -1,0 +1,17 @@
+@model IdentityServerTemplate.Pages.Admin.Components.Federation.FederationViewModel
+
+<div class="card h-100 text-bg-light">
+    <h5 class="card-header">
+        <i class="bi bi-hourglass-split me-2"></i>
+        Federation Gateway
+        <a asp-page="/Admin/Federation/Index" class="float-end">
+            <i class="bi bi-binoculars"></i>
+            <span class="d-none">Manage External Providers</span>
+        </a>
+    </h5>
+    <div class="card-body">
+        <p class="display-2 mb-0 text-center">
+            @Model.Count
+        </p>
+    </div>
+</div>

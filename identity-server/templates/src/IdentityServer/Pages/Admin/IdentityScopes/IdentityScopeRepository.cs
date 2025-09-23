@@ -12,6 +12,7 @@ public class IdentityScopeSummaryModel
     [Required]
     [DisplayName("Name")]
     public string Name { get; set; } = default!;
+
     [DisplayName("Display Name")]
     public string? DisplayName { get; set; }
 }
