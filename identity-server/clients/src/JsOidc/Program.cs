@@ -5,7 +5,7 @@ using Microsoft.AspNetCore;
 
 namespace JsOidc;
 
-#pragma warning disable ASPDEPR008 // Ignore IWebHost deprectation warnings
+#pragma warning disable ASPDEPR008 // Ignore IWebHost deprecation warnings
 
 public class Program
 {

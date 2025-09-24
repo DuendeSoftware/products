@@ -16,7 +16,10 @@
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.SqlServer" />
 
-    <!-- Add reference to transitive KubernetesClient to fix fulnerability issues -->
+    <!--
+      Aspire.Hosting.AppHost 9.4.2 has a transitive dependency on KubernetesClient 17.0.4 which has a vulnerability.
+      Todo: Remove this when Aspire.Hosting.AppHost is patched.
+    -->
     <PackageReference Include="KubernetesClient" />
   </ItemGroup>
 
