@@ -13,30 +13,30 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
+
+    <!--
+      Aspire.Hosting.AppHost 9.4.2 has a transitive dependency on KubernetesClient 17.0.4 which has a vulnerability.
+      Todo: Remove this when Aspire.Hosting.AppHost is patched.
+    -->
+    <PackageReference Include="KubernetesClient" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj"
-      IsAspireProjectResource="false" />
+    <ProjectReference Include="..\Hosts.ServiceDefaults\Hosts.ServiceDefaults.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\migrations\UserSessionDb\UserSessionDb.csproj" />
     <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi.DPoP\Hosts.RemoteApi.DPoP.csproj" />
-    <ProjectReference
-      Include="..\RemoteApis\Hosts.RemoteApi.Isolated\Hosts.RemoteApi.Isolated.csproj" />
+    <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi.Isolated\Hosts.RemoteApi.Isolated.csproj" />
     <ProjectReference Include="..\RemoteApis\Hosts.RemoteApi\Hosts.RemoteApi.csproj" />
     <ProjectReference Include="..\Hosts.Bff.DPoP\Hosts.Bff.DPoP.csproj" />
     <ProjectReference Include="..\Hosts.Bff.EF\Hosts.Bff.EF.csproj" />
     <ProjectReference Include="..\Hosts.Bff.InMemory\Hosts.Bff.InMemory.csproj" />
-    <ProjectReference
-      Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent.Client\Hosts.Bff.Blazor.PerComponent.Client.csproj" />
-    <ProjectReference
-      Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent\Hosts.Bff.Blazor.PerComponent.csproj" />
-    <ProjectReference
-      Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly.Client\Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
-    <ProjectReference
-      Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly\Hosts.Bff.Blazor.WebAssembly.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent.Client\Hosts.Bff.Blazor.PerComponent.Client.csproj" />
+    <ProjectReference Include="..\Blazor\PerComponent\Hosts.Bff.Blazor.PerComponent\Hosts.Bff.Blazor.PerComponent.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly.Client\Hosts.Bff.Blazor.WebAssembly.Client.csproj" />
+    <ProjectReference Include="..\Blazor\WebAssembly\Hosts.Bff.Blazor.WebAssembly\Hosts.Bff.Blazor.WebAssembly.csproj" />
     <ProjectReference Include="..\Hosts.IdentityServer\Hosts.IdentityServer.csproj" />
 
 
