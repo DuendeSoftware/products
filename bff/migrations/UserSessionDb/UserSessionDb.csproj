@@ -1,8 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <!--<PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-  </PropertyGroup>-->
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
