@@ -7,6 +7,9 @@
     <RuntimeCompilationVersion>8.0.20</RuntimeCompilationVersion>
     <AuthenticationCertificateVersion>8.0.16</AuthenticationCertificateVersion>
     <IdentityModelVersion>7.1.2</IdentityModelVersion>
+    <CachingMemoryVersion>9.0.3</CachingMemoryVersion>
+    <SystemTextJsonVersion>9.0.9</SystemTextJsonVersion>
+    <LoggingAbstractionsVersion>8.0.2</LoggingAbstractionsVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0'">
@@ -16,6 +19,9 @@
     <RuntimeCompilationVersion>9.0.3</RuntimeCompilationVersion>
     <AuthenticationCertificateVersion>9.0.3</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
+    <CachingMemoryVersion>9.0.3</CachingMemoryVersion>
+    <SystemTextJsonVersion>9.0.9</SystemTextJsonVersion>
+    <LoggingAbstractionsVersion>9.0.9</LoggingAbstractionsVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0'">
@@ -25,6 +31,9 @@
     <RuntimeCompilationVersion>10.0.0-rc.1.25451.107</RuntimeCompilationVersion>
     <AuthenticationCertificateVersion>10.0.0-rc.1.25451.107</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
+    <CachingMemoryVersion>10.0.0-rc.1.25451.107</CachingMemoryVersion>
+    <SystemTextJsonVersion>10.0.0-rc.1.25451.107</SystemTextJsonVersion>
+    <LoggingAbstractionsVersion>10.0.0-rc.1.25451.107</LoggingAbstractionsVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -76,23 +85,23 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EFCoreVersion)" />
     
-    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade hybrid cache-->
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(CachingMemoryVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.3.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade diagnostics.testing-->
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.10.0" />
-    <PackageVersion Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Embedded" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.4.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0-rc.1.25451.107" />
-    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(LoggingAbstractionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(LoggingAbstractionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(LoggingAbstractionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade service discovery and timeprovider.testing-->
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.0.0" />
@@ -135,7 +144,7 @@
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="$(IdentityModelVersion)" />
     
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
-    <PackageVersion Include="System.Text.Json" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="xunit.core" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
