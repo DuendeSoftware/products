@@ -5,6 +5,8 @@ using Microsoft.AspNetCore;
 
 namespace JsOidc;
 
+#pragma warning disable ASPDEPR008 // Ignore IWebHost deprectation warnings
+
 public class Program
 {
     public static void Main(string[] args) => BuildWebHost(args).Run();
