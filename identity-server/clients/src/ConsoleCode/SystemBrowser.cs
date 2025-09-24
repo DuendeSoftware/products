@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace ConsoleResourceIndicators;
 
+#pragma warning disable ASPDEPR008 // Ignore IWebHost deprectation warnings
+#pragma warning disable ASPDEPR004 // Ignore WebHostBuilder deprectation warnings
+
 public class SystemBrowser : IBrowser
 {
     public int Port { get; }

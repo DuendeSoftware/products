@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace ConsoleResourceIndicators;
 
+#pragma warning disable ASPDEPR008 // Ignore IWebHost deprectation warnings
+#pragma warning disable ASPDEPR004 // Ignore WebHostBuilder deprectation warnings
+
 public class LoopbackHttpListener : IDisposable
 {
     private const int DefaultTimeout = 60 * 5; // 5 mins (in seconds)
