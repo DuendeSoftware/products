@@ -54,7 +54,10 @@ internal static class HostingExtensions
     {
         builder.Services.AddHttpContextAccessor();
 
-        builder.Services.AddRazorPages()
+        builder.Services.AddRazorPages().AddMvcOptions(options =>
+            {
+                options.ModelBinderProviders.Insert(0, new ProviderConfigurationModelBinderProvider());
+            })
             .AddRazorRuntimeCompilation();
 
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -113,6 +116,8 @@ internal static class HostingExtensions
             builder.Services.AddTransient<ClientRepository>();
             builder.Services.AddTransient<IdentityScopeRepository>();
             builder.Services.AddTransient<ApiScopeRepository>();
+
+            builder.Services.AddTransient<IProviderConfigurationModelFactory, OidcProviderConfigurationModelFactory>();
             builder.Services.AddTransient<FederationRepository>();
         }
 

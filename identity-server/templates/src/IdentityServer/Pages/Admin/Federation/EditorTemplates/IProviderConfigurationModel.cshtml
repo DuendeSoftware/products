@@ -1,0 +1,47 @@
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@if (ViewData.TemplateInfo.TemplateDepth > 1)
+{
+    if (Model == null)
+    {
+        <text>ViewData.ModelMetadata.NullDisplayText</text>
+    }
+    else
+    {
+        <text>ViewData.ModelMetadata.SimpleDisplayText</text>
+    }
+}
+else
+{
+    ModelPropertyCollection modelProperties = ViewData.ModelMetadata.GetMetadataForType(ViewData.Model.GetType()).Properties;
+    foreach (var prop in modelProperties
+                 .Where(metadata => metadata.ShowForEdit && !metadata.IsComplexType))
+    {
+        if (prop.HideSurroundingHtml)
+        {
+            @Html.Editor(prop.PropertyName)
+        }
+        else
+        {
+            <div class="form-group mb-3">
+                @if (prop.ModelType == typeof(bool))
+                {
+                    <label class="form-label">
+                        @Html.Editor(prop.PropertyName)
+
+                        @prop.DisplayName
+                    </label>
+                }
+                else
+                {
+                    @Html.Label(prop.PropertyName, prop.DisplayName, new { @class = "form-label" })
+                    @Html.Editor(prop.PropertyName, new { htmlAttributes = new { @class = "form-control form-control-sm" } })
+
+                }
+                @if (!string.IsNullOrEmpty(prop.Description))
+                {
+                    <small>@prop.Description</small>
+                }
+            </div>
+        }
+    }
+}

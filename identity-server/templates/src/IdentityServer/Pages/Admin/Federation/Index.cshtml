@@ -27,7 +27,10 @@
                     Create External Provider
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" asp-page="/Admin/Federation/New" asp-route-type="oidc">OpenID Connect</a></li>
+                    @foreach (var providerConfigurationInfo in Model.ProviderConfigurationInfo)
+                    {
+                        <li><a class="dropdown-item" asp-page="/Admin/Federation/New" asp-route-type="@providerConfigurationInfo.Type">@providerConfigurationInfo.Name</a></li>
+                    }
                 </ul>
             </div>
 
@@ -60,8 +63,8 @@
     <thead>
         <tr>
             <th></th>
-            <th>Type</th>
             <th>Name</th>
+            <th>Type</th>
             <th>Enabled</th>
             <th><span class="d-none">Actions</span></th>
         </tr>
@@ -71,12 +74,11 @@
         {
           <tr>
             <td>
-              @if (!string.IsNullOrEmpty(provider.IconUrl))
+              @if (!string.IsNullOrEmpty(provider.Configuration.IconUrl))
               {
-                <img src="@provider.IconUrl" alt="@provider.Name" width="32" height="32" class="me-2">
+                <img src="@provider.Configuration.IconUrl" alt="@provider.Name" width="32" height="32" class="me-2">
               }
             </td>
-            <td class="align-middle">@provider.ToFriendlyType()</td>
             <td class="align-middle fw-bold">
               @if (string.IsNullOrWhiteSpace(provider.Name))
               {
@@ -89,6 +91,7 @@
               <br />
               <small class="text-muted">Scheme: @provider.Scheme</small>
             </td>
+            <td class="align-middle">@provider.Configuration.ToFriendlyType()</td>
             <td class="align-middle">
               @(provider.Enabled ? "Yes": "No")
             </td>

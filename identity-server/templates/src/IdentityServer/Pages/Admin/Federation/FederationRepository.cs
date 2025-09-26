@@ -9,67 +9,48 @@ namespace IdentityServerTemplate.Pages.Admin.Federation;
 public class ProviderSummaryModel
 {
     [Required]
-    [DisplayName("Type")]
+    [Display(Name = "Type")]
     public string Type { get; set; } = default!;
 
     [Required]
-    [DisplayName("Scheme")]
+    [Display(Name = "Scheme")]
     public string Scheme { get; set; } = default!;
 
-    [DisplayName("Display Name")]
+    [Display(Name = "Display name")]
     public string? Name { get; set; }
 
-    [DisplayName("Icon URL")]
-    public string? IconUrl { get; set; }
-
-    [DisplayName("Enabled")]
+    [Display(Name = "Enabled")]
     public bool Enabled { get; set; } = true;
 
-    public string ToFriendlyType() =>
-        Type switch
-        {
-            "oidc" => "OpenID Connect",
-            _ => Type
-        };
+    public IProviderConfigurationModel Configuration { get; set; }
 }
 
 public class CreateProviderModel : ProviderSummaryModel
 {
-    [Required]
-    [DisplayName("Authority URL")]
-    public string Authority { get; set; } = string.Empty;
-
-    [Required]
-    [DisplayName("Client ID")]
-    public string ClientId { get; set; } = string.Empty;
-
-    [Required]
-    [DisplayName("Client Secret")]
-    public string ClientSecret { get; set; } = string.Empty;
-
-    [Required]
-    [DisplayName("Response type")]
-    public string ResponseType { get; set; } = "code";
-
-    [Required]
-    [DisplayName("Scope")]
-    public string Scope { get; set; } = "openid profile";
 }
 
-public class EditProviderModel : CreateProviderModel, IValidatableObject
+public class EditProviderModel : CreateProviderModel
 {
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        var errors = new List<ValidationResult>();
-        return errors;
-    }
-
+    // TODO
     [DisplayName("Callback URL")]
     public string? CallbackUrl { get; set; }
 }
 
-public class FederationRepository(ConfigurationDbContext context)
+public class FederationRepository(
+    IEnumerable<IProviderConfigurationModelFactory> providerConfigurationModelFactories,
+    ConfigurationDbContext context)
 {
+    private IProviderConfigurationModelFactory FindProviderConfigurationModelFactoryFor(string type)
+    {
+        return providerConfigurationModelFactories.FirstOrDefault(x => x.SupportsType(type))
+            ?? throw new ArgumentException($"No provider configuration model factory for type '{type}'");
+    }
+
+    public IEnumerable<ProviderConfigurationInfo> GetAllProviderConfigurationInfo()
+    {
+        return providerConfigurationModelFactories.Select(x => x.GetProviderConfigurationInfo()).ToArray();
+    }
+
     public async Task<IEnumerable<ProviderSummaryModel>> GetAllAsync(string? filter = null)
     {
         var query = context.IdentityProviders.AsQueryable();
@@ -79,18 +60,20 @@ public class FederationRepository(ConfigurationDbContext context)
             query = query.Where(x => x.Scheme.Contains(filter) || x.DisplayName.Contains(filter));
         }
 
-        var result = query
+        var result = await query
             .Select(x => x.ToModel())
+            .ToArrayAsync();
+
+        return result
             .Select(x => new ProviderSummaryModel
             {
                 Type = x.Type,
                 Scheme = x.Scheme,
                 Name = x.DisplayName,
-                IconUrl = x.Properties["IconUrl"],
-                Enabled = x.Enabled
-            });
-
-        return await result.ToArrayAsync();
+                Enabled = x.Enabled,
+                Configuration = FindProviderConfigurationModelFactoryFor(x.Type).CreateFrom(x)
+            })
+            .ToArray();
     }
 
     public async Task<EditProviderModel?> GetBySchemeAsync(string scheme)
@@ -111,19 +94,10 @@ public class FederationRepository(ConfigurationDbContext context)
             Type = identityProviderModel.Type,
             Scheme = identityProviderModel.Scheme,
             Name = identityProviderModel.DisplayName,
-            IconUrl = identityProviderModel.Properties["IconUrl"],
             Enabled = identityProviderModel.Enabled,
+            Configuration = FindProviderConfigurationModelFactoryFor(identityProviderModel.Type).CreateFrom(identityProviderModel),
             CallbackUrl = null
         };
-
-        if (string.Equals(model.Type, "oidc", StringComparison.OrdinalIgnoreCase))
-        {
-            model.Authority = identityProviderModel.Properties["Authority"];
-            model.ClientId = identityProviderModel.Properties["ClientId"];
-            model.ClientSecret = identityProviderModel.Properties["ClientSecret"];
-            model.ResponseType = identityProviderModel.Properties["ResponseType"];
-            model.Scope = identityProviderModel.Properties["Scope"];
-        }
 
         return model;
     }
@@ -145,16 +119,8 @@ public class FederationRepository(ConfigurationDbContext context)
             Enabled = model.Enabled
         };
 
-        identityProviderModel.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
-
-        if (model.Type == "oidc")
-        {
-            identityProviderModel.Properties["Authority"] = model.Authority.Trim();
-            identityProviderModel.Properties["ClientId"] = model.ClientId.Trim();
-            identityProviderModel.Properties["ClientSecret"] = model.ClientSecret.Trim();
-            identityProviderModel.Properties["ResponseType"] = model.ResponseType.Trim();
-            identityProviderModel.Properties["Scope"] = model.Scope.Trim();
-        }
+        FindProviderConfigurationModelFactoryFor(model.Type)
+            .UpdateModelFrom(identityProviderModel, model.Configuration);
 
         context.IdentityProviders.Add(identityProviderModel.ToEntity());
         await context.SaveChangesAsync();
@@ -171,16 +137,9 @@ public class FederationRepository(ConfigurationDbContext context)
 
         identityProviderModel.DisplayName = model.Name?.Trim();
         identityProviderModel.Enabled = model.Enabled;
-        identityProviderModel.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
 
-        if (model.Type == "oidc")
-        {
-            identityProviderModel.Properties["Authority"] = model.Authority.Trim();
-            identityProviderModel.Properties["ClientId"] = model.ClientId.Trim();
-            identityProviderModel.Properties["ClientSecret"] = model.ClientSecret.Trim();
-            identityProviderModel.Properties["ResponseType"] = model.ResponseType.Trim();
-            identityProviderModel.Properties["Scope"] = model.Scope.Trim();
-        }
+        FindProviderConfigurationModelFactoryFor(model.Type)
+            .UpdateModelFrom(identityProviderModel, model.Configuration);
 
         // Convert back to entity
         var updatedIdentityProvider = identityProviderModel.ToEntity();
