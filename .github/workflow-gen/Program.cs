@@ -16,12 +16,14 @@ var products = new Product[]
         "bff.slnf",
         "bff",
         ["Bff.Tests"],
-        ["Hosts.Tests"]),
+        ["Hosts.Tests"],
+        "hosts/Hosts.AspireHost"),
     new("identity-server",
         "identity-server.slnf",
         "is",
         ["IdentityServer.IntegrationTests", "IdentityServer.UnitTests"],
-        [])
+        ["IdentityServer.EndToEndTests"],
+        "aspire/AppHosts/All")
 };
 foreach (var product in products)
 {
@@ -144,6 +146,9 @@ void GenerateCiWorkflow(Product product)
         playwrightJob.StepRestore(product.Solution);
 
         playwrightJob.StepBuild(product.Solution);
+
+        playwrightJob.StepRunAspireHostInBackground(product.AspireHostProject ??
+            throw new InvalidOperationException("AspireHostProject must be set for Playwright tests"));
 
         playwrightJob.StepInstallPlayWright();
 
@@ -350,4 +355,10 @@ void WriteWorkflow(Workflow workflow, string fileName)
     Console.WriteLine($"Wrote workflow to {filePath}");
 }
 
-internal record Product(string Name, string Solution, string TagPrefix, string[] UnitTestProjects, string[] PlaywrightTestProjects);
+internal record Product(
+    string Name,
+    string Solution,
+    string TagPrefix,
+    string[] UnitTestProjects,
+    string[] PlaywrightTestProjects,
+    string? AspireHostProject = null);

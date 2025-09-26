@@ -40,6 +40,11 @@ public static class StepExtensions
             .Name("Dotnet devcerts")
             .Run("dotnet dev-certs https --trust");
 
+    public static void StepRunAspireHostInBackground(this Job job, string hostProject)
+        => job.Step()
+            .Name("Run Aspire Host in background")
+            .Run($"dotnet run -c Release -p {hostProject} &");
+
     public static void StepInstallPlayWright(this Job job)
         => job.Step()
             .Name("Install Playwright")

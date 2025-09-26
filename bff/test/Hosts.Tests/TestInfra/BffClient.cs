@@ -8,7 +8,7 @@ using AngleSharp.Html.Dom;
 namespace Hosts.Tests.TestInfra;
 
 /// <summary>
-///     Client for the BFF. All the methods that can be invoked are here.
+/// Client for the BFF. All the methods that can be invoked are here.
 /// </summary>
 public class BffClient
 {

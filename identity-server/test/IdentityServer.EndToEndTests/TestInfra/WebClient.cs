@@ -7,24 +7,11 @@ using AngleSharp.Html.Dom;
 
 namespace Duende.IdentityServer.EndToEndTests.TestInfra;
 
-/// <summary>
-///     Client for the BFF. All the methods that can be invoked are here.
-/// </summary>
-public class IdentityServerClient
+public class WebClient(HttpClient client)
 {
-    private readonly HttpClient _client;
-
-    public IdentityServerClient(HttpClient client)
+    public async Task Login(string userName = "alice", string password = "alice", CancellationToken ct = default)
     {
-        _client = client;
-
-        // Add a header that will trigger pre-flight cors checks
-        _client.DefaultRequestHeaders.Add("X-CSRF", "1");
-    }
-
-    public async Task TriggerLogin(string userName = "alice", string password = "alice", CancellationToken ct = default)
-    {
-        var triggerLoginResponse = await _client.GetAsync("/bff/login");
+        var triggerLoginResponse = await client.GetAsync("/Secure");
 
         triggerLoginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -40,10 +27,10 @@ public class IdentityServerClient
         form.Fields["Input.Button"] = "login";
 
         var postLoginResponse =
-            await _client.PostAsync(new Uri(loginPage, form.FormUrl), new FormUrlEncodedContent(form.Fields), ct);
+            await client.PostAsync(new Uri(loginPage, form.FormUrl), new FormUrlEncodedContent(form.Fields), ct);
 
         postLoginResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-        postLoginResponse.RequestMessage?.RequestUri?.Authority.ShouldBe(_client.BaseAddress?.Authority,
+        postLoginResponse.RequestMessage?.RequestUri?.Authority.ShouldBe(client.BaseAddress?.Authority,
             await postLoginResponse.Content.ReadAsStringAsync(ct));
     }
 
@@ -96,21 +83,16 @@ public class IdentityServerClient
         };
     }
 
-    public async Task TriggerLogout()
+    public async Task Logout()
     {
-        // To trigger a logout, we need the logout claim
-        var userClaims = await GetUserClaims();
-
-        var logoutLink = userClaims.FirstOrDefault(x => x.Type == "bff:logout_url")
-                         ?? throw new InvalidOperationException("Failed to find logout link claim");
-
-        var logoutResponse = await _client.GetAsync(logoutLink.Value.ToString());
+        var logoutResponse = await client.GetAsync("/Logout");
         logoutResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+
     }
 
     public async Task<UserClaim[]> GetUserClaims()
     {
-        var userClaimsString = await _client.GetStringAsync("/bff/user");
+        var userClaimsString = await client.GetStringAsync("/bff/user");
         var userClaims = JsonSerializer.Deserialize<UserClaim[]>(userClaimsString, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -120,7 +102,7 @@ public class IdentityServerClient
 
     public async Task InvokeApi(string url, HttpStatusCode expectedResponse = HttpStatusCode.OK)
     {
-        var response = await _client.GetAsync(url);
+        var response = await client.GetAsync(url);
 
         response.StatusCode.ShouldBe(expectedResponse);
         if (response.StatusCode == HttpStatusCode.OK)

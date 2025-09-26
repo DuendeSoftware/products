@@ -143,6 +143,8 @@ jobs:
       # We do not intend to keep using Debug config after it is fixed in net10.0 rc2.
       # Re-generating the workflows with workflow-gen will overwrite this.
       run: dotnet build bff.slnf --no-restore -c Debug
+    - name: Run Aspire Host in background
+      run: dotnet run -c Debug -p hosts/Hosts.AspireHost &
     - name: Install Playwright
       run: pwsh test/Hosts.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
     - name: Dotnet devcerts

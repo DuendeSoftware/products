@@ -2,23 +2,22 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer.EndToEndTests.TestInfra;
-using Duende.Xunit.Playwright;
-using Projects;
 using ServiceDefaults;
 using Xunit.Abstractions;
+using WebClient = Duende.IdentityServer.EndToEndTests.TestInfra.WebClient;
 
 namespace Duende.IdentityServer.EndToEndTests;
 
 [Collection(IdentityServerAppHostCollection.CollectionName)]
-public class IdentityServerTests : IntegrationTestBase<Dev>
+public class IdentityServerTests : IdentityServerPlaywrightTestBase
 {
     private readonly HttpClient _identityServerClient;
-    private readonly HttpClient _webClient;
+    private readonly WebClient _webClient;
 
     public IdentityServerTests(ITestOutputHelper output, IdentityServerHostTestFixture fixture) : base(output, fixture)
     {
         _identityServerClient = CreateHttpClient(AppHostServices.IdentityServer);
-        _webClient = CreateHttpClient(AppHostServices.Web);
+        _webClient = new WebClient(CreateHttpClient(AppHostServices.Web));
     }
 
     [Fact]
@@ -29,8 +28,8 @@ public class IdentityServerTests : IntegrationTestBase<Dev>
     {
         var discoResponse = await _identityServerClient.GetAsync("/.well-known/openid-configuration");
         discoResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-        var webResponse = await _webClient.GetAsync("/");
-        webResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
+
+    [Fact]
+    public async Task Can_login() => await _webClient.Login();
 }

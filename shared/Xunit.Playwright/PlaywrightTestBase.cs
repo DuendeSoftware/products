@@ -16,28 +16,15 @@ public class Defaults
 }
 
 [WithTestName]
-public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : class
+public class PlaywrightTestBase : PageTest, IDisposable
 {
     private readonly IDisposable _loggingScope;
 
-    public PlaywrightTestBase(ITestOutputHelper output, AppHostFixture<THost> fixture)
+    public PlaywrightTestBase(ITestOutputHelper output, AppHostFixture fixture)
     {
         Output = output;
         Fixture = fixture;
         _loggingScope = fixture.ConnectLogger(output.WriteLine);
-
-        if (Fixture.UsingAlreadyRunningInstance)
-        {
-            output.WriteLine("Running tests against locally running instance");
-        }
-        else
-        {
-#if DEBUG_NCRUNCH
-            // Running in NCrunch. NCrunch cannot build the aspire project, so it needs
-            // to be started manually.
-            Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
-#endif
-        }
     }
 
     public override async Task InitializeAsync()
@@ -87,25 +74,11 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
     };
 
 
-    public AppHostFixture<THost> Fixture { get; }
+    public AppHostFixture Fixture { get; }
 
     public ITestOutputHelper Output { get; }
 
-    public void Dispose()
-    {
-        if (!Fixture.UsingAlreadyRunningInstance)
-        {
-            Output.WriteLine(Environment.NewLine);
-            Output.WriteLine(Environment.NewLine);
-            Output.WriteLine(Environment.NewLine);
-            Output.WriteLine("*************************************************");
-            Output.WriteLine("** Startup logs ***");
-            Output.WriteLine("*************************************************");
-            Output.WriteLine(Fixture.StartupLogs);
-        }
-
-        _loggingScope.Dispose();
-    }
+    public void Dispose() => _loggingScope.Dispose();
 
     public HttpClient CreateHttpClient(string clientName) => Fixture.CreateHttpClient(clientName);
 }

@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Xunit.Playwright;
-using Projects;
 using ServiceDefaults;
 
 namespace Duende.IdentityServer.EndToEndTests.TestInfra;
 
-public class IdentityServerHostTestFixture() : AppHostFixture<Dev>(new IdentityServerAppHostRoutes())
+public class IdentityServerHostTestFixture() : AppHostFixture(new IdentityServerAppHostRoutes())
 {
 }

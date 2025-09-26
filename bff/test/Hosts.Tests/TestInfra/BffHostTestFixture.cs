@@ -3,10 +3,9 @@
 
 using Duende.Xunit.Playwright;
 using Hosts.ServiceDefaults;
-using Projects;
 
 namespace Hosts.Tests.TestInfra;
 
-public class BffHostTestFixture() : AppHostFixture<Hosts_AppHost>(new BffAppHostRoutes())
+public class BffHostTestFixture() : AppHostFixture(new BffAppHostRoutes())
 {
 }

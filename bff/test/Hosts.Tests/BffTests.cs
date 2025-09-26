@@ -4,13 +4,12 @@
 using Duende.Xunit.Playwright;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.TestInfra;
-using Projects;
 using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
 [Collection(BffAppHostCollection.CollectionName)]
-public class BffTests : IntegrationTestBase<Hosts_AppHost>
+public class BffTests : IntegrationTestBase
 {
     private readonly HttpClient _httpClient;
     private readonly BffClient _bffClient;

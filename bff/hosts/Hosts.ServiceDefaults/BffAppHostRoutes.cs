@@ -22,4 +22,6 @@ public class BffAppHostRoutes : IAppHostServiceRoutes
         };
         return new Uri(url);
     }
+
+    public Uri AppHostUrl => new Uri("https://localhost:17052");
 }

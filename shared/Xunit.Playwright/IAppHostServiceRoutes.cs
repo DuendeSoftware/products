@@ -9,5 +9,6 @@ namespace Duende.Xunit.Playwright;
 public interface IAppHostServiceRoutes
 {
     public string[] ServiceNames { get; }
-    public Uri UrlTo(string clientName);
+    public Uri UrlTo(string serviceName);
+    public Uri AppHostUrl { get; }
 }

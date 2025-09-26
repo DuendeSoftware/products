@@ -12,9 +12,9 @@ public class IdentityServerAppHostRoutes : IAppHostServiceRoutes
         AppHostServices.Web
     ];
 
-    public Uri UrlTo(string clientName)
+    public Uri UrlTo(string serviceName)
     {
-        var url = clientName switch
+        var url = serviceName switch
         {
             AppHostServices.IdentityServer => "https://localhost:5001",
             AppHostServices.MvcAutomaticTokenManagement => "https://localhost:44301",
@@ -28,6 +28,8 @@ public class IdentityServerAppHostRoutes : IAppHostServiceRoutes
         };
         return new Uri(url);
     }
+
+    public Uri AppHostUrl => new Uri("https://localhost:17053");
 }
 
 public class AppHostServices
