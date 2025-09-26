@@ -14,7 +14,7 @@ else
 {
     ModelPropertyCollection modelProperties = ViewData.ModelMetadata.GetMetadataForType(ViewData.Model.GetType()).Properties;
     foreach (var prop in modelProperties
-                 .Where(metadata => metadata.ShowForEdit && !metadata.IsComplexType))
+                 .Where(metadata => metadata.ShowForEdit && !metadata.IsComplexType && metadata.PropertyName != "IconUrl"))
     {
         if (prop.HideSurroundingHtml)
         {

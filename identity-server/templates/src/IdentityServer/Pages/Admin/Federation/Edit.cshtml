@@ -73,9 +73,11 @@
                           </small>
 
                           <div class="form-group mb-3">
-                            <label asp-for="@Model.InputModel.CallbackUrl" class="form-label"></label>
-                            <input class="form-control form-control-sm" asp-for="@Model.InputModel.CallbackUrl" readonly disabled />
+                              <label asp-for="@Model.InputModel.CallbackUrl" class="form-label"></label>
+                              <input class="form-control form-control-sm" asp-for="@Model.InputModel.CallbackUrl" readonly disabled />
                           </div>
+
+                          <hr />
 
                           @if (Model.InputModel.Configuration.IsIconUrlEditable())
                           {

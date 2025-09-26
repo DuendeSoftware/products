@@ -49,8 +49,6 @@ public class EditModel(
             return RedirectToPage("/Admin/Federation/Index");
         }
 
-        ModelState.Clear();
-        TryValidateModel(InputModel);
         if (ModelState.IsValid)
         {
             await repository.UpdateAsync(InputModel);

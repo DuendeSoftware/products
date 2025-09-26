@@ -100,7 +100,8 @@ internal static class HostingExtensions
                         dbOpts => dbOpts.MigrationsAssembly(typeof(Program).Assembly.FullName));
             })
             .AddServerSideSessions()
-            .AddLicenseSummary();
+            .AddLicenseSummary()
+            .AddIdentityProviderStore<FederationIdentityProviderStore>();
 
         // Add authentication
         builder.Services.AddAuthentication();
@@ -119,6 +120,8 @@ internal static class HostingExtensions
 
             builder.Services.AddTransient<IProviderConfigurationModelFactory, OidcProviderConfigurationModelFactory>();
             builder.Services.AddTransient<FederationRepository>();
+
+            builder.Services.AddGoogleDynamicProvider();
         }
 
         // this adds the necessary config for the portal page

@@ -31,7 +31,6 @@ public class CreateProviderModel : ProviderSummaryModel
 
 public class EditProviderModel : CreateProviderModel
 {
-    // TODO
     [DisplayName("Callback URL")]
     public string? CallbackUrl { get; set; }
 }
@@ -40,7 +39,7 @@ public class FederationRepository(
     IEnumerable<IProviderConfigurationModelFactory> providerConfigurationModelFactories,
     ConfigurationDbContext context)
 {
-    private IProviderConfigurationModelFactory FindProviderConfigurationModelFactoryFor(string type)
+    public IProviderConfigurationModelFactory FindProviderConfigurationModelFactoryFor(string type)
     {
         return providerConfigurationModelFactories.FirstOrDefault(x => x.SupportsType(type))
             ?? throw new ArgumentException($"No provider configuration model factory for type '{type}'");

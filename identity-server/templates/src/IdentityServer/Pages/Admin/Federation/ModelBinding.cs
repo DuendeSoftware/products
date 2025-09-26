@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace IdentityServerTemplate.Pages.Admin.Federation;
 
@@ -66,5 +68,41 @@ public class ProviderConfigurationModelBinder(
 
         await concreteBinder.BindModelAsync(concreteBindingContext);
         bindingContext.Result = concreteBindingContext.Result;
+
+        // Perform model validation
+        if (bindingContext.Result.IsModelSet)
+        {
+            // Mark as validated
+            foreach (var keyValuePair in bindingContext.ModelState.FindKeysWithPrefix(bindingContext.ModelName))
+            {
+                keyValuePair.Value.ValidationState = ModelValidationState.Valid;
+            }
+
+            // Run new validation
+            var validationResults = new List<ValidationResult>();
+            var validationContext = new ValidationContext(bindingContext.Result.Model!);
+            if (!Validator.TryValidateObject(bindingContext.Result.Model!, validationContext, validationResults, true))
+            {
+                foreach (var result in validationResults)
+                {
+                    if (!result.MemberNames.Any())
+                    {
+                        bindingContext.ModelState.AddModelError(string.Empty, result.ErrorMessage!);
+                    }
+                    else
+                    {
+                        foreach (var name in result.MemberNames)
+                        {
+                            bindingContext.ModelState.AddModelError(ModelNames.CreatePropertyModelName(bindingContext.ModelName, name), result.ErrorMessage!);
+                        }
+                    }
+                }
+            }
+
+            bindingContext.ValidationState[bindingContext.Result.Model!] = new ValidationStateEntry
+            {
+                Metadata = bindingContext.ModelMetadata
+            };
+        }
     }
 }

@@ -16,13 +16,12 @@ public class NewModel(FederationRepository repository) : PageModel
 
     public void OnGet(string type) => InputModel = new CreateProviderModel
     {
-        Type = type
+        Type = type,
+        Configuration = repository.FindProviderConfigurationModelFactoryFor(type).Create()
     };
 
     public async Task<IActionResult> OnPostAsync()
     {
-        ModelState.Clear();
-        TryValidateModel(InputModel);
         if (!ModelState.IsValid)
         {
             return Page();
