@@ -122,6 +122,7 @@ internal static class HostingExtensions
             builder.Services.AddTransient<FederationRepository>();
 
             builder.Services.AddGoogleDynamicProvider();
+            builder.Services.AddWsFederationDynamicProvider();
         }
 
         // this adds the necessary config for the portal page

@@ -37,15 +37,15 @@ class GoogleDynamicConfigureOptions
     protected override void Configure(
         ConfigureAuthenticationContext<GoogleOptions, IdentityProvider> context)
     {
-        var googleProvider = context.IdentityProvider;
-        var googleOptions = context.AuthenticationOptions;
+        var provider = context.IdentityProvider;
+        var options = context.AuthenticationOptions;
 
-        googleOptions.ClientId = googleProvider.Properties["ClientId"];
-        googleOptions.ClientSecret = googleProvider.Properties["ClientSecret"];
-        googleOptions.ClaimActions.MapAll();
+        options.ClientId = provider.Properties["ClientId"];
+        options.ClientSecret = provider.Properties["ClientSecret"];
+        options.ClaimActions.MapAll();
 
-        googleOptions.SignInScheme = context.DynamicProviderOptions.SignInScheme;
-        googleOptions.CallbackPath = context.PathPrefix + "/signin-oidc";
+        options.SignInScheme = context.DynamicProviderOptions.SignInScheme;
+        options.CallbackPath = context.PathPrefix + "/signin-oidc";
     }
 }
 
