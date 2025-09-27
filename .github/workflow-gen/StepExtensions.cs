@@ -45,10 +45,10 @@ public static class StepExtensions
             .Name("Run Aspire Host in background")
             .Run($"dotnet run -c Release -p {hostProject} &");
 
-    public static void StepInstallPlayWright(this Job job)
+    public static void StepInstallPlayWright(this Job job, string playrightTestProject)
         => job.Step()
             .Name("Install Playwright")
-            .Run("pwsh test/Hosts.Tests/bin/Release/net9.0/playwright.ps1 install --with-deps");
+            .Run("pwsh test/{playrightTestProject}/bin/Release/net10.0/playwright.ps1 install --with-deps");
 
     public static void StepToolRestore(this Job job)
         => job.Step()

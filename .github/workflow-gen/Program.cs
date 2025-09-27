@@ -150,7 +150,7 @@ void GenerateCiWorkflow(Product product)
         playwrightJob.StepRunAspireHostInBackground(product.AspireHostProject ??
             throw new InvalidOperationException("AspireHostProject must be set for Playwright tests"));
 
-        playwrightJob.StepInstallPlayWright();
+        playwrightJob.StepInstallPlayWright(product.PlaywrightTestProjects.First());
 
         playwrightJob.StepDotNetDevCerts();
 

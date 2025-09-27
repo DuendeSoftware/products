@@ -145,8 +145,10 @@ jobs:
       run: dotnet build bff.slnf --no-restore -c Debug
     - name: Run Aspire Host in background
       run: dotnet run -c Debug -p hosts/Hosts.AspireHost &
+    - name: Wait for Aspire Host to be ready
+      run: sleep 240 # wait 4 minutes to ensure Aspire Host is ready (this is a hacky test to verify that the issue is that we need to wait for the host to be ready)
     - name: Install Playwright
-      run: pwsh test/Hosts.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
+      run: pwsh test/Hosts.Tests/bin/Debug/net10.0/playwright.ps1 install --with-deps
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test - test/Hosts.Tests
