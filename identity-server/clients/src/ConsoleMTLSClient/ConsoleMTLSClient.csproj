@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Explicitly override the Directory.Build.Props as this project depends on features only available in .net 9 and higher. -->
-    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
