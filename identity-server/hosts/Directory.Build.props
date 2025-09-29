@@ -4,5 +4,6 @@
   <Import Project="../identity-server.props" />
   <PropertyGroup>
     <IsIdSrvProject>true</IsIdSrvProject>
+     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>
