@@ -35,10 +35,7 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
     }
 
     // Added for testing purposes to be able to call ExecuteAsync directly.
-    internal async Task ExecuteForTestOnly(CancellationToken stoppingToken)
-    {
-        await ExecuteAsync(stoppingToken);
-    }
+    internal Task ExecuteForTestOnly(CancellationToken stoppingToken) => ExecuteAsync(stoppingToken);
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
