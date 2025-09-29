@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
@@ -44,11 +44,6 @@ public class DiagnosticHostedServiceTests
 
     private class TestDiagnosticEntry : IDiagnosticEntry
     {
-        public bool WasCalled { get; private set; }
-        public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer)
-        {
-            WasCalled = true;
-            return Task.CompletedTask;
-        }
+        public Task WriteAsync(DiagnosticContext context, Utf8JsonWriter writer) => Task.CompletedTask;
     }
 }
