@@ -1,4 +1,4 @@
-namespace Duende.Bff.AccessTokenManagement
+﻿namespace Duende.Bff.AccessTokenManagement
 {
     [System.Text.Json.Serialization.JsonConverter(typeof(Duende.Bff.Internal.StringValueJsonConverter<Duende.Bff.AccessTokenManagement.AccessToken>))]
     public readonly struct AccessToken : System.IEquatable<Duende.Bff.AccessTokenManagement.AccessToken>
@@ -160,7 +160,7 @@ namespace Duende.Bff
     {
         public static T AddFrontends<T>(this T builder, params Duende.Bff.DynamicFrontends.BffFrontend[] frontends)
             where T : Duende.Bff.Builder.IBffServicesBuilder { }
-        public static Duende.Bff.Builder.IBffBuilder AddServerSideSessions<T>(this Duende.Bff.Builder.IBffServicesBuilder builder)
+        public static Duende.Bff.Builder.IBffServicesBuilder AddServerSideSessions<T>(this Duende.Bff.Builder.IBffServicesBuilder builder)
             where T :  class, Duende.Bff.SessionManagement.SessionStore.IUserSessionStore { }
         public static T AddServerSideSessions<T>(this T builder)
             where T : Duende.Bff.Builder.IBffServicesBuilder { }

@@ -55,7 +55,7 @@ public static class BffBuilderExtensions
         // IMPORTANT: The BffConfigureOpenIdConnectOptions MUST be called before calling
         // AddOpenIdConnectAccessTokenManagement because both configure the same options
         // The AddOpenIdConnectAccessTokenManagement adds OR wraps the BackchannelHttpHandler
-        // to add DPoP support. However, our code can also add a backchannel handler. 
+        // to add DPoP support. However, our code can also add a backchannel handler.
         builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, BffConfigureOpenIdConnectOptions>();
         builder.Services.AddOpenIdConnectAccessTokenManagement();
 
@@ -123,7 +123,7 @@ public static class BffBuilderExtensions
         // Add a scheme provider that will inject authentication schemes that are needed for the BFF
         builder.Services.AddTransient<IAuthenticationSchemeProvider, BffAuthenticationSchemeProvider>();
 
-        // Configure the AspNet Core Authentication settings if no 
+        // Configure the AspNet Core Authentication settings if no
         // .AddAuthentication().AddCookie().AddOpenIdConnect() was added
         builder.Services.AddSingleton<IPostConfigureOptions<AuthenticationOptions>, BffConfigureAuthenticationOptions>();
 
@@ -195,12 +195,13 @@ public static class BffBuilderExtensions
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static IBffBuilder AddServerSideSessions<T>(this IBffServicesBuilder builder)
+    public static IBffServicesBuilder AddServerSideSessions<T>(this IBffServicesBuilder builder)
         where T : class, IUserSessionStore
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services.AddTransient<IUserSessionStore, T>();
-        return builder.AddServerSideSessions();
+        builder.AddServerSideSessions();
+        return builder;
     }
 
     public static T AddFrontends<T>(this T builder, params BffFrontend[] frontends)
