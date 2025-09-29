@@ -3,5 +3,5 @@
   <PropertyGroup>
 	  <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
-  <Import Project="../../samples.props" />
+  <Import Project="../../hosts_and_clients.props" />
 </Project>

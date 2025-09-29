@@ -20,5 +20,5 @@
     <TargetFramework>net9.0</TargetFramework>
     <IsBffProject>true</IsBffProject>
   </PropertyGroup>
-  <Import Project="../../samples.props" />
+  <Import Project="../../hosts_and_clients.props" />
 </Project>
