@@ -3,7 +3,6 @@
 
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
-using Duende.IdentityModel.Client;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MvcJarJwt;
