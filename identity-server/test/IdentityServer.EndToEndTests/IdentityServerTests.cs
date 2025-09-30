@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 namespace Duende.IdentityServer.EndToEndTests;
 
 [Collection(IdentityServerAppHostCollection.CollectionName)]
-public class IdentityServerTests : IntegrationTestBase<Dev>
+public class IdentityServerTests : PlaywrightTestBase<All>
 {
     private readonly HttpClient _identityServerClient;
     private readonly HttpClient _webClient;
@@ -32,5 +32,23 @@ public class IdentityServerTests : IntegrationTestBase<Dev>
 
         var webResponse = await _webClient.GetAsync("/");
         webResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Theory]
+    [InlineData(AppHostServices.MvcAutomaticTokenManagement)]
+    [InlineData(AppHostServices.MvcCode)]
+    [InlineData(AppHostServices.MvcDPoP)]
+    [InlineData(AppHostServices.MvcHybridBackChannel)]
+    [InlineData(AppHostServices.MvcJarJwt)]
+    [InlineData(AppHostServices.MvcJarUriJwt)]
+    [InlineData(AppHostServices.Web)]
+    public async Task CanLoginUseTokensAndLogout(string clientName)
+    {
+        await Page.GotoAsync(Fixture.GetUrlTo(clientName).ToString());
+        await Page.Login();
+        await Page.CallApi();
+        await Page.RenewTokens();
+        await Page.CallApi();
+        await Page.Logout();
     }
 }

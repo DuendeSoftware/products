@@ -8,5 +8,5 @@ using Xunit.Abstractions;
 namespace Duende.IdentityServer.EndToEndTests.TestInfra;
 
 [Collection(IdentityServerAppHostCollection.CollectionName)]
-public class IdentityServerPlaywrightTestBase(ITestOutputHelper output, AppHostFixture<Dev> fixture)
-    : PlaywrightTestBase<Dev>(output, fixture);
+public class IdentityServerPlaywrightTestBase(ITestOutputHelper output, AppHostFixture<All> fixture)
+    : PlaywrightTestBase<All>(output, fixture);

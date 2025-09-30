@@ -1,7 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Globalization;
 using Clients;
+using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +15,10 @@ public class HomeController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public HomeController(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
+    public HomeController(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
 
     [AllowAnonymous]
     public IActionResult Index() => View();
@@ -28,5 +35,11 @@ public class HomeController : Controller
         ViewBag.Json = response.PrettyPrintJson();
 
         return View();
+    }
+
+    public async Task<IActionResult> RenewTokens()
+    {
+        await HttpContext.GetUserAccessTokenAsync(new () { ForceTokenRenewal = true });
+        return RedirectToAction(nameof(Secure));
     }
 }

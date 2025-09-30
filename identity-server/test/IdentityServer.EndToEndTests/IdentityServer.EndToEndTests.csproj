@@ -29,8 +29,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Duende.Xunit.Playwright.csproj" />
-    <ProjectReference Include="..\..\aspire\AppHosts\Dev\Dev.csproj" />
+    <ProjectReference Include="..\..\aspire\AppHosts\All\All.csproj" />
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
-  
+
 </Project>

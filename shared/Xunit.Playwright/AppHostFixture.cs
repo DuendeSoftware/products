@@ -124,7 +124,6 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
             var client = new HttpClient();
             client.Timeout = TimeSpan.FromMilliseconds(1000);
 
-            // TODO - This is specific to BFF
             var response = await client.GetAsync("https://localhost:17052");
 
             if (response.IsSuccessStatusCode)

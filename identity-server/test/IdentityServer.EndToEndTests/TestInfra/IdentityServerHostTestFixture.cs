@@ -7,6 +7,6 @@ using ServiceDefaults;
 
 namespace Duende.IdentityServer.EndToEndTests.TestInfra;
 
-public class IdentityServerHostTestFixture() : AppHostFixture<Dev>(new IdentityServerAppHostRoutes())
+public class IdentityServerHostTestFixture() : AppHostFixture<All>(new IdentityServerAppHostRoutes())
 {
 }
