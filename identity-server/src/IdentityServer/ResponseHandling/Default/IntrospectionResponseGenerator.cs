@@ -97,6 +97,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         // add scopes
         response.Add("scope", scopes.ToSpaceSeparatedString());
 
+        Telemetry.Metrics.Introspection(callerName, true);
         await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult));
         return response;
     }

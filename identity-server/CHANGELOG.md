@@ -23,6 +23,7 @@
 
 ## Bug Fixes
 - Reject Pushed Authorization Requests with parameters duplicated in a JAR by @wcabus
+- Emit Telemetry Event for Introspection Requests for Valid Tokens by @bhazen
 
 ## Code Quality
 - Fixed typo in XML doc for Client.CoordinateLifetimeWithUserSession by @wcabus
