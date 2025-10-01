@@ -9,7 +9,18 @@ public class IdentityServerAppHostRoutes : IAppHostServiceRoutes
 {
     public string[] ServiceNames => [
         AppHostServices.IdentityServer,
-        AppHostServices.Web
+        AppHostServices.MvcAutomaticTokenManagement,
+        AppHostServices.MvcCode,
+        AppHostServices.MvcDPoP,
+        AppHostServices.MvcHybridBackChannel,
+        AppHostServices.MvcJarJwt,
+        AppHostServices.MvcJarUriJwt,
+        AppHostServices.Web,
+        AppHostServices.TemplateIs,
+        AppHostServices.TemplateIsEmpty,
+        AppHostServices.TemplateIsInMem,
+        AppHostServices.TemplateIsAspid,
+        AppHostServices.TemplateIsEF
     ];
 
     public Uri UrlTo(string clientName)
