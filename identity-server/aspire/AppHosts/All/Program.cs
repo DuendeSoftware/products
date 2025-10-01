@@ -230,7 +230,7 @@ bool ApiIsEnabled(string name)
 }
 
 IResourceBuilder<ProjectResource>? RegisterTemplateIfEnabled<T>(string name, int port) where T : IProjectMetadata, new() =>
-    RegisterClientIfEnabled<T>(name, useLaunchProfile: false)?.WithHttpsEndpoint(port: port, name: name);
+    RegisterClientIfEnabled<T>(name, useLaunchProfile: false)?.WithHttpsEndpoint(port: port);
 
 IResourceBuilder<ProjectResource>? RegisterClientIfEnabled<T>(string name, bool explicitStart = false, bool useLaunchProfile = true) where T : IProjectMetadata, new()
 {
