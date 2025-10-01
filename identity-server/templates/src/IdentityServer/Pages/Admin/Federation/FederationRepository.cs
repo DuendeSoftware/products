@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
+using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Services;
 using IdentityServerTemplate.Pages.Admin.Federation.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +39,9 @@ public class EditProviderModel : CreateProviderModel
 
 public class FederationRepository(
     IEnumerable<IProviderConfigurationModelFactory> providerConfigurationModelFactories,
-    ConfigurationDbContext context)
+    ConfigurationDbContext context,
+    ICache<IdentityProvider>? identityProviderCache = null,
+    ICache<IEnumerable<IdentityProviderName>>? identityProviderNamesCache = null)
 {
     public IProviderConfigurationModelFactory FindProviderConfigurationModelFactoryFor(string type)
     {
@@ -122,6 +126,8 @@ public class FederationRepository(
 
         context.IdentityProviders.Add(identityProviderModel.ToEntity());
         await context.SaveChangesAsync();
+
+        await RemoveFromCacheAsync(identityProviderModel.Scheme);
     }
 
     public async Task UpdateAsync(EditProviderModel model)
@@ -142,6 +148,8 @@ public class FederationRepository(
         identityProvider.Properties = identityProviderModel.ToEntity().Properties;
 
         await context.SaveChangesAsync();
+
+        await RemoveFromCacheAsync(identityProvider.Scheme);
     }
 
     public async Task DeleteAsync(string scheme)
@@ -151,5 +159,16 @@ public class FederationRepository(
 
         context.IdentityProviders.Remove(identityProvider);
         await context.SaveChangesAsync();
+
+        await RemoveFromCacheAsync(scheme);
+    }
+
+    private async Task RemoveFromCacheAsync(string scheme)
+    {
+        if (identityProviderCache != null && identityProviderNamesCache != null)
+        {
+            await identityProviderCache.RemoveAsync(scheme);
+            await identityProviderNamesCache.RemoveAsync("__all__");
+        }
     }
 }
