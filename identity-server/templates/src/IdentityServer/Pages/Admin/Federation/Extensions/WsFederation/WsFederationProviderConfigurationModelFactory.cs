@@ -16,24 +16,27 @@ public class WsFederationProviderConfigurationModelFactory : IProviderConfigurat
 
     public IProviderConfigurationModel CreateFrom(IdentityProvider identityProvider)
     {
-        var model = new WsFederationProviderConfigurationModel();
+        var provider = new WsFederationProvider(identityProvider);
 
-        model.IconUrl = identityProvider.Properties["IconUrl"];
-        model.MetadataAddress = identityProvider.Properties["MetadataAddress"];
-        model.RelyingPartyId = identityProvider.Properties["RelyingPartyId"];
-        model.AllowIdpInitiated = identityProvider.Properties.ContainsKey("AllowIdpInitiated") &&
-                                  "true".Equals(identityProvider.Properties["AllowIdpInitiated"], StringComparison.Ordinal);
-
-        return model;
+        return new WsFederationProviderConfigurationModel
+        {
+            IconUrl = provider.Properties["IconUrl"],
+            MetadataAddress = provider.MetadataAddress ?? "",
+            RelyingPartyId = provider.RelyingPartyId ?? "",
+            AllowIdpInitiated = provider.AllowIdpInitiated
+        };
     }
 
-    public void UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration)
+    public IdentityProvider UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration)
     {
+        var provider = new WsFederationProvider(identityProviderModel);
         var model = (WsFederationProviderConfigurationModel)modelConfiguration;
 
-        identityProviderModel.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
-        identityProviderModel.Properties["MetadataAddress"] = model.MetadataAddress.Trim();
-        identityProviderModel.Properties["RelyingPartyId"] = model.RelyingPartyId.Trim();
-        identityProviderModel.Properties["AllowIdpInitiated"] = model.AllowIdpInitiated ? "true" : "false";
+        provider.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
+        provider.MetadataAddress = model.MetadataAddress.Trim();
+        provider.RelyingPartyId = model.RelyingPartyId.Trim();
+        provider.AllowIdpInitiated = model.AllowIdpInitiated;
+
+        return provider;
     }
 }

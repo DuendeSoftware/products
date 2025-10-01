@@ -16,21 +16,25 @@ public class GoogleProviderConfigurationModelFactory : IProviderConfigurationMod
 
     public IProviderConfigurationModel CreateFrom(IdentityProvider identityProvider)
     {
-        var model = new GoogleProviderConfigurationModel();
+        var provider = new GoogleIdentityProvider(identityProvider);
 
-        model.IconUrl = identityProvider.Properties["IconUrl"];
-        model.ClientId = identityProvider.Properties["ClientId"];
-        model.ClientSecret = identityProvider.Properties["ClientSecret"];
-
-        return model;
+        return new GoogleProviderConfigurationModel
+        {
+            IconUrl = provider.Properties["IconUrl"],
+            ClientId = provider.ClientId ?? "",
+            ClientSecret = provider.ClientSecret ?? ""
+        };
     }
 
-    public void UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration)
+    public IdentityProvider UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration)
     {
+        var provider = new GoogleIdentityProvider(identityProviderModel);
         var model = (GoogleProviderConfigurationModel)modelConfiguration;
 
-        identityProviderModel.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
-        identityProviderModel.Properties["ClientId"] = model.ClientId.Trim();
-        identityProviderModel.Properties["ClientSecret"] = model.ClientSecret.Trim();
+        provider.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
+        provider.ClientId = model.ClientId.Trim();
+        provider.ClientSecret = model.ClientSecret.Trim();
+
+        return provider;
     }
 }

@@ -16,31 +16,33 @@ public class OidcProviderConfigurationModelFactory : IProviderConfigurationModel
 
     public IProviderConfigurationModel CreateFrom(IdentityProvider identityProvider)
     {
-        var model = new OidcProviderConfigurationModel();
+        var provider = new OidcProvider(identityProvider);
 
-        model.IconUrl = identityProvider.Properties["IconUrl"];
-        model.Authority = identityProvider.Properties["Authority"];
-        model.ClientId = identityProvider.Properties["ClientId"];
-        model.ClientSecret = identityProvider.Properties["ClientSecret"];
-        model.ResponseType = identityProvider.Properties["ResponseType"];
-        model.Scope = identityProvider.Properties["Scope"];
-        model.UsePkce = !identityProvider.Properties.ContainsKey("UsePkce") ||
-                        "true".Equals(identityProvider.Properties["UsePkce"], StringComparison.Ordinal);
-
-        return model;
+        return new OidcProviderConfigurationModel
+        {
+            IconUrl = provider.Properties["IconUrl"],
+            Authority = provider.Authority ?? "",
+            ClientId = provider.ClientId ?? "",
+            ClientSecret = provider.ClientSecret ?? "",
+            UsePkce = provider.UsePkce,
+            ResponseType = provider.ResponseType,
+            Scope = provider.Scope
+        };
     }
 
-    public void UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration)
+    public IdentityProvider UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration)
     {
+        var provider = new OidcProvider(identityProviderModel);
         var model = (OidcProviderConfigurationModel)modelConfiguration;
 
+        provider.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
+        provider.Authority = model.Authority.Trim();
+        provider.ClientId = model.ClientId.Trim();
+        provider.ClientSecret = model.ClientSecret.Trim();
+        provider.ResponseType = model.ResponseType.Trim();
+        provider.Scope = model.Scope.Trim();
+        provider.UsePkce = model.UsePkce;
 
-        identityProviderModel.Properties["IconUrl"] = model.IconUrl?.Trim() ?? string.Empty;
-        identityProviderModel.Properties["Authority"] = model.Authority.Trim();
-        identityProviderModel.Properties["ClientId"] = model.ClientId.Trim();
-        identityProviderModel.Properties["ClientSecret"] = model.ClientSecret.Trim();
-        identityProviderModel.Properties["ResponseType"] = model.ResponseType.Trim();
-        identityProviderModel.Properties["Scope"] = model.Scope.Trim();
-        identityProviderModel.Properties["UsePkce"] = model.UsePkce ? "true" : "false";
+        return provider;
     }
 }

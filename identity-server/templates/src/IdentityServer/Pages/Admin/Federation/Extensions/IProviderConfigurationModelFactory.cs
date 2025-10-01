@@ -11,5 +11,5 @@ public interface IProviderConfigurationModelFactory
     public IProviderConfigurationModel Create();
     public IProviderConfigurationModel CreateFrom(IdentityProvider identityProvider);
 
-    void UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration);
+    IdentityProvider UpdateModelFrom(IdentityProvider identityProviderModel, IProviderConfigurationModel modelConfiguration);
 }

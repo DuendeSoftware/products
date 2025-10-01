@@ -110,15 +110,15 @@ public class FederationRepository(
             throw new ValidationException($"A provider with the scheme '{model.Scheme}' already exists.");
         }
 
-        var identityProviderModel = new Duende.IdentityServer.Models.IdentityProvider(model.Type)
-        {
-            Scheme = model.Scheme.Trim(),
-            DisplayName = model.Name?.Trim(),
-            Enabled = model.Enabled
-        };
-
-        FindProviderConfigurationModelFactoryFor(model.Type)
-            .UpdateModelFrom(identityProviderModel, model.Configuration);
+        var identityProviderModel = FindProviderConfigurationModelFactoryFor(type: model.Type)
+            .UpdateModelFrom(
+                identityProviderModel: new Duende.IdentityServer.Models.IdentityProvider(model.Type)
+                {
+                    Scheme = model.Scheme.Trim(),
+                    DisplayName = model.Name?.Trim(),
+                    Enabled = model.Enabled
+                },
+                modelConfiguration: model.Configuration);
 
         context.IdentityProviders.Add(identityProviderModel.ToEntity());
         await context.SaveChangesAsync();
@@ -131,19 +131,15 @@ public class FederationRepository(
         var identityProvider = await context.IdentityProviders
             .SingleOrDefaultAsync(x => x.Scheme == model.Scheme) ?? throw new ArgumentException("Invalid scheme name");
 
-        var identityProviderModel = identityProvider.ToModel();
-
-        identityProviderModel.DisplayName = model.Name?.Trim();
-        identityProviderModel.Enabled = model.Enabled;
-
-        FindProviderConfigurationModelFactoryFor(model.Type)
-            .UpdateModelFrom(identityProviderModel, model.Configuration);
+        var identityProviderModel = FindProviderConfigurationModelFactoryFor(type: model.Type)
+            .UpdateModelFrom(
+                identityProviderModel: identityProvider.ToModel(),
+                modelConfiguration: model.Configuration);
 
         // Convert back to entity
-        var updatedIdentityProvider = identityProviderModel.ToEntity();
-        identityProvider.DisplayName = updatedIdentityProvider.DisplayName;
-        identityProvider.Enabled = updatedIdentityProvider.Enabled;
-        identityProvider.Properties = updatedIdentityProvider.Properties;
+        identityProvider.DisplayName = model.Name?.Trim();
+        identityProvider.Enabled = model.Enabled;
+        identityProvider.Properties = identityProviderModel.ToEntity().Properties;
 
         await context.SaveChangesAsync();
     }

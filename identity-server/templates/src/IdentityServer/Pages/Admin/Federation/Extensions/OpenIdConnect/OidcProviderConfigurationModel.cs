@@ -40,5 +40,5 @@ public class OidcProviderConfigurationModel : IProviderConfigurationModel
 
     [Required]
     [Display(Name = "Scope", Order = 7)]
-    public string Scope { get; set; } = "openid profile";
+    public string Scope { get; set; } = "openid";
 }
