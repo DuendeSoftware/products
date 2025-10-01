@@ -5,13 +5,22 @@
 
     <header class="pb-3 mb-4 border-bottom">
         <h1 class=" fw-bold">
-            <i class="bi bi-laptop text-brand"></i>
+            <i class="bi bi-unlock2 text-brand"></i>
             Federation
         </h1>
         <span class="text-muted">
             Manage social and enterprise external authentication providers.
         </span>
     </header>
+
+    @if (Model.ProviderConfigurationInfo.Count() > 0 && !Model.IsLicensed)
+    {
+        <div class="alert alert-info mt-4" role="alert">
+            Dynamic providers are a <a href="https://duendesoftware.com/products/identityserver" class="alert-link">Duende IdentityServer Enterprise feature</a>,
+            which is not included in your current license.<br/>
+            <a href="https://duendesoftware.com/contact/sales" class="alert-link">Contact us</a> for more information.
+        </div>
+    }
 
     <div class="d-flex justify-content-end align-items-end bg-body-tertiary p-2 flex-nowrap">
 

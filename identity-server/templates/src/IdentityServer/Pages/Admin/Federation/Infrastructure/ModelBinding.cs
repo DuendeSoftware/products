@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using IdentityServerTemplate.Pages.Admin.Federation.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 

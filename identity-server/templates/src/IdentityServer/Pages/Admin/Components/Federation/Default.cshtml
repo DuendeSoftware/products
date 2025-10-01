@@ -2,10 +2,10 @@
 
 <div class="card h-100 text-bg-light">
     <h5 class="card-header">
-        <i class="bi bi-hourglass-split me-2"></i>
+        <i class="bi bi-unlock2 me-2"></i>
         Federation Gateway
         <a asp-page="/Admin/Federation/Index" class="float-end">
-            <i class="bi bi-binoculars"></i>
+            <i class="bi bi-plus-circle"></i>
             <span class="d-none">Manage External Providers</span>
         </a>
     </h5>
@@ -13,5 +13,14 @@
         <p class="display-2 mb-0 text-center">
             @Model.Count
         </p>
+        @if (Model.Count > 0 && !Model.IsLicensed)
+        {
+            <div class="alert alert-info mt-4" role="alert">
+                You have @Model.Count external providers configured.<br/><br/>
+                Dynamic providers are a <a href="https://duendesoftware.com/products/identityserver" class="alert-link">Duende IdentityServer Enterprise feature</a>,
+                which is not included in your current license.<br/>
+                <a href="https://duendesoftware.com/contact/sales" class="alert-link">Contact us</a> for more information.
+            </div>
+        }
     </div>
 </div>

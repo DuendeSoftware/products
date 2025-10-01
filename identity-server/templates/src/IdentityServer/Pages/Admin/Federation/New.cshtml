@@ -4,7 +4,7 @@
 <div class="container-fluid mb-4 px-0">
     <header class="pb-3 mb-4 border-bottom">
         <h1 class=" fw-bold">
-            <i class="bi bi-laptop text-brand"></i>
+            <i class="bi bi-unlock2 text-brand"></i>
             Create New External Provider
         </h1>
         <span class="text-muted">
@@ -57,14 +57,6 @@
                           <small class="mb-2 text-body-secondary d-block fst-italic">
                             Configure the provider settings.
                           </small>
-
-                          @if (Model.InputModel.Configuration.IsIconUrlEditable())
-                          {
-                              <div class="form-group mb-3">
-                                  <label asp-for="@Model.InputModel.Configuration.IconUrl" class="form-label"></label>
-                                  <input class="form-control form-control-sm" asp-for="@Model.InputModel.Configuration.IconUrl" autofocus />
-                              </div>
-                          }
 
                           <div class="form-group mb-3">
                             <label asp-for="@Model.InputModel.Scheme" class="form-label"></label>

@@ -14,11 +14,16 @@ else
 {
     ModelPropertyCollection modelProperties = ViewData.ModelMetadata.GetMetadataForType(ViewData.Model.GetType()).Properties;
     foreach (var prop in modelProperties
-                 .Where(metadata => metadata.ShowForEdit && !metadata.IsComplexType && metadata.PropertyName != "IconUrl"))
+                 .Where(metadata => metadata is { ShowForEdit: true, IsComplexType: false })
+                 .OrderBy(metadata => metadata.Order))
     {
         if (prop.HideSurroundingHtml)
         {
             @Html.Editor(prop.PropertyName)
+        }
+        else if (prop.TemplateHint is "HiddenInput" or "Hidden")
+        {
+            @Html.Hidden(prop.PropertyName)
         }
         else
         {

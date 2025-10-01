@@ -34,7 +34,7 @@ public class EditModel(
 
             var callbackUrlBuilder = new UriBuilder(
                 httpContextAccessor.HttpContext?.Request.Scheme + "://" + httpContextAccessor.HttpContext?.Request.Host + "/");
-            callbackUrlBuilder.Path = identityServerOptions.DynamicProviders.PathPrefix + "/" + InputModel.Scheme + "/signin-oidc";
+            callbackUrlBuilder.Path = identityServerOptions.DynamicProviders.PathPrefix + "/" + InputModel.Scheme + "/" + model.Configuration.GetCallbackUrlSuffix();
             InputModel.CallbackUrl = callbackUrlBuilder.ToString();
 
             return Page();

@@ -1,7 +1,7 @@
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
+using IdentityServerTemplate.Pages.Admin.Federation.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace IdentityServerTemplate.Pages.Admin.Federation;
@@ -31,7 +31,7 @@ public class CreateProviderModel : ProviderSummaryModel
 
 public class EditProviderModel : CreateProviderModel
 {
-    [DisplayName("Callback URL")]
+    [Display(Name = "Callback URL")]
     public string? CallbackUrl { get; set; }
 }
 
@@ -94,8 +94,7 @@ public class FederationRepository(
             Scheme = identityProviderModel.Scheme,
             Name = identityProviderModel.DisplayName,
             Enabled = identityProviderModel.Enabled,
-            Configuration = FindProviderConfigurationModelFactoryFor(identityProviderModel.Type).CreateFrom(identityProviderModel),
-            CallbackUrl = null
+            Configuration = FindProviderConfigurationModelFactoryFor(identityProviderModel.Type).CreateFrom(identityProviderModel)
         };
 
         return model;
