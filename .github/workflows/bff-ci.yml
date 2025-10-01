@@ -152,7 +152,7 @@ jobs:
         restore-keys: playwright-${{ runner.os }}-
     - name: Install Playwright
       if: steps.playwright-cache.outputs.cache-hit != 'true'
-      run: pwsh test/Hosts.Tests/bin/Debug/net9.0/playwright.ps1 install --with-deps
+      run: pwsh test/Hosts.Tests/bin/Debug/net10.0/playwright.ps1 install --with-deps
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test - test/Hosts.Tests
