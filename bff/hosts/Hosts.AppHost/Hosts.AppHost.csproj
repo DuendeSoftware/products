@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.2" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
@@ -13,12 +13,6 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
-
-    <!--
-      Aspire.Hosting.AppHost 9.4.2 has a transitive dependency on KubernetesClient 17.0.4 which has a vulnerability.
-      Todo: Remove this when Aspire.Hosting.AppHost is patched.
-    -->
-    <PackageReference Include="KubernetesClient" />
   </ItemGroup>
 
   <ItemGroup>

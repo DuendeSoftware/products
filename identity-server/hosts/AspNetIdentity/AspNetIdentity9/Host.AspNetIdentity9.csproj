@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <RootNamespace>IdentityServerHost</RootNamespace>
     <Nullable>enable</Nullable>
     <AnalysisMode>all</AnalysisMode>
