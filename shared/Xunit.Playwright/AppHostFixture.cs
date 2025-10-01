@@ -148,16 +148,16 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
     /// <summary>
     /// This method builds an http client.
     /// </summary>
-    /// <param name="clientName"></param>
+    /// <param name="hostName"></param>
     /// <returns></returns>
-    public HttpClient CreateHttpClient(string clientName)
+    public HttpClient CreateHttpClient(string hostName)
     {
         HttpMessageHandler inner;
         Uri? baseAddress;
 
         if (UsingAlreadyRunningInstance)
         {
-            var url = GetUrlTo(clientName);
+            var url = GetUrlTo(hostName);
             baseAddress = url;
 
             inner = new SocketsHttpHandler
@@ -182,7 +182,7 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
                 throw new NotSupportedException("App should not be null");
             }
 
-            var client = _app.CreateHttpClient(clientName);
+            var client = _app.CreateHttpClient(hostName);
             baseAddress = client.BaseAddress;
 
             // We can't directly use the HTTP Client, because we need cookie support, but if we
@@ -221,11 +221,11 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
         };
     }
 
-    public Uri GetUrlTo(string clientName)
+    public Uri GetUrlTo(string hostName)
     {
         if (UsingAlreadyRunningInstance)
         {
-            return routes.UrlTo(clientName);
+            return routes.UrlTo(hostName);
         }
         else
         {
@@ -235,7 +235,7 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
                 throw new NullReferenceException("App should not be null");
             }
 
-            return _app.GetEndpoint(clientName);
+            return _app.GetEndpoint(hostName);
 #else
             Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
             return null!;

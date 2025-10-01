@@ -60,6 +60,12 @@
     <ProjectReference Include="..\..\..\hosts\Main\Main9\Host.Main9.csproj" />
     <ProjectReference Include="..\..\..\migrations\AspNetIdentityDb\AspNetIdentityDb.csproj" />
     <ProjectReference Include="..\..\..\migrations\IdentityServerDb\IdentityServerDb.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerAspNetIdentity\IdentityServerAspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerEmpty\IdentityServerEmpty.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerEntityFramework\IdentityServerEntityFramework.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerInMem\IdentityServerInMem.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServer\IdentityServerTemplate.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\WebApp\TemplateWebApp.csproj" />
   </ItemGroup>
 
 </Project>

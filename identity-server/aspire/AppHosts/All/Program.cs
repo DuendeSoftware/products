@@ -163,6 +163,11 @@ void ConfigureWebClients()
     RegisterClientIfEnabled<Projects.MvcJarJwt>("mvc-jar-jwt");
     RegisterClientIfEnabled<Projects.MvcJarUriJwt>("mvc-jar-uri-jwt");
     RegisterClientIfEnabled<Projects.Web>("web");
+    RegisterTemplateIfEnabled<Projects.IdentityServerTemplate>("template-is", 7001);
+    RegisterTemplateIfEnabled<Projects.IdentityServerEmpty>("template-is-empty", 7002);
+    RegisterTemplateIfEnabled<Projects.IdentityServerInMem>("template-is-inmem", 7003);
+    RegisterTemplateIfEnabled<Projects.IdentityServerAspNetIdentity>("template-is-aspid", 7004);
+    RegisterTemplateIfEnabled<Projects.IdentityServerEntityFramework>("template-is-ef", 7005);
 }
 
 void ConfigureConsoleClients()
@@ -224,15 +229,24 @@ bool ApiIsEnabled(string name)
     return appConfig.UseApis.TryGetValue(name, out var enabled) && enabled;
 }
 
-void RegisterClientIfEnabled<T>(string name, bool explicitStart = false) where T : IProjectMetadata, new()
+IResourceBuilder<ProjectResource>? RegisterTemplateIfEnabled<T>(string name, int port) where T : IProjectMetadata, new() =>
+    RegisterClientIfEnabled<T>(name, useLaunchProfile: false)?.WithHttpsEndpoint(port: port, name: name);
+
+IResourceBuilder<ProjectResource>? RegisterClientIfEnabled<T>(string name, bool explicitStart = false, bool useLaunchProfile = true) where T : IProjectMetadata, new()
 {
     if (ClientIsEnabled(typeof(T).Name))
     {
-        var resourceBuilder = builder.AddProject<T>(name)
-            .AddIdentityAndApiReferences(projectRegistry);
+        var resourceBuilder = useLaunchProfile ?
+            builder.AddProject<T>(name) :
+            builder.AddProject<T>(name, launchProfileName: null);
+        resourceBuilder.AddIdentityAndApiReferences(projectRegistry);
         if (explicitStart)
         {
             resourceBuilder.WithExplicitStart();
         }
+
+        return resourceBuilder;
     }
+
+    return null;
 }
