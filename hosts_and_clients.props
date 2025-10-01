@@ -2,6 +2,7 @@
 <Project>
 
   <PropertyGroup>
+
     <TargetFrameworks>net10.0</TargetFrameworks>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <IsPackable>false</IsPackable>
