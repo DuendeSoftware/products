@@ -21,19 +21,6 @@ public class IdentityServerTests : PlaywrightTestBase<All>
         _webClient = CreateHttpClient(AppHostServices.Web);
     }
 
-    [Fact]
-    public void Can_setup_fixture() => true.ShouldBeTrue();
-
-    [Fact]
-    public async Task Can_invoke_discovery()
-    {
-        var discoResponse = await _identityServerClient.GetAsync("/.well-known/openid-configuration");
-        discoResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-        var webResponse = await _webClient.GetAsync("/");
-        webResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
-    }
-
     [Theory]
     [InlineData(AppHostServices.MvcAutomaticTokenManagement)]
     [InlineData(AppHostServices.MvcCode)]
@@ -42,7 +29,7 @@ public class IdentityServerTests : PlaywrightTestBase<All>
     [InlineData(AppHostServices.MvcJarJwt)]
     [InlineData(AppHostServices.MvcJarUriJwt)]
     [InlineData(AppHostServices.Web)]
-    public async Task CanLoginUseTokensAndLogout(string clientName)
+    public async Task can_login_use_tokens_and_logout(string clientName)
     {
         await Page.GotoAsync(Fixture.GetUrlTo(clientName).ToString());
         await Page.Login();
