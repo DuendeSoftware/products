@@ -53,12 +53,10 @@
     <Project Path="bff/templates/src/BffRemoteApi/BffRemoteApi.csproj" />
   </Folder>
   <Folder Name="/bff/test/">
-    <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="bff/test/Bff.Blazor.Client.UnitTests/Bff.Blazor.Client.UnitTests.csproj" />
     <Project Path="bff/test/Bff.Blazor.UnitTests/Bff.Blazor.UnitTests.csproj" />
     <Project Path="bff/test/Bff.EntityFramework.Tests/Bff.EntityFramework.Tests.csproj" />
-    
-    
+    <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>
   <Folder Name="/identity-server/" />
@@ -111,24 +109,24 @@
     <Project Path="identity-server/hosts/Shared/Host.Shared.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/AspNetIdentity/">
+    <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity10/Host.AspNetIdentity10.csproj" />
     <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity8/Host.AspNetIdentity8.csproj" />
     <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity9/Host.AspNetIdentity9.csproj" />
-    <Project Path="identity-server/hosts/AspNetIdentity/AspNetIdentity10/Host.AspNetIdentity10.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/EntityFramework/">
+    <Project Path="identity-server/hosts/EntityFramework/EntityFramework10/Host.EntityFramework10.csproj" />
     <Project Path="identity-server/hosts/EntityFramework/EntityFramework8/Host.EntityFramework8.csproj" />
     <Project Path="identity-server/hosts/EntityFramework/EntityFramework9/Host.EntityFramework9.csproj" />
-    <Project Path="identity-server/hosts/EntityFramework/EntityFramework10/Host.EntityFramework10.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/Main/">
+    <Project Path="identity-server/hosts/Main/Main10/Host.Main10.csproj" />
     <Project Path="identity-server/hosts/Main/Main8/Host.Main8.csproj" />
     <Project Path="identity-server/hosts/Main/Main9/Host.Main9.csproj" />
-    <Project Path="identity-server/hosts/Main/Main10/Host.Main10.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/UI/">
-    <Project Path="identity-server/hosts/UI/Main/UI.Main.csproj" />
-    <Project Path="identity-server/hosts/UI/EntityFramework/UI.EntityFramework.csproj" />
     <Project Path="identity-server/hosts/UI/AspNetIdentity/UI.AspNetIdentity.csproj" />
+    <Project Path="identity-server/hosts/UI/EntityFramework/UI.EntityFramework.csproj" />
+    <Project Path="identity-server/hosts/UI/Main/UI.Main.csproj" />
   </Folder>
   <Folder Name="/identity-server/migrations/">
     <Project Path="identity-server/migrations/AspNetIdentityDb/AspNetIdentityDb.csproj" />
@@ -136,15 +134,6 @@
   </Folder>
   <Folder Name="/identity-server/perf/">
     <Project Path="identity-server/perf/IdentityServer.PerfTests/IdentityServer.PerfTests.csproj" />
-  </Folder>
-  <Folder Name="/identity-server/src/">
-    <Project Path="identity-server/src/AspNetIdentity/Duende.IdentityServer.AspNetIdentity.csproj" />
-    <Project Path="identity-server/src/Configuration.EntityFramework/Duende.IdentityServer.Configuration.EntityFramework.csproj" />
-    <Project Path="identity-server/src/Configuration/Duende.IdentityServer.Configuration.csproj" />
-    <Project Path="identity-server/src/EntityFramework.Storage/Duende.IdentityServer.EntityFramework.Storage.csproj" />
-    <Project Path="identity-server/src/EntityFramework/Duende.IdentityServer.EntityFramework.csproj" />
-    <Project Path="identity-server/src/IdentityServer/Duende.IdentityServer.csproj" />
-    <Project Path="identity-server/src/Storage/Duende.IdentityServer.Storage.csproj" />
   </Folder>
   <Folder Name="/identity-server/templates/" />
   <Folder Name="/identity-server/templates/src/">
@@ -159,6 +148,15 @@
     <Project Path="identity-server/test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/identity-server/test/src/">
+    <Project Path="identity-server/src/AspNetIdentity/Duende.IdentityServer.AspNetIdentity.csproj" />
+    <Project Path="identity-server/src/Configuration.EntityFramework/Duende.IdentityServer.Configuration.EntityFramework.csproj" />
+    <Project Path="identity-server/src/Configuration/Duende.IdentityServer.Configuration.csproj" />
+    <Project Path="identity-server/src/EntityFramework.Storage/Duende.IdentityServer.EntityFramework.Storage.csproj" />
+    <Project Path="identity-server/src/EntityFramework/Duende.IdentityServer.EntityFramework.csproj" />
+    <Project Path="identity-server/src/IdentityServer/Duende.IdentityServer.csproj" />
+    <Project Path="identity-server/src/Storage/Duende.IdentityServer.Storage.csproj" />
+  </Folder>
   <Folder Name="/identity-server/_solution-items/">
     <File Path="identity-server/README.md" />
     <File Path="identity-server\CHANGELOG.md" />
@@ -169,7 +167,7 @@
   </Folder>
   <Folder Name="/identity-server/_solution-items/props/">
     <File Path="Directory.Packages.props" />
-    <File Path="samples.props" />
+    <File Path="hosts_and_clients.props" />
     <File Path="src.props" />
     <File Path="templates.props" />
     <File Path="test.props" />

@@ -13,6 +13,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace ConsoleResourceIndicators;
 
+// TODO: Upgrade this client to remove dependancy on IWebHost & WebHostBuilder
+#pragma warning disable ASPDEPR008 // IWebHost is deprecated in net10.0
+#pragma warning disable ASPDEPR004 // WebHostBuilder is deprecated in net10.0
+
 public class SystemBrowser : IBrowser
 {
     public int Port { get; }
