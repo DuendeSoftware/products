@@ -7,6 +7,7 @@ using IdentityServerTemplate.Pages.Admin.Federation;
 using IdentityServerTemplate.Pages.Admin.Federation.Extensions;
 using IdentityServerTemplate.Pages.Admin.Federation.Extensions.Google;
 using IdentityServerTemplate.Pages.Admin.Federation.Extensions.OpenIdConnect;
+using IdentityServerTemplate.Pages.Admin.Federation.Extensions.SAML2;
 using IdentityServerTemplate.Pages.Admin.Federation.Extensions.WsFederation;
 using IdentityServerTemplate.Pages.Admin.IdentityScopes;
 using Microsoft.AspNetCore.StaticFiles;
@@ -109,6 +110,7 @@ internal static class HostingExtensions
             {
                 federation.AddOidcDynamicProvider();
                 federation.AddGoogleDynamicProvider();
+                federation.AddSaml2DynamicProvider();
                 federation.AddWsFederationDynamicProvider();
             });
 
