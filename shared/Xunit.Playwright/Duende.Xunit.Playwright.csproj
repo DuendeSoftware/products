@@ -27,8 +27,6 @@
     <PackageReference Include="xunit.core" />
   </ItemGroup>
 
-
-
   <ItemGroup>
     <Using Include="Microsoft.Extensions.DependencyInjection" />
     <Using Include="System.Net" />

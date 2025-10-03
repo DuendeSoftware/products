@@ -1,17 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <TargetFrameworks>net10.0</TargetFrameworks>
     <RootNamespace>IdentityServerHost</RootNamespace>
     <Nullable>enable</Nullable>
     <AnalysisMode>all</AnalysisMode>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="OpenTelemetry" />
@@ -25,12 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\UI\EntityFramework\UI.EntityFramework.csproj" />
     <ProjectReference Include="..\..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
     <ProjectReference Include="..\..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
-    <ProjectReference Include="..\..\..\src\Configuration.EntityFramework\Duende.IdentityServer.Configuration.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\UI\AspNetIdentity\UI.AspNetIdentity.csproj" />
     <ProjectReference Include="..\..\Shared\Host.Shared.csproj" />
   </ItemGroup>
+
 </Project>

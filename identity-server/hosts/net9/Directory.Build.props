@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="../../../hosts_and_clients.props" />
+  <Import Project="../../identity-server.props" />
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsIdSrvProject>true</IsIdSrvProject>
+  </PropertyGroup>
+</Project>

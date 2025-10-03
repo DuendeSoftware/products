@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
     <IsBffProject>true</IsBffProject>
   </PropertyGroup>
   <Import Project="../../hosts_and_clients.props" />
