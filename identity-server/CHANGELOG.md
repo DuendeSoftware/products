@@ -20,7 +20,9 @@
   This makes the IdentityServer route names appear in OTel traces.
 - Support for custom parameters in the Authorize Redirect Uri by @bhazen
   - Adds a new `CustomParameters` property to `AuthorizeResponse` to support adding custom query parameters to the redirect uri. This will typically be used in conjunction with a custom `IAuthorizeResponseGenerator`.
-
+- Updated ASP.NET Identity package to persist session claims based on an interface @bhazen
+  - The ASP.NET Identity integration package now persists session claims based on `ISessionClaimsFilter.FilterToSessionClaimsAsync` which comes with a default implementation
+  - The new interface can be implemented to customize which session claims are persisted in non-default scenarios.
 ## Bug Fixes
 - Reject Pushed Authorization Requests with parameters duplicated in a JAR by @wcabus
 - Emit Telemetry Event for Introspection Requests for Valid Tokens by @bhazen

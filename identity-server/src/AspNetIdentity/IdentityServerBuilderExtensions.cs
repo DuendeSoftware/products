@@ -10,6 +10,7 @@ using Duende.IdentityServer.AspNetIdentity;
 using Duende.IdentityServer.Configuration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -20,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class IdentityServerBuilderExtensions
 {
     /// <summary>
-    /// Configures IdentityServer to use the ASP.NET Identity implementations 
+    /// Configures IdentityServer to use the ASP.NET Identity implementations
     /// of IUserClaimsPrincipalFactory, IResourceOwnerPasswordValidator, and IProfileService.
     /// Also configures some of ASP.NET Identity's options for use with IdentityServer (such as claim types to use
     /// and authentication cookie settings).
@@ -41,10 +42,8 @@ public static class IdentityServerBuilderExtensions
             options.ClaimsIdentity.EmailClaimType = JwtClaimTypes.Email;
         });
 
-        builder.Services.Configure<SecurityStampValidatorOptions>(opts =>
-        {
-            opts.OnRefreshingPrincipal = SecurityStampValidatorCallback.UpdatePrincipal;
-        });
+        builder.Services.TryAddTransient<ISessionClaimsFilter, DefaultSessionClaimsFilter>();
+        builder.Services.ConfigureOptions<ConfigureSecurityStampValidatorOptions>();
 
         builder.Services.ConfigureApplicationCookie(options =>
         {
