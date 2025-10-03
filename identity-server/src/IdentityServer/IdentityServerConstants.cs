@@ -257,6 +257,7 @@ public static class IdentityServerConstants
         public const string DeviceAuthorization = ConnectPathPrefix + "/deviceauthorization";
         public const string PushedAuthorization = ConnectPathPrefix + "/par";
         public const string OAuthMetadata = ".well-known/oauth-authorization-server";
+        public const string DynamicClientRegistration = ConnectPathPrefix + "/dcr";
 
 
         public const string MtlsPathPrefix = ConnectPathPrefix + "/mtls";
