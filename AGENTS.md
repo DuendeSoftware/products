@@ -84,9 +84,36 @@ Use shouldly for assertions.
 
 Use XUnit for test projects.
 
-TODO test categories/traits
-- TODO test file placement
-- TODO test names
+#### Test Categories/Traits
+All test classes must define a category using the `[Trait("Category", Category)]` attribute on test methods:
+1. Declare a private const string at the top of each test class:
+   ```csharp
+   private const string Category = "YourCategoryName";
+   ```
+2. Apply the trait to each test method:
+   ```csharp
+   [Fact]
+   [Trait("Category", Category)]
+   public void your_test_method()
+   ```
+
+**Category naming conventions:**
+- For conformance tests: `"Conformance.{Area}.{TestClassName}"` (e.g., `"Conformance.Basic.CodeFlowTests"`)
+- For validation tests: descriptive names like `"TokenRequest Validation - RefreshToken - Invalid"`
+- For feature tests: use the feature area name (e.g., `"PKCE"`, `"Local API Integration"`)
+- For extensibility tests: use the class name (e.g., `"CustomClaimsServiceTests"`)
+
+#### Test File Placement
+- **Unit tests**: `/identity-server/test/IdentityServer.UnitTests/` - organized by feature area matching the main source structure
+- **Integration tests**: `/identity-server/test/IdentityServer.IntegrationTests/` - organized by functional area (Endpoints, Conformance, Extensibility, etc.)
+- **End-to-end tests**: `/identity-server/test/IdentityServer.EndToEndTests/` - for full system tests
+
+#### Test Names
+Use descriptive, lowercase method names with underscores:
+- **Good**: `expired_par_requests_should_fail()`, `duplicate_values_should_throw()`, `custom_should_be_allowed()`
+- **Pattern**: `{condition}_{should}_{expected_outcome}()` or `{action}_{expected_outcome}()`
+- Avoid "Test" suffix in method names
+- Be specific about the scenario being tested
 
 ## Git and GitHub
 - The `main` branch represents the next stable release.
