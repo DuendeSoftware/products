@@ -3,6 +3,7 @@
 
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,6 +15,12 @@ internal static class HostingExtensions
     {
         var authority = builder.Configuration["is-host"];
         var simpleApi = builder.Configuration["simple-api"];
+
+        builder.Services.AddSingleton<IDiscoveryCache>(r =>
+        {
+            var factory = r.GetRequiredService<IHttpClientFactory>();
+            return new DiscoveryCache(authority, () => factory.CreateClient());
+        });
 
         builder.Services.AddSingleton<AssertionService>();
         builder.Services.AddSingleton<RequestUriService>();

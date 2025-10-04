@@ -13,4 +13,5 @@
     <ProjectReference Include="..\..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
     <ProjectReference Include="..\Constants\Constants.csproj" />
   </ItemGroup>
+
 </Project>

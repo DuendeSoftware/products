@@ -2,6 +2,7 @@
 <Project>
   <Import Project="../../hosts_and_clients.props" />
   <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <IsIdSrvProject>true</IsIdSrvProject>
   </PropertyGroup>
 </Project>

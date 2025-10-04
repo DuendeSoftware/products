@@ -1,22 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <!-- This line is needed because:
-    
-    Aspire needs a single target framework 
-      (until this is resolved: https://github.com/dotnet/aspire/issues/2962)
-    
-    When you add <TargetFramework>net9.0</TargetFramework> then aspire thinks there are more than
-    one framework. But this causes a problem for the Directory.Packages.props file.
-
-    In the Directory.Packages.props where we check for $(TargetFramework) == 'net9.0',
-    which is ONLY set if you use <TargetFramework>net9.0</TargetFramework> in the csproj file, not
-    if you set <TargetFramework>. 
-
-    Now normally it's not recommended to set both, however, since this is only for samples, AND
-    we do need this check, we're setting it here as well. 
-
-      -->
     <TargetFramework>net10.0</TargetFramework>
     <IsBffProject>true</IsBffProject>
   </PropertyGroup>
