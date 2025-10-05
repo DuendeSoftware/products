@@ -48,6 +48,58 @@ If a transitive dependency contains a security issue, the preferred solution is 
 ## Breaking Changes
 Breaking changes to public APIs require explicit human approval.
 
+## Development Environment Verification
+
+### Required SDK Version
+The repository requires the .NET SDK version specified in `global.json`. Verify your environment:
+```bash
+dotnet --version
+```
+The SDK supports rollForward to newer versions, but using the specified version ensures consistency.
+
+### Repository Setup Verification
+Before making changes, verify the repository is in a buildable state:
+
+```bash
+# Verify you're in the repository root
+ls global.json products.slnx
+
+# Restore dependencies (required before first build)
+dotnet restore
+
+# Verify basic build works
+dotnet build products.slnx
+```
+
+### Solution File Usage
+- Use **products.slnx** for repository-wide operations
+- Use **{product}/{product}.slnf** for product-specific work (e.g., `identity-server/identity-server.slnf`)
+- Product-specific solution filters are faster for focused development
+
+### Build Configuration
+- **Debug builds**: `dotnet build` (default, faster for development)
+- **Release builds**: `dotnet build -c release` (includes full code analysis, required before PR submission)
+
+### Common Environment Issues
+- **SDK version mismatch**: If build fails, check `dotnet --version` matches global.json requirements
+- **Dependency conflicts**: Run `dotnet restore` if you see package-related errors  
+- **Code analysis warnings**: Release builds treat warnings as errors; Debug builds are more permissive
+
+### Environment Health Check
+Run these commands to verify your environment is ready:
+```bash
+# 1. Check SDK version
+dotnet --version
+
+# 2. Restore all dependencies  
+dotnet restore
+
+# 3. Build repository (should complete without errors)
+dotnet build products.slnx
+```
+
+If any of these commands fail, resolve the issues before proceeding with development work.
+
 ## Project and File Naming Conventions
 
 ### Published Project Names
