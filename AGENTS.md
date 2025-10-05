@@ -48,6 +48,33 @@ If a transitive dependency contains a security issue, the preferred solution is 
 ## Breaking Changes
 Breaking changes to public APIs require explicit human approval.
 
+## Project and File Naming Conventions
+
+### Published Project Names
+Projects that are published as NuGet packages follow the `Duende.{Product}.{Feature}` pattern:
+- **IdentityServer**: `Duende.IdentityServer`, `Duende.IdentityServer.EntityFramework`, `Duende.IdentityServer.Storage`, etc.
+- **BFF**: `Duende.BFF`, `Duende.BFF.Blazor`, `Duende.BFF.EntityFramework`, etc.
+- **JWT Bearer**: `Duende.AspNetCore.Authentication.JwtBearer`
+
+### Test Project Names
+Test projects follow these patterns:
+- **Unit tests**: `{Product}.UnitTests` (e.g., `IdentityServer.UnitTests`, `Bff.Tests`)
+- **Integration tests**: `{Product}.IntegrationTests` (e.g., `IdentityServer.IntegrationTests`)
+- **End-to-end tests**: `{Product}.EndToEndTests` (e.g., `IdentityServer.EndToEndTests`)
+- **Feature-specific tests**: `{Product}.{Feature}.Tests` (e.g., `Bff.EntityFramework.Tests`, `Bff.Blazor.UnitTests`)
+
+### File Naming Conventions
+- **Interfaces**: Start with `I` followed by PascalCase (e.g., `ITokenService.cs`, `IClaimsService.cs`)
+- **Default implementations**: Prefix interface name with `Default` (e.g., `DefaultTokenService.cs`, `DefaultClaimsService.cs`)
+- **Service implementations**: Use descriptive names ending in the service type (e.g., `DistributedDeviceFlowThrottlingService.cs`)
+- **Models**: Use PascalCase descriptive names (e.g., `DeserializedPushedAuthorizationRequest.cs`)
+- **Test files**: Match the class or feature being tested, adding `Tests` suffix (e.g., `PkceTests.cs`, `ConsentTests.cs`)
+
+### Folder Structure Conventions
+- Group related files in folders matching their namespace
+- Place default implementations in a `Default/` subfolder when there are multiple implementations
+- Organize test files to mirror the source code structure they're testing
+
 ## Style and Coding conventions
 Follow the style rules in `.editorconfig`. Do not bypass or reformat contrary to its rules. The project is configured to treat warnings as errors. Following editorconfig rules is mandatory.
 
