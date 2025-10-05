@@ -229,7 +229,45 @@ dotnet build identity-server/identity-server.slnf -c release
 ```
 
 ## CHANGELOG.md
-- Update `/identity-server/CHANGELOG.md` with a summary of changes made. Internal changes, such as refactoring without a breaking change, updates to build tools and the CI/CD pipeline, and updates to clients or hosts should be omitted. `CHANGELOG.md` should only include user-facing changes. Imitate the style of the existing changelog entries in that file.
+Update `/identity-server/CHANGELOG.md` with a summary of changes made. **Only include user-facing changes** - omit internal refactoring, build tool updates, CI/CD changes, and updates to test clients or hosts.
+
+### Entry Categories
+Organize entries under these section headings (use only sections that apply):
+
+- **## Breaking Changes** - Changes that break backward compatibility
+- **## Enhancements** - New features and improvements
+- **## Bug Fixes** - Fixes for existing functionality
+- **## Code Quality** - Minor improvements that don't change behavior
+
+### Entry Format
+Follow this format for each entry:
+```markdown
+- Brief description of the change by @githubusername
+  - Optional detailed explanation with technical context
+  - Additional bullet points for complex changes
+```
+
+### Examples of User-Facing Changes (INCLUDE):
+- New public APIs, interfaces, or services
+- Breaking changes to existing APIs
+- New configuration options or settings
+- Bug fixes that affect end-user behavior
+- Performance improvements
+- Security enhancements
+
+### Examples of Internal Changes (EXCLUDE):
+- Test infrastructure updates
+- Build process changes
+- CI/CD pipeline modifications  
+- Refactoring without behavioral changes
+- Updates to sample clients or hosts
+- Developer tooling improvements
+
+### Version Formatting
+New versions should be added at the top using this format:
+```markdown
+# 7.x.x
+```
 
 # BFF
 TODO
