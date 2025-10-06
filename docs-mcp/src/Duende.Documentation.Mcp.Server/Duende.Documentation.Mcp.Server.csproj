@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AssemblyName>Duende.Documentation.Mcp.Server</AssemblyName>
+    <AssemblyName>Duende.Documentation.Mcp</AssemblyName>
 
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
