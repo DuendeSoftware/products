@@ -148,13 +148,35 @@ When creating a new file, begin with this header.
 Write tests for all new features and bug fixes.
 
 ### Test-driven development
-Before fixing a bug or implementing a new feature:
-1. Write tests that verify the fix or new functionality.
-2. Run the tests with the expectation that they should fail.
-3. If the tests succeeded without changes to the implementation, change the new tests so that they fail.
-4. Once you have tests that fail, commit the failings tests by themselves before proceeding to implementation.
-5. Now proceed to the implementation, making the smallest change that will cause the tests to pass.
-Failing tests provoke a change to the implementation, and we only make a change when we see a failure. To prevent false positives, we must always verify that without our changes, the test would fail.
+**CRITICAL: Test-driven development is mandatory for all features and bug fixes.** Before fixing a bug or implementing a new feature:
+
+1. **Write failing tests first:**
+   - Write tests that verify the fix or new functionality
+   - If the tests require new types (classes, interfaces, etc.) to compile, create **skeleton implementations** with minimal or incorrect behavior
+   - The skeleton implementations should allow tests to compile and run, but produce failures
+   - Example: A property that should default to `true` can be created with a `false` default in the skeleton
+
+2. **Verify tests fail correctly:**
+   - Build the test project to ensure tests compile
+   - Run the tests to verify they fail with meaningful error messages
+   - **Critical:** Tests must actually run and fail, not just fail to compile
+   - If tests pass without implementation changes, revise them to fail
+
+3. **Commit the failing tests:**
+   - Commit only the test files and skeleton implementations (if needed)
+   - Commit message should describe what is being tested and why tests currently fail
+   - Example: "Add failing tests for X feature. Tests fail because property Y defaults to false instead of true."
+
+4. **Implement the fix:**
+   - Now make the smallest changes necessary to make tests pass
+   - Run tests frequently to verify progress
+   - Commit the implementation separately with a clear message
+
+5. **Verify success:**
+   - Run the full test suite to ensure no regressions
+   - Run `dotnet format` to ensure code style compliance
+
+**Why this approach matters:** Failing tests first prove that when tests pass, it's because of your implementation, not because the tests are incorrectly written (false positives). This builds confidence in the test suite.
 
 ### Test style
 There is no need to strictly follow the arrange-act-assert pattern in tests, though it can be helpful. Do not include "arrange-act-assert" comments in tests.
