@@ -293,4 +293,11 @@ public class IdentityServerOptions
     /// Options that control the diagnostic data that is logged by IdentityServer.
     /// </summary>
     public DiagnosticOptions Diagnostics { get; set; } = new DiagnosticOptions();
+
+    /// <summary>
+    /// Gets or sets the configuration profile options.
+    /// Configuration profiles allow expressing the intention that the server is following a particular specification or profile,
+    /// such as FAPI 2.0. IdentityServer will automatically configure options and validate configuration to comply with the profile.
+    /// </summary>
+    public ConfigurationProfileOptions ConfigurationProfile { get; set; } = new ConfigurationProfileOptions();
 }

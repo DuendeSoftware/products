@@ -9,6 +9,12 @@
   - This PR marked static properties referring to counters in Telemetry.cs as readonly
 
 ## Enhancements
+- Add configuration profile abstraction by @josephdecock
+  - Adds infrastructure to support configuration profiles that allow developers to express the intention that they are following a particular specification or profile, such as FAPI 2.0.
+  - Adds `ConfigurationProfiles` static class with constants for well-known profiles (currently includes `Fapi2`).
+  - Adds `ConfigurationProfileOptions` to `IdentityServerOptions` to enable profiles globally.
+  - Adds `ConfigurationProfiles` property to `Client` model to enable profiles per-client.
+  - This is foundational infrastructure; profile enforcement logic will be added in subsequent releases.
 - Skip front-channel logout iframe when unnecessary by @bhazen
 - Callback option for path detection in Dynamic Providers by @bhazen
 - Improved UI locales support by @bhazen

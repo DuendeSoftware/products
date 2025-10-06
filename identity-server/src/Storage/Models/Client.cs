@@ -39,8 +39,11 @@ public class Client
 
     /// <summary>
     /// Specifies the configuration profiles that this client should conform to.
+    /// Configuration profiles allow expressing the intention that the client follows a particular specification or profile,
+    /// such as FAPI 2.0. IdentityServer will validate that the client's configuration complies with the profile's requirements.
+    /// Multiple profiles can be specified. Use constants from <see cref="ConfigurationProfiles"/> for well-known profiles.
     /// </summary>
-    public ICollection<string> ConfigurationProfiles { get; set; } = null!;
+    public ICollection<string> ConfigurationProfiles { get; set; } = new HashSet<string>();
 
     /// <summary>
     /// Client secrets - only relevant for flows that require a secret
