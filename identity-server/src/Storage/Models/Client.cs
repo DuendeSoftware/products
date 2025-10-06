@@ -38,6 +38,11 @@ public class Client
     public string ProtocolType { get; set; } = IdentityServerConstants.ProtocolTypes.OpenIdConnect;
 
     /// <summary>
+    /// Specifies the configuration profiles that this client should conform to.
+    /// </summary>
+    public ICollection<string> ConfigurationProfiles { get; set; } = null!;
+
+    /// <summary>
     /// Client secrets - only relevant for flows that require a secret
     /// </summary>
     public ICollection<Secret> ClientSecrets { get; set; } = new HashSet<Secret>();
