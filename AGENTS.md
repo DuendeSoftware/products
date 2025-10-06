@@ -355,6 +355,80 @@ New versions should be added at the top using this format:
 # 7.x.x
 ```
 
+## IdentityServer Pipeline and Architecture
+
+IdentityServer is primarily an implementation of OpenID Connect and OAuth 2.0 protocol endpoints. Understanding the request processing pipeline is crucial for agents working on features and bug fixes.
+
+### Core Pipeline Flow
+
+IdentityServer follows a consistent request processing pattern across all OAuth 2.0 and OpenID Connect endpoints:
+
+**1. Router (`EndpointRouter`)**
+- Single router invoked by IdentityServer middleware
+- Determines endpoint class to invoke based on request path
+- Checks if endpoints are enabled in configuration
+- Creates endpoint handler instances via dependency injection
+- **Key file**: `identity-server/src/IdentityServer/Hosting/EndpointRouter.cs`
+
+**2. Endpoint (`IEndpointHandler`)**
+- Distinct endpoint classes for every OAuth/OIDC endpoint (Token, Authorize, UserInfo, etc.)
+- Performs HTTP-level validation (content type, method)
+- Orchestrates validation and response generation processes
+- Returns `IEndpointResult` to middleware
+- **Example**: `identity-server/src/IdentityServer/Endpoints/TokenEndpoint.cs`
+
+**3. Validators**
+- Map incoming raw HTTP request parameters onto validated models
+- Ensure validation of request parameters during mapping
+- Some validation logic is reused across endpoints, others are endpoint-specific
+- Orchestrated by endpoints, with validators sometimes calling other validators
+- Return endpoint-specific validation results (e.g., `TokenRequestValidationResult`)
+- **Example**: `identity-server/src/IdentityServer/Validation/Default/TokenRequestValidator.cs`
+
+**4. Response Generators**
+- Process validation results after successful validation
+- Implement endpoint-specific interfaces, making them replaceable via DI
+- Contain single `ProcessAsync` method that maps validation results to response types
+- **Example**: `identity-server/src/IdentityServer/ResponseHandling/Default/TokenResponseGenerator.cs`
+
+**5. Response Types**
+- Represent data that will be returned in HTTP response
+- Often specific model classes, sometimes simple dictionaries
+- Contain business logic results (tokens, user info, etc.)
+
+**6. Result Processing (`IEndpointResult` → `IHttpResponseWriter`)**
+- Response data wrapped in `IEndpointResult` implementation
+- `IEndpointResult` can be "executed" to produce HTTP response
+- Each endpoint has dedicated `HttpWriter` class for serialization
+- Middleware executes the result to complete the request
+- **Example**: `identity-server/src/IdentityServer/Endpoints/Results/TokenResult.cs`
+
+### Token Endpoint Example
+
+The token endpoint demonstrates this pattern concretely:
+- **Router** matches `/connect/token` to `TokenEndpoint`
+- **TokenEndpoint** validates HTTP POST with form content type
+- **TokenRequestValidator** validates grant type, client authentication, and request parameters
+- **TokenResponseGenerator** creates access tokens, refresh tokens, and ID tokens
+- **TokenResult** wraps the response, **TokenHttpWriter** serializes to JSON with appropriate headers
+
+### Key Architectural Patterns
+
+**Dependency Injection Throughout**
+- All major components are registered in DI container
+- Enables customization by replacing implementations
+- Constructor injection is used consistently
+
+**Validation Pattern**
+- Separate validation classes for each concern
+- Validation results contain both success/failure state and detailed error information
+- Custom validators can be registered to extend validation logic
+
+**Result Pattern**
+- Endpoints return `IEndpointResult` implementations
+- Results are processed by corresponding `IHttpResponseWriter<T>` implementations
+- Separates business logic from HTTP response formatting
+
 # BFF
 TODO
 
