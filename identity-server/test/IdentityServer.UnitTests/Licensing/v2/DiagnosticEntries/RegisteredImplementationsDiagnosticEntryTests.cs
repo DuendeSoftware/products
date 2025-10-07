@@ -111,7 +111,8 @@ public class RegisteredImplementationsDiagnosticEntryTests
             .SelectMany(assembly => assembly.GetExportedTypes())
             .Where(type => type.IsInterface && type.IsPublic && type.Namespace != null
                             && type.Namespace.StartsWith("Duende.IdentityServer")
-                            && !type.Namespace.StartsWith("Duende.IdentityServer.EntityFramework"))
+                            && !type.Namespace.StartsWith("Duende.IdentityServer.EntityFramework")
+                            && !type.Namespace.StartsWith("Duende.IdentityServer.AspNetIdentity"))
             .Select(type => type);
         var subject = new RegisteredImplementationsDiagnosticEntry(new ServiceCollectionAccessor(new ServiceCollection()));
         var typesTrackedField = typeof(RegisteredImplementationsDiagnosticEntry)

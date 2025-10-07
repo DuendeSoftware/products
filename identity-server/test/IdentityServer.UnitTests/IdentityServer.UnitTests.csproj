@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
+    <ProjectReference Include="..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
     <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
     <ProjectReference Include="..\..\src\EntityFramework.Storage\Duende.IdentityServer.EntityFramework.Storage.csproj" />
   </ItemGroup>
