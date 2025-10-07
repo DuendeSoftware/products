@@ -61,6 +61,10 @@ public static class IdentityServerBuilderExtensionsCore
             resolver => resolver.GetRequiredService<IOptions<IdentityServerOptions>>().Value.PersistentGrants);
         builder.Services.AddHttpClient();
 
+        builder.Services.AddSingleton<IConfigurationProfileService, Fapi2ProfileService>();
+        builder.Services.AddSingleton<IConfigurationProfileService, OAuth21ProfileService>();
+        builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerOptions>, PostConfigureIdentityServerOptions>();
+
         return builder;
     }
 

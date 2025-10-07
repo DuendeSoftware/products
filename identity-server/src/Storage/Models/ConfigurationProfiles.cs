@@ -22,4 +22,13 @@ public static class ConfigurationProfiles
     /// - Other FAPI 2.0 security requirements
     /// </summary>
     public const string Fapi2 = "fapi2";
+
+    /// <summary>
+    /// OAuth 2.1 Profile.
+    /// When this profile is active, IdentityServer will enforce OAuth 2.1 requirements including:
+    /// - Pushed Authorization Requests (PAR) are required
+    /// - PKCE is required for authorization code flow
+    /// - Other OAuth 2.1 requirements
+    /// </summary>
+    public const string OAuth21 = "oauth21";
 }

@@ -5,6 +5,7 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -15,11 +16,18 @@ namespace Duende.IdentityServer.Validation;
 public class DefaultClientConfigurationValidator : IClientConfigurationValidator
 {
     private readonly IdentityServerOptions _options;
+    private readonly IEnumerable<IConfigurationProfileService> _profileServices;
+    private readonly ILogger<DefaultClientConfigurationValidator> _logger;
 
     /// <summary>
     /// Constructor for DefaultClientConfigurationValidator
     /// </summary>
-    public DefaultClientConfigurationValidator(IdentityServerOptions options) => _options = options;
+    public DefaultClientConfigurationValidator(IdentityServerOptions options, IEnumerable<IConfigurationProfileService> profileServices, ILogger<DefaultClientConfigurationValidator> logger)
+    {
+        _options = options;
+        _profileServices = profileServices;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Determines whether the configuration of a client is valid.
@@ -72,6 +80,28 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
             if (context.IsValid == false)
             {
                 return;
+            }
+        }
+
+        // TODO - Refactor into a virtual method
+        // Invoke configuration profile specific client validation for enabled profiles
+        if (context.IsValid)
+        {
+            foreach (var enabledProfile in _options.ConfigurationProfile.Profiles)
+            {
+                var service = _profileServices.FirstOrDefault(s => s.ProfileName.Equals(enabledProfile, StringComparison.OrdinalIgnoreCase));
+                if (service == null)
+                {
+                    _logger.LogWarning("No IConfigurationProfileService found for enabled profile: {ProfileName}", enabledProfile);
+                }
+                else
+                {
+                    service.ValidateClient(_options, context);
+                    if (!context.IsValid)
+                    {
+                        return;
+                    }
+                }
             }
         }
     }
