@@ -1,0 +1,50 @@
+{
+  "author": "Duende Software",
+  "classifications": [
+    "Web",
+    "Duende",
+    "BFF"
+  ],
+  "name": "Duende BFF with Blazor autorender",
+  "identity": "Duende.BFF.Blazor",
+  "groupIdentity": "Duende.BFF.Blazor",
+  "shortName": "duende-bff-blazor",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "BffBlazorAutoRenderMode",
+  "preferNameDirectory": true,
+  "symbols": {
+    "ProjectName": {
+      "type": "parameter",
+      "datatype": "string",
+      "replaces": "BffBlazorAutoRenderMode"
+    },
+    "Framework": {
+      "type": "parameter",
+      "description": "The target framework for the project.",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "net9.0",
+          "description": "Target net9.0"
+        },
+        {
+          "choice": "net8.0",
+          "description": "Target net8.0"
+        }
+      ],
+      "replaces": "net9.0",
+      "defaultValue": "net9.0"
+    },
+    "UseMapStaticAssets": {
+      "type": "computed",
+      "value": "Framework != net8.0"
+    }
+  },
+  "primaryOutputs": [
+    { "path": "BffBlazor/{{ProjectName}}.csproj" },
+    { "path": "BffBlazor.Client/{{ProjectName}}.Client.csproj" }
+  ]
+}

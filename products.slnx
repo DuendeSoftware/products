@@ -52,6 +52,20 @@
     <Project Path="bff/templates/src/BffLocalApi/BffLocalApi.csproj" />
     <Project Path="bff/templates/src/BffRemoteApi/BffRemoteApi.csproj" />
   </Folder>
+  <Folder Name="/bff/templates/src/BffBlazorAutoRenderMode/">
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj" Type="Classic C#">
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj" Type="Classic C#">
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
+  </Folder>
   <Folder Name="/bff/test/">
     <Project Path="bff/test/Bff.Blazor.Client.UnitTests/Bff.Blazor.Client.UnitTests.csproj" />
     <Project Path="bff/test/Bff.Blazor.UnitTests/Bff.Blazor.UnitTests.csproj" />
@@ -108,6 +122,11 @@
   <Folder Name="/identity-server/hosts/">
     <Project Path="identity-server/hosts/Shared/Host.Shared.csproj" />
   </Folder>
+  <Folder Name="/identity-server/hosts/net10/">
+    <Project Path="identity-server/hosts/net10/AspNetIdentity10/Host.AspNetIdentity10.csproj" />
+    <Project Path="identity-server/hosts/net10/EntityFramework10/Host.EntityFramework10.csproj" />
+    <Project Path="identity-server/hosts/net10/Main10/Host.Main10.csproj" />
+  </Folder>
   <Folder Name="/identity-server/hosts/net8/">
     <Project Path="identity-server/hosts/net8/AspNetIdentity8/Host.AspNetIdentity8.csproj" />
     <Project Path="identity-server/hosts/net8/EntityFramework8/Host.EntityFramework8.csproj" />
@@ -117,11 +136,6 @@
     <Project Path="identity-server/hosts/net9/AspNetIdentity9/Host.AspNetIdentity9.csproj" />
     <Project Path="identity-server/hosts/net9/EntityFramework9/Host.EntityFramework9.csproj" />
     <Project Path="identity-server/hosts/net9/Main9/Host.Main9.csproj" />
-  </Folder>
-  <Folder Name="/identity-server/hosts/net10/">
-    <Project Path="identity-server/hosts/net10/AspNetIdentity10/Host.AspNetIdentity10.csproj" />
-    <Project Path="identity-server/hosts/net10/EntityFramework10/Host.EntityFramework10.csproj" />
-    <Project Path="identity-server/hosts/net10/Main10/Host.Main10.csproj" />
   </Folder>
   <Folder Name="/identity-server/hosts/UI/">
     <Project Path="identity-server/hosts/UI/AspNetIdentity/UI.AspNetIdentity.csproj" />
@@ -145,8 +159,8 @@
     <Project Path="identity-server/templates/src/WebApp/TemplateWebApp.csproj" />
   </Folder>
   <Folder Name="/identity-server/test/">
-    <Project Path="identity-server/test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.EndToEndTests/IdentityServer.EndToEndTests.csproj" />
+    <Project Path="identity-server/test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
     <Project Path="identity-server/test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
   </Folder>
   <Folder Name="/identity-server/test/src/">
