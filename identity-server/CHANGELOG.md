@@ -26,6 +26,7 @@
 ## Bug Fixes
 - Reject Pushed Authorization Requests with parameters duplicated in a JAR by @wcabus
 - Emit Telemetry Event for Introspection Requests for Valid Tokens by @bhazen
+- Consolidated EF Core versions to prevent missing method exceptions by @bhazen
 
 ## Code Quality
 - Fixed typo in XML doc for Client.CoordinateLifetimeWithUserSession by @wcabus

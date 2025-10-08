@@ -1,14 +1,14 @@
 <Project>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
     <FrameworkVersion>8.0.1</FrameworkVersion>
-    <EFCoreVersion>8.0.20</EFCoreVersion>
+    <EFCoreVersion>9.0.9</EFCoreVersion>
     <IdentityEFCoreVersion>8.0.20</IdentityEFCoreVersion>
     <RuntimeCompilationVersion>8.0.20</RuntimeCompilationVersion>
     <AuthenticationCertificateVersion>8.0.16</AuthenticationCertificateVersion>
     <IdentityModelVersion>7.1.2</IdentityModelVersion>
     <CachingMemoryVersion>9.0.3</CachingMemoryVersion>
     <SystemTextJsonVersion>9.0.9</SystemTextJsonVersion>
-    <LoggingAbstractionsVersion>8.0.2</LoggingAbstractionsVersion>
+    <LoggingAbstractionsVersion>9.0.9</LoggingAbstractionsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0'">
     <FrameworkVersion>9.0.3</FrameworkVersion>
