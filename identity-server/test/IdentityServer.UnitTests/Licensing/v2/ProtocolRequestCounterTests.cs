@@ -15,7 +15,7 @@ public class ProtocolRequestCounterTests
 
     public ProtocolRequestCounterTests()
     {
-        var licenseAccessor = new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance);
+        var licenseAccessor = new LicenseAccessor(() => null, NullLogger<LicenseAccessor>.Instance);
         _logger = new FakeLogger<ProtocolRequestCounter>();
         _counter = new ProtocolRequestCounter(licenseAccessor, new StubLoggerFactory(_logger));
     }
