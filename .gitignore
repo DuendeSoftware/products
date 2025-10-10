@@ -232,3 +232,5 @@ reports
 *.db
 *.db-shm
 *.db-wal
+
+**/Generated/Microsoft*

@@ -9,6 +9,8 @@
   - This PR marked static properties referring to counters in Telemetry.cs as readonly
 
 ## Enhancements
+- Add configuration profiles by @josephdecock
+  - Adds configuration to support configuration profiles that allow developers to express the intention that they are following a particular specification or profile, such as FAPI 2.0.
 - Skip front-channel logout iframe when unnecessary by @bhazen
 - Callback option for path detection in Dynamic Providers by @bhazen
 - Improved UI locales support by @bhazen

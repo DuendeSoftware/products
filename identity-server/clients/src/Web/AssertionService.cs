@@ -35,7 +35,7 @@ public class AssertionService(IConfiguration configuration)
 
         var token = new JwtSecurityToken(
             "web",
-            configuration["is-host"] + "/connect/token",
+            configuration["is-host"],
             new List<Claim>()
             {
                 new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()),
@@ -44,8 +44,10 @@ public class AssertionService(IConfiguration configuration)
             },
             now,
             now.AddMinutes(1),
-            new SigningCredentials(new JsonWebKey(rsaKey), "RS256")
+            new SigningCredentials(new JsonWebKey(rsaKey), "PS256")
         );
+
+        token.Header[JwtClaimTypes.TokenType] = "client-authentication+jwt";
 
         var tokenHandler = new JwtSecurityTokenHandler();
         tokenHandler.OutboundClaimTypeMap.Clear();
@@ -69,7 +71,7 @@ public class AssertionService(IConfiguration configuration)
             claims,
             now,
             now.AddMinutes(1),
-            new SigningCredentials(new JsonWebKey(rsaKey), "RS256")
+            new SigningCredentials(new JsonWebKey(rsaKey), "PS256")
         );
 
         var tokenHandler = new JwtSecurityTokenHandler();

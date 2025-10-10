@@ -8,6 +8,7 @@ using System.Net;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.DependencyInjection;
+using Duende.IdentityServer.Configuration.Profiles;
 using Duende.IdentityServer.Endpoints;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Events;
@@ -60,6 +61,10 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransient(
             resolver => resolver.GetRequiredService<IOptions<IdentityServerOptions>>().Value.PersistentGrants);
         builder.Services.AddHttpClient();
+
+        builder.Services.AddSingleton<IConfigurationProfile, Fapi2ConfigurationProfile>();
+        builder.Services.AddSingleton<IConfigurationProfile, OAuth21ConfigurationProfile>();
+        builder.Services.AddSingleton<IPostConfigureOptions<IdentityServerOptions>, PostConfigureProfiles>();
 
         return builder;
     }

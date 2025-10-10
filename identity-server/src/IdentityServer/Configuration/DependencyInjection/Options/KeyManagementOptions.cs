@@ -212,4 +212,6 @@ public class SigningAlgorithmOptions
 
     internal bool IsRsaKey => Name.StartsWith('R') || Name.StartsWith('P');
     internal bool IsEcKey => Name.StartsWith('E');
+
+    public override string ToString() => UseX509Certificate ? $"{Name} wrapped in X.509" : Name;
 }

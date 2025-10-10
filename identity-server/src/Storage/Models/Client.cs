@@ -5,6 +5,7 @@
 
 using System.Collections;
 using System.Diagnostics;
+using Duende.IdentityServer.Configuration.Profiles;
 
 namespace Duende.IdentityServer.Models;
 
@@ -12,6 +13,7 @@ namespace Duende.IdentityServer.Models;
 /// Models an OpenID Connect or OAuth2 client
 /// </summary>
 [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
+[GenerateProfileValidator]
 public class Client
 {
     // setting grant types should be atomic

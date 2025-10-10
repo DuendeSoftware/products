@@ -156,6 +156,7 @@
     <Project Path="identity-server/src/EntityFramework.Storage/Duende.IdentityServer.EntityFramework.Storage.csproj" />
     <Project Path="identity-server/src/EntityFramework/Duende.IdentityServer.EntityFramework.csproj" />
     <Project Path="identity-server/src/IdentityServer/Duende.IdentityServer.csproj" />
+    <Project Path="identity-server/src/SourceGenerators/Duende.IdentityServer.SourceGenerators.csproj" />
     <Project Path="identity-server/src/Storage/Duende.IdentityServer.Storage.csproj" />
   </Folder>
   <Folder Name="/identity-server/templates/" />

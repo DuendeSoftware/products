@@ -220,6 +220,35 @@ public static class IdentityServerConstants
 
     }
 
+    /// <summary>
+    /// Constants for well-known configuration profiles that IdentityServer can enforce.
+    /// Configuration profiles allow developers to express the intention that they are following a particular specification or profile,
+    /// such as OAuth 2.1, FAPI 2.0, etc. IdentityServer will automatically configure options and validate client configuration to
+    /// comply with the profile.
+    /// </summary>
+    public static class ConfigurationProfiles
+    {
+
+        // IMPORTANT - Use nicely formatted names here, as these are used in log messages.
+
+        /// <summary>
+        /// FAPI 2.0 Security Profile.
+        /// When this profile is active, IdentityServer will enforce FAPI 2.0 requirements including:
+        /// - Pushed Authorization Requests (PAR) are required
+        /// - Sender-constrained tokens (DPoP if no other constraint is configured)
+        /// - Other FAPI 2.0 security requirements
+        /// </summary>
+        public const string Fapi2 = "FAPI 2.0";
+
+        /// <summary>
+        /// OAuth 2.1 Profile.
+        /// When this profile is active, IdentityServer will enforce OAuth 2.1 requirements including:
+        /// - PKCE is required for authorization code flow
+        /// - Other OAuth 2.1 requirements
+        /// </summary>
+        public const string OAuth21 = "OAuth 2.1";
+    }
+
     public static class ContentSecurityPolicyHashes
     {
         /// <summary>

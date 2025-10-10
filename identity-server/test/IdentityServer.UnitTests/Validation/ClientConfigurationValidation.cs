@@ -5,6 +5,7 @@
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
+using UnitTests.Common;
 using UnitTests.Validation.Setup;
 
 namespace UnitTests.Validation;
@@ -18,7 +19,7 @@ public class ClientConfigurationValidation
     public ClientConfigurationValidation()
     {
         _options = new IdentityServerOptions();
-        _validator = new DefaultClientConfigurationValidator(_options);
+        _validator = new DefaultClientConfigurationValidator(_options, [], new MockLogger<DefaultClientConfigurationValidator>());
     }
 
     [Fact]
