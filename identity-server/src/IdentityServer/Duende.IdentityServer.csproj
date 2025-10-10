@@ -5,7 +5,15 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Description>OpenID Connect and OAuth 2.0 Framework for ASP.NET Core</Description>
     <AssemblyName>Duende.IdentityServer</AssemblyName>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+      <!-- Exclude the output of source generators from the compilation -->
+      <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
@@ -17,6 +25,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
+    <ProjectReference Include="..\SourceGenerators\Duende.IdentityServer.SourceGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

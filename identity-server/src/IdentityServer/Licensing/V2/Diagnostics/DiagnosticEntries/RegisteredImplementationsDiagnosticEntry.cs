@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.IdentityServer.Configuration.Profiles;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Hosting.DynamicProviders;
@@ -37,6 +38,11 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
             "Infrastructure", [
                 new(typeof(IClock), [typeof(DefaultClock)]),
                 new(typeof(IConcurrencyLock<>), [typeof(DefaultConcurrencyLock<>)]),
+            ]
+        },
+        {
+            "Configuration", [
+                new(typeof(IConfigurationProfile), [typeof(Fapi2ConfigurationProfile), typeof(OAuth21ConfigurationProfile)]),
             ]
         },
         {

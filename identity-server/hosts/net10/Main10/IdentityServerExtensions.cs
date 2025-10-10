@@ -39,6 +39,8 @@ internal static class IdentityServerExtensions
                     UseX509Certificate = true
                 });
 
+                options.ConfigurationProfiles.EnabledProfiles = [IdentityServerConstants.ConfigurationProfiles.Fapi2];
+
                 // In load-balanced environments, synchronization delay is important.
                 // In development, we're never load balanced and can skip it to start up faster.
                 if (builder.Environment.IsDevelopment())

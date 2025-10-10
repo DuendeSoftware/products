@@ -3,8 +3,10 @@
 
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Configuration.Profiles;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Validation;
 
@@ -15,11 +17,18 @@ namespace Duende.IdentityServer.Validation;
 public class DefaultClientConfigurationValidator : IClientConfigurationValidator
 {
     private readonly IdentityServerOptions _options;
+    private readonly IEnumerable<IConfigurationProfile> _profiles;
+    private readonly ILogger<DefaultClientConfigurationValidator> _logger;
 
     /// <summary>
     /// Constructor for DefaultClientConfigurationValidator
     /// </summary>
-    public DefaultClientConfigurationValidator(IdentityServerOptions options) => _options = options;
+    public DefaultClientConfigurationValidator(IdentityServerOptions options, IEnumerable<IConfigurationProfile> profiles, ILogger<DefaultClientConfigurationValidator> logger)
+    {
+        _options = options;
+        _profiles = profiles;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Determines whether the configuration of a client is valid.
@@ -29,6 +38,12 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     public async Task ValidateAsync(ClientConfigurationValidationContext context)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("DefaultClientConfigurationValidator.Validate");
+
+        await ValidateProfilesAsync(context);
+        if (context.IsValid == false)
+        {
+            return;
+        }
 
         if (context.Client.ProtocolType == IdentityServerConstants.ProtocolTypes.OpenIdConnect)
         {
@@ -275,4 +290,34 @@ public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     /// <param name="context">The context.</param>
     /// <returns></returns>
     protected virtual Task ValidatePropertiesAsync(ClientConfigurationValidationContext context) => Task.CompletedTask;
+
+    protected virtual Task ValidateProfilesAsync(ClientConfigurationValidationContext context)
+    {
+        // Invoke configuration profile specific client validation for enabled profiles
+        if (!context.IsValid)
+        {
+            return Task.CompletedTask;
+        }
+        foreach (var enabledProfile in _options.ConfigurationProfiles.EnabledProfiles)
+        {
+            var service = _profiles.FirstOrDefault(s => s.ProfileName.Equals(enabledProfile, StringComparison.OrdinalIgnoreCase));
+            if (service == null)
+            {
+                _logger.LogWarning("No IConfigurationProfile found for enabled profile: {ProfileName}", enabledProfile);
+            }
+            else
+            {
+                var result = service.ValidateClient(_options, context);
+                if (!result.IsValid)
+                {
+                    var paths = string.Join(',', result.Failed.Select(f => f.Path));
+                    var properties = result.Failed.Count > 1 ? "properties" : "property";
+                    var errorMessage = $"Client {properties} '{paths}' do not comply with {enabledProfile} profile requirements.";
+                    context.SetError(errorMessage);
+                    return Task.CompletedTask;
+                }
+            }
+        }
+        return Task.CompletedTask;
+    }
 }

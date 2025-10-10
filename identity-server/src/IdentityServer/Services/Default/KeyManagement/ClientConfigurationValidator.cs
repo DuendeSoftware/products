@@ -3,7 +3,9 @@
 
 
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Configuration.Profiles;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Services.KeyManagement;
 
@@ -19,8 +21,10 @@ public class ClientConfigurationValidator : DefaultClientConfigurationValidator
     /// </summary>
     /// <param name="isOptions"></param>
     /// <param name="keyManagerOptions"></param>
-    public ClientConfigurationValidator(IdentityServerOptions isOptions, KeyManagementOptions keyManagerOptions = null)
-        : base(isOptions) => _keyManagerOptions = keyManagerOptions;
+    /// <param name="configurationProfiles">Profile services for configuration profile validation.</param>
+    /// <param name="logger">Logger for configuration validation.</param>
+    public ClientConfigurationValidator(IdentityServerOptions isOptions, ILogger<DefaultClientConfigurationValidator> logger, KeyManagementOptions keyManagerOptions = null, IEnumerable<IConfigurationProfile> configurationProfiles = null)
+        : base(isOptions, configurationProfiles ?? Enumerable.Empty<IConfigurationProfile>(), logger) => _keyManagerOptions = keyManagerOptions;
 
     /// <inheritdoc/>
     protected override async Task ValidateLifetimesAsync(ClientConfigurationValidationContext context)
