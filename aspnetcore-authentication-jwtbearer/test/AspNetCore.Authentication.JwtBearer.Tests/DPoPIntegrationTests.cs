@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
-using Xunit.Abstractions;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer;
 

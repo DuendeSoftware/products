@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Xunit.Abstractions;
 
 namespace Duende.Xunit.Playwright;
 
@@ -23,7 +22,7 @@ public class IntegrationTestBase<THost> : IDisposable where THost : class
 #if DEBUG_NCRUNCH
             // Running in NCrunch. NCrunch cannot build the aspire project, so it needs
             // to be started manually.
-            Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
+            Assert.Skip("When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
 #endif
         }
     }

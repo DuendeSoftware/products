@@ -5,7 +5,6 @@ using System.Net;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 

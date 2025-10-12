@@ -7,8 +7,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="PublicApiGenerator" />
-    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bff.EntityFramework\Bff.EntityFramework.csproj" />
   </ItemGroup>

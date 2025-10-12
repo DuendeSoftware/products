@@ -7,7 +7,6 @@ using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 

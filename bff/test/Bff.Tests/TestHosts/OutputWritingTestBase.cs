@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Text;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts;
 
@@ -18,9 +17,9 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
         }
     }
 
-    public virtual Task InitializeAsync() => Task.CompletedTask;
+    public virtual ValueTask InitializeAsync() => default;
 
-    public virtual Task DisposeAsync()
+    public virtual ValueTask DisposeAsync()
     {
         lock (_output)
         {
@@ -28,6 +27,6 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
         }
 
 
-        return Task.CompletedTask;
+        return default;
     }
 }

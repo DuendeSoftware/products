@@ -6,7 +6,6 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts;
 
@@ -52,7 +51,7 @@ public class BffIntegrationTestBase : OutputWritingTestBase
 
     public async Task Login(string sub) => await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await IdentityServerHost.InitializeAsync();
         await ApiHost.InitializeAsync();
@@ -61,7 +60,7 @@ public class BffIntegrationTestBase : OutputWritingTestBase
         await base.InitializeAsync();
     }
 
-    public override async Task DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         await ApiHost.DisposeAsync();
         await BffHost.DisposeAsync();

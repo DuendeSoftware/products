@@ -4,7 +4,6 @@
 using System.Net;
 using Duende.Bff.Tests.TestFramework;
 using Microsoft.AspNetCore.Builder;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
 

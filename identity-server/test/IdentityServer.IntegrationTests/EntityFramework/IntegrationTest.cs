@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -50,5 +51,6 @@ public class IntegrationTest<TClass, TDbContext, TStoreOption> : IClassFixture<D
         }
     }
 
-    protected IntegrationTest(DatabaseProviderFixture<TDbContext> fixture) => fixture.Options = TestDatabaseProviders.ToList<DbContextOptions<TDbContext>>();
+    protected IntegrationTest(DatabaseProviderFixture<TDbContext> fixture)
+        => fixture.Options = TestDatabaseProviders.Select(row => row.Data).ToList();
 }

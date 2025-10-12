@@ -90,7 +90,7 @@ public class DynamicProvidersTests
                 await ctx.SignOutAsync();
             });
         };
-        _idp1.InitializeAsync().Wait();
+        _idp1.InitializeAsync().AsTask().Wait();
 
         _idp2 = new GenericHost("https://idp2");
         _idp2.OnConfigureServices += services =>
@@ -133,9 +133,7 @@ public class DynamicProvidersTests
                 await ctx.SignInAsync(new IdentityServerUser("2").CreatePrincipal());
             });
         };
-        _idp2.InitializeAsync().Wait();
-
-
+        _idp2.InitializeAsync().AsTask().Wait();
 
         _host = new GenericHost("https://server");
         _host.OnConfigureServices += services =>
@@ -403,21 +401,15 @@ public class DynamicProvidersTests
         public override string ToString() => Name;
     }
 
-    private class DynamicProviderConfigurationData : TheoryData<DynamicProviderTestScenario>
+    private sealed class DynamicProviderConfigurationData : TheoryData<DynamicProviderTestScenario>
     {
         public DynamicProviderConfigurationData()
         {
-            Add(new("Default PathPrefix", _ => { }));
-            Add(new("PathPrefix Callback",
-                options => options.DynamicProviders.PathMatchingCallback = ctx =>
-                {
-                    if (ctx.Request.Path.StartsWithSegments("/federation/idp1", StringComparison.InvariantCulture))
-                    {
-                        return Task.FromResult("idp1");
-                    }
-
-                    return Task.FromResult((string)null);
-                }));
+            Add(new DynamicProviderTestScenario("Default PathPrefix", _ => { }));
+            Add(new DynamicProviderTestScenario("PathPrefix Callback",
+                options => options.DynamicProviders.PathMatchingCallback = ctx => ctx.Request.Path.StartsWithSegments("/federation/idp1", StringComparison.InvariantCulture)
+                    ? Task.FromResult("idp1")
+                    : Task.FromResult((string)null)));
         }
     }
 }

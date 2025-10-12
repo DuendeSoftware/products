@@ -3,8 +3,6 @@
 
 using System.Reflection;
 using Microsoft.Playwright;
-using Microsoft.Playwright.Xunit;
-using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Duende.Xunit.Playwright;
@@ -12,13 +10,20 @@ namespace Duende.Xunit.Playwright;
 public class Defaults
 {
     public static readonly PageGotoOptions PageGotoOptions = new PageGotoOptions()
-    { WaitUntil = WaitUntilState.NetworkIdle };
+    {
+        WaitUntil = WaitUntilState.NetworkIdle
+    };
 }
 
 [WithTestName]
-public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : class
+public class PlaywrightTestBase<THost> : IAsyncLifetime, IDisposable where THost : class
 {
     private readonly IDisposable _loggingScope;
+    private IPlaywright? _playwright;
+    private IBrowser? _browser;
+    
+    protected IBrowserContext Context { get; private set; } = null!;
+    protected IPage Page { get; private set; } = null!;
 
     public PlaywrightTestBase(ITestOutputHelper output, AppHostFixture<THost> fixture)
     {
@@ -35,14 +40,22 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
 #if DEBUG_NCRUNCH
             // Running in NCrunch. NCrunch cannot build the aspire project, so it needs
             // to be started manually.
-            Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
+            Assert.Skip("When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
 #endif
         }
     }
 
-    public override async Task InitializeAsync()
+    public AppHostFixture<THost> Fixture { get; }
+
+    public ITestOutputHelper Output { get; }
+
+    public virtual async ValueTask InitializeAsync()
     {
-        await base.InitializeAsync();
+        _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+        _browser = await _playwright.Chromium.LaunchAsync(new() { Headless = true });
+        Context = await _browser.NewContextAsync(ContextOptions());
+        Page = await Context.NewPageAsync();
+        
         Context.SetDefaultTimeout(10_000);
         await Context.Tracing.StartAsync(new()
         {
@@ -53,7 +66,7 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
         });
     }
 
-    public override async Task DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
         var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? Environment.CurrentDirectory;
         // if path ends with /bin/{build configuration}/{dotnetversion}, then strip that from the path.
@@ -63,7 +76,6 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
             path = Path.GetFullPath(Path.Combine(path, "../../../"));
         }
 
-
         await Context.Tracing.StopAsync(new()
         {
             Path = Path.Combine(
@@ -72,10 +84,13 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
                 $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}.zip"
             )
         });
-        await base.DisposeAsync();
+        
+        await Context.CloseAsync();
+        await _browser!.DisposeAsync();
+        _playwright!.Dispose();
     }
 
-    public override BrowserNewContextOptions ContextOptions() => new()
+    public virtual BrowserNewContextOptions ContextOptions() => new()
     {
         Locale = "en-US",
         ColorScheme = ColorScheme.Light,
@@ -85,11 +100,6 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
         // it still claims the certs are invalid.
         IgnoreHTTPSErrors = true,
     };
-
-
-    public AppHostFixture<THost> Fixture { get; }
-
-    public ITestOutputHelper Output { get; }
 
     public void Dispose()
     {
@@ -108,20 +118,4 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
     }
 
     public HttpClient CreateHttpClient(string clientName) => Fixture.CreateHttpClient(clientName);
-}
-
-public class WithTestNameAttribute : BeforeAfterTestAttribute
-{
-    public static string CurrentTestName = string.Empty;
-    public static string CurrentClassName = string.Empty;
-
-    public override void Before(MethodInfo methodInfo)
-    {
-        CurrentTestName = methodInfo.Name;
-        CurrentClassName = methodInfo.DeclaringType!.Name;
-    }
-
-    public override void After(MethodInfo methodInfo)
-    {
-    }
 }

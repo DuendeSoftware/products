@@ -4,7 +4,6 @@
 using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Headers;
 

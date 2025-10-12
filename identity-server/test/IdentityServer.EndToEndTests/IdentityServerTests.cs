@@ -5,7 +5,6 @@ using Duende.IdentityServer.EndToEndTests.TestInfra;
 using Duende.Xunit.Playwright;
 using Projects;
 using ServiceDefaults;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.EndToEndTests;
 

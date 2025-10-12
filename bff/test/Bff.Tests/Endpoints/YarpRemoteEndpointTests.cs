@@ -4,7 +4,6 @@
 using System.Net;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 

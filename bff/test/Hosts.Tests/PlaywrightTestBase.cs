@@ -4,9 +4,8 @@
 using System.Reflection;
 using Hosts.Tests.TestInfra;
 using Microsoft.Playwright;
-using Microsoft.Playwright.Xunit;
-using Xunit.Abstractions;
-using Xunit.Sdk;
+using Microsoft.Playwright.Xunit.v3;
+using Xunit.v3;
 
 namespace Hosts.Tests;
 
@@ -31,12 +30,12 @@ public class PlaywrightTestBase : PageTest, IDisposable
 #if DEBUG_NCRUNCH
             // Running in NCrunch. NCrunch cannot build the aspire project, so it needs
             // to be started manually. 
-            Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
+            Assert.Skip("When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
 #endif
         }
     }
 
-    public override async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         Context.SetDefaultTimeout(10_000);
@@ -49,7 +48,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
         });
     }
 
-    public override async Task DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? Environment.CurrentDirectory;
         // if path ends with /bin/{build configuration}/{dotnetversion}, then strip that from the path. 
@@ -106,18 +105,17 @@ public class PlaywrightTestBase : PageTest, IDisposable
     public HttpClient CreateHttpClient(string clientName) => Fixture.CreateHttpClient(clientName);
 }
 
-public class WithTestNameAttribute : BeforeAfterTestAttribute
+public class WithTestNameAttribute : Attribute, IBeforeAfterTestAttribute
 {
     public static string CurrentTestName = string.Empty;
     public static string CurrentClassName = string.Empty;
 
-    public override void Before(MethodInfo methodInfo)
+    public void Before(MethodInfo methodInfo, IXunitTest _)
     {
         CurrentTestName = methodInfo.Name;
         CurrentClassName = methodInfo.DeclaringType!.Name;
     }
 
-    public override void After(MethodInfo methodInfo)
-    {
-    }
+    public void After(MethodInfo methodInfo, IXunitTest _)
+    { }
 }

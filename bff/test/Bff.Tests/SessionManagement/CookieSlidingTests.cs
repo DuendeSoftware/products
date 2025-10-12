@@ -5,7 +5,6 @@ using Duende.Bff.Tests.TestHosts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
-using Xunit.Abstractions;
 
 
 namespace Duende.Bff.Tests.SessionManagement;

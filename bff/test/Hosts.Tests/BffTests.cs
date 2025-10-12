@@ -3,7 +3,6 @@
 
 using Hosts.ServiceDefaults;
 using Hosts.Tests.TestInfra;
-using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
@@ -18,14 +17,14 @@ public class BffTests : IntegrationTestBase
         _bffClient = new BffClient(CreateHttpClient(AppHostServices.Bff));
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_invoke_home()
     {
         var response = await _httpClient.GetAsync("/");
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_initiate_login()
     {
 
@@ -39,7 +38,7 @@ public class BffTests : IntegrationTestBase
         claims.Any().ShouldBeTrue();
     }
 
-    [SkippableTheory]
+    [Theory]
     [InlineData("/local/self-contained")]
     [InlineData("/local/invokes-external-api")]
     [InlineData("/api/user-token")]
@@ -55,7 +54,7 @@ public class BffTests : IntegrationTestBase
         await _bffClient.InvokeApi(url);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_logout()
     {
         await _bffClient.TriggerLogin();

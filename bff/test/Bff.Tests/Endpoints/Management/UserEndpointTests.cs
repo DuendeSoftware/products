@@ -4,7 +4,6 @@
 using System.Net;
 using System.Security.Claims;
 using Duende.Bff.Tests.TestHosts;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 

@@ -6,7 +6,6 @@ using Duende.Bff;
 using Duende.Bff.Tests.TestHosts;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Xunit.Abstractions;
 
 namespace Bff.Blazor.UnitTests;
 
@@ -70,7 +69,7 @@ public class BffBlazorTests : OutputWritingTestBase
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await IdentityServerHost.InitializeAsync();
         await ApiHost.InitializeAsync();
@@ -78,7 +77,7 @@ public class BffBlazorTests : OutputWritingTestBase
         await base.InitializeAsync();
     }
 
-    public override async Task DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         await ApiHost.DisposeAsync();
         await BffHost.DisposeAsync();
