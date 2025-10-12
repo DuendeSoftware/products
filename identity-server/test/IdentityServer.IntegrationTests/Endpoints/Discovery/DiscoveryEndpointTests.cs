@@ -18,6 +18,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
 public class DiscoveryEndpointTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Discovery endpoint";
 
     [Fact]

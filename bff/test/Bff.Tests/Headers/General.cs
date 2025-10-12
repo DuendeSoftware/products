@@ -9,15 +9,17 @@ namespace Duende.Bff.Tests.Headers;
 
 public class General(ITestOutputHelper output) : BffIntegrationTestBase(output)
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task local_endpoint_should_receive_standard_headers()
     {
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/local_anon"));
         req.Headers.Add("x-csrf", "1");
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(_ct);
         var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
         apiResult.RequestHeaders.Count.ShouldBe(2);
@@ -33,10 +35,10 @@ public class General(ITestOutputHelper output) : BffIntegrationTestBase(output)
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
         req.Headers.Add("x-csrf", "1");
         req.Headers.Add("x-custom", "custom");
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(_ct);
         var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
         apiResult.RequestHeaders["Host"].Single().ShouldBe("api");
@@ -51,10 +53,10 @@ public class General(ITestOutputHelper output) : BffIntegrationTestBase(output)
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
         req.Headers.Add("x-csrf", "1");
         req.Headers.Add("x-custom", "custom");
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(_ct);
         var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
         apiResult.RequestHeaders["X-Forwarded-Host"].Single().ShouldBe("app");

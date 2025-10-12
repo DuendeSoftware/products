@@ -12,11 +12,11 @@ namespace Duende.Bff.Tests.TestHosts;
 public class BffIntegrationTestBase : OutputWritingTestBase
 {
     protected readonly IdentityServerHost IdentityServerHost;
-    protected ApiHost ApiHost;
-    protected BffHost BffHost;
-    protected BffHostUsingResourceNamedTokens BffHostWithNamedTokens;
+    protected readonly ApiHost ApiHost;
+    protected readonly BffHost BffHost;
+    protected readonly BffHostUsingResourceNamedTokens BffHostWithNamedTokens;
 
-    public BffIntegrationTestBase(ITestOutputHelper output) : base(output)
+    protected BffIntegrationTestBase(ITestOutputHelper output) : base(output)
     {
         IdentityServerHost = new IdentityServerHost(WriteLine);
         ApiHost = new ApiHost(WriteLine, IdentityServerHost, "scope1");
@@ -46,7 +46,6 @@ public class BffIntegrationTestBase : OutputWritingTestBase
 
             services.AddSingleton<DefaultAccessTokenRetriever>();
         };
-
     }
 
     public async Task Login(string sub) => await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
@@ -67,6 +66,5 @@ public class BffIntegrationTestBase : OutputWritingTestBase
         await BffHostWithNamedTokens.DisposeAsync();
         await IdentityServerHost.DisposeAsync();
         await base.DisposeAsync();
-
     }
 }

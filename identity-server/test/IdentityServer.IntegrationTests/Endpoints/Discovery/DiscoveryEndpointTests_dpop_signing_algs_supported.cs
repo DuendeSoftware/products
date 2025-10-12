@@ -12,6 +12,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
 public class DiscoveryEndpointTests_dpop_signing_alg_values_supported
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Discovery endpoint - dpop_signing_alg_values_supported";
 
     [Fact]

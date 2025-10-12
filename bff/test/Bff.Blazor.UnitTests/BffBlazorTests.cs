@@ -11,18 +11,19 @@ namespace Bff.Blazor.UnitTests;
 
 public class BffBlazorTests : OutputWritingTestBase
 {
-    protected readonly IdentityServerHost IdentityServerHost;
-    protected ApiHost ApiHost;
-    protected BffBlazorHost BffHost;
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly IdentityServerHost _identityServerHost;
+    private readonly ApiHost _apiHost;
+    private readonly BffBlazorHost _bffHost;
 
     public BffBlazorTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        IdentityServerHost = new IdentityServerHost(WriteLine);
-        ApiHost = new ApiHost(WriteLine, IdentityServerHost, "scope1");
+        _identityServerHost = new IdentityServerHost(WriteLine);
+        _apiHost = new ApiHost(WriteLine, _identityServerHost, "scope1");
 
-        BffHost = new BffBlazorHost(WriteLine, IdentityServerHost, ApiHost, "spa");
+        _bffHost = new BffBlazorHost(WriteLine, _identityServerHost, _apiHost, "spa");
 
-        IdentityServerHost.Clients.Add(new Client
+        _identityServerHost.Clients.Add(new Client
         {
             ClientId = "spa",
             ClientSecrets = { new Secret("secret".Sha256()) },
@@ -36,11 +37,11 @@ public class BffBlazorTests : OutputWritingTestBase
 
 
 
-        IdentityServerHost.OnConfigureServices += services =>
+        _identityServerHost.OnConfigureServices += services =>
         {
             services.AddTransient<IBackChannelLogoutHttpClient>(provider =>
                 new DefaultBackChannelLogoutHttpClient(
-                    BffHost!.HttpClient,
+                    _bffHost!.HttpClient,
                     provider.GetRequiredService<ILoggerFactory>(),
                     provider.GetRequiredService<ICancellationTokenProvider>()));
 
@@ -51,38 +52,38 @@ public class BffBlazorTests : OutputWritingTestBase
     [Fact]
     public async Task Can_get_home()
     {
-        var response = await BffHost.BrowserClient.GetAsync("/");
+        var response = await _bffHost.BrowserClient.GetAsync("/", _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
+
     [Fact]
-    public async Task Cannot_get_secure_without_loggin_in()
+    public async Task Cannot_get_secure_without_logging_in()
     {
-        var response = await BffHost.BrowserClient.GetAsync("/secure");
+        var response = await _bffHost.BrowserClient.GetAsync("/secure", _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.Found, "this indicates we are redirecting to the login page");
     }
 
     [Fact]
     public async Task Can_get_secure_when_logged_in()
     {
-        await BffHost.BffLoginAsync("sub");
-        var response = await BffHost.BrowserClient.GetAsync("/secure");
+        await _bffHost.BffLoginAsync("sub");
+        var response = await _bffHost.BrowserClient.GetAsync("/secure", _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     public override async ValueTask InitializeAsync()
     {
-        await IdentityServerHost.InitializeAsync();
-        await ApiHost.InitializeAsync();
-        await BffHost.InitializeAsync();
+        await _identityServerHost.InitializeAsync();
+        await _apiHost.InitializeAsync();
+        await _bffHost.InitializeAsync();
         await base.InitializeAsync();
     }
 
     public override async ValueTask DisposeAsync()
     {
-        await ApiHost.DisposeAsync();
-        await BffHost.DisposeAsync();
-        await IdentityServerHost.DisposeAsync();
+        await _apiHost.DisposeAsync();
+        await _bffHost.DisposeAsync();
+        await _identityServerHost.DisposeAsync();
         await base.DisposeAsync();
-
     }
 }

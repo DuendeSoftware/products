@@ -19,6 +19,7 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, PersistedGrantDbContext, OperationalStoreOptions>
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly IPersistentGrantSerializer serializer = new PersistentGrantSerializer();
 
     public DeviceFlowStoreTests(DatabaseProviderFixture<PersistedGrantDbContext> fixture) : base(fixture)

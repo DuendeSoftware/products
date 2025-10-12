@@ -12,6 +12,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 
 public class ClientCredentialsandResourceOwnerClient
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string TokenEndpoint = "https://server/connect/token";
 
     private readonly HttpClient _client;
@@ -39,7 +40,7 @@ public class ClientCredentialsandResourceOwnerClient
             ClientId = "client.and.ro",
             ClientSecret = "secret",
             Scope = "api1"
-        });
+        }, _ct);
 
         response.IsError.ShouldBe(false);
     }
@@ -53,7 +54,7 @@ public class ClientCredentialsandResourceOwnerClient
             ClientId = "client.and.ro",
             ClientSecret = "secret",
             Scope = "openid api1"
-        });
+        }, _ct);
 
         response.IsError.ShouldBe(true);
     }
@@ -70,7 +71,7 @@ public class ClientCredentialsandResourceOwnerClient
 
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBe(false);
     }
@@ -87,7 +88,7 @@ public class ClientCredentialsandResourceOwnerClient
 
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBe(false);
     }

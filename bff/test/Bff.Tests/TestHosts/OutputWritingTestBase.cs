@@ -7,9 +7,11 @@ namespace Duende.Bff.Tests.TestHosts;
 
 public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncLifetime
 {
-    private readonly StringBuilder _output = new StringBuilder();
+    private readonly StringBuilder _output = new();
 
-    public void WriteLine(string message)
+    public virtual ValueTask InitializeAsync() => default;
+
+    protected void WriteLine(string message)
     {
         lock (_output)
         {
@@ -17,16 +19,12 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
         }
     }
 
-    public virtual ValueTask InitializeAsync() => default;
-
     public virtual ValueTask DisposeAsync()
     {
         lock (_output)
         {
             testOutputHelper.WriteLine(_output.ToString());
         }
-
-
         return default;
     }
 }

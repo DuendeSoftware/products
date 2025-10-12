@@ -14,6 +14,7 @@ namespace Duende.IdentityServer.IntegrationTests.Conformance.Basic;
 
 public class CodeFlowTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Conformance.Basic.CodeFlowTests";
 
     private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
@@ -72,7 +73,7 @@ public class CodeFlowTests
             scope: "openid",
             redirectUri: "https://code_pipeline.Client/callback?foo=bar&baz=quux",
             nonce: nonce);
-        var response = await _pipeline.BrowserClient.GetAsync(url);
+        var response = await _pipeline.BrowserClient.GetAsync(url, _ct);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
         authorization.Code.ShouldNotBeNull();
@@ -90,7 +91,7 @@ public class CodeFlowTests
 
             Code = code,
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
-        });
+        }, cancellationToken: _ct);
 
         tokenResult.IsError.ShouldBeFalse();
         tokenResult.HttpErrorReason.ShouldBe("OK");
@@ -125,7 +126,7 @@ public class CodeFlowTests
             redirectUri: "https://code_pipeline.Client/callback?foo=bar&baz=quux",
             state: "state",
             nonce: nonce);
-        var response = await _pipeline.BrowserClient.GetAsync(url);
+        var response = await _pipeline.BrowserClient.GetAsync(url, _ct);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
         authorization.Code.ShouldNotBeNull();
@@ -143,7 +144,7 @@ public class CodeFlowTests
 
             Code = code,
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
-        });
+        }, cancellationToken: _ct);
 
         tokenResult.IsError.ShouldBeFalse();
         tokenResult.HttpErrorReason.ShouldBe("OK");

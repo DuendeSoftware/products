@@ -11,19 +11,21 @@ namespace Duende.Bff.Tests.SessionManagement;
 
 public class CookieSlidingTests : BffIntegrationTestBase
 {
-    readonly InMemoryUserSessionStore _sessionStore = new();
-    readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly InMemoryUserSessionStore _sessionStore = new();
+    private readonly FakeTimeProvider _clock = new(DateTime.UtcNow);
 
-    public CookieSlidingTests(ITestOutputHelper output) : base(output) => BffHost.OnConfigureServices += services =>
-                                                                               {
-                                                                                   services.AddSingleton<IUserSessionStore>(_sessionStore);
-                                                                                   services.Configure<CookieAuthenticationOptions>("cookie", options =>
-                                                                                   {
-                                                                                       options.SlidingExpiration = true;
-                                                                                       options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-                                                                                   });
-                                                                                   services.AddSingleton<TimeProvider>(_clock);
-                                                                               };
+    public CookieSlidingTests(ITestOutputHelper output) : base(output)
+        => BffHost.OnConfigureServices += services =>
+           {
+               services.AddSingleton<IUserSessionStore>(_sessionStore);
+               services.Configure<CookieAuthenticationOptions>("cookie", options =>
+               {
+                   options.SlidingExpiration = true;
+                   options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+               });
+               services.AddSingleton<TimeProvider>(_clock);
+           };
 
     private void SetClock(TimeSpan t) => _clock.SetUtcNow(_clock.GetUtcNow().Add(t));
 
@@ -32,19 +34,19 @@ public class CookieSlidingTests : BffIntegrationTestBase
     {
         await BffHost.BffLoginAsync("alice");
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" }, _ct);
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
         var ticketStore = BffHost.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         firstTicket.ShouldNotBeNull();
 
         SetClock(TimeSpan.FromMinutes(8));
         (await BffHost.GetIsUserLoggedInAsync()).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
@@ -56,19 +58,19 @@ public class CookieSlidingTests : BffIntegrationTestBase
     {
         await BffHost.BffLoginAsync("alice");
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" }, _ct);
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
         var ticketStore = BffHost.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         firstTicket.ShouldNotBeNull();
 
         SetClock(TimeSpan.FromMinutes(8));
         (await BffHost.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();
@@ -95,20 +97,20 @@ public class CookieSlidingTests : BffIntegrationTestBase
 
         await BffHost.BffLoginAsync("alice");
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" }, _ct);
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
         var ticketStore = BffHost.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         firstTicket.ShouldNotBeNull();
 
         shouldRenew = true;
         SetClock(TimeSpan.FromSeconds(1));
         (await BffHost.GetIsUserLoggedInAsync()).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc > firstTicket.Properties.IssuedUtc).ShouldBeTrue();
@@ -136,20 +138,20 @@ public class CookieSlidingTests : BffIntegrationTestBase
 
         await BffHost.BffLoginAsync("alice");
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
+        var sessions = await _sessionStore.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" }, _ct);
         sessions.Count().ShouldBe(1);
 
         var session = sessions.Single();
 
         var ticketStore = BffHost.Resolve<IServerTicketStore>();
-        var firstTicket = await ticketStore.RetrieveAsync(session.Key);
+        var firstTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         firstTicket.ShouldNotBeNull();
 
         shouldRenew = true;
         SetClock(TimeSpan.FromSeconds(1));
         (await BffHost.GetIsUserLoggedInAsync("slide=false")).ShouldBeTrue();
 
-        var secondTicket = await ticketStore.RetrieveAsync(session.Key);
+        var secondTicket = await ticketStore.RetrieveAsync(session.Key, _ct);
         secondTicket.ShouldNotBeNull();
 
         (secondTicket.Properties.IssuedUtc == firstTicket.Properties.IssuedUtc).ShouldBeTrue();

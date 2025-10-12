@@ -14,6 +14,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class ResourceTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Authorize endpoint";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();

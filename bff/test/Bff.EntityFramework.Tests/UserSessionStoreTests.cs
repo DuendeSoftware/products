@@ -9,6 +9,7 @@ namespace Duende.Bff.EntityFramework.Tests;
 
 public class UserSessionStoreTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly IUserSessionStore _subject;
     private readonly SessionDbContext _database;
 
@@ -37,7 +38,7 @@ public class UserSessionStoreTests
             Renewed = new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc),
             Expires = new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc),
             Ticket = "ticket"
-        });
+        }, _ct);
 
         _database.UserSessions.Count().ShouldBe(1);
     }
@@ -55,9 +56,9 @@ public class UserSessionStoreTests
             Renewed = new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc),
             Expires = new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc),
             Ticket = "ticket"
-        });
+        }, _ct);
 
-        var item = await _subject.GetUserSessionAsync("key123");
+        var item = await _subject.GetUserSessionAsync("key123", _ct);
 
         item.ShouldNotBeNull();
         item.Key.ShouldBe("key123");
@@ -71,7 +72,7 @@ public class UserSessionStoreTests
     [Fact]
     public async Task GetUserSessionAsync_for_invalid_key_should_return_null()
     {
-        var item = await _subject.GetUserSessionAsync("invalid");
+        var item = await _subject.GetUserSessionAsync("invalid", _ct);
         item.ShouldBeNull();
     }
 
@@ -88,7 +89,7 @@ public class UserSessionStoreTests
             Renewed = new DateTime(2021, 4, 2, 10, 13, 34, DateTimeKind.Utc),
             Expires = new DateTime(2022, 5, 3, 11, 14, 35, DateTimeKind.Utc),
             Ticket = "ticket"
-        });
+        }, _ct);
 
         {
             await _subject.UpdateUserSessionAsync("key123", new UserSessionUpdate
@@ -99,9 +100,9 @@ public class UserSessionStoreTests
                 Created = new DateTime(2020, 3, 1, 9, 12, 33, DateTimeKind.Utc),
                 Renewed = new DateTime(2024, 1, 3, 5, 7, 9, DateTimeKind.Utc),
                 Expires = new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc)
-            });
+            }, _ct);
 
-            var item = await _subject.GetUserSessionAsync("key123");
+            var item = await _subject.GetUserSessionAsync("key123", _ct);
             item.ShouldNotBeNull();
             item.Key.ShouldBe("key123");
             item.SubjectId.ShouldBe("sub");
@@ -120,9 +121,9 @@ public class UserSessionStoreTests
                 Created = new DateTime(2022, 3, 1, 9, 12, 33, DateTimeKind.Utc),
                 Renewed = new DateTime(2024, 1, 3, 5, 7, 9, DateTimeKind.Utc),
                 Expires = new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc)
-            });
+            }, _ct);
 
-            var item = await _subject.GetUserSessionAsync("key123");
+            var item = await _subject.GetUserSessionAsync("key123", _ct);
             item.ShouldNotBeNull();
             item.Key.ShouldBe("key123");
             item.SubjectId.ShouldBe("sub2");
@@ -141,9 +142,9 @@ public class UserSessionStoreTests
             Ticket = "ticket2",
             Renewed = new DateTime(2024, 1, 3, 5, 7, 9, DateTimeKind.Utc),
             Expires = new DateTime(2025, 2, 4, 6, 8, 10, DateTimeKind.Utc)
-        });
+        }, _ct);
 
-        var item = await _subject.GetUserSessionAsync("key123");
+        var item = await _subject.GetUserSessionAsync("key123", _ct);
         item.ShouldBeNull();
     }
 
@@ -157,15 +158,16 @@ public class UserSessionStoreTests
             SubjectId = "sub",
             SessionId = "session",
             Ticket = "ticket",
-        });
+        }, _ct);
         _database.UserSessions.Count().ShouldBe(1);
 
-        await _subject.DeleteUserSessionAsync("key123");
+        await _subject.DeleteUserSessionAsync("key123", _ct);
 
         _database.UserSessions.Count().ShouldBe(0);
     }
     [Fact]
-    public async Task DeleteUserSessionAsync_for_invalid_key_should_succeed() => await _subject.DeleteUserSessionAsync("invalid");
+    public async Task DeleteUserSessionAsync_for_invalid_key_should_succeed()
+        => await _subject.DeleteUserSessionAsync("invalid", _ct);
 
 
     [Fact]
@@ -177,44 +179,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2" });
+        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2" }, _ct);
         items.Count().ShouldBe(3);
         items.Select(x => x.SubjectId).Distinct().ToArray().ShouldBeEquivalentTo(new[] { "sub2" });
         items.Select(x => x.SessionId).ToArray().ShouldBeEquivalentTo(new[] { "sid2_1", "sid2_2", "sid2_3", });
@@ -228,44 +230,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid" });
+        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid" }, _ct);
         items.Count().ShouldBe(0);
     }
     [Fact]
@@ -277,44 +279,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SessionId = "sid2_2" });
+        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SessionId = "sid2_2" }, _ct);
         items.Count().ShouldBe(1);
         items.Select(x => x.SubjectId).ToArray().ShouldBeEquivalentTo(new[] { "sub2" });
         items.Select(x => x.SessionId).ToArray().ShouldBeEquivalentTo(new[] { "sid2_2" });
@@ -328,44 +330,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SessionId = "invalid" });
+        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SessionId = "invalid" }, _ct);
         items.Count().ShouldBe(0);
     }
     [Fact]
@@ -377,44 +379,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" });
+        var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" }, _ct);
         items.Count().ShouldBe(1);
         items.Select(x => x.SubjectId).ToArray().ShouldBeEquivalentTo(new[] { "sub2" });
         items.Select(x => x.SessionId).ToArray().ShouldBeEquivalentTo(new[] { "sid2_2" });
@@ -428,60 +430,60 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "invalid" });
+            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "invalid" }, _ct);
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub1", SessionId = "invalid" });
+            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub1", SessionId = "invalid" }, _ct);
             items.Count().ShouldBe(0);
         }
         {
-            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "sid1_1" });
+            var items = await _subject.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "sid1_1" }, _ct);
             items.Count().ShouldBe(0);
         }
     }
     [Fact]
     public async Task GetUserSessionsAsync_for_missing_sub_and_sid_should_throw()
     {
-        Func<Task> f = () => _subject.GetUserSessionsAsync(new UserSessionsFilter());
+        Func<Task> f = () => _subject.GetUserSessionsAsync(new UserSessionsFilter(), _ct);
         await f.ShouldThrowAsync<Exception>();
     }
 
@@ -495,44 +497,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2" });
+        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2" }, _ct);
         _database.UserSessions.Count().ShouldBe(3);
         _database.UserSessions.Count(x => x.SubjectId == "sub2").ShouldBe(0);
     }
@@ -545,44 +547,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid" });
+        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid" }, _ct);
         _database.UserSessions.Count().ShouldBe(6);
     }
     [Fact]
@@ -594,44 +596,47 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SessionId = "sid2_2" });
+        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter
+        {
+            SessionId = "sid2_2"
+        }, _ct);
         _database.UserSessions.Count().ShouldBe(5);
         _database.UserSessions.Count(x => x.SessionId == "sid2_2").ShouldBe(0);
     }
@@ -644,44 +649,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SessionId = "invalid" });
+        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SessionId = "invalid" }, _ct);
         _database.UserSessions.Count().ShouldBe(6);
     }
     [Fact]
@@ -693,44 +698,44 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
-        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" });
+        await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub2", SessionId = "sid2_2" }, _ct);
         _database.UserSessions.Count().ShouldBe(5);
         _database.UserSessions.Count(x => x.SubjectId == "sub2" && x.SessionId == "sid2_2").ShouldBe(0);
     }
@@ -743,60 +748,60 @@ public class UserSessionStoreTests
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub1",
             SessionId = "sid1_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_1",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_2",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub2",
             SessionId = "sid2_3",
-        });
+        }, _ct);
         await _subject.CreateUserSessionAsync(new UserSession
         {
             Key = Guid.NewGuid().ToString(),
             Ticket = "ticket",
             SubjectId = "sub3",
             SessionId = "sid3_1",
-        });
+        }, _ct);
 
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "invalid" });
+            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "invalid" }, _ct);
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub1", SessionId = "invalid" });
+            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "sub1", SessionId = "invalid" }, _ct);
             _database.UserSessions.Count().ShouldBe(6);
         }
         {
-            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "sid1_1" });
+            await _subject.DeleteUserSessionsAsync(new UserSessionsFilter { SubjectId = "invalid", SessionId = "sid1_1" }, _ct);
             _database.UserSessions.Count().ShouldBe(6);
         }
     }
     [Fact]
     public async Task DeleteUserSessionsAsync_for_missing_sub_and_sid_should_throw()
     {
-        Func<Task> f = () => _subject.DeleteUserSessionsAsync(new UserSessionsFilter());
+        Func<Task> f = () => _subject.DeleteUserSessionsAsync(new UserSessionsFilter(), _ct);
         await f.ShouldThrowAsync<Exception>();
     }
 
@@ -820,7 +825,7 @@ public class UserSessionStoreTests
             SubjectId = "sub",
             SessionId = "sid",
         });
-        await ctx0.SaveChangesAsync();
+        await ctx0.SaveChangesAsync(_ct);
 
         using var scope1 = provider.CreateScope();
         var ctx1 = scope1.ServiceProvider.GetRequiredService<SessionDbContext>();
@@ -832,14 +837,14 @@ public class UserSessionStoreTests
         var item2 = ctx2.UserSessions.Single(x => x.Key == key);
         ctx2.UserSessions.Remove(item2);
 
-        await ctx1.SaveChangesAsync();
+        await ctx1.SaveChangesAsync(_ct);
 
-        Func<Task> f1 = async () => await ctx2.SaveChangesAsync();
+        Func<Task> f1 = async () => await ctx2.SaveChangesAsync(_ct);
         await f1.ShouldThrowAsync<DbUpdateConcurrencyException>();
 
         try
         {
-            await ctx2.SaveChangesAsync();
+            await ctx2.SaveChangesAsync(_ct);
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -851,6 +856,6 @@ public class UserSessionStoreTests
         }
 
         // calling again to not throw
-        await ctx2.SaveChangesAsync();
+        await ctx2.SaveChangesAsync(_ct);
     }
 }

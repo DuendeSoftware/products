@@ -13,6 +13,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.DeviceAuthorization;
 
 public class DeviceAuthorizationTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Device authorization endpoint";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
