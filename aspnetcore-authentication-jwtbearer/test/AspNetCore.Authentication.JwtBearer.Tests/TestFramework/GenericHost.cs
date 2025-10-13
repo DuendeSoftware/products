@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace Duende.AspNetCore.TestFramework;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class GenericHost
 {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
-namespace Duende.AspNetCore.TestFramework;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class ApiHost : GenericHost
 {
