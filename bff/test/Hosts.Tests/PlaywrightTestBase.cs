@@ -35,7 +35,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
         }
     }
 
-    public async ValueTask InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         Context.SetDefaultTimeout(10_000);
@@ -57,7 +57,6 @@ public class PlaywrightTestBase : PageTest, IDisposable
         {
             path = Path.GetFullPath(Path.Combine(path, "../../../"));
         }
-
 
         await Context.Tracing.StopAsync(new()
         {
