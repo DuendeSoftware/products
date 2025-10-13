@@ -18,7 +18,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 public class ExtensionGrantClient
 {
     private const string TokenEndpoint = "https://server/connect/token";
-
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly HttpClient _client;
 
     public ExtensionGrantClient()
@@ -51,7 +51,7 @@ public class ExtensionGrantClient
                 { "custom_credential", "custom credential"},
                 { "scope", "api1" }
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -96,7 +96,7 @@ public class ExtensionGrantClient
                 { "extra_claim", "extra_value" },
                 { "scope", "api1" }
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -148,7 +148,7 @@ public class ExtensionGrantClient
                 { "extra_claim", "extra_value" },
                 { "scope", "api1 offline_access" }
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -165,7 +165,7 @@ public class ExtensionGrantClient
             ClientSecret = "secret",
 
             RefreshToken = response.RefreshToken
-        });
+        }, _ct);
 
         refreshResponse.IsError.ShouldBeFalse();
         refreshResponse.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -215,7 +215,7 @@ public class ExtensionGrantClient
                 { "custom_credential", "custom credential"},
                 { "scope", "api1" }
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -250,7 +250,7 @@ public class ExtensionGrantClient
             {
                 { "custom_credential", "custom credential"}
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -296,7 +296,7 @@ public class ExtensionGrantClient
             {
                 { "scope", "api1" }
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -320,7 +320,7 @@ public class ExtensionGrantClient
                 { "custom_credential", "custom credential"},
                 { "scope", "api1" }
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -344,7 +344,7 @@ public class ExtensionGrantClient
                 { "custom_credential", "custom credential"},
                 { "scope", "api1" }
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -370,7 +370,7 @@ public class ExtensionGrantClient
                 { "lifetime", "5000"},
                 { "sub",  "818727"}
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -421,7 +421,7 @@ public class ExtensionGrantClient
                 { "type", "jwt"},
                 { "sub",  "818727"}
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -452,7 +452,7 @@ public class ExtensionGrantClient
                 { "impersonated_client", "impersonated_client_id"},
                 { "sub",  "818727"}
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -485,7 +485,7 @@ public class ExtensionGrantClient
                 { "type", "reference"},
                 { "sub",  "818727"}
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -515,7 +515,7 @@ public class ExtensionGrantClient
                 { "claim", "extra_claim"},
                 { "sub",  "818727"}
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);
@@ -561,7 +561,7 @@ public class ExtensionGrantClient
 
                 { "claim", "extra_claim"},
             }
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.HttpStatusCode.ShouldBe(HttpStatusCode.OK);

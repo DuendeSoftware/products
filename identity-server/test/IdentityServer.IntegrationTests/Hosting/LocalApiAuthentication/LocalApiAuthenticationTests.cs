@@ -24,15 +24,15 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting.LocalApiAuthentication;
 public class LocalApiAuthenticationTests
 {
     private const string Category = "Local API Integration";
-
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
-
     private static string _jwk;
     private Client _client;
 
     public LocalApiTokenMode Mode { get; set; }
 
     public bool ApiWasCalled { get; set; }
+
     public ClaimsPrincipal ApiPrincipal { get; set; }
 
     static LocalApiAuthenticationTests() => _jwk = GenerateJwk();
@@ -240,7 +240,7 @@ public class LocalApiAuthenticationTests
         var at = await GetAccessTokenAsync();
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", at);
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
         ApiWasCalled.ShouldBeTrue();
@@ -257,7 +257,7 @@ public class LocalApiAuthenticationTests
         var at = await GetAccessTokenAsync();
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", at);
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
         ApiWasCalled.ShouldBeTrue();
@@ -273,7 +273,7 @@ public class LocalApiAuthenticationTests
         req.Headers.Authorization = new AuthenticationHeaderValue("DPoP", at);
         req.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at));
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
         ApiWasCalled.ShouldBeTrue();
@@ -310,7 +310,7 @@ public class LocalApiAuthenticationTests
             accessTokenJkt.ShouldNotBe(newJkt);
         }
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -339,7 +339,7 @@ public class LocalApiAuthenticationTests
             ClientSecret = "secret",
             Token = at
         };
-        var introspectionResponse = await _pipeline.BackChannelClient.IntrospectTokenAsync(introspectionRequest);
+        var introspectionResponse = await _pipeline.BackChannelClient.IntrospectTokenAsync(introspectionRequest, _ct);
         introspectionResponse.IsError.ShouldBeFalse();
 
         var cnf = introspectionResponse.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.Confirmation);
@@ -350,7 +350,7 @@ public class LocalApiAuthenticationTests
             accessTokenJkt.ShouldNotBe(newJkt);
         }
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -365,7 +365,7 @@ public class LocalApiAuthenticationTests
         req.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at));
 
         _client.DPoPValidationMode = DPoPTokenExpirationValidationMode.Nonce;
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
         response.Headers.Contains("DPoP-Nonce").ShouldBeTrue();
@@ -381,14 +381,14 @@ public class LocalApiAuthenticationTests
         req.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at));
 
         _client.DPoPValidationMode = DPoPTokenExpirationValidationMode.Nonce;
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
         var nonce = response.Headers.GetValues("DPoP-Nonce").FirstOrDefault();
 
         var req2 = new HttpRequestMessage(HttpMethod.Get, "https://server/api");
         req2.Headers.Authorization = new AuthenticationHeaderValue("DPoP", at);
         req2.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at, nonce));
 
-        var response2 = await _pipeline.BackChannelClient.SendAsync(req2);
+        var response2 = await _pipeline.BackChannelClient.SendAsync(req2, _ct);
         response2.IsSuccessStatusCode.ShouldBeTrue();
     }
 
@@ -402,7 +402,7 @@ public class LocalApiAuthenticationTests
         req.Headers.Authorization = new AuthenticationHeaderValue("DPoP", at);
         req.Headers.Add("DPoP", CreateProofToken("GET", "https://server/api", at));
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
         response.Headers.WwwAuthenticate.Select(x => x.Scheme).ShouldBe(["Bearer"]);
@@ -418,7 +418,7 @@ public class LocalApiAuthenticationTests
         var at = await GetAccessTokenAsync();
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", at);
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
         response.Headers.WwwAuthenticate.Select(x => x.Scheme).ShouldBe(["DPoP"]);
@@ -430,7 +430,7 @@ public class LocalApiAuthenticationTests
     {
         var req = new HttpRequestMessage(HttpMethod.Get, "https://server/api");
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
         response.Headers.WwwAuthenticate.Select(x => x.Scheme).ShouldBe(["Bearer", "DPoP"]);
@@ -442,7 +442,7 @@ public class LocalApiAuthenticationTests
         var req = new HttpRequestMessage(HttpMethod.Get, "https://server/api");
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
     }
@@ -454,7 +454,7 @@ public class LocalApiAuthenticationTests
         var at = await GetAccessTokenAsync();
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", at.Substring(at.Length / 2));
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
     }
@@ -470,7 +470,7 @@ public class LocalApiAuthenticationTests
 
         _client.Enabled = false;
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
     }
@@ -483,7 +483,7 @@ public class LocalApiAuthenticationTests
         var at = await GetAccessTokenAsync(true);
         req.Headers.Authorization = new AuthenticationHeaderValue("DPoP", at);
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
     }
@@ -495,7 +495,7 @@ public class LocalApiAuthenticationTests
         var at = await GetAccessTokenAsync(true);
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", at);
 
-        var response = await _pipeline.BackChannelClient.SendAsync(req);
+        var response = await _pipeline.BackChannelClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeFalse();
     }

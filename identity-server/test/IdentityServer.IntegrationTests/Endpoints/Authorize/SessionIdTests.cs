@@ -12,8 +12,8 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 public class SessionIdTests
 {
     private const string Category = "SessionIdTests";
-
-    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public SessionIdTests()
     {
@@ -84,7 +84,7 @@ public class SessionIdTests
 
         _mockPipeline.RemoveSessionCookie();
 
-        await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint);
+        await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint, _ct);
 
         var sid2 = _mockPipeline.GetSessionCookie().Value;
         sid2.ShouldBe(sid1);

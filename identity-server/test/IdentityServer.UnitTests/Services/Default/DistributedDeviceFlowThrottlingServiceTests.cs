@@ -14,16 +14,15 @@ namespace UnitTests.Services.Default;
 
 public class DistributedDeviceFlowThrottlingServiceTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private TestCache cache = new TestCache();
     private InMemoryClientStore _store;
-
     private readonly IdentityServerOptions options = new IdentityServerOptions { DeviceFlow = new DeviceFlowOptions { Interval = 5 } };
     private readonly DeviceCode deviceCode = new DeviceCode
     {
         Lifetime = 300,
         CreationTime = DateTime.UtcNow
     };
-
     private const string CacheKey = "devicecode_";
     private readonly DateTime testDate = new DateTime(2018, 09, 01, 8, 0, 0, DateTimeKind.Utc);
 
@@ -48,7 +47,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
         var handle = Guid.NewGuid().ToString();
         var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
 
-        await cache.SetAsync(CacheKey + handle, Encoding.UTF8.GetBytes(testDate.AddSeconds(-1).ToString("O")));
+        await cache.SetAsync(CacheKey + handle, Encoding.UTF8.GetBytes(testDate.AddSeconds(-1).ToString("O")), token: _ct);
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 
@@ -64,7 +63,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
 
         var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
 
-        await cache.SetAsync($"devicecode_{handle}", Encoding.UTF8.GetBytes(testDate.AddSeconds(-deviceCode.Lifetime - 1).ToString("O")));
+        await cache.SetAsync($"devicecode_{handle}", Encoding.UTF8.GetBytes(testDate.AddSeconds(-deviceCode.Lifetime - 1).ToString("O")), _ct);
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 

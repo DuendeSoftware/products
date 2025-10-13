@@ -16,6 +16,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     public ScopeStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -69,7 +71,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         await using (var context = new ConfigurationDbContext(options))
         {
             context.ApiResources.Add(resource.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         ApiResource foundResource;
@@ -98,7 +100,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         {
             context.ApiResources.Add(resource.ToEntity());
             context.ApiResources.Add(CreateApiResourceTestResource().ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         ApiResource foundResource;
@@ -130,7 +132,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         {
             context.ApiResources.Add(testApiResource.ToEntity());
             context.ApiScopes.Add(testApiScope.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         IEnumerable<ApiResource> resources;
@@ -164,7 +166,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             context.IdentityResources.Add(CreateIdentityTestResource().ToEntity());
             context.ApiResources.Add(CreateApiResourceTestResource().ToEntity());
             context.ApiScopes.Add(CreateApiScopeTestResource().ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         IEnumerable<ApiResource> resources;
@@ -187,7 +189,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         await using (var context = new ConfigurationDbContext(options))
         {
             context.IdentityResources.Add(resource.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         IList<IdentityResource> resources;
@@ -218,7 +220,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         {
             context.IdentityResources.Add(resource.ToEntity());
             context.IdentityResources.Add(CreateIdentityTestResource().ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         IList<IdentityResource> resources;
@@ -244,7 +246,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         await using (var context = new ConfigurationDbContext(options))
         {
             context.ApiScopes.Add(resource.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         IList<ApiScope> resources;
@@ -275,7 +277,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         {
             context.ApiScopes.Add(resource.ToEntity());
             context.ApiScopes.Add(CreateApiScopeTestResource().ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         IList<ApiScope> resources;
@@ -322,7 +324,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             context.ApiResources.Add(hiddenApiResource.ToEntity());
             context.ApiScopes.Add(hiddenApiScope.ToEntity());
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         Resources resources;

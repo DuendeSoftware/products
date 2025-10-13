@@ -13,8 +13,8 @@ namespace Duende.IdentityServer.IntegrationTests.Conformance.Basic;
 public class RedirectUriTests
 {
     private const string Category = "Conformance.Basic.RedirectUriTests";
-
-    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public RedirectUriTests()
     {
@@ -72,7 +72,7 @@ public class RedirectUriTests
             redirectUri: "https://bad",
             state: state,
             nonce: nonce);
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_request");
@@ -95,7 +95,7 @@ public class RedirectUriTests
             redirectUri: null,
             state: state,
             nonce: nonce);
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_request");
@@ -118,7 +118,7 @@ public class RedirectUriTests
             redirectUri: "https://code_client/callback?foo=bar&baz=quux",
             state: state,
             nonce: nonce);
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://code_client/callback?");
@@ -146,7 +146,7 @@ public class RedirectUriTests
             redirectUri: "https://code_client/callback?baz=quux&foo=bar",
             state: state,
             nonce: nonce);
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_request");

@@ -46,7 +46,7 @@ public class CustomTokenRequestValidatorClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api1"
-        }, cancellationToken: _ct);
+        }, _ct);
 
         var fields = GetFields(response);
         fields["custom"].GetString().ShouldBe("custom");
@@ -65,7 +65,7 @@ public class CustomTokenRequestValidatorClient
 
             UserName = "bob",
             Password = "bob"
-        }, cancellationToken: _ct);
+        }, _ct);
 
         var fields = GetFields(response);
         fields["custom"].GetString().ShouldBe("custom");
@@ -84,7 +84,7 @@ public class CustomTokenRequestValidatorClient
 
             UserName = "bob",
             Password = "bob"
-        }, cancellationToken: _ct);
+        }, _ct);
 
         response = await _client.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -93,7 +93,7 @@ public class CustomTokenRequestValidatorClient
             ClientSecret = "secret",
 
             RefreshToken = response.RefreshToken
-        }, cancellationToken: _ct);
+        }, _ct);
 
         var fields = GetFields(response);
         fields["custom"].GetString().ShouldBe("custom");
@@ -115,7 +115,7 @@ public class CustomTokenRequestValidatorClient
                 { "scope", "api1" },
                 { "custom_credential", "custom credential"}
             }
-        }, cancellationToken: _ct);
+        }, _ct);
 
         var fields = GetFields(response);
         fields["custom"].GetString().ShouldBe("custom");

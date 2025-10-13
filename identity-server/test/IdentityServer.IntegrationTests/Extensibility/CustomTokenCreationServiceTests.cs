@@ -59,7 +59,7 @@ public class CustomTokenCreationServiceTests
                 Address = IdentityServerPipeline.TokenEndpoint,
                 ClientId = "test",
                 ClientSecret = "secret"
-            }, cancellationToken: _ct);
+            }, _ct);
         result.IsError.ShouldBeFalse();
 
         var accessToken = result.AccessToken;

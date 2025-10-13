@@ -31,7 +31,7 @@ public class DiscoveryEndpointTests_dpop_signing_alg_values_supported
 
         var result =
             await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
-                "https://server/.well-known/openid-configuration");
+                "https://server/.well-known/openid-configuration", _ct);
 
         var supportedAlgorithmsFromResponse =
             result.TryGetStringArray(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported);
@@ -44,9 +44,9 @@ public class DiscoveryEndpointTests_dpop_signing_alg_values_supported
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
 
-        var result =
-            await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
-                "https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
+                "https://server/.well-known/openid-configuration",
+                _ct);
         var algorithmsSupported = result.TryGetStringArray("dpop_signing_alg_values_supported");
 
         algorithmsSupported.Count().ShouldBe(9);
@@ -72,8 +72,8 @@ public class DiscoveryEndpointTests_dpop_signing_alg_values_supported
         pipeline.Options.DPoP.SupportedDPoPSigningAlgorithms = algorithms;
 
         var result = await pipeline.BackChannelClient
-            .GetAsync("https://server/.well-known/openid-configuration");
-        var json = await result.Content.ReadAsStringAsync();
+            .GetAsync("https://server/.well-known/openid-configuration", _ct);
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         data.ShouldNotContainKey(OidcConstants.Discovery.DPoPSigningAlgorithmsSupported);

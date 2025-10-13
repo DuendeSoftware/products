@@ -10,6 +10,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
 public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Discovery endpoint - request_object_signing_algs_supported";
 
     [Fact]
@@ -25,9 +26,8 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests
             SecurityAlgorithms.EcdsaSha256
         ];
 
-        var result =
-            await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
-                "https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient
+            .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration", _ct);
         var algorithmsSupported = result.TryGetStringArray("request_object_signing_alg_values_supported");
 
         algorithmsSupported.Count().ShouldBe(2);
@@ -46,8 +46,8 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests
         pipeline.Options.SupportedRequestObjectSigningAlgorithms = algorithms;
 
         var result = await pipeline.BackChannelClient
-            .GetAsync("https://server/.well-known/openid-configuration");
-        var json = await result.Content.ReadAsStringAsync();
+            .GetAsync("https://server/.well-known/openid-configuration", _ct);
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         data.ShouldNotContainKey("request_object_signing_alg_values_supported");
@@ -62,7 +62,7 @@ public class DiscoveryEndpoint_request_object_auth_signing_algs_supported_Tests
 
         var result =
             await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
-                "https://server/.well-known/openid-configuration");
+                "https://server/.well-known/openid-configuration", _ct);
         var algorithmsSupported = result.TryGetStringArray("request_object_signing_alg_values_supported");
 
         algorithmsSupported.ShouldBe([

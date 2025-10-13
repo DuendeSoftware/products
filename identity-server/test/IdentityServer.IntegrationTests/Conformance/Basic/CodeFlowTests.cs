@@ -91,7 +91,7 @@ public class CodeFlowTests
 
             Code = code,
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
-        }, cancellationToken: _ct);
+        }, _ct);
 
         tokenResult.IsError.ShouldBeFalse();
         tokenResult.HttpErrorReason.ShouldBe("OK");
@@ -144,7 +144,7 @@ public class CodeFlowTests
 
             Code = code,
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
-        }, cancellationToken: _ct);
+        }, _ct);
 
         tokenResult.IsError.ShouldBeFalse();
         tokenResult.HttpErrorReason.ShouldBe("OK");

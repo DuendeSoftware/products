@@ -14,7 +14,7 @@ public class RefreshTokenClient
 {
     private const string TokenEndpoint = "https://server/connect/token";
     private const string RevocationEndpoint = "https://server/connect/revocation";
-
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly HttpClient _client;
 
     public RefreshTokenClient()
@@ -43,7 +43,7 @@ public class RefreshTokenClient
             Scope = "api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -58,7 +58,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = response.RefreshToken
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -79,7 +79,7 @@ public class RefreshTokenClient
             Scope = "openid api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -94,7 +94,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = response.RefreshToken
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -115,7 +115,7 @@ public class RefreshTokenClient
             Scope = "openid api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -132,7 +132,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = response.RefreshToken
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -157,7 +157,7 @@ public class RefreshTokenClient
             Scope = "openid api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -174,7 +174,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = response.RefreshToken
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -200,7 +200,7 @@ public class RefreshTokenClient
             Scope = "openid api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -218,7 +218,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = response.RefreshToken
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -234,7 +234,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = rt1
-        });
+        }, _ct);
 
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe("invalid_grant");
@@ -253,7 +253,7 @@ public class RefreshTokenClient
             Scope = "openid api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -271,7 +271,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = rt1
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
     }
@@ -289,7 +289,7 @@ public class RefreshTokenClient
             Scope = "openid api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
         response.ExpiresIn.ShouldBe(3600);
@@ -309,7 +309,7 @@ public class RefreshTokenClient
 
             Token = rt1,
             TokenTypeHint = "refresh_token"
-        });
+        }, _ct);
 
         revocationResponse.IsError.ShouldBe(false);
 
@@ -321,7 +321,7 @@ public class RefreshTokenClient
             ClientSecret = "secret",
 
             RefreshToken = rt1
-        });
+        }, _ct);
 
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe("invalid_grant");

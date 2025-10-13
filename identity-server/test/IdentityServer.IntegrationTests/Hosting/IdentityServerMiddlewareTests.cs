@@ -20,6 +20,7 @@ public class FailRouter : IEndpointRouter
 
 public class IdentityServerMiddlewareTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
     public static readonly TheoryData<Type, bool> ExceptionFilteringTestCases = new TheoryData<Type, bool>
     {
@@ -91,7 +92,7 @@ public class IdentityServerMiddlewareTests
         pipeline.OnPreConfigure += builder => builder.Use(next => context => testActivityMiddleware.Handle(context, next));
         pipeline.Initialize();
 
-        await pipeline.BackChannelClient.GetAsync($"https://server{path}");
+        await pipeline.BackChannelClient.GetAsync($"https://server{path}", _ct);
 
         if (displayNameShouldBeSet)
         {
@@ -113,7 +114,7 @@ public class IdentityServerMiddlewareTests
         var clientCert = TestCert.Load();
         pipeline.SetClientCertificate(clientCert);
 
-        await pipeline.MtlsBackChannelClient.GetAsync(IdentityServerPipeline.TokenMtlsEndpoint);
+        await pipeline.MtlsBackChannelClient.GetAsync(IdentityServerPipeline.TokenMtlsEndpoint, _ct);
 
         var path = IdentityServerPipeline.TokenMtlsEndpoint.Substring(14); // trim off "https://server"
         testActivityMiddleware.CapturedActivity.DisplayName.ShouldBe($"GET {path}");

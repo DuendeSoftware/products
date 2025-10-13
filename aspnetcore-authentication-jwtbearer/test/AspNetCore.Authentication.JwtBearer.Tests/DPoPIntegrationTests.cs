@@ -73,7 +73,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         // Login and get token for api call
         await app.LoginAsync("sub");
         var response = await app.BrowserClient.GetAsync(app.Url("/user_token"), _ct);
-        var token = await response.Content.ReadFromJsonAsync<UserToken>(cancellationToken: _ct);
+        var token = await response.Content.ReadFromJsonAsync<UserToken>(_ct);
         token.ShouldNotBeNull();
         token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
