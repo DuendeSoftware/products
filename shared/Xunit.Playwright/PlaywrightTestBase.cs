@@ -3,8 +3,6 @@
 
 using System.Reflection;
 using Microsoft.Playwright;
-using Xunit.Sdk;
-
 namespace Duende.Xunit.Playwright;
 
 public class Defaults
@@ -21,9 +19,6 @@ public class PlaywrightTestBase<THost> : IAsyncLifetime, IDisposable where THost
     private readonly IDisposable _loggingScope;
     private IPlaywright? _playwright;
     private IBrowser? _browser;
-    
-    protected IBrowserContext Context { get; private set; } = null!;
-    protected IPage Page { get; private set; } = null!;
 
     public PlaywrightTestBase(ITestOutputHelper output, AppHostFixture<THost> fixture)
     {
@@ -44,6 +39,9 @@ public class PlaywrightTestBase<THost> : IAsyncLifetime, IDisposable where THost
 #endif
         }
     }
+    protected IBrowserContext Context { get; private set; } = null!;
+
+    protected IPage Page { get; private set; } = null!;
 
     public AppHostFixture<THost> Fixture { get; }
 
@@ -55,7 +53,7 @@ public class PlaywrightTestBase<THost> : IAsyncLifetime, IDisposable where THost
         _browser = await _playwright.Chromium.LaunchAsync(new() { Headless = true });
         Context = await _browser.NewContextAsync(ContextOptions());
         Page = await Context.NewPageAsync();
-        
+
         Context.SetDefaultTimeout(10_000);
         await Context.Tracing.StartAsync(new()
         {
@@ -84,7 +82,7 @@ public class PlaywrightTestBase<THost> : IAsyncLifetime, IDisposable where THost
                 $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}.zip"
             )
         });
-        
+
         await Context.CloseAsync();
         await _browser!.DisposeAsync();
         _playwright!.Dispose();
