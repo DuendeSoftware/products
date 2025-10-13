@@ -67,7 +67,7 @@ public class IdentityServerHost : GenericHost
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapGet("/account/login", context =>
+            endpoints.MapGet("/account/login", _ =>
             {
                 return Task.CompletedTask;
             });

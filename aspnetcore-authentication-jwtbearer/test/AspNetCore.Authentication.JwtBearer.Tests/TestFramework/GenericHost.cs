@@ -98,8 +98,8 @@ public class GenericHost
         HttpClient = Server.CreateClient();
     }
 
-    public event Action<IServiceCollection> OnConfigureServices = services => { };
-    public event Action<WebApplication> OnConfigure = app => { };
+    public event Action<IServiceCollection> OnConfigureServices = _ => { };
+    public event Action<WebApplication> OnConfigure = _ => { };
 
     private void ConfigureServices(IServiceCollection services)
     {
