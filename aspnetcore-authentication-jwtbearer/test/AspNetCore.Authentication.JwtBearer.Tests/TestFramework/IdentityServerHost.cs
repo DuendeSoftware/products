@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Xunit.Abstractions;
 
-namespace Duende.AspNetCore.TestFramework;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class IdentityServerHost : GenericHost
 {

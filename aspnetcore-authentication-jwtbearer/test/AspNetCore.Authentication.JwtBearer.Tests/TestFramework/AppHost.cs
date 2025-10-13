@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
 using Xunit.Abstractions;
 
-namespace Duende.AspNetCore.TestFramework;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class AppHost : GenericHost
 {

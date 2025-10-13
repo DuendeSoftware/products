@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Net;
 
-namespace Duende.AspNetCore.TestFramework;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class TestBrowserClient : HttpClient
 {

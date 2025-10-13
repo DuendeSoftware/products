@@ -8,7 +8,7 @@ using System.Text.Json;
 using Duende.AccessTokenManagement.DPoP;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.AspNetCore.Authentication.JwtBearer.DPoP;
-using Duende.AspNetCore.TestFramework;
+using Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
