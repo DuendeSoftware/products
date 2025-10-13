@@ -29,7 +29,10 @@ public class GenericHost
 
     public GenericHost(ITestOutputHelper testOutputHelper, string baseAddress = "https://server")
     {
-        if (baseAddress.EndsWith("/")) baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        if (baseAddress.EndsWith("/"))
+        {
+            baseAddress = baseAddress.Substring(0, baseAddress.Length - 1);
+        }
 
         _baseAddress = baseAddress;
         _testOutputHelper = testOutputHelper;
@@ -61,18 +64,13 @@ public class GenericHost
         private set => _httpClient = value;
     }
 
-    public T Resolve<T>()
-        where T : notnull
-    {
-        // not calling dispose on scope on purpose
-        return _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider
-            .GetRequiredService<T>();
-    }
-
     public string Url(string? path = null)
     {
-        path = path ?? string.Empty;
-        if (!path.StartsWith("/")) path = "/" + path;
+        path ??= string.Empty;
+        if (!path.StartsWith("/"))
+        {
+            path = "/" + path;
+        }
 
         return _baseAddress + path;
     }
@@ -128,8 +126,7 @@ public class GenericHost
         ConfigureSignout(builder);
     }
 
-    private void ConfigureSignout(WebApplication app)
-    {
+    private void ConfigureSignout(WebApplication app) =>
         app.Use(async (ctx, next) =>
         {
             if (ctx.Request.Path == "/__signout")
@@ -141,21 +138,16 @@ public class GenericHost
 
             await next();
         });
-    }
 
-    public async Task RevokeSessionCookieAsync()
-    {
-        var response = await BrowserClient.GetAsync(Url("__signout"));
-        response.StatusCode.ShouldBe((HttpStatusCode)204);
-    }
-
-    private void ConfigureSignin(WebApplication app)
-    {
+    private void ConfigureSignin(WebApplication app) =>
         app.Use(async (ctx, next) =>
         {
             if (ctx.Request.Path == "/__signin")
             {
-                if (_userToSignIn is not object) throw new Exception("No User Configured for SignIn");
+                if (_userToSignIn is not object)
+                {
+                    throw new Exception("No User Configured for SignIn");
+                }
 
                 var props = _propsToSignIn ?? new AuthenticationProperties();
                 await ctx.SignInAsync(_userToSignIn, props);
@@ -169,7 +161,6 @@ public class GenericHost
 
             await next();
         });
-    }
 
     public async Task IssueSessionCookieAsync(params Claim[] claims)
     {
@@ -182,10 +173,5 @@ public class GenericHost
     {
         _propsToSignIn = props;
         return IssueSessionCookieAsync(claims);
-    }
-
-    public Task IssueSessionCookieAsync(string sub, params Claim[] claims)
-    {
-        return IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
     }
 }
