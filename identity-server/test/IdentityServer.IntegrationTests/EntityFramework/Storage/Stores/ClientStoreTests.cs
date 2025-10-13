@@ -169,7 +169,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             }
             else
             {
-                TestTimeoutException.ForTimedOutTest(timeout);
+                throw TestTimeoutException.ForTimedOutTest(timeout);
             }
         }
     }
