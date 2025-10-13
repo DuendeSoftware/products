@@ -12,10 +12,7 @@ public class ApiHost : GenericHost
 {
     public const string AuthenticationScheme = "token";
 
-    public int? ApiStatusCodeToReturn { get; set; }
-
     private readonly IdentityServerHost _identityServerHost;
-    public event Action<HttpContext> ApiInvoked = ctx => { };
 
     public ApiHost(IdentityServerHost identityServerHost, ITestOutputHelper testOutputHelper, string baseAddress = "https://api")
         : base(testOutputHelper, baseAddress)
@@ -25,6 +22,10 @@ public class ApiHost : GenericHost
         OnConfigureServices += ConfigureServices;
         OnConfigure += Configure;
     }
+
+    public int? ApiStatusCodeToReturn { get; set; }
+
+    public event Action<HttpContext> ApiInvoked = _ => { };
 
     private void ConfigureServices(IServiceCollection services)
     {
