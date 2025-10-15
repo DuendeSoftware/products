@@ -20,6 +20,13 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
+  <!-- Workaround for https://github.com/dotnet/aspnetcore/issues/63719 -->
+  <Target Name="_PreserveFileProvidersEmbeddedPackageReference" AfterTargets="AddPrunePackageReferences">
+    <ItemGroup>
+      <PrunePackageReference Remove="Microsoft.Extensions.FileProviders.Embedded" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
   </ItemGroup>
