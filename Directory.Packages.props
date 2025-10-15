@@ -22,15 +22,15 @@
     <LoggingAbstractionsVersion>9.0.9</LoggingAbstractionsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0'">
-    <FrameworkVersion>10.0.0-rc.2.25502.107</FrameworkVersion>
-    <EFCoreVersion>10.0.0-rc.2.25502.107</EFCoreVersion>
-    <IdentityEFCoreVersion>10.0.0-rc.2.25502.107</IdentityEFCoreVersion>
-    <RuntimeCompilationVersion>10.0.0-rc.2.25502.107</RuntimeCompilationVersion>
-    <AuthenticationCertificateVersion>10.0.0-rc.2.25502.107</AuthenticationCertificateVersion>
+    <FrameworkVersion>10.0.0-rc.1.25451.107</FrameworkVersion>
+    <EFCoreVersion>10.0.0-rc.1.25451.107</EFCoreVersion>
+    <IdentityEFCoreVersion>10.0.0-rc.1.25451.107</IdentityEFCoreVersion>
+    <RuntimeCompilationVersion>10.0.0-rc.1.25451.107</RuntimeCompilationVersion>
+    <AuthenticationCertificateVersion>10.0.0-rc.1.25451.107</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
-    <CachingMemoryVersion>10.0.0-rc.2.25502.107</CachingMemoryVersion>
-    <SystemTextJsonVersion>10.0.0-rc.2.25502.107</SystemTextJsonVersion>
-    <LoggingAbstractionsVersion>10.0.0-rc.2.25502.107</LoggingAbstractionsVersion>
+    <CachingMemoryVersion>10.0.0-rc.1.25451.107</CachingMemoryVersion>
+    <SystemTextJsonVersion>10.0.0-rc.1.25451.107</SystemTextJsonVersion>
+    <LoggingAbstractionsVersion>10.0.0-rc.1.25451.107</LoggingAbstractionsVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
