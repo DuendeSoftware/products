@@ -52,7 +52,7 @@ public class GenericHost
         return _baseAddress + path;
     }
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {

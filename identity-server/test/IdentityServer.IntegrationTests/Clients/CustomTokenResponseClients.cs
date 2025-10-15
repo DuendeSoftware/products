@@ -16,7 +16,6 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 
 public class CustomTokenResponseClients
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string TokenEndpoint = "https://server/connect/token";
 
     private readonly HttpClient _client;
@@ -47,7 +46,7 @@ public class CustomTokenResponseClients
             UserName = "bob",
             Password = "bob",
             Scope = "api1"
-        }, _ct);
+        });
 
         // raw fields
         var fields = GetFields(response);
@@ -110,7 +109,7 @@ public class CustomTokenResponseClients
             UserName = "bob",
             Password = "invalid",
             Scope = "api1"
-        }, _ct);
+        });
 
         // raw fields
         var fields = GetFields(response);
@@ -162,7 +161,7 @@ public class CustomTokenResponseClients
                 { "scope", "api1" },
                 { "outcome", "succeed"}
             }
-        }, _ct);
+        });
 
 
         // raw fields
@@ -230,7 +229,7 @@ public class CustomTokenResponseClients
                 { "scope", "api1" },
                 { "outcome", "fail"}
             }
-        }, _ct);
+        });
 
 
         // raw fields

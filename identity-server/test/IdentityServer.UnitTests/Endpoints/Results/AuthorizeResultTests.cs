@@ -20,7 +20,6 @@ namespace UnitTests.Endpoints.Results;
 
 public class AuthorizeResultTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private AuthorizeHttpWriter _subject;
 
     private AuthorizeResponse _response = new AuthorizeResponse();
@@ -221,7 +220,7 @@ public class AuthorizeResultTests
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.AuthorizeScript}'");
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
         using var rdr = new StreamReader(_context.Response.Body);
-        var html = await rdr.ReadToEndAsync(_ct);
+        var html = await rdr.ReadToEndAsync();
         html.ShouldContain("<base target='_self'/>");
         html.ShouldContain("<form method='post' action='http://client/callback'>");
         html.ShouldContain("<input type='hidden' name='state' value='state' />");

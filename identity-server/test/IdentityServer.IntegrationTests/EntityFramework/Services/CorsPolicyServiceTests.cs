@@ -15,8 +15,6 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Services;
 
 public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-
     public CorsPolicyServiceTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -45,7 +43,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
                 ClientName = "2",
                 AllowedCorsOrigins = new List<string> { "https://www.identityserver.com", testCorsOrigin }
             }.ToEntity());
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         bool result;
@@ -69,7 +67,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
                 ClientName = Guid.NewGuid().ToString(),
                 AllowedCorsOrigins = new List<string> { "https://www.identityserver.com" }
             }.ToEntity());
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         bool result;

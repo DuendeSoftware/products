@@ -6,17 +6,18 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts;
 
 public class BffIntegrationTestBase : OutputWritingTestBase
 {
     protected readonly IdentityServerHost IdentityServerHost;
-    protected readonly ApiHost ApiHost;
-    protected readonly BffHost BffHost;
-    protected readonly BffHostUsingResourceNamedTokens BffHostWithNamedTokens;
+    protected ApiHost ApiHost;
+    protected BffHost BffHost;
+    protected BffHostUsingResourceNamedTokens BffHostWithNamedTokens;
 
-    protected BffIntegrationTestBase(ITestOutputHelper output) : base(output)
+    public BffIntegrationTestBase(ITestOutputHelper output) : base(output)
     {
         IdentityServerHost = new IdentityServerHost(WriteLine);
         ApiHost = new ApiHost(WriteLine, IdentityServerHost, "scope1");
@@ -46,11 +47,12 @@ public class BffIntegrationTestBase : OutputWritingTestBase
 
             services.AddSingleton<DefaultAccessTokenRetriever>();
         };
+
     }
 
     public async Task Login(string sub) => await IdentityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
 
-    public override async ValueTask InitializeAsync()
+    public override async Task InitializeAsync()
     {
         await IdentityServerHost.InitializeAsync();
         await ApiHost.InitializeAsync();
@@ -59,12 +61,13 @@ public class BffIntegrationTestBase : OutputWritingTestBase
         await base.InitializeAsync();
     }
 
-    public override async ValueTask DisposeAsync()
+    public override async Task DisposeAsync()
     {
         await ApiHost.DisposeAsync();
         await BffHost.DisposeAsync();
         await BffHostWithNamedTokens.DisposeAsync();
         await IdentityServerHost.DisposeAsync();
         await base.DisposeAsync();
+
     }
 }

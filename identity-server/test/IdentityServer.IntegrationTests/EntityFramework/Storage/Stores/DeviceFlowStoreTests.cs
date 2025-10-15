@@ -19,7 +19,6 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, PersistedGrantDbContext, OperationalStoreOptions>
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly IPersistentGrantSerializer serializer = new PersistentGrantSerializer();
 
     public DeviceFlowStoreTests(DatabaseProviderFixture<PersistedGrantDbContext> fixture) : base(fixture)
@@ -117,7 +116,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = deviceCodeData.CreationTime.AddSeconds(deviceCodeData.Lifetime),
                 Data = serializer.Serialize(deviceCodeData)
             });
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         await using (var context = new PersistedGrantDbContext(options))
@@ -162,7 +161,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = deviceCodeData.CreationTime.AddSeconds(deviceCodeData.Lifetime),
                 Data = serializer.Serialize(deviceCodeData)
             });
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         await using (var context = new PersistedGrantDbContext(options))
@@ -209,7 +208,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = expectedDeviceCodeData.CreationTime.AddSeconds(expectedDeviceCodeData.Lifetime),
                 Data = serializer.Serialize(expectedDeviceCodeData)
             });
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         DeviceCode code;
@@ -271,7 +270,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = expectedDeviceCodeData.CreationTime.AddSeconds(expectedDeviceCodeData.Lifetime),
                 Data = serializer.Serialize(expectedDeviceCodeData)
             });
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         DeviceCode code;
@@ -330,7 +329,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = unauthorizedDeviceCode.CreationTime.AddSeconds(unauthorizedDeviceCode.Lifetime),
                 Data = serializer.Serialize(unauthorizedDeviceCode)
             });
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         var authorizedDeviceCode = new DeviceCode
@@ -405,7 +404,7 @@ public class DeviceFlowStoreTests : IntegrationTest<DeviceFlowStoreTests, Persis
                 Expiration = existingDeviceCode.CreationTime.AddSeconds(existingDeviceCode.Lifetime),
                 Data = serializer.Serialize(existingDeviceCode)
             });
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         await using (var context = new PersistedGrantDbContext(options))

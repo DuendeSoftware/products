@@ -7,15 +7,14 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 public class ReplayTests : DPoPProofValidatorTestBase
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     [Fact]
     [Trait("Category", "Unit")]
     public async Task replays_detected_in_ValidateReplay_fail()
     {
-        ReplayCache.Exists(TokenIdHash, _ct).Returns(true);
+        ReplayCache.Exists(TokenIdHash).Returns(true);
         Result.TokenIdHash = TokenIdHash;
 
-        await ProofValidator.ValidateReplay(Context, Result, _ct);
+        await ProofValidator.ValidateReplay(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Detected DPoP proof token replay.");
     }
@@ -29,7 +28,7 @@ public class ReplayTests : DPoPProofValidatorTestBase
     [InlineData(true, true, ClockSkew * 2, ClockSkew * 2)]
     public async Task new_proof_tokens_are_added_to_replay_cache(bool validateIat, bool validateNonce, int clientClockSkew, int serverClockSkew)
     {
-        ReplayCache.Exists(TokenIdHash, _ct).Returns(false);
+        ReplayCache.Exists(TokenIdHash).Returns(false);
 
         Options.ValidationMode = (validateIat && validateNonce) ? ExpirationValidationMode.Both
             : validateIat ? ExpirationValidationMode.IssuedAt : ExpirationValidationMode.Nonce;
@@ -39,7 +38,7 @@ public class ReplayTests : DPoPProofValidatorTestBase
 
         Result.TokenIdHash = TokenIdHash;
 
-        await ProofValidator.ValidateReplay(Context, Result, _ct);
+        await ProofValidator.ValidateReplay(Context, Result);
 
         Result.IsError.ShouldBeFalse();
         var skew = validateIat && validateNonce
@@ -48,6 +47,6 @@ public class ReplayTests : DPoPProofValidatorTestBase
         var expectedExpiration = ProofValidator.TestTimeProvider.GetUtcNow()
             .Add(TimeSpan.FromSeconds(skew * 2))
             .Add(TimeSpan.FromSeconds(ValidFor));
-        await ReplayCache.Received().Add(TokenIdHash, expectedExpiration, _ct);
+        await ReplayCache.Received().Add(TokenIdHash, expectedExpiration);
     }
 }

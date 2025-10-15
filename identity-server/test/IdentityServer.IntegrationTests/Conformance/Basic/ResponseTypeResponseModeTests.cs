@@ -15,8 +15,8 @@ namespace Duende.IdentityServer.IntegrationTests.Conformance.Basic;
 public class ResponseTypeResponseModeTests
 {
     private const string Category = "Conformance.Basic.ResponseTypeResponseModeTests";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public ResponseTypeResponseModeTests()
     {
@@ -63,7 +63,7 @@ public class ResponseTypeResponseModeTests
     {
         await _mockPipeline.LoginAsync("bob");
 
-        var metadata = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint, _ct);
+        var metadata = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DiscoveryEndpoint);
         metadata.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         var state = Guid.NewGuid().ToString();
@@ -76,7 +76,7 @@ public class ResponseTypeResponseModeTests
             redirectUri: "https://code_client/callback",
             state: state,
             nonce: nonce);
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
@@ -109,7 +109,7 @@ public class ResponseTypeResponseModeTests
         var url = request.Create(values);
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = true;
-        var _ = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var _ = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }

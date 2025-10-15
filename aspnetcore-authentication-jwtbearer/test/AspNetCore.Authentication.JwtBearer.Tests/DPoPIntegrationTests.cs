@@ -16,13 +16,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Xunit.Abstractions;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer;
 
 public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private readonly Client DPoPOnlyClient = new()
+    private Client DPoPOnlyClient = new()
     {
         ClientId = "client1",
         ClientSecrets = [new Secret("secret".ToSha256())],
@@ -39,7 +39,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
     {
         var api = await CreateDPoPApi();
 
-        var result = await api.HttpClient.GetAsync("/", _ct);
+        var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -52,7 +52,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         var bearerToken = "unimportant opaque value";
         api.HttpClient.SetBearerToken(bearerToken);
 
-        var result = await api.HttpClient.GetAsync("/", _ct);
+        var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -72,8 +72,8 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
 
         // Login and get token for api call
         await app.LoginAsync("sub");
-        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"), _ct);
-        var token = await response.Content.ReadFromJsonAsync<UserToken>(_ct);
+        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
         token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
@@ -87,11 +87,11 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
             DPoPProofKey = jwk,
             Method = HttpMethod.Get,
             Url = new Uri("http://localhost/")
-        }, _ct);
+        });
         proof.ShouldNotBeNull();
         api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, [proof.Value, proof.Value]);
 
-        var result = await api.HttpClient.GetAsync("/", _ct);
+        var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         var error = result.Headers.GetValues(HeaderNames.WWWAuthenticate).FirstOrDefault();
@@ -117,8 +117,8 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
 
         // Login and get token for api call
         await app.LoginAsync("sub");
-        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"), _ct);
-        var token = await response.Content.ReadFromJsonAsync<UserToken>(_ct);
+        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
         token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
@@ -132,11 +132,11 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
             DPoPProofKey = jwk,
             Method = HttpMethod.Get,
             Url = new Uri("http://localhost/")
-        }, _ct);
+        });
         proof.ShouldNotBeNull();
         api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof.Value);
 
-        var result = await api.HttpClient.GetAsync("/", _ct);
+        var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -156,14 +156,14 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
 
         // Login and get token for api call
         await app.LoginAsync("sub");
-        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"), _ct);
-        var token = await response.Content.ReadFromJsonAsync<UserToken>(_ct);
+        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
         token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
         api.HttpClient.SetToken("DPoP", token.AccessToken);
 
-        var result = await api.HttpClient.GetAsync("/", _ct);
+        var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         var error = result.Headers.GetValues(HeaderNames.WWWAuthenticate).FirstOrDefault();
@@ -189,8 +189,8 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
 
         // Login and get token for api call
         await app.LoginAsync("sub");
-        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"), _ct);
-        var token = await response.Content.ReadFromJsonAsync<UserToken>(_ct);
+        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
         token.ShouldNotBeNull();
         token.AccessToken.ToString().ShouldNotBeNull();
         token.DPoPJsonWebKey.ShouldNotBeNull();
@@ -205,11 +205,11 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
             Method = HttpMethod.Get,
             Url = new Uri("http://localhost/"),
             DPoPNonce = DPoPNonce.Parse(new string('x', maxLength + 1)) // <--- Most important part of the test
-        }, _ct);
+        });
         proof.ShouldNotBeNull();
         api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof.Value);
 
-        var result = await api.HttpClient.GetAsync("/", _ct);
+        var result = await api.HttpClient.GetAsync("/");
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }

@@ -10,8 +10,8 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 public class MtlsTokenEndpointTests
 {
     private const string Category = "mTLS Token endpoint";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private readonly IdentityServerPipeline _pipeline = new IdentityServerPipeline();
+
+    private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
 
     [Fact]
     [Trait("Category", Category)]
@@ -57,12 +57,12 @@ public class MtlsTokenEndpointTests
         };
 
         var form = new FormUrlEncodedContent(formParams);
-        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenMtlsEndpoint, form, _ct);
+        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenMtlsEndpoint, form);
 
         // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         json.ShouldContain("access_token");
         json.ShouldContain("\"token_type\":\"Bearer\"");
     }
@@ -99,12 +99,12 @@ public class MtlsTokenEndpointTests
         };
 
         var form = new FormUrlEncodedContent(formParams);
-        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form, _ct);
+        var response = await tokenClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
 
         // Assert
         response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         json.ShouldContain("access_token");
         json.ShouldContain("\"token_type\":\"Bearer\"");
     }

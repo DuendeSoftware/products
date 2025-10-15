@@ -17,7 +17,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 public class ResourceOwnerClient
 {
     private const string TokenEndpoint = "https://server/connect/token";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     private readonly HttpClient _client;
 
     public ResourceOwnerClient()
@@ -46,7 +46,7 @@ public class ResourceOwnerClient
             Scope = "api1",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -85,7 +85,7 @@ public class ResourceOwnerClient
 
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -132,7 +132,7 @@ public class ResourceOwnerClient
             Scope = "openid email api1",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -174,7 +174,7 @@ public class ResourceOwnerClient
             Scope = "openid email api1 offline_access",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -217,7 +217,7 @@ public class ResourceOwnerClient
             Scope = "api1",
             UserName = "unknown",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -236,7 +236,7 @@ public class ResourceOwnerClient
 
             Scope = "api1",
             UserName = "bob_no_password"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
     }
@@ -255,7 +255,7 @@ public class ResourceOwnerClient
             Scope = "api1",
             UserName = "bob",
             Password = password
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);

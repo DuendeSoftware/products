@@ -14,13 +14,13 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 public class ResourceTests
 {
     private const string Category = "Token endpoint";
-    private const string client_id = "client";
-    private const string client_secret = "secret";
-    private const string username = "bob";
-    private const string password = "password";
 
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+    private string client_id = "client";
+    private string client_secret = "secret";
+    private string username = "bob";
+    private string password = "password";
+
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public ResourceTests()
     {
@@ -32,6 +32,7 @@ public class ResourceTests
             AllowedScopes = new List<string> { "scope1", "scope2", "scope3", "scope4", },
             AllowOfflineAccess = true,
         });
+
 
         _mockPipeline.Users.Add(new TestUser
         {
@@ -86,13 +87,12 @@ public class ResourceTests
             Address = IdentityServerPipeline.TokenEndpoint,
             ClientId = client_id,
             ClientSecret = client_secret,
-        }, _ct);
+        });
 
         var claims = ParseAccessTokenClaims(tokenResponse);
         claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1", "urn:api2"]);
         claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope2", "scope3", "scope4"]);
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task client_credentials_with_resource_without_scope_should_succeed()
@@ -107,7 +107,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api1" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
@@ -123,7 +123,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api2" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api2"]);
@@ -139,14 +139,13 @@ public class ResourceTests
                 {
                     { "resource", "urn:api3" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api3"]);
             claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope3"]);
         }
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task client_credentials_without_resource_with_scope_should_succeed()
@@ -157,13 +156,12 @@ public class ResourceTests
             ClientId = client_id,
             ClientSecret = client_secret,
             Scope = "scope1",
-        }, _ct);
+        });
 
         var claims = ParseAccessTokenClaims(tokenResponse);
         claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
         claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1"]);
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task client_credentials_with_resource_with_scope_should_succeed()
@@ -179,7 +177,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api1" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
@@ -196,14 +194,13 @@ public class ResourceTests
                 {
                     { "resource", "urn:api3" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api3"]);
             claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1"]);
         }
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task client_credentials_with_invalid_resource_and_scope_should_fail()
@@ -219,7 +216,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api2" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -234,7 +231,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api3" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -249,7 +246,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api4" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -263,12 +260,13 @@ public class ResourceTests
                 {
                     { "resource", "urn:api4" }
                 }
-            }, _ct);
+            });
 
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
     }
+
 
     [Fact]
     [Trait("Category", Category)]
@@ -283,7 +281,7 @@ public class ResourceTests
             {
                 { "resource", " " }
             }
-        }, _ct);
+        });
 
         var claims = ParseAccessTokenClaims(tokenResponse);
         claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1", "urn:api2"]);
@@ -301,13 +299,12 @@ public class ResourceTests
             ClientSecret = client_secret,
             UserName = username,
             Password = password,
-        }, _ct);
+        });
 
         var claims = ParseAccessTokenClaims(tokenResponse);
         claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1", "urn:api2"]);
         claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope2", "scope3", "scope4", "offline_access"]);
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task refresh_token_requested_with_resource_without_scope_should_succeed()
@@ -324,7 +321,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api1" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
@@ -343,7 +340,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api2" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api2"]);
@@ -362,14 +359,13 @@ public class ResourceTests
                 {
                     { "resource", "urn:api3" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api3"]);
             claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "scope3", "offline_access"]);
         }
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task refresh_token_requested_without_resource_with_scope_should_succeed()
@@ -382,13 +378,12 @@ public class ResourceTests
             UserName = username,
             Password = password,
             Scope = "scope1 offline_access"
-        }, _ct);
+        });
 
         var claims = ParseAccessTokenClaims(tokenResponse);
         claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
         claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "offline_access"]);
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task refresh_token_requested_with_resource_with_scope_should_succeed()
@@ -406,7 +401,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api1" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
@@ -425,14 +420,13 @@ public class ResourceTests
                 {
                     { "resource", "urn:api3" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api3"]);
             claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(["scope1", "offline_access"]);
         }
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task refresh_token_requested_with_invalid_resource_and_scope_should_fail()
@@ -450,7 +444,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api2" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -467,7 +461,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api3" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -484,7 +478,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api4" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -501,12 +495,13 @@ public class ResourceTests
                 {
                     { "resource", "urn:api4" }
                 }
-            }, _ct);
+            });
 
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
     }
+
 
     [Fact]
     [Trait("Category", Category)]
@@ -520,7 +515,7 @@ public class ResourceTests
             UserName = username,
             Password = password,
             Scope = "scope1 scope2 scope3 scope4 offline_access",
-        }, _ct);
+        });
 
         {
             tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
@@ -529,7 +524,7 @@ public class ResourceTests
                 ClientId = client_id,
                 ClientSecret = client_secret,
                 RefreshToken = tokenResponse.RefreshToken,
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1", "urn:api2"]);
@@ -546,7 +541,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api1" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api1"]);
@@ -563,7 +558,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api2" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(["urn:api2"]);
@@ -580,14 +575,13 @@ public class ResourceTests
                 {
                     { "resource", "urn:api3" }
                 }
-            }, _ct);
+            });
 
             var claims = ParseAccessTokenClaims(tokenResponse);
             claims.Where(x => x.Type == "aud").Select(x => x.Value).ShouldBe(new[] { "urn:api3" });
             claims.Where(x => x.Type == "scope").Select(x => x.Value).ShouldBe(new[] { "scope1", "scope3", "offline_access" });
         }
     }
-
     [Fact]
     [Trait("Category", Category)]
     public async Task refresh_token_exchange_with_invalid_resource_should_fail()
@@ -601,7 +595,7 @@ public class ResourceTests
                 UserName = username,
                 Password = password,
                 Scope = "scope1 scope2 scope3 scope4 offline_access",
-            }, _ct);
+            });
             tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
             {
                 Address = IdentityServerPipeline.TokenEndpoint,
@@ -612,7 +606,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api4" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -627,7 +621,7 @@ public class ResourceTests
                 UserName = username,
                 Password = password,
                 Scope = "scope2 offline_access",
-            }, _ct);
+            });
             tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
             {
                 Address = IdentityServerPipeline.TokenEndpoint,
@@ -638,7 +632,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api1" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }
@@ -652,7 +646,7 @@ public class ResourceTests
                 UserName = username,
                 Password = password,
                 Scope = "scope4 offline_access",
-            }, _ct);
+            });
             tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
             {
                 Address = IdentityServerPipeline.TokenEndpoint,
@@ -663,7 +657,7 @@ public class ResourceTests
                 {
                     { "resource", "urn:api1" }
                 }
-            }, _ct);
+            });
             tokenResponse.IsError.ShouldBeTrue();
             tokenResponse.Error.ShouldBe("invalid_target");
         }

@@ -6,6 +6,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts;
 
@@ -50,7 +51,7 @@ public class YarpBffIntegrationTestBase : OutputWritingTestBase
 
     public async Task Login(string sub) => await _identityServerHost.IssueSessionCookieAsync(new Claim("sub", sub));
 
-    public override async ValueTask InitializeAsync()
+    public override async Task InitializeAsync()
     {
         await _identityServerHost.InitializeAsync();
         await ApiHost.InitializeAsync();
@@ -59,7 +60,7 @@ public class YarpBffIntegrationTestBase : OutputWritingTestBase
         await base.InitializeAsync();
     }
 
-    public override async ValueTask DisposeAsync()
+    public override async Task DisposeAsync()
     {
         await _identityServerHost.DisposeAsync();
         await ApiHost.DisposeAsync();

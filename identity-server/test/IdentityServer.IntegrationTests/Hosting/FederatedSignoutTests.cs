@@ -15,9 +15,9 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting;
 public class FederatedSignoutTests
 {
     private const string Category = "Federated Signout";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private readonly IdentityServerPipeline _pipeline = new IdentityServerPipeline();
-    private readonly ClaimsPrincipal _user;
+
+    private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
+    private ClaimsPrincipal _user;
 
     public FederatedSignoutTests()
     {
@@ -72,11 +72,11 @@ public class FederatedSignoutTests
             state: "123_state",
             nonce: "123_nonce");
 
-        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123", _ct);
+        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.MediaType.ShouldBe("text/html");
-        var html = await response.Content.ReadAsStringAsync(_ct);
+        var html = await response.Content.ReadAsStringAsync();
         html.ShouldContain("https://server/connect/endsession/callback?endSessionId=");
     }
 
@@ -93,11 +93,11 @@ public class FederatedSignoutTests
             state: "123_state",
             nonce: "123_nonce");
 
-        var response = await _pipeline.BrowserClient.PostAsync(IdentityServerPipeline.FederatedSignOutUrl, new FormUrlEncodedContent(new Dictionary<string, string> { { "sid", "123" } }), _ct);
+        var response = await _pipeline.BrowserClient.PostAsync(IdentityServerPipeline.FederatedSignOutUrl, new FormUrlEncodedContent(new Dictionary<string, string> { { "sid", "123" } }));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.MediaType.ShouldBe("text/html");
-        var html = await response.Content.ReadAsStringAsync(_ct);
+        var html = await response.Content.ReadAsStringAsync();
         html.ShouldContain("https://server/connect/endsession/callback?endSessionId=");
     }
 
@@ -106,22 +106,22 @@ public class FederatedSignoutTests
     {
         await _pipeline.LoginAsync(_user);
 
-        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123", _ct);
+        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.ShouldBeNull();
-        var html = await response.Content.ReadAsStringAsync(_ct);
+        var html = await response.Content.ReadAsStringAsync();
         html.ShouldBe(string.Empty);
     }
 
     [Fact]
     public async Task no_authenticated_user_should_not_render_page_with_iframe()
     {
-        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123", _ct);
+        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.ShouldBeNull();
-        var html = await response.Content.ReadAsStringAsync(_ct);
+        var html = await response.Content.ReadAsStringAsync();
         html.ShouldBe(string.Empty);
     }
 
@@ -143,11 +143,11 @@ public class FederatedSignoutTests
             state: "123_state",
             nonce: "123_nonce");
 
-        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123", _ct);
+        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.ShouldBeNull();
-        var html = await response.Content.ReadAsStringAsync(_ct);
+        var html = await response.Content.ReadAsStringAsync();
         html.ShouldBe(string.Empty);
     }
 
@@ -172,11 +172,11 @@ public class FederatedSignoutTests
             nonce: "123_nonce");
 
         _pipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123", _ct);
+        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.FederatedSignOutUrl + "?sid=123");
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Content.Headers.ContentType.ShouldBeNull();
-        var html = await response.Content.ReadAsStringAsync(_ct);
+        var html = await response.Content.ReadAsStringAsync();
         html.ShouldBe(string.Empty);
     }
 }

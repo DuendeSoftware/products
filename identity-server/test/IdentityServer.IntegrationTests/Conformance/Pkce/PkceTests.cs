@@ -15,19 +15,22 @@ namespace Duende.IdentityServer.IntegrationTests.Conformance.Pkce;
 public class PkceTests
 {
     private const string Category = "PKCE";
+
+    private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
+
+    private Client client;
+
     private const string client_id = "code_client";
     private const string client_id_optional = "code_client_optional";
     private const string client_id_plain = "code_plain_client";
     private const string client_id_pkce = "codewithproofkey_client";
     private const string client_id_pkce_plain = "codewithproofkey_plain_client";
-    private const string client_secret = "secret";
-    private const string code_verifier = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    private const string redirect_uri = "https://code_client/callback";
-    private const string response_type = "code";
 
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private Client client;
-    private readonly IdentityServerPipeline _pipeline = new IdentityServerPipeline();
+
+    private string redirect_uri = "https://code_client/callback";
+    private string code_verifier = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    private string client_secret = "secret";
+    private string response_type = "code";
 
     public PkceTests()
     {
@@ -205,7 +208,7 @@ public class PkceTests
             Code = code,
             RedirectUri = redirect_uri,
             CodeVerifier = code_verifier
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeFalse();
         tokenResponse.TokenType.ShouldBe("Bearer");
@@ -245,7 +248,7 @@ public class PkceTests
             Code = code,
             RedirectUri = redirect_uri,
             CodeVerifier = code_verifier
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeFalse();
         tokenResponse.TokenType.ShouldBe("Bearer");
@@ -298,7 +301,7 @@ public class PkceTests
             Code = code,
             RedirectUri = redirect_uri,
             CodeVerifier = code_verifier
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeTrue();
     }
@@ -314,6 +317,7 @@ public class PkceTests
         await _pipeline.LoginAsync("bob");
 
         var nonce = Guid.NewGuid().ToString();
+        var code_challenge = code_verifier;
         var authorizeResponse = await _pipeline.RequestAuthorizationEndpointAsync(clientId,
             response_type,
             IdentityServerConstants.StandardScopes.OpenId,
@@ -336,6 +340,7 @@ public class PkceTests
         await _pipeline.LoginAsync("bob");
 
         var nonce = Guid.NewGuid().ToString();
+        var code_challenge = code_verifier;
         var authorizeResponse = await _pipeline.RequestAuthorizationEndpointAsync(clientId,
             response_type,
             IdentityServerConstants.StandardScopes.OpenId,
@@ -402,7 +407,7 @@ public class PkceTests
 
             Code = code,
             RedirectUri = redirect_uri,
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeTrue();
         tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -439,7 +444,7 @@ public class PkceTests
             Code = code,
             RedirectUri = redirect_uri,
             CodeVerifier = "a"
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeTrue();
         tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -476,7 +481,7 @@ public class PkceTests
             Code = code,
             RedirectUri = redirect_uri,
             CodeVerifier = new string('a', _pipeline.Options.InputLengthRestrictions.CodeVerifierMaxLength + 1)
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeTrue();
         tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -513,7 +518,7 @@ public class PkceTests
             Code = code,
             RedirectUri = redirect_uri,
             CodeVerifier = "mismatched_code_verifier"
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeTrue();
         tokenResponse.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);

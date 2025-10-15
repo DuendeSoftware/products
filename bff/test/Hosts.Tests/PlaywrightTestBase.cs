@@ -4,8 +4,9 @@
 using System.Reflection;
 using Hosts.Tests.TestInfra;
 using Microsoft.Playwright;
-using Microsoft.Playwright.Xunit.v3;
-using Xunit.v3;
+using Microsoft.Playwright.Xunit;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Hosts.Tests;
 
@@ -30,12 +31,12 @@ public class PlaywrightTestBase : PageTest, IDisposable
 #if DEBUG_NCRUNCH
             // Running in NCrunch. NCrunch cannot build the aspire project, so it needs
             // to be started manually. 
-            Assert.Skip("When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
+            Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
 #endif
         }
     }
 
-    public override async ValueTask InitializeAsync()
+    public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
         Context.SetDefaultTimeout(10_000);
@@ -48,7 +49,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
         });
     }
 
-    public override async ValueTask DisposeAsync()
+    public override async Task DisposeAsync()
     {
         var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? Environment.CurrentDirectory;
         // if path ends with /bin/{build configuration}/{dotnetversion}, then strip that from the path. 
@@ -57,6 +58,7 @@ public class PlaywrightTestBase : PageTest, IDisposable
         {
             path = Path.GetFullPath(Path.Combine(path, "../../../"));
         }
+
 
         await Context.Tracing.StopAsync(new()
         {
@@ -104,17 +106,18 @@ public class PlaywrightTestBase : PageTest, IDisposable
     public HttpClient CreateHttpClient(string clientName) => Fixture.CreateHttpClient(clientName);
 }
 
-public class WithTestNameAttribute : Attribute, IBeforeAfterTestAttribute
+public class WithTestNameAttribute : BeforeAfterTestAttribute
 {
     public static string CurrentTestName = string.Empty;
     public static string CurrentClassName = string.Empty;
 
-    public void Before(MethodInfo methodInfo, IXunitTest _)
+    public override void Before(MethodInfo methodInfo)
     {
         CurrentTestName = methodInfo.Name;
         CurrentClassName = methodInfo.DeclaringType!.Name;
     }
 
-    public void After(MethodInfo methodInfo, IXunitTest _)
-    { }
+    public override void After(MethodInfo methodInfo)
+    {
+    }
 }

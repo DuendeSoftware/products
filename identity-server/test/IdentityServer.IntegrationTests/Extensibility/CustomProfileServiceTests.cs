@@ -16,7 +16,6 @@ namespace Duende.IdentityServer.IntegrationTests.Extensibility;
 
 public class CustomProfileServiceTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Authorize endpoint";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
@@ -64,7 +63,7 @@ public class CustomProfileServiceTests
             nonce: "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client/callback");

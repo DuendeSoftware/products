@@ -22,14 +22,15 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class AuthorizeTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Authorize endpoint";
-    private readonly IdentityServerPipeline _mockPipeline = new();
-    private readonly Client _client1;
+
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+
+    private Client _client1;
 
     public AuthorizeTests()
     {
-        _mockPipeline.Clients.AddRange([
+        _mockPipeline.Clients.AddRange(new Client[] {
             _client1 = new Client
             {
                 ClientId = "client1",
@@ -71,9 +72,9 @@ public class AuthorizeTests
                 RequirePkce = false,
                 AllowedScopes = new List<string> { "openid", "profile", "api1", "api2" },
                 RedirectUris = new List<string> { "https://client4/callback" },
-            }
+            },
 
-        ]);
+        });
 
         _mockPipeline.Users.Add(new TestUser
         {
@@ -81,8 +82,8 @@ public class AuthorizeTests
             Username = "bob",
             Claims = new Claim[]
             {
-                new("name", "Bob Loblaw"),
-                new("email", "bob@loblaw.com"),
+                new Claim("name", "Bob Loblaw"),
+                new Claim("email", "bob@loblaw.com"),
                 new Claim("role", "Attorney")
             }
         });
@@ -133,7 +134,7 @@ public class AuthorizeTests
     [Trait("Category", Category)]
     public async Task get_request_should_not_return_404()
     {
-        var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.AuthorizeEndpoint, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.AuthorizeEndpoint);
 
         response.StatusCode.ShouldNotBe(HttpStatusCode.NotFound);
     }
@@ -142,7 +143,7 @@ public class AuthorizeTests
     [Trait("Category", Category)]
     public async Task post_request_without_form_should_return_415()
     {
-        var response = await _mockPipeline.BrowserClient.PostAsync(IdentityServerPipeline.AuthorizeEndpoint, new StringContent("foo"), _ct);
+        var response = await _mockPipeline.BrowserClient.PostAsync(IdentityServerPipeline.AuthorizeEndpoint, new StringContent("foo"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.UnsupportedMediaType);
     }
@@ -153,7 +154,7 @@ public class AuthorizeTests
     {
         var response = await _mockPipeline.BrowserClient.PostAsync(IdentityServerPipeline.AuthorizeEndpoint,
             new FormUrlEncodedContent(
-                new Dictionary<string, string> { }), _ct);
+                new Dictionary<string, string> { }));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -162,7 +163,7 @@ public class AuthorizeTests
     [Trait("Category", Category)]
     public async Task get_request_should_not_return_500()
     {
-        var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.AuthorizeEndpoint, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.AuthorizeEndpoint);
 
         ((int)response.StatusCode).ShouldBeLessThan(500);
     }
@@ -178,7 +179,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
     }
@@ -214,7 +215,7 @@ public class AuthorizeTests
                 ui_locales = "ui_locale_value",
                 custom_foo = "foo_value"
             });
-        var response = await _mockPipeline.BrowserClient.GetAsync(url + "&foo=foo1&foo=foo2", _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url + "&foo=foo1&foo=foo2");
 
         _mockPipeline.LoginRequest.ShouldNotBeNull();
         _mockPipeline.LoginRequest.Client.ClientId.ShouldBe("client1");
@@ -242,7 +243,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
@@ -268,7 +269,7 @@ public class AuthorizeTests
             redirectUri: "https://client4/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client4/callback");
@@ -298,7 +299,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
@@ -329,7 +330,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
@@ -372,7 +373,7 @@ public class AuthorizeTests
             redirectUri: "https://client2/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client2/callback");
@@ -397,7 +398,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             acrValues: "idp:google");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
         _mockPipeline.LoginRequest.IdP.ShouldBe("google");
@@ -415,7 +416,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             acrValues: "idp:facebook");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
         _mockPipeline.LoginRequest.IdP.ShouldBeNull();
@@ -434,7 +435,7 @@ public class AuthorizeTests
             redirectUri: "https://client3/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
         _mockPipeline.LoginRequest.IdP.ShouldBeNull();
@@ -455,7 +456,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             acrValues: "idp:idp2");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
         _mockPipeline.LoginRequest.IdP.ShouldBe("idp2");
@@ -478,7 +479,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             acrValues: "tenant:t2");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
         _mockPipeline.LoginRequest.Tenant.ShouldBe("t2");
@@ -500,7 +501,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             acrValues: "tenant:t2");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeFalse();
     }
@@ -518,7 +519,7 @@ public class AuthorizeTests
             redirectUri: "https://invalid",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.ClientId.ShouldBeNull();
@@ -537,7 +538,7 @@ public class AuthorizeTests
             redirectUri: "https://invalid",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.ClientId.ShouldBe("client1");
@@ -556,7 +557,7 @@ public class AuthorizeTests
             redirectUri: "https://invalid",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -576,7 +577,7 @@ public class AuthorizeTests
             redirectUri: "https://invalid",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -596,7 +597,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -615,7 +616,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -635,7 +636,7 @@ public class AuthorizeTests
             //redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -655,7 +656,7 @@ public class AuthorizeTests
             //redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -675,7 +676,7 @@ public class AuthorizeTests
             redirectUri: "invalid-uri",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -697,7 +698,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -718,7 +719,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -740,7 +741,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnauthorizedClient);
@@ -762,7 +763,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -782,7 +783,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnsupportedResponseType);
@@ -801,7 +802,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -822,7 +823,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -843,7 +844,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -864,7 +865,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.UnsupportedResponseType);
@@ -885,7 +886,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -905,7 +906,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -925,7 +926,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -946,7 +947,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.RedirectUri.ShouldBeNull();
@@ -966,7 +967,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -988,7 +989,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1011,7 +1012,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidScope);
@@ -1034,7 +1035,7 @@ public class AuthorizeTests
             state: "123_state"
         //nonce: "123_nonce"
         );
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1056,7 +1057,7 @@ public class AuthorizeTests
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: new string('x', 500));
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1079,7 +1080,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             extra: new { ui_locales = new string('x', 500) });
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1102,7 +1103,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             extra: new { max_age = "invalid" });
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1125,7 +1126,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             extra: new { max_age = "-10" });
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1148,7 +1149,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             loginHint: new string('x', 500));
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1171,7 +1172,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce",
             acrValues: new string('x', 500));
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -1199,7 +1200,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce");
 
-        Func<Task> a = () => _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        Func<Task> a = () => _mockPipeline.BrowserClient.GetAsync(url);
         await a.ShouldThrowAsync<Exception>();
     }
 
@@ -1218,7 +1219,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             acrValues: new string('x', 500),
             extra: new { ui_locales = "fr-FR" });
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.UiLocales.ShouldBe("fr-FR");
@@ -1239,7 +1240,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             acrValues: new string('x', 500),
             extra: new { display = "popup" });
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.DisplayMode.ShouldBe("popup");
@@ -1258,7 +1259,7 @@ public class AuthorizeTests
             nonce: "123_nonce");
         url = url.Replace(IdentityServerPipeline.BaseUrl, "https://грант.рф");
 
-        var result = await _mockPipeline.BackChannelClient.GetAsync(url, _ct);
+        var result = await _mockPipeline.BackChannelClient.GetAsync(url);
         result.Headers.Location.Authority.ShouldBe("xn--80af5akm.xn--p1ai");
     }
 
@@ -1275,7 +1276,7 @@ public class AuthorizeTests
             state: "123_state",
             nonce: "123_nonce");
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
     }
 
@@ -1294,7 +1295,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             extra: new { prompt = "login" }
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
         _mockPipeline.LoginRequest.PromptModes.ShouldContain("login");
@@ -1315,7 +1316,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             extra: new { max_age = "0" }
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
     }
@@ -1336,11 +1337,11 @@ public class AuthorizeTests
             extra: new { prompt = "login" }
         );
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         // this simulates the login page returning to the returnUrl which is the authorize callback page
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + _mockPipeline.LoginReturnUrl, _ct);
+        response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + _mockPipeline.LoginReturnUrl);
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
         response.Headers.Location.ToString().ShouldContain("id_token=");
@@ -1362,11 +1363,11 @@ public class AuthorizeTests
             extra: new { max_age = "0" }
         );
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         // this simulates the login page returning to the returnUrl which is the authorize callback page
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + _mockPipeline.LoginReturnUrl, _ct);
+        response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + _mockPipeline.LoginReturnUrl);
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
         response.Headers.Location.ToString().ShouldContain("id_token=");
@@ -1385,7 +1386,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             extra: new { prompt = "unknown" }
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
     }
@@ -1403,7 +1404,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             extra: new { prompt = "create" }
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
     }
@@ -1432,7 +1433,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             extra: new { prompt = "create" }
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.CreateAccountWasCalled.ShouldBeTrue();
         _mockPipeline.CreateAccountRequest.PromptModes.ShouldContain("create");
@@ -1462,7 +1463,7 @@ public class AuthorizeTests
             nonce: "123_nonce",
             extra: new { prompt = "create login" }
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
     }
@@ -1511,7 +1512,7 @@ public class AuthorizeTests
                 ui_locales = "ui_locale_value",
                 custom_foo = "foo_value"
             });
-        var response = await _mockPipeline.BrowserClient.GetAsync(url + "&foo=bar", _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url + "&foo=bar");
 
         _mockPipeline.CustomWasCalled.ShouldBeTrue();
 
@@ -1545,7 +1546,7 @@ public class AuthorizeTests
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
 
-        Func<Task> a = () => _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        Func<Task> a = () => _mockPipeline.BrowserClient.GetAsync(url);
         await a.ShouldThrowAsync<Exception>();
     }
 
@@ -1576,7 +1577,7 @@ public class AuthorizeTests
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         response.Headers.Location.GetLeftPart(UriPartial.Path).ShouldBe("https://server/custom");
         mockAuthzInteractionService.Request.PromptModes.ShouldContain("custom-prompt");
         mockAuthzInteractionService.Request.PromptModes.Count().ShouldBe(1);
@@ -1598,7 +1599,7 @@ public class AuthorizeTests
                 ui_locales = "nb-NO"
             });
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
 
@@ -1625,7 +1626,7 @@ public class AuthorizeTests
                 ui_locales = "nb-NO"
             });
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ConsentWasCalled.ShouldBeTrue();
 
@@ -1662,7 +1663,7 @@ public class AuthorizeTests
                 ui_locales = "nb-NO"
             });
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.CreateAccountWasCalled.ShouldBeTrue();
 
@@ -1686,7 +1687,7 @@ public class AuthorizeTests
                 ui_locales = "nb-NO"
             });
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
 

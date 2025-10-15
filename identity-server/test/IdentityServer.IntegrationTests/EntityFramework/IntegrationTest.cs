@@ -15,13 +15,12 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 /// <typeparam name="TDbContext">The type of the database context.</typeparam>
 /// <typeparam name="TStoreOption">The type of the store option.</typeparam>
 /// <seealso cref="DatabaseProviderFixture{T}" />
-public abstract class IntegrationTest<TClass, TDbContext, TStoreOption> : IClassFixture<DatabaseProviderFixture<TDbContext>>
+public class IntegrationTest<TClass, TDbContext, TStoreOption> : IClassFixture<DatabaseProviderFixture<TDbContext>>
     where TDbContext : DbContext
     where TStoreOption : class
 {
     public static readonly TheoryData<DbContextOptions<TDbContext>> TestDatabaseProviders;
-
-    protected static readonly TStoreOption StoreOptions = Activator.CreateInstance<TStoreOption>();
+    protected static TStoreOption StoreOptions = Activator.CreateInstance<TStoreOption>();
 
     static IntegrationTest()
     {
@@ -51,6 +50,5 @@ public abstract class IntegrationTest<TClass, TDbContext, TStoreOption> : IClass
         }
     }
 
-    protected IntegrationTest(DatabaseProviderFixture<TDbContext> fixture)
-        => fixture.Options = TestDatabaseProviders.Select(row => row.Data).ToList();
+    protected IntegrationTest(DatabaseProviderFixture<TDbContext> fixture) => fixture.Options = TestDatabaseProviders.ToList<DbContextOptions<TDbContext>>();
 }

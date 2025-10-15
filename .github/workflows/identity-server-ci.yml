@@ -53,7 +53,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100-rc.1.25451.107
     - name: Restore
       run: dotnet restore identity-server.slnf
     - name: Verify Formatting
@@ -85,7 +85,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100-rc.1.25451.107
     - name: Restore
       run: dotnet restore identity-server.slnf
     - name: Build
@@ -148,11 +148,15 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100-rc.1.25451.107
     - name: Restore
       run: dotnet restore identity-server.slnf
     - name: Build
-      run: dotnet build identity-server.slnf --no-restore -c Release
+      # This build is using Debug config because of a known issue in net10.0 rc1
+      # https://github.com/dotnet/aspnetcore/issues/63364
+      # We do not intend to keep using Debug config after it is fixed in net10.0 rc2.
+      # Re-generating the workflows with workflow-gen will overwrite this.
+      run: dotnet build identity-server.slnf --no-restore -c Debug
     - id: playwright-cache
       name: Cache Playwright assets
       uses: actions/cache@v4
@@ -162,11 +166,11 @@ jobs:
         restore-keys: playwright-${{ runner.os }}-
     - name: Install Playwright
       if: steps.playwright-cache.outputs.cache-hit != 'true'
-      run: pwsh test/IdentityServer.EndToEndTests/bin/Release/net10.0/playwright.ps1 install --with-deps
+      run: pwsh test/IdentityServer.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install --with-deps
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test - test/IdentityServer.EndToEndTests
-      run: dotnet test test/IdentityServer.EndToEndTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/IdentityServer.EndToEndTests-tests.trx" --collect:"XPlat Code Coverage"
+      run: dotnet test test/IdentityServer.EndToEndTests -c Debug --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/IdentityServer.EndToEndTests-tests.trx" --collect:"XPlat Code Coverage"
     - id: test-report-test-IdentityServer-EndToEndTests
       name: Test report - test/IdentityServer.EndToEndTests
       if: github.event_name == 'push' && (success() || failure())
@@ -216,7 +220,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100-rc.1.25451.107
     - name: Restore
       run: dotnet restore identity-server.slnf
     - name: Build
@@ -259,7 +263,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100-rc.1.25451.107
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack identity-server.slnf

@@ -18,7 +18,6 @@ namespace Duende.IdentityServer.IntegrationTests.Extensibility;
 
 public class CustomClaimsServiceTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "CustomClaimsServiceTests";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
@@ -60,7 +59,7 @@ public class CustomClaimsServiceTests
                 Address = IdentityServerPipeline.TokenEndpoint,
                 ClientId = "test",
                 ClientSecret = "secret"
-            }, _ct);
+            });
         result.IsError.ShouldBeFalse();
 
         var accessToken = result.AccessToken;
