@@ -92,7 +92,7 @@
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade service discovery and timeprovider.testing-->
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
-    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.10.0" />
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="$(IdentityModelVersion)" />
     <PackageVersion Include="Microsoft.IdentityModel.Logging" Version="$(IdentityModelVersion)" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="$(IdentityModelVersion)" />
