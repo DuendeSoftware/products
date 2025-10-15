@@ -147,6 +147,7 @@ jobs:
         languages: csharp
         build-mode: manual
         db-location: ~/.codeql/databases
+        debug: true
     - name: List .net sdks
       run: dotnet --list-sdks
     - name: Setup Dotnet
