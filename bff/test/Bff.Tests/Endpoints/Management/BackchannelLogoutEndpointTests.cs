@@ -27,6 +27,54 @@ public class BackchannelLogoutEndpointTests : BffTestBase
         }
     }
 
+    [Fact]
+    public async Task backchannel_logout_multi_frontend_signs_out_of_all_frontends()
+    {
+        Bff.OnConfigureServices += s => s.AddSingleton<BuildUserSessionPartitionKey>(() => PartitionKey.Parse("bob"));
+        await InitializeAsync();
+
+        var f1 = new BffFrontend(BffFrontendName.Parse("f1"))
+            .WithOpenIdConnectOptions(x =>
+            {
+                The.DefaultOpenIdConnectConfiguration(x);
+                x.ClientId = "f1";
+            })
+            .MapToPath("/p1");
+        Bff.AddOrUpdateFrontend(f1);
+
+        var c1 = IdentityServer.AddClientFor(f1, [Bff.Url("/p1")]);
+        c1.BackChannelLogoutSessionRequired = true;
+        c1.BackChannelLogoutUri = Bff.Url("/p1/bff/backchannel").ToString();
+
+        var f2 = new BffFrontend(BffFrontendName.Parse("f2"))
+            .WithOpenIdConnectOptions(x =>
+            {
+                The.DefaultOpenIdConnectConfiguration(x);
+                x.ClientId = "f2";
+            })
+            .MapToPath("/p2");
+
+        Bff.AddOrUpdateFrontend(f2);
+
+        var c2 = IdentityServer.AddClientFor(f2, [Bff.Url("/p2")]);
+        c2.BackChannelLogoutSessionRequired = true;
+        c2.BackChannelLogoutUri = Bff.Url("/p2/bff/backchannel").ToString();
+
+        await Bff.BrowserClient.CreateIdentityServerSessionCookieAsync(IdentityServer, The.Sub, The.Sid);
+
+        await Bff.BrowserClient.Login("/p1");
+        await Bff.BrowserClient.Login("/p2");
+
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync(basePath: "/p2")).ShouldBeTrue();
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync(basePath: "/p1")).ShouldBeTrue();
+
+        await Bff.BrowserClient.RevokeIdentityServerSession();
+
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync(basePath: "/p1")).ShouldBeFalse();
+        (await Bff.BrowserClient.GetIsUserLoggedInAsync(basePath: "/p2")).ShouldBeFalse();
+
+    }
+
     [Theory]
     [MemberData(nameof(AllSetups))]
     public async Task backchannel_logout_should_allow_anonymous(BffSetupType setup)

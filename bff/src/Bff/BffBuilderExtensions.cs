@@ -94,7 +94,7 @@ public static class BffBuilderExtensions
 
         // Make sure the session partitioning is registered. There are a few codepaths that require this injected
         // even if you are not using session management.
-        builder.Services.AddSingleton<BuildUserSessionPartitionKey>(sp => sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
+        builder.Services.TryAddSingleton<BuildUserSessionPartitionKey>(sp => sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
         builder.Services.AddSingleton<UserSessionPartitionKeyBuilder>();
 
         return builder;
@@ -180,7 +180,7 @@ public static class BffBuilderExtensions
 
     internal static void AddServerSideSessionsSupportingServices(this IServiceCollection services)
     {
-        services.AddSingleton<BuildUserSessionPartitionKey>(sp => sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
+        services.TryAddSingleton<BuildUserSessionPartitionKey>(sp => sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
         services.AddSingleton<UserSessionPartitionKeyBuilder>();
 
         services.AddSingleton<UserSessionPartitionKeyBuilder>();

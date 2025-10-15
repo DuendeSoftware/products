@@ -104,14 +104,14 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
         }
     }
 
-    public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null)
+    public async Task<bool> GetIsUserLoggedInAsync(string? userQuery = null, string? basePath = null)
     {
         if (userQuery != null)
         {
             userQuery = "?" + userQuery;
         }
 
-        var req = new HttpRequestMessage(HttpMethod.Get, "/bff/user" + userQuery);
+        var req = new HttpRequestMessage(HttpMethod.Get, basePath + "/bff/user" + userQuery);
         req.Headers.Add("x-csrf", "1");
         var response = await SendAsync(req);
 
