@@ -17,8 +17,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 /// </summary>
 public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
 {
-    private const string Category = "DPoP PAR endpoint";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    protected const string Category = "DPoP PAR endpoint";
 
     private PushedAuthorizationRequest CreatePushedAuthorizationRequest(
         string proofToken = null, bool omitDPoPProof = false, string dpopKeyThumprint = null
@@ -48,7 +47,7 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
     {
         Payload.Add("foo", new string('x', 3000));
         var request = CreatePushedAuthorizationRequest();
-        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request, _ct);
+        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request);
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe("invalid_dpop_proof");
     }
@@ -62,12 +61,12 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
 
         // Initial request succeeds
         var firstRequest = CreatePushedAuthorizationRequest(dpopToken);
-        var firstResponse = await Pipeline.BackChannelClient.PushAuthorizationAsync(firstRequest, _ct);
+        var firstResponse = await Pipeline.BackChannelClient.PushAuthorizationAsync(firstRequest);
         firstResponse.IsError.ShouldBeFalse();
 
         // Second request fails
         var secondRequest = CreatePushedAuthorizationRequest(dpopToken);
-        var secondResponse = await Pipeline.BackChannelClient.PushAuthorizationAsync(secondRequest, _ct);
+        var secondResponse = await Pipeline.BackChannelClient.PushAuthorizationAsync(secondRequest);
         secondResponse.IsError.ShouldBeTrue();
         secondResponse.Error.ShouldBe("invalid_dpop_proof");
     }
@@ -77,7 +76,7 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
     public async Task invalid_dpop_request_should_fail()
     {
         var request = CreatePushedAuthorizationRequest(proofToken: "malformed");
-        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request, _ct);
+        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request);
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe("invalid_dpop_proof");
     }
@@ -90,7 +89,7 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
         request.Headers.Add("DPoP", dpopToken);
         request.Headers.Add("DPoP", dpopToken);
 
-        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request, _ct);
+        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request);
 
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -104,7 +103,7 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
         oldThumbprint.ShouldNotBe(JKT);
         var request = CreatePushedAuthorizationRequest(dpopKeyThumprint: oldThumbprint);
 
-        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request, _ct);
+        var response = await Pipeline.BackChannelClient.PushAuthorizationAsync(request);
 
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
@@ -145,7 +144,7 @@ public class DPoPPushedAuthorizationEndpointTests : DPoPEndpointTestBase
         tokenClient.DefaultRequestHeaders.Add("DPoP", proofToken);
         var request = CreatePushedAuthorizationRequest(proofToken);
 
-        var response = await tokenClient.PushAuthorizationAsync(request, _ct);
+        var response = await tokenClient.PushAuthorizationAsync(request);
 
         response.IsError.ShouldBeFalse();
     }

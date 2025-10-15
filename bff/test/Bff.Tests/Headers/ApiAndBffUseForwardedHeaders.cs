@@ -4,13 +4,12 @@
 using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Headers;
 
 public class ApiAndBffUseForwardedHeaders : BffIntegrationTestBase
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-
     public ApiAndBffUseForwardedHeaders(ITestOutputHelper output) : base(output)
     {
         BffHost.UseForwardedHeaders = true;
@@ -22,10 +21,10 @@ public class ApiAndBffUseForwardedHeaders : BffIntegrationTestBase
     {
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
         req.Headers.Add("x-csrf", "1");
-        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
+        var response = await BffHost.BrowserClient.SendAsync(req);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
         var host = apiResult.RequestHeaders["Host"].Single();
@@ -40,10 +39,10 @@ public class ApiAndBffUseForwardedHeaders : BffIntegrationTestBase
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
         req.Headers.Add("x-csrf", "1");
         req.Headers.Add("X-Forwarded-Host", "external");
-        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
+        var response = await BffHost.BrowserClient.SendAsync(req);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
         var host = apiResult.RequestHeaders["Host"].Single();
@@ -58,10 +57,10 @@ public class ApiAndBffUseForwardedHeaders : BffIntegrationTestBase
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_anon_only/test"));
         req.Headers.Add("x-csrf", "1");
         req.Headers.Add("X-Forwarded-Host", "external");
-        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
+        var response = await BffHost.BrowserClient.SendAsync(req);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
 
         var host = apiResult.RequestHeaders["Host"].Single();

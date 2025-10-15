@@ -19,7 +19,6 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Ciba;
 
 public class CibaTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Backchannel Authentication (CIBA) endpoint";
 
     private IdentityServerPipeline _mockPipeline = new();
@@ -159,7 +158,7 @@ public class CibaTests
     [Trait("Category", Category)]
     public async Task get_request_should_return_error()
     {
-        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.BackchannelAuthenticationEndpoint, _ct);
+        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.BackchannelAuthenticationEndpoint);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
@@ -170,8 +169,7 @@ public class CibaTests
     {
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new StringContent("invalid"),
-            _ct);
+            new StringContent("invalid"));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
@@ -195,8 +193,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -236,8 +233,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         // The custom validator was invoked with the request parameters and mapped the custom input
         var validatedRequest = _mockCustomBackchannelAuthenticationValidator.Context.ValidationResult.ValidatedRequest;
@@ -276,12 +272,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         // Custom request properties are not included automatically in the response to the client
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsStringAsync(_ct);
+        var responseContent = await response.Content.ReadAsStringAsync();
         var json = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(responseContent);
         json.ShouldNotBeNull();
         json.ShouldNotContainKey("complex");
@@ -311,12 +306,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("auth_req_id").ShouldBeTrue();
@@ -347,12 +341,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("auth_req_id").ShouldBeTrue();
@@ -380,12 +373,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -415,12 +407,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -450,12 +441,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -484,12 +474,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -520,12 +509,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -556,12 +544,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -594,12 +581,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -633,11 +619,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body), _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -668,12 +654,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -704,12 +689,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -740,8 +724,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -766,8 +749,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -798,12 +780,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -830,12 +811,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -866,12 +846,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(code);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -896,12 +875,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -928,12 +906,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -957,12 +934,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -988,12 +964,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1018,12 +993,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1049,12 +1023,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1080,12 +1053,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1111,12 +1083,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1147,12 +1118,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1178,12 +1148,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1211,12 +1180,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1244,8 +1212,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
@@ -1269,12 +1236,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1302,8 +1268,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -1330,12 +1295,11 @@ public class CibaTests
 
             var response = await _mockPipeline.BackChannelClient.PostAsync(
                 IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-                new FormUrlEncodedContent(body),
-                _ct);
+                new FormUrlEncodedContent(body));
 
             response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-            var json = await response.Content.ReadAsStringAsync(_ct);
+            var json = await response.Content.ReadAsStringAsync();
             var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
             values.ContainsKey("error").ShouldBeTrue();
@@ -1357,12 +1321,11 @@ public class CibaTests
 
             var response = await _mockPipeline.BackChannelClient.PostAsync(
                 IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-                new FormUrlEncodedContent(body),
-                _ct);
+                new FormUrlEncodedContent(body));
 
             response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-            var json = await response.Content.ReadAsStringAsync(_ct);
+            var json = await response.Content.ReadAsStringAsync();
             var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
             values.ContainsKey("error").ShouldBeTrue();
@@ -1384,11 +1347,11 @@ public class CibaTests
 
             var response = await _mockPipeline.BackChannelClient.PostAsync(
                 IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-                new FormUrlEncodedContent(body), _ct);
+                new FormUrlEncodedContent(body));
 
             response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-            var json = await response.Content.ReadAsStringAsync(_ct);
+            var json = await response.Content.ReadAsStringAsync();
             var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
             values.ContainsKey("error").ShouldBeTrue();
@@ -1413,12 +1376,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1443,12 +1405,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1473,12 +1434,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1503,12 +1463,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1533,12 +1492,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1571,8 +1529,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -1599,8 +1556,7 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -1627,12 +1583,11 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
@@ -1657,15 +1612,15 @@ public class CibaTests
 
         var response = await _mockPipeline.BackChannelClient.PostAsync(
             IdentityServerPipeline.BackchannelAuthenticationEndpoint,
-            new FormUrlEncodedContent(body),
-            _ct);
+            new FormUrlEncodedContent(body));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var json = await response.Content.ReadAsStringAsync(_ct);
+        var json = await response.Content.ReadAsStringAsync();
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
         values.ContainsKey("error").ShouldBeTrue();
         values["error"].ToString().ShouldBe("invalid_binding_message");
     }
+
 }

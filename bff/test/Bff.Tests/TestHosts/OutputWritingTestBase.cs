@@ -2,16 +2,15 @@
 // See LICENSE in the project root for license information.
 
 using System.Text;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.TestHosts;
 
 public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncLifetime
 {
-    private readonly StringBuilder _output = new();
+    private readonly StringBuilder _output = new StringBuilder();
 
-    public virtual ValueTask InitializeAsync() => default;
-
-    protected void WriteLine(string message)
+    public void WriteLine(string message)
     {
         lock (_output)
         {
@@ -19,12 +18,16 @@ public class OutputWritingTestBase(ITestOutputHelper testOutputHelper) : IAsyncL
         }
     }
 
-    public virtual ValueTask DisposeAsync()
+    public virtual Task InitializeAsync() => Task.CompletedTask;
+
+    public virtual Task DisposeAsync()
     {
         lock (_output)
         {
             testOutputHelper.WriteLine(_output.ToString());
         }
-        return default;
+
+
+        return Task.CompletedTask;
     }
 }

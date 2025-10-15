@@ -19,7 +19,7 @@ public class UserInfoEndpointClient
 {
     private const string TokenEndpoint = "https://server/connect/token";
     private const string UserInfoEndpoint = "https://server/connect/userinfo";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     private readonly HttpClient _client;
 
     public UserInfoEndpointClient()
@@ -48,7 +48,7 @@ public class UserInfoEndpointClient
             Scope = "openid email api1",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBeFalse();
 
@@ -56,7 +56,7 @@ public class UserInfoEndpointClient
         {
             Address = UserInfoEndpoint,
             Token = response.AccessToken
-        }, _ct);
+        });
 
         userInfo.IsError.ShouldBeFalse();
         userInfo.Claims.Count().ShouldBe(3);
@@ -78,7 +78,7 @@ public class UserInfoEndpointClient
             Scope = "openid address",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBeFalse();
 
@@ -86,7 +86,7 @@ public class UserInfoEndpointClient
         {
             Address = UserInfoEndpoint,
             Token = response.AccessToken
-        }, _ct);
+        });
 
         userInfo.IsError.ShouldBeFalse();
         userInfo.Claims.First().Value.ShouldBe("{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }");
@@ -104,7 +104,7 @@ public class UserInfoEndpointClient
             Scope = "api1",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBeFalse();
 
@@ -112,7 +112,7 @@ public class UserInfoEndpointClient
         {
             Address = UserInfoEndpoint,
             Token = response.AccessToken
-        }, _ct);
+        });
 
         userInfo.IsError.ShouldBeTrue();
         userInfo.HttpStatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -130,7 +130,7 @@ public class UserInfoEndpointClient
             Scope = "email api1",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBeFalse();
 
@@ -138,7 +138,7 @@ public class UserInfoEndpointClient
         {
             Address = UserInfoEndpoint,
             Token = response.AccessToken
-        }, _ct);
+        });
 
         userInfo.IsError.ShouldBeTrue();
         userInfo.HttpStatusCode.ShouldBe(HttpStatusCode.Forbidden);
@@ -151,7 +151,7 @@ public class UserInfoEndpointClient
         {
             Address = UserInfoEndpoint,
             Token = "invalid"
-        }, _ct);
+        });
 
         userInfo.IsError.ShouldBeTrue();
         userInfo.HttpStatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -169,7 +169,7 @@ public class UserInfoEndpointClient
             Scope = "openid email api1 api4.with.roles roles",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         response.IsError.ShouldBeFalse();
 
@@ -192,7 +192,7 @@ public class UserInfoEndpointClient
         {
             Address = UserInfoEndpoint,
             Token = response.AccessToken
-        }, _ct);
+        });
 
         roles = userInfo.Json?.TryGetStringArray("role").ToList();
         roles.Count.ShouldBe(2);

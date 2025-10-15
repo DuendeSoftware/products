@@ -14,7 +14,6 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class ResourceTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Authorize endpoint";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
@@ -152,7 +151,7 @@ public class ResourceTests
         url += "&resource=urn:resource1";
         url += "&resource=urn:resource3";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -162,7 +161,7 @@ public class ResourceTests
             ClientSecret = "secret",
             Code = code,
             RedirectUri = "https://client1/callback"
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -187,7 +186,7 @@ public class ResourceTests
 
         url += "&resource= ";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -201,7 +200,7 @@ public class ResourceTests
             {
                 { "resource", " " }
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -227,7 +226,7 @@ public class ResourceTests
         url += "&resource=urn:resource1";
         url += "&resource=urn:resource3";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -241,7 +240,7 @@ public class ResourceTests
             {
                 { "resource", " " }
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -267,7 +266,7 @@ public class ResourceTests
         url += "&resource=urn:resource1";
         url += "&resource=urn:resource3";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -281,7 +280,7 @@ public class ResourceTests
             {
                 { "resource", "urn:resource1" }
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -307,7 +306,7 @@ public class ResourceTests
         url += "&resource=urn:resource1";
         url += "&resource=urn:resource3";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -317,7 +316,7 @@ public class ResourceTests
             ClientSecret = "secret",
             Code = code,
             RedirectUri = "https://client1/callback"
-        }, _ct);
+        });
 
         tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -329,7 +328,7 @@ public class ResourceTests
             {
                 { "resource", "urn:resource1" }
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -355,7 +354,7 @@ public class ResourceTests
         url += "&resource=urn:resource1";
         url += "&resource=urn:resource3";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -365,7 +364,7 @@ public class ResourceTests
             ClientSecret = "secret",
             Code = code,
             RedirectUri = "https://client1/callback"
-        }, _ct);
+        });
 
         tokenResponse = await _mockPipeline.BackChannelClient.RequestRefreshTokenAsync(new RefreshTokenRequest
         {
@@ -373,7 +372,7 @@ public class ResourceTests
             ClientId = "client1",
             ClientSecret = "secret",
             RefreshToken = tokenResponse.RefreshToken,
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -398,7 +397,7 @@ public class ResourceTests
 
         url += "&resource=urn:resource1";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -412,7 +411,7 @@ public class ResourceTests
             {
                 { "resource", "urn:resource1" }
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -437,7 +436,7 @@ public class ResourceTests
 
         url += "&resource=urn:resource1";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -451,7 +450,7 @@ public class ResourceTests
             {
                 // no resource param
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -476,7 +475,7 @@ public class ResourceTests
 
         url += "&resource=urn:resource3";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -490,7 +489,7 @@ public class ResourceTests
             {
                 // no resource param
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -508,7 +507,7 @@ public class ResourceTests
             {
                 { "resource", "urn:resource3" }
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -533,7 +532,7 @@ public class ResourceTests
 
         url += "&resource=urn:resource3";
 
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         var code = GetCode(response);
 
         var tokenResponse = await _mockPipeline.BackChannelClient.RequestAuthorizationCodeTokenAsync(new AuthorizationCodeTokenRequest
@@ -547,7 +546,7 @@ public class ResourceTests
             {
                 { "resource", "urn:resource3" }
             }
-        }, _ct);
+        });
 
         {
             var claims = ParseAccessTokenClaims(tokenResponse);
@@ -572,7 +571,7 @@ public class ResourceTests
         url += "&resource=urn:resource1";
         url += "&resource=urn:resource3";
 
-        await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        await _mockPipeline.BrowserClient.GetAsync(url);
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
         _mockPipeline.ErrorMessage.Error.ShouldBe("invalid_target");
     }

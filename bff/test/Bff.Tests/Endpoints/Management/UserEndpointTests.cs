@@ -4,13 +4,12 @@
 using System.Net;
 using System.Security.Claims;
 using Duende.Bff.Tests.TestHosts;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 
 public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBase(output)
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-
     [Fact]
     public async Task user_endpoint_for_authenticated_user_should_return_claims()
     {
@@ -55,7 +54,7 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
         await BffHost.IssueSessionCookieAsync(new Claim("sub", "alice"), new Claim("foo", "foo1"), new Claim("foo", "foo2"));
 
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/bff/user"));
-        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
+        var response = await BffHost.BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -65,7 +64,7 @@ public class UserEndpointTests(ITestOutputHelper output) : BffIntegrationTestBas
     {
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/bff/user"));
         req.Headers.Add("x-csrf", "1");
-        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
+        var response = await BffHost.BrowserClient.SendAsync(req);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }

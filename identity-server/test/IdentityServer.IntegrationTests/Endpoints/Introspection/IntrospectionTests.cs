@@ -24,7 +24,7 @@ public class IntrospectionTests
     private const string IntrospectionEndpoint = "https://server/connect/introspect";
     private const string TokenEndpoint = "https://server/connect/token";
     private const string RevocationEndpoint = "https://server/connect/revocation";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     private readonly HttpClient _client;
     private readonly HttpMessageHandler _handler;
 
@@ -49,7 +49,7 @@ public class IntrospectionTests
     {
         var form = new Dictionary<string, string>();
 
-        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form), _ct);
+        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -61,7 +61,7 @@ public class IntrospectionTests
         var form = new Dictionary<string, string>();
 
         _client.SetBasicAuthentication("unknown", "invalid");
-        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form), _ct);
+        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -73,7 +73,7 @@ public class IntrospectionTests
         var form = new Dictionary<string, string>();
 
         _client.SetBasicAuthentication("api1", "invalid");
-        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form), _ct);
+        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form));
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -85,7 +85,7 @@ public class IntrospectionTests
         var form = new Dictionary<string, string>();
 
         _client.SetBasicAuthentication("api1", "secret");
-        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form), _ct);
+        var response = await _client.PostAsync(IntrospectionEndpoint, new FormUrlEncodedContent(form));
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
@@ -101,7 +101,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = "invalid"
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(false);
         introspectionResponse.IsError.ShouldBe(false);
@@ -117,7 +117,7 @@ public class IntrospectionTests
             ClientId = "client1",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         var data = new
         {
@@ -129,7 +129,7 @@ public class IntrospectionTests
 
         var client = new HttpClient(_handler);
         var response = await client.PostAsync(IntrospectionEndpoint,
-            new StringContent(json, Encoding.UTF8, "application/json"), _ct);
+            new StringContent(json, Encoding.UTF8, "application/json"));
         response.StatusCode.ShouldBe(HttpStatusCode.UnsupportedMediaType);
     }
 
@@ -143,7 +143,7 @@ public class IntrospectionTests
             ClientId = "client1",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -153,7 +153,7 @@ public class IntrospectionTests
 
             Token = tokenResponse.AccessToken,
             TokenTypeHint = "invalid"
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(true);
         introspectionResponse.IsError.ShouldBe(false);
@@ -176,7 +176,9 @@ public class IntrospectionTests
     [InlineData("api1", "bogus")]
     public async Task Access_tokens_can_be_introspected_with_any_hint(string introspectedBy, string hint)
     {
-        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        TokenResponse tokenResponse;
+
+        tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
         {
             Address = TokenEndpoint,
             ClientId = "ro.client",
@@ -184,7 +186,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -194,7 +196,7 @@ public class IntrospectionTests
 
             Token = tokenResponse.AccessToken,
             TokenTypeHint = hint
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(true);
         introspectionResponse.IsError.ShouldBe(false);
@@ -221,7 +223,9 @@ public class IntrospectionTests
     public async Task Refresh_tokens_can_be_introspected_by_their_client_with_any_hint(string introspectedBy,
         string hint, bool isActive)
     {
-        var tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
+        TokenResponse tokenResponse;
+
+        tokenResponse = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
         {
             Address = TokenEndpoint,
             ClientId = "ro.client",
@@ -229,7 +233,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -239,7 +243,7 @@ public class IntrospectionTests
 
             Token = tokenResponse.RefreshToken,
             TokenTypeHint = hint
-        }, _ct);
+        });
 
         if (isActive)
         {
@@ -270,7 +274,7 @@ public class IntrospectionTests
             ClientId = "client1",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -279,7 +283,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(true);
         introspectionResponse.IsError.ShouldBe(false);
@@ -302,7 +306,7 @@ public class IntrospectionTests
             ClientId = "client1",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -311,7 +315,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         var values = GetFields(introspectionResponse);
 
@@ -340,7 +344,7 @@ public class IntrospectionTests
             Password = "bob",
 
             Scope = "api1",
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeFalse();
 
@@ -351,7 +355,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         var values = GetFields(introspectionResponse);
 
@@ -378,7 +382,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Scope = "api2 api3-a api3-b",
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeFalse();
 
@@ -389,7 +393,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         var values = GetFields(introspectionResponse);
 
@@ -423,7 +427,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Scope = "api3-a api3-b",
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeFalse();
 
@@ -434,7 +438,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         var values = GetFields(introspectionResponse);
 
@@ -461,7 +465,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Scope = "api1 api2 api3-a",
-        }, _ct);
+        });
 
         tokenResponse.IsError.ShouldBeFalse();
 
@@ -472,7 +476,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBeTrue();
         introspectionResponse.IsError.ShouldBeFalse();
@@ -496,7 +500,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Scope = "api1 api2",
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -505,7 +509,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(true);
         introspectionResponse.IsError.ShouldBe(false);
@@ -529,7 +533,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Scope = "api1",
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -538,7 +542,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(false);
         introspectionResponse.IsError.ShouldBe(false);
@@ -554,7 +558,7 @@ public class IntrospectionTests
             ClientId = "client1",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -563,7 +567,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBeTrue();
         introspectionResponse.IsError.ShouldBeFalse();
@@ -582,7 +586,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -591,7 +595,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.RefreshToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBeTrue();
         introspectionResponse.IsError.ShouldBeFalse();
@@ -613,7 +617,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -622,7 +626,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.RefreshToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBeFalse();
         introspectionResponse.IsError.ShouldBeFalse();
@@ -640,7 +644,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var revocationResponse = await _client.RevokeTokenAsync(new TokenRevocationRequest
         {
@@ -649,7 +653,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.RefreshToken
-        }, _ct);
+        });
         revocationResponse.IsError.ShouldBeFalse();
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
@@ -659,7 +663,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.RefreshToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBeFalse();
         introspectionResponse.IsError.ShouldBeFalse();
@@ -675,7 +679,7 @@ public class IntrospectionTests
             ClientId = "client1",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -684,7 +688,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBeFalse();
         introspectionResponse.IsError.ShouldBeFalse();
@@ -702,7 +706,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -711,7 +715,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.RefreshToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBeFalse();
         introspectionResponse.IsError.ShouldBeFalse();
@@ -729,7 +733,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -740,7 +744,7 @@ public class IntrospectionTests
             Token = tokenResponse.AccessToken,
             TokenTypeHint = Constants.TokenTypeHints.AccessToken,
             ResponseFormat = ResponseFormat.Jwt
-        }, _ct);
+        });
 
         introspectionResponse.HttpResponse.Content.Headers.ContentType.MediaType.ShouldBe($"application/{JwtClaimTypes.JwtTypes.IntrospectionJwtResponse}");
     }
@@ -757,7 +761,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -768,7 +772,7 @@ public class IntrospectionTests
             Token = tokenResponse.AccessToken,
             TokenTypeHint = Constants.TokenTypeHints.AccessToken,
             ResponseFormat = ResponseFormat.Jwt
-        }, _ct);
+        });
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(introspectionResponse.Raw);
@@ -800,7 +804,7 @@ public class IntrospectionTests
             UserName = "bob",
             Password = "bob",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         var revocationResponse = await _client.RevokeTokenAsync(new TokenRevocationRequest
         {
@@ -809,7 +813,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.RefreshToken
-        }, _ct);
+        });
         revocationResponse.IsError.ShouldBeFalse();
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
@@ -821,7 +825,7 @@ public class IntrospectionTests
             Token = tokenResponse.AccessToken,
             TokenTypeHint = Constants.TokenTypeHints.AccessToken,
             ResponseFormat = ResponseFormat.Jwt
-        }, _ct);
+        });
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(introspectionResponse.Raw);
@@ -846,7 +850,7 @@ public class IntrospectionTests
 
             Token = "invalid",
             ResponseFormat = ResponseFormat.Jwt
-        }, _ct);
+        });
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(introspectionResponse.Raw);
@@ -872,7 +876,7 @@ public class IntrospectionTests
             Scope = "api1 offline_access roles address",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -883,7 +887,7 @@ public class IntrospectionTests
             Token = tokenResponse.AccessToken,
             TokenTypeHint = Constants.TokenTypeHints.AccessToken,
             ResponseFormat = ResponseFormat.Jwt
-        }, _ct);
+        });
 
         introspectionResponse.Json.ShouldNotBeNull();
         var addressClaim = introspectionResponse.Json.Value.TryGetString("address");
@@ -903,7 +907,7 @@ public class IntrospectionTests
             Scope = "api1 offline_access roles",
             UserName = "bob",
             Password = "bob"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -914,7 +918,7 @@ public class IntrospectionTests
             Token = tokenResponse.AccessToken,
             TokenTypeHint = Constants.TokenTypeHints.AccessToken,
             ResponseFormat = ResponseFormat.Jwt
-        }, _ct);
+        });
 
         introspectionResponse.Json.ShouldNotBeNull();
         var rolesClaim = introspectionResponse.Json.Value.TryGetStringArray("role").ToList();
@@ -935,7 +939,7 @@ public class IntrospectionTests
             ClientId = "client1",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
         {
@@ -944,7 +948,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = tokenResponse.AccessToken
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(true);
         introspectionResponse.IsError.ShouldBe(false);
@@ -967,7 +971,7 @@ public class IntrospectionTests
             ClientSecret = "secret",
 
             Token = "invalid"
-        }, _ct);
+        });
 
         introspectionResponse.IsActive.ShouldBe(false);
         introspectionResponse.IsError.ShouldBe(false);
@@ -989,8 +993,8 @@ public class IntrospectionTests
             { "client_secret", "secret" },
             { "token", "" }
         });
-        var rawIntrospectionResponse = await _client.PostAsync(IntrospectionEndpoint, requestContent, _ct);
-        var introspectionResponse = await rawIntrospectionResponse.Content.ReadFromJsonAsync<TokenIntrospectionResponse>(_ct);
+        var rawIntrospectionResponse = await _client.PostAsync(IntrospectionEndpoint, requestContent);
+        var introspectionResponse = await rawIntrospectionResponse.Content.ReadFromJsonAsync<TokenIntrospectionResponse>();
 
         introspectionResponse.IsActive.ShouldBe(false);
         introspectionResponse.IsError.ShouldBe(false);

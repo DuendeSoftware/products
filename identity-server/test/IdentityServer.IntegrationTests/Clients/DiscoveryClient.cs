@@ -13,7 +13,7 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 public class DiscoveryClientTests
 {
     private const string DiscoveryEndpoint = "https://server/.well-known/openid-configuration";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     private readonly HttpClient _client;
 
     public DiscoveryClientTests()
@@ -40,7 +40,7 @@ public class DiscoveryClientTests
             {
                 ValidateIssuerName = false
             }
-        }, _ct);
+        });
 
         // endpoints
         doc.TokenEndpoint.ShouldBe("https://server/connect/token");

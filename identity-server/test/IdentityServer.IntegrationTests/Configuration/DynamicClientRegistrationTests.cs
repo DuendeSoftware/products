@@ -11,8 +11,6 @@ namespace Duende.IdentityServer.IntegrationTests.Configuration;
 
 public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-
     [Fact]
     public async Task valid_request_creates_new_client()
     {
@@ -27,9 +25,9 @@ public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
             DefaultMaxAge = 10000,
             Scope = "api1 openid profile"
         };
-        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request, _ct);
+        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
 
-        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>(_ct);
+        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
         response.ShouldNotBeNull();
         var newClient = await IdentityServerHost.GetClientAsync(response!.ClientId); // Not null already asserted
         newClient.ShouldNotBeNull();

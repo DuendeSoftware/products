@@ -14,7 +14,6 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class CorsTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "CORS Integration";
 
     private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
@@ -84,7 +83,7 @@ public class CorsTests
         _pipeline.BackChannelClient.DefaultRequestHeaders.Add("Access-Control-Request-Method", "GET");
 
         var message = new HttpRequestMessage(HttpMethod.Options, url);
-        var response = await _pipeline.BackChannelClient.SendAsync(message, _ct);
+        var response = await _pipeline.BackChannelClient.SendAsync(message);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         response.Headers.Contains("Access-Control-Allow-Origin").ShouldBeTrue();
@@ -104,7 +103,7 @@ public class CorsTests
         _pipeline.BackChannelClient.DefaultRequestHeaders.Add("Access-Control-Request-Method", "GET");
 
         var message = new HttpRequestMessage(HttpMethod.Options, url);
-        var response = await _pipeline.BackChannelClient.SendAsync(message, _ct);
+        var response = await _pipeline.BackChannelClient.SendAsync(message);
 
         response.Headers.Contains("Access-Control-Allow-Origin").ShouldBeFalse();
     }
@@ -124,7 +123,7 @@ public class CorsTests
         _pipeline.BackChannelClient.DefaultRequestHeaders.Add("Access-Control-Request-Method", "GET");
 
         var message = new HttpRequestMessage(HttpMethod.Options, IdentityServerPipeline.DiscoveryEndpoint);
-        var response = await _pipeline.BackChannelClient.SendAsync(message, _ct);
+        var response = await _pipeline.BackChannelClient.SendAsync(message);
 
         policy.WasCalled.ShouldBeTrue();
     }

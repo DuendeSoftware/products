@@ -4,6 +4,7 @@
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
+using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
@@ -20,7 +21,7 @@ public class BlazorPerComponentTests(ITestOutputHelper output, AppHostFixture fi
         };
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task Can_load_blazor_webassembly_app()
     {
         await Warmup();

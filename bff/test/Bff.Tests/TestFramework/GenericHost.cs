@@ -46,7 +46,7 @@ public class GenericHost(WriteTestOutput writeOutput, string baseAddress = "http
         return _baseAddress + path;
     }
 
-    public async ValueTask InitializeAsync()
+    public async Task InitializeAsync()
     {
         var hostBuilder = new HostBuilder()
             .ConfigureWebHost(builder =>

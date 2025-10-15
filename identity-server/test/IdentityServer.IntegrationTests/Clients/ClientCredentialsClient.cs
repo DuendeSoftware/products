@@ -16,7 +16,6 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 
 public class ClientCredentialsClient
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string TokenEndpoint = "https://server/connect/token";
 
     private readonly HttpClient _client;
@@ -44,7 +43,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Http);
@@ -61,7 +60,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -91,7 +90,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api1 other_api"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -125,7 +124,7 @@ public class ClientCredentialsClient
             ClientId = "client.cnf",
             ClientSecret = "foo",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -158,7 +157,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api1 api2"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -189,7 +188,7 @@ public class ClientCredentialsClient
             Address = TokenEndpoint,
             ClientId = "client",
             ClientSecret = "secret"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -225,7 +224,7 @@ public class ClientCredentialsClient
             Address = TokenEndpoint,
             ClientId = "client.no_default_scopes",
             ClientSecret = "secret"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ExpiresIn.ShouldBe(0);
@@ -246,7 +245,7 @@ public class ClientCredentialsClient
             Scope = "api1",
 
             ClientCredentialStyle = ClientCredentialStyle.PostBody
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(false);
         response.ExpiresIn.ShouldBe(3600);
@@ -273,7 +272,7 @@ public class ClientCredentialsClient
             Address = TokenEndpoint,
             ClientId = "client.no_secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe("invalid_client");
@@ -288,7 +287,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "invalid",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.Error.ShouldBe("invalid_client");
@@ -303,7 +302,7 @@ public class ClientCredentialsClient
             ClientId = "invalid",
             ClientSecret = "secret",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -319,7 +318,7 @@ public class ClientCredentialsClient
             Address = TokenEndpoint,
             ClientId = "implicit",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -336,7 +335,7 @@ public class ClientCredentialsClient
             ClientId = "implicit_and_client_creds",
             ClientSecret = "invalid",
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -354,7 +353,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "unknown"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -371,7 +370,7 @@ public class ClientCredentialsClient
             ClientId = "client.identityscopes",
             ClientSecret = "secret",
             Scope = "openid api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -388,7 +387,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api1 offline_access"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -405,7 +404,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api3"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);
@@ -422,7 +421,7 @@ public class ClientCredentialsClient
             ClientId = "client",
             ClientSecret = "secret",
             Scope = "api1 api3"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.ErrorType.ShouldBe(ResponseErrorType.Protocol);

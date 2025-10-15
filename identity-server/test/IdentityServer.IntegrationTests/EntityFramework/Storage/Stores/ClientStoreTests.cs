@@ -16,8 +16,6 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-
     public ClientStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -48,7 +46,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(testClient.ToEntity());
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         Client client;
@@ -82,7 +80,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(testClient.ToEntity());
-            await context.SaveChangesAsync(_ct);
+            await context.SaveChangesAsync();
         }
 
         Client client;
@@ -144,7 +142,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
                 }.ToEntity());
             }
 
-            await context.SaveChangesAsync(_ct);
+            context.SaveChanges();
         }
 
         await using (var context = new ConfigurationDbContext(options))
@@ -154,7 +152,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             const int timeout = 5000;
             var task = Task.Run(() => store.FindClientByIdAsync(testClient.ClientId));
 
-            if (await Task.WhenAny(task, Task.Delay(timeout, _ct)) == task)
+            if (await Task.WhenAny(task, Task.Delay(timeout)) == task)
             {
 #pragma warning disable xUnit1031 // Do not use blocking task operations in test method, suppressed because the task must have completed to enter this block
                 var client = task.Result;
@@ -169,7 +167,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             }
             else
             {
-                throw TestTimeoutException.ForTimedOutTest(timeout);
+                throw new TestTimeoutException(timeout);
             }
         }
     }

@@ -9,9 +9,9 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.CheckSession;
 
 public class CheckSessionTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
     private const string Category = "Check session endpoint";
+
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public CheckSessionTests() => _mockPipeline.Initialize();
 
@@ -19,7 +19,7 @@ public class CheckSessionTests
     [Trait("Category", Category)]
     public async Task get_request_should_not_return_404()
     {
-        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.CheckSessionEndpoint, _ct);
+        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.CheckSessionEndpoint);
 
         response.StatusCode.ShouldNotBe(HttpStatusCode.NotFound);
     }

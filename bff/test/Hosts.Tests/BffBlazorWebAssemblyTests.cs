@@ -4,6 +4,7 @@
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
+using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
@@ -19,7 +20,7 @@ public class BffBlazorWebAssemblyTests(ITestOutputHelper output, AppHostFixture 
         };
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task Can_login_and_load_local_api()
     {
         await Warmup();

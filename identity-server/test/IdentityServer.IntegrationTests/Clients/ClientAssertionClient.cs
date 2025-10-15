@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -18,7 +19,6 @@ namespace Duende.IdentityServer.IntegrationTests.Clients;
 
 public class ClientAssertionClient
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string TokenEndpoint = "https://idsvr4/connect/token";
     private const string ClientId = "certificate_base64_valid";
 
@@ -74,7 +74,7 @@ public class ClientAssertionClient
             },
 
             Scope = "api1"
-        }, _ct);
+        });
 
         AssertValidToken(response);
     }
@@ -97,7 +97,7 @@ public class ClientAssertionClient
             },
 
             Scope = "api1"
-        }, _ct);
+        });
 
         AssertValidToken(response);
     }
@@ -120,7 +120,7 @@ public class ClientAssertionClient
             },
 
             Scope = "api1"
-        }, _ct);
+        });
 
         AssertValidToken(response);
 
@@ -138,7 +138,7 @@ public class ClientAssertionClient
             },
 
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBeTrue();
         response.Error.ShouldBe("invalid_client");
@@ -160,7 +160,7 @@ public class ClientAssertionClient
             },
 
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.Error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
@@ -186,7 +186,7 @@ public class ClientAssertionClient
             },
 
             Scope = "api1"
-        }, _ct);
+        });
 
         response.IsError.ShouldBe(true);
         response.Error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
@@ -195,7 +195,7 @@ public class ClientAssertionClient
 
     private async Task<TokenResponse> GetToken(FormUrlEncodedContent body)
     {
-        var response = await _client.PostAsync(TokenEndpoint, body, _ct);
+        var response = await _client.PostAsync(TokenEndpoint, body);
         return await ProtocolResponse.FromHttpResponseAsync<TokenResponse>(response);
     }
 

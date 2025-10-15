@@ -18,10 +18,9 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class PushedAuthorizationTests
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly IdentityServerPipeline _mockPipeline = new();
     private Client _client;
-    private readonly string clientSecret = Guid.NewGuid().ToString();
+    private string clientSecret = Guid.NewGuid().ToString();
     private Client _client2;
 
     private WilsonJsonWebKey _privateKey;
@@ -59,7 +58,7 @@ public class PushedAuthorizationTests
         var authorizeUrl = _mockPipeline.CreateAuthorizeUrl(
             clientId: "client1",
             requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
-        var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location!.AbsoluteUri.ShouldMatch($"{expectedCallback}.*");
@@ -90,7 +89,7 @@ public class PushedAuthorizationTests
         var authorizeUrl = _mockPipeline.CreateAuthorizeUrl(
             clientId: "client2",
             requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
-        var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location!.AbsoluteUri.ShouldMatch($"{expectedCallback}.*");
@@ -142,7 +141,7 @@ public class PushedAuthorizationTests
             redirectUri: "https://client1/callback",
             nonce: "123_nonce");
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
@@ -164,7 +163,7 @@ public class PushedAuthorizationTests
             redirectUri: "https://client1/callback",
             nonce: "123_nonce");
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
@@ -192,7 +191,7 @@ public class PushedAuthorizationTests
         // call to authorize. We don't want to follow redirects. Instead we'll just
         // check for a 302 to the error page
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var authorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl, _ct);
+        var authorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
         authorizeResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
         authorizeResponse.Headers.Location!.ToString().ShouldMatch(".*/error.*");
@@ -214,8 +213,8 @@ public class PushedAuthorizationTests
             requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var firstAuthorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl, _ct);
-        var secondAuthorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl, _ct);
+        var firstAuthorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
+        var secondAuthorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
         secondAuthorizeResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
         secondAuthorizeResponse.Headers.Location!.ToString().ShouldMatch(".*/error.*");
@@ -269,7 +268,7 @@ public class PushedAuthorizationTests
         var authorizeUrl = _mockPipeline.CreateAuthorizeUrl(
             clientId: "client1",
             requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
-        var authorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl, _ct);
+        var authorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
         // Verify that authorize redirects to login
         authorizeResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
@@ -278,14 +277,14 @@ public class PushedAuthorizationTests
         authorizeResponse.Headers.Location.ToString().ToLower().ShouldMatch($"{expectedLocation.ToLower()}*");
 
         // Verify that the UI prompts the user at this point
-        var uiResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeResponse.Headers.Location, _ct);
+        var uiResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeResponse.Headers.Location);
         uiResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         // Now login and return to the return url we were given
         var returnPath = isPromptCreate ? _mockPipeline.CreateAccountReturnUrl : _mockPipeline.LoginReturnUrl;
         var returnUrl = new Uri(new Uri(IdentityServerPipeline.BaseUrl), returnPath);
         await _mockPipeline.LoginAsync("bob");
-        var authorizeCallbackResponse = await _mockPipeline.BrowserClient.GetAsync(returnUrl, _ct);
+        var authorizeCallbackResponse = await _mockPipeline.BrowserClient.GetAsync(returnUrl);
 
         // The authorize callback should continue back to the application (the prompt parameter is processed so we don't go back to the UI)
         authorizeCallbackResponse.StatusCode.ShouldBe(HttpStatusCode.Found);

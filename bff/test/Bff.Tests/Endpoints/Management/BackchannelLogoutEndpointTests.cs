@@ -4,19 +4,18 @@
 using System.Net;
 using Duende.Bff.Tests.TestHosts;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 
 public class BackchannelLogoutEndpointTests(ITestOutputHelper output) : BffIntegrationTestBase(output)
 {
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-
     [Fact]
     public async Task backchannel_logout_should_allow_anonymous()
     {
-        BffHost.OnConfigureServices += services =>
+        BffHost.OnConfigureServices += svcs =>
         {
-            services.AddAuthorization(opts =>
+            svcs.AddAuthorization(opts =>
             {
                 opts.FallbackPolicy =
                     new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -26,7 +25,7 @@ public class BackchannelLogoutEndpointTests(ITestOutputHelper output) : BffInteg
         };
         await BffHost.InitializeAsync();
 
-        var response = await BffHost.HttpClient.PostAsync(BffHost.Url("/bff/backchannel"), null, _ct);
+        var response = await BffHost.HttpClient.PostAsync(BffHost.Url("/bff/backchannel"), null);
         response.StatusCode.ShouldNotBe(HttpStatusCode.Unauthorized);
     }
 
@@ -76,9 +75,7 @@ public class BackchannelLogoutEndpointTests(ITestOutputHelper output) : BffInteg
 
         {
             var store = BffHost.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(
-                new UserSessionsFilter { SubjectId = "alice" },
-                _ct);
+            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
             sessions.Count().ShouldBe(2);
         }
 
@@ -86,9 +83,7 @@ public class BackchannelLogoutEndpointTests(ITestOutputHelper output) : BffInteg
 
         {
             var store = BffHost.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(
-                new UserSessionsFilter { SubjectId = "alice" },
-                _ct);
+            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
             var session = sessions.Single();
             session.SessionId.ShouldBe("sid1");
         }
@@ -105,9 +100,7 @@ public class BackchannelLogoutEndpointTests(ITestOutputHelper output) : BffInteg
 
         {
             var store = BffHost.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(
-                new UserSessionsFilter { SubjectId = "alice" },
-                _ct);
+            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
             sessions.Count().ShouldBe(2);
         }
 
@@ -115,9 +108,7 @@ public class BackchannelLogoutEndpointTests(ITestOutputHelper output) : BffInteg
 
         {
             var store = BffHost.Resolve<IUserSessionStore>();
-            var sessions = await store.GetUserSessionsAsync(
-                new UserSessionsFilter { SubjectId = "alice" },
-                _ct);
+            var sessions = await store.GetUserSessionsAsync(new UserSessionsFilter { SubjectId = "alice" });
             sessions.ShouldBeEmpty();
         }
     }

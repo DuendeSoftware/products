@@ -15,9 +15,9 @@ public class ConfigurationIntegrationTestBase
     {
         var dbRoot = new InMemoryDatabaseRoot();
         IdentityServerHost = new IdentityServerHost(dbRoot);
-        IdentityServerHost.InitializeAsync().AsTask().Wait();
+        IdentityServerHost.InitializeAsync().Wait();
 
         ConfigurationHost = new ConfigurationHost(dbRoot);
-        ConfigurationHost.InitializeAsync().AsTask().Wait();
+        ConfigurationHost.InitializeAsync().Wait();
     }
 }

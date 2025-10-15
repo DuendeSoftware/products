@@ -15,11 +15,12 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 public class RefreshTokenTests
 {
     private const string Category = "Refresh Token Tests";
-    private const string client_id = "client";
-    private const string client_secret = "secret";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     private readonly Client _client;
-    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+    private string client_id = "client";
+    private string client_secret = "secret";
+
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public RefreshTokenTests()
     {
@@ -90,7 +91,7 @@ public class RefreshTokenTests
 
             Code = code,
             RedirectUri = "https://client/callback"
-        }, _ct);
+        });
 
         tokenResult1.IsError.ShouldBeFalse();
         tokenResult1.AccessToken.ShouldNotBeNull();
@@ -108,7 +109,7 @@ public class RefreshTokenTests
             ClientCredentialStyle = ClientCredentialStyle.PostBody,
 
             RefreshToken = tokenResult1.RefreshToken
-        }, _ct);
+        });
 
         tokenResult2.IsError.ShouldBeFalse();
         tokenResult2.AccessToken.ShouldNotBeNull();
@@ -148,7 +149,7 @@ public class RefreshTokenTests
 
             Code = code,
             RedirectUri = "https://client/callback"
-        }, _ct);
+        });
 
         tokenResult1.IsError.ShouldBeFalse();
         tokenResult1.AccessToken.ShouldNotBeNull();
@@ -166,7 +167,7 @@ public class RefreshTokenTests
             ClientCredentialStyle = ClientCredentialStyle.PostBody,
 
             RefreshToken = tokenResult1.RefreshToken
-        }, _ct);
+        });
 
         tokenResult2.IsError.ShouldBeFalse();
         tokenResult2.AccessToken.ShouldNotBeNull();

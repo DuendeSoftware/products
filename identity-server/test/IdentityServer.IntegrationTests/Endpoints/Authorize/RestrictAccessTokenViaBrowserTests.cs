@@ -13,9 +13,10 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 public class RestrictAccessTokenViaBrowserTests
 {
     private const string Category = "RestrictAccessTokenViaBrowserTests";
-    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
-    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
-    private readonly ClaimsPrincipal _user = new IdentityServerUser("bob").CreatePrincipal();
+
+    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+
+    private ClaimsPrincipal _user = new IdentityServerUser("bob").CreatePrincipal();
 
     public RestrictAccessTokenViaBrowserTests()
     {
@@ -91,7 +92,7 @@ public class RestrictAccessTokenViaBrowserTests
             "id_token", "openid", "https://client1/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client1/callback");
@@ -110,7 +111,7 @@ public class RestrictAccessTokenViaBrowserTests
             "id_token token", "openid", "https://client1/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client1/callback");
@@ -129,7 +130,7 @@ public class RestrictAccessTokenViaBrowserTests
             "id_token", "openid", "https://client2/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client2/callback");
@@ -148,7 +149,7 @@ public class RestrictAccessTokenViaBrowserTests
             "id_token token", "openid", "https://client2/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = true;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
     }
 
@@ -162,7 +163,7 @@ public class RestrictAccessTokenViaBrowserTests
             "code id_token", "openid", "https://client3/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client3/callback");
@@ -182,7 +183,7 @@ public class RestrictAccessTokenViaBrowserTests
             "code id_token token", "openid", "https://client3/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client3/callback");
@@ -203,7 +204,7 @@ public class RestrictAccessTokenViaBrowserTests
             "code id_token", "openid", "https://client4/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Found);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client4/callback");
@@ -223,7 +224,7 @@ public class RestrictAccessTokenViaBrowserTests
             "code id_token token", "openid", "https://client4/callback", "state", "nonce");
 
         _mockPipeline.BrowserClient.AllowAutoRedirect = true;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url);
         _mockPipeline.ErrorWasCalled.ShouldBeTrue();
     }
 }

@@ -4,29 +4,18 @@
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
+using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 
 namespace Duende.AspNetCore.TestFramework;
 
 public class GenericHost
 {
-    protected readonly string _baseAddress;
-
-    private readonly ITestOutputHelper _testOutputHelper;
-    private IServiceProvider _appServices = default!;
-
-    private TestBrowserClient? _browserClient;
-
-    private HttpClient? _httpClient;
-    private AuthenticationProperties? _propsToSignIn;
-    private TestServer? _server;
-
-    private ClaimsPrincipal? _userToSignIn;
-
     public GenericHost(ITestOutputHelper testOutputHelper, string baseAddress = "https://server")
     {
         if (baseAddress.EndsWith("/"))
@@ -38,16 +27,20 @@ public class GenericHost
         _testOutputHelper = testOutputHelper;
     }
 
+    protected readonly string _baseAddress;
+    private IServiceProvider _appServices = default!;
+
     public Assembly? HostAssembly { get; set; }
     public bool IsDevelopment { get; set; }
-
+    private TestServer? _server;
     public TestServer Server
     {
         get => _server ?? throw new InvalidOperationException(
-            $"Attempt to use {nameof(Server)} before it was initialized. Did you forget to call {nameof(Initialize)}");
+                $"Attempt to use {nameof(Server)} before it was initialized. Did you forget to call ${Initialize}?");
         private set => _server = value;
     }
 
+    private TestBrowserClient? _browserClient;
     public TestBrowserClient BrowserClient
     {
         get =>
@@ -56,6 +49,7 @@ public class GenericHost
         private set => _browserClient = value;
     }
 
+    private HttpClient? _httpClient;
     public HttpClient HttpClient
     {
         get =>
@@ -64,9 +58,17 @@ public class GenericHost
         private set => _httpClient = value;
     }
 
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public T Resolve<T>()
+        where T : notnull =>
+        // not calling dispose on scope on purpose
+        _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider
+            .GetRequiredService<T>();
+
     public string Url(string? path = null)
     {
-        path ??= string.Empty;
+        path = path ?? string.Empty;
         if (!path.StartsWith("/"))
         {
             path = "/" + path;
@@ -102,7 +104,7 @@ public class GenericHost
     private void ConfigureServices(IServiceCollection services)
     {
         // This adds log messages to the output of our tests when they fail.
-        // See https://github.com/martincostello/xunit-logging
+        // See https://www.meziantou.net/how-to-view-logs-from-ilogger-in-xunitdotnet.htm
         services.AddLogging(options =>
         {
             // If you need different log output to understand a test failure, configure it here
@@ -111,7 +113,10 @@ public class GenericHost
             options.AddFilter("Duende.IdentityServer.License", LogLevel.Error);
             options.AddFilter("Duende.IdentityServer.Startup", LogLevel.Error);
 
-            options.AddXUnit(_testOutputHelper);
+            options.AddProvider(new XUnitLoggerProvider(_testOutputHelper, new XUnitLoggerOptions
+            {
+                IncludeCategory = true,
+            }));
         });
 
         OnConfigureServices(services);
@@ -126,41 +131,48 @@ public class GenericHost
         ConfigureSignout(builder);
     }
 
-    private void ConfigureSignout(WebApplication app) =>
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signout")
-            {
-                await ctx.SignOutAsync();
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+    private void ConfigureSignout(WebApplication app) => app.Use(async (ctx, next) =>
+                                                              {
+                                                                  if (ctx.Request.Path == "/__signout")
+                                                                  {
+                                                                      await ctx.SignOutAsync();
+                                                                      ctx.Response.StatusCode = 204;
+                                                                      return;
+                                                                  }
 
-            await next();
-        });
+                                                                  await next();
+                                                              });
 
-    private void ConfigureSignin(WebApplication app) =>
-        app.Use(async (ctx, next) =>
-        {
-            if (ctx.Request.Path == "/__signin")
-            {
-                if (_userToSignIn is not object)
-                {
-                    throw new Exception("No User Configured for SignIn");
-                }
+    public async Task RevokeSessionCookieAsync()
+    {
+        var response = await BrowserClient.GetAsync(Url("__signout"));
+        response.StatusCode.ShouldBe((HttpStatusCode)204);
+    }
 
-                var props = _propsToSignIn ?? new AuthenticationProperties();
-                await ctx.SignInAsync(_userToSignIn, props);
+    private void ConfigureSignin(WebApplication app) => app.Use(async (ctx, next) =>
+                                                             {
+                                                                 if (ctx.Request.Path == "/__signin")
+                                                                 {
+                                                                     if (_userToSignIn is not object)
+                                                                     {
+                                                                         throw new Exception("No User Configured for SignIn");
+                                                                     }
 
-                _userToSignIn = null;
-                _propsToSignIn = null;
+                                                                     var props = _propsToSignIn ?? new AuthenticationProperties();
+                                                                     await ctx.SignInAsync(_userToSignIn, props);
 
-                ctx.Response.StatusCode = 204;
-                return;
-            }
+                                                                     _userToSignIn = null;
+                                                                     _propsToSignIn = null;
 
-            await next();
-        });
+                                                                     ctx.Response.StatusCode = 204;
+                                                                     return;
+                                                                 }
+
+                                                                 await next();
+                                                             });
+
+    private ClaimsPrincipal? _userToSignIn;
+    private AuthenticationProperties? _propsToSignIn;
 
     public async Task IssueSessionCookieAsync(params Claim[] claims)
     {
@@ -168,10 +180,10 @@ public class GenericHost
         var response = await BrowserClient.GetAsync(Url("__signin"));
         response.StatusCode.ShouldBe((HttpStatusCode)204);
     }
-
     public Task IssueSessionCookieAsync(AuthenticationProperties props, params Claim[] claims)
     {
         _propsToSignIn = props;
         return IssueSessionCookieAsync(claims);
     }
+    public Task IssueSessionCookieAsync(string sub, params Claim[] claims) => IssueSessionCookieAsync(claims.Append(new Claim("sub", sub)).ToArray());
 }
