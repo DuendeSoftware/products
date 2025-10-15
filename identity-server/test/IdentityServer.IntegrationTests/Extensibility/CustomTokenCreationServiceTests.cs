@@ -17,6 +17,7 @@ namespace Duende.IdentityServer.IntegrationTests.Extensibility;
 
 public class CustomTokenCreationServiceTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "CustomTokenCreationServiceTests";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
@@ -58,7 +59,7 @@ public class CustomTokenCreationServiceTests
                 Address = IdentityServerPipeline.TokenEndpoint,
                 ClientId = "test",
                 ClientSecret = "secret"
-            });
+            }, _ct);
         result.IsError.ShouldBeFalse();
 
         var accessToken = result.AccessToken;

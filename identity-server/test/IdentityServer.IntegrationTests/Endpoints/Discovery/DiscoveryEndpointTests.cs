@@ -18,6 +18,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
 public class DiscoveryEndpointTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Discovery endpoint";
 
     [Fact]
@@ -27,9 +28,9 @@ public class DiscoveryEndpointTests
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("HTTPS://SERVER/ROOT/.WELL-KNOWN/OPENID-CONFIGURATION");
+        var result = await pipeline.BackChannelClient.GetAsync("HTTPS://SERVER/ROOT/.WELL-KNOWN/OPENID-CONFIGURATION", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server/root");
     }
@@ -43,9 +44,9 @@ public class DiscoveryEndpointTests
 
         pipeline.Options.LowerCaseIssuerUri = false;
 
-        var result = await pipeline.BackChannelClient.GetAsync("HTTPS://SERVER/ROOT/.WELL-KNOWN/OPENID-CONFIGURATION");
+        var result = await pipeline.BackChannelClient.GetAsync("HTTPS://SERVER/ROOT/.WELL-KNOWN/OPENID-CONFIGURATION", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server/ROOT");
     }
@@ -68,7 +69,7 @@ public class DiscoveryEndpointTests
         };
         pipeline.Initialize();
 
-        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration", _ct);
 
         var algorithmsSupported = result.TryGetStringArray("id_token_signing_alg_values_supported");
 
@@ -110,9 +111,9 @@ public class DiscoveryEndpointTests
 
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         var keys = data["keys"].EnumerateArray().ToList();
@@ -130,9 +131,9 @@ public class DiscoveryEndpointTests
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         var keys = data["keys"];
@@ -159,9 +160,9 @@ public class DiscoveryEndpointTests
         };
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var jwks = new JsonWebKeySet(json);
         var parsedKeys = jwks.GetSigningKeys();
 
@@ -185,9 +186,9 @@ public class DiscoveryEndpointTests
         };
         pipeline.Initialize("/ROOT");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration/jwks", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var jwks = new JsonWebKeySet(json);
 
         jwks.Keys.ShouldContain(x => x.KeyId == ecdsaKey.KeyId && x.Alg == "ES256");
@@ -211,7 +212,7 @@ public class DiscoveryEndpointTests
                 RequireHttps = false,
                 RequireKeySet = false
             }
-        });
+        }, _ct);
 
         result.Issuer.ShouldBe("https://грант.рф");
     }
@@ -224,9 +225,9 @@ public class DiscoveryEndpointTests
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         var prompts = data["prompt_values_supported"].EnumerateArray()
             .Select(x => x.GetString()).ToList();
@@ -248,9 +249,9 @@ public class DiscoveryEndpointTests
         pipeline.Initialize();
 
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         var prompts = data["prompt_values_supported"].EnumerateArray()
             .Select(x => x.GetString()).ToList();
@@ -265,9 +266,9 @@ public class DiscoveryEndpointTests
         pipeline.Initialize();
         pipeline.Options.Endpoints.EnableAuthorizeEndpoint = false;
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data.ContainsKey("prompt_values_supported").ShouldBeFalse();
     }
@@ -284,7 +285,7 @@ public class DiscoveryEndpointTests
         pipeline.Options.Preview.DiscoveryDocumentCacheDuration = TimeSpan.FromSeconds(1);
 
         // cache
-        _ = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+        _ = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration", _ct);
 
         // add new entry
         pipeline.Options.Discovery.CustomEntries = new() {
@@ -292,9 +293,9 @@ public class DiscoveryEndpointTests
         };
 
         // get cached document
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/root/.well-known/openid-configuration", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         // we got a result back
@@ -332,7 +333,7 @@ public class DiscoveryEndpointTests
         pipeline.Options.Preview.EnableDiscoveryDocumentCache = enableCache;
         pipeline.Options.Discovery.CustomEntries.Add("foo", "bar");
 
-        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration", _ct);
 
         result.TryGetString("foo").ShouldBe("bar");
     }
@@ -351,7 +352,7 @@ public class DiscoveryEndpointTests
         pipeline.Initialize();
         pipeline.Options.Preview.EnableDiscoveryDocumentCache = enableCache;
 
-        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration", _ct);
 
         if (enableCache)
         {
@@ -373,7 +374,7 @@ public class DiscoveryEndpointTests
         pipeline.Options.MutualTls.Enabled = true;
 
 
-        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration", _ct);
         result.MtlsEndpointAliases.PushedAuthorizationRequestEndpoint.ShouldNotBeNull();
     }
 }

@@ -20,6 +20,7 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 
 public class EntityFrameworkBasedLogoutTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly IdentityServerPipeline _mockPipeline = new();
 
     private static readonly ICollection<Client> _clients =
@@ -74,7 +75,7 @@ public class EntityFrameworkBasedLogoutTests
         var options = DatabaseProviderBuilder.BuildSqlite<PersistedGrantDbContext, OperationalStoreOptions>("NotUsed", new OperationalStoreOptions(),
             TimeSpan.FromMilliseconds(1));
         await using var context = new PersistedGrantDbContext(options);
-        await context.Database.EnsureCreatedAsync();
+        await context.Database.EnsureCreatedAsync(_ct);
 
         _mockPipeline.OnPostConfigureServices += services =>
         {
@@ -98,7 +99,7 @@ public class EntityFrameworkBasedLogoutTests
                 ClientId = client.ClientId,
                 Code = authzResponse.Code,
                 RedirectUri = client.RedirectUris.First()
-            });
+            }, _ct);
         }
 
         //Clear cache to simulate needing to load from db when creating logout notifications to send

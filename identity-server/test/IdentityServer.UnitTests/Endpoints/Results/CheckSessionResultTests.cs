@@ -12,11 +12,10 @@ namespace UnitTests.Endpoints.Results;
 
 public class CheckSessionResultTests
 {
-    private CheckSessionHttpWriter _subject;
-
-    private IdentityServerOptions _options = new IdentityServerOptions();
-
-    private DefaultHttpContext _context = new DefaultHttpContext();
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly CheckSessionHttpWriter _subject;
+    private readonly IdentityServerOptions _options = new IdentityServerOptions();
+    private readonly DefaultHttpContext _context = new DefaultHttpContext();
 
     public CheckSessionResultTests()
     {
@@ -42,7 +41,7 @@ public class CheckSessionResultTests
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"script-src '{IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript}'");
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
         using var rdr = new StreamReader(_context.Response.Body);
-        var html = await rdr.ReadToEndAsync();
+        var html = await rdr.ReadToEndAsync(_ct);
         html.ShouldContain("<script id='cookie-name' type='application/json'>foobar</script>");
     }
 
@@ -77,7 +76,7 @@ public class CheckSessionResultTests
         await _subject.WriteHttpResponse(new CheckSessionResult(), _context);
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
         using var rdr = new StreamReader(_context.Response.Body);
-        var html = await rdr.ReadToEndAsync();
+        var html = await rdr.ReadToEndAsync(_ct);
         html.ShouldContain($"<script id='cookie-name' type='application/json'>{cookieName}</script>");
     }
 }

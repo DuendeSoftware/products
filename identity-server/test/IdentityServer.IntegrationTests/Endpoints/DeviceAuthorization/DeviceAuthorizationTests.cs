@@ -13,6 +13,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.DeviceAuthorization;
 
 public class DeviceAuthorizationTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Device authorization endpoint";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
@@ -38,10 +39,10 @@ public class DeviceAuthorizationTests
     [Trait("Category", Category)]
     public async Task get_should_return_InvalidRequest()
     {
-        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DeviceAuthorization);
+        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.DeviceAuthorization, _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
+        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync(_ct));
 
         resultDto.ShouldNotBeNull();
         resultDto.error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
@@ -56,11 +57,11 @@ public class DeviceAuthorizationTests
             {"client_id", Guid.NewGuid().ToString()}
         };
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization,
-            new StringContent(@"{""client_id"": ""client1""}", Encoding.UTF8, "application/json"));
+            new StringContent(@"{""client_id"": ""client1""}", Encoding.UTF8, "application/json"), _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
+        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync(_ct));
 
         resultDto.ShouldNotBeNull();
         resultDto.error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
@@ -71,11 +72,11 @@ public class DeviceAuthorizationTests
     public async Task empty_request_should_return_InvalidRequest()
     {
         var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization,
-            new FormUrlEncodedContent(new Dictionary<string, string>()));
+            new FormUrlEncodedContent(new Dictionary<string, string>()), _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
+        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync(_ct));
 
         resultDto.ShouldNotBeNull();
         resultDto.error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
@@ -89,11 +90,11 @@ public class DeviceAuthorizationTests
         {
             {"client_id", "client1"}
         };
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization, new FormUrlEncodedContent(form));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization, new FormUrlEncodedContent(form), _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync());
+        var resultDto = ParseJsonBody<ErrorResultDto>(await response.Content.ReadAsStreamAsync(_ct));
 
         resultDto.ShouldNotBeNull();
         resultDto.error.ShouldBe(OidcConstants.TokenErrors.InvalidClient);
@@ -108,12 +109,12 @@ public class DeviceAuthorizationTests
             {"client_id", "client1"},
             {"client_secret", "secret" }
         };
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization, new FormUrlEncodedContent(form));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.DeviceAuthorization, new FormUrlEncodedContent(form), _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType.MediaType.ShouldBe("application/json");
 
-        var resultDto = ParseJsonBody<ResultDto>(await response.Content.ReadAsStreamAsync());
+        var resultDto = ParseJsonBody<ResultDto>(await response.Content.ReadAsStreamAsync(_ct));
 
         resultDto.ShouldNotBeNull();
 

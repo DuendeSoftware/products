@@ -19,6 +19,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Authorize;
 
 public class ConsentTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Authorize and consent tests";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
@@ -110,7 +111,7 @@ public class ConsentTests
             state: "123_state",
             nonce: "123_nonce"
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         _mockPipeline.ConsentWasCalled.ShouldBeTrue();
     }
@@ -149,7 +150,7 @@ public class ConsentTests
                 custom_foo = "foo_value"
             }
         );
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         _mockPipeline.ConsentRequest.ShouldNotBeNull();
         _mockPipeline.ConsentRequest.Client.ClientId.ShouldBe("client2");
@@ -193,7 +194,7 @@ public class ConsentTests
             redirectUri: "https://client2/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client2/callback");
@@ -225,12 +226,12 @@ public class ConsentTests
             redirectUri: "https://client2/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://server/consent");
 
-        response = await _mockPipeline.BrowserClient.GetAsync(response.Headers.Location.ToString());
+        response = await _mockPipeline.BrowserClient.GetAsync(response.Headers.Location.ToString(), _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("/connect/authorize/callback");
@@ -238,7 +239,7 @@ public class ConsentTests
         var modifiedAuthorizeCallback = "https://server" + response.Headers.Location;
         modifiedAuthorizeCallback = modifiedAuthorizeCallback.Replace("api2", "api1%20api2");
 
-        response = await _mockPipeline.BrowserClient.GetAsync(modifiedAuthorizeCallback);
+        response = await _mockPipeline.BrowserClient.GetAsync(modifiedAuthorizeCallback, _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://server/consent");
     }
@@ -262,7 +263,7 @@ public class ConsentTests
             redirectUri: "https://client2/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client2/callback");
 
@@ -304,7 +305,7 @@ public class ConsentTests
             redirectUri: "https://client2/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client2/callback");
@@ -347,7 +348,7 @@ public class ConsentTests
             redirectUri: "https://client2/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ToString().ShouldStartWith("https://client2/callback");
@@ -407,7 +408,7 @@ public class ConsentTests
            nonce: "123_nonce"
         );
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         // The existing legacy consent should apply - user isn't show consent screen
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);

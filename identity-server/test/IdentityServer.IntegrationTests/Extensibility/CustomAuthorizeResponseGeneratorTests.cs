@@ -17,6 +17,7 @@ namespace Duende.IdentityServer.IntegrationTests.Extensibility;
 
 public class CustomAuthorizeResponseGeneratorTests
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "CustomAuthorizeResponseGeneratorTests";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
@@ -71,7 +72,7 @@ public class CustomAuthorizeResponseGeneratorTests
             codeChallengeMethod: OidcConstants.CodeChallengeMethods.Sha256,
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location.ShouldNotBeNull();

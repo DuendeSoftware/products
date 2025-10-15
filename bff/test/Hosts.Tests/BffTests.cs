@@ -3,12 +3,12 @@
 
 using Hosts.ServiceDefaults;
 using Hosts.Tests.TestInfra;
-using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
 public class BffTests : IntegrationTestBase
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly HttpClient _httpClient;
     private readonly BffClient _bffClient;
 
@@ -18,28 +18,28 @@ public class BffTests : IntegrationTestBase
         _bffClient = new BffClient(CreateHttpClient(AppHostServices.Bff));
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_invoke_home()
     {
-        var response = await _httpClient.GetAsync("/");
+        var response = await _httpClient.GetAsync("/", _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_initiate_login()
     {
 
-        var response = await _httpClient.GetAsync("/");
+        var response = await _httpClient.GetAsync("/", _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        await _bffClient.TriggerLogin();
+        await _bffClient.TriggerLogin(ct: _ct);
 
         // Verify that there are user claims
         var claims = await _bffClient.GetUserClaims();
         claims.Any().ShouldBeTrue();
     }
 
-    [SkippableTheory]
+    [Theory]
     [InlineData("/local/self-contained")]
     [InlineData("/local/invokes-external-api")]
     [InlineData("/api/user-token")]
@@ -51,14 +51,14 @@ public class BffTests : IntegrationTestBase
     [InlineData("/api/audience-constrained")]
     public async Task Once_authenticated_can_call_proxied_urls(string url)
     {
-        await _bffClient.TriggerLogin();
+        await _bffClient.TriggerLogin(ct: _ct);
         await _bffClient.InvokeApi(url);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_logout()
     {
-        await _bffClient.TriggerLogin();
+        await _bffClient.TriggerLogin(ct: _ct);
         await _bffClient.TriggerLogout();
 
         await _bffClient.InvokeApi(url: "/local/self-contained", expectedResponse: HttpStatusCode.Unauthorized);

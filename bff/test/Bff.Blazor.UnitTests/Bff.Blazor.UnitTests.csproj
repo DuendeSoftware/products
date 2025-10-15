@@ -3,33 +3,25 @@
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
-
-  </ItemGroup>
-
-
-  <ItemGroup>
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     <PackageReference Include="PublicApiGenerator" />
-    <PackageReference Include="Verify.Xunit" />
-
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
-    
+    <PackageReference Include="Verify.XunitV3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bff.Blazor\Bff.Blazor.csproj" />
     <ProjectReference Include="..\Bff.Tests\Bff.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>

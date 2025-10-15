@@ -13,6 +13,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.OAuthMetadata;
 public class OAuthMetadataTests
 {
     private const string Category = "OAuth Metadata endpoint";
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
@@ -21,7 +22,7 @@ public class OAuthMetadataTests
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
 
-        var result = await pipeline.BackChannelClient.PostAsync("https://server/.well-known/oauth-authorization-server", null);
+        var result = await pipeline.BackChannelClient.PostAsync("https://server/.well-known/oauth-authorization-server", null, _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.MethodNotAllowed);
     }
@@ -33,9 +34,9 @@ public class OAuthMetadataTests
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize();
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server");
     }
@@ -49,9 +50,9 @@ public class OAuthMetadataTests
         pipeline.Initialize();
         pipeline.Options.IssuerUri = "https://server/identity";
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server/identity");
     }
@@ -65,9 +66,9 @@ public class OAuthMetadataTests
         pipeline.Initialize();
         pipeline.Options.IssuerUri = "https://server/identity";
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity?query=string");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity?query=string", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server/identity");
     }
@@ -81,9 +82,9 @@ public class OAuthMetadataTests
         pipeline.Initialize();
         pipeline.Options.IssuerUri = "https://server/identity";
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity#fragment");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity#fragment", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server/identity");
     }
@@ -96,9 +97,9 @@ public class OAuthMetadataTests
         pipeline.Initialize();
         pipeline.Options.IssuerUri = "https://server/explicit";
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/explicit");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/explicit", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server/explicit");
     }
@@ -111,7 +112,7 @@ public class OAuthMetadataTests
         pipeline.Initialize();
         pipeline.Options.IssuerUri = "https://example.com/explicit";
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
@@ -123,7 +124,7 @@ public class OAuthMetadataTests
         var pipeline = new IdentityServerPipeline();
         pipeline.Initialize("/identity");
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/identity/.well-known/oauth-authorization-server");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/identity/.well-known/oauth-authorization-server", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
@@ -137,7 +138,7 @@ public class OAuthMetadataTests
         pipeline.Initialize();
         pipeline.Options.IssuerUri = "https://server/identity";
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/wrong");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/wrong", _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
@@ -151,9 +152,9 @@ public class OAuthMetadataTests
         pipeline.Initialize();
         pipeline.Options.IssuerUri = "https://server/identity";
 
-        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity");
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/oauth-authorization-server/identity", _ct);
 
-        var json = await result.Content.ReadAsStringAsync();
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         data["issuer"].GetString().ShouldBe("https://server/identity");
 

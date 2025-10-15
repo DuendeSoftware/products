@@ -15,6 +15,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     public IdentityProviderStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -23,8 +25,6 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
             context.Database.EnsureCreated();
         }
     }
-
-
 
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task GetBySchemeAsync_should_find_by_scheme(DbContextOptions<ConfigurationDbContext> options)
@@ -37,7 +37,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
                 Type = "oidc"
             };
             context.IdentityProviders.Add(idp.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new ConfigurationDbContext(options))
@@ -61,7 +61,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
                 Type = "saml"
             };
             context.IdentityProviders.Add(idp.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new ConfigurationDbContext(options))
@@ -84,7 +84,7 @@ public class IdentityProviderStoreTests : IntegrationTest<IdentityProviderStoreT
                 Type = "oidc"
             };
             context.IdentityProviders.Add(idp.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new ConfigurationDbContext(options))

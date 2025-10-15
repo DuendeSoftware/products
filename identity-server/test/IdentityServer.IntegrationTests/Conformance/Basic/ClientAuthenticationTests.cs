@@ -13,8 +13,8 @@ namespace Duende.IdentityServer.IntegrationTests.Conformance.Basic;
 public class ClientAuthenticationTests
 {
     private const string Category = "Conformance.Basic.ClientAuthenticationTests";
-
-    private IdentityServerPipeline _pipeline = new IdentityServerPipeline();
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly IdentityServerPipeline _pipeline = new IdentityServerPipeline();
 
     public ClientAuthenticationTests()
     {
@@ -70,7 +70,7 @@ public class ClientAuthenticationTests
             scope: "openid",
             redirectUri: "https://code_pipeline.Client/callback?foo=bar&baz=quux",
             nonce: nonce);
-        var response = await _pipeline.BrowserClient.GetAsync(url);
+        var response = await _pipeline.BrowserClient.GetAsync(url, _ct);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
         authorization.Code.ShouldNotBeNull();
@@ -88,7 +88,7 @@ public class ClientAuthenticationTests
 
             Code = code,
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
-        });
+        }, _ct);
 
         tokenResult.IsError.ShouldBeFalse();
         tokenResult.HttpErrorReason.ShouldBe("OK");
@@ -116,7 +116,7 @@ public class ClientAuthenticationTests
             scope: "openid",
             redirectUri: "https://code_pipeline.Client/callback?foo=bar&baz=quux",
             nonce: nonce);
-        var response = await _pipeline.BrowserClient.GetAsync(url);
+        var response = await _pipeline.BrowserClient.GetAsync(url, _ct);
 
         var authorization = _pipeline.ParseAuthorizationResponseUrl(response.Headers.Location.ToString());
         authorization.Code.ShouldNotBeNull();
@@ -135,7 +135,7 @@ public class ClientAuthenticationTests
 
             Code = code,
             RedirectUri = "https://code_pipeline.Client/callback?foo=bar&baz=quux"
-        });
+        }, _ct);
 
         tokenResult.IsError.ShouldBeFalse();
         tokenResult.HttpErrorReason.ShouldBe("OK");

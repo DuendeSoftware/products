@@ -18,13 +18,12 @@
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="Serilog.Sinks.TextWriter" />
-    <PackageReference Include="Serilog.Sinks.XUnit" />
+    <PackageReference Include="Serilog.Sinks.XUnit3" />
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Aspire.Hosting.Testing" />
-    <PackageReference Include="Xunit.SkippableFact" />
-    <PackageReference Include="Microsoft.Playwright.Xunit" />
+    <PackageReference Include="Microsoft.Playwright" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="xunit.core" />
+    <PackageReference Include="xunit.v3.extensibility.core" />
   </ItemGroup>
 
   <ItemGroup>

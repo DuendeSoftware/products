@@ -10,6 +10,7 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class LicenseTests : IDisposable
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private string client_id = "client";
     private string client_secret = "secret";
     private string scope_name = "api";
@@ -68,7 +69,7 @@ public class LicenseTests : IDisposable
 
         for (var i = 0; i < threshold + 1; i++)
         {
-            await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form);
+            await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.TokenEndpoint, form, _ct);
         }
 
         _mockPipeline.MockLogger.LogMessages.ShouldContain(

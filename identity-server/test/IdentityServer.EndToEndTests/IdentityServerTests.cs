@@ -5,7 +5,6 @@ using Duende.IdentityServer.EndToEndTests.TestInfra;
 using Duende.Xunit.Playwright;
 using Projects;
 using ServiceDefaults;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.EndToEndTests;
 
@@ -13,6 +12,8 @@ namespace Duende.IdentityServer.EndToEndTests;
 public class IdentityServerTests(ITestOutputHelper output, IdentityServerHostTestFixture fixture)
     : PlaywrightTestBase<All>(output, fixture)
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     [Theory]
     [InlineData(AppHostServices.MvcAutomaticTokenManagement)]
     [InlineData(AppHostServices.MvcCode)]
@@ -24,7 +25,7 @@ public class IdentityServerTests(ITestOutputHelper output, IdentityServerHostTes
     public async Task clients_can_login_use_tokens_and_logout(string clientName)
     {
         await Page.GotoAsync(Fixture.GetUrlTo(clientName).ToString());
-        await Page.Login();
+        await Page.Login(ct: _ct);
         await Page.CallApi();
         await Page.RenewTokens();
         await Page.CallApi();
@@ -41,7 +42,7 @@ public class IdentityServerTests(ITestOutputHelper output, IdentityServerHostTes
     public async Task templates_can_serve_discovery(string templateName)
     {
         var client = CreateHttpClient(templateName);
-        var response = await client.GetAsync(".well-known/openid-configuration");
+        var response = await client.GetAsync(".well-known/openid-configuration", _ct);
         response.IsSuccessStatusCode.ShouldBeTrue();
     }
 }

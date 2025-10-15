@@ -6,17 +6,19 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 
 public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestBase(output)
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     [Fact]
-    public async Task unauthenticated_calls_to_remote_endpoint_should_return_401() => await BffHost.BrowserClient.CallBffHostApi(
+    public async Task unauthenticated_calls_to_remote_endpoint_should_return_401()
+        => await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_user/test"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
 
     [Fact]
     public async Task calls_to_remote_endpoint_should_forward_user_to_api()
@@ -24,8 +26,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         await BffHost.BffLoginAsync("alice");
 
         var (response, apiResult) = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/api_user/test")
-        );
+            url: BffHost.Url("/api_user/test"),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Path.ShouldBe("/test");
@@ -37,15 +39,14 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
     }
 
     [Fact]
-    public async Task
-        calls_to_remote_endpoint_with_useraccesstokenparameters_having_stored_named_token_should_forward_user_to_api()
+    public async Task calls_to_remote_endpoint_with_useraccesstokenparameters_having_stored_named_token_should_forward_user_to_api()
     {
         await BffHostWithNamedTokens.BffLoginAsync("alice");
 
         ApiResponse apiResult = await BffHostWithNamedTokens.BrowserClient.CallBffHostApi(
             url: BffHostWithNamedTokens.Url(
-                "/api_user_with_useraccesstokenparameters_having_stored_named_token/test")
-        );
+                "/api_user_with_useraccesstokenparameters_having_stored_named_token/test"),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Path.ShouldBe("/test");
@@ -62,8 +63,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         await BffHostWithNamedTokens.BrowserClient.CallBffHostApi(
             url: BffHostWithNamedTokens.Url(
                 "/api_user_with_useraccesstokenparameters_having_not_stored_named_token/test"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
     }
 
     [Fact]
@@ -74,8 +75,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_user/test"),
             method: HttpMethod.Put,
-            content: JsonContent.Create(new TestPayload("hello test api"))
-        );
+            content: JsonContent.Create(new TestPayload("hello test api")),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("PUT");
         apiResult.Path.ShouldBe("/test");
@@ -93,8 +94,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_user/test"),
             method: HttpMethod.Post,
-            content: JsonContent.Create(new TestPayload("hello test api"))
-        );
+            content: JsonContent.Create(new TestPayload("hello test api")),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("POST");
         apiResult.Path.ShouldBe("/test");
@@ -109,8 +110,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
     {
         {
             ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/api_user_or_anon/test")
-            );
+                url: BffHost.Url("/api_user_or_anon/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/test");
@@ -122,8 +123,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
             await BffHost.BffLoginAsync("alice");
 
             ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/api_user_or_anon/test")
-            );
+                url: BffHost.Url("/api_user_or_anon/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/test");
@@ -138,8 +139,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         await BffHost.BffLoginAsync("alice");
 
         ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/api_client/test")
-        );
+            url: BffHost.Url("/api_client/test"),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Path.ShouldBe("/test");
@@ -154,8 +155,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
 
         await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_with_access_token_retrieval_that_fails"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
 
         // user should be signed out
         var result = await BffHost.GetIsUserLoggedInAsync();
@@ -169,8 +170,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
 
         await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_forbidden"),
-            expectedStatusCode: HttpStatusCode.Forbidden
-        );
+            expectedStatusCode: HttpStatusCode.Forbidden,
+            ct: _ct);
     }
 
     [Fact]
@@ -180,8 +181,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
 
         await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_unauthenticated"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
     }
 
     [Fact]
@@ -190,8 +191,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         await BffHost.BffLoginAsync("alice");
 
         ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/api_with_access_token_retriever")
-        );
+            url: BffHost.Url("/api_with_access_token_retriever"),
+            ct: _ct);
 
         apiResult.Sub.ShouldBe("123");
         apiResult.ClientId.ShouldBe("fake-client");
@@ -202,8 +203,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
     {
         {
             ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/api_user_or_client/test")
-            );
+                url: BffHost.Url("/api_user_or_client/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/test");
@@ -215,8 +216,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
             await BffHost.BffLoginAsync("alice");
 
             ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/api_user_or_client/test")
-            );
+                url: BffHost.Url("/api_user_or_client/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/test");
@@ -230,8 +231,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
     {
         {
             ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/api_anon_only/test")
-            );
+                url: BffHost.Url("/api_anon_only/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/test");
@@ -243,8 +244,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
             await BffHost.BffLoginAsync("alice");
 
             ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-                url: BffHost.Url("/api_anon_only/test")
-            );
+                url: BffHost.Url("/api_anon_only/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/test");
@@ -261,13 +262,13 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
 
         await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_user_or_client/test"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
 
         await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_client/test"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
     }
 
     [Fact]
@@ -278,8 +279,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
 
         await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_user/test"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
     }
 
     [Fact]
@@ -290,14 +291,14 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
 
         await BffHost.BrowserClient.CallBffHostApi(
             url: BffHost.Url("/api_user/test"),
-            expectedStatusCode: HttpStatusCode.Forbidden
-        );
+            expectedStatusCode: HttpStatusCode.Forbidden,
+            ct: _ct);
     }
     [Fact]
     public async Task calls_to_remote_endpoint_should_require_csrf()
     {
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_user_or_client/test"));
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
@@ -308,8 +309,8 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         await BffHost.BffLoginAsync("alice");
 
         ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/api_user_no_csrf/test")
-        );
+            url: BffHost.Url("/api_user_no_csrf/test"),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Path.ShouldBe("/test");
@@ -325,11 +326,11 @@ public class RemoteEndpointTests(ITestOutputHelper output) : BffIntegrationTestB
         var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/api_custom_transform/test"));
         req.Headers.Add("x-csrf", "1");
         req.Headers.Add("my-header-to-be-copied-by-yarp", "copied-value");
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        var response = await BffHost.BrowserClient.SendAsync(req, _ct);
 
         response.IsSuccessStatusCode.ShouldBeTrue();
         response.Content.Headers.ContentType!.MediaType.ShouldBe("application/json");
-        var json = await response.Content.ReadAsStringAsync();
+        var json = await response.Content.ReadAsStringAsync(_ct);
         var apiResult = JsonSerializer.Deserialize<ApiResponse>(json).ShouldNotBeNull();
         apiResult.RequestHeaders["my-header-to-be-copied-by-yarp"].First().ShouldBe("copied-value");
 

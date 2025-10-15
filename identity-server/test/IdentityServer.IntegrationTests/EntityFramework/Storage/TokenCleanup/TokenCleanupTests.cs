@@ -18,6 +18,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.TokenCl
 
 public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGrantDbContext, OperationalStoreOptions>
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     public TokenCleanupTests(DatabaseProviderFixture<PersistedGrantDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -54,10 +56,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(expiredGrant);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -81,10 +83,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(validGrant);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -125,10 +127,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         {
             context.PersistedGrants.AddRange(expiredGrants);
             context.PersistedGrants.AddRange(validGrants);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -156,10 +158,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(expiredGrant);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -184,10 +186,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.DeviceFlowCodes.Add(validGrant);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options).CleanupGrantsAsync();
+        await CreateSut(options).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -213,10 +215,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(consumedGrant);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options, removeConsumedTokens: true).CleanupGrantsAsync();
+        await CreateSut(options, removeConsumedTokens: true).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -241,10 +243,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(consumedGrant);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options, removeConsumedTokens: false).CleanupGrantsAsync();
+        await CreateSut(options, removeConsumedTokens: false).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {
@@ -277,7 +279,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                 context.PersistedGrants.Add(expiredGrant);
             }
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
 
             context.PersistedGrants.Count().ShouldBe(StoreOptions.TokenCleanupBatchSize * expectedPageCount);
         }
@@ -287,7 +289,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await CreateSut(options, svcs =>
         {
             svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
-        }).CleanupGrantsAsync();
+        }).CleanupGrantsAsync(_ct);
 
         // The right number of batches executed
         mockNotifications.PersistedGrantNotifications.Count.ShouldBe(expectedPageCount);
@@ -328,7 +330,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
                 context.PersistedGrants.Add(expiredGrant);
             }
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         // Whenever we cleanup a batch of grants, a new (expired) grant is inserted
@@ -356,7 +358,7 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         await CreateSut(options, svcs =>
         {
             svcs.AddSingleton<IOperationalStoreNotification>(mockNotifications);
-        }).CleanupGrantsAsync();
+        }).CleanupGrantsAsync(_ct);
 
         // Each batch created an extra grant, so we do an extra batch to clean up
         // the extras
@@ -414,10 +416,10 @@ public class TokenCleanupTests : IntegrationTest<TokenCleanupTests, PersistedGra
         {
             context.PersistedGrants.Add(newConsumedGrant);
             context.PersistedGrants.Add(oldConsumedGrant);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
-        await CreateSut(options, removeConsumedTokens: true, delay).CleanupGrantsAsync();
+        await CreateSut(options, removeConsumedTokens: true, delay).CleanupGrantsAsync(_ct);
 
         await using (var context = new PersistedGrantDbContext(options))
         {

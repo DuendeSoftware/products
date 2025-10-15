@@ -4,12 +4,13 @@
 using System.Net;
 using Duende.Bff.Tests.TestFramework;
 using Microsoft.AspNetCore.Builder;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
 
 public class GenericHostTests(ITestOutputHelper output)
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task Test1()
     {
@@ -21,7 +22,7 @@ public class GenericHostTests(ITestOutputHelper output)
         });
         await host.InitializeAsync();
 
-        var response = await host.HttpClient.GetAsync("/test");
+        var response = await host.HttpClient.GetAsync("/test", _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }

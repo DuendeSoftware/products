@@ -12,6 +12,7 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Discovery;
 
 public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_supported
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private const string Category = "Discovery endpoint - token_endpoint_auth_signing_alg_values_supported";
 
     [Fact]
@@ -29,7 +30,7 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
         ];
 
         var disco = await pipeline.BackChannelClient
-            .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+            .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration", _ct);
         disco.IsError.ShouldBeFalse();
 
         var algorithmsSupported = disco.TokenEndpointAuthenticationSigningAlgorithmsSupported;
@@ -48,9 +49,9 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
             svcs.AddIdentityServerBuilder().AddJwtBearerClientAuthentication();
         pipeline.Initialize();
 
-        var result =
-            await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
-                "https://server/.well-known/openid-configuration");
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync(
+                "https://server/.well-known/openid-configuration",
+                _ct);
 
         result.IsError.ShouldBeFalse();
         var algorithmsSupported = result.TokenEndpointAuthenticationSigningAlgorithmsSupported;
@@ -77,7 +78,7 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
         pipeline.Options.SupportedClientAssertionSigningAlgorithms = [SecurityAlgorithms.RsaSha256];
 
         var disco = await pipeline.BackChannelClient
-            .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+            .GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration", _ct);
 
         // Verify assumptions
         disco.IsError.ShouldBeFalse();
@@ -102,8 +103,8 @@ public class DiscoveryEndpointTests_token_endpoint_auth_signing_alg_values_suppo
         pipeline.Options.SupportedClientAssertionSigningAlgorithms = algorithms;
 
         var result = await pipeline.BackChannelClient
-            .GetAsync("https://server/.well-known/openid-configuration");
-        var json = await result.Content.ReadAsStringAsync();
+            .GetAsync("https://server/.well-known/openid-configuration", _ct);
+        var json = await result.Content.ReadAsStringAsync(_ct);
         var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         data.ShouldNotContainKey(OidcConstants.Discovery.TokenEndpointAuthSigningAlgorithmsSupported);

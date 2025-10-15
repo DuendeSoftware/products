@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
 
@@ -15,14 +14,15 @@ namespace Duende.Bff.Tests;
 /// </summary>
 public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
 
-    private ContextCapturingAccessTokenRetriever _customAccessTokenReceiver { get; } = new(NullLogger<DefaultAccessTokenRetriever>.Instance);
+    private ContextCapturingAccessTokenRetriever CustomAccessTokenReceiver { get; } = new(NullLogger<DefaultAccessTokenRetriever>.Instance);
 
     public IAccessTokenRetriever_Extensibility_tests(ITestOutputHelper output) : base(output)
     {
         BffHost.OnConfigureServices += services =>
         {
-            services.AddSingleton(_customAccessTokenReceiver);
+            services.AddSingleton(CustomAccessTokenReceiver);
         };
 
         BffHost.OnConfigure += app =>
@@ -55,9 +55,9 @@ public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
     {
         await BffHost.BffLoginAsync("alice");
 
-        await BffHost.BrowserClient.CallBffHostApi(BffHost.Url("/custom"));
+        await BffHost.BrowserClient.CallBffHostApi(BffHost.Url("/custom"), ct: _ct);
 
-        var usedContext = _customAccessTokenReceiver.UsedContext.ShouldNotBeNull();
+        var usedContext = CustomAccessTokenReceiver.UsedContext.ShouldNotBeNull();
 
         usedContext.Metadata.RequiredTokenType.ShouldBe(TokenType.User);
 
@@ -71,9 +71,9 @@ public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
     {
         await BffHost.BffLoginAsync("alice");
 
-        await BffHost.BrowserClient.CallBffHostApi(BffHost.Url("/subPath/custom_within_subpath"));
+        await BffHost.BrowserClient.CallBffHostApi(BffHost.Url("/subPath/custom_within_subpath"), ct: _ct);
 
-        var usedContext = _customAccessTokenReceiver.UsedContext.ShouldNotBeNull();
+        var usedContext = CustomAccessTokenReceiver.UsedContext.ShouldNotBeNull();
 
         usedContext.ApiAddress.ShouldBe(new Uri(ApiHost.Url("/some/path")));
         usedContext.LocalPath.ToString().ShouldBe("/custom_within_subpath");
@@ -83,12 +83,10 @@ public class IAccessTokenRetriever_Extensibility_tests : BffIntegrationTestBase
     /// <summary>
     /// Captures the context in which the access token retriever is called, so we can assert on it
     /// </summary>
-    private class ContextCapturingAccessTokenRetriever : DefaultAccessTokenRetriever
+    private class ContextCapturingAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger)
+        : DefaultAccessTokenRetriever(logger)
     {
         public AccessTokenRetrievalContext? UsedContext { get; private set; }
-        public ContextCapturingAccessTokenRetriever(ILogger<DefaultAccessTokenRetriever> logger) : base(logger)
-        {
-        }
 
         public override Task<AccessTokenResult> GetAccessToken(AccessTokenRetrievalContext context)
         {

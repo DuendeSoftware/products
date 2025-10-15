@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10</TargetFrameworks>
     <Nullable>enable</Nullable>
     <RootNamespace>Duende.AspNetCore.Authentication.JwtBearer</RootNamespace>
     <AssemblyName>Duende.AspNetCore.Authentication.JwtBearer</AssemblyName>

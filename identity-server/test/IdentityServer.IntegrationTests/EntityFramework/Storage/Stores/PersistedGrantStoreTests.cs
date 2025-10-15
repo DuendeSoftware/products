@@ -16,6 +16,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests, PersistedGrantDbContext, OperationalStoreOptions>
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
     public PersistedGrantStoreTests(DatabaseProviderFixture<PersistedGrantDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -63,7 +65,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(persistedGrant.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         PersistedGrant foundPersistedGrant;
@@ -84,7 +86,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(persistedGrant.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         IList<PersistedGrant> foundPersistedGrants;
@@ -114,7 +116,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
             context.PersistedGrants.Add(CreateTestObject(sub: "sub1", clientId: "c2", sid: "s2", type: "t2").ToEntity());
             context.PersistedGrants.Add(CreateTestObject(sub: "sub1", clientId: "c3", sid: "s3", type: "t3").ToEntity());
             context.PersistedGrants.Add(CreateTestObject().ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new PersistedGrantDbContext(options))
@@ -186,7 +188,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(persistedGrant.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new PersistedGrantDbContext(options))
@@ -210,7 +212,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(persistedGrant.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new PersistedGrantDbContext(options))
@@ -238,7 +240,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(persistedGrant.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new PersistedGrantDbContext(options))
@@ -449,7 +451,7 @@ public class PersistedGrantStoreTests : IntegrationTest<PersistedGrantStoreTests
         await using (var context = new PersistedGrantDbContext(options))
         {
             context.PersistedGrants.Add(persistedGrant.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         var newDate = persistedGrant.Expiration.Value.AddHours(1);

@@ -3,7 +3,6 @@
 
 using Duende.Xunit.Playwright;
 using Projects;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.EndToEndTests.TestInfra;
 

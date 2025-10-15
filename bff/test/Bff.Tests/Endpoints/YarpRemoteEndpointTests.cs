@@ -4,46 +4,51 @@
 using System.Net;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestHosts;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 
 public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrationTestBase(output)
 {
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+
+
     [Fact]
-    public async Task anonymous_call_with_no_csrf_header_to_no_token_requirement_no_csrf_route_should_succeed() => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+    public async Task anonymous_call_with_no_csrf_header_to_no_token_requirement_no_csrf_route_should_succeed()
+        => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_anon_no_csrf/test"),
-            expectedStatusCode: HttpStatusCode.OK
-        );
+            expectedStatusCode: HttpStatusCode.OK,
+            ct: _ct);
 
     [Fact]
     public async Task anonymous_call_with_no_csrf_header_to_csrf_route_should_fail()
     {
         var req = new HttpRequestMessage(HttpMethod.Get, YarpBasedBffHost.Url("/api_anon/test"));
-        var response = await YarpBasedBffHost.BrowserClient.SendAsync(req);
+        var response = await YarpBasedBffHost.BrowserClient.SendAsync(req, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
 
     [Fact]
-    public async Task anonymous_call_to_no_token_requirement_route_should_succeed() => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+    public async Task anonymous_call_to_no_token_requirement_route_should_succeed()
+        => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_anon/test"),
-            expectedStatusCode: HttpStatusCode.OK
-        );
+            expectedStatusCode: HttpStatusCode.OK,
+            ct: _ct);
 
     [Fact]
-    public async Task anonymous_call_to_user_token_requirement_route_should_fail() => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+    public async Task anonymous_call_to_user_token_requirement_route_should_fail()
+        => await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_user/test"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
 
     [Fact]
     public async Task anonymous_call_to_optional_user_token_route_should_succeed()
     {
         ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
-            url: YarpBasedBffHost.Url("/api_optional_user/test")
-        );
+            url: YarpBasedBffHost.Url("/api_optional_user/test"),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Path.ShouldBe("/api_optional_user/test");
@@ -55,8 +60,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
     public async Task call_to_api_badly_cased_anti_forgery()
     {
         var result = await YarpBasedBffHost.BrowserClient.GetAsync(
-            new Uri(YarpBasedBffHost.Url("/api_badly_cased_anti_forgery/test"))
-        );
+            new Uri(YarpBasedBffHost.Url("/api_badly_cased_anti_forgery/test")),
+            _ct);
 
         result.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
@@ -67,10 +72,9 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
     {
         await YarpBasedBffHost.BffLoginAsync("alice");
 
-
         ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
-            YarpBasedBffHost.Url("/api_badly_cased_optional_token/test")
-        );
+            YarpBasedBffHost.Url("/api_badly_cased_optional_token/test"),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Sub.ShouldBe("alice");
@@ -86,8 +90,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
         await YarpBasedBffHost.BffLoginAsync("alice");
 
         ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
-            url: YarpBasedBffHost.Url(route)
-        );
+            url: YarpBasedBffHost.Url(route),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Path.ShouldBe(route);
@@ -104,8 +108,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
 
         ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url(route),
-            method: HttpMethod.Put
-        );
+            method: HttpMethod.Put,
+            ct: _ct);
 
         apiResult.Method.ShouldBe("PUT");
         apiResult.Path.ShouldBe(route);
@@ -122,8 +126,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
 
         ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url(route),
-            method: HttpMethod.Post
-        );
+            method: HttpMethod.Post,
+            ct: _ct);
 
         apiResult.Method.ShouldBe("POST");
         apiResult.Path.ShouldBe(route);
@@ -137,8 +141,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
         await YarpBasedBffHost.BffLoginAsync("alice");
 
         ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
-            url: YarpBasedBffHost.Url("/api_client/test")
-        );
+            url: YarpBasedBffHost.Url("/api_client/test"),
+            ct: _ct);
 
         apiResult.Method.ShouldBe("GET");
         apiResult.Path.ShouldBe("/api_client/test");
@@ -151,8 +155,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
     {
         {
             ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
-                url: YarpBasedBffHost.Url("/api_user_or_client/test")
-            );
+                url: YarpBasedBffHost.Url("/api_user_or_client/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/api_user_or_client/test");
@@ -164,8 +168,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
             await YarpBasedBffHost.BffLoginAsync("alice");
 
             ApiResponse apiResult = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
-                url: YarpBasedBffHost.Url("/api_user_or_client/test")
-            );
+                url: YarpBasedBffHost.Url("/api_user_or_client/test"),
+                ct: _ct);
 
             apiResult.Method.ShouldBe("GET");
             apiResult.Path.ShouldBe("/api_user_or_client/test");
@@ -182,8 +186,8 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
 
         var response = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_user/test"),
-            expectedStatusCode: HttpStatusCode.Unauthorized
-        );
+            expectedStatusCode: HttpStatusCode.Unauthorized,
+            ct: _ct);
     }
 
     [Fact]
@@ -192,18 +196,17 @@ public class YarpRemoteEndpointTests(ITestOutputHelper output) : YarpBffIntegrat
         await YarpBasedBffHost.BffLoginAsync("alice");
         ApiHost.ApiStatusCodeToReturn = 403;
 
-        var response = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+        _ = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_user/test"),
-            expectedStatusCode: HttpStatusCode.Forbidden
-        );
+            expectedStatusCode: HttpStatusCode.Forbidden,
+            ct: _ct);
     }
 
     [Fact]
     public async Task invalid_configuration_of_routes_should_return_500()
-    {
-        var response = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
+        =>
+        _ = await YarpBasedBffHost.BrowserClient.CallBffHostApi(
             url: YarpBasedBffHost.Url("/api_invalid/test"),
-            expectedStatusCode: HttpStatusCode.InternalServerError
-        );
-    }
+            expectedStatusCode: HttpStatusCode.InternalServerError,
+            ct: _ct);
 }

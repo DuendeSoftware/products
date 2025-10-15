@@ -13,9 +13,8 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting;
 public class SubpathHosting
 {
     private const string Category = "Subpath endpoint";
-
-    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
-
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
     private Client _client1;
 
     public SubpathHosting()
@@ -64,7 +63,7 @@ public class SubpathHosting
             redirectUri: "https://client1/callback",
             state: "123_state",
             nonce: "123_nonce");
-        var response = await _mockPipeline.BrowserClient.GetAsync(url);
+        var response = await _mockPipeline.BrowserClient.GetAsync(url, _ct);
 
         _mockPipeline.LoginWasCalled.ShouldBeTrue();
     }

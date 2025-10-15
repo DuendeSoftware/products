@@ -15,7 +15,7 @@ public class RevocationClient
     private const string TokenEndpoint = "https://server/connect/token";
     private const string RevocationEndpoint = "https://server/connect/revocation";
     private const string IntrospectionEndpoint = "https://server/connect/introspect";
-
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
     private readonly HttpClient _client;
 
     public RevocationClient()
@@ -35,7 +35,7 @@ public class RevocationClient
     [Fact]
     public async Task Revoking_reference_token_should_invalidate_token()
     {
-        // request acccess token
+        // request access token
         var response = await _client.RequestPasswordTokenAsync(new PasswordTokenRequest
         {
             Address = TokenEndpoint,
@@ -45,7 +45,7 @@ public class RevocationClient
             Scope = "api1",
             UserName = "bob",
             Password = "bob"
-        });
+        }, _ct);
 
         response.IsError.ShouldBeFalse();
 
@@ -57,7 +57,7 @@ public class RevocationClient
             ClientSecret = "secret",
 
             Token = response.AccessToken
-        });
+        }, _ct);
 
         introspectionResponse.IsActive.ShouldBe(true);
 
@@ -69,7 +69,7 @@ public class RevocationClient
             ClientSecret = "secret",
 
             Token = response.AccessToken
-        });
+        }, _ct);
 
         // introspect - should be inactive
         introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
@@ -79,7 +79,7 @@ public class RevocationClient
             ClientSecret = "secret",
 
             Token = response.AccessToken
-        });
+        }, _ct);
 
         introspectionResponse.IsActive.ShouldBe(false);
     }

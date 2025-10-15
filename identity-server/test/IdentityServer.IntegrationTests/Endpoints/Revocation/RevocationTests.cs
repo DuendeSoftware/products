@@ -14,15 +14,13 @@ namespace Duende.IdentityServer.IntegrationTests.Endpoints.Revocation;
 public class RevocationTests
 {
     private const string Category = "RevocationTests endpoint";
-
-    private string client_id = "client";
-    private string client_secret = "secret";
-    private string redirect_uri = "https://client/callback";
-
-    private string scope_name = "api";
-    private string scope_secret = "api_secret";
-
-    private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+    private const string client_id = "client";
+    private const string client_secret = "secret";
+    private const string redirect_uri = "https://client/callback";
+    private const string scope_name = "api";
+    private const string scope_secret = "api_secret";
+    private readonly CancellationToken _ct = TestContext.Current.CancellationToken;
+    private readonly IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
 
     public RevocationTests()
     {
@@ -197,7 +195,7 @@ public class RevocationTests
     [Trait("Category", Category)]
     public async Task Get_request_should_return_405()
     {
-        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.RevocationEndpoint);
+        var response = await _mockPipeline.BackChannelClient.GetAsync(IdentityServerPipeline.RevocationEndpoint, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.MethodNotAllowed);
     }
@@ -206,7 +204,7 @@ public class RevocationTests
     [Trait("Category", Category)]
     public async Task Post_without_form_urlencoded_should_return_415()
     {
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, null);
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, null, _ct);
 
         response.StatusCode.ShouldBe(HttpStatusCode.UnsupportedMediaType);
     }
@@ -225,7 +223,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.AccessToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
         (await IsAccessTokenValidAsync(tokens)).ShouldBeFalse();
@@ -245,7 +243,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.AccessToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
         (await IsAccessTokenValidAsync(tokens)).ShouldBeTrue();
@@ -265,7 +263,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.RefreshToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
 
@@ -286,7 +284,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.RefreshToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
 
@@ -311,7 +309,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens1.RefreshToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
 
@@ -333,7 +331,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.AccessToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
 
@@ -346,7 +344,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.AccessToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -365,7 +363,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.RefreshToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
 
@@ -378,7 +376,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.RefreshToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -397,7 +395,7 @@ public class RevocationTests
             ClientSecret = client_secret,
 
             Token = tokens.AccessToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_client");
@@ -417,7 +415,7 @@ public class RevocationTests
             ClientSecret = "not_valid",
 
             Token = tokens.AccessToken
-        });
+        }, _ct);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe("invalid_client");
@@ -433,7 +431,7 @@ public class RevocationTests
             { "client_secret", client_secret }
         };
 
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data), _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         var result = await ProtocolResponse.FromHttpResponseAsync<TokenRevocationResponse>(response);
@@ -456,7 +454,7 @@ public class RevocationTests
             { "token_type_hint", "not_valid" }
         };
 
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data), _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         var result = await ProtocolResponse.FromHttpResponseAsync<TokenRevocationResponse>(response);
@@ -478,7 +476,7 @@ public class RevocationTests
             { "token", tokens.AccessToken }
         };
 
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data), _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         (await IsAccessTokenValidAsync(tokens)).ShouldBeFalse();
@@ -498,7 +496,7 @@ public class RevocationTests
             { "token", tokens.RefreshToken }
         };
 
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data), _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         (await UseRefreshTokenAsync(tokens)).ShouldBeFalse();
@@ -518,7 +516,7 @@ public class RevocationTests
 
         (await IsAccessTokenValidAsync(token)).ShouldBeTrue();
 
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data), _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await IsAccessTokenValidAsync(token)).ShouldBeFalse();
     }
@@ -537,7 +535,7 @@ public class RevocationTests
 
         (await IsAccessTokenValidAsync(token)).ShouldBeTrue();
 
-        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data));
+        var response = await _mockPipeline.BackChannelClient.PostAsync(IdentityServerPipeline.RevocationEndpoint, new FormUrlEncodedContent(data), _ct);
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         (await IsAccessTokenValidAsync(token)).ShouldBeTrue();
     }

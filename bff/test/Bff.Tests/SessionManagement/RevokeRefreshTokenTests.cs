@@ -4,7 +4,6 @@
 using Duende.Bff.Tests.TestHosts;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.SessionManagement;
 
