@@ -160,7 +160,7 @@ jobs:
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Build
-      run: dotnet build aspnetcore-authentication-jwtbearer.slnf --no-restore -c Release
+      run: dotnet build aspnetcore-authentication-jwtbearer.slnf --no-restore --no-incremental -c Release
     - name: Perform CodeQL Analysis
       if: ${{ env.DISABLE_CODEQL_ANALYSIS != 'true' }}
       uses: github/codeql-action/analyze@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0
