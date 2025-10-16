@@ -13,18 +13,29 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(options.Value.Diagnostics.LogFrequency);
-        while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
             {
-                await diagnosticSummary.PrintSummary();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred while logging the diagnostic summary: {Message}", ex.Message);
+                try
+                {
+                    await diagnosticSummary.PrintSummary();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while logging the diagnostic summary: {Message}",
+                        ex.Message);
+                }
             }
         }
+        catch (OperationCanceledException)
+        {
+            // When stopping this hosted service, "await timer.WaitForNextTickAsync(stoppingToken)" can throw an OperationCanceledException.
+        }
     }
+
+    // Added for testing purposes to be able to call ExecuteAsync directly.
+    internal Task ExecuteForTestOnly(CancellationToken stoppingToken) => ExecuteAsync(stoppingToken);
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {

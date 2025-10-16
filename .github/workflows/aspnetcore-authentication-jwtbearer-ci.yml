@@ -53,7 +53,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Verify Formatting
@@ -85,7 +85,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Build
@@ -128,7 +128,8 @@ jobs:
         fetch-depth: 0
   codeql:
     name: CodeQL analyze
-    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    # Remove once https://github.com/github/codeql-action/issues/3207#issuecomment-3405956414 has been resolved
+    if: false && ((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch'))
     runs-on:
       group: large
       labels: [ubuntu-latest-x64-16core]
@@ -147,6 +148,7 @@ jobs:
         languages: csharp
         build-mode: manual
         db-location: ~/.codeql/databases
+        debug: true
     - name: List .net sdks
       run: dotnet --list-sdks
     - name: Setup Dotnet
@@ -155,11 +157,11 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Build
-      run: dotnet build aspnetcore-authentication-jwtbearer.slnf --no-restore -c Release
+      run: dotnet build aspnetcore-authentication-jwtbearer.slnf --no-restore --no-incremental -c Release
     - name: Perform CodeQL Analysis
       if: ${{ env.DISABLE_CODEQL_ANALYSIS != 'true' }}
       uses: github/codeql-action/analyze@9e8d0789d4a0fa9ceb6b1738f7e269594bdd67f0
@@ -198,7 +200,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack aspnetcore-authentication-jwtbearer.slnf

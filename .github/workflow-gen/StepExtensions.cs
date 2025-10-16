@@ -18,7 +18,7 @@ public static class StepExtensions
 
         job.Step()
             .Name("Setup .NET")
-            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["8.0.x", "9.0.203", "10.0.100-rc.1.25451.107"]);
+            .ActionsSetupDotNet("3e891b0cb619bf60e2c25674b222b8940e2c1c25", ["8.0.x", "9.0.203", "10.0.100-rc.2.25502.107"]);
         // v4.1.0
     }
 
@@ -49,11 +49,11 @@ public static class StepExtensions
                 ("key", "playwright-${{ runner.os }}-${{ hashFiles('**/Hosts.Tests.csproj') }}"),
                 ("restore-keys", "playwright-${{ runner.os }}-"));
 
-    public static void StepInstallPlayWright(this Job job)
+    public static void StepInstallPlayWright(this Job job, string playwrightTestProject)
         => job.Step()
             .Name("Install Playwright")
             .If("steps.playwright-cache.outputs.cache-hit != 'true'")
-            .Run("pwsh test/Hosts.Tests/bin/Release/net9.0/playwright.ps1 install --with-deps");
+            .Run($"pwsh test/{playwrightTestProject}/bin/Release/net10.0/playwright.ps1 install --with-deps");
 
     public static void StepToolRestore(this Job job)
         => job.Step()

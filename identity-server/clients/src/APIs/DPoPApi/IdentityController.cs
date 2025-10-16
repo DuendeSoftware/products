@@ -1,8 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using Duende.IdentityModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DPoPApi.Controllers;
@@ -20,19 +19,15 @@ public class IdentityController : ControllerBase
         var claims = User.Claims.Select(c => new { c.Type, c.Value });
         _logger.LogInformation("claims: {claims}", claims);
 
-        var scheme = Request.GetAuthorizationScheme();
-        var proofToken = Request.GetDPoPProofToken();
+        var scheme = GetAuthorizationScheme(Request);
+        var proofToken = GetDPoPProofToken(Request);
 
         return new JsonResult(new { scheme, proofToken, claims });
     }
 
-    [HttpGet("TestNonce")]
-    [AllowAnonymous]
-    public ActionResult TestNonce()
-    {
-        var props = new AuthenticationProperties();
-        props.SetDPoPNonce("custom-nonce");
+    private static string GetAuthorizationScheme(HttpRequest request) =>
+        request.Headers.Authorization.FirstOrDefault()?.Split(' ', System.StringSplitOptions.RemoveEmptyEntries)[0];
 
-        return Challenge(props);
-    }
+    private static string GetDPoPProofToken(HttpRequest request) =>
+        request.Headers[OidcConstants.HttpHeaders.DPoP].FirstOrDefault();
 }

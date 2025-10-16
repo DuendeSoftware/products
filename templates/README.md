@@ -54,5 +54,5 @@ Creates a basic JavaScript-based BFF host that configures and invokes a remote A
 Creates a basic JavaScript-based BFF host that invokes a local API co-hosted with the BFF.
 
 ### dotnet new duende-bff-blazor
-Creetes a Blazor application that uses the interactive auto render mode, and secures the application across all render modes consistently using Duende.BFF.Blazor.
+Creates a Blazor application that uses the interactive auto render mode, and secures the application across all render modes consistently using Duende.BFF.Blazor.
 
