@@ -42,10 +42,8 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <!-- Added aspire transitive package to resolve package vulnerability -->
     <PackageVersion Include="KubernetesClient" Version="17.0.14" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="3.2.0" Condition="'$(IsBffProject)' == 'true'" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.0.0" Condition="'$(IsBffProject)' != 'true'" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="3.2.0" Condition="'$(IsBffProject)' == 'true'" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0" Condition="'$(IsBffProject)' != 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.0.0" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0" />
     <!-- <PackageVersion Include="Duende.AccessTokenManagement" Version="4.0.0" />
     <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0" /> -->
     <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.1.3" />

@@ -5,13 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(Framework)' == ''">
     <!-- If we do not have a value for framework from running dotnet new, default to one so things build in an IDE -->
     <Framework>$(TargetFramework)</Framework>
     <DefineConstants Condition="'$(Framework)' != 'net8.0'">UseMapStaticAssets</DefineConstants>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.3" Condition="'$(Framework)' == 'net9.0'" />
