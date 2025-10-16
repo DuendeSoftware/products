@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -264,7 +263,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         var bytes = Encoding.UTF8.GetBytes(context.AccessToken);
         var hash = SHA256.HashData(bytes);
 
-        var accessTokenHash = Base64Url.EncodeToString(hash);
+        var accessTokenHash = Base64Url.Encode(hash);
         if (accessTokenHash != result.AccessTokenHash)
         {
             result.SetError("Invalid 'ath' value.");
@@ -279,7 +278,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
                 return;
             }
             var jtiBytes = Encoding.UTF8.GetBytes(jtiString);
-            result.TokenIdHash = Base64Url.EncodeToString(SHA256.HashData(jtiBytes));
+            result.TokenIdHash = Base64Url.Encode(SHA256.HashData(jtiBytes));
         }
 
         if (string.IsNullOrEmpty(result.TokenIdHash))
