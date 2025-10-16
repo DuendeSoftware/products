@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
@@ -62,7 +62,7 @@ public class DefaultBackChannelLogoutServiceTests
         });
 
 
-        var payload = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(Base64Url.Decode(rawToken.Split('.')[1]));
+        var payload = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(Base64Url.DecodeFromChars(rawToken.Split('.')[1]));
         payload["iss"].GetString().ShouldBe(expected);
     }
 }

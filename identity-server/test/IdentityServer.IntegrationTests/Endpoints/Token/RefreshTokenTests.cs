@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Security.Claims;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
@@ -97,7 +97,7 @@ public class RefreshTokenTests
         tokenResult1.AccessToken.ShouldNotBeNull();
 
 
-        var payload1 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult1.AccessToken.Split('.')[1]));
+        var payload1 = JsonSerializer.Deserialize<JsonElement>(Base64Url.DecodeFromChars(tokenResult1.AccessToken.Split('.')[1]));
         var sid1 = payload1.TryGetValue("sid").GetString();
         sid1.ShouldBe(_mockPipeline.GetSessionCookie().Value);
 
@@ -114,7 +114,7 @@ public class RefreshTokenTests
         tokenResult2.IsError.ShouldBeFalse();
         tokenResult2.AccessToken.ShouldNotBeNull();
 
-        var payload2 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult2.AccessToken.Split('.')[1]));
+        var payload2 = JsonSerializer.Deserialize<JsonElement>(Base64Url.DecodeFromChars(tokenResult2.AccessToken.Split('.')[1]));
         var sid2 = payload2.TryGetValue("sid").GetString();
         sid1.ShouldBe(sid2);
     }
@@ -155,7 +155,7 @@ public class RefreshTokenTests
         tokenResult1.AccessToken.ShouldNotBeNull();
 
 
-        var payload1 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult1.AccessToken.Split('.')[1]));
+        var payload1 = JsonSerializer.Deserialize<JsonElement>(Base64Url.DecodeFromChars(tokenResult1.AccessToken.Split('.')[1]));
         var sid1 = payload1.TryGetValue("sid").GetString();
         sid1.ShouldBe(_mockPipeline.GetSessionCookie().Value);
 
@@ -172,7 +172,7 @@ public class RefreshTokenTests
         tokenResult2.IsError.ShouldBeFalse();
         tokenResult2.AccessToken.ShouldNotBeNull();
 
-        var payload2 = JsonSerializer.Deserialize<JsonElement>(Base64Url.Decode(tokenResult2.AccessToken.Split('.')[1]));
+        var payload2 = JsonSerializer.Deserialize<JsonElement>(Base64Url.DecodeFromChars(tokenResult2.AccessToken.Split('.')[1]));
         var sid2 = payload2.TryGetValue("sid").GetString();
         sid1.ShouldBe(sid2);
     }

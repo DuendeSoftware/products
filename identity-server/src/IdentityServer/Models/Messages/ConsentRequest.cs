@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Collections.Specialized;
 using System.Security.Cryptography;
 using System.Text;
@@ -89,7 +90,7 @@ public class ConsentRequest
             var bytes = Encoding.UTF8.GetBytes(value);
             var hash = SHA256.HashData(bytes);
 
-            return Base64Url.Encode(hash);
+            return Base64Url.EncodeToString(hash);
         }
     }
 }

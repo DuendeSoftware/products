@@ -52,7 +52,7 @@ public abstract class DPoPProofValidatorTestBase
 
     protected DPoPProofValidationResult Result = new();
 
-    // This is just an arbitrary date that we're going to do all our date arithmetic relative to. 
+    // This is just an arbitrary date that we're going to do all our date arithmetic relative to.
     // It was chosen because it is convenient to use - it is well within the range of DateTime
     protected const long IssuedAt = 1704088800; // Mon Jan 01 2024 06:00:00 GMT+0000
     protected const long ValidFor = 100;

@@ -328,7 +328,7 @@ public class DPoPProofValidator
             skew = dpopOptions.ServerClockSkew;
         }
 
-        // we do x2 here because clock might be might be before or after, so we're making cache duration 
+        // we do x2 here because clock might be might be before or after, so we're making cache duration
         // longer than the likelyhood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dpopOptions.ProofTokenValidityDuration + skew;

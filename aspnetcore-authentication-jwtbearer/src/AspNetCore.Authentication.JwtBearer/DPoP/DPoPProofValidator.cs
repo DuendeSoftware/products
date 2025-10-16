@@ -21,7 +21,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
 
     /// <summary>
-    /// Provides the options for DPoP proof validation. 
+    /// Provides the options for DPoP proof validation.
     /// </summary>
     internal readonly IOptionsMonitor<DPoPOptions> OptionsMonitor;
 
@@ -382,7 +382,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
             skew = dPoPOptions.ServerClockSkew;
         }
 
-        // we do x2 here because the clock might be before or after, so we're making cache duration 
+        // we do x2 here because the clock might be before or after, so we're making cache duration
         // longer than the likelihood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dPoPOptions.ProofTokenValidityDuration + skew;
