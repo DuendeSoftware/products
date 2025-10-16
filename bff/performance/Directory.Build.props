@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+
+  <Import Project="../../src.props" />
+
   <PropertyGroup>
-    <IsBffProject>true</IsBffProject>
     <IsPackable>false</IsPackable>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 

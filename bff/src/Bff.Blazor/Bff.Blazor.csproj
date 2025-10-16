@@ -10,7 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Bff\Bff.csproj" />
     <ProjectReference Include="..\Bff.Blazor.Client\Bff.Blazor.Client.csproj" />
-    
+
   </ItemGroup>
 
   <ItemGroup>
