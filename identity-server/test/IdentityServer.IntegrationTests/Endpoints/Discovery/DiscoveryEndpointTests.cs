@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text.Json;
+using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
@@ -77,8 +78,99 @@ public class DiscoveryEndpointTests
         algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
     }
 
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task UserInfo_signing_algorithms_supported_should_match_signing_key()
+    {
+        var key = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
+        var expectedAlgorithm = SecurityAlgorithms.EcdsaSha256;
 
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            // add key to standard RSA key
+            services.AddIdentityServerBuilder()
+                .AddSigningCredential(key, expectedAlgorithm);
+        };
+        pipeline.Initialize();
 
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        var algorithmsSupported = result.UserInfoSigningAlgorithmsSupported;
+
+        algorithmsSupported.Count().ShouldBe(2);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task UserInfo_signing_algorithms_supported_should_not_be_present_if_userinfo_endpoint_disabled()
+    {
+        var key = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
+        var expectedAlgorithm = SecurityAlgorithms.EcdsaSha256;
+
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            // add key to standard RSA key
+            services.AddIdentityServerBuilder()
+                .AddSigningCredential(key, expectedAlgorithm);
+        };
+        pipeline.Initialize();
+        pipeline.Options.Endpoints.EnableUserInfoEndpoint = false;
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        result.UserInfoSigningAlgorithmsSupported.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Introspection_signing_algorithms_supported_should_match_signing_key()
+    {
+        var key = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
+        var expectedAlgorithm = SecurityAlgorithms.EcdsaSha256;
+
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            // add key to standard RSA key
+            services.AddIdentityServerBuilder()
+                .AddSigningCredential(key, expectedAlgorithm);
+        };
+        pipeline.Initialize();
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        var algorithmsSupported = result.IntrospectionSigningAlgorithmsSupported;
+
+        algorithmsSupported.Count().ShouldBe(2);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.RsaSha256);
+        algorithmsSupported.ShouldContain(SecurityAlgorithms.EcdsaSha256);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Introspection_signing_algorithms_supported_should_not_be_present_if_introspection_endpoint_disabled()
+    {
+        var key = CryptoHelper.CreateECDsaSecurityKey(JsonWebKeyECTypes.P256);
+        var expectedAlgorithm = SecurityAlgorithms.EcdsaSha256;
+
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            // add key to standard RSA key
+            services.AddIdentityServerBuilder()
+                .AddSigningCredential(key, expectedAlgorithm);
+        };
+        pipeline.Initialize();
+        pipeline.Options.Endpoints.EnableIntrospectionEndpoint = false;
+
+        var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
+
+        result.IntrospectionSigningAlgorithmsSupported.ShouldBeEmpty();
+    }
 
     [Fact]
     [Trait("Category", Category)]
@@ -215,7 +307,6 @@ public class DiscoveryEndpointTests
 
         result.Issuer.ShouldBe("https://грант.рф");
     }
-
 
     [Fact]
     [Trait("Category", Category)]
@@ -375,6 +466,51 @@ public class DiscoveryEndpointTests
 
         var result = await pipeline.BackChannelClient.GetDiscoveryDocumentAsync("https://server/.well-known/openid-configuration");
         result.MtlsEndpointAliases.PushedAuthorizationRequestEndpoint.ShouldNotBeNull();
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task registration_endpoint_should_be_custom_when_static_type_and_custom_endpoint_set()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointMode = RegistrationEndpointMode.Static;
+        pipeline.Options.Discovery.DynamicClientRegistration.StaticRegistrationEndpoint = new Uri("https://custom.example.com/register");
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        data.ShouldContainKey(OidcConstants.Discovery.RegistrationEndpoint);
+        data[OidcConstants.Discovery.RegistrationEndpoint].GetString().ShouldBe("https://custom.example.com/register");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task registration_endpoint_should_be_default_when_dynamic_type()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointMode = RegistrationEndpointMode.Inferred;
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        data.ShouldContainKey(OidcConstants.Discovery.RegistrationEndpoint);
+        data[OidcConstants.Discovery.RegistrationEndpoint].GetString().ShouldBe("https://server/connect/dcr");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task registration_endpoint_should_not_be_present_when_none_type()
+    {
+        var pipeline = new IdentityServerPipeline();
+        pipeline.Initialize();
+        pipeline.Options.Discovery.DynamicClientRegistration.RegistrationEndpointMode = RegistrationEndpointMode.None;
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration");
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+        data.ShouldNotContainKey(OidcConstants.Discovery.RegistrationEndpoint);
     }
 }
 
