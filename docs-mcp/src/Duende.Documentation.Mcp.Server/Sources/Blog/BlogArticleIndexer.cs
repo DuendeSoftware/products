@@ -82,10 +82,10 @@ public class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIn
         var content = htmlDocument.DocumentNode.SelectSingleNode("//section[@class='page-content alt markdown']");
 
         // Convert to Markdown
-        var markdownContent = new ReverseMarkdown.Converter(new Config
+        var markdownContent = new Converter(new Config
         {
             GithubFlavored = true
-        }).Convert(content.InnerHtml); ;
+        }).Convert(content!.InnerHtml); ;
 
         db.FTSBlogArticle.Add(new FTSBlogArticle
         {
