@@ -1,26 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Duende.Documentation.Mcp</AssemblyName>
-
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
     <PublishSelfContained>true</PublishSelfContained>
-
     <Version>0.0.1-preview.3</Version>
     <Title>Duende Documentation MCP Server</Title>
     <Copyright>Duende Software</Copyright>
     <PackageTags>MCP;ModelContextProtocol;AI;LLM;Duende;IdentityServer</PackageTags>
-
-    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.12.2"/>
     <PackageReference Include="Markdig" Version="0.41.3"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
@@ -33,9 +29,4 @@
     <PackageReference Include="ReverseMarkdown" Version="4.7.0"/>
     <PackageReference Include="SimpleFeedReader" Version="2.0.4"/>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Database\Migrations\"/>
-  </ItemGroup>
-
 </Project>
