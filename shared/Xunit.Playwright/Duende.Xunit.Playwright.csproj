@@ -7,6 +7,7 @@
     <RootNamespace>Duende.Xunit.Playwright</RootNamespace>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <IsTestProject>false</IsTestProject>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_ncrunch|AnyCPU'">
