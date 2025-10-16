@@ -47,7 +47,7 @@ public class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIn
 
         // Fetch RSS
         var reader = new FeedReader();
-        var items = await reader.RetrieveFeedAsync("https://duendesoftware.com/rss.xml");
+        var items = await reader.RetrieveFeedAsync("https://duendesoftware.com/rss.xml", stoppingToken);
         var filteredItems = items
             .Where(it => it.PublishDate >= ReferenceDate && it.Categories?.Contains("blog") == true).ToList();
 
