@@ -130,7 +130,8 @@ jobs:
         fetch-depth: 0
   codeql:
     name: CodeQL analyze
-    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
+    # Remove once https://github.com/github/codeql-action/issues/3207#issuecomment-3405956414 has been resolved
+    if: false && ((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch'))
     runs-on:
       group: large
       labels: [ubuntu-latest-x64-16core]
