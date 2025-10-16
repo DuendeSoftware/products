@@ -98,6 +98,7 @@ public static class AuthenticationTicketExtensions
     {
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(protector);
+        ArgumentNullException.ThrowIfNull(logger);
         try
         {
             var envelope = JsonSerializer.Deserialize<Envelope>(session.Ticket, JsonOptions);
