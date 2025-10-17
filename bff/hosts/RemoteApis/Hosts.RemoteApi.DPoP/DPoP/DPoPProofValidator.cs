@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -226,7 +227,7 @@ public class DPoPProofValidator
             var bytes = Encoding.UTF8.GetBytes(context.AccessToken);
             var hash = sha.ComputeHash(bytes);
 
-            var accessTokenHash = Base64Url.Encode(hash);
+            var accessTokenHash = Base64Url.EncodeToString(hash);
             if (accessTokenHash != result.AccessTokenHash)
             {
                 result.IsError = true;
@@ -328,7 +329,7 @@ public class DPoPProofValidator
             skew = dpopOptions.ServerClockSkew;
         }
 
-        // we do x2 here because clock might be might be before or after, so we're making cache duration 
+        // we do x2 here because clock might be might be before or after, so we're making cache duration
         // longer than the likelyhood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dpopOptions.ProofTokenValidityDuration + skew;

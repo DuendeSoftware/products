@@ -42,14 +42,12 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <!-- Added aspire transitive package to resolve package vulnerability -->
     <PackageVersion Include="KubernetesClient" Version="17.0.14" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.0.0" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0" />
-    <!-- <PackageVersion Include="Duende.AccessTokenManagement" Version="4.0.0" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0" /> -->
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.0-preview.2" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.0-preview.2" />
     <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.1.3" />
-    <PackageVersion Include="Duende.IdentityModel" Version="7.1.0" />
-    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
-    <PackageVersion Include="Duende.IdentityServer" Version="7.1.0" />
+    <PackageVersion Include="Duende.IdentityModel" Version="8.0.0-preview.1" />
+    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0-preview.2" />
+    <PackageVersion Include="Duende.IdentityServer" Version="7.4.0-preview.2" />
     <PackageVersion Include="Duende.Private.Licensing" Version="1.0.0" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
     <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />
@@ -67,6 +65,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.14.28" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EFCoreVersion)" />
@@ -75,7 +74,7 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade hybrid cache-->
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(CachingMemoryVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.9.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade diagnostics.testing-->
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.10.0" />

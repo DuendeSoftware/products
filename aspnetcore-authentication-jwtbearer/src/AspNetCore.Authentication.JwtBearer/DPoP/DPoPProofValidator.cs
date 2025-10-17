@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -21,7 +22,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
 
     /// <summary>
-    /// Provides the options for DPoP proof validation. 
+    /// Provides the options for DPoP proof validation.
     /// </summary>
     internal readonly IOptionsMonitor<DPoPOptions> OptionsMonitor;
 
@@ -263,7 +264,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         var bytes = Encoding.UTF8.GetBytes(context.AccessToken);
         var hash = SHA256.HashData(bytes);
 
-        var accessTokenHash = Base64Url.Encode(hash);
+        var accessTokenHash = Base64Url.EncodeToString(hash);
         if (accessTokenHash != result.AccessTokenHash)
         {
             result.SetError("Invalid 'ath' value.");
@@ -278,7 +279,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
                 return;
             }
             var jtiBytes = Encoding.UTF8.GetBytes(jtiString);
-            result.TokenIdHash = Base64Url.Encode(SHA256.HashData(jtiBytes));
+            result.TokenIdHash = Base64Url.EncodeToString(SHA256.HashData(jtiBytes));
         }
 
         if (string.IsNullOrEmpty(result.TokenIdHash))
@@ -382,7 +383,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
             skew = dPoPOptions.ServerClockSkew;
         }
 
-        // we do x2 here because the clock might be before or after, so we're making cache duration 
+        // we do x2 here because the clock might be before or after, so we're making cache duration
         // longer than the likelihood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dPoPOptions.ProofTokenValidityDuration + skew;
