@@ -74,7 +74,7 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade hybrid cache-->
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(CachingMemoryVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.9.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade diagnostics.testing-->
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.10.0" />

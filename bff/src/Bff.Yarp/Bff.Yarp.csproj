@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="Yarp.ReverseProxy" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" VersionOverride="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
