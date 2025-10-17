@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
@@ -44,5 +45,5 @@ internal static class DPoPExtensions
     /// <summary>
     /// Create the value of a thumbprint
     /// </summary>
-    public static string CreateThumbprint(this JsonWebKey jwk) => Base64Url.Encode(jwk.ComputeJwkThumbprint());
+    public static string CreateThumbprint(this JsonWebKey jwk) => Base64Url.EncodeToString(jwk.ComputeJwkThumbprint());
 }

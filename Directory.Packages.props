@@ -42,18 +42,14 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <!-- Added aspire transitive package to resolve package vulnerability -->
     <PackageVersion Include="KubernetesClient" Version="17.0.14" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="3.2.0" Condition="'$(IsBffProject)' == 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="3.3.0-preview.1" Condition="'$(IsBffProject)' == 'true'" />
     <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.0-preview.2" Condition="'$(IsBffProject)' != 'true'" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="3.2.0" Condition="'$(IsBffProject)' == 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="3.3.0-preview.1" Condition="'$(IsBffProject)' == 'true'" />
     <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.0-preview.2" Condition="'$(IsBffProject)' != 'true'" />
-    <!-- <PackageVersion Include="Duende.AccessTokenManagement" Version="4.0.0" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.0.0" /> -->
     <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.1.3" />
-    <PackageVersion Include="Duende.IdentityModel" Version="7.0.0" Condition="'$(IsBffProject)' == 'true'"  />
-    <PackageVersion Include="Duende.IdentityModel" Version="8.0.0-preview.1" Condition="'$(IsBffProject)' != 'true'"  />
-    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="6.0.1" Condition="'$(IsBffProject)' == 'true'"/>
-    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0-preview.2" Condition="'$(IsBffProject)' != 'true'"/>
-    <PackageVersion Include="Duende.IdentityServer" Version="7.1.0" />
+    <PackageVersion Include="Duende.IdentityModel" Version="8.0.0-preview.1" />
+    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0-preview.2" />
+    <PackageVersion Include="Duende.IdentityServer" Version="7.4.0-preview.2" />
     <PackageVersion Include="Duende.Private.Licensing" Version="1.0.0" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
     <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />

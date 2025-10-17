@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,7 +20,7 @@ public abstract class DPoPProofValidatorTestBase
     {
         ProofValidator = CreateProofValidator();
         var jtiBytes = Encoding.UTF8.GetBytes(TokenId);
-        TokenIdHash = Base64Url.Encode(SHA256.HashData(jtiBytes));
+        TokenIdHash = Base64Url.EncodeToString(SHA256.HashData(jtiBytes));
         Context = new()
         {
             Options = Options,
