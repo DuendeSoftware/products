@@ -3,7 +3,6 @@
   <PropertyGroup>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
-    <IsBffProject >true</IsBffProject >
   </PropertyGroup>
   <Import Project="../../test.props" />
 </Project>

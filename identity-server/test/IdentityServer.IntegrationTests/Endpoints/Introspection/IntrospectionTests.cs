@@ -2,8 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Diagnostics.Metrics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
@@ -12,6 +14,7 @@ using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.Endpoints.Introspection.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Hosting;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Introspection;
 
@@ -27,12 +30,17 @@ public class IntrospectionTests
 
     public IntrospectionTests()
     {
-        var builder = new WebHostBuilder()
-            .UseStartup<Startup>();
-        var server = new TestServer(builder);
+        var hostBuilder = new HostBuilder()
+            .ConfigureWebHost(webHost =>
+            {
+                webHost.UseTestServer();
+                webHost.UseStartup<Startup>();
+            });
 
-        _handler = server.CreateHandler();
-        _client = server.CreateClient();
+        var host = hostBuilder.Start();
+
+        _handler = host.GetTestServer().CreateHandler();
+        _client = host.GetTestClient();
     }
 
     [Fact]
@@ -920,5 +928,104 @@ public class IntrospectionTests
         rolesClaim.ShouldContain("Geek");
     }
 
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task valid_active_token_should_increment_telemetry()
+    {
+        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, out var measurements);
+        var tokenResponse = await _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+        {
+            Address = TokenEndpoint,
+            ClientId = "client1",
+            ClientSecret = "secret",
+            Scope = "api1"
+        });
+
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "api1",
+            ClientSecret = "secret",
+
+            Token = tokenResponse.AccessToken
+        });
+
+        introspectionResponse.IsActive.ShouldBe(true);
+        introspectionResponse.IsError.ShouldBe(false);
+        measurements.Count.ShouldBe(1);
+        measurements[0].Name.ShouldBe(Telemetry.Metrics.Counters.Introspection);
+        measurements[0].Value.ShouldBe(1);
+        measurements[0].Tags.ShouldContain(new KeyValuePair<string, object>("active", true));
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task token_that_fails_validation_should_increment_telemetry()
+    {
+        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, out var measurements);
+
+        var introspectionResponse = await _client.IntrospectTokenAsync(new TokenIntrospectionRequest
+        {
+            Address = IntrospectionEndpoint,
+            ClientId = "client1",
+            ClientSecret = "secret",
+
+            Token = "invalid"
+        });
+
+        introspectionResponse.IsActive.ShouldBe(false);
+        introspectionResponse.IsError.ShouldBe(false);
+        measurements.Count.ShouldBe(1);
+        measurements[0].Name.ShouldBe(Telemetry.Metrics.Counters.Introspection);
+        measurements[0].Value.ShouldBe(1);
+        measurements[0].Tags.ShouldContain(new KeyValuePair<string, object>("active", false));
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task token_that_results_in_validation_error_should_increment_telemetry()
+    {
+        using var listener = StartListeningForMeasurements(Telemetry.Metrics.Counters.Introspection, out var measurements);
+
+        var requestContent = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            { "client_id", "api1" },
+            { "client_secret", "secret" },
+            { "token", "" }
+        });
+        var rawIntrospectionResponse = await _client.PostAsync(IntrospectionEndpoint, requestContent);
+        var introspectionResponse = await rawIntrospectionResponse.Content.ReadFromJsonAsync<TokenIntrospectionResponse>();
+
+        introspectionResponse.IsActive.ShouldBe(false);
+        introspectionResponse.IsError.ShouldBe(false);
+        measurements.Count.ShouldBe(1);
+        measurements[0].Name.ShouldBe(Telemetry.Metrics.Counters.Introspection);
+        measurements[0].Value.ShouldBe(1);
+        measurements[0].Tags.ShouldContain(new KeyValuePair<string, object>("error", "missing_token"));
+    }
+
     private Dictionary<string, JsonElement> GetFields(TokenIntrospectionResponse response) => response.Raw.GetFields();
+
+    private static MeterListener StartListeningForMeasurements(string meterName,
+        out List<(string Name, long Value, KeyValuePair<string, object>[] Tags)> results)
+    {
+        var listener = new MeterListener();
+        List<(string Name, long Value, KeyValuePair<string, object>[] Tags)> measurements = new();
+
+        listener.SetMeasurementEventCallback<long>((instrument, measurement, tags, _) =>
+        {
+            measurements.Add((instrument.Name, measurement, tags.ToArray()));
+        });
+
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Name == meterName)
+            {
+                meterListener.EnableMeasurementEvents(instrument);
+            }
+        };
+        listener.Start();
+        results = measurements;
+        return listener;
+    }
 }

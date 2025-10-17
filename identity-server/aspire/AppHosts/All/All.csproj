@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.2" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -52,14 +52,20 @@
     <ProjectReference Include="..\..\..\clients\src\MvcJarUriJwt\MvcJarUriJwt.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\..\clients\src\WindowsConsoleSystemBrowser\WindowsConsoleSystemBrowser.csproj" />
-    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\AspNetIdentity8\Host.AspNetIdentity8.csproj" />
-    <ProjectReference Include="..\..\..\hosts\AspNetIdentity\AspNetIdentity9\Host.AspNetIdentity9.csproj" />
-    <ProjectReference Include="..\..\..\hosts\EntityFramework\EntityFramework8\Host.EntityFramework8.csproj" />
-    <ProjectReference Include="..\..\..\hosts\EntityFramework\EntityFramework9\Host.EntityFramework9.csproj" />
-    <ProjectReference Include="..\..\..\hosts\Main\Main8\Host.Main8.csproj" />
-    <ProjectReference Include="..\..\..\hosts\Main\Main9\Host.Main9.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net8\AspNetIdentity8\Host.AspNetIdentity8.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net8\EntityFramework8\Host.EntityFramework8.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net8\Main8\Host.Main8.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net9\AspNetIdentity9\Host.AspNetIdentity9.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net9\EntityFramework9\Host.EntityFramework9.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net9\Main9\Host.Main9.csproj" />
     <ProjectReference Include="..\..\..\migrations\AspNetIdentityDb\AspNetIdentityDb.csproj" />
     <ProjectReference Include="..\..\..\migrations\IdentityServerDb\IdentityServerDb.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerAspNetIdentity\IdentityServerAspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerEmpty\IdentityServerEmpty.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerEntityFramework\IdentityServerEntityFramework.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServerInMem\IdentityServerInMem.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\IdentityServer\IdentityServerTemplate.csproj" />
+    <ProjectReference Include="..\..\..\templates\src\WebApp\TemplateWebApp.csproj" />
   </ItemGroup>
 
 </Project>

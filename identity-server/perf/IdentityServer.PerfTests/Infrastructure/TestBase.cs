@@ -8,6 +8,9 @@ using BenchmarkDotNet.Attributes;
 
 namespace IdentityServer.PerfTest.Infrastructure;
 
+// TODO: Update to newer X509Certificate2 implementation
+#pragma warning disable SYSLIB0057 // X509Certificate2 constructor used here is deprecated from net10.0 onwards.
+
 public class TestBase<T>
     where T : IdentityServerContainer, new()
 {

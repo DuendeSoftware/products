@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using DPoPApi;
+using Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 using Serilog;
 
 SerilogDefaults.Bootstrap();
@@ -32,7 +32,7 @@ try
 
     builder.Services.ConfigureDPoPTokensForScheme("token", options =>
     {
-        options.Mode = DPoPMode.DPoPAndBearer;
+        options.TokenMode = DPoPMode.DPoPAndBearer;
     });
 
     var app = builder.Build();

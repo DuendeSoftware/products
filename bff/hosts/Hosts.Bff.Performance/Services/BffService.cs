@@ -31,7 +31,7 @@ public abstract class BffService(string[] urlConfigKeys, IConfiguration config, 
         {
             options.ForwardedHeaders = ForwardedHeaders.All;
             options.KnownProxies.Clear();
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
         });
 
         builder.Services.AddAuthorization();

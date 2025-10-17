@@ -53,7 +53,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Restore
       run: dotnet restore identity-server.slnf
     - name: Verify Formatting
@@ -85,7 +85,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Restore
       run: dotnet restore identity-server.slnf
     - name: Build
@@ -140,6 +140,53 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: List .net sdks
+      run: dotnet --list-sdks
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
+      with:
+        dotnet-version: |-
+          8.0.x
+          9.0.203
+          10.0.100-rc.2.25502.107
+    - name: Restore
+      run: dotnet restore identity-server.slnf
+    - name: Build
+      run: dotnet build identity-server.slnf --no-restore -c Release
+    - id: playwright-cache
+      name: Cache Playwright assets
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('**/Hosts.Tests.csproj') }}
+        restore-keys: playwright-${{ runner.os }}-
+    - name: Install Playwright
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      run: pwsh test/IdentityServer.EndToEndTests/bin/Release/net10.0/playwright.ps1 install --with-deps
+    - name: Dotnet devcerts
+      run: dotnet dev-certs https --trust
+    - name: Test - test/IdentityServer.EndToEndTests
+      run: dotnet test test/IdentityServer.EndToEndTests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/IdentityServer.EndToEndTests-tests.trx" --collect:"XPlat Code Coverage"
+    - id: test-report-test-IdentityServer-EndToEndTests
+      name: Test report - test/IdentityServer.EndToEndTests
+      if: github.event_name == 'push' && (success() || failure())
+      uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
+      with:
+        name: Test Report - test/IdentityServer.EndToEndTests
+        path: '**/test/IdentityServer.EndToEndTests-tests.trx'
+        reporter: dotnet-trx
+        fail-on-error: true
+        fail-on-empty: true
+    - name: Publish test report link
+      run: echo "[Test Results - test/IdentityServer.EndToEndTests](${{ steps.test-report-test-IdentityServer-EndToEndTests.outputs.url_html }})" >> $GITHUB_STEP_SUMMARY
+    - name: Upload playwright traces
+      if: success() || failure()
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+      with:
+        name: playwright-traces
+        path: identity-server/test/**/playwright-traces/*.zip
+        overwrite: true
+        retention-days: 15
   codeql:
     name: CodeQL analyze
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
@@ -169,7 +216,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Restore
       run: dotnet restore identity-server.slnf
     - name: Build
@@ -212,7 +259,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack identity-server.slnf

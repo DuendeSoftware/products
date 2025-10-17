@@ -12,7 +12,6 @@
     <MinVerMinimumMajorMinor>2.3</MinVerMinimumMajorMinor>
     <AssemblyName>Duende.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
-    <IsBffProject>true</IsBffProject>
   </PropertyGroup>
 
   <PropertyGroup>

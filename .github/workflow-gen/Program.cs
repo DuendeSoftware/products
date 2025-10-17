@@ -21,7 +21,7 @@ var products = new Product[]
         "identity-server.slnf",
         "is",
         ["IdentityServer.IntegrationTests", "IdentityServer.UnitTests"],
-        [])
+        ["IdentityServer.EndToEndTests"])
 };
 foreach (var product in products)
 {
@@ -147,7 +147,7 @@ void GenerateCiWorkflow(Product product)
 
         playwrightJob.CachePlaywrightAssets();
 
-        playwrightJob.StepInstallPlayWright();
+        playwrightJob.StepInstallPlayWright(product.PlaywrightTestProjects[0]);
 
         playwrightJob.StepDotNetDevCerts();
 
@@ -352,4 +352,9 @@ void WriteWorkflow(Workflow workflow, string fileName)
     Console.WriteLine($"Wrote workflow to {filePath}");
 }
 
-internal record Product(string Name, string Solution, string TagPrefix, string[] UnitTestProjects, string[] PlaywrightTestProjects);
+internal record Product(
+    string Name,
+    string Solution,
+    string TagPrefix,
+    string[] UnitTestProjects,
+    string[] PlaywrightTestProjects);

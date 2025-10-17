@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.2" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -18,7 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
-    <ProjectReference Include="..\..\..\hosts\Main\Main10\Host.Main10.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net10\Main10\Host.Main10.csproj" />
   </ItemGroup>
 
 </Project>
