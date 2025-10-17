@@ -7,6 +7,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <RootNamespace>Duende.IdentityServer.UI.AspNetIdentity</RootNamespace>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

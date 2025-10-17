@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json;
@@ -93,7 +94,7 @@ public class IdentityTokenValidation
 
         // check that the custom aud was ignored
         var payload = jwt.Split('.')[1];
-        var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
+        var json = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload));
         var values = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
         values["aud"].GetString().ShouldBe("roclient");
     }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Globalization;
 using System.Net;
 using System.Security.Claims;
@@ -581,7 +582,7 @@ public class EndSessionTests
             var parts = token.Split('.');
             parts.Length.ShouldBe(3);
 
-            var bytes = Base64Url.Decode(parts[1]);
+            var bytes = Base64Url.DecodeFromChars(parts[1]);
             var json = Encoding.UTF8.GetString(bytes);
             var payload = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
@@ -629,7 +630,7 @@ public class EndSessionTests
             var parts = token.Split('.');
             parts.Length.ShouldBe(3);
 
-            var bytes = Base64Url.Decode(parts[0]);
+            var bytes = Base64Url.DecodeFromChars(parts[0]);
             var json = Encoding.UTF8.GetString(bytes);
             var header = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
@@ -669,7 +670,7 @@ public class EndSessionTests
             var parts = token.Split('.');
             parts.Length.ShouldBe(3);
 
-            var bytes = Base64Url.Decode(parts[0]);
+            var bytes = Base64Url.DecodeFromChars(parts[0]);
             var json = Encoding.UTF8.GetString(bytes);
             var header = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 

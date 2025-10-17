@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -302,7 +303,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
             var bytes = Encoding.UTF8.GetBytes(context.AccessToken);
             var hash = SHA256.HashData(bytes);
 
-            var accessTokenHash = Base64Url.Encode(hash);
+            var accessTokenHash = Base64Url.EncodeToString(hash);
             if (accessTokenHash != result.AccessTokenHash)
             {
                 result.IsError = true;

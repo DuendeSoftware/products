@@ -4,6 +4,7 @@
 
 #nullable enable
 
+using System.Buffers.Text;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -75,7 +76,7 @@ public static class CryptoHelper
         var leftPart = new byte[size];
         Array.Copy(hash, leftPart, size);
 
-        return Base64Url.Encode(leftPart);
+        return Base64Url.EncodeToString(leftPart);
     }
 
     /// <summary>
