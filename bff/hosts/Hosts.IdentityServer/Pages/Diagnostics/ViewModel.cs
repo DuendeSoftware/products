@@ -5,7 +5,6 @@
 using System.Buffers.Text;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServerHost.Pages.Diagnostics;
