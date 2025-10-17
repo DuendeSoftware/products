@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -226,7 +227,7 @@ public class DPoPProofValidator
             var bytes = Encoding.UTF8.GetBytes(context.AccessToken);
             var hash = sha.ComputeHash(bytes);
 
-            var accessTokenHash = Base64Url.Encode(hash);
+            var accessTokenHash = Base64Url.EncodeToString(hash);
             if (accessTokenHash != result.AccessTokenHash)
             {
                 result.IsError = true;
