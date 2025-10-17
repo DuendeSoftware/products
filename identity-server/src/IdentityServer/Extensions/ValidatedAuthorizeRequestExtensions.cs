@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Security.Cryptography;
@@ -159,7 +160,7 @@ public static class ValidatedAuthorizeRequestExtensions
         var bytes = Encoding.UTF8.GetBytes(clientId + origin + sessionId + salt);
         var hash = SHA256.HashData(bytes);
 
-        return Base64Url.Encode(hash) + "." + salt;
+        return Base64Url.EncodeToString(hash) + "." + salt;
     }
 
     private static NameValueCollection ToOptimizedRawValues(this ValidatedAuthorizeRequest request)

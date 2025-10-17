@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Security.Claims;
 using System.Text;
 using Duende.IdentityModel;
@@ -528,7 +529,7 @@ public class PkceTests
     {
         var codeVerifierBytes = Encoding.ASCII.GetBytes(codeVerifier);
         var hashedBytes = codeVerifierBytes.Sha256();
-        var transformedCodeVerifier = Base64Url.Encode(hashedBytes);
+        var transformedCodeVerifier = Base64Url.EncodeToString(hashedBytes);
 
         return transformedCodeVerifier;
     }

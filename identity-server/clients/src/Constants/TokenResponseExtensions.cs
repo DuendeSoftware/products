@@ -1,9 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 
 namespace Clients;
@@ -25,8 +25,8 @@ public static class TokenResponseExtensions
                 var header = parts[0];
                 var payload = parts[1];
 
-                Console.WriteLine(PrettyPrintJson(Encoding.UTF8.GetString(Base64Url.Decode(header))));
-                Console.WriteLine(PrettyPrintJson(Encoding.UTF8.GetString(Base64Url.Decode(payload))));
+                Console.WriteLine(PrettyPrintJson(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(header))));
+                Console.WriteLine(PrettyPrintJson(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload))));
             }
         }
         else

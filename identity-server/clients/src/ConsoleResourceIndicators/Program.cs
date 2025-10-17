@@ -1,10 +1,10 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Buffers.Text;
 using System.Text;
 using Clients;
 using ConsoleResourceIndicators;
-using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient;
 using Microsoft.Extensions.Hosting;
@@ -103,8 +103,8 @@ async Task FrontChannel(string scope, IEnumerable<string> resource)
 
     Console.WriteLine();
     Console.WriteLine("Standard access token:");
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(header)).PrettyPrintJson());
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(payload)).PrettyPrintJson());
+    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(header)).PrettyPrintJson());
+    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload)).PrettyPrintJson());
 
     if (result.RefreshToken == null)
     {
@@ -155,8 +155,8 @@ async Task Refresh(string refreshToken, string resource)
     var header = parts[0];
     var payload = parts[1];
 
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(header)).PrettyPrintJson());
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.Decode(payload)).PrettyPrintJson());
+    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(header)).PrettyPrintJson());
+    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload)).PrettyPrintJson());
 }
 
 internal class Test

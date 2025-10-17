@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using Duende.IdentityModel;
 
 namespace Duende.IdentityServer.Extensions;
 
@@ -35,5 +35,5 @@ public static class X509CertificateExtensions
     /// Returns the SHA256 thumbprint of the certificate as a base64url encoded string
     /// </summary>
     /// <returns></returns>
-    public static string GetSha256Thumbprint(this X509Certificate2 certificate) => Base64Url.Encode(certificate.GetCertHash(HashAlgorithmName.SHA256));
+    public static string GetSha256Thumbprint(this X509Certificate2 certificate) => Base64Url.EncodeToString(certificate.GetCertHash(HashAlgorithmName.SHA256));
 }

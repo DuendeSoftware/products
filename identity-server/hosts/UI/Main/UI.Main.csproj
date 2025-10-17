@@ -8,6 +8,7 @@
     <RootNamespace>Duende.IdentityServer.UI</RootNamespace>
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
