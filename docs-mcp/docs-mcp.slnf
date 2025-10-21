@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "..\\products.slnx",
+    "projects": [
+      ".github\\workflow-gen\\workflow-gen.csproj",
+      "docs-mcp\\src\\Documentation.Mcp\\Documentation.Mcp.csproj"
+    ]
+  }
+}
