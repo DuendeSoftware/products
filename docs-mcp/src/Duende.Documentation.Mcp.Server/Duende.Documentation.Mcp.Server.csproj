@@ -17,16 +17,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.41.3"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
+    <PackageReference Include="Markdig" Version="0.42.0" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.14.28" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0-rc.2.25502.107">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8"/>
-    <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.4"/>
-    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4"/>
-    <PackageReference Include="ReverseMarkdown" Version="4.7.0"/>
-    <PackageReference Include="SimpleFeedReader" Version="2.0.4"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.4" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
+    <PackageReference Include="ReverseMarkdown" Version="4.7.0" />
+    <PackageReference Include="SimpleFeedReader" Version="2.0.4" />
   </ItemGroup>
 </Project>
