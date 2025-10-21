@@ -1,10 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Documentation.Mcp.Database;
+using Documentation.Mcp.Sources.Blog;
+using Documentation.Mcp.Sources.Docs;
+using Documentation.Mcp.Sources.Samples;
 using Duende.Documentation.Mcp.Server.Database;
-using Duende.Documentation.Mcp.Server.Sources.Blog;
-using Duende.Documentation.Mcp.Server.Sources.Docs;
-using Duende.Documentation.Mcp.Server.Sources.Samples;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

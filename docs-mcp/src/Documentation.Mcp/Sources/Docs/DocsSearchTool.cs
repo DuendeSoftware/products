@@ -3,11 +3,11 @@
 
 using System.ComponentModel;
 using System.Text;
-using Duende.Documentation.Mcp.Server.Database;
+using Documentation.Mcp.Database;
 using Microsoft.EntityFrameworkCore;
 using ModelContextProtocol.Server;
 
-namespace Duende.Documentation.Mcp.Server.Sources.Docs;
+namespace Documentation.Mcp.Sources.Docs;
 
 [McpServerToolType]
 public class DocsSearchTool(McpDb db)

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Text;
-using Duende.Documentation.Mcp.Server.Database;
+using Documentation.Mcp.Database;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Duende.Documentation.Mcp.Server.Sources.Docs;
+namespace Documentation.Mcp.Sources.Docs;
 
 public class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
 {

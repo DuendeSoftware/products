@@ -4,7 +4,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 
-namespace Duende.Documentation.Mcp.Server.Database;
+namespace Documentation.Mcp.Database;
 
 public class McpDb : DbContext
 {

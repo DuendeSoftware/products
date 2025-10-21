@@ -3,9 +3,9 @@
 
 using System.IO.Compression;
 using System.Text;
-using Duende.Documentation.Mcp.Server.Database;
-using Duende.Documentation.Mcp.Server.Infrastructure;
-using Duende.Documentation.Mcp.Server.Sources.Docs;
+using Documentation.Mcp.Database;
+using Documentation.Mcp.Infrastructure;
+using Documentation.Mcp.Sources.Docs;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Duende.Documentation.Mcp.Server.Sources.Samples;
+namespace Documentation.Mcp.Sources.Samples;
 
 public class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
 {
