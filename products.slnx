@@ -74,7 +74,7 @@
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>
   <Folder Name="/docs-mcp/">
-    <Project Path="docs-mcp\src\Duende.Documentation.Mcp.Server\Duende.Documentation.Mcp.Server.csproj" Type="Classic C#">
+    <Project Path="docs-mcp\src\Documentation.Mcp\Documentation.Mcp.csproj" >
       <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
       <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
       <Configuration Solution="Release|x64" Project="Release|Any CPU" />

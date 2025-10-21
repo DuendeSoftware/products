@@ -7,7 +7,7 @@
     <AnalysisMode>All</AnalysisMode>
     <PackageTags>OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;ASP.NET Core</PackageTags>
     <Product>Duende Documentation MCP Server</Product>
-    <MinVerTagPrefix>mcp-</MinVerTagPrefix>
+    <MinVerTagPrefix>dmcp-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
 </Project>
