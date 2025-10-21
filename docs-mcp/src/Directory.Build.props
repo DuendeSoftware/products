@@ -9,5 +9,6 @@
     <Product>Duende Documentation MCP Server</Product>
     <MinVerTagPrefix>dmcp-</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
   </PropertyGroup>
 </Project>
