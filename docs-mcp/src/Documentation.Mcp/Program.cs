@@ -5,7 +5,6 @@ using Documentation.Mcp.Database;
 using Documentation.Mcp.Sources.Blog;
 using Documentation.Mcp.Sources.Docs;
 using Documentation.Mcp.Sources.Samples;
-using Duende.Documentation.Mcp.Server.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

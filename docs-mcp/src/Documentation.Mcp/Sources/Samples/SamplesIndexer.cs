@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Documentation.Mcp.Sources.Samples;
 
-public class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
+internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(7);
 
@@ -48,7 +48,8 @@ public class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleIndexe
         }
 
         // Explore llms.txt specific to samples
-        var llmsTxt = await httpClient.GetStringAsync("https://docs.duendesoftware.com/_llms-txt/identityserver-sample-code.txt", stoppingToken);
+        var llmsUri = new Uri("https://docs.duendesoftware.com/_llms-txt/identityserver-sample-code.txt");
+        var llmsTxt = await httpClient.GetStringAsync(llmsUri, stoppingToken);
         llmsTxt = llmsTxt.Replace("###", "\n\n###"); // keep sample titles on separate lines (rehype in docs does minification)
         llmsTxt = llmsTxt.Replace("* ", "\n* "); // keep lists on separate lines (rehype in docs does minification)
         var llmsMd = Markdig.Markdown.Parse(llmsTxt);

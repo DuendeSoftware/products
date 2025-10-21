@@ -12,7 +12,7 @@ using SimpleFeedReader;
 
 namespace Documentation.Mcp.Sources.Blog;
 
-public class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIndexer> logger) : BackgroundService
+internal class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIndexer> logger) : BackgroundService
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(2);
     private static readonly DateTime ReferenceDate = new(2024, 10, 01);
@@ -59,14 +59,20 @@ public class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIn
         }
 
         await db.SaveChangesAsync(stoppingToken);
-        logger.LogInformation("Saved {count} blog articles", db.FTSBlogArticle.Count());
+        logger.LogInformation("Saved {Count} blog articles", db.FTSBlogArticle.Count());
 
         await db.SetLastUpdateStateAsync("blog", DateTimeOffset.UtcNow);
 
         logger.LogInformation("Finished blog indexer");
     }
 
-    private async Task RunIndexerForDocumentAsync(string title, string? description, Uri? url, McpDb db, HttpClient httpClient, CancellationToken stoppingToken)
+    private static async Task RunIndexerForDocumentAsync(
+        string title,
+        string? description,
+        Uri? url,
+        McpDb db,
+        HttpClient httpClient,
+        CancellationToken stoppingToken)
     {
         if (url == null)
         {

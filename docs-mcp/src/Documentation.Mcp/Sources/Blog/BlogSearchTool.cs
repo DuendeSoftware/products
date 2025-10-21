@@ -10,7 +10,7 @@ using ModelContextProtocol.Server;
 namespace Documentation.Mcp.Sources.Blog;
 
 [McpServerToolType]
-public class BlogSearchTool(McpDb db)
+internal class BlogSearchTool(McpDb db)
 {
     [McpServerTool(Name = "search_duende_blog", Title = "Search Duende Blog")]
     [Description("Semantically search within the Duende blog for the given query.")]
@@ -18,7 +18,7 @@ public class BlogSearchTool(McpDb db)
         [Description("The search query. Keep it concise and specific to increase the likelihood of a match.")] string query)
     {
         var results = await db.FTSBlogArticle
-            .FromSqlRaw("SELECT * FROM FTSBlogArticle WHERE Title MATCH {0} OR Content MATCH {0} ORDER BY rank", db.EscapeFtsQueryString(query))
+            .FromSqlRaw("SELECT * FROM FTSBlogArticle WHERE Title MATCH {0} OR Content MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query))
             .AsNoTracking()
             .Take(6)
             .ToListAsync();
@@ -44,19 +44,15 @@ public class BlogSearchTool(McpDb db)
 
     [McpServerTool(Name = "fetch_duende_blog", Title = "Fetch specific article from Duende blog")]
     [Description("Fetch a specific article from the Duende blog.")]
-    public async Task<string> Fetch(
-        [Description("The document id.")] string id)
+    public async Task<string> Fetch([Description("The document id.")] string id)
     {
         var result = await db.FTSBlogArticle
             .FromSqlRaw("SELECT * FROM FTSBlogArticle WHERE Id = {0} ORDER BY rank", id)
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
-        if (result == null)
-        {
-            return $"No data found for document: \"{id}\".";
-        }
-
-        return $"# {result.Title}\n\n{result.Content}";
+        return result == null
+            ? $"No data found for document: \"{id}\"."
+            : $"# {result.Title}\n\n{result.Content}";
     }
 }

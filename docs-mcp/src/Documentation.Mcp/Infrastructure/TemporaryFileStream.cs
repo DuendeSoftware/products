@@ -3,7 +3,7 @@
 
 namespace Documentation.Mcp.Infrastructure;
 
-public class TemporaryFileStream : FileStream
+internal class TemporaryFileStream : FileStream
 {
     public static TemporaryFileStream Create()
     {

@@ -6,14 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Documentation.Mcp.Database;
 
-public class McpDb : DbContext
+internal class McpDb(DbContextOptions<McpDb> options) : DbContext(options)
 {
-    public McpDb(DbContextOptions<McpDb> options)
-        : base(options) { }
-
     public DbSet<State> State => Set<State>();
+
     public DbSet<FTSDocsArticle> FTSDocsArticle => Set<FTSDocsArticle>();
+
     public DbSet<FTSBlogArticle> FTSBlogArticle => Set<FTSBlogArticle>();
+
     public DbSet<FTSSampleProject> FTSSampleProject => Set<FTSSampleProject>();
 
     public async Task SetLastUpdateStateAsync(string key, DateTimeOffset value)
@@ -39,20 +39,17 @@ public class McpDb : DbContext
     public async Task<DateTimeOffset> GetLastUpdateStateAsync(string key)
     {
         var stateEntity = await State.FirstOrDefaultAsync(it => it.Key == key);
-        if (stateEntity == null)
-        {
-            return DateTimeOffset.MinValue;
-        }
-
-        return JsonSerializer.Deserialize<DateTimeOffset>(stateEntity.Value);
+        return stateEntity == null
+            ? DateTimeOffset.MinValue
+            : JsonSerializer.Deserialize<DateTimeOffset>(stateEntity.Value);
     }
 
-    public string? EscapeFtsQueryString(string? query)
+    public static string? EscapeFtsQueryString(string? query)
         => !string.IsNullOrEmpty(query)
             ? string.Join(" ", query.Split(' ').Select(q => $"\"{q.Replace("\"", "\"\"")}\""))
             : query;
 
-    public string? EscapeFtsQueryString(string? query, string joinWith)
+    public static string? EscapeFtsQueryString(string? query, string joinWith)
         => !string.IsNullOrEmpty(query)
             ? string.Join($" {joinWith} ", query.Split(' ').Select(q => $"\"{q.Replace("\"", "\"\"")}\""))
             : query;
