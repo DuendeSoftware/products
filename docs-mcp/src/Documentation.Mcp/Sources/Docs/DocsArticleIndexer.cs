@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Documentation.Mcp.Sources.Docs;
 
-public class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
+internal class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(2);
 
@@ -40,12 +40,13 @@ public class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticleIn
         var lastUpdate = await db.GetLastUpdateStateAsync("docs");
         if (lastUpdate > DateTimeOffset.UtcNow.Add(-_maxAge))
         {
-            logger.LogInformation("Skipping docs indexer, last update was {lastUpdate}", lastUpdate);
+            logger.LogInformation("Skipping docs indexer, last update was {LastUpdate}", lastUpdate);
             return;
         }
 
         // Explore llms.txt
-        var llmsTxt = await httpClient.GetStringAsync("https://docs.duendesoftware.com/llms.txt", stoppingToken);
+        var llmsUrl = new Uri("https://docs.duendesoftware.com/llms.txt");
+        var llmsTxt = await httpClient.GetStringAsync(llmsUrl, stoppingToken);
         var llmsMd = Markdig.Markdown.Parse(llmsTxt);
 
         await db.FTSDocsArticle.ExecuteDeleteAsync(stoppingToken);
@@ -57,19 +58,25 @@ public class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticleIn
                 var title = link.Title ?? link.FirstChild?.ToString() ?? "Unknown";
                 var description = link.NextSibling is LiteralInline literal ? literal.Content.Text.TrimStart(':', ' ') : "";
 
-                await RunIndexerForDocumentAsync(title, description, link.Url!, db, httpClient, stoppingToken);
+                await RunIndexerForDocument(title, description, link.Url!, db, httpClient, stoppingToken);
             }
         }
 
         await db.SaveChangesAsync(stoppingToken);
-        logger.LogInformation("Saved {count} docs articles", db.FTSDocsArticle.Count());
+        logger.LogInformation("Saved {Count} docs articles", db.FTSDocsArticle.Count());
 
         await db.SetLastUpdateStateAsync("docs", DateTimeOffset.UtcNow);
 
         logger.LogInformation("Finished docs indexer");
     }
 
-    private async Task RunIndexerForDocumentAsync(string title, string description, string linkUrl, McpDb db, HttpClient httpClient, CancellationToken stoppingToken)
+    private static async Task RunIndexerForDocument(
+        string title,
+        string description,
+        string linkUrl,
+        McpDb db,
+        HttpClient httpClient,
+        CancellationToken stoppingToken)
     {
         // Start indexing
         var llmsTxt = await httpClient.GetStringAsync(linkUrl, stoppingToken);

@@ -10,7 +10,7 @@ using ModelContextProtocol.Server;
 namespace Documentation.Mcp.Sources.Docs;
 
 [McpServerToolType]
-public class DocsSearchTool(McpDb db)
+internal class DocsSearchTool(McpDb db)
 {
     [McpServerTool(Name = "search_duende_docs", Title = "Search Duende Documentation")]
     [Description("Semantically search within the Duende documentation for the given query.")]
@@ -18,7 +18,7 @@ public class DocsSearchTool(McpDb db)
         [Description("The search query. Keep it concise and specific to increase the likelihood of a match.")] string query)
     {
         var results = await db.FTSDocsArticle
-            .FromSqlRaw("SELECT * FROM FTSDocsArticle WHERE Title MATCH {0} OR Content MATCH {0} OR Product MATCH {0} ORDER BY rank", db.EscapeFtsQueryString(query))
+            .FromSqlRaw("SELECT * FROM FTSDocsArticle WHERE Title MATCH {0} OR Content MATCH {0} OR Product MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query))
             .AsNoTracking()
             .Take(6)
             .ToListAsync();

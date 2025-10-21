@@ -5,12 +5,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Documentation.Mcp.Database;
 
-public class FTSSampleProject
+internal class FTSSampleProject
 {
     [Key]
     public required string Id { get; init; }
+
     public required string Product { get; init; }
+
     public required string Title { get; init; }
+
     public required string Description { get; init; }
+
     public List<string> Files { get; init; } = new(0);
 }

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Documentation.Mcp.Database;
 
-public class State
+internal class State
 {
     [Key]
     public required string Id { get; init; }

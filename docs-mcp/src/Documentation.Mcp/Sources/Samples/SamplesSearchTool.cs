@@ -10,7 +10,7 @@ using ModelContextProtocol.Server;
 namespace Documentation.Mcp.Sources.Samples;
 
 [McpServerToolType]
-public class SamplesSearchTool(McpDb db)
+internal class SamplesSearchTool(McpDb db)
 {
     [McpServerTool(Name = "search_duende_samples", Title = "Search Duende Code Samples")]
     [Description("Search within the Duende code samples for the given query. Use this tool to find recent and relevant C# code samples.")]
@@ -18,7 +18,7 @@ public class SamplesSearchTool(McpDb db)
         [Description("The search query. Keep it concise and specific to increase the likelihood of a match.")] string query)
     {
         var results = await db.FTSSampleProject
-            .FromSqlRaw("SELECT * FROM FTSSampleProject WHERE Title MATCH {0} OR Description MATCH {0} OR Product MATCH {0} ORDER BY rank", db.EscapeFtsQueryString(query, "OR"))
+            .FromSqlRaw("SELECT * FROM FTSSampleProject WHERE Title MATCH {0} OR Description MATCH {0} OR Product MATCH {0} ORDER BY rank", McpDb.EscapeFtsQueryString(query, "OR"))
             .AsNoTracking()
             .Take(6)
             .ToListAsync();
@@ -88,7 +88,7 @@ public class SamplesSearchTool(McpDb db)
                ?? SampleProjectFile.NotFound();
     }
 
-    public class SampleProject
+    internal class SampleProject
     {
         public static SampleProject NotFound() => new SampleProject { Title = "No data found.", Description = "" };
 
@@ -97,7 +97,7 @@ public class SamplesSearchTool(McpDb db)
         public List<SampleProjectFile> Files { get; set; } = new(0);
     }
 
-    public class SampleProjectFile
+    internal class SampleProjectFile
     {
         public static SampleProjectFile NotFound() => new SampleProjectFile { Content = "No data found." };
 
