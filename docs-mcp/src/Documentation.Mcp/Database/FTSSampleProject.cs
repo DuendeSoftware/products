@@ -3,7 +3,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Duende.Documentation.Mcp.Server.Database;
+namespace Documentation.Mcp.Database;
 
 public class FTSSampleProject
 {

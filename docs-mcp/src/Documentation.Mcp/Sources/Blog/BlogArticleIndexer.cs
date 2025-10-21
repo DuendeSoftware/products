@@ -1,7 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Documentation.Mcp.Server.Database;
+using Documentation.Mcp.Database;
 using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using ReverseMarkdown;
 using SimpleFeedReader;
 
-namespace Duende.Documentation.Mcp.Server.Sources.Blog;
+namespace Documentation.Mcp.Sources.Blog;
 
 public class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIndexer> logger) : BackgroundService
 {

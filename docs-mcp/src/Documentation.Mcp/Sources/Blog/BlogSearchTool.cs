@@ -3,11 +3,11 @@
 
 using System.ComponentModel;
 using System.Text;
-using Duende.Documentation.Mcp.Server.Database;
+using Documentation.Mcp.Database;
 using Microsoft.EntityFrameworkCore;
 using ModelContextProtocol.Server;
 
-namespace Duende.Documentation.Mcp.Server.Sources.Blog;
+namespace Documentation.Mcp.Sources.Blog;
 
 [McpServerToolType]
 public class BlogSearchTool(McpDb db)
