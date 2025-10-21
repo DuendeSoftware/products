@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <Import Project="../../src.props" />
+
+  <PropertyGroup>
+    <AnalysisMode>All</AnalysisMode>
+    <PackageTags>OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;ASP.NET Core</PackageTags>
+    <Product>Duende Documentation MCP Server</Product>
+    <MinVerTagPrefix>mcp-</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
+  </PropertyGroup>
+</Project>
