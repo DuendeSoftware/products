@@ -150,7 +150,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         };
         var partitionKey = _buildUserSessionPartitionKey();
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter, ct);
+        var sessions = await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter, ct);
         return sessions.Count != 0;
     }
 }
