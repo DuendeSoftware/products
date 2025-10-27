@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Documentation.Mcp.Sources.Samples;
 
-internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
+internal sealed class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(7);
 
@@ -43,19 +43,20 @@ internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleInde
         var lastUpdate = await db.GetLastUpdateStateAsync("samples");
         if (lastUpdate > DateTimeOffset.UtcNow.Add(-_maxAge))
         {
-            logger.LogInformation("Skipping samples indexer, last update was {lastUpdate}", lastUpdate);
+            logger.LogInformation("Skipping samples indexer, last update was {LastUpdate}", lastUpdate);
             return;
         }
 
         // Explore llms.txt specific to samples
         var llmsUri = new Uri("https://docs.duendesoftware.com/_llms-txt/identityserver-sample-code.txt");
         var llmsTxt = await httpClient.GetStringAsync(llmsUri, stoppingToken);
-        llmsTxt = llmsTxt.Replace("###", "\n\n###"); // keep sample titles on separate lines (rehype in docs does minification)
-        llmsTxt = llmsTxt.Replace("* ", "\n* "); // keep lists on separate lines (rehype in docs does minification)
+        llmsTxt = llmsTxt.Replace("###", "\n\n###", StringComparison.OrdinalIgnoreCase); // keep sample titles on separate lines (rehype in docs does minification)
+        llmsTxt = llmsTxt.Replace("* ", "\n* ", StringComparison.OrdinalIgnoreCase); // keep lists on separate lines (rehype in docs does minification)
         var llmsMd = Markdig.Markdown.Parse(llmsTxt);
 
         // Download samples repository blob
-        await using var samplesRepositoryBlobStream = await httpClient.GetStreamAsync("https://github.com/duendesoftware/samples/archive/refs/heads/main.zip", stoppingToken);
+        var samplesBlobUri = new Uri("https://github.com/duendesoftware/samples/archive/refs/heads/main.zip");
+        await using var samplesRepositoryBlobStream = await httpClient.GetStreamAsync(samplesBlobUri, stoppingToken);
         await using var samplesRepositoryTempStream = await TemporaryFileStream.CreateFromAsync(samplesRepositoryBlobStream);
         await using var samplesRepositoryZipStream = new ZipArchive(samplesRepositoryTempStream, ZipArchiveMode.Read, leaveOpen: false);
 
@@ -76,7 +77,7 @@ internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleInde
                 }
                 else if (sampleContent != null)
                 {
-                    var files = await GetFilesForRepositoryPathAsync(sampleContent.ToString(), samplesRepositoryZipStream);
+                    var files = await GetFilesForRepositoryPathAsync(sampleContent.ToString(), samplesRepositoryZipStream, stoppingToken);
                     if (files.Count > 0)
                     {
                         db.FTSSampleProject.Add(new FTSSampleProject
@@ -108,7 +109,7 @@ internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleInde
 
         if (sampleTitle != null && sampleContent != null)
         {
-            var files = await GetFilesForRepositoryPathAsync(sampleContent.ToString(), samplesRepositoryZipStream);
+            var files = await GetFilesForRepositoryPathAsync(sampleContent.ToString(), samplesRepositoryZipStream, stoppingToken);
             if (files.Count > 0)
             {
                 db.FTSSampleProject.Add(new FTSSampleProject
@@ -123,27 +124,30 @@ internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleInde
         }
 
         await db.SaveChangesAsync(stoppingToken);
-        logger.LogInformation("Saved {count} samples", db.FTSSampleProject.Count());
+        logger.LogInformation("Saved {Count} samples", db.FTSSampleProject.Count());
 
         await db.SetLastUpdateStateAsync("samples", DateTimeOffset.UtcNow);
 
         logger.LogInformation("Finished samples indexer");
     }
 
-    private string ExtractTitle(string markdownText)
+    private static string ExtractTitle(string markdownText)
     {
         // Remove:
         // [Section titled “.......”](#custom-profile-service)
         var indexOfSection = markdownText.IndexOf("[Section", StringComparison.OrdinalIgnoreCase);
         if (indexOfSection > 0)
         {
-            markdownText = markdownText.Substring(0, indexOfSection - 1);
+            markdownText = markdownText[..(indexOfSection - 1)];
         }
 
         return markdownText;
     }
 
-    private async Task<List<string>> GetFilesForRepositoryPathAsync(string markdownText, ZipArchive repositoryArchive)
+    private static async Task<List<string>> GetFilesForRepositoryPathAsync(
+        string markdownText,
+        ZipArchive repositoryArchive,
+        CancellationToken cancellationToken)
     {
         var files = new List<string>();
 
@@ -160,7 +164,7 @@ internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleInde
                     continue;
                 }
 
-                var sampleRootPath = "samples-main" + link.Url!.Substring(sampleRootIndex);
+                var sampleRootPath = $"samples-main{link.Url![sampleRootIndex..]}";
                 var sampleEntries = repositoryArchive.Entries
                     .Where(e =>
 
@@ -176,8 +180,8 @@ internal class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleInde
 
                 foreach (var sampleEntry in sampleEntries)
                 {
-                    using var sampleEntryStream = new StreamReader(sampleEntry.Open());
-                    var sampleContents = await sampleEntryStream.ReadToEndAsync();
+                    using var sampleEntryStream = new StreamReader(await sampleEntry.OpenAsync(cancellationToken));
+                    var sampleContents = await sampleEntryStream.ReadToEndAsync(cancellationToken);
 
                     files.Add("File: `" + sampleEntry.FullName + "`:\n```\n" + sampleContents + "\n```");
                 }

@@ -12,7 +12,7 @@ using SimpleFeedReader;
 
 namespace Documentation.Mcp.Sources.Blog;
 
-internal class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIndexer> logger) : BackgroundService
+internal sealed class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticleIndexer> logger) : BackgroundService
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(2);
     private static readonly DateTime ReferenceDate = new(2024, 10, 01);
@@ -41,7 +41,7 @@ internal class BlogArticleIndexer(IServiceProvider services, ILogger<BlogArticle
         var lastUpdate = await db.GetLastUpdateStateAsync("blog");
         if (lastUpdate > DateTimeOffset.UtcNow.Add(-_maxAge))
         {
-            logger.LogInformation("Skipping blog indexer, last update was {lastUpdate}", lastUpdate);
+            logger.LogInformation("Skipping blog indexer, last update was {LastUpdate}", lastUpdate);
             return;
         }
 

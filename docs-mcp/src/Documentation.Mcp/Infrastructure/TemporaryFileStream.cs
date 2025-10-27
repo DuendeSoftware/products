@@ -3,16 +3,13 @@
 
 namespace Documentation.Mcp.Infrastructure;
 
-internal class TemporaryFileStream : FileStream
+internal sealed class TemporaryFileStream : FileStream
 {
-    public static TemporaryFileStream Create()
-    {
-        var path = Path.Combine(
-            Path.GetTempPath(),
-            Guid.NewGuid() + ".tmp");
+    private readonly string _path;
 
-        return new TemporaryFileStream(path);
-    }
+    private TemporaryFileStream(string path)
+        : base(path, FileMode.OpenOrCreate, FileAccess.ReadWrite) => _path = path;
+
 
     public static async Task<TemporaryFileStream> CreateFromAsync(Stream otherStream)
     {
@@ -24,10 +21,15 @@ internal class TemporaryFileStream : FileStream
         return temporaryFileStream;
     }
 
-    private readonly string _path;
+    private static TemporaryFileStream Create()
+    {
+        var path = Path.Combine(
+            Path.GetTempPath(),
+            Guid.NewGuid() + ".tmp");
 
-    private TemporaryFileStream(string path)
-        : base(path, FileMode.OpenOrCreate, FileAccess.ReadWrite) => _path = path;
+        return new TemporaryFileStream(path);
+    }
+
 
     protected override void Dispose(bool disposing)
     {
@@ -37,9 +39,13 @@ internal class TemporaryFileStream : FileStream
         {
             File.Delete(_path);
         }
-        catch
+        catch (IOException)
         {
-            // Best-effort...
+            // Best-effort cleanup - file may be locked or inaccessible
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Best-effort cleanup - insufficient permissions
         }
     }
 }

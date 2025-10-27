@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Documentation.Mcp.Database;
 
-internal class FTSSampleProject
+internal sealed class FTSSampleProject
 {
     [Key]
     public required string Id { get; init; }

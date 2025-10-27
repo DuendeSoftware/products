@@ -10,6 +10,12 @@
     <Title>Duende Documentation MCP Server</Title>
     <Copyright>Duende Software</Copyright>
     <PackageTags>MCP;ModelContextProtocol;AI;LLM;Duende;IdentityServer</PackageTags>
+    <!--Use the LoggerMessage delegates - not a high performence scenario-->
+    <NoWarn>$(NoWarn);CA1848</NoWarn>
+    <!-- Evaluation of this argument may be expensive and unnecessary if logging is disabled - not a high performance scenario-->
+    <NoWarn>$(NoWarn);CA1873</NoWarn>
+    <!-- Avoid uninstantiated internal classes (code analysis) - https://github.com/dotnet/roslyn-analyzers/issues/6561 -->
+    <NoWarn>$(NoWarn);CA1812</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

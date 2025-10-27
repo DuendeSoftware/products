@@ -65,7 +65,7 @@ app.MapMcp();
 
 await EnsureDb(app.Services, app.Logger);
 
-app.Run();
+await app.RunAsync();
 
 async Task EnsureDb(IServiceProvider services, ILogger logger)
 {

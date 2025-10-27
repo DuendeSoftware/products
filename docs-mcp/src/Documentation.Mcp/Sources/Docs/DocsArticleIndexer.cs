@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Documentation.Mcp.Sources.Docs;
 
-internal class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
+internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(2);
 
@@ -56,9 +56,7 @@ internal class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticle
             if (link.Url?.Contains("_llms-txt/", StringComparison.OrdinalIgnoreCase) == true)
             {
                 var title = link.Title ?? link.FirstChild?.ToString() ?? "Unknown";
-                var description = link.NextSibling is LiteralInline literal ? literal.Content.Text.TrimStart(':', ' ') : "";
-
-                await RunIndexerForDocument(title, description, link.Url!, db, httpClient, stoppingToken);
+                await RunIndexerForDocument(title, link.Url!, db, httpClient, stoppingToken);
             }
         }
 
@@ -72,14 +70,14 @@ internal class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticle
 
     private static async Task RunIndexerForDocument(
         string title,
-        string description,
         string linkUrl,
         McpDb db,
         HttpClient httpClient,
         CancellationToken stoppingToken)
     {
         // Start indexing
-        var llmsTxt = await httpClient.GetStringAsync(linkUrl, stoppingToken);
+        var linkUri = new Uri(linkUrl);
+        var llmsTxt = await httpClient.GetStringAsync(linkUri, stoppingToken);
         var llmsMd = Markdig.Markdown.Parse(llmsTxt);
 
         string? articleTitle = null;
@@ -108,10 +106,7 @@ internal class DocsArticleIndexer(IServiceProvider services, ILogger<DocsArticle
                 }
             }
 
-            if (articleContent != null)
-            {
-                articleContent.AppendLine(llmsTxt.Substring(block.Span.Start, block.Span.Length));
-            }
+            articleContent?.AppendLine(llmsTxt.Substring(block.Span.Start, block.Span.Length));
         }
 
         if (articleTitle != null && articleContent != null)

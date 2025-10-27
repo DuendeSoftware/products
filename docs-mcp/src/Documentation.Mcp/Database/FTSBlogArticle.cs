@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Documentation.Mcp.Database;
 
-internal class FTSBlogArticle
+internal sealed class FTSBlogArticle
 {
     [Key]
     public required string Id { get; init; }

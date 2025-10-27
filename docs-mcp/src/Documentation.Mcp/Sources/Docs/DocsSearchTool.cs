@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.ComponentModel;
+using System.Globalization;
 using System.Text;
 using Documentation.Mcp.Database;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ using ModelContextProtocol.Server;
 namespace Documentation.Mcp.Sources.Docs;
 
 [McpServerToolType]
-internal class DocsSearchTool(McpDb db)
+internal sealed class DocsSearchTool(McpDb db)
 {
     [McpServerTool(Name = "search_duende_docs", Title = "Search Duende Documentation")]
     [Description("Semantically search within the Duende documentation for the given query.")]
@@ -24,19 +25,19 @@ internal class DocsSearchTool(McpDb db)
             .ToListAsync();
 
         var responseBuilder = new StringBuilder();
-        responseBuilder.Append($"## Query\n\n{query}\n\n");
+        responseBuilder.Append(CultureInfo.InvariantCulture, $"## Query\n\n{query}\n\n");
 
         if (results.Count == 0)
         {
-            responseBuilder.Append($"## Response\n\nNo results found for: \"{query}\"\n\nIf you'd like to retry the search, try changing the query to increase the likelihood of a match.");
+            responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nNo results found for: \"{query}\"\n\nIf you'd like to retry the search, try changing the query to increase the likelihood of a match.");
             return responseBuilder.ToString();
         }
 
-        responseBuilder.Append($"## Response\n\nResults found for: \"{query}\". Listing a document id and document title, followed by related product:\n\n");
+        responseBuilder.Append(CultureInfo.InvariantCulture, $"## Response\n\nResults found for: \"{query}\". Listing a document id and document title, followed by related product:\n\n");
 
         foreach (var result in results)
         {
-            responseBuilder.Append($"- [{result.Id}]({result.Title}) ({result.Product})\n");
+            responseBuilder.Append(CultureInfo.InvariantCulture, $"- [{result.Id}]({result.Title}) ({result.Product})\n");
         }
 
         return responseBuilder.ToString();
@@ -52,11 +53,8 @@ internal class DocsSearchTool(McpDb db)
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
-        if (result == null)
-        {
-            return $"No data found for document: \"{id}\".";
-        }
-
-        return result.Content;
+        return result == null
+            ? $"No data found for document: \"{id}\"."
+            : result.Content;
     }
 }

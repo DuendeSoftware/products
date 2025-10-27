@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Duende.Documentation.Mcp.Server.Database.Migrations;
 
 /// <inheritdoc />
-internal partial class Initial : Migration
+internal sealed partial class Initial : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Documentation.Mcp.Database;
 
-internal class McpDb(DbContextOptions<McpDb> options) : DbContext(options)
+internal sealed class McpDb(DbContextOptions<McpDb> options) : DbContext(options)
 {
     public DbSet<State> State => Set<State>();
 
@@ -46,11 +46,11 @@ internal class McpDb(DbContextOptions<McpDb> options) : DbContext(options)
 
     public static string? EscapeFtsQueryString(string? query)
         => !string.IsNullOrEmpty(query)
-            ? string.Join(" ", query.Split(' ').Select(q => $"\"{q.Replace("\"", "\"\"")}\""))
+            ? string.Join(" ", query.Split(' ').Select(q => $"\"{q.Replace("\"", "\"\"", StringComparison.OrdinalIgnoreCase)}\""))
             : query;
 
     public static string? EscapeFtsQueryString(string? query, string joinWith)
         => !string.IsNullOrEmpty(query)
-            ? string.Join($" {joinWith} ", query.Split(' ').Select(q => $"\"{q.Replace("\"", "\"\"")}\""))
+            ? string.Join($" {joinWith} ", query.Split(' ').Select(q => $"\"{q.Replace("\"", "\"\"", StringComparison.OrdinalIgnoreCase)}\""))
             : query;
 }
