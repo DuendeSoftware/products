@@ -1,36 +1,21 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Buffers;
 using System.Text;
-using System.Text.Json;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Licensing.V2.Diagnostics;
 
-internal class DiagnosticSummary(DateTime serverStartTime, IEnumerable<IDiagnosticEntry> entries, IdentityServerOptions options, ILoggerFactory loggerFactory)
+internal class DiagnosticSummary(DiagnosticDataService diagnosticDataService, IdentityServerOptions options, ILoggerFactory loggerFactory)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.Diagnostics.Summary");
 
     public async Task PrintSummary()
     {
-        var bufferWriter = new ArrayBufferWriter<byte>();
-        await using var writer = new Utf8JsonWriter(bufferWriter, new JsonWriterOptions { Indented = false });
-
-        writer.WriteStartObject();
-
-        var diagnosticContext = new DiagnosticContext(serverStartTime, DateTime.UtcNow);
-        foreach (var diagnosticEntry in entries)
-        {
-            await diagnosticEntry.WriteAsync(diagnosticContext, writer);
-        }
-
-        writer.WriteEndObject();
-
-        await writer.FlushAsync();
-
-        var span = bufferWriter.WrittenSpan;
+        var jsonMemory = await diagnosticDataService.GetJsonBytesAsync();
+        var span = jsonMemory.Span;
 
         using var diagnosticActivity = Tracing.DiagnosticsActivitySource.StartActivity("DiagnosticSummary");
         var chunkSize = options.Diagnostics.ChunkSize;
@@ -47,7 +32,7 @@ internal class DiagnosticSummary(DateTime serverStartTime, IEnumerable<IDiagnost
         }
         else
         {
-            _logger.DiagnosticSummaryLogged(1, 1, Encoding.UTF8.GetString(bufferWriter.WrittenSpan));
+            _logger.DiagnosticSummaryLogged(1, 1, Encoding.UTF8.GetString(span));
         }
     }
 }
