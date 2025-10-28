@@ -176,7 +176,9 @@ void GenerateCiWorkflow(Product product)
     codeQlJob.Step()
         .ActionsCheckout();
 
-    codeQlJob.StepInitializeCodeQl();
+    // Uncomment once https://github.com/github/codeql-action/issues/3207#issuecomment-3405956414 has been resolved
+
+    /*codeQlJob.StepInitializeCodeQl();
 
     codeQlJob.StepSetupDotNet();
 
@@ -184,7 +186,7 @@ void GenerateCiWorkflow(Product product)
 
     codeQlJob.StepBuild(product.Solution);
 
-    codeQlJob.StepPerformCodeQlAnalysis();
+    codeQlJob.StepPerformCodeQlAnalysis();*/
 
     // Pack
     var packJob = workflow
