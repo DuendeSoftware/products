@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <AssemblyName>Duende.Documentation.Mcp</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <PublishSelfContained>true</PublishSelfContained>
+    <Title>Duende Documentation MCP Server</Title>
+    <Copyright>Duende Software</Copyright>
+    <PackageTags>MCP;ModelContextProtocol;AI;LLM;Duende;IdentityServer</PackageTags>
+    <!--Use the LoggerMessage delegates - not a high performence scenario-->
+    <NoWarn>$(NoWarn);CA1848</NoWarn>
+    <!-- Evaluation of this argument may be expensive and unnecessary if logging is disabled - not a high performance scenario-->
+    <NoWarn>$(NoWarn);CA1873</NoWarn>
+    <!-- Avoid uninstantiated internal classes (code analysis) - https://github.com/dotnet/roslyn-analyzers/issues/6561 -->
+    <NoWarn>$(NoWarn);CA1812</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig"/>
+    <PackageReference Include="Microsoft.Build.Tasks.Core"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting"/>
+    <PackageReference Include="ModelContextProtocol"/>
+    <PackageReference Include="ModelContextProtocol.AspNetCore"/>
+    <PackageReference Include="ReverseMarkdown"/>
+    <PackageReference Include="SimpleFeedReader"/>
+  </ItemGroup>
+</Project>
