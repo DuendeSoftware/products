@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using Duende.Private.Licensing;
+
 namespace Duende.IdentityServer.Licensing.V2;
 
 internal static class LicenseUsageTrackerExtensions
@@ -11,7 +13,7 @@ internal static class LicenseUsageTrackerExtensions
     {
         if (!string.IsNullOrWhiteSpace(resourceIndicator))
         {
-            tracker.FeatureUsed(LicenseFeature.ResourceIsolation);
+            tracker.FeatureUsed(IdentityServerLicenseFeature.ResourceIsolation);
         }
     }
 
@@ -19,7 +21,7 @@ internal static class LicenseUsageTrackerExtensions
     {
         if (resourceIndicators?.Any() == true)
         {
-            tracker.FeatureUsed(LicenseFeature.ResourceIsolation);
+            tracker.FeatureUsed(IdentityServerLicenseFeature.ResourceIsolation);
         }
     }
 }
