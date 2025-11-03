@@ -5,6 +5,7 @@ using System.Text.Json;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
+using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
 
@@ -25,7 +26,8 @@ public class DiagnosticSummaryTests
             secondDiagnosticEntry,
             thirdDiagnosticEntry
         };
-        var summary = new DiagnosticSummary(DateTime.UtcNow, entries, new IdentityServerOptions(), new StubLoggerFactory(logger));
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, entries);
+        var summary = new DiagnosticSummary(diagnosticService, new IdentityServerOptions(), new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
 
@@ -42,7 +44,8 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = chunkSize * 2 };
-        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
 
@@ -61,7 +64,9 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = 2, OutputCharacter = '€' };
-        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
+
 
         await summary.PrintSummary();
 
@@ -76,7 +81,9 @@ public class DiagnosticSummaryTests
 
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = options.Diagnostics.ChunkSize * 2 };
-        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
+
 
         await summary.PrintSummary();
         foreach (var entry in logger.Collector.GetSnapshot())
@@ -91,7 +98,8 @@ public class DiagnosticSummaryTests
         var options = new IdentityServerOptions();
         var logger = new FakeLogger<DiagnosticSummary>();
         var diagnosticEntry = new LongDiagnosticEntry { OutputLength = 100000 };
-        var summary = new DiagnosticSummary(DateTime.UtcNow, [diagnosticEntry], options, new StubLoggerFactory(logger));
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, [diagnosticEntry]);
+        var summary = new DiagnosticSummary(diagnosticService, options, new StubLoggerFactory(logger));
 
         await summary.PrintSummary();
 
