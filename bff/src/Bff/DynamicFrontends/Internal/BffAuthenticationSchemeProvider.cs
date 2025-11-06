@@ -6,11 +6,13 @@ using Duende.Bff.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace Duende.Bff.DynamicFrontends.Internal;
 
 internal class BffAuthenticationSchemeProvider(
+    IHttpContextAccessor httpContextAccessor,
     CurrentFrontendAccessor currentFrontendAccessor,
     IOptions<AuthenticationOptions> options,
     IOptions<BffOptions> bffOptions) : AuthenticationSchemeProvider(options)
@@ -19,9 +21,13 @@ internal class BffAuthenticationSchemeProvider(
     {
         var defaultSchemes = await base.GetRequestHandlerSchemesAsync();
 
-        if (!currentFrontendAccessor.TryGet(out _) && bffOptions.Value.ConfigureOpenIdConnectDefaults != null)
+        if (httpContextAccessor.HttpContext != null
+            && !currentFrontendAccessor.TryGet(out _)
+            && bffOptions.Value.ConfigureOpenIdConnectDefaults != null)
         {
-            defaultSchemes = defaultSchemes.Append(new BffAuthenticationScheme(BffAuthenticationSchemes.BffOpenIdConnect, "Default Duende Bff OpenIdConnect", typeof(OpenIdConnectHandler)));
+            defaultSchemes = defaultSchemes.Append(new BffAuthenticationScheme(
+                BffAuthenticationSchemes.BffOpenIdConnect, "Default Duende Bff OpenIdConnect",
+                typeof(OpenIdConnectHandler)));
         }
 
         return defaultSchemes;
@@ -36,16 +42,22 @@ internal class BffAuthenticationSchemeProvider(
 
     private BffAuthenticationScheme? GetBffAuthenticationScheme(string name)
     {
-        currentFrontendAccessor.TryGet(out var frontend);
+        BffFrontend? frontend = null;
+        if (httpContextAccessor.HttpContext != null)
+        {
+            currentFrontendAccessor.TryGet(out frontend);
+        }
 
         if (name == frontend?.CookieSchemeName || name == BffAuthenticationSchemes.BffCookie)
         {
-            return new BffAuthenticationScheme(frontend?.CookieSchemeName ?? BffAuthenticationSchemes.BffCookie, "Duende Bff Cookie", typeof(CookieAuthenticationHandler));
+            return new BffAuthenticationScheme(frontend?.CookieSchemeName ?? BffAuthenticationSchemes.BffCookie,
+                "Duende Bff Cookie", typeof(CookieAuthenticationHandler));
         }
 
         if (name == frontend?.OidcSchemeName || name == BffAuthenticationSchemes.BffOpenIdConnect)
         {
-            return new BffAuthenticationScheme(frontend?.OidcSchemeName ?? BffAuthenticationSchemes.BffOpenIdConnect, "Duende Bff OpenIdConnect", typeof(OpenIdConnectHandler));
+            return new BffAuthenticationScheme(frontend?.OidcSchemeName ?? BffAuthenticationSchemes.BffOpenIdConnect,
+                "Duende Bff OpenIdConnect", typeof(OpenIdConnectHandler));
         }
 
         return null;

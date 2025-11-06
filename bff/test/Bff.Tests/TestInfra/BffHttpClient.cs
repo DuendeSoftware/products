@@ -15,20 +15,22 @@ public static class CookieContainerExtensions
         var cookies = container.GetCookies(uri);
         foreach (var cookie in cookies.ToArray())
         {
-            container.SetCookies(uri, $"{cookie.Name}=; path={cookie.Path}; expires=Thu, 01 Jan 1970 00:00:00 GMT; {(cookie.Secure ? "Secure;" : "")} HttpOnly;");
+            container.SetCookies(uri,
+                $"{cookie.Name}=; path={cookie.Path}; expires=Thu, 01 Jan 1970 00:00:00 GMT; {(cookie.Secure ? "Secure;" : "")} HttpOnly;");
         }
     }
 }
 
-public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, IdentityServerTestHost identityServer) : HttpClient(handler)
+public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, IdentityServerTestHost identityServer)
+    : HttpClient(handler)
 {
     public CookieContainer Cookies { get; } = cookies;
 
     public RedirectHandler RedirectHandler = handler;
 
-    public async Task<HttpResponseMessage> Login(PathString? basePath = null, HttpStatusCode expectedStatusCode = HttpStatusCode.OK) => await GetAsync(basePath.ToString() + "/bff/login")
+    public async Task<HttpResponseMessage> Login(PathString? basePath = null,
+        HttpStatusCode expectedStatusCode = HttpStatusCode.OK) => await GetAsync(basePath.ToString() + "/bff/login")
         .CheckHttpStatusCode(expectedStatusCode);
-
 
 
     public async Task<List<JsonRecord>> CallUserEndpointAsync()
@@ -121,7 +123,8 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
         return response.StatusCode == HttpStatusCode.OK;
     }
 
-    public async Task CreateIdentityServerSessionCookieAsync(IdentityServerTestHost host, string sub, string? sid = null)
+    public async Task CreateIdentityServerSessionCookieAsync(IdentityServerTestHost host, string sub,
+        string? sid = null)
     {
         host.PropsToSignIn = new();
 
@@ -146,9 +149,10 @@ public class BffHttpClient(RedirectHandler handler, CookieContainer cookies, Ide
         {
             identityServer.UserToSignIn = previousUser;
         }
-
     }
-    public async Task RevokeIdentityServerSession() => await GetAsync(identityServer.Url("__signout")).CheckHttpStatusCode(HttpStatusCode.NoContent);
+
+    public async Task RevokeIdentityServerSession() =>
+        await GetAsync(identityServer.Url("__signout")).CheckHttpStatusCode(HttpStatusCode.NoContent);
 
     public async Task<HttpResponseMessage> Logout(string? sid = null, Uri? returnUrl = null)
     {

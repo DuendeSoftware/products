@@ -110,15 +110,15 @@ public class IdentityServerTestHost : TestHost
     public ClaimsPrincipal UserToSignIn { get; set; }
     public AuthenticationProperties? PropsToSignIn { get; set; }
 
-    public Client AddClient(string clientId, Uri uri)
+    public Client AddClient(string clientId, Uri redirectUri)
     {
         var client = new Client()
         {
             ClientId = clientId ?? throw new InvalidOperationException("missing client id"),
             ClientSecrets = { new Secret(The.ClientSecret.Sha256()) },
             AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-            RedirectUris = [new Uri(uri, "signin-oidc").ToString()],
-            PostLogoutRedirectUris = [new Uri(uri, "signout-callback-oidc").ToString()],
+            RedirectUris = [new Uri(redirectUri, "signin-oidc").ToString()],
+            PostLogoutRedirectUris = [new Uri(redirectUri, "signout-callback-oidc").ToString()],
             AllowOfflineAccess = true,
             AllowedScopes = { "openid", "profile", The.Scope, "offline_access" },
         };
