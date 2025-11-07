@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Documentation.Mcp.Database;
 using Markdig.Syntax;
@@ -16,13 +17,21 @@ internal sealed class DocsArticleIndexer(IServiceProvider services, ILogger<Docs
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(2);
 
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(500), stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await RunIndexerAsync(stoppingToken);
+            try
+            {
+                await RunIndexerAsync(stoppingToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error running docs indexer. Try restarting the application.");
+            }
             await Task.Delay(TimeSpan.FromHours(8), stoppingToken);
         }
     }
