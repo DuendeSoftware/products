@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using Documentation.Mcp.Database;
 using HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
@@ -17,13 +18,21 @@ internal sealed class BlogArticleIndexer(IServiceProvider services, ILogger<Blog
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(2);
     private static readonly DateTime ReferenceDate = new(2024, 10, 01);
 
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(500), stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await RunIndexerAsync(stoppingToken);
+            try
+            {
+                await RunIndexerAsync(stoppingToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error running blog indexer. Try restarting the application.");
+            }
             await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
         }
     }
