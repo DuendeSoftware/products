@@ -10,13 +10,25 @@ public sealed class CurrentFrontendAccessor(IHttpContextAccessor contextAccessor
 {
     private const string HttpItemName = "Duende.Bff.Frontend";
 
-    private HttpContext Context => contextAccessor.HttpContext ?? throw new InvalidOperationException("Not running in a http context");
+    internal void Set(BffFrontend frontend)
+    {
+        if (contextAccessor.HttpContext == null)
+        {
+            throw new InvalidOperationException("Not running in a http context");
+        }
 
-    internal void Set(BffFrontend frontend) => Context.Items[HttpItemName] = frontend;
+        contextAccessor.HttpContext.Items[HttpItemName] = frontend;
+    }
 
     public bool TryGet([NotNullWhen(true)] out BffFrontend? frontend)
     {
-        Context.Items.TryGetValue(HttpItemName, out var value);
+        if (contextAccessor.HttpContext == null)
+        {
+            frontend = null;
+            return false;
+        }
+
+        contextAccessor.HttpContext.Items.TryGetValue(HttpItemName, out var value);
         frontend = value as BffFrontend;
         return frontend != null;
     }

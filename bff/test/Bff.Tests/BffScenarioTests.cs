@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Bff.Benchmarks;
 using Duende.AccessTokenManagement;
+using Duende.AccessTokenManagement.OpenIdConnect;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Tests.TestInfra;
+using Duende.Bff.Yarp;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
@@ -36,7 +40,7 @@ public class BffScenarioTests(ITestOutputHelper output) : BffTestBase(output)
 
             services.AddSingleton(contentReceived);
             services.AddSingleton(workerStarted);
-            services.AddHostedService<BackgroundWorker>();
+            services.AddHostedService<ClientCredentialsBackgroundWorker>();
         };
         await InitializeAsync();
         workerStarted.SetResult();
@@ -44,7 +48,52 @@ public class BffScenarioTests(ITestOutputHelper output) : BffTestBase(output)
         content.ShouldNotBeNullOrEmpty();
     }
 
-    internal class BackgroundWorker(
+    [Fact]
+    public async Task Foo()
+    {
+        var workerClientId = "worker.client.id";
+        IdentityServer.AddClient(workerClientId, Bff.Url());
+        var contentReceived = new TaskCompletionSource<string>();
+        var workerStarted = new TaskCompletionSource();
+
+        Bff.OnConfigureServices += services =>
+        {
+            services.AddAuthentication(x =>
+                {
+                    x.DefaultScheme = "oidc";
+                    x.DefaultChallengeScheme = "oidc";
+                })
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.Authority = IdentityServer.Url().ToString();
+                    options.ClientId = ClientId.Parse(workerClientId);
+                    options.ClientSecret = The.ClientSecret;
+                });
+
+            services.AddOpenIdConnectAccessTokenManagement();
+            services.AddClientAccessTokenHttpClient("worker",
+                    configureClient: client => { client.BaseAddress = Api.Url(); })
+                .ConfigurePrimaryHttpMessageHandler(() => Internet);
+
+            services.AddSingleton(contentReceived);
+            services.AddSingleton(workerStarted);
+            // services.AddHostedService<ClientCredentialsBackgroundWorker>();
+        };
+        Bff.OnConfigureBff += builder => { builder.AddRemoteApis(); };
+        Bff.OnConfigureApp += app =>
+        {
+            app.MapRemoteBffApiEndpoint("/foo", Api.Url())
+                .WithAccessToken(RequiredTokenType.Client);
+        };
+        await InitializeAsync();
+        await Bff.BrowserClient.Login();
+        await Bff.BrowserClient.GetAsync("/foo").EnsureStatusCode();
+        // workerStarted.SetResult();
+        // var content = await contentReceived.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        // content.ShouldNotBeNullOrEmpty();
+    }
+
+    internal class ClientCredentialsBackgroundWorker(
         IHttpClientFactory httpClientFactory,
         TaskCompletionSource<string> contentReceived,
         TaskCompletionSource workerIsAllowedToStart) : BackgroundService
