@@ -36,8 +36,8 @@ var plannedRuns = new List<PlannedRun>
     new() { Enabled = true, Id = "J", Name = "No scope (resource: resource1)", Scope = "", Resource = "urn:resource1" },
     new() { Enabled = true, Id = "K", Name = "No scope (resource: resource3)", Scope = "", Resource = "urn:resource3" },
     new() { Enabled = true, Id = "L", Name = "Isolated scope without resource parameter", Scope = "resource3.scope1" },
-    new() { Enabled = true, Id = "M", Name = "Isolated scope without resource parameter", Scope = "resource3.scope1", Resource = "urn:resource3" },
-    new() { Enabled = true, Id = "N", Name = "Isolated scope without resource parameter", Scope = "resource3.scope1", Resource = "urn:resource2" }
+    new() { Enabled = true, Id = "M", Name = "Isolated scope with resource parameter", Scope = "resource3.scope1", Resource = "urn:resource3" },
+    new() { Enabled = true, Id = "N", Name = "Shared scope with resource parameter", Scope = "shared.scope", Resource = "urn:resource2" }
 };
 
 // Execute the planned runs
