@@ -4,6 +4,7 @@
 using System.Globalization;
 using System.Security.Claims;
 using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Hosts.Shared.Customization;
 using Duende.IdentityServer.UI;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -170,6 +171,9 @@ internal static class HostingExtensions
         // UI
         app.MapRazorPages()
             .RequireAuthorization();
+
+        app.MapDynamicClientRegistration()
+            .AllowAnonymous();
 
         return app;
     }

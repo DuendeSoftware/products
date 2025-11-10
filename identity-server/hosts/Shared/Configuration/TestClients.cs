@@ -7,7 +7,7 @@ namespace Duende.IdentityServer.Hosts.Shared.Configuration;
 
 public static class TestClients
 {
-    public static IEnumerable<Client> Get()
+    public static List<Client> Get()
     {
         var clients = new List<Client>();
 
