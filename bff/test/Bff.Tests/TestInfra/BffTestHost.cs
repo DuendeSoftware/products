@@ -62,7 +62,7 @@ public class BffTestHost(TestHostContext context, IdentityServerTestHost identit
             }
         };
     }
-   
+
 
     public BffHttpClient BuildBrowserClient(Uri baseAddress, CookieContainer? cookieContainer = null)
     {
