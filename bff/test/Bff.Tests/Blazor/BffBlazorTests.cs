@@ -2,10 +2,12 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
-using Duende.Bff;
 using Duende.Bff.Blazor;
+using Duende.Bff.EntityFramework;
 using Duende.Bff.Tests.Blazor.Components;
 using Duende.Bff.Tests.TestInfra;
+using Microsoft.EntityFrameworkCore;
+using UserSessionDb;
 using Xunit.Abstractions;
 
 namespace Bff.Tests.Blazor;
@@ -32,12 +34,31 @@ public class BffBlazorTests(ITestOutputHelper testOutputHelper) : BffTestBase(te
 
             if (_addServerSideSessions)
             {
-                bff.AddServerSideSessions();
+                var dbFilePath = Path.Combine(
+                    Path.GetTempPath(),
+                    $"test-{Guid.NewGuid():N}.sqlite"
+                );
+                var connectionString = $"Data Source={dbFilePath}";
+                bff.AddEntityFrameworkServerSideSessions(options =>
+                    options.UseSqlite(
+                        connectionString,
+                        dbOpts => dbOpts.MigrationsAssembly(typeof(Startup).Assembly.FullName)
+                    )
+                );
+                bff.AddSessionCleanupBackgroundProcess();
             }
         };
 
         Bff.OnConfigureApp += app =>
         {
+            if (_addServerSideSessions)
+            {
+                using var scope = app
+                    .ApplicationServices.GetRequiredService<IServiceScopeFactory>()
+                    .CreateScope();
+                scope.ServiceProvider.GetRequiredService<SessionDbContext>().Database.Migrate();
+            }
+
             app.UseAntiforgery();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode()

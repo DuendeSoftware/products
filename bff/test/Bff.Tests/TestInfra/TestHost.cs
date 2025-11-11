@@ -1,8 +1,8 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
-
 using Duende.Bff.Builder;
 using Duende.Bff.DynamicFrontends;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.TestHost;
 
 namespace Duende.Bff.Tests.TestInfra;
@@ -17,6 +17,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     protected void WriteOutput(string output) => context.WriteOutput(output);
 
     IServiceProvider? _appServices = null!;
+    private WebApplication? _webApplication = null;
 
     public TestServer Server { get; private set; } = null!;
 
@@ -92,19 +93,22 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     {
         Initialize();
 
-        var hostBuilder = new HostBuilder()
-            .ConfigureWebHost(builder =>
-            {
-                builder.UseTestServer();
+        var hostBuilder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions()
+        {
+            ApplicationName = baseAddress.ToString(),
+        });
 
-                builder.ConfigureServices(ConfigureServices);
-                builder.Configure(ConfigureApp);
-            });
+        hostBuilder.WebHost.UseTestServer();
+        ConfigureServices(hostBuilder.Services);
+        hostBuilder.Logging.ClearProviders();
+        hostBuilder.Logging.SetMinimumLevel(LogLevel.Debug);
+        hostBuilder.Logging.AddProvider(Logger);
 
-        // Build and start the IHost
-        var host = await hostBuilder.StartAsync();
-        Server = host.GetTestServer();
-
+        _webApplication = hostBuilder.Build();
+        Server = (_webApplication.Services.GetRequiredService<IServer>() as TestServer)!;
+        ConfigureApp(_webApplication);
+        await _webApplication.StartAsync();
+        _webApplication.Services.GetRequiredService<ILogger<StartupBase>>().LogInformation("Started TestHost server at " + baseAddress);
         context.Internet.AddHandler(this);
     }
 
@@ -120,11 +124,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
         services.AddAuthorization();
         services.AddRouting();
 
-        services.AddLogging(options =>
-        {
-            options.SetMinimumLevel(LogLevel.Debug);
-            options.AddProvider(Logger);
-        });
+
 
         OnConfigureServices(services);
     }
@@ -146,12 +146,13 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
 
     public async ValueTask DisposeAsync()
     {
+        await CastAndDispose(_webApplication);
         await CastAndDispose(Server);
         await CastAndDispose(Logger);
 
         return;
 
-        static async ValueTask CastAndDispose(IDisposable resource)
+        static async ValueTask CastAndDispose(IDisposable? resource)
         {
             if (resource is IAsyncDisposable resourceAsyncDisposable)
             {
@@ -159,7 +160,7 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
             }
             else
             {
-                resource.Dispose();
+                resource?.Dispose();
             }
         }
     }

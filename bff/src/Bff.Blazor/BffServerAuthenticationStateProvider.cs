@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -31,7 +32,7 @@ namespace Duende.Bff.Blazor;
 /// </summary>
 internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerAuthenticationStateProvider, IDisposable
 {
-    private readonly IUserSessionStore _sessionStore;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly PersistentComponentState _state;
     private readonly NavigationManager _navigation;
     private readonly BuildUserSessionPartitionKey _buildUserSessionPartitionKey;
@@ -45,7 +46,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
     protected override TimeSpan RevalidationInterval { get; }
 
     public BffServerAuthenticationStateProvider(
-        IUserSessionStore sessionStore,
+        IServiceScopeFactory serviceScopeFactory,
         PersistentComponentState persistentComponentState,
         NavigationManager navigation,
         BuildUserSessionPartitionKey buildUserSessionPartitionKey,
@@ -55,7 +56,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         ILoggerFactory loggerFactory)
         : base(loggerFactory)
     {
-        _sessionStore = sessionStore;
+        _serviceScopeFactory = serviceScopeFactory;
         _state = persistentComponentState;
         _navigation = navigation;
         _buildUserSessionPartitionKey = buildUserSessionPartitionKey;
@@ -136,6 +137,9 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
     /// <returns>A boolean indicating whether the authentication state is valid.</returns>
     protected override async Task<bool> ValidateAuthenticationStateAsync(AuthenticationState authenticationState, CT ct)
     {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var sessionStore = scope.ServiceProvider.GetRequiredService<IUserSessionStore>();
+
         var sid = authenticationState.User.FindFirstValue(JwtClaimTypes.SessionId);
         var sub = authenticationState.User.FindFirstValue(JwtClaimTypes.Subject);
 
@@ -146,7 +150,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         };
         var partitionKey = _buildUserSessionPartitionKey();
 
-        var sessions = await _sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter, ct);
+        var sessions = await sessionStore.GetUserSessionsAsync(partitionKey, userSessionsFilter, ct);
         return sessions.Count != 0;
     }
 }
