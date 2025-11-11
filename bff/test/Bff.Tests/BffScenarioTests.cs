@@ -1,4 +1,4 @@
-﻿// Copyright (c) Duende Software. All rights reserved.
+// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 using Bff.Benchmarks;
@@ -58,17 +58,17 @@ public class BffScenarioTests(ITestOutputHelper output) : BffTestBase(output)
 
         Bff.OnConfigureServices += services =>
         {
-            services.AddAuthentication(x =>
-                {
-                    x.DefaultScheme = "oidc";
-                    x.DefaultChallengeScheme = "oidc";
-                })
-                .AddOpenIdConnect("oidc", options =>
-                {
-                    options.Authority = IdentityServer.Url().ToString();
-                    options.ClientId = ClientId.Parse(workerClientId);
-                    options.ClientSecret = The.ClientSecret;
-                });
+            //services.AddAuthentication(x =>
+            //    {
+            //        x.DefaultScheme = "oidc";
+            //        x.DefaultChallengeScheme = "oidc";
+            //    })
+            //    .AddOpenIdConnect("oidc", options =>
+            //    {
+            //        options.Authority = IdentityServer.Url().ToString();
+            //        options.ClientId = ClientId.Parse(workerClientId);
+            //        options.ClientSecret = The.ClientSecret;
+            //    });
 
             services.AddOpenIdConnectAccessTokenManagement();
             services.AddClientAccessTokenHttpClient("worker",
@@ -77,20 +77,34 @@ public class BffScenarioTests(ITestOutputHelper output) : BffTestBase(output)
 
             services.AddSingleton(contentReceived);
             services.AddSingleton(workerStarted);
-            // services.AddHostedService<ClientCredentialsBackgroundWorker>();
+             services.AddHostedService<ClientCredentialsBackgroundWorker>();
         };
-        Bff.OnConfigureBff += builder => { builder.AddRemoteApis(); };
+        Bff.OnConfigureBff += builder =>
+        {
+            builder.ConfigureOpenIdConnect(options =>
+            {
+                options.Authority = IdentityServer.Url().ToString();
+                options.ClientId = ClientId.Parse(workerClientId);
+                options.ClientSecret = The.ClientSecret;
+                options.ResponseType = "code";
+                options.ResponseMode = "query";
+                options.Scope.Clear();
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("offline_access");
+                options.BackchannelHttpHandler = Internet;
+            });
+            builder.AddRemoteApis();
+        };
         Bff.OnConfigureApp += app =>
         {
             app.MapRemoteBffApiEndpoint("/foo", Api.Url())
                 .WithAccessToken(RequiredTokenType.Client);
         };
         await InitializeAsync();
-        await Bff.BrowserClient.Login();
-        await Bff.BrowserClient.GetAsync("/foo").EnsureStatusCode();
-        // workerStarted.SetResult();
-        // var content = await contentReceived.Task.WaitAsync(TimeSpan.FromSeconds(5));
-        // content.ShouldNotBeNullOrEmpty();
+        workerStarted.SetResult();
+        var content = await contentReceived.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        content.ShouldNotBeNullOrEmpty();
     }
 
     internal class ClientCredentialsBackgroundWorker(
