@@ -3,6 +3,7 @@
 
 using Duende.Bff.Builder;
 using Duende.Bff.DynamicFrontends;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.TestHost;
 
 namespace Duende.Bff.Tests.TestInfra;
@@ -92,18 +93,16 @@ public class TestHost(TestHostContext context, Uri baseAddress) : IAsyncDisposab
     {
         Initialize();
 
-        var hostBuilder = new HostBuilder()
-            .ConfigureWebHost(builder =>
-            {
-                builder.UseTestServer();
+        var hostBuilder = WebApplication.CreateBuilder();
 
-                builder.ConfigureServices(ConfigureServices);
-                builder.Configure(ConfigureApp);
-            });
+        hostBuilder.WebHost.UseTestServer();
 
-        // Build and start the IHost
-        var host = await hostBuilder.StartAsync();
-        Server = host.GetTestServer();
+        ConfigureServices(hostBuilder.Services);
+
+        var app = hostBuilder.Build();
+        Server = (app.Services.GetRequiredService<IServer>() as TestServer)!;
+        ConfigureApp(app);
+        await app.StartAsync();
 
         context.Internet.AddHandler(this);
     }
