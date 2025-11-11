@@ -110,7 +110,7 @@ internal static class Constants
         OidcConstants.PromptModes.Consent,
         OidcConstants.PromptModes.SelectAccount,
         // Create not in here by default -- it's added if customer sets the CreateAccountUrl user interaction option
-        //OidcConstants.PromptModes.Create, 
+        //OidcConstants.PromptModes.Create,
     };
 
     /// <summary>
@@ -222,6 +222,7 @@ internal static class Constants
         public const string IdentityServerBasePath = "idsvr:IdentityServerBasePath";
         public const string SignOutCalled = "idsvr:IdentityServerSignOutCalled";
         public const string DetectedExpiredUserSession = "idsvr:IdentityServerDetectedExpiredUserSession";
+        public const string BackChannlLogoutTriggered = "idsvr:IdentityServerBackChannlLogoutTriggered";
     }
 
     public static class TokenTypeHints
