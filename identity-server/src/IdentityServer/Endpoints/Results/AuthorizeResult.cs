@@ -223,6 +223,19 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
             await uiLocalesService.StoreUiLocalesForRedirectAsync(response.Request?.UiLocales);
         }
 
+        var errorModel = await CreateErrorMessage(response, context);
+
+        var message = new Message<ErrorMessage>(errorModel, _clock.UtcNow.UtcDateTime);
+        var id = await _errorMessageStore.WriteAsync(message);
+
+        var errorUrl = _options.UserInteraction.ErrorUrl;
+
+        var url = errorUrl.AddQueryString(_options.UserInteraction.ErrorIdParameter, id);
+        context.Response.Redirect(_urls.GetAbsoluteUrl(url));
+    }
+
+    protected virtual Task<ErrorMessage> CreateErrorMessage(AuthorizeResponse response, HttpContext context)
+    {
         var errorModel = new ErrorMessage
         {
             ActivityId = System.Diagnostics.Activity.Current?.Id,
@@ -234,12 +247,6 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
             ClientId = response.Request?.ClientId
         };
 
-        var message = new Message<ErrorMessage>(errorModel, _clock.UtcNow.UtcDateTime);
-        var id = await _errorMessageStore.WriteAsync(message);
-
-        var errorUrl = _options.UserInteraction.ErrorUrl;
-
-        var url = errorUrl.AddQueryString(_options.UserInteraction.ErrorIdParameter, id);
-        context.Response.Redirect(_urls.GetAbsoluteUrl(url));
+        return Task.FromResult(errorModel);
     }
 }
