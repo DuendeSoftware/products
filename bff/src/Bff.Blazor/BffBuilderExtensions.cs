@@ -43,7 +43,7 @@ public static class
         public ServerSideSessionChecker(IServiceProvider sp)
         {
             using var scope = sp.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            
+
             var sessions = scope.ServiceProvider.GetService<IUserSessionStore>();
 
             if (sessions == null)
