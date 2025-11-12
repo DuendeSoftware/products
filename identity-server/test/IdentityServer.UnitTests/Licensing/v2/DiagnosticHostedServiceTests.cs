@@ -4,6 +4,7 @@
 using System.Text.Json;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
+using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +25,8 @@ public class DiagnosticHostedServiceTests
             secondDiagnosticEntry,
             thirdDiagnosticEntry
         };
-        var diagnosticSummary = new DiagnosticSummary(DateTime.UtcNow, entries, new IdentityServerOptions(), new StubLoggerFactory(diagnosticSummaryLogger));
+        var diagnosticService = new DiagnosticDataService(DateTime.UtcNow, entries);
+        var diagnosticSummary = new DiagnosticSummary(diagnosticService, new IdentityServerOptions(), new StubLoggerFactory(diagnosticSummaryLogger));
 
         var options = Options.Create(new IdentityServerOptions());
         var logger = new NullLogger<DiagnosticHostedService>();
