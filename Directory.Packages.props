@@ -3,17 +3,20 @@ that supports the target frameworks our products target (8, 9, 10) -->
 <Project>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
     <FrameworkVersion>8.0.1</FrameworkVersion>
+    <!-- Package Versions Note: 
+         These versions are here because they don't explicitly have a version 10 of the package that supports .NET 8, 9 and 10 -->
     <EFCoreVersion>9.0.9</EFCoreVersion>
     <IdentityEFCoreVersion>8.0.20</IdentityEFCoreVersion>
-    <RuntimeCompilationVersion>8.0.20</RuntimeCompilationVersion>
+    <MvcRazorRuntimeCompilationVersion>8.0.20</MvcRazorRuntimeCompilationVersion>
     <AuthenticationCertificateVersion>8.0.16</AuthenticationCertificateVersion>
+    <!-- /End Note -->
     <IdentityModelVersion>7.1.2</IdentityModelVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0'">
     <FrameworkVersion>9.0.3</FrameworkVersion>
     <EFCoreVersion>9.0.9</EFCoreVersion>
     <IdentityEFCoreVersion>9.0.3</IdentityEFCoreVersion>
-    <RuntimeCompilationVersion>9.0.3</RuntimeCompilationVersion>
+    <MvcRazorRuntimeCompilationVersion>9.0.3</MvcRazorRuntimeCompilationVersion>
     <AuthenticationCertificateVersion>9.0.3</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
   </PropertyGroup>
@@ -21,7 +24,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <FrameworkVersion>10.0.0</FrameworkVersion>
     <EFCoreVersion>10.0.0</EFCoreVersion>
     <IdentityEFCoreVersion>10.0.0</IdentityEFCoreVersion>
-    <RuntimeCompilationVersion>10.0.0</RuntimeCompilationVersion>
+    <MvcRazorRuntimeCompilationVersion>10.0.0</MvcRazorRuntimeCompilationVersion>
     <AuthenticationCertificateVersion>10.0.0</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
   </PropertyGroup>
@@ -57,7 +60,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(IdentityEFCoreVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(RuntimeCompilationVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(MvcRazorRuntimeCompilationVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
