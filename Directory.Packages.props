@@ -1,3 +1,5 @@
+<!-- We have agreed to explicitly target where possible version 10 of the package(s) 
+that supports the target frameworks our products target (8, 9, 10) -->
 <Project>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
     <FrameworkVersion>8.0.1</FrameworkVersion>
