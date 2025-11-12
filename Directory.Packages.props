@@ -54,6 +54,7 @@
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
     <PackageVersion Include="Markdig" Version="0.42.0" />
     <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />
+    <!-- Review Packages -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="$(AuthenticationCertificateVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(FrameworkVersion)" />
@@ -61,7 +62,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="$(FrameworkVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(IdentityEFCoreVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(RuntimeCompilationVersion)" />
