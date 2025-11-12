@@ -7,7 +7,6 @@
     <AuthenticationCertificateVersion>8.0.16</AuthenticationCertificateVersion>
     <IdentityModelVersion>7.1.2</IdentityModelVersion>
     <SystemTextJsonVersion>9.0.9</SystemTextJsonVersion>
-    <LoggingAbstractionsVersion>9.0.9</LoggingAbstractionsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0'">
     <FrameworkVersion>9.0.3</FrameworkVersion>
@@ -17,7 +16,6 @@
     <AuthenticationCertificateVersion>9.0.3</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
     <SystemTextJsonVersion>9.0.9</SystemTextJsonVersion>
-    <LoggingAbstractionsVersion>9.0.9</LoggingAbstractionsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0'">
     <FrameworkVersion>10.0.0</FrameworkVersion>
@@ -27,7 +25,6 @@
     <AuthenticationCertificateVersion>10.0.0</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
     <SystemTextJsonVersion>10.0.0</SystemTextJsonVersion>
-    <LoggingAbstractionsVersion>10.0.0</LoggingAbstractionsVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
@@ -86,7 +83,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(LoggingAbstractionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(FrameworkVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="$(FrameworkVersion)" />
