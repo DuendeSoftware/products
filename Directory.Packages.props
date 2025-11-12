@@ -67,11 +67,9 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
-    <!-- TODO - Upgrade hybrid cache-->
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
-    <!-- TODO - Upgrade diagnostics.testing-->
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
@@ -84,7 +82,6 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="10.0.0" />
-    <!-- TODO - Upgrade service discovery and timeprovider.testing-->
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.0.0" />
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="$(IdentityModelVersion)" />
