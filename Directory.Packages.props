@@ -75,7 +75,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EFCoreVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
     <!-- TODO - Upgrade hybrid cache-->
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(CachingMemoryVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.3.0" />
