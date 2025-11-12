@@ -85,7 +85,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade service discovery and timeprovider.testing-->
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
