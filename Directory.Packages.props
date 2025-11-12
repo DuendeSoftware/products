@@ -6,7 +6,6 @@
     <RuntimeCompilationVersion>8.0.20</RuntimeCompilationVersion>
     <AuthenticationCertificateVersion>8.0.16</AuthenticationCertificateVersion>
     <IdentityModelVersion>7.1.2</IdentityModelVersion>
-    <CachingMemoryVersion>9.0.3</CachingMemoryVersion>
     <SystemTextJsonVersion>9.0.9</SystemTextJsonVersion>
     <LoggingAbstractionsVersion>9.0.9</LoggingAbstractionsVersion>
   </PropertyGroup>
@@ -17,7 +16,6 @@
     <RuntimeCompilationVersion>9.0.3</RuntimeCompilationVersion>
     <AuthenticationCertificateVersion>9.0.3</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
-    <CachingMemoryVersion>9.0.3</CachingMemoryVersion>
     <SystemTextJsonVersion>9.0.9</SystemTextJsonVersion>
     <LoggingAbstractionsVersion>9.0.9</LoggingAbstractionsVersion>
   </PropertyGroup>
@@ -28,7 +26,6 @@
     <RuntimeCompilationVersion>10.0.0</RuntimeCompilationVersion>
     <AuthenticationCertificateVersion>10.0.0</AuthenticationCertificateVersion>
     <IdentityModelVersion>8.0.1</IdentityModelVersion>
-    <CachingMemoryVersion>10.0.0</CachingMemoryVersion>
     <SystemTextJsonVersion>10.0.0</SystemTextJsonVersion>
     <LoggingAbstractionsVersion>10.0.0</LoggingAbstractionsVersion>
   </PropertyGroup>
@@ -77,8 +74,8 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EFCoreVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
     <!-- TODO - Upgrade hybrid cache-->
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(CachingMemoryVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(FrameworkVersion)" />
     <!-- TODO - Upgrade diagnostics.testing-->
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.10.0" />
