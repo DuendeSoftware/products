@@ -113,4 +113,34 @@ public class DynamicClientRegistrationValidationTests : ConfigurationIntegration
         var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
         error?.Error.ShouldBe("invalid_client_metadata");
     }
+
+    [Fact]
+    public async Task client_credentials_and_do_not_require_client_secret_should_fail()
+    {
+        var response = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr",
+            new DynamicClientRegistrationRequest
+            {
+                GrantTypes = { "client_credentials" },
+                RequireClientSecret = false
+            });
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
+        error?.Error.ShouldBe("invalid_client_metadata");
+    }
+
+    [Fact]
+    public async Task client_credentials_and_token_endpoint_auth_method_none_should_fail()
+    {
+        var response = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr",
+            new DynamicClientRegistrationRequest
+            {
+                GrantTypes = { "client_credentials" },
+                TokenEndpointAuthenticationMethod = "none"
+            });
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        var error = await response.Content.ReadFromJsonAsync<DynamicClientRegistrationError>();
+        error?.Error.ShouldBe("invalid_client_metadata");
+    }
 }

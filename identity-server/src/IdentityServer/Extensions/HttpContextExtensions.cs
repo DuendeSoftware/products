@@ -23,6 +23,14 @@ public static class HttpContextExtensions
 
     internal static bool GetSignOutCalled(this HttpContext context) => context.Items.ContainsKey(Constants.EnvironmentKeys.SignOutCalled);
 
+    internal static void SetBackChannelLogoutTriggered(this HttpContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        context.Items[Constants.EnvironmentKeys.BackChannlLogoutTriggered] = "true";
+    }
+
+    internal static bool GetBackChannelLogoutTriggered(this HttpContext context) => context.Items.ContainsKey(Constants.EnvironmentKeys.BackChannlLogoutTriggered);
+
     internal static void SetExpiredUserSession(this HttpContext context, UserSession userSession)
     {
         ArgumentNullException.ThrowIfNull(context);

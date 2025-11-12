@@ -95,7 +95,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
     protected virtual async Task<IStepResult> AddClientSecret(
         DynamicClientRegistrationContext context)
     {
-        if (context.Client.ClientSecrets.Count == 0)
+        if (context.Client.ClientSecrets.Count == 0 && context.Request.TokenEndpointAuthenticationMethod != "none")
         {
             var (secret, plainText) = await GenerateSecret(context);
             context.Items["secret"] = secret;

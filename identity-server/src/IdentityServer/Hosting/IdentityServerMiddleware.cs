@@ -7,7 +7,6 @@ using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Logging;
-using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -61,28 +60,6 @@ public class IdentityServerMiddleware
 
         context.Response.OnStarting(async () =>
         {
-            if (context.GetSignOutCalled())
-            {
-                _sanitizedLogger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
-
-                // this clears our session id cookie so JS clients can detect the user has signed out
-                await userSession.RemoveSessionIdCookieAsync();
-
-                var user = await userSession.GetUserAsync();
-                if (user != null)
-                {
-                    var session = new UserSession
-                    {
-                        SubjectId = user.GetSubjectId(),
-                        SessionId = await userSession.GetSessionIdAsync(),
-                        DisplayName = user.GetDisplayName(),
-                        ClientIds = (await userSession.GetClientListAsync()).ToList(),
-                        Issuer = await issuerNameService.GetCurrentAsync()
-                    };
-                    await sessionCoordinationService.ProcessLogoutAsync(session);
-                }
-            }
-
             if (context.TryGetExpiredUserSession(out var expiredUserSession))
             {
                 _sanitizedLogger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");

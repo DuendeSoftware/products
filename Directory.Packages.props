@@ -34,9 +34,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.0" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="9.5.0" />
-    <PackageVersion Include="Aspire.Hosting.SqlServer" Version="9.5.0" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.SqlServer" Version="9.5.2" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.0" />
     <PackageVersion Include="BullsEye" Version="5.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />

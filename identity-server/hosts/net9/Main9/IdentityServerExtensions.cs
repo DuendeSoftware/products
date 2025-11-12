@@ -5,6 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.Configuration.RequestProcessing;
 using Duende.IdentityServer.Hosts.Shared.Configuration;
 using Duende.IdentityServer.Hosts.Shared.Customization;
 using Microsoft.AspNetCore.Authentication.Certificate;
@@ -51,7 +52,7 @@ internal static class IdentityServerExtensions
                 options.Diagnostics.ChunkSize = 1024 * 1000 - 32; // 1 MB minus some formatting space;
             })
             .AddServerSideSessions()
-            .AddInMemoryClients([.. TestClients.Get()])
+            .AddInMemoryClients(TestClients.Get())
             .AddInMemoryIdentityResources(TestResources.IdentityResources)
             .AddInMemoryApiResources(TestResources.ApiResources)
             .AddInMemoryApiScopes(TestResources.ApiScopes)
@@ -81,6 +82,7 @@ internal static class IdentityServerExtensions
 
         builder.Services.AddIdentityServerConfiguration(opt => { })
             .AddInMemoryClientConfigurationStore();
+        builder.Services.AddTransient<IDynamicClientRegistrationRequestProcessor, CustomClientRegistrationProcessor>();
 
         builder.Services.AddDistributedMemoryCache();
 

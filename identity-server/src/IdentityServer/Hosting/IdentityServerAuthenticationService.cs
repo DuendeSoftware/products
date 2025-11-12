@@ -7,6 +7,7 @@ using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration.DependencyInjection;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -27,6 +28,8 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
     private readonly IAuthenticationSchemeProvider _schemes;
     private readonly IClock _clock;
     private readonly IUserSession _session;
+    private readonly IIssuerNameService _issuerNameService;
+    private readonly ISessionCoordinationService _sessionCoordinationService;
     private readonly ILogger<IdentityServerAuthenticationService> _logger;
 
     public IdentityServerAuthenticationService(
@@ -34,6 +37,8 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         IAuthenticationSchemeProvider schemes,
         IClock clock,
         IUserSession session,
+        IIssuerNameService issuerNameService,
+        ISessionCoordinationService sessionCoordinationService,
         ILogger<IdentityServerAuthenticationService> logger)
     {
         _inner = decorator.Instance;
@@ -41,6 +46,8 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         _schemes = schemes;
         _clock = clock;
         _session = session;
+        _issuerNameService = issuerNameService;
+        _sessionCoordinationService = sessionCoordinationService;
         _logger = logger;
     }
 
@@ -77,6 +84,38 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         {
             // this sets a flag used by middleware to do post-signout work.
             context.SetSignOutCalled();
+
+            if (!context.GetBackChannelLogoutTriggered())
+            {
+                // Note: it is important the work for triggering back-channel logout
+                // is inside the Response.OnStarting event. Otherwise, in some conditions
+                // the request will never complete.
+                // See: https://github.com/DuendeArchive/IdentityServer4/issues/4644
+                context.Response.OnStarting(async () =>
+                {
+                    _logger.LogDebug("SignOutCalled set; processing post-signout session cleanup.");
+
+                    // back channel logout
+                    var user = await _session.GetUserAsync();
+                    if (user != null)
+                    {
+                        var session = new UserSession
+                        {
+                            SubjectId = user.GetSubjectId(),
+                            SessionId = await _session.GetSessionIdAsync(),
+                            DisplayName = user.GetDisplayName(),
+                            ClientIds = (await _session.GetClientListAsync()).ToList(),
+                            Issuer = await _issuerNameService.GetCurrentAsync()
+                        };
+                        await _sessionCoordinationService.ProcessLogoutAsync(session);
+                    }
+
+                    // this clears our session id cookie so JS clients can detect the user has signed out
+                    await _session.RemoveSessionIdCookieAsync();
+                });
+
+                context.SetBackChannelLogoutTriggered();
+            }
         }
 
         await _inner.SignOutAsync(context, scheme, properties);
