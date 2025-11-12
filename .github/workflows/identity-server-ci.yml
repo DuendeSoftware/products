@@ -61,7 +61,9 @@ jobs:
   build:
     name: Build and test (unit)
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       actions: read
       checks: write

@@ -95,7 +95,7 @@ void GenerateCiWorkflow(Product product)
         .Job(BuildJobId)
         .RunEitherOnBranchOrAsPR()
         .Name("Build and test (unit)")
-        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
         .Defaults().Run("bash", product.Name)
         .Job;
 
