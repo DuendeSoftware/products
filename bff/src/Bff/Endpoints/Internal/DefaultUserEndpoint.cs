@@ -69,12 +69,8 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
     /// Collect user-centric claims
     /// </summary>
     /// <returns></returns>
-<<<<<<< HEAD:bff/src/Bff/EndpointServices/User/DefaultUserService.cs
-    protected virtual Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult) => Task.FromResult(authenticateResult.Principal?.Claims.Select(x => new ClaimRecord(x.Type, x.Value)) ?? Enumerable.Empty<ClaimRecord>());
-=======
     private static Task<IEnumerable<ClaimRecord>> GetUserClaimsAsync(AuthenticateResult authenticateResult, CT ct = default) =>
         Task.FromResult(authenticateResult.Principal?.Claims.Select(x => new ClaimRecord(x.Type, x.Value)) ?? Enumerable.Empty<ClaimRecord>());
->>>>>>> 3721b63c8 (Revert "restore BFF main to V3, in preparation for creating V4 release branch"):bff/src/Bff/Endpoints/Internal/DefaultUserEndpoint.cs
 
     /// <summary>
     /// Collect management claims

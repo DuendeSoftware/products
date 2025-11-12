@@ -55,27 +55,4 @@ internal class PostConfigureSlidingExpirationCheck(
 
         return Callback;
     }
-
-    private Func<CookieSlidingExpirationContext, Task> CreateCallback(Func<CookieSlidingExpirationContext, Task> inner)
-    {
-        Task Callback(CookieSlidingExpirationContext ctx)
-        {
-            var result = inner?.Invoke(ctx) ?? Task.CompletedTask;
-
-            // disable sliding expiration
-            if (ctx.HttpContext.Request.Path == _options.UserPath)
-            {
-                var slide = ctx.Request.Query[Constants.RequestParameters.SlideCookie];
-                if (slide == "false")
-                {
-                    _logger.LogDebug("Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.");
-                    ctx.ShouldRenew = false;
-                }
-            }
-
-            return result;
-        }
-
-        return Callback;
-    }
 }

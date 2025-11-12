@@ -21,30 +21,24 @@ public sealed class BffRemoteApiEndpointMetadata : IBffApiMetadata
     /// </summary>
     public BffUserAccessTokenParameters? BffUserAccessTokenParameters { get; set; }
 
-    private Type _accessTokenRetriever = typeof(IAccessTokenRetriever);
-
     /// <summary>
     /// The type used to retrieve access tokens.
     /// </summary>
     public Type AccessTokenRetriever
     {
-        get => _accessTokenRetriever;
+        get;
         set
         {
             ArgumentNullException.ThrowIfNull(value);
             if (value.IsAssignableTo(typeof(IAccessTokenRetriever)))
             {
-                _accessTokenRetriever = value;
+                field = value;
             }
             else
             {
-<<<<<<< HEAD
-                throw new InvalidOperationException("Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
-=======
                 throw new InvalidOperationException(
                     "Attempt to assign a AccessTokenRetriever type that cannot be assigned to IAccessTokenTokenRetriever");
->>>>>>> 3721b63c8 (Revert "restore BFF main to V3, in preparation for creating V4 release branch")
             }
         }
-    }
+    } = typeof(IAccessTokenRetriever);
 }
