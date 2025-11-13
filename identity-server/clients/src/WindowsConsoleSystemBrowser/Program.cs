@@ -74,7 +74,7 @@ internal class Program
         {
             Authority = Constants.Authority,
             ClientId = "winconsole",
-            Scope = "openid profile scope1",
+            Scope = "openid profile resource1.scope1",
             RedirectUri = redirectUri,
         };
 
@@ -94,7 +94,12 @@ internal class Program
         var callbackManager = new CallbackManager(state.State);
 
         // open system browser to start authentication
-        Process.Start(state.StartUrl);
+        var psi = new ProcessStartInfo
+        {
+            FileName = state.StartUrl,
+            UseShellExecute = true
+        };
+        Process.Start(psi);
 
         Console.WriteLine("Running callback manager");
         var response = await callbackManager.RunServer();

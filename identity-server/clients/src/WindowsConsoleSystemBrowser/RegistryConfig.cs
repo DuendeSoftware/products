@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
 
@@ -36,7 +35,7 @@ internal class RegistryConfig
 
     private const string CommandKeyValueName = "";
     private const string CommandKeyValueFormat = "\"{0}\" \"%1\"";
-    private static string CommandKeyValueValue => string.Format(CommandKeyValueFormat, Assembly.GetExecutingAssembly().Location);
+    private static string CommandKeyValueValue => string.Format(CommandKeyValueFormat, Environment.ProcessPath);
 
     private const string UrlProtocolValueName = "URL Protocol";
     private const string UrlProtocolValueValue = "";
