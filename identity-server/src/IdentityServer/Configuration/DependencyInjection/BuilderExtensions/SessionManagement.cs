@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class SessionManagementServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds a server-side session store using the provided store type
+    /// Adds server-side session components using the provided store type
     /// </summary>
     /// <returns></returns>
     public static IIdentityServerBuilder AddServerSideSessions<T>(this IIdentityServerBuilder builder)
@@ -31,8 +31,11 @@ public static class SessionManagementServiceCollectionExtensions
             .AddServerSideSessions();
 
     /// <summary>
-    /// Adds a server-side session store using the in-memory store
+    /// Adds server-side session components, including an in-memory store if no other store has been registered
     /// </summary>
+    /// <remarks>
+    /// If no other <see cref="IServerSideSessionStore"/> has been registered, an in-memory store will be registered
+    /// </remarks>
     /// <returns></returns>
     public static IIdentityServerBuilder AddServerSideSessions(this IIdentityServerBuilder builder)
     {
