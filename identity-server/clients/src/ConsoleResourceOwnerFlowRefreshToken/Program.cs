@@ -34,12 +34,12 @@ response.Show();
 
 var refresh_token = response.RefreshToken;
 
-while (true)
+for (var i = 0; i < 10; i++)
 {
     response = await RefreshTokenAsync(refresh_token);
     response.Show();
 
-    Thread.Sleep(5000);
+    Thread.Sleep(50);
 
     await CallServiceAsync(response.AccessToken);
 

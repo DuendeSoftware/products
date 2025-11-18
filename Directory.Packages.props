@@ -30,22 +30,25 @@ that supports the target frameworks our products target (8, 9, 10) -->
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.0" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="9.5.0" />
-    <PackageVersion Include="Aspire.Hosting.SqlServer" Version="9.5.0" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.0.0" />
+    <PackageVersion Include="Aspire.Hosting.SqlServer" Version="13.0.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.0" />
     <PackageVersion Include="BullsEye" Version="5.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <!-- Added aspire transitive package to resolve package vulnerability -->
     <PackageVersion Include="KubernetesClient" Version="17.0.14" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.0-rc.1" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.0-rc.1" />
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="[3.3.0-rc.1, 4.0.0)" Condition="'$(IsBffProject)' == 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.0-rc.1" Condition="'$(IsBffProject)' != 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="[3.3.0-rc.1, 4.0.0)" Condition="'$(IsBffProject)' == 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.0-rc.1" Condition="'$(IsBffProject)' != 'true'" />
     <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.1.3" />
     <PackageVersion Include="Duende.IdentityModel" Version="8.0.0-rc.1" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0-rc.1" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.4.0-preview.2" />
     <PackageVersion Include="Duende.Private.Licensing" Version="1.0.0" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
+    <PackageVersion Include="Markdig" Version="0.42.0" />
     <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />
     <!-- Review Packages -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="$(AuthenticationCertificateVersion)" />
@@ -94,6 +97,8 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="MinVer" Version="6.0.0" />
+    <PackageVersion Include="ModelContextProtocol" Version="0.3.0-preview.4" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
     <PackageVersion Include="NBomber" Version="6.0.2" />
     <PackageVersion Include="NBomber.Http" Version="6.0.2" />
     <PackageVersion Include="NBomber.Sinks.Timescale" Version="0.8.0" />
@@ -107,6 +112,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.12.0-beta.2" />
     <PackageVersion Include="OpenTelemetry" Version="1.12.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.1.0" />
+    <PackageVersion Include="ReverseMarkdown" Version="4.7.0" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
     <PackageVersion Include="Serilog" Version="4.2.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
@@ -118,6 +124,9 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Include="SimpleExec" Version="12.0.0" />
+    <PackageVersion Include="SimpleFeedReader" Version="2.0.4" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />
+    <PackageVersion Include="Spectre.Console.Json" Version="0.53.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="$(IdentityModelVersion)" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Text.Json" Version="10.0.0" />

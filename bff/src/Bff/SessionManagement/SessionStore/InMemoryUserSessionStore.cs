@@ -87,7 +87,6 @@ internal class InMemoryUserSessionStore(
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-
         if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);
@@ -107,7 +106,6 @@ internal class InMemoryUserSessionStore(
         {
             query = query.Where(x => x.SubjectId == filter.SubjectId);
         }
-
         if (!string.IsNullOrWhiteSpace(filter.SessionId))
         {
             query = query.Where(x => x.SessionId == filter.SessionId);

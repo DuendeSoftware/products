@@ -20,8 +20,6 @@
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.EF/Hosts.Bff.EF.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.InMemory/Hosts.Bff.InMemory.csproj" />
-    <Project Path="bff/hosts/Hosts.Bff.MultiFrontend/Hosts.Bff.MultiFrontend.csproj" />
-    <Project Path="bff/hosts/Hosts.Bff.Performance/Hosts.Bff.Performance.csproj" />
     <Project Path="bff/hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj" />
     <Project Path="bff/hosts/Hosts.ServiceDefaults/Hosts.ServiceDefaults.csproj" />
   </Folder>
@@ -42,10 +40,6 @@
   <Folder Name="/bff/migrations/">
     <Project Path="bff/migrations/UserSessionDb/UserSessionDb.csproj" />
   </Folder>
-  <Folder Name="/bff/performance/">
-    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
-    <Project Path="bff/performance/Bff.Performance/Bff.Performance.csproj" />
-  </Folder>
   <Folder Name="/bff/src/">
     <Project Path="bff/src/Bff.Blazor.Client/Bff.Blazor.Client.csproj" />
     <Project Path="bff/src/Bff.Blazor/Bff.Blazor.csproj" />
@@ -59,12 +53,37 @@
     <Project Path="bff/templates/src/BffRemoteApi/BffRemoteApi.csproj" />
   </Folder>
   <Folder Name="/bff/templates/src/BffBlazorAutoRenderMode/">
-    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj" />
-    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj" />
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj" Type="Classic C#">
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj" Type="Classic C#">
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
   </Folder>
   <Folder Name="/bff/test/">
+    <Project Path="bff/test/Bff.Blazor.Client.UnitTests/Bff.Blazor.Client.UnitTests.csproj" />
+    <Project Path="bff/test/Bff.Blazor.UnitTests/Bff.Blazor.UnitTests.csproj" />
+    <Project Path="bff/test/Bff.EntityFramework.Tests/Bff.EntityFramework.Tests.csproj" />
     <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
+  </Folder>
+  <Folder Name="/docs-mcp/">
+    <Project Path="docs-mcp\src\Documentation.Mcp\Documentation.Mcp.csproj" >
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
+    <File Path="docs-mcp\README.md" />
+  </Folder>
+  <Folder Name="/docs-mcp/.config/">
+    <File Path="docs-mcp\.config\dotnet-tools.json" />
   </Folder>
   <Folder Name="/identity-server/" />
   <Folder Name="/identity-server/aspire/">

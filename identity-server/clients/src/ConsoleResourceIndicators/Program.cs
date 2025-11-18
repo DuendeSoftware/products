@@ -8,16 +8,58 @@ using ConsoleResourceIndicators;
 using Duende.IdentityModel.Client;
 using Duende.IdentityModel.OidcClient;
 using Microsoft.Extensions.Hosting;
-using Serilog;
+using Spectre.Console;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add ServiceDefaults from Aspire
 builder.AddServiceDefaults();
 
-OidcClient _oidcClient;
+// Display banner
+AnsiConsole.Write(new Rule("[bold green]Resource Indicators Demo[/]").Centered());
+AnsiConsole.WriteLine();
 
-"Resource Indicators Demo".ConsoleBox(ConsoleColor.Green);
+// Resolve the authority from the configuration
+var authority = builder.Configuration["is-host"]
+    ?? throw new InvalidOperationException("Authority configuration 'is-host' is missing.");
+
+// Display important setup information
+var setupPanel = new Panel(
+    new Markup($"[yellow]⚠[/] [bold]Before running tests:[/]\n" +
+              $"[dim]→[/] Ensure your Identity Server is running at: [cyan]{authority}[/]\n" +
+              $"[dim]→[/] Sign in to the Identity Server before starting tests\n" +
+              $"[dim]→[/] This will allow tests to complete quickly and smoothly"))
+    .Border(BoxBorder.Rounded)
+    .BorderColor(Color.Yellow)
+    .Header("[yellow]Setup Checklist[/]");
+
+AnsiConsole.Write(setupPanel);
+AnsiConsole.WriteLine();
+
+// Determine output mode based on whether console is interactive
+OutputMode mode;
+
+if (Console.IsInputRedirected || Console.IsOutputRedirected || !Environment.UserInteractive)
+{
+    // Non-interactive environment, use verbose mode by default
+    AnsiConsole.MarkupLine("[dim]Running in non-interactive mode. Using verbose output.[/]");
+    mode = OutputMode.Verbose;
+}
+else
+{
+    // Interactive environment, prompt user for output mode
+    var outputMode = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("[cyan]Choose output mode:[/]")
+            .AddChoices("Table View (Live Status)", "Verbose Output (Detailed)")
+            .HighlightStyle(new Style(Color.Green)));
+
+    mode = outputMode.StartsWith("Table") ? OutputMode.Table : OutputMode.Verbose;
+}
+
+AnsiConsole.WriteLine();
+
+var testRunner = new TestRunner(authority, mode);
 
 var testsToRun = new List<Test>
 {
@@ -31,58 +73,65 @@ var testsToRun = new List<Test>
     new() { Id = "8", Enabled = true, Scope = "resource1.scope1 resource2.scope1 resource3.scope1 shared.scope", Resources = ["urn:resource3"] },
     new() { Id = "9", Enabled = true, Scope = "resource3.scope1 offline_access", Resources = ["urn:resource3"] },
     new() { Id = "10", Enabled = true, Scope = "resource3.scope1", Resources = ["urn:resource3"] },
-    new() { Id = "11", Enabled = true, Scope = "resource1.scope1 offline_access", Resources = ["urn:resource3"] },
-    new() { Id = "12", Enabled = true, Scope = "shared.scope", Resources = ["urn:invalid"] }
+    new() { Id = "11", Enabled = true, Scope = "resource1.scope1 offline_access", Resources = ["urn:resource3"], AccessTokenExpected = false },
+    new() { Id = "12", Enabled = true, Scope = "shared.scope", Resources = ["urn:invalid"], AccessTokenExpected = false }
 };
 
-foreach (var test in testsToRun.Where(t => t.Enabled))
+await testRunner.RunAllTestsAsync(testsToRun);
+
+// Show summary
+AnsiConsole.WriteLine();
+AnsiConsole.Write(new Rule("[bold green]Test Summary[/]").Centered());
+
+var summary = new Table()
+    .Border(TableBorder.Rounded)
+    .AddColumn("[bold]Status[/]")
+    .AddColumn("[bold]Count[/]");
+
+var completed = testsToRun.Count(t => t.Enabled && t.Status == TestStatus.Completed);
+var failed = testsToRun.Count(t => t.Enabled && t.Status == TestStatus.Failed);
+var total = testsToRun.Count(t => t.Enabled);
+
+summary.AddRow("[green]Completed[/]", completed.ToString());
+summary.AddRow("[red]Failed[/]", failed.ToString());
+summary.AddRow("[cyan]Total[/]", total.ToString());
+
+AnsiConsole.Write(summary);
+
+// Show expected errors section
+var testsWithExpectedErrors = testsToRun
+    .Where(t => t.Enabled && t.Result?.RefreshResults.Any(r => r.WasExpectedError) == true)
+    .ToList();
+
+if (testsWithExpectedErrors.Any())
 {
-    var resources = test.Resources != null ? test.Resources.Aggregate((x, y) => $"{x}, {y}") : "-none-";
-    ($"Runing test: ({test.Id}) SCOPES: " + test.Scope + ", RESOURCES: " + resources).ConsoleBox(ConsoleColor.Green);
+    AnsiConsole.WriteLine();
+    AnsiConsole.Write(new Rule("[bold yellow]Expected Errors (By Design)[/]").Centered());
+    AnsiConsole.WriteLine();
+    AnsiConsole.MarkupLine("[dim]The following errors were expected as part of the test validation:[/]");
+    AnsiConsole.WriteLine();
 
-    try
+    var expectedErrorsTable = new Table()
+        .Border(TableBorder.Rounded)
+        .AddColumn("[bold]Test ID[/]")
+        .AddColumn("[bold]Resource[/]")
+        .AddColumn("[bold]Error[/]")
+        .AddColumn("[bold]Reason[/]");
+
+    foreach (var test in testsWithExpectedErrors)
     {
-        await FrontChannel(test.Scope, test.Resources);
-        Thread.Sleep(millisecondsTimeout: 1000);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Exception: {ex.Message}");
-    }
-}
+        var expectedErrors = test.Result!.RefreshResults.Where(r => r.WasExpectedError).ToList();
 
-// Exit the application
-"Exiting application...".ConsoleYellow();
-Environment.Exit(0);
-
-async Task FrontChannel(string scope, IEnumerable<string> resource)
-{
-    // Resolve the authority from the configuration.
-    var authority = builder.Configuration["is-host"];
-
-    resource ??= [];
-
-    // create a redirect URI using an available port on the loopback address.
-    // requires the OP to allow random ports on 127.0.0.1 - otherwise set a static port
-    var browser = new SystemBrowser();
-    var redirectUri = string.Format($"http://127.0.0.1:{browser.Port}");
-
-    var options = new OidcClientOptions
-    {
-        Authority = authority,
-
-        ClientId = "console.resource.indicators",
-
-        RedirectUri = redirectUri,
-        Scope = scope,
-        Resource = [.. resource],
-        FilterClaims = false,
-        LoadProfile = false,
-        Browser = browser,
-
-        Policy =
+        foreach (var error in expectedErrors)
         {
-            RequireIdentityTokenSignature = false
+            var reason = "Resource not configured for this test";
+
+            expectedErrorsTable.AddRow(
+                test.Id,
+                error.Resource.Replace("urn:", ""),
+                $"[yellow]{error.Error ?? "unknown"}[/]",
+                $"[dim]{reason}[/]"
+            );
         }
     };
 
@@ -114,38 +163,53 @@ async Task FrontChannel(string scope, IEnumerable<string> resource)
         Environment.Exit(0);
     }
 
-    await BackChannel(result);
+    AnsiConsole.Write(expectedErrorsTable);
 }
 
-async Task BackChannel(LoginResult result)
+// Show detailed results if available
+if (mode == OutputMode.Table)
 {
-    Console.WriteLine("\n\n");
-    Console.WriteLine("Refreshing with resource parameters");
+    var testsWithResults = testsToRun.Where(t => t.Enabled && t.Result != null).ToList();
 
-    var resources = new List<string>() { "urn:resource1", "urn:resource2", "urn:resource3" };
-
-    foreach (var resource in resources)
+    if (testsWithResults.Any())
     {
-        $"Refreshing for resource: {resource}...".ConsoleGreen();
-        await Refresh(result.RefreshToken, resource);
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule("[bold cyan]Detailed Test Results[/]").Centered());
 
-        Thread.Sleep(millisecondsTimeout: 500);
-    }
-}
+        var detailsTable = new Table()
+            .Border(TableBorder.Rounded)
+            .AddColumn("[bold]Test ID[/]")
+            .AddColumn("[bold]Access Token[/]")
+            .AddColumn("[bold]Refresh Token[/]")
+            .AddColumn("[bold]Refresh Operations[/]");
 
-async Task Refresh(string refreshToken, string resource)
-{
-    var result = await _oidcClient.RefreshTokenAsync(refreshToken,
-        new Parameters
+        foreach (var test in testsWithResults)
         {
-            { "resource", resource }
-        });
+            var accessToken = test.Result!.AccessTokenReceived
+                ? "[green]✓ Received[/]"
+                : test.AccessTokenExpected
+                    ? "[red]✗ Not Received[/]"
+                    : "[green]✓ Not Expected[/]";
 
-    if (result.IsError)
-    {
-        Console.WriteLine();
-        Console.WriteLine(result.Error);
-        return;
+            var refreshToken = test.Result.RefreshTokenReceived
+                ? "[green]✓ Received[/]"
+                : test.RefreshTokenExpected
+                    ? "[red]✗ Not Received[/]"
+                    : "[green]✓ Not Expected[/]";
+
+            var refreshOps = test.Result.RefreshResults.Any()
+                ? $"{test.Result.RefreshResults.Count(r => r.Success)}/{test.Result.RefreshResults.Count} successful"
+                : "-";
+
+            detailsTable.AddRow(
+                test.Id,
+                accessToken,
+                refreshToken,
+                refreshOps
+            );
+        }
+
+        AnsiConsole.Write(detailsTable);
     }
 
     Console.WriteLine();
@@ -159,10 +223,14 @@ async Task Refresh(string refreshToken, string resource)
     Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload)).PrettyPrintJson());
 }
 
-internal class Test
+// Exit prompt - only in interactive mode
+if (Environment.UserInteractive && !Console.IsInputRedirected)
 {
-    public string Id { get; set; }
-    public bool Enabled { get; set; }
-    public string Scope { get; set; }
-    public IEnumerable<string> Resources { get; set; } = null;
+    AnsiConsole.WriteLine();
+    AnsiConsole.Markup("[dim]Press Enter to exit...[/]");
+    Console.ReadLine();
+}
+else
+{
+    Environment.Exit(0);
 }

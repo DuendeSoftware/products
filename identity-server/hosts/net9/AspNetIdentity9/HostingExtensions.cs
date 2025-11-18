@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.UI;
 using Duende.IdentityServer.UI.AspNetIdentity.Models;
 using IdentityServerHost.Data;
@@ -24,14 +25,12 @@ internal static class HostingExtensions
 
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
             {
-                {
-                    opt.Password.RequireDigit = false;
-                    opt.Password.RequireLowercase = false;
-                    opt.Password.RequireUppercase = false;
-                    opt.Password.RequireNonAlphanumeric = false;
-                    opt.Password.RequireUppercase = false;
-                    opt.Password.RequiredLength = 3; // Too short for production, but allows bob/bob
-                }
+                opt.Password.RequireDigit = false;
+                opt.Password.RequireLowercase = false;
+                opt.Password.RequireUppercase = false;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = false;
+                opt.Password.RequiredLength = 3; // Too short for production, but allows bob/bob
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
@@ -121,6 +120,9 @@ internal static class HostingExtensions
         // UI
         app.MapRazorPages()
             .RequireAuthorization();
+
+        app.MapDynamicClientRegistration()
+            .AllowAnonymous();
 
         return app;
     }

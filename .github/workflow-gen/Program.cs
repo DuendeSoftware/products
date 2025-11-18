@@ -11,7 +11,17 @@ var products = new Product[]
         "bff.slnf",
         "bff",
         ["Bff.Tests"],
-        ["Hosts.Tests"])
+        ["Hosts.Tests"]),
+    new("docs-mcp",
+        "docs-mcp.slnf",
+        "dmcp",
+        [],
+        []),
+    new("identity-server",
+        "identity-server.slnf",
+        "is",
+        ["IdentityServer.IntegrationTests", "IdentityServer.UnitTests"],
+        ["IdentityServer.EndToEndTests"])
 };
 foreach (var product in products)
 {
@@ -80,7 +90,7 @@ void GenerateCiWorkflow(Product product)
         .Job(BuildJobId)
         .RunEitherOnBranchOrAsPR()
         .Name("Build and test (unit)")
-        .RunsOn(GitHubHostedRunners.UbuntuLatest)
+        .RunsOn("large", ["ubuntu-latest-x64-16core"])
         .Defaults().Run("bash", product.Name)
         .Job;
 
@@ -161,7 +171,9 @@ void GenerateCiWorkflow(Product product)
     codeQlJob.Step()
         .ActionsCheckout();
 
-    codeQlJob.StepInitializeCodeQl();
+    // Uncomment once https://github.com/github/codeql-action/issues/3207#issuecomment-3405956414 has been resolved
+
+    /*codeQlJob.StepInitializeCodeQl();
 
     codeQlJob.StepSetupDotNet();
 
@@ -169,7 +181,7 @@ void GenerateCiWorkflow(Product product)
 
     codeQlJob.StepBuild(product.Solution);
 
-    codeQlJob.StepPerformCodeQlAnalysis();
+    codeQlJob.StepPerformCodeQlAnalysis();*/
 
     // Pack
     var packJob = workflow
