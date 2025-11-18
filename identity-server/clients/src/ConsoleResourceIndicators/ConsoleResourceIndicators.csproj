@@ -9,6 +9,8 @@
 
     <PackageReference Include="Duende.IdentityModel.OidcClient" />
     <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="Spectre.Console.Json" />
   </ItemGroup>
 
   <ItemGroup>

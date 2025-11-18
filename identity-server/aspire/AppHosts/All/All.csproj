@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.2" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -58,6 +58,9 @@
     <ProjectReference Include="..\..\..\hosts\net9\AspNetIdentity9\Host.AspNetIdentity9.csproj" />
     <ProjectReference Include="..\..\..\hosts\net9\EntityFramework9\Host.EntityFramework9.csproj" />
     <ProjectReference Include="..\..\..\hosts\net9\Main9\Host.Main9.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net10\AspNetIdentity10\Host.AspNetIdentity10.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net10\EntityFramework10\Host.EntityFramework10.csproj" />
+    <ProjectReference Include="..\..\..\hosts\net10\Main10\Host.Main10.csproj" />
     <ProjectReference Include="..\..\..\migrations\AspNetIdentityDb\AspNetIdentityDb.csproj" />
     <ProjectReference Include="..\..\..\migrations\IdentityServerDb\IdentityServerDb.csproj" />
     <ProjectReference Include="..\..\..\templates\src\IdentityServerAspNetIdentity\IdentityServerAspNetIdentity.csproj" />

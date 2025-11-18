@@ -25,7 +25,7 @@ public sealed class CustomClientRegistrationProcessor(
             var clientId = clientIdParameter.ToString();
             if (clientId != null)
             {
-                var existingClient = clientStore.FindClientByIdAsync(clientId);
+                var existingClient = await clientStore.FindClientByIdAsync(clientId);
                 if (existingClient is not null)
                 {
                     return new DynamicClientRegistrationError(

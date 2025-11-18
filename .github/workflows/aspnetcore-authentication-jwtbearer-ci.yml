@@ -53,7 +53,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Verify Formatting
@@ -61,7 +61,9 @@ jobs:
   build:
     name: Build and test (unit)
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on:
+      group: large
+      labels: [ubuntu-latest-x64-16core]
     permissions:
       actions: read
       checks: write
@@ -85,7 +87,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Build
@@ -174,7 +176,7 @@ jobs:
         dotnet-version: |-
           8.0.x
           9.0.203
-          10.0.100-rc.2.25502.107
+          10.0.100
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack aspnetcore-authentication-jwtbearer.slnf

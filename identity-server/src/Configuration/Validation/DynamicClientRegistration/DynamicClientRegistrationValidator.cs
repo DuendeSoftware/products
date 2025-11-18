@@ -129,6 +129,12 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
 
         if (context.Request.GrantTypes.Contains(OidcConstants.GrantTypes.ClientCredentials))
         {
+            if (context.Request.RequireClientSecret is false ||
+                context.Request.TokenEndpointAuthenticationMethod == "none")
+            {
+                return StepResult.Failure("client secret is required for client credentials grant type");
+            }
+
             context.Client.AllowedGrantTypes.Add(GrantType.ClientCredentials);
         }
         if (context.Request.GrantTypes.Contains(OidcConstants.GrantTypes.AuthorizationCode))
@@ -482,6 +488,11 @@ public class DynamicClientRegistrationValidator : IDynamicClientRegistrationVali
         {
             context.Client.RequireClientSecret = context.Request.RequireClientSecret.Value;
         }
+        else if (context.Request.TokenEndpointAuthenticationMethod == "none")
+        {
+            context.Client.RequireClientSecret = false;
+        }
+
         return StepResult.Success();
     }
 

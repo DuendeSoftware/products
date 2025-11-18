@@ -269,7 +269,7 @@ public static class ClientsConsole
                 RedirectUris = { "sample-windows-client://callback" },
                 RequireConsent = false,
                 AllowOfflineAccess = true,
-                AllowedIdentityTokenSigningAlgorithms = { "ES256" },
+                AllowedIdentityTokenSigningAlgorithms = { "RS256" },
                 AllowedScopes =
                 {
                     IdentityServerConstants.StandardScopes.OpenId,

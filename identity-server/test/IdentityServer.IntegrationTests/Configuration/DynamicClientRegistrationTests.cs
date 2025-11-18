@@ -39,4 +39,28 @@ public class DynamicClientRegistrationTests : ConfigurationIntegrationTestBase
         newClient.ClientSecrets.Count.ShouldBe(1);
         newClient.ClientSecrets.Single().Value.ShouldBe(response.ClientSecret.Sha256());
     }
+
+    [Fact]
+    public async Task request_for_public_client_does_not_require_client_secret()
+    {
+        IdentityServerHost.ApiScopes.Add(new ApiScope("api1"));
+
+        var request = new DynamicClientRegistrationRequest
+        {
+            RedirectUris = new[] { new Uri("https://example.com/callback") },
+            GrantTypes = new[] { "authorization_code" },
+            ClientName = "test",
+            ClientUri = new Uri("https://example.com"),
+            DefaultMaxAge = 10000,
+            Scope = "api1 openid profile",
+            TokenEndpointAuthenticationMethod = "none"
+        };
+        var httpResponse = await ConfigurationHost.HttpClient!.PostAsJsonAsync("/connect/dcr", request);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<DynamicClientRegistrationResponse>();
+        response.ShouldNotBeNull();
+        response.ClientSecret.ShouldBeNull();
+        response.RequireClientSecret.ShouldNotBeNull();
+        response.RequireClientSecret.Value.ShouldBeFalse();
+    }
 }
