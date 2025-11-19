@@ -132,7 +132,47 @@ public class BffRemoteApiTests : BffTestBase
 
         await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Unauthorized);
+    }
 
+    [Fact]
+    public async Task When_not_logged_in_UserOrNone_makes_anonymous_request()
+    {
+        await InitializeAsync();
 
+        AddOrUpdateFrontend(Some.BffFrontend()
+            .WithRemoteApis(
+                new RemoteApi()
+                {
+                    PathMatch = The.Path,
+                    TargetUri = Api.Url(),
+                    RequiredTokenType = RequiredTokenType.UserOrNone
+                })
+        );
+
+        ApiCallDetails result = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
+
+        result.Sub.ShouldBeNull();
+        result.ClientId.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task When_not_logged_in_UserOrClient_falls_through_to_client_token()
+    {
+        await InitializeAsync();
+
+        AddOrUpdateFrontend(Some.BffFrontend()
+            .WithRemoteApis(
+                new RemoteApi()
+                {
+                    PathMatch = The.Path,
+                    TargetUri = Api.Url(),
+                    RequiredTokenType = RequiredTokenType.UserOrClient
+                })
+        );
+
+        ApiCallDetails result = await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath);
+
+        result.Sub.ShouldBeNull();
+        result.ClientId.ShouldBe(The.ClientId);
     }
 }
