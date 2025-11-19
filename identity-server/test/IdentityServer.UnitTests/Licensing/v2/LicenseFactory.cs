@@ -2,13 +2,15 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using Duende;
+using Duende.IdentityServer;
 using Duende.IdentityServer.Licensing.V2;
 
 namespace IdentityServer.UnitTests.Licensing.V2;
 
 internal static class LicenseFactory
 {
-    public static License Create(LicenseEdition edition, DateTimeOffset? expiration = null, bool redistribution = false)
+    public static License Create(License.LicenseEdition edition, DateTimeOffset? expiration = null, bool redistribution = false)
     {
         expiration ??= DateTimeOffset.MaxValue;
         var claims = new List<Claim>
@@ -20,6 +22,6 @@ internal static class LicenseFactory
         {
             claims.Add(new Claim("feature", "redistribution"));
         }
-        return new(new ClaimsPrincipal(new ClaimsIdentity(claims)));
+        return new IdentityServerLicense(claims.ToArray());
     }
 }
