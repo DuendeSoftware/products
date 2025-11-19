@@ -6,7 +6,7 @@ namespace Duende.Bff.Blazor;
 /// <summary>
 /// Options for Blazor BFF on the server. 
 /// </summary>
-public class BffBlazorServerOptions
+public sealed record BffBlazorServerOptions
 {
     /// <summary>
     /// The delay, in milliseconds, between polling requests by the

@@ -66,6 +66,5 @@ internal static class Extensions
         app.MapControllers()
             .RequireAuthorization("ApiCaller");
         return app;
-
     }
 }

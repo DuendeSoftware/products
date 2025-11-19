@@ -2,189 +2,313 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
-using System.Net.Http.Json;
 using Duende.Bff.Tests.TestFramework;
-using Duende.Bff.Tests.TestHosts;
-using Microsoft.Extensions.DependencyInjection;
+using Duende.Bff.Tests.TestInfra;
+using Microsoft.AspNetCore.Authentication;
 using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 
-public class LocalEndpointTests(ITestOutputHelper output) : BffIntegrationTestBase(output)
+public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 {
-    [Fact]
-    public async Task calls_to_authorized_local_endpoint_should_succeed()
-    {
-        await BffHost.BffLoginAsync("alice");
+    public HttpStatusCode LocalApiResponseStatus { get; set; } = HttpStatusCode.OK;
 
-        ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_authz")
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task calls_to_authorized_local_endpoint_should_succeed(BffSetupType setup)
+    {
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .RequireAuthorization()
+                .AsBffApiEndpoint();
+        };
+
+        await ConfigureBff(setup);
+
+        await Bff.BrowserClient.Login();
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path)
         );
 
-        apiResult.Method.ShouldBe("GET");
-        apiResult.Path.ShouldBe("/local_authz");
-        apiResult.Sub.ShouldBe("alice");
+        apiResult.Method.ShouldBe(HttpMethod.Get);
+        apiResult.Path.ShouldBe(The.Path);
+        apiResult.Sub.ShouldBe(The.Sub);
     }
 
-    [Fact]
-    public async Task calls_to_authorized_local_endpoint_without_csrf_should_succeed_without_antiforgery_header()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task calls_to_authorized_local_endpoint_without_csrf_should_succeed_without_antiforgery_header(BffSetupType setup)
     {
-        await BffHost.BffLoginAsync("alice");
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .RequireAuthorization()
+                .SkipAntiforgery()
+                .AsBffApiEndpoint();
+        };
+        await ConfigureBff(setup);
 
-        ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_authz_no_csrf")
+        await Bff.BrowserClient.Login();
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
+            headers: []
         );
 
-        apiResult.Method.ShouldBe("GET");
-        apiResult.Path.ShouldBe("/local_authz_no_csrf");
-        apiResult.Sub.ShouldBe("alice");
+        apiResult.Method.ShouldBe(HttpMethod.Get);
+        apiResult.Path.ShouldBe(The.Path);
+        apiResult.Sub.ShouldBe(The.Sub);
     }
 
-    [Fact]
-    public async Task unauthenticated_calls_to_authorized_local_endpoint_should_fail()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task unauthenticated_calls_to_authorized_local_endpoint_should_fail(BffSetupType setup)
     {
-        var response = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_authz"),
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .RequireAuthorization()
+                .AsBffApiEndpoint();
+        };
+        await ConfigureBff(setup);
+
+
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
     }
 
-    [Fact]
-    public async Task calls_to_local_endpoint_should_require_antiforgery_header()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task calls_to_local_endpoint_should_require_antiforgery_header(BffSetupType setup)
     {
-        var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/local_anon"));
-        var response = await BffHost.BrowserClient.SendAsync(req);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
-    }
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .AsBffApiEndpoint();
+        };
+
+        await ConfigureBff(setup);
 
 
-    [Fact]
-    public async Task calls_to_local_endpoint_without_csrf_should_not_require_antiforgery_header()
-    {
-        var response = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_anon_no_csrf"),
-            expectedStatusCode: HttpStatusCode.OK
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
+            headers: [],
+            expectedStatusCode: HttpStatusCode.Unauthorized
         );
     }
 
-    [Fact]
-    public async Task calls_to_anon_endpoint_should_allow_anonymous()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task calls_to_local_endpoint_without_csrf_should_not_require_antiforgery_header(BffSetupType setup)
     {
-        ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_anon")
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .SkipAntiforgery()
+                .AsBffApiEndpoint();
+        };
+        await ConfigureBff(setup);
+
+
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
+            headers: []
         );
 
-        apiResult.Method.ShouldBe("GET");
-        apiResult.Path.ShouldBe("/local_anon");
         apiResult.Sub.ShouldBeNull();
     }
 
-    [Fact]
-    public async Task put_to_local_endpoint_should_succeed()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task calls_to_anon_endpoint_should_allow_anonymous(BffSetupType setup)
     {
-        await BffHost.BffLoginAsync("alice");
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .AsBffApiEndpoint();
+        };
+        await ConfigureBff(setup);
 
-        ApiResponse apiResult = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_authz"),
+
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path)
+        );
+
+        apiResult.Sub.ShouldBeNull();
+    }
+
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task put_to_local_endpoint_should_succeed(BffSetupType setup)
+    {
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .AsBffApiEndpoint();
+        };
+        await ConfigureBff(setup);
+
+
+
+        await Bff.BrowserClient.Login();
+
+        ApiCallDetails apiResult = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
             method: HttpMethod.Put,
             content: JsonContent.Create(new TestPayload("hello test api"))
         );
 
-        apiResult.Method.ShouldBe("PUT");
-        apiResult.Path.ShouldBe("/local_authz");
-        apiResult.Sub.ShouldBe("alice");
+        apiResult.Method.ShouldBe(HttpMethod.Put);
+        apiResult.Path.ShouldBe(The.Path);
+        apiResult.Sub.ShouldBe(The.Sub);
         var body = apiResult.BodyAs<TestPayload>();
         body.Message.ShouldBe("hello test api", apiResult.Body);
     }
 
-    [Fact]
-    public async Task unauthenticated_non_bff_endpoint_should_return_302_for_login()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task unauthenticated_non_bff_endpoint_should_return_302_for_login(BffSetupType setup)
     {
-        var req = new HttpRequestMessage(HttpMethod.Get, BffHost.Url("/always_fail_authz_non_bff_endpoint"));
-        req.Headers.Add("x-csrf", "1");
-        var response = await BffHost.BrowserClient.SendAsync(req);
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .RequireAuthorization();
+        };
+        await ConfigureBff(setup);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
-        response.Headers.Location
+
+
+        Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false; // we want to see the redirect
+        var response = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
+            expectedStatusCode: HttpStatusCode.Redirect
+        );
+
+        response.HttpResponse.Headers.Location
             .ShouldNotBeNull()
             .ToString()
             .ToLowerInvariant()
-            .ShouldStartWith(IdentityServerHost.Url("/connect/authorize"));
+            .ShouldStartWith(IdentityServer.Url("/connect/authorize").ToString());
     }
 
-    [Fact]
-    public async Task unauthenticated_api_call_should_return_401()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task unauthenticated_api_call_should_return_401(BffSetupType setup)
     {
-        var response = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/always_fail_authz"),
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .RequireAuthorization()
+                .AsBffApiEndpoint();
+        };
+        await ConfigureBff(setup);
+
+
+
+        LocalApiResponseStatus = HttpStatusCode.Unauthorized;
+
+        var response = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
     }
 
-    [Fact]
-    public async Task forbidden_api_call_should_return_403()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task forbidden_api_call_should_return_403(BffSetupType setup)
     {
-        await BffHost.BffLoginAsync("alice");
+        Bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .RequireAuthorization()
+                .AsBffApiEndpoint();
+        };
 
-        var response = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/always_fail_authz"),
+        await ConfigureBff(setup);
+        LocalApiResponseStatus = HttpStatusCode.Forbidden;
+
+        await Bff.BrowserClient.Login();
+        Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
+        var response = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Forbidden
         );
     }
 
-    [Fact]
-    public async Task challenge_response_should_return_401()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task challenge_response_should_return_401(BffSetupType setup)
     {
-        await BffHost.BffLoginAsync("alice");
-        BffHost.LocalApiResponseStatus = BffHost.ResponseStatus.Challenge;
+        Bff.OnConfigureApp += app =>
+        {
+            app.MapGet(The.Path, c => c.ChallengeAsync())
+                .RequireAuthorization()
+                .AsBffApiEndpoint();
+        };
 
-        var response = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_authz"),
+        await ConfigureBff(setup);
+
+
+
+        await Bff.BrowserClient.Login();
+
+        var response = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Unauthorized
         );
     }
 
-    [Fact]
-    public async Task forbid_response_should_return_403()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task challenge_response_when_response_handling_skipped_should_trigger_redirect_for_login(BffSetupType setup)
     {
-        await BffHost.BffLoginAsync("alice");
-        BffHost.LocalApiResponseStatus = BffHost.ResponseStatus.Forbid;
+        Bff.OnConfigureApp += app =>
+        {
+            app.MapGet(The.Path, c => c.ChallengeAsync())
+                .RequireAuthorization()
+                .AsBffApiEndpoint()
+                .SkipResponseHandling();
+        };
 
-        var response = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_authz"),
-            expectedStatusCode: HttpStatusCode.Forbidden
-        );
-    }
+        await ConfigureBff(setup);
 
-    [Fact]
-    public async Task challenge_response_when_response_handling_skipped_should_trigger_redirect_for_login()
-    {
-        await BffHost.BffLoginAsync("alice");
-        BffHost.LocalApiResponseStatus = BffHost.ResponseStatus.Challenge;
 
-        var response = await BffHost.BrowserClient.CallBffHostApi(
-            url: BffHost.Url("/local_anon_no_csrf_no_response_handling"),
+
+        await Bff.BrowserClient.Login();
+        Bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
+        var response = await Bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
             expectedStatusCode: HttpStatusCode.Redirect
         );
     }
 
-    [Fact]
-    public async Task fallback_policy_should_not_fail()
+    [Theory]
+    [MemberData(nameof(AllSetups))]
+    public async Task fallback_policy_should_not_fail(BffSetupType setup)
     {
-        BffHost.OnConfigureServices += svcs =>
+
+        Bff.OnConfigureServices += svcs =>
         {
             svcs.AddAuthorization(opts =>
             {
                 opts.FallbackPolicy =
                     new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
+                        .RequireAuthenticatedUser()
+                        .Build();
             });
         };
-        await BffHost.InitializeAsync();
+        await ConfigureBff(setup);
 
-        var response = await BffHost.HttpClient.GetAsync(BffHost.Url("/not-found"));
-        response.StatusCode.ShouldNotBe(HttpStatusCode.InternalServerError);
+
+        var response = await Bff.BrowserClient.GetAsync(Bff.Url("/not-found"));
+        response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 }

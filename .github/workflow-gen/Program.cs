@@ -7,11 +7,6 @@ var contexts = GitHubContexts.Instance;
 
 var products = new Product[]
 {
-    new("aspnetcore-authentication-jwtbearer",
-        "aspnetcore-authentication-jwtbearer.slnf",
-        "aaj",
-        ["AspNetCore.Authentication.JwtBearer.Tests"],
-        []),
     new("bff",
         "bff.slnf",
         "bff",

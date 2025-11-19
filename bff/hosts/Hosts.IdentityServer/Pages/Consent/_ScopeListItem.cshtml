@@ -2,46 +2,46 @@
 @model ScopeViewModel
 
 <li class="list-group-item">
-    <label>
-        <input class="consent-scopecheck"
-               type="checkbox"
-               name="Input.ScopesConsented"
-               id="scopes_@Model.Value"
-               value="@Model.Value"
-               checked="@Model.Checked"
-               disabled="@Model.Required" />
-        @if (Model.Required)
-        {
-            <input type="hidden"
-                   name="Input.ScopesConsented"
-                   value="@Model.Value" />
-        }
-        <strong>@Model.DisplayName</strong>
-        @if (Model.Emphasize)
-        {
-            <span class="glyphicon glyphicon-exclamation-sign"></span>
-        }
-    </label>
+  <label>
+    <input class="consent-scopecheck"
+           type="checkbox"
+           name="Input.ScopesConsented"
+           id="scopes_@Model.Value"
+           value="@Model.Value"
+           checked="@Model.Checked"
+           disabled="@Model.Required" />
     @if (Model.Required)
     {
-        <span><em>(required)</em></span>
+      <input type="hidden"
+             name="Input.ScopesConsented"
+             value="@Model.Value" />
     }
-    @if (Model.Description != null)
+    <strong>@Model.DisplayName</strong>
+    @if (Model.Emphasize)
     {
-        <div class="consent-description">
-            <label for="scopes_@Model.Value">@Model.Description</label>
-        </div>
+      <span class="glyphicon glyphicon-exclamation-sign"></span>
     }
-    @if (Model.Resources?.Any() == true)
-    {
-        <div class="consent-description">
-            <label>Will be available to these resource servers:</label>
-            <ul>
-            @foreach (var resource in Model.Resources)
-            {
-                <li>@resource.DisplayName</li>
-            }
-            </ul>
-        </div>
-    }
+  </label>
+  @if (Model.Required)
+  {
+    <span><em>(required)</em></span>
+  }
+  @if (Model.Description != null)
+  {
+    <div class="consent-description">
+      <label for="scopes_@Model.Value">@Model.Description</label>
+    </div>
+  }
+  @if (Model.Resources?.Any() == true)
+  {
+    <div class="consent-description">
+      <label>Will be available to these resource servers:</label>
+      <ul>
+        @foreach (var resource in Model.Resources)
+        {
+          <li>@resource.DisplayName</li>
+        }
+      </ul>
+    </div>
+  }
 </li>

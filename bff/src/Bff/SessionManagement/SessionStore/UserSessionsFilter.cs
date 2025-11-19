@@ -1,12 +1,12 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-namespace Duende.Bff;
+namespace Duende.Bff.SessionManagement.SessionStore;
 
 /// <summary>
 /// Filter to query user sessions
 /// </summary>
-public class UserSessionsFilter
+public sealed class UserSessionsFilter
 {
     /// <summary>
     /// The subject ID
@@ -14,7 +14,7 @@ public class UserSessionsFilter
     public string? SubjectId { get; init; }
 
     /// <summary>
-    /// The sesion ID
+    /// The session ID
     /// </summary>
     public string? SessionId { get; set; }
 
@@ -25,7 +25,7 @@ public class UserSessionsFilter
     {
         if (string.IsNullOrWhiteSpace(SubjectId) && string.IsNullOrWhiteSpace(SessionId))
         {
-            throw new ArgumentNullException("SubjectId or SessionId is required.");
+            throw new InvalidOperationException("SubjectId or SessionId is required.");
         }
     }
 }

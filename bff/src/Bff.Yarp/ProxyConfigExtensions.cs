@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
 using Yarp.ReverseProxy.Configuration;
 
 namespace Duende.Bff.Yarp;
@@ -14,9 +15,13 @@ public static class ProxyConfigExtensions
     /// Adds BFF access token metadata to a route configuration
     /// </summary>
     /// <param name="config"></param>
-    /// <param name="tokenType"></param>
+    /// <param name="requiredTokenType"></param>
     /// <returns></returns>
-    public static RouteConfig WithAccessToken(this RouteConfig config, TokenType tokenType) => config.WithMetadata(Constants.Yarp.TokenTypeMetadata, tokenType.ToString());
+    public static RouteConfig WithAccessToken(this RouteConfig config, RequiredTokenType requiredTokenType)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        return config.WithMetadata(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
+    }
 
     /// <summary>
     /// Adds BFF access token metadata to a route configuration, indicating that 
@@ -25,17 +30,28 @@ public static class ProxyConfigExtensions
     /// </summary>
     /// <param name="config"></param>
     /// <returns></returns>
-    public static RouteConfig WithOptionalUserAccessToken(this RouteConfig config) => config.WithMetadata(Constants.Yarp.OptionalUserTokenMetadata, "true");
+    [Obsolete("Use TokenRequirement.OptionalUserOrNone")]
+    public static RouteConfig WithOptionalUserAccessToken(this RouteConfig config)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        return WithAccessToken(config, RequiredTokenType.UserOrNone);
+    }
 
     /// <summary>
     /// Adds anti-forgery metadata to a route configuration
     /// </summary>
     /// <param name="config"></param>
     /// <returns></returns>
-    public static RouteConfig WithAntiforgeryCheck(this RouteConfig config) => config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
-
-    internal static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
+    public static RouteConfig WithAntiforgeryCheck(this RouteConfig config)
     {
+        ArgumentNullException.ThrowIfNull(config);
+        return config.WithMetadata(Constants.Yarp.AntiforgeryCheckMetadata, "true");
+    }
+
+    private static RouteConfig WithMetadata(this RouteConfig config, string key, string value)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+
         Dictionary<string, string> metadata;
 
         if (config.Metadata != null)
@@ -57,10 +73,11 @@ public static class ProxyConfigExtensions
     /// Adds BFF access token metadata to a cluster configuration
     /// </summary>
     /// <param name="config"></param>
-    /// <param name="tokenType"></param>
+    /// <param name="requiredTokenType"></param>
     /// <returns></returns>
-    public static ClusterConfig WithAccessToken(this ClusterConfig config, TokenType tokenType)
+    public static ClusterConfig WithAccessToken(this ClusterConfig config, RequiredTokenType requiredTokenType)
     {
+        ArgumentNullException.ThrowIfNull(config);
         Dictionary<string, string> metadata;
 
         if (config.Metadata != null)
@@ -72,7 +89,7 @@ public static class ProxyConfigExtensions
             metadata = new();
         }
 
-        metadata.TryAdd(Constants.Yarp.TokenTypeMetadata, tokenType.ToString());
+        metadata.TryAdd(Constants.Yarp.TokenTypeMetadata, requiredTokenType.ToString());
 
         return config with { Metadata = metadata };
     }

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title></title>
+  <link href="https://localhost:5005/static/libs/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://localhost:5005/static/StyleSheet.css" rel="stylesheet" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://localhost:5005/static/libs/bootstrap.min.js"></script>
+  <base href="[Path]">
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+          <h1>BFF Multi-Frontend</h1>
+          <h2>Serving Frontend : [FrontendName]</h2>
+        </header>
+
+        <div class="row">
+            <ul class="list-unstyled list-inline">
+                <li><button class="btn btn-primary login">Login</button></li>
+                <li>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Call APIs
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header">Local API Calls</li>
+                            <li><a href="#" class="call_local_self_contained" type="button">Self Contained</a></li>
+                            <li><a href="#" class="call_local_external" type="button">Invokes External API</a></li>
+                            
+                            <li role="separator" class="divider"></li>
+                            
+                            <li class="dropdown-header">Remote API Calls</li>
+                            <li><a href="#" class="call_anonymous" type="button">Anonymous</a></li>
+                            <li><a href="#" class="call_user" type="button">Required User Token</a></li>
+                            <li><a href="#" class="call_optional_user" type="button">Optional User Token</a></li>
+                            <li><a href="#" class="call_client" type="button">Client Token</a></li>
+                            <li><a href="#" class="call_user_or_client" type="button">User or Client Token</a></li>
+                            
+                            <li role="separator" class="divider"></li>
+                            
+                            <li class="dropdown-header">YARP API Calls</li>
+                            <li><a href="#" class="call_yarp_anonymous" type="button">Anonymous</a></li>
+                            <li><a href="#" class="call_yarp_user" type="button">User Token</a></li>
+                            <li><a href="#" class="call_yarp_client" type="button">Client Token</a></li>
+                            <li><a href="#" class="call_yarp_user_or_client" type="button">User or Client Token</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li><button class="btn btn-info logout">Logout</button></li>
+            </ul>
+        </div>
+
+        <div class="row">
+            <ul class="list-unstyled list-inline">
+            </ul>
+        </div>
+
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">Message</div>
+                <div class="panel-body">
+                    <pre id="response"></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Current User</div>
+                    <div class="panel-body">
+                        <pre id="user"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">API Result</div>
+                    <div class="panel-body">
+                        <pre id="api-result"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://localhost:5005/static/app.js"></script>
+
+    <iframe id="bff-silent-login"></iframe>
+</body>
+</html>

@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.Yarp.Internal;
 using Microsoft.AspNetCore.Builder;
 
 namespace Duende.Bff.Yarp;
@@ -15,5 +16,5 @@ public static class ProxyAppBuilderExtensions
     /// </summary>
     /// <param name="yarpApp"></param>
     /// <returns></returns>
-    public static IApplicationBuilder UseAntiforgeryCheck(this IApplicationBuilder yarpApp) => yarpApp.UseMiddleware<AntiforgeryMiddleware>();
+    public static IApplicationBuilder UseAntiforgeryCheck(this IApplicationBuilder yarpApp) => yarpApp.UseMiddleware<AntiForgeryMiddleware>();
 }

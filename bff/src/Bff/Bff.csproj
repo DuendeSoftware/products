@@ -1,17 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
     <AssemblyName>Duende.BFF</AssemblyName>
     <Description>Backend for frontend (BFF) host for ASP.NET Core</Description>
+    <!--    Related to https://github.com/dotnet/sdk/issues/50676-->
+<!--    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+<!--    <CompilerGeneratedFilesOutputPath>Otel/Generated</CompilerGeneratedFilesOutputPath>-->
   </PropertyGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Duende.Bff.Blazor" />
+    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect"/>
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bff.Benchmarks"/>
+    <InternalsVisibleTo Include="Duende.Bff.Blazor"/>
+    <InternalsVisibleTo Include="Duende.Bff.EntityFramework"/>
+    <InternalsVisibleTo Include="Duende.Bff.Yarp"/>
+    <InternalsVisibleTo Include="Duende.Bff.Tests"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Duende.Private.Licensing"/>
   </ItemGroup>
 </Project>

@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using Duende.Bff.Configuration;
+using Duende.Bff.Internal;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +17,7 @@ namespace Duende.Bff.Blazor;
 /// </summary>
 /// <param name="httpContextAccessor"></param>
 /// <param name="options"></param>
-public class AddServerManagementClaimsTransform(IHttpContextAccessor httpContextAccessor, IOptionsMonitor<BffOptions> options) : IClaimsTransformation
+internal class AddServerManagementClaimsTransform(IHttpContextAccessor httpContextAccessor, IOptionsMonitor<BffOptions> options) : IClaimsTransformation
 {
     private HttpContext _httpContext => httpContextAccessor.HttpContext ?? throw new InvalidOperationException("not running in http context");
 

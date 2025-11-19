@@ -1,0 +1,71 @@
+namespace Duende.Bff.EntityFramework
+{
+    public static class BffBuilderExtensions
+    {
+        public static T AddEntityFrameworkServerSideSessions<T>(this T bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessions<T>(this T bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessions<TContext, T>(this T bffBuilder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessions<TContext, T>(this T bffBuilder, System.Action<System.IServiceProvider, Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> action)
+            where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddEntityFrameworkServerSideSessionsServices<TContext, T>(this T bffBuilder)
+            where TContext : Duende.Bff.EntityFramework.ISessionDbContext
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T AddSessionCleanupBackgroundProcess<T>(this T bffBuilder)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+        public static T ConfigureEntityFrameworkSessionStoreOptions<T>(this T bffBuilder, System.Action<Duende.Bff.EntityFramework.SessionStoreOptions> action)
+            where T : Duende.Bff.Builder.IBffServicesBuilder { }
+    }
+    public interface ISessionDbContext
+    {
+        Microsoft.EntityFrameworkCore.DbSet<Duende.Bff.EntityFramework.UserSessionEntity> UserSessions { get; set; }
+        System.Threading.Tasks.Task<int> SaveChangesAsync(System.Threading.CancellationToken ct = default);
+    }
+    public static class ModelBuilderExtensions
+    {
+        public static void ConfigureSessionContext(this Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder, Duende.Bff.EntityFramework.SessionStoreOptions storeOptions) { }
+        public class PartitionKeyConverter : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<Duende.Bff.SessionManagement.SessionStore.PartitionKey, string>
+        {
+            public PartitionKeyConverter() { }
+        }
+        public class UserKeyConverter : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<Duende.Bff.SessionManagement.SessionStore.UserKey, string>
+        {
+            public UserKeyConverter() { }
+        }
+    }
+    public class SessionDbContext : Duende.Bff.EntityFramework.SessionDbContext<Duende.Bff.EntityFramework.SessionDbContext>
+    {
+        public SessionDbContext(Microsoft.EntityFrameworkCore.DbContextOptions<Duende.Bff.EntityFramework.SessionDbContext> options) { }
+    }
+    public class SessionDbContext<TContext> : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext
+        where TContext : Microsoft.EntityFrameworkCore.DbContext, Duende.Bff.EntityFramework.ISessionDbContext
+    {
+        public SessionDbContext(Microsoft.EntityFrameworkCore.DbContextOptions<TContext> options) { }
+        public Duende.Bff.EntityFramework.SessionStoreOptions? StoreOptions { get; set; }
+        public Microsoft.EntityFrameworkCore.DbSet<Duende.Bff.EntityFramework.UserSessionEntity> UserSessions { get; set; }
+        protected virtual void ConfigureSchema(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder) { }
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder) { }
+    }
+    public sealed class SessionStoreOptions : System.IEquatable<Duende.Bff.EntityFramework.SessionStoreOptions>
+    {
+        public SessionStoreOptions() { }
+        public string? DefaultSchema { get; set; }
+        public Duende.Bff.EntityFramework.TableConfiguration UserSessions { get; set; }
+    }
+    public sealed class TableConfiguration : System.IEquatable<Duende.Bff.EntityFramework.TableConfiguration>
+    {
+        public TableConfiguration(string name) { }
+        public TableConfiguration(string name, string schema) { }
+        public string Name { get; set; }
+        public string? Schema { get; set; }
+    }
+    public class UserSessionEntity : Duende.Bff.SessionManagement.SessionStore.UserSession
+    {
+        public UserSessionEntity() { }
+        public long Id { get; set; }
+    }
+}

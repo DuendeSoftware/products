@@ -15,8 +15,8 @@ namespace Api.DPoP;
 
 public class DPoPProofValidator
 {
-    const string ReplayCachePurpose = "DPoPJwtBearerEvents-DPoPReplay-jti-";
-    const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
+    private const string ReplayCachePurpose = "DPoPJwtBearerEvents-DPoPReplay-jti-";
+    private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
 
     public readonly static IEnumerable<string> SupportedDPoPSigningAlgorithms = new[]
     {
@@ -98,7 +98,7 @@ public class DPoPProofValidator
     /// <summary>
     /// Validates the header.
     /// </summary>
-    protected virtual Task ValidateHeaderAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected Task ValidateHeaderAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         JsonWebToken token;
 
@@ -168,7 +168,7 @@ public class DPoPProofValidator
     /// <summary>
     /// Validates the signature.
     /// </summary>
-    protected virtual async Task ValidateSignatureAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected async Task ValidateSignatureAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         TokenValidationResult tokenValidationResult;
 
@@ -208,7 +208,7 @@ public class DPoPProofValidator
     /// <summary>
     /// Validates the payload.
     /// </summary>
-    protected virtual async Task ValidatePayloadAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected async Task ValidatePayloadAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         if (result.Payload.TryGetValue(JwtClaimTypes.DPoPAccessTokenHash, out var ath))
         {
@@ -305,7 +305,7 @@ public class DPoPProofValidator
     /// <summary>
     /// Validates is the token has been replayed.
     /// </summary>
-    protected virtual async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
 
@@ -339,7 +339,7 @@ public class DPoPProofValidator
     /// <summary>
     /// Validates the freshness.
     /// </summary>
-    protected virtual async Task ValidateFreshnessAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected async Task ValidateFreshnessAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
 
@@ -367,7 +367,7 @@ public class DPoPProofValidator
     /// <summary>
     /// Validates the freshness of the iat value.
     /// </summary>
-    protected virtual Task ValidateIatAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected Task ValidateIatAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
 
@@ -384,7 +384,7 @@ public class DPoPProofValidator
     /// <summary>
     /// Validates the freshness of the nonce value.
     /// </summary>
-    protected virtual async Task ValidateNonceAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected async Task ValidateNonceAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         if (string.IsNullOrWhiteSpace(result.Nonce))
         {
@@ -423,7 +423,7 @@ public class DPoPProofValidator
     /// Creates a nonce value to return to the client.
     /// </summary>
     /// <returns></returns>
-    protected virtual string CreateNonce(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected string CreateNonce(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         return DataProtector.Protect(now.ToString());
@@ -433,7 +433,7 @@ public class DPoPProofValidator
     /// Reads the time the nonce was created.
     /// </summary>
     /// <returns></returns>
-    protected virtual ValueTask<long> GetUnixTimeFromNonceAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
+    protected ValueTask<long> GetUnixTimeFromNonceAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
         try
         {
@@ -455,7 +455,7 @@ public class DPoPProofValidator
     /// Validates the expiration of the DPoP proof.
     /// Returns true if the time is beyond the allowed limits, false otherwise.
     /// </summary>
-    protected virtual bool IsExpired(DPoPProofValidatonContext context, DPoPProofValidatonResult result, TimeSpan clockSkew, long issuedAtTime)
+    protected bool IsExpired(DPoPProofValidatonContext context, DPoPProofValidatonResult result, TimeSpan clockSkew, long issuedAtTime)
     {
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var start = now + (int)clockSkew.TotalSeconds;

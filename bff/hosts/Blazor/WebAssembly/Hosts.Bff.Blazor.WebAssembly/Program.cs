@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff;
 using Hosts.Bff.Blazor.WebAssembly;
 using Hosts.Bff.Blazor.WebAssembly.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -82,7 +83,6 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Hosts.Bff.Blazor.WebAssembly.Client._Imports).Assembly);
 
-app.MapBffManagementEndpoints();
 WeatherEndpoints.Map(app);
 
 app.Run();
