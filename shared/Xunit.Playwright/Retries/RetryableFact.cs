@@ -6,8 +6,8 @@ using Xunit.Sdk;
 namespace Duende.Xunit.Playwright.Retries;
 
 [XunitTestCaseDiscoverer(
-    typeName: "Duende.Hosts.Tests.TestInfra.Retries.RetryableTestDiscoverer",
-    assemblyName: "Duende.Hosts.Tests"
+    typeName: "Duende.Xunit.Playwright.Retries.RetryableTestDiscoverer",
+    assemblyName: "Duende.Xunit.Playwright"
 )]
 public class RetryableFact : FactAttribute
 {

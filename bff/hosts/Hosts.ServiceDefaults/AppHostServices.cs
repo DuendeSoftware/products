@@ -37,6 +37,7 @@ public static class AppHostServices
         TemplateBffLocal,
         TemplateBffRemote
     ];
+
 }
 
 public static class ServiceDiscovery

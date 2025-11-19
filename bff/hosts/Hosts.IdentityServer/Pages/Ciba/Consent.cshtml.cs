@@ -126,6 +126,7 @@ public class Consent : PageModel
         {
             _logger.LogError("No backchannel login request matching id: {id}", id);
         }
+
         return null;
     }
 
@@ -164,10 +165,12 @@ public class Consent : PageModel
                 apiScopes.Add(scopeVm);
             }
         }
+
         if (ConsentOptions.EnableOfflineAccess && request.ValidatedResources.Resources.OfflineAccess)
         {
             apiScopes.Add(GetOfflineAccessScope(model == null || model.ScopesConsented?.Contains(Duende.IdentityServer.IdentityServerConstants.StandardScopes.OfflineAccess) == true));
         }
+
         vm.ApiScopes = apiScopes;
 
         return vm;

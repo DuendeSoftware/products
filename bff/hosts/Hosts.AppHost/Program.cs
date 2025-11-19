@@ -19,12 +19,13 @@ var bff = builder.AddProject<Projects.Hosts_Bff_InMemory>(AppHostServices.Bff)
     ;
 
 var perf = builder.AddProject<Projects.Hosts_Bff_Performance>(AppHostServices.BffPerf)
-    .WithExternalHttpEndpoints()
-    .WithEndpoint(6100, isProxied: false, scheme: "https", name: "idsrv")
-    .WithEndpoint(6001, isProxied: false, scheme: "https", name: "api")
-    .WithEndpoint(6002, isProxied: false, scheme: "https", name: "single")
-    .WithEndpoint(6003, isProxied: false, scheme: "https", name: "multi")
-    ;
+   .WithExternalHttpEndpoints()
+   .WithEndpoint(6100, isProxied: false, scheme: "https", name: "idsrv")
+   .WithEndpoint(6001, isProxied: false, scheme: "https", name: "api")
+   .WithEndpoint(6002, isProxied: false, scheme: "https", name: "single")
+   .WithEndpoint(6003, isProxied: false, scheme: "https", name: "multi")
+   .WithEndpoint(6004, isProxied: false, scheme: "https", name: "multi2")
+   ;
 
 var bffMulti = builder.AddProject<Projects.Hosts_Bff_MultiFrontend>(AppHostServices.BffMultiFrontend)
     .WithExternalHttpEndpoints()

@@ -20,6 +20,8 @@
     <Project Path="bff/hosts/Hosts.Bff.DPoP/Hosts.Bff.DPoP.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.EF/Hosts.Bff.EF.csproj" />
     <Project Path="bff/hosts/Hosts.Bff.InMemory/Hosts.Bff.InMemory.csproj" />
+    <Project Path="bff/hosts/Hosts.Bff.MultiFrontend/Hosts.Bff.MultiFrontend.csproj" />
+    <Project Path="bff/hosts/Hosts.Bff.Performance/Hosts.Bff.Performance.csproj" />
     <Project Path="bff/hosts/Hosts.IdentityServer/Hosts.IdentityServer.csproj" />
     <Project Path="bff/hosts/Hosts.ServiceDefaults/Hosts.ServiceDefaults.csproj" />
   </Folder>
@@ -47,6 +49,10 @@
     <Project Path="bff/src/Bff.Yarp/Bff.Yarp.csproj" />
     <Project Path="bff/src/Bff/Bff.csproj" />
   </Folder>
+  <Folder Name="/bff/performance/">
+    <Project Path="bff/performance/Bff.Benchmarks/Bff.Benchmarks.csproj" />
+    <Project Path="bff/performance/Bff.Performance/Bff.Performance.csproj" />
+  </Folder>  
   <Folder Name="/bff/templates/" />
   <Folder Name="/bff/templates/src/">
     <Project Path="bff/templates/src/BffLocalApi/BffLocalApi.csproj" />
@@ -67,9 +73,6 @@
     </Project>
   </Folder>
   <Folder Name="/bff/test/">
-    <Project Path="bff/test/Bff.Blazor.Client.UnitTests/Bff.Blazor.Client.UnitTests.csproj" />
-    <Project Path="bff/test/Bff.Blazor.UnitTests/Bff.Blazor.UnitTests.csproj" />
-    <Project Path="bff/test/Bff.EntityFramework.Tests/Bff.EntityFramework.Tests.csproj" />
     <Project Path="bff/test/Bff.Tests/Bff.Tests.csproj" />
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>

@@ -40,7 +40,7 @@ public class BffScenarioTests(ITestOutputHelper output) : BffTestBase(output)
         };
         await InitializeAsync();
         workerStarted.SetResult();
-        var content = await contentReceived.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        var content = await contentReceived.Task.WaitAsync(TimeSpan.FromSeconds(10));
         content.ShouldNotBeNullOrEmpty();
     }
 

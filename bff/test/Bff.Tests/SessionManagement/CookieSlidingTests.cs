@@ -132,7 +132,6 @@ public class CookieSlidingTests : BffTestBase
             };
         });
 
-        await BffHost.InitializeAsync();
 
         await Bff.BrowserClient.Login();
 

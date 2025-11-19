@@ -10,27 +10,27 @@
       },
       "remoteApis": [
         {
-          "matchingPath": "/api/client-token",
+          "pathMatch": "/api/client-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "Client"
         },
         {
-          "matchingPath": "/api/user-or-client-token",
+          "pathMatch": "/api/user-or-client-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "OptionalUserOrClient"
         },
         {
-          "matchingPath": "/api/anonymous",
+          "pathMatch": "/api/anonymous",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "None"
         },
         {
-          "matchingPath": "/api/optional-user-token",
+          "pathMatch": "/api/optional-user-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "OptionalUserOrNone"
         },
         {
-          "matchingPath": "/api/user-token",
+          "pathMatch": "/api/user-token",
           "targetUri": "https://localhost:5010",
           "tokenRequirement": "User"
         }

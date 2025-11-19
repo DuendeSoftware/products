@@ -1,12 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using System.Buffers.Text;
-using System.Text;
-using Clients;
 using ConsoleResourceIndicators;
-using Duende.IdentityModel.Client;
-using Duende.IdentityModel.OidcClient;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console;
 
@@ -133,34 +128,6 @@ if (testsWithExpectedErrors.Any())
                 $"[dim]{reason}[/]"
             );
         }
-    };
-
-    var serilog = new LoggerConfiguration()
-        .MinimumLevel.Warning()
-        .Enrich.FromLogContext()
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}")
-        .CreateLogger();
-
-    options.LoggerFactory.AddSerilog(serilog);
-
-    _oidcClient = new OidcClient(options);
-    var result = await _oidcClient.LoginAsync();
-
-    var parts = result.AccessToken.Split('.');
-    var header = parts[0];
-    var payload = parts[1];
-
-    Console.WriteLine();
-    Console.WriteLine("Standard access token:");
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(header)).PrettyPrintJson());
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload)).PrettyPrintJson());
-
-    if (result.RefreshToken == null)
-    {
-        Console.WriteLine();
-        Console.WriteLine("No Refresh Token, exiting.");
-
-        Environment.Exit(0);
     }
 
     AnsiConsole.Write(expectedErrorsTable);
@@ -211,16 +178,6 @@ if (mode == OutputMode.Table)
 
         AnsiConsole.Write(detailsTable);
     }
-
-    Console.WriteLine();
-    Console.WriteLine("down-scoped access token:");
-
-    var parts = result.AccessToken.Split('.');
-    var header = parts[0];
-    var payload = parts[1];
-
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(header)).PrettyPrintJson());
-    Console.WriteLine(Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload)).PrettyPrintJson());
 }
 
 // Exit prompt - only in interactive mode
