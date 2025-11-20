@@ -222,7 +222,7 @@ internal static class Constants
         public const string IdentityServerBasePath = "idsvr:IdentityServerBasePath";
         public const string SignOutCalled = "idsvr:IdentityServerSignOutCalled";
         public const string DetectedExpiredUserSession = "idsvr:IdentityServerDetectedExpiredUserSession";
-        public const string BackChannlLogoutTriggered = "idsvr:IdentityServerBackChannlLogoutTriggered";
+        public const string BackChannelLogoutTriggered = "idsvr:IdentityServerBackChannelLogoutTriggered";
     }
 
     public static class TokenTypeHints
