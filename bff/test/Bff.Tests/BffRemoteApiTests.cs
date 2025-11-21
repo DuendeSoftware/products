@@ -136,8 +136,6 @@ public class BffRemoteApiTests : BffTestBase
 
         await Bff.BrowserClient.CallBffHostApi(The.PathAndSubPath,
             expectedStatusCode: HttpStatusCode.Unauthorized);
-
-
     }
 
     private class FakeUserManager : IUserTokenManager
@@ -154,8 +152,7 @@ public class BffRemoteApiTests : BffTestBase
         }
 
         public Task RevokeRefreshTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null,
-            CancellationToken ct = new CancellationToken()) =>
-            throw new NotImplementedException();
+            CancellationToken ct = new CancellationToken()) => throw new NotImplementedException();
     }
 
     [Fact]
@@ -186,7 +183,7 @@ public class BffRemoteApiTests : BffTestBase
         // that errors were being logged. This assertion ensures that no such errors are no longer logged.
         //https://github.com/orgs/DuendeSoftware/discussions/396#discussioncomment-14936964
         var userTokenManager = (FakeUserManager)Bff.Resolve<IUserTokenManager>();
-        userTokenManager.WasCalled.ShouldBeFalse("The fake user manager should not have been called because there is no currently logged in user.");
+        userTokenManager.WasCalled.ShouldBeFalse("The fake user token manager should not have been called because there is no currently logged in user.");
     }
 
     [Fact]
@@ -215,6 +212,6 @@ public class BffRemoteApiTests : BffTestBase
         // that errors were being logged. This assertion ensures that no such errors are no longer logged.
         //https://github.com/orgs/DuendeSoftware/discussions/396#discussioncomment-14936964
         var userTokenManager = (FakeUserManager)Bff.Resolve<IUserTokenManager>();
-        userTokenManager.WasCalled.ShouldBeFalse("The fake user manager should not have been called because there is no currently logged in user.");
+        userTokenManager.WasCalled.ShouldBeFalse("The fake user token manager should not have been called because there is no currently logged in user.");
     }
 }
