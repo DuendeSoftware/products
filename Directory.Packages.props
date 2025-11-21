@@ -46,7 +46,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Duende.IdentityServer" Version="7.4.0-preview.2" />
     <PackageVersion Include="Duende.Private.Licensing" Version="1.0.0" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
-    <PackageVersion Include="Markdig" Version="0.42.0" />
+    <PackageVersion Include="Markdig" Version="0.43.0" />
     <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />
     <!-- Review Packages -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="$(AuthenticationCertificateVersion)" />
@@ -95,8 +95,8 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="MinVer" Version="6.0.0" />
-    <PackageVersion Include="ModelContextProtocol" Version="0.3.0-preview.4" />
-    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
+    <PackageVersion Include="ModelContextProtocol" Version="0.4.0-preview.3" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.4.0-preview.3" />
     <PackageVersion Include="NBomber" Version="6.0.2" />
     <PackageVersion Include="NBomber.Http" Version="6.0.2" />
     <PackageVersion Include="NBomber.Sinks.Timescale" Version="0.8.0" />

@@ -1,11 +1,11 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Text;
 using Documentation.Mcp.Database;
 using Documentation.Mcp.Infrastructure;
-using Documentation.Mcp.Sources.Docs;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using Microsoft.EntityFrameworkCore;
@@ -15,17 +15,25 @@ using Microsoft.Extensions.Logging;
 
 namespace Documentation.Mcp.Sources.Samples;
 
-internal sealed class SamplesIndexer(IServiceProvider services, ILogger<DocsArticleIndexer> logger) : BackgroundService
+internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesIndexer> logger) : BackgroundService
 {
     private readonly TimeSpan _maxAge = TimeSpan.FromDays(7);
 
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(500), stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await RunIndexerAsync(stoppingToken);
+            try
+            {
+                await RunIndexerAsync(stoppingToken);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error running samples indexer. Try restarting the application.");
+            }
             await Task.Delay(TimeSpan.FromHours(8), stoppingToken);
         }
     }
