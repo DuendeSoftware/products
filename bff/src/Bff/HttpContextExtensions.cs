@@ -68,47 +68,68 @@ internal static class HttpContextExtensions
 
         if (shouldGetUserToken.Contains(requiredTokenType))
         {
-            var userTokenResult = await
-                context.GetUserAccessTokenAsync(userAccessTokenRequestParameters, ct);
-
-            if (userTokenResult.WasSuccessful(out var userToken, out var userTokenFailure))
+            // Only attempt to geta user token if user is authenticated
+            if (context.User.Identity!.IsAuthenticated)
             {
-                // Doing a case insensitive comparison here, because some openid connect providers return
-                // non standard casing: https://github.com/orgs/DuendeSoftware/discussions/280#discussioncomment-13862452
-                if (!string.Equals(userToken.AccessTokenType, OidcConstants.TokenResponse.DPoPTokenType,
-                        StringComparison.OrdinalIgnoreCase))
+                var userTokenResult = await
+                    context.GetUserAccessTokenAsync(userAccessTokenRequestParameters, ct);
+
+                if (userTokenResult.WasSuccessful(out var userToken, out var userTokenFailure))
                 {
-                    return new BearerTokenResult
+                    // Doing a case insensitive comparison here, because some openid connect providers return
+                    // non standard casing: https://github.com/orgs/DuendeSoftware/discussions/280#discussioncomment-13862452
+                    if (!string.Equals(userToken.AccessTokenType, OidcConstants.TokenResponse.DPoPTokenType,
+                            StringComparison.OrdinalIgnoreCase))
                     {
-                        // Should we append the type here?
-                        AccessToken = AccessToken.Parse(userToken.AccessToken.ToString())
+                        return new BearerTokenResult
+                        {
+                            // Should we append the type here?
+                            AccessToken = AccessToken.Parse(userToken.AccessToken.ToString())
+                        };
+                    }
+
+                    if (userToken.DPoPJsonWebKey == null)
+                    {
+                        throw new InvalidOperationException("DPoP JsonWebKey was null");
+                    }
+
+                    return new DPoPTokenResult()
+                    {
+                        AccessToken = AccessToken.Parse(userToken.ToString()),
+                        DPoPJsonWebKey = DPoPProofKey.Parse(userToken.DPoPJsonWebKey!.ToString()!)
                     };
                 }
 
-                if (userToken.DPoPJsonWebKey == null)
+                if (requiredTokenType == RequiredTokenType.User)
                 {
-                    throw new InvalidOperationException("DPoP JsonWebKey was null");
+                    return new AccessTokenRetrievalError
+                    {
+                        Error = userTokenFailure.Error,
+                        ErrorDescription = userTokenFailure.ErrorDescription
+                    };
                 }
-
-                return new DPoPTokenResult()
+                if (requiredTokenType == RequiredTokenType.UserOrNone)
                 {
-                    AccessToken = AccessToken.Parse(userToken.ToString()),
-                    DPoPJsonWebKey = DPoPProofKey.Parse(userToken.DPoPJsonWebKey!.ToString()!)
-                };
-
+                    return new NoAccessTokenResult();
+                }
             }
-
-            if (requiredTokenType == RequiredTokenType.User)
+            else
             {
-                return new AccessTokenRetrievalError
+                // User is not authenticated
+                // Handle unauthenticated scenarios based on token type
+                // For UserOrClient, fall through to client token
+                if (requiredTokenType == RequiredTokenType.User)
                 {
-                    Error = userTokenFailure.Error,
-                    ErrorDescription = userTokenFailure.ErrorDescription
-                };
-            }
-            if (requiredTokenType == RequiredTokenType.UserOrNone)
-            {
-                return new NoAccessTokenResult();
+                    return new AccessTokenRetrievalError
+                    {
+                        Error = "not_authenticated",
+                        ErrorDescription = "User is not authenticated"
+                    };
+                }
+                if (requiredTokenType == RequiredTokenType.UserOrNone)
+                {
+                    return new NoAccessTokenResult();
+                }
             }
         }
 
