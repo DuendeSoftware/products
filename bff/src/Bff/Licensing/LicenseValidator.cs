@@ -13,16 +13,34 @@ internal class LicenseValidator(ILogger<LicenseValidator> logger, License licens
     {
     }
 
-    public void CheckLicenseValidity()
+    private bool? _licenseCheckResult;
+
+    public bool CheckLicense()
+    {
+        if (_licenseCheckResult != null)
+        {
+            return _licenseCheckResult.Value;
+        }
+
+        _licenseCheckResult = CheckLicenseValidity();
+        return _licenseCheckResult.Value;
+    }
+
+    private bool CheckLicenseValidity()
     {
         if (!license.IsConfigured)
         {
             logger.NoValidLicense(LogLevel.Error);
+            return false;
         }
 
         if (license.Expiration <= timeProvider.GetUtcNow())
         {
-            logger.LicenseHasExpired(LogLevel.Error, license.Expiration, license.ContactInfo ?? "", license.CompanyName ?? "");
+            logger.LicenseHasExpired(LogLevel.Error, license.Expiration, license.ContactInfo ?? "",
+                license.CompanyName ?? "");
+            return false;
         }
+
+        return true;
     }
 }

@@ -61,15 +61,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                     .Where(frontend => oldFrontends.All(x => x.Name != frontend.Name))
                     .ToArray();
 
-                //TODO: potential place to log out number of frontends
-
-                // var totalFrontends = oldFrontends.Length - removedFrontends.Length;
-
-                // foreach (var frontend in addedFrontends)
-                // {
-                //     _licenseValidator.LogFrontendAdded(frontend.Name, ++totalFrontends);
-                // }
-
                 Interlocked.Exchange(ref _frontends, newFrontends);
 
             }
@@ -190,9 +181,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         }
         else
         {
-            //TODO: potential place to log out number of frontends
-
-            // _licenseValidator.LogFrontendAdded(frontend.Name, _frontends.Length);
             OnFrontendAdded(frontend);
         }
 

@@ -179,4 +179,9 @@ public sealed class BffOptions
     /// </summary>
     public Collection<string> AllowedSilentLoginReferers { get; } = new();
 
+    /// <summary>
+    /// Options for diagnostics logging
+    /// </summary>
+    public DiagnosticsOptions Diagnostics { get; set; } = new();
+
 }

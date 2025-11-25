@@ -5,6 +5,86 @@ using Microsoft.AspNetCore.Http;
 
 #pragma warning disable CS1591 // Compensate for https://github.com/dotnet/roslyn/issues/54103
 
+namespace Duende.Bff.Diagnostics
+{
+    internal static class DiagnosticsLog
+    {
+        /// <summary>
+        /// Logs "Diagnostic summary ({current}/{total}): {diagnosticData}" at "Information" level.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
+        internal static void DiagnosticSummaryLogged(this global::Microsoft.Extensions.Logging.ILogger logger, int current, int total, string diagnosticData)
+        {
+            if (!logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
+            {
+                return;
+            }
+
+            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
+
+            _ = state.ReserveTagSpace(4);
+            state.TagArray[3] = new("{OriginalFormat}", "Diagnostic summary ({current}/{total}): {diagnosticData}");
+            state.TagArray[2] = new("current", current);
+            state.TagArray[1] = new("total", total);
+            state.TagArray[0] = new("diagnosticData", diagnosticData);
+
+            logger.Log(
+                global::Microsoft.Extensions.Logging.LogLevel.Information,
+                new(1, nameof(DiagnosticSummaryLogged)),
+                state,
+                null,
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
+                {
+                    var current = s.TagArray[2].Value;
+                    var total = s.TagArray[1].Value;
+                    var diagnosticData = s.TagArray[0].Value ?? "(null)";
+                    #if NET
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Diagnostic summary ({current}/{total}): {diagnosticData}");
+                    #else
+                    return global::System.FormattableString.Invariant($"Diagnostic summary ({current}/{total}): {diagnosticData}");
+                    #endif
+                });
+
+            state.Clear();
+        }
+
+        /// <summary>
+        /// Logs "An error occurred while logging the diagnostic summary: {Message}" at "Warning" level.
+        /// </summary>
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
+        internal static void FailedToLogDiagnosticsSummary(this global::Microsoft.Extensions.Logging.ILogger logger, string message)
+        {
+            if (!logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Warning))
+            {
+                return;
+            }
+
+            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
+
+            _ = state.ReserveTagSpace(2);
+            state.TagArray[1] = new("{OriginalFormat}", "An error occurred while logging the diagnostic summary: {Message}");
+            state.TagArray[0] = new("Message", message);
+
+            logger.Log(
+                global::Microsoft.Extensions.Logging.LogLevel.Warning,
+                new(2, nameof(FailedToLogDiagnosticsSummary)),
+                state,
+                null,
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
+                {
+                    var message = s.TagArray[0].Value ?? "(null)";
+                    #if NET
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"An error occurred while logging the diagnostic summary: {message}");
+                    #else
+                    return global::System.FormattableString.Invariant($"An error occurred while logging the diagnostic summary: {message}");
+                    #endif
+                });
+
+            state.Clear();
+        }
+    }
+}
+
 namespace Duende.Bff.Licensing
 {
     internal static class LicensingLogMessages

@@ -68,7 +68,7 @@ internal sealed class BffServerAuthenticationStateProvider : RevalidatingServerA
         AuthenticationStateChanged += OnAuthenticationStateChanged;
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
 
-        licenseValidator.CheckLicenseValidity();
+        licenseValidator.CheckLicense();
     }
 
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task) => _authenticationStateTask = task;

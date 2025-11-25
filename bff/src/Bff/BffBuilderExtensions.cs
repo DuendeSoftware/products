@@ -5,6 +5,8 @@ using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Builder;
 using Duende.Bff.Configuration;
+using Duende.Bff.Diagnostics;
+using Duende.Bff.Diagnostics.DiagnosticEntries;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Endpoints;
@@ -113,6 +115,20 @@ public static class BffBuilderExtensions
     internal static void AddBffMetrics<T>(T builder) where T : IBffBuilder =>
         builder.Services.AddSingleton<BffMetrics>();
 
+    internal static T AddDiagnostics<T>(this T builder)
+        where T : IBffServicesBuilder
+    {
+        builder.Services.AddSingleton<IDiagnosticEntry, BasicServerInfoDiagnosticEntry>();
+        builder.Services.AddSingleton<IDiagnosticEntry, AssemblyInfoDiagnosticEntry>();
+        builder.Services.AddSingleton<IDiagnosticEntry, FrontendCountDiagnosticEntry>();
+        builder.Services.AddSingleton<DiagnosticSummary>();
+        builder.Services.AddSingleton(serviceProvider => new DiagnosticDataService(
+            serviceProvider.GetRequiredService<TimeProvider>().GetUtcNow().UtcDateTime,
+            serviceProvider.GetServices<IDiagnosticEntry>()));
+        builder.Services.AddHostedService<DiagnosticHostedService>();
+
+        return builder;
+    }
 
     internal static T AddDynamicFrontends<T>(this T builder)
         where T : IBffServicesBuilder
