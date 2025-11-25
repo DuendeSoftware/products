@@ -10,9 +10,9 @@ namespace Duende.Bff.Licensing
     internal static class LicensingLogMessages
     {
         /// <summary>
-        /// Logs "Duende BFF Security Framework License information:\r\n - Edition: {Edition}\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}        \r\n - Number of frontends licensed: {NumberOfFrontends}".
+        /// Logs "Duende BFF Security Framework License information:\r\n - Edition: {Edition}\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {NumberOfFrontends}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LicenseDetails(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, string? edition, global::System.DateTimeOffset? expirationDate, string licenseContact, string licenseCompany, string? numberOfFrontends)
         {
             if (!logger.IsEnabled(level))
@@ -23,29 +23,29 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(6);
-            state.TagArray[5] = new("Edition", edition);
-            state.TagArray[4] = new("ExpirationDate", expirationDate);
-            state.TagArray[3] = new("LicenseContact", licenseContact);
-            state.TagArray[2] = new("licenseCompany", licenseCompany);
-            state.TagArray[1] = new("NumberOfFrontends", numberOfFrontends);
-            state.TagArray[0] = new("{OriginalFormat}", "Duende BFF Security Framework License information:\r\n - Edition: {Edition}\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}        \r\n - Number of frontends licensed: {NumberOfFrontends}");
+            state.TagArray[5] = new("{OriginalFormat}", "Duende BFF Security Framework License information:\r\n - Edition: {Edition}\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {NumberOfFrontends}");
+            state.TagArray[4] = new("Edition", edition);
+            state.TagArray[3] = new("ExpirationDate", expirationDate);
+            state.TagArray[2] = new("LicenseContact", licenseContact);
+            state.TagArray[1] = new("licenseCompany", licenseCompany);
+            state.TagArray[0] = new("NumberOfFrontends", numberOfFrontends);
 
             logger.Log(
                 level,
-                new(1205910631, nameof(LicenseDetails)),
+                new(1878989586, nameof(LicenseDetails)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var edition = s.TagArray[5].Value ?? "(null)";
-                    var expirationDate = s.TagArray[4].Value ?? "(null)";
-                    var licenseContact = s.TagArray[3].Value ?? "(null)";
-                    var licenseCompany = s.TagArray[2].Value ?? "(null)";
-                    var numberOfFrontends = s.TagArray[1].Value ?? "(null)";
+                    var edition = s.TagArray[4].Value ?? "(null)";
+                    var expirationDate = s.TagArray[3].Value ?? "(null)";
+                    var licenseContact = s.TagArray[2].Value ?? "(null)";
+                    var licenseCompany = s.TagArray[1].Value ?? "(null)";
+                    var numberOfFrontends = s.TagArray[0].Value ?? "(null)";
                     #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Duende BFF Security Framework License information:\r\n - Edition: {edition}\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}        \r\n - Number of frontends licensed: {numberOfFrontends}");
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Duende BFF Security Framework License information:\r\n - Edition: {edition}\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {numberOfFrontends}");
                     #else
-                    return global::System.FormattableString.Invariant($"Duende BFF Security Framework License information:\r\n - Edition: {edition}\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}        \r\n - Number of frontends licensed: {numberOfFrontends}");
+                    return global::System.FormattableString.Invariant($"Duende BFF Security Framework License information:\r\n - Edition: {edition}\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {numberOfFrontends}");
                     #endif
                 });
 
@@ -53,9 +53,9 @@ namespace Duende.Bff.Licensing
         }
 
         /// <summary>
-        /// Logs "Your license for Duende BFF Security Framework has expired on {ExpirationDate}. \r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.".
+        /// Logs "Your license for the Duende Software has expired on {ExpirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LicenseHasExpired(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::System.DateTimeOffset? expirationDate, string licenseContact, string licenseCompany)
         {
             if (!logger.IsEnabled(level))
@@ -66,25 +66,25 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("ExpirationDate", expirationDate);
-            state.TagArray[2] = new("licenseContact", licenseContact);
-            state.TagArray[1] = new("licenseCompany", licenseCompany);
-            state.TagArray[0] = new("{OriginalFormat}", "Your license for Duende BFF Security Framework has expired on {ExpirationDate}. \r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
+            state.TagArray[3] = new("{OriginalFormat}", "Your license for the Duende Software has expired on {ExpirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
+            state.TagArray[2] = new("ExpirationDate", expirationDate);
+            state.TagArray[1] = new("licenseContact", licenseContact);
+            state.TagArray[0] = new("licenseCompany", licenseCompany);
 
             logger.Log(
                 level,
-                new(1620871452, nameof(LicenseHasExpired)),
+                new(770251973, nameof(LicenseHasExpired)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var expirationDate = s.TagArray[3].Value ?? "(null)";
-                    var licenseContact = s.TagArray[2].Value ?? "(null)";
-                    var licenseCompany = s.TagArray[1].Value ?? "(null)";
+                    var expirationDate = s.TagArray[2].Value ?? "(null)";
+                    var licenseContact = s.TagArray[1].Value ?? "(null)";
+                    var licenseCompany = s.TagArray[0].Value ?? "(null)";
                     #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Your license for Duende BFF Security Framework has expired on {expirationDate}. \r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Your license for the Duende Software has expired on {expirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
                     #else
-                    return global::System.FormattableString.Invariant($"Your license for Duende BFF Security Framework has expired on {expirationDate}. \r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
+                    return global::System.FormattableString.Invariant($"Your license for the Duende Software has expired on {expirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
                     #endif
                 });
 
@@ -92,9 +92,9 @@ namespace Duende.Bff.Licensing
         }
 
         /// <summary>
-        /// Logs "You do not have a valid license key for the Duende BFF Security Framework.\r\nWhen unlicensed, BFF will run in trial mode. It will limit the number of active sessions to 5.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.".
+        /// Logs "You do not have a valid license key for the Duende software.\r\nThis is allowed for development and testing scenarios.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/contact"".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoValidLicense(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -105,25 +105,25 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(1);
-            state.TagArray[0] = new("{OriginalFormat}", "You do not have a valid license key for the Duende BFF Security Framework.\r\nWhen unlicensed, BFF will run in trial mode. It will limit the number of active sessions to 5.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+            state.TagArray[0] = new("{OriginalFormat}", "You do not have a valid license key for the Duende software.\r\nThis is allowed for development and testing scenarios.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/contact\"");
 
             logger.Log(
                 logLevel,
-                new(2083751822, nameof(NoValidLicense)),
+                new(767400809, nameof(NoValidLicense)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    return "You do not have a valid license key for the Duende BFF Security Framework.\r\nWhen unlicensed, BFF will run in trial mode. It will limit the number of active sessions to 5.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.";
+                    return "You do not have a valid license key for the Duende software.\r\nThis is allowed for development and testing scenarios.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/contact\"";
                 });
 
             state.Clear();
         }
 
         /// <summary>
-        /// Logs "Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5. \r\nPlease contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.".
+        /// Logs "Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NotLicensedForBff(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string licenseContact, string licenseCompany)
         {
             if (!logger.IsEnabled(logLevel))
@@ -134,23 +134,23 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("LicenseContact", licenseContact);
-            state.TagArray[1] = new("LicenseCompany", licenseCompany);
-            state.TagArray[0] = new("{OriginalFormat}", "Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5. \r\nPlease contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+            state.TagArray[2] = new("{OriginalFormat}", "Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+            state.TagArray[1] = new("LicenseContact", licenseContact);
+            state.TagArray[0] = new("LicenseCompany", licenseCompany);
 
             logger.Log(
                 logLevel,
-                new(616438795, nameof(NotLicensedForBff)),
+                new(792057768, nameof(NotLicensedForBff)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var licenseContact = s.TagArray[2].Value ?? "(null)";
-                    var licenseCompany = s.TagArray[1].Value ?? "(null)";
+                    var licenseContact = s.TagArray[1].Value ?? "(null)";
+                    var licenseCompany = s.TagArray[0].Value ?? "(null)";
                     #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5. \r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
                     #else
-                    return global::System.FormattableString.Invariant($"Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5. \r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+                    return global::System.FormattableString.Invariant($"Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
                     #endif
                 });
 
@@ -160,7 +160,7 @@ namespace Duende.Bff.Licensing
         /// <summary>
         /// Logs "Error validating the license key.If you are running in production you are required to have a licensed version. Please start a conversation with us: https://duende.link/l/bff/contact".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ErrorValidatingLicenseKey(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex)
         {
             if (!logger.IsEnabled(logLevel))
@@ -175,10 +175,10 @@ namespace Duende.Bff.Licensing
 
             logger.Log(
                 logLevel,
-                new(1152327271, nameof(ErrorValidatingLicenseKey)),
+                new(197645874, nameof(ErrorValidatingLicenseKey)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Error validating the license key.If you are running in production you are required to have a licensed version. Please start a conversation with us: https://duende.link/l/bff/contact";
                 });
@@ -189,7 +189,7 @@ namespace Duende.Bff.Licensing
         /// <summary>
         /// Logs "Frontend #{FrontendsUsed} with name {FrontendName} was added. The license allows for unlimited frontends.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void UnlimitedFrontends(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName, int frontendsUsed)
         {
             if (!logger.IsEnabled(logLevel))
@@ -200,19 +200,19 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("FrontendName", frontendName);
-            state.TagArray[1] = new("FrontendsUsed", frontendsUsed);
-            state.TagArray[0] = new("{OriginalFormat}", "Frontend #{FrontendsUsed} with name {FrontendName} was added. The license allows for unlimited frontends.");
+            state.TagArray[2] = new("{OriginalFormat}", "Frontend #{FrontendsUsed} with name {FrontendName} was added. The license allows for unlimited frontends.");
+            state.TagArray[1] = new("FrontendName", frontendName);
+            state.TagArray[0] = new("FrontendsUsed", frontendsUsed);
 
             logger.Log(
                 logLevel,
-                new(602507404, nameof(UnlimitedFrontends)),
+                new(1958275515, nameof(UnlimitedFrontends)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontendName = s.TagArray[2].Value ?? "(null)";
-                    var frontendsUsed = s.TagArray[1].Value;
+                    var frontendName = s.TagArray[1].Value ?? "(null)";
+                    var frontendsUsed = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend #{frontendsUsed} with name {frontendName} was added. The license allows for unlimited frontends.");
                     #else
@@ -226,7 +226,7 @@ namespace Duende.Bff.Licensing
         /// <summary>
         /// Logs "Frontend {FrontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FrontendAdded(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName, int frontendsUsed, int frontendLimit)
         {
             if (!logger.IsEnabled(logLevel))
@@ -237,21 +237,21 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("FrontendName", frontendName);
-            state.TagArray[2] = new("frontendsUsed", frontendsUsed);
-            state.TagArray[1] = new("frontendLimit", frontendLimit);
-            state.TagArray[0] = new("{OriginalFormat}", "Frontend {FrontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.");
+            state.TagArray[3] = new("{OriginalFormat}", "Frontend {FrontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.");
+            state.TagArray[2] = new("FrontendName", frontendName);
+            state.TagArray[1] = new("frontendsUsed", frontendsUsed);
+            state.TagArray[0] = new("frontendLimit", frontendLimit);
 
             logger.Log(
                 logLevel,
-                new(429719596, nameof(FrontendAdded)),
+                new(231888333, nameof(FrontendAdded)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontendName = s.TagArray[3].Value ?? "(null)";
-                    var frontendsUsed = s.TagArray[2].Value;
-                    var frontendLimit = s.TagArray[1].Value;
+                    var frontendName = s.TagArray[2].Value ?? "(null)";
+                    var frontendsUsed = s.TagArray[1].Value;
+                    var frontendLimit = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend {frontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.");
                     #else
@@ -265,7 +265,7 @@ namespace Duende.Bff.Licensing
         /// <summary>
         /// Logs "Frontend {FrontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FrontendLimitExceeded(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName, int frontendsUsed, int frontendLimit)
         {
             if (!logger.IsEnabled(logLevel))
@@ -276,21 +276,21 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("FrontendName", frontendName);
-            state.TagArray[2] = new("frontendsUsed", frontendsUsed);
-            state.TagArray[1] = new("frontendLimit", frontendLimit);
-            state.TagArray[0] = new("{OriginalFormat}", "Frontend {FrontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
+            state.TagArray[3] = new("{OriginalFormat}", "Frontend {FrontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
+            state.TagArray[2] = new("FrontendName", frontendName);
+            state.TagArray[1] = new("frontendsUsed", frontendsUsed);
+            state.TagArray[0] = new("frontendLimit", frontendLimit);
 
             logger.Log(
                 logLevel,
-                new(1163398776, nameof(FrontendLimitExceeded)),
+                new(438656937, nameof(FrontendLimitExceeded)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontendName = s.TagArray[3].Value ?? "(null)";
-                    var frontendsUsed = s.TagArray[2].Value;
-                    var frontendLimit = s.TagArray[1].Value;
+                    var frontendName = s.TagArray[2].Value ?? "(null)";
+                    var frontendsUsed = s.TagArray[1].Value;
+                    var frontendLimit = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend {frontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
                     #else
@@ -304,7 +304,7 @@ namespace Duende.Bff.Licensing
         /// <summary>
         /// Logs "Frontend {FrontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NotLicensedForMultiFrontend(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName)
         {
             if (!logger.IsEnabled(logLevel))
@@ -315,17 +315,17 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("FrontendName", frontendName);
-            state.TagArray[0] = new("{OriginalFormat}", "Frontend {FrontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
+            state.TagArray[1] = new("{OriginalFormat}", "Frontend {FrontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
+            state.TagArray[0] = new("FrontendName", frontendName);
 
             logger.Log(
                 logLevel,
-                new(483064138, nameof(NotLicensedForMultiFrontend)),
+                new(289456605, nameof(NotLicensedForMultiFrontend)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontendName = s.TagArray[1].Value ?? "(null)";
+                    var frontendName = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend {frontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
                     #else
@@ -345,7 +345,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Management URL request {Path} blocked with 404 response, because the implicit frontend is disabled.\r\n\r\nWhen you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,\r\nAdd one without Host or Path mapping.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ImplicitFrontendDisabled(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::Microsoft.AspNetCore.Http.PathString path)
         {
             if (!logger.IsEnabled(level))
@@ -356,17 +356,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Path", path.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Management URL request {Path} blocked with 404 response, because the implicit frontend is disabled.\r\n\r\nWhen you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,\r\nAdd one without Host or Path mapping.");
+            state.TagArray[1] = new("{OriginalFormat}", "Management URL request {Path} blocked with 404 response, because the implicit frontend is disabled.\r\n\r\nWhen you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,\r\nAdd one without Host or Path mapping.");
+            state.TagArray[0] = new("Path", path.ToString());
 
             logger.Log(
                 level,
-                new(469382589, nameof(ImplicitFrontendDisabled)),
+                new(646064610, nameof(ImplicitFrontendDisabled)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var path = s.TagArray[1].Value;
+                    var path = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Management URL request {path} blocked with 404 response, because the implicit frontend is disabled.\r\n\r\nWhen you add multiple frontends, the implicit frontend is disabled. If you wish to create an implicit frontend,\r\nAdd one without Host or Path mapping.");
                     #else
@@ -380,7 +380,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Retrieved IndexHTML for {Frontend}. Statuscode was {StatusCode}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RetrievedIndexHTML(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend, global::System.Net.HttpStatusCode statusCode)
         {
             if (!logger.IsEnabled(level))
@@ -391,19 +391,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Frontend", frontend.ToString());
-            state.TagArray[1] = new("StatusCode", statusCode);
-            state.TagArray[0] = new("{OriginalFormat}", "Retrieved IndexHTML for {Frontend}. Statuscode was {StatusCode}");
+            state.TagArray[2] = new("{OriginalFormat}", "Retrieved IndexHTML for {Frontend}. Statuscode was {StatusCode}");
+            state.TagArray[1] = new("Frontend", frontend.ToString());
+            state.TagArray[0] = new("StatusCode", statusCode);
 
             logger.Log(
                 level,
-                new(127338875, nameof(RetrievedIndexHTML)),
+                new(1828340680, nameof(RetrievedIndexHTML)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[2].Value;
-                    var statusCode = s.TagArray[1].Value;
+                    var frontend = s.TagArray[1].Value;
+                    var statusCode = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Retrieved IndexHTML for {frontend}. Statuscode was {statusCode}");
                     #else
@@ -417,7 +417,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to retrieve IndexHTML for {Frontend}. Statuscode was {StatusCode}. This result will not be cached.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void IndexHtmlRetrievalFailed(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend, global::System.Net.HttpStatusCode statusCode)
         {
             if (!logger.IsEnabled(level))
@@ -428,19 +428,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Frontend", frontend.ToString());
-            state.TagArray[1] = new("StatusCode", statusCode);
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to retrieve IndexHTML for {Frontend}. Statuscode was {StatusCode}. This result will not be cached.");
+            state.TagArray[2] = new("{OriginalFormat}", "Failed to retrieve IndexHTML for {Frontend}. Statuscode was {StatusCode}. This result will not be cached.");
+            state.TagArray[1] = new("Frontend", frontend.ToString());
+            state.TagArray[0] = new("StatusCode", statusCode);
 
             logger.Log(
                 level,
-                new(971421598, nameof(IndexHtmlRetrievalFailed)),
+                new(2144924891, nameof(IndexHtmlRetrievalFailed)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[2].Value;
-                    var statusCode = s.TagArray[1].Value;
+                    var frontend = s.TagArray[1].Value;
+                    var statusCode = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to retrieve IndexHTML for {frontend}. Statuscode was {statusCode}. This result will not be cached.");
                     #else
@@ -454,7 +454,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Duplicate 'default' frontend configured. This is a frontend without an origin and path. The first one is used. ".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void DuplicateDefaultRouteConfigured(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level)
         {
             if (!logger.IsEnabled(level))
@@ -469,10 +469,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 level,
-                new(1759121909, nameof(DuplicateDefaultRouteConfigured)),
+                new(177674312, nameof(DuplicateDefaultRouteConfigured)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Duplicate 'default' frontend configured. This is a frontend without an origin and path. The first one is used. ";
                 });
@@ -483,7 +483,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Duplicate Frontend matching criteria registered. Frontend '{Frontend}' will be ignored because it collides with frontend '{duplicate}'.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FrontendWithSimilarMatchingCriteriaAlreadyRegistered(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend, global::Duende.Bff.DynamicFrontends.BffFrontendName duplicate)
         {
             if (!logger.IsEnabled(level))
@@ -494,19 +494,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Frontend", frontend.ToString());
-            state.TagArray[1] = new("duplicate", duplicate.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Duplicate Frontend matching criteria registered. Frontend '{Frontend}' will be ignored because it collides with frontend '{duplicate}'.");
+            state.TagArray[2] = new("{OriginalFormat}", "Duplicate Frontend matching criteria registered. Frontend '{Frontend}' will be ignored because it collides with frontend '{duplicate}'.");
+            state.TagArray[1] = new("Frontend", frontend.ToString());
+            state.TagArray[0] = new("duplicate", duplicate.ToString());
 
             logger.Log(
                 level,
-                new(875495101, nameof(FrontendWithSimilarMatchingCriteriaAlreadyRegistered)),
+                new(444679312, nameof(FrontendWithSimilarMatchingCriteriaAlreadyRegistered)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[2].Value;
-                    var duplicate = s.TagArray[1].Value;
+                    var frontend = s.TagArray[1].Value;
+                    var duplicate = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Duplicate Frontend matching criteria registered. Frontend '{frontend}' will be ignored because it collides with frontend '{duplicate}'.");
                     #else
@@ -520,7 +520,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to apply yarp access token request transform.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToApplyYarpAccessTokenRequestTransform(this global::Microsoft.Extensions.Logging.ILogger logger, global::System.Exception ex, global::Microsoft.Extensions.Logging.LogLevel level)
         {
             if (!logger.IsEnabled(level))
@@ -535,10 +535,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 level,
-                new(507886080, nameof(FailedToApplyYarpAccessTokenRequestTransform)),
+                new(575124767, nameof(FailedToApplyYarpAccessTokenRequestTransform)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Failed to apply yarp access token request transform.";
                 });
@@ -549,7 +549,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "AllowedSilentLoginReferrers have been configured but no referer header was found on silent login callback. Returning bad request. ".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SilentLoginEndpointRefererHeaderMissing(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level)
         {
             if (!logger.IsEnabled(level))
@@ -564,10 +564,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 level,
-                new(1038547159, nameof(SilentLoginEndpointRefererHeaderMissing)),
+                new(1316852332, nameof(SilentLoginEndpointRefererHeaderMissing)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "AllowedSilentLoginReferrers have been configured but no referer header was found on silent login callback. Returning bad request. ";
                 });
@@ -578,7 +578,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Referer {Referer} not in allowed referers: {AllowedReferers}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SilentLoginEndpointRefererNotAllowed(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, string referer, string allowedReferers)
         {
             if (!logger.IsEnabled(level))
@@ -589,19 +589,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Referer", referer);
-            state.TagArray[1] = new("AllowedReferers", allowedReferers);
-            state.TagArray[0] = new("{OriginalFormat}", "Referer {Referer} not in allowed referers: {AllowedReferers}");
+            state.TagArray[2] = new("{OriginalFormat}", "Referer {Referer} not in allowed referers: {AllowedReferers}");
+            state.TagArray[1] = new("Referer", referer);
+            state.TagArray[0] = new("AllowedReferers", allowedReferers);
 
             logger.Log(
                 level,
-                new(91029881, nameof(SilentLoginEndpointRefererNotAllowed)),
+                new(21879938, nameof(SilentLoginEndpointRefererNotAllowed)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var referer = s.TagArray[2].Value ?? "(null)";
-                    var allowedReferers = s.TagArray[1].Value ?? "(null)";
+                    var referer = s.TagArray[1].Value ?? "(null)";
+                    var allowedReferers = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Referer {referer} not in allowed referers: {allowedReferers}");
                     #else
@@ -615,7 +615,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Proxy response error. Path: '{Path}', error: '{Error}'".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ProxyResponseError(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, string path, string error)
         {
             if (!logger.IsEnabled(level))
@@ -626,19 +626,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Path", path);
-            state.TagArray[1] = new("Error", error);
-            state.TagArray[0] = new("{OriginalFormat}", "Proxy response error. Path: '{Path}', error: '{Error}'");
+            state.TagArray[2] = new("{OriginalFormat}", "Proxy response error. Path: '{Path}', error: '{Error}'");
+            state.TagArray[1] = new("Path", path);
+            state.TagArray[0] = new("Error", error);
 
             logger.Log(
                 level,
-                new(387163085, nameof(ProxyResponseError)),
+                new(1910499378, nameof(ProxyResponseError)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var path = s.TagArray[2].Value ?? "(null)";
-                    var error = s.TagArray[1].Value ?? "(null)";
+                    var path = s.TagArray[1].Value ?? "(null)";
+                    var error = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Proxy response error. Path: '{path}', error: '{error}'");
                     #else
@@ -652,8 +652,8 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Deserializing AuthenticationTicket envelope failed or found incorrect version for key {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
-        internal static void AuthenticationTicketEnvelopeVersionInvalid(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.SessionManagement.SessionStore.UserSessionKey key)
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
+        public static void AuthenticationTicketEnvelopeVersionInvalid(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.SessionManagement.SessionStore.UserSessionKey key)
         {
             if (!logger.IsEnabled(logLevel))
             {
@@ -663,17 +663,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Deserializing AuthenticationTicket envelope failed or found incorrect version for key {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "Deserializing AuthenticationTicket envelope failed or found incorrect version for key {Key}");
+            state.TagArray[0] = new("Key", key.ToString());
 
             logger.Log(
                 logLevel,
-                new(354836767, nameof(AuthenticationTicketEnvelopeVersionInvalid)),
+                new(958878518, nameof(AuthenticationTicketEnvelopeVersionInvalid)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value;
+                    var key = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Deserializing AuthenticationTicket envelope failed or found incorrect version for key {key}");
                     #else
@@ -687,7 +687,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to unprotect AuthenticationTicket payload for key {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void AuthenticationTicketPayloadInvalid(this global::Microsoft.Extensions.Logging.ILogger logger, global::System.Exception? ex, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.SessionManagement.SessionStore.UserSessionKey key)
         {
             if (!logger.IsEnabled(logLevel))
@@ -698,17 +698,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to unprotect AuthenticationTicket payload for key {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed to unprotect AuthenticationTicket payload for key {Key}");
+            state.TagArray[0] = new("Key", key.ToString());
 
             logger.Log(
                 logLevel,
-                new(863664585, nameof(AuthenticationTicketPayloadInvalid)),
+                new(234891412, nameof(AuthenticationTicketPayloadInvalid)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value;
+                    var key = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to unprotect AuthenticationTicket payload for key {key}");
                     #else
@@ -722,7 +722,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to deserialize AuthenticationTicket payload for key {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void AuthenticationTicketFailedToDeserialize(this global::Microsoft.Extensions.Logging.ILogger logger, global::System.Exception? ex, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.SessionManagement.SessionStore.UserSessionKey key)
         {
             if (!logger.IsEnabled(logLevel))
@@ -733,17 +733,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to deserialize AuthenticationTicket payload for key {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed to deserialize AuthenticationTicket payload for key {Key}");
+            state.TagArray[0] = new("Key", key.ToString());
 
             logger.Log(
                 logLevel,
-                new(245709081, nameof(AuthenticationTicketFailedToDeserialize)),
+                new(1204051220, nameof(AuthenticationTicketFailedToDeserialize)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value;
+                    var key = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to deserialize AuthenticationTicket payload for key {key}");
                     #else
@@ -757,7 +757,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "FrontendSelection: No frontends registered in the store.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoFrontendsRegistered(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -772,10 +772,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1060368318, nameof(NoFrontendsRegistered)),
+                new(815977895, nameof(NoFrontendsRegistered)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "FrontendSelection: No frontends registered in the store.";
                 });
@@ -786,7 +786,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Invalid prompt value {Prompt}.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void InvalidPromptValue(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string prompt)
         {
             if (!logger.IsEnabled(logLevel))
@@ -797,17 +797,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Prompt", prompt);
-            state.TagArray[0] = new("{OriginalFormat}", "Invalid prompt value {Prompt}.");
+            state.TagArray[1] = new("{OriginalFormat}", "Invalid prompt value {Prompt}.");
+            state.TagArray[0] = new("Prompt", prompt);
 
             logger.Log(
                 logLevel,
-                new(1772992930, nameof(InvalidPromptValue)),
+                new(633713241, nameof(InvalidPromptValue)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var prompt = s.TagArray[1].Value ?? "(null)";
+                    var prompt = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Invalid prompt value {prompt}.");
                     #else
@@ -821,7 +821,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Invalid return url {Url}.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void InvalidReturnUrl(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string url)
         {
             if (!logger.IsEnabled(logLevel))
@@ -832,17 +832,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Url", url);
-            state.TagArray[0] = new("{OriginalFormat}", "Invalid return url {Url}.");
+            state.TagArray[1] = new("{OriginalFormat}", "Invalid return url {Url}.");
+            state.TagArray[0] = new("Url", url);
 
             logger.Log(
                 logLevel,
-                new(1864635278, nameof(InvalidReturnUrl)),
+                new(458705031, nameof(InvalidReturnUrl)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var url = s.TagArray[1].Value ?? "(null)";
+                    var url = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Invalid return url {url}.");
                     #else
@@ -856,7 +856,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Invalid sid {Sid}.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void InvalidSid(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -867,17 +867,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Invalid sid {Sid}.");
+            state.TagArray[1] = new("{OriginalFormat}", "Invalid sid {Sid}.");
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(1519240679, nameof(InvalidSid)),
+                new(569388796, nameof(InvalidSid)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Invalid sid {sid}.");
                     #else
@@ -891,7 +891,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed To clear IndexHtmlCache for BFF Frontend {Frontend}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToClearIndexHtmlCacheForFrontend(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend)
         {
             if (!logger.IsEnabled(logLevel))
@@ -902,17 +902,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Frontend", frontend.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Failed To clear IndexHtmlCache for BFF Frontend {Frontend}");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed To clear IndexHtmlCache for BFF Frontend {Frontend}");
+            state.TagArray[0] = new("Frontend", frontend.ToString());
 
             logger.Log(
                 logLevel,
-                new(711926561, nameof(FailedToClearIndexHtmlCacheForFrontend)),
+                new(1535143738, nameof(FailedToClearIndexHtmlCacheForFrontend)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[1].Value;
+                    var frontend = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed To clear IndexHtmlCache for BFF Frontend {frontend}");
                     #else
@@ -926,7 +926,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "No OpenID Configuration found for scheme {Scheme}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoOpenIdConfigurationFoundForScheme(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.AccessTokenManagement.Scheme scheme)
         {
             if (!logger.IsEnabled(logLevel))
@@ -937,17 +937,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Scheme", scheme.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "No OpenID Configuration found for scheme {Scheme}");
+            state.TagArray[1] = new("{OriginalFormat}", "No OpenID Configuration found for scheme {Scheme}");
+            state.TagArray[0] = new("Scheme", scheme.ToString());
 
             logger.Log(
                 logLevel,
-                new(422555722, nameof(NoOpenIdConfigurationFoundForScheme)),
+                new(946850851, nameof(NoOpenIdConfigurationFoundForScheme)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var scheme = s.TagArray[1].Value;
+                    var scheme = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"No OpenID Configuration found for scheme {scheme}");
                     #else
@@ -961,7 +961,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "No frontend selected: None of the configured frontends matched the matching criteria.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoFrontendSelected(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -976,10 +976,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1087834562, nameof(NoFrontendSelected)),
+                new(101163333, nameof(NoFrontendSelected)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "No frontend selected: None of the configured frontends matched the matching criteria.";
                 });
@@ -990,7 +990,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "BFF is not configured to work with multiple frontends. No frontend is currently selected. ".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void MultiFrontendDisabled(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1005,10 +1005,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1555283577, nameof(MultiFrontendDisabled)),
+                new(356331886, nameof(MultiFrontendDisabled)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "BFF is not configured to work with multiple frontends. No frontend is currently selected. ";
                 });
@@ -1019,7 +1019,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Selected frontend '{Frontend}'".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SelectedFrontend(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1030,17 +1030,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Frontend", frontend.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Selected frontend '{Frontend}'");
+            state.TagArray[1] = new("{OriginalFormat}", "Selected frontend '{Frontend}'");
+            state.TagArray[0] = new("Frontend", frontend.ToString());
 
             logger.Log(
                 logLevel,
-                new(1602197389, nameof(SelectedFrontend)),
+                new(1069185056, nameof(SelectedFrontend)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[1].Value;
+                    var frontend = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Selected frontend '{frontend}'");
                     #else
@@ -1054,7 +1054,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Anti-forgery validation failed. Path: '{Path}'".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void AntiForgeryValidationFailed(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string path)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1065,17 +1065,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Path", path);
-            state.TagArray[0] = new("{OriginalFormat}", "Anti-forgery validation failed. Path: '{Path}'");
+            state.TagArray[1] = new("{OriginalFormat}", "Anti-forgery validation failed. Path: '{Path}'");
+            state.TagArray[0] = new("Path", path);
 
             logger.Log(
                 logLevel,
-                new(146559854, nameof(AntiForgeryValidationFailed)),
+                new(16433013, nameof(AntiForgeryValidationFailed)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var path = s.TagArray[1].Value ?? "(null)";
+                    var path = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Anti-forgery validation failed. Path: '{path}'");
                     #else
@@ -1089,7 +1089,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Back-channel logout. sub: '{Sub}', sid: '{Sid}'".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void BackChannelLogout(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string sub, string sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1100,19 +1100,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Back-channel logout. sub: '{Sub}', sid: '{Sid}'");
+            state.TagArray[2] = new("{OriginalFormat}", "Back-channel logout. sub: '{Sub}', sid: '{Sid}'");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(920465342, nameof(BackChannelLogout)),
+                new(530582699, nameof(BackChannelLogout)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Back-channel logout. sub: '{sub}', sid: '{sid}'");
                     #else
@@ -1126,7 +1126,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Access token is missing. token type: '{TokenType}', Path: '{Path}', detail: '{Detail}'".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void AccessTokenMissing(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string tokenType, string path, string detail)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1137,21 +1137,21 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("TokenType", tokenType);
-            state.TagArray[2] = new("Path", path);
-            state.TagArray[1] = new("Detail", detail);
-            state.TagArray[0] = new("{OriginalFormat}", "Access token is missing. token type: '{TokenType}', Path: '{Path}', detail: '{Detail}'");
+            state.TagArray[3] = new("{OriginalFormat}", "Access token is missing. token type: '{TokenType}', Path: '{Path}', detail: '{Detail}'");
+            state.TagArray[2] = new("TokenType", tokenType);
+            state.TagArray[1] = new("Path", path);
+            state.TagArray[0] = new("Detail", detail);
 
             logger.Log(
                 logLevel,
-                new(687218971, nameof(AccessTokenMissing)),
+                new(1607445224, nameof(AccessTokenMissing)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var tokenType = s.TagArray[3].Value ?? "(null)";
-                    var path = s.TagArray[2].Value ?? "(null)";
-                    var detail = s.TagArray[1].Value ?? "(null)";
+                    var tokenType = s.TagArray[2].Value ?? "(null)";
+                    var path = s.TagArray[1].Value ?? "(null)";
+                    var detail = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Access token is missing. token type: '{tokenType}', Path: '{path}', detail: '{detail}'");
                     #else
@@ -1165,7 +1165,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{ClusterId}', routeId: '{RouteId}'".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void InvalidRouteConfiguration(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? clusterId, string routeId)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1176,19 +1176,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("ClusterId", clusterId);
-            state.TagArray[1] = new("RouteId", routeId);
-            state.TagArray[0] = new("{OriginalFormat}", "Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{ClusterId}', routeId: '{RouteId}'");
+            state.TagArray[2] = new("{OriginalFormat}", "Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{ClusterId}', routeId: '{RouteId}'");
+            state.TagArray[1] = new("ClusterId", clusterId);
+            state.TagArray[0] = new("RouteId", routeId);
 
             logger.Log(
                 logLevel,
-                new(1891888800, nameof(InvalidRouteConfiguration)),
+                new(245007841, nameof(InvalidRouteConfiguration)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var clusterId = s.TagArray[2].Value ?? "(null)";
-                    var routeId = s.TagArray[1].Value ?? "(null)";
+                    var clusterId = s.TagArray[1].Value ?? "(null)";
+                    var routeId = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Invalid route configuration. Cannot combine a required access token (a call to WithAccessToken) and an optional access token (a call to WithOptionalUserAccessToken). clusterId: '{clusterId}', routeId: '{routeId}'");
                     #else
@@ -1202,7 +1202,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to request new User Access Token due to: {Error}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToRequestNewUserAccessToken(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string error)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1213,17 +1213,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Error", error);
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to request new User Access Token due to: {Error}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed to request new User Access Token due to: {Error}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.");
+            state.TagArray[0] = new("Error", error);
 
             logger.Log(
                 logLevel,
-                new(39149415, nameof(FailedToRequestNewUserAccessToken)),
+                new(2131134334, nameof(FailedToRequestNewUserAccessToken)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var error = s.TagArray[1].Value ?? "(null)";
+                    var error = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to request new User Access Token due to: {error}. This can mean that the refresh token is expired or revoked but the cookie session is still active. If the session was not revoked, ensure that the session cookie lifetime is smaller than the refresh token lifetime.");
                     #else
@@ -1237,7 +1237,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to request new User Access Token due to: {Error}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void UserSessionRevoked(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string error)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1248,17 +1248,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Error", error);
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to request new User Access Token due to: {Error}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed to request new User Access Token due to: {Error}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.");
+            state.TagArray[0] = new("Error", error);
 
             logger.Log(
                 logLevel,
-                new(804513411, nameof(UserSessionRevoked)),
+                new(1313108000, nameof(UserSessionRevoked)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var error = s.TagArray[1].Value ?? "(null)";
+                    var error = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to request new User Access Token due to: {error}. This likely means that the user's refresh token is expired or revoked. The user's session will be ended, which will force the user to log in.");
                     #else
@@ -1272,7 +1272,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "BFF management endpoint {endpoint} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ManagementEndpointAccessedViaAjax(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string endpoint)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1283,17 +1283,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("endpoint", endpoint);
-            state.TagArray[0] = new("{OriginalFormat}", "BFF management endpoint {endpoint} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.");
+            state.TagArray[1] = new("{OriginalFormat}", "BFF management endpoint {endpoint} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.");
+            state.TagArray[0] = new("endpoint", endpoint);
 
             logger.Log(
                 logLevel,
-                new(441059535, nameof(ManagementEndpointAccessedViaAjax)),
+                new(1588002554, nameof(ManagementEndpointAccessedViaAjax)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var endpoint = s.TagArray[1].Value ?? "(null)";
+                    var endpoint = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"BFF management endpoint {endpoint} is only intended for a browser window to request and load. It is not intended to be accessed with Ajax or fetch requests.");
                     #else
@@ -1307,7 +1307,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Challenge was called for a BFF API endpoint, BFF response handling changing status code to 401.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ChallengeForBffApiEndpoint(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1322,10 +1322,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(642681511, nameof(ChallengeForBffApiEndpoint)),
+                new(1068428514, nameof(ChallengeForBffApiEndpoint)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Challenge was called for a BFF API endpoint, BFF response handling changing status code to 401.";
                 });
@@ -1336,7 +1336,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Forbid was called for a BFF API endpoint, BFF response handling changing status code to 403.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ForbidForBffApiEndpoint(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1351,10 +1351,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(655421072, nameof(ForbidForBffApiEndpoint)),
+                new(568631999, nameof(ForbidForBffApiEndpoint)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Forbid was called for a BFF API endpoint, BFF response handling changing status code to 403.";
                 });
@@ -1365,7 +1365,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Creating user session record in store for sub {Sub} sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void CreatingUserSession(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1376,19 +1376,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Creating user session record in store for sub {Sub} sid {Sid}");
+            state.TagArray[2] = new("{OriginalFormat}", "Creating user session record in store for sub {Sub} sid {Sid}");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(1874888402, nameof(CreatingUserSession)),
+                new(1880151499, nameof(CreatingUserSession)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Creating user session record in store for sub {sub} sid {sid}");
                     #else
@@ -1402,7 +1402,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Detected a duplicate insert of the same session. This can happen when multiple browser tabs are open and can safely be ignored.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void DuplicateSessionInsertDetected(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception? ex = null)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1417,10 +1417,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(83103844, nameof(DuplicateSessionInsertDetected)),
+                new(1718098917, nameof(DuplicateSessionInsertDetected)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Detected a duplicate insert of the same session. This can happen when multiple browser tabs are open and can safely be ignored.";
                 });
@@ -1431,7 +1431,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Exception creating new server-side session in database: {Error}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ExceptionCreatingSession(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex, string error)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1442,17 +1442,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Error", error);
-            state.TagArray[0] = new("{OriginalFormat}", "Exception creating new server-side session in database: {Error}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.");
+            state.TagArray[1] = new("{OriginalFormat}", "Exception creating new server-side session in database: {Error}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.");
+            state.TagArray[0] = new("Error", error);
 
             logger.Log(
                 logLevel,
-                new(54160514, nameof(ExceptionCreatingSession)),
+                new(768029607, nameof(ExceptionCreatingSession)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var error = s.TagArray[1].Value ?? "(null)";
+                    var error = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Exception creating new server-side session in database: {error}. If this is a duplicate key error, it's safe to ignore. This can happen (for example) when two identical tabs are open.");
                     #else
@@ -1466,7 +1466,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "No record found in user session store when trying to delete user session for key {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoRecordFoundForKey(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.SessionManagement.SessionStore.UserSessionKey key)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1477,17 +1477,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "No record found in user session store when trying to delete user session for key {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "No record found in user session store when trying to delete user session for key {Key}");
+            state.TagArray[0] = new("Key", key.ToString());
 
             logger.Log(
                 logLevel,
-                new(1160496550, nameof(NoRecordFoundForKey)),
+                new(657599571, nameof(NoRecordFoundForKey)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value;
+                    var key = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"No record found in user session store when trying to delete user session for key {key}");
                     #else
@@ -1501,7 +1501,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Deleting user session record in store for sub {Sub} sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void DeletingUserSession(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1512,19 +1512,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Deleting user session record in store for sub {Sub} sid {Sid}");
+            state.TagArray[2] = new("{OriginalFormat}", "Deleting user session record in store for sub {Sub} sid {Sid}");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(959361069, nameof(DeletingUserSession)),
+                new(604800898, nameof(DeletingUserSession)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Deleting user session record in store for sub {sub} sid {sid}");
                     #else
@@ -1538,7 +1538,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "DbUpdateConcurrencyException: {Error}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void DbUpdateConcurrencyException(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string error)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1549,17 +1549,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Error", error);
-            state.TagArray[0] = new("{OriginalFormat}", "DbUpdateConcurrencyException: {Error}");
+            state.TagArray[1] = new("{OriginalFormat}", "DbUpdateConcurrencyException: {Error}");
+            state.TagArray[0] = new("Error", error);
 
             logger.Log(
                 logLevel,
-                new(1569080331, nameof(DbUpdateConcurrencyException)),
+                new(1856473546, nameof(DbUpdateConcurrencyException)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var error = s.TagArray[1].Value ?? "(null)";
+                    var error = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"DbUpdateConcurrencyException: {error}");
                     #else
@@ -1573,7 +1573,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Getting user session record from store for sub {Sub} sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void GettingUserSession(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1584,19 +1584,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Getting user session record from store for sub {Sub} sid {Sid}");
+            state.TagArray[2] = new("{OriginalFormat}", "Getting user session record from store for sub {Sub} sid {Sid}");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(1913398477, nameof(GettingUserSession)),
+                new(370854000, nameof(GettingUserSession)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Getting user session record from store for sub {sub} sid {sid}");
                     #else
@@ -1610,7 +1610,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Getting {Count} user session(s) from store for sub {Sub} sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void GettingUserSessions(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, int count, string? sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1621,21 +1621,21 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("Count", count);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Getting {Count} user session(s) from store for sub {Sub} sid {Sid}");
+            state.TagArray[3] = new("{OriginalFormat}", "Getting {Count} user session(s) from store for sub {Sub} sid {Sid}");
+            state.TagArray[2] = new("Count", count);
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(326910376, nameof(GettingUserSessions)),
+                new(819405639, nameof(GettingUserSessions)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var count = s.TagArray[3].Value;
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var count = s.TagArray[2].Value;
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Getting {count} user session(s) from store for sub {sub} sid {sid}");
                     #else
@@ -1649,7 +1649,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Deleting {Count} user session(s) from store for sub {Sub} sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void DeletingUserSessions(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, int count, string? sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1660,21 +1660,21 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("Count", count);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Deleting {Count} user session(s) from store for sub {Sub} sid {Sid}");
+            state.TagArray[3] = new("{OriginalFormat}", "Deleting {Count} user session(s) from store for sub {Sub} sid {Sid}");
+            state.TagArray[2] = new("Count", count);
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(1394785822, nameof(DeletingUserSessions)),
+                new(1296432247, nameof(DeletingUserSessions)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var count = s.TagArray[3].Value;
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var count = s.TagArray[2].Value;
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Deleting {count} user session(s) from store for sub {sub} sid {sid}");
                     #else
@@ -1688,7 +1688,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Updating user session record in store for sub {Sub} sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void UpdatingUserSession(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1699,19 +1699,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Updating user session record in store for sub {Sub} sid {Sid}");
+            state.TagArray[2] = new("{OriginalFormat}", "Updating user session record in store for sub {Sub} sid {Sid}");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(40359619, nameof(UpdatingUserSession)),
+                new(1237750320, nameof(UpdatingUserSession)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Updating user session record in store for sub {sub} sid {sid}");
                     #else
@@ -1725,7 +1725,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Removing {Count} server side sessions".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RemovingServerSideSessions(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, int count)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1736,17 +1736,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Count", count);
-            state.TagArray[0] = new("{OriginalFormat}", "Removing {Count} server side sessions");
+            state.TagArray[1] = new("{OriginalFormat}", "Removing {Count} server side sessions");
+            state.TagArray[0] = new("Count", count);
 
             logger.Log(
                 logLevel,
-                new(1803003422, nameof(RemovingServerSideSessions)),
+                new(516689623, nameof(RemovingServerSideSessions)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var count = s.TagArray[1].Value;
+                    var count = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Removing {count} server side sessions");
                     #else
@@ -1760,7 +1760,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Retrieving token for user {User}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RetrievingTokenForUser(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? user)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1771,17 +1771,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("User", user);
-            state.TagArray[0] = new("{OriginalFormat}", "Retrieving token for user {User}");
+            state.TagArray[1] = new("{OriginalFormat}", "Retrieving token for user {User}");
+            state.TagArray[0] = new("User", user);
 
             logger.Log(
                 logLevel,
-                new(817366252, nameof(RetrievingTokenForUser)),
+                new(1155721757, nameof(RetrievingTokenForUser)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var user = s.TagArray[1].Value ?? "(null)";
+                    var user = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Retrieving token for user {user}");
                     #else
@@ -1795,7 +1795,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Retrieving session {Sid} for sub {Sub}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RetrievingSession(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string sid, string sub)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1806,19 +1806,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sid", sid);
-            state.TagArray[1] = new("Sub", sub);
-            state.TagArray[0] = new("{OriginalFormat}", "Retrieving session {Sid} for sub {Sub}");
+            state.TagArray[2] = new("{OriginalFormat}", "Retrieving session {Sid} for sub {Sub}");
+            state.TagArray[1] = new("Sid", sid);
+            state.TagArray[0] = new("Sub", sub);
 
             logger.Log(
                 logLevel,
-                new(2015766163, nameof(RetrievingSession)),
+                new(1542921726, nameof(RetrievingSession)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sid = s.TagArray[2].Value ?? "(null)";
-                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Retrieving session {sid} for sub {sub}");
                     #else
@@ -1832,7 +1832,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Storing token for user {User}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void StoringTokenForUser(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? user)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1843,17 +1843,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("User", user);
-            state.TagArray[0] = new("{OriginalFormat}", "Storing token for user {User}");
+            state.TagArray[1] = new("{OriginalFormat}", "Storing token for user {User}");
+            state.TagArray[0] = new("User", user);
 
             logger.Log(
                 logLevel,
-                new(1675488649, nameof(StoringTokenForUser)),
+                new(114355538, nameof(StoringTokenForUser)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var user = s.TagArray[1].Value ?? "(null)";
+                    var user = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Storing token for user {user}");
                     #else
@@ -1867,7 +1867,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Removing token for user {User}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RemovingTokenForUser(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? user)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1878,17 +1878,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("User", user);
-            state.TagArray[0] = new("{OriginalFormat}", "Removing token for user {User}");
+            state.TagArray[1] = new("{OriginalFormat}", "Removing token for user {User}");
+            state.TagArray[0] = new("User", user);
 
             logger.Log(
                 logLevel,
-                new(1247903432, nameof(RemovingTokenForUser)),
+                new(911167719, nameof(RemovingTokenForUser)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var user = s.TagArray[1].Value ?? "(null)";
+                    var user = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Removing token for user {user}");
                     #else
@@ -1902,7 +1902,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to find a session to update, bailing out".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToFindSessionToUpdate(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1917,10 +1917,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1686152447, nameof(FailedToFindSessionToUpdate)),
+                new(1188363286, nameof(FailedToFindSessionToUpdate)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Failed to find a session to update, bailing out";
                 });
@@ -1931,7 +1931,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Creating entry in store for AuthenticationTicket, key {Key}, with expiration: {Expiration}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void CreatingAuthenticationTicketEntry(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string key, global::System.DateTime? expiration)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1942,19 +1942,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Key", key);
-            state.TagArray[1] = new("Expiration", expiration);
-            state.TagArray[0] = new("{OriginalFormat}", "Creating entry in store for AuthenticationTicket, key {Key}, with expiration: {Expiration}");
+            state.TagArray[2] = new("{OriginalFormat}", "Creating entry in store for AuthenticationTicket, key {Key}, with expiration: {Expiration}");
+            state.TagArray[1] = new("Key", key);
+            state.TagArray[0] = new("Expiration", expiration);
 
             logger.Log(
                 logLevel,
-                new(960199371, nameof(CreatingAuthenticationTicketEntry)),
+                new(916852806, nameof(CreatingAuthenticationTicketEntry)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[2].Value ?? "(null)";
-                    var expiration = s.TagArray[1].Value ?? "(null)";
+                    var key = s.TagArray[1].Value ?? "(null)";
+                    var expiration = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Creating entry in store for AuthenticationTicket, key {key}, with expiration: {expiration}");
                     #else
@@ -1968,7 +1968,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Retrieve AuthenticationTicket for key {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RetrieveAuthenticationTicket(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string key)
         {
             if (!logger.IsEnabled(logLevel))
@@ -1979,17 +1979,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key);
-            state.TagArray[0] = new("{OriginalFormat}", "Retrieve AuthenticationTicket for key {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "Retrieve AuthenticationTicket for key {Key}");
+            state.TagArray[0] = new("Key", key);
 
             logger.Log(
                 logLevel,
-                new(65815620, nameof(RetrieveAuthenticationTicket)),
+                new(1404101509, nameof(RetrieveAuthenticationTicket)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value ?? "(null)";
+                    var key = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Retrieve AuthenticationTicket for key {key}");
                     #else
@@ -2003,7 +2003,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Ticket loaded for key: {Key}, with expiration: {Expiration}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void TicketLoaded(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string key, global::System.DateTime? expiration)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2014,19 +2014,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Key", key);
-            state.TagArray[1] = new("Expiration", expiration);
-            state.TagArray[0] = new("{OriginalFormat}", "Ticket loaded for key: {Key}, with expiration: {Expiration}");
+            state.TagArray[2] = new("{OriginalFormat}", "Ticket loaded for key: {Key}, with expiration: {Expiration}");
+            state.TagArray[1] = new("Key", key);
+            state.TagArray[0] = new("Expiration", expiration);
 
             logger.Log(
                 logLevel,
-                new(1224988019, nameof(TicketLoaded)),
+                new(2067869024, nameof(TicketLoaded)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[2].Value ?? "(null)";
-                    var expiration = s.TagArray[1].Value ?? "(null)";
+                    var key = s.TagArray[1].Value ?? "(null)";
+                    var expiration = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Ticket loaded for key: {key}, with expiration: {expiration}");
                     #else
@@ -2040,7 +2040,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "No AuthenticationTicket found in store for {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoAuthenticationTicketFoundForKey(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string key)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2051,17 +2051,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key);
-            state.TagArray[0] = new("{OriginalFormat}", "No AuthenticationTicket found in store for {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "No AuthenticationTicket found in store for {Key}");
+            state.TagArray[0] = new("Key", key);
 
             logger.Log(
                 logLevel,
-                new(426988975, nameof(NoAuthenticationTicketFoundForKey)),
+                new(1730106316, nameof(NoAuthenticationTicketFoundForKey)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value ?? "(null)";
+                    var key = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"No AuthenticationTicket found in store for {key}");
                     #else
@@ -2075,7 +2075,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to deserialize authentication ticket from store, deleting record for key {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToDeserializeAuthenticationTicket(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string key)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2086,17 +2086,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key);
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to deserialize authentication ticket from store, deleting record for key {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed to deserialize authentication ticket from store, deleting record for key {Key}");
+            state.TagArray[0] = new("Key", key);
 
             logger.Log(
                 logLevel,
-                new(1300162747, nameof(FailedToDeserializeAuthenticationTicket)),
+                new(717775336, nameof(FailedToDeserializeAuthenticationTicket)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value ?? "(null)";
+                    var key = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to deserialize authentication ticket from store, deleting record for key {key}");
                     #else
@@ -2110,7 +2110,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Renewing AuthenticationTicket for key {Key}, with expiration: {Expiration}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RenewingAuthenticationTicket(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string key, global::System.DateTime? expiration)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2121,19 +2121,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Key", key);
-            state.TagArray[1] = new("Expiration", expiration);
-            state.TagArray[0] = new("{OriginalFormat}", "Renewing AuthenticationTicket for key {Key}, with expiration: {Expiration}");
+            state.TagArray[2] = new("{OriginalFormat}", "Renewing AuthenticationTicket for key {Key}, with expiration: {Expiration}");
+            state.TagArray[1] = new("Key", key);
+            state.TagArray[0] = new("Expiration", expiration);
 
             logger.Log(
                 logLevel,
-                new(707874553, nameof(RenewingAuthenticationTicket)),
+                new(696136082, nameof(RenewingAuthenticationTicket)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[2].Value ?? "(null)";
-                    var expiration = s.TagArray[1].Value ?? "(null)";
+                    var key = s.TagArray[1].Value ?? "(null)";
+                    var expiration = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Renewing AuthenticationTicket for key {key}, with expiration: {expiration}");
                     #else
@@ -2147,7 +2147,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Removing AuthenticationTicket from store for key {Key}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RemovingAuthenticationTicket(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string key)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2158,17 +2158,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Key", key);
-            state.TagArray[0] = new("{OriginalFormat}", "Removing AuthenticationTicket from store for key {Key}");
+            state.TagArray[1] = new("{OriginalFormat}", "Removing AuthenticationTicket from store for key {Key}");
+            state.TagArray[0] = new("Key", key);
 
             logger.Log(
                 logLevel,
-                new(1961829635, nameof(RemovingAuthenticationTicket)),
+                new(451155394, nameof(RemovingAuthenticationTicket)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var key = s.TagArray[1].Value ?? "(null)";
+                    var key = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Removing AuthenticationTicket from store for key {key}");
                     #else
@@ -2182,7 +2182,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Getting AuthenticationTickets from store for sub {Sub} sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void GettingAuthenticationTickets(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2193,19 +2193,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Getting AuthenticationTickets from store for sub {Sub} sid {Sid}");
+            state.TagArray[2] = new("{OriginalFormat}", "Getting AuthenticationTickets from store for sub {Sub} sid {Sid}");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(622682141, nameof(GettingAuthenticationTickets)),
+                new(1759928912, nameof(GettingAuthenticationTickets)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Getting AuthenticationTickets from store for sub {sub} sid {sid}");
                     #else
@@ -2219,7 +2219,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Frontend selected via path mapping '{PathMapping}', but request path '{Path}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FrontendSelectedWithPathCasingIssue(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string pathMapping, global::Microsoft.AspNetCore.Http.PathString path)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2230,19 +2230,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("PathMapping", pathMapping);
-            state.TagArray[1] = new("Path", path.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Frontend selected via path mapping '{PathMapping}', but request path '{Path}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.");
+            state.TagArray[2] = new("{OriginalFormat}", "Frontend selected via path mapping '{PathMapping}', but request path '{Path}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.");
+            state.TagArray[1] = new("PathMapping", pathMapping);
+            state.TagArray[0] = new("Path", path.ToString());
 
             logger.Log(
                 logLevel,
-                new(1880243510, nameof(FrontendSelectedWithPathCasingIssue)),
+                new(1615926397, nameof(FrontendSelectedWithPathCasingIssue)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var pathMapping = s.TagArray[2].Value ?? "(null)";
-                    var path = s.TagArray[1].Value;
+                    var pathMapping = s.TagArray[1].Value ?? "(null)";
+                    var path = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend selected via path mapping '{pathMapping}', but request path '{path}' has different case. Cookie path names are case sensitive, so the cookie likely doesn't work.");
                     #else
@@ -2256,7 +2256,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Management endpoints are automatically mapped, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void AlreadyMappedManagementEndpoints(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2271,10 +2271,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1219957122, nameof(AlreadyMappedManagementEndpoints)),
+                new(94227125, nameof(AlreadyMappedManagementEndpoints)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Management endpoints are automatically mapped, so the call to MapBffManagementEndpoints will be ignored. If you're using BffOptions.AutomaticallyRegisterBffMiddleware, you don't need to call endpoints.MapBffManagementEndpoints()";
                 });
@@ -2285,7 +2285,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Authenticating scheme: {Scheme}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void AuthenticatingScheme(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? scheme)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2296,17 +2296,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Scheme", scheme);
-            state.TagArray[0] = new("{OriginalFormat}", "Authenticating scheme: {Scheme}");
+            state.TagArray[1] = new("{OriginalFormat}", "Authenticating scheme: {Scheme}");
+            state.TagArray[0] = new("Scheme", scheme);
 
             logger.Log(
                 logLevel,
-                new(1078491209, nameof(AuthenticatingScheme)),
+                new(221489388, nameof(AuthenticatingScheme)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var scheme = s.TagArray[1].Value ?? "(null)";
+                    var scheme = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Authenticating scheme: {scheme}");
                     #else
@@ -2320,7 +2320,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Signing out of scheme: {Scheme}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SigningOutOfScheme(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? scheme)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2331,17 +2331,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Scheme", scheme);
-            state.TagArray[0] = new("{OriginalFormat}", "Signing out of scheme: {Scheme}");
+            state.TagArray[1] = new("{OriginalFormat}", "Signing out of scheme: {Scheme}");
+            state.TagArray[0] = new("Scheme", scheme);
 
             logger.Log(
                 logLevel,
-                new(2030830787, nameof(SigningOutOfScheme)),
+                new(2114392866, nameof(SigningOutOfScheme)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var scheme = s.TagArray[1].Value ?? "(null)";
+                    var scheme = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Signing out of scheme: {scheme}");
                     #else
@@ -2355,7 +2355,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Setting OIDC ProtocolMessage.Prompt to 'none' for BFF silent login".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SettingOidcPromptNoneForSilentLogin(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2370,10 +2370,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1767730600, nameof(SettingOidcPromptNoneForSilentLogin)),
+                new(839818343, nameof(SettingOidcPromptNoneForSilentLogin)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Setting OIDC ProtocolMessage.Prompt to 'none' for BFF silent login";
                 });
@@ -2384,7 +2384,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Setting OIDC ProtocolMessage.Prompt to {Prompt} for BFF silent login".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SettingOidcPromptForSilentLogin(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string prompt)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2395,17 +2395,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Prompt", prompt);
-            state.TagArray[0] = new("{OriginalFormat}", "Setting OIDC ProtocolMessage.Prompt to {Prompt} for BFF silent login");
+            state.TagArray[1] = new("{OriginalFormat}", "Setting OIDC ProtocolMessage.Prompt to {Prompt} for BFF silent login");
+            state.TagArray[0] = new("Prompt", prompt);
 
             logger.Log(
                 logLevel,
-                new(573166490, nameof(SettingOidcPromptForSilentLogin)),
+                new(1904470271, nameof(SettingOidcPromptForSilentLogin)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var prompt = s.TagArray[1].Value ?? "(null)";
+                    var prompt = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Setting OIDC ProtocolMessage.Prompt to {prompt} for BFF silent login");
                     #else
@@ -2419,7 +2419,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Handling error response from OIDC provider for BFF silent login.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void HandlingErrorResponseFromOidcProviderForSilentLogin(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2434,10 +2434,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1137832901, nameof(HandlingErrorResponseFromOidcProviderForSilentLogin)),
+                new(248407638, nameof(HandlingErrorResponseFromOidcProviderForSilentLogin)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Handling error response from OIDC provider for BFF silent login.";
                 });
@@ -2448,7 +2448,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Handling failed response from OIDC provider for BFF silent login.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void HandlingFailedResponseFromOidcProviderForSilentLogin(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2463,10 +2463,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(177583912, nameof(HandlingFailedResponseFromOidcProviderForSilentLogin)),
+                new(1743908777, nameof(HandlingFailedResponseFromOidcProviderForSilentLogin)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Handling failed response from OIDC provider for BFF silent login.";
                 });
@@ -2477,7 +2477,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Processing back-channel logout request".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ProcessingBackChannelLogoutRequest(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2492,10 +2492,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(772319522, nameof(ProcessingBackChannelLogoutRequest)),
+                new(570229497, nameof(ProcessingBackChannelLogoutRequest)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Processing back-channel logout request";
                 });
@@ -2506,7 +2506,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "No claims in back-channel JWT".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoClaimsInBackChannelJwt(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2521,10 +2521,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1573613638, nameof(NoClaimsInBackChannelJwt)),
+                new(241509663, nameof(NoClaimsInBackChannelJwt)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "No claims in back-channel JWT";
                 });
@@ -2535,7 +2535,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Claims found in back-channel JWT {Claims}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ClaimsFoundInBackChannelJwt(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string claims)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2546,17 +2546,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Claims", claims);
-            state.TagArray[0] = new("{OriginalFormat}", "Claims found in back-channel JWT {Claims}");
+            state.TagArray[1] = new("{OriginalFormat}", "Claims found in back-channel JWT {Claims}");
+            state.TagArray[0] = new("Claims", claims);
 
             logger.Log(
                 logLevel,
-                new(1092893573, nameof(ClaimsFoundInBackChannelJwt)),
+                new(1309119768, nameof(ClaimsFoundInBackChannelJwt)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var claims = s.TagArray[1].Value ?? "(null)";
+                    var claims = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Claims found in back-channel JWT {claims}");
                     #else
@@ -2570,7 +2570,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Back-channel JWT validation successful".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void BackChannelJwtValidationSuccessful(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2585,10 +2585,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(664219482, nameof(BackChannelJwtValidationSuccessful)),
+                new(1897874243, nameof(BackChannelJwtValidationSuccessful)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Back-channel JWT validation successful";
                 });
@@ -2599,7 +2599,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Processing login request".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ProcessingLoginRequest(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2614,10 +2614,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(389857127, nameof(ProcessingLoginRequest)),
+                new(188495588, nameof(ProcessingLoginRequest)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Processing login request";
                 });
@@ -2628,7 +2628,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Login endpoint triggering Challenge with returnUrl {ReturnUrl}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LoginEndpointTriggeringChallenge(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string returnUrl)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2639,17 +2639,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("ReturnUrl", returnUrl);
-            state.TagArray[0] = new("{OriginalFormat}", "Login endpoint triggering Challenge with returnUrl {ReturnUrl}");
+            state.TagArray[1] = new("{OriginalFormat}", "Login endpoint triggering Challenge with returnUrl {ReturnUrl}");
+            state.TagArray[0] = new("ReturnUrl", returnUrl);
 
             logger.Log(
                 logLevel,
-                new(1273811029, nameof(LoginEndpointTriggeringChallenge)),
+                new(1830924184, nameof(LoginEndpointTriggeringChallenge)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var returnUrl = s.TagArray[1].Value ?? "(null)";
+                    var returnUrl = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Login endpoint triggering Challenge with returnUrl {returnUrl}");
                     #else
@@ -2663,7 +2663,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Processing logout request".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ProcessingLogoutRequest(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2678,10 +2678,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(598692640, nameof(ProcessingLogoutRequest)),
+                new(381187535, nameof(ProcessingLogoutRequest)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Processing logout request";
                 });
@@ -2692,7 +2692,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Logout endpoint triggering SignOut with returnUrl {ReturnUrl}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LogoutEndpointTriggeringSignOut(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string returnUrl)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2703,17 +2703,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("ReturnUrl", returnUrl);
-            state.TagArray[0] = new("{OriginalFormat}", "Logout endpoint triggering SignOut with returnUrl {ReturnUrl}");
+            state.TagArray[1] = new("{OriginalFormat}", "Logout endpoint triggering SignOut with returnUrl {ReturnUrl}");
+            state.TagArray[0] = new("ReturnUrl", returnUrl);
 
             logger.Log(
                 logLevel,
-                new(247223768, nameof(LogoutEndpointTriggeringSignOut)),
+                new(1568891897, nameof(LogoutEndpointTriggeringSignOut)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var returnUrl = s.TagArray[1].Value ?? "(null)";
+                    var returnUrl = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Logout endpoint triggering SignOut with returnUrl {returnUrl}");
                     #else
@@ -2727,7 +2727,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Processing silent login callback request".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ProcessingSilentLoginCallbackRequest(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2742,10 +2742,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(301260843, nameof(ProcessingSilentLoginCallbackRequest)),
+                new(2095781080, nameof(ProcessingSilentLoginCallbackRequest)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Processing silent login callback request";
                 });
@@ -2756,7 +2756,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Silent login endpoint rendering HTML with JS postMessage to origin {Origin} with isLoggedIn {IsLoggedIn}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SilentLoginEndpointRenderingHtml(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string origin, string isLoggedIn)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2767,19 +2767,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Origin", origin);
-            state.TagArray[1] = new("IsLoggedIn", isLoggedIn);
-            state.TagArray[0] = new("{OriginalFormat}", "Silent login endpoint rendering HTML with JS postMessage to origin {Origin} with isLoggedIn {IsLoggedIn}");
+            state.TagArray[2] = new("{OriginalFormat}", "Silent login endpoint rendering HTML with JS postMessage to origin {Origin} with isLoggedIn {IsLoggedIn}");
+            state.TagArray[1] = new("Origin", origin);
+            state.TagArray[0] = new("IsLoggedIn", isLoggedIn);
 
             logger.Log(
                 logLevel,
-                new(1109308436, nameof(SilentLoginEndpointRenderingHtml)),
+                new(1542593693, nameof(SilentLoginEndpointRenderingHtml)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var origin = s.TagArray[2].Value ?? "(null)";
-                    var isLoggedIn = s.TagArray[1].Value ?? "(null)";
+                    var origin = s.TagArray[1].Value ?? "(null)";
+                    var isLoggedIn = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Silent login endpoint rendering HTML with JS postMessage to origin {origin} with isLoggedIn {isLoggedIn}");
                     #else
@@ -2793,7 +2793,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Processing silent login request".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ProcessingSilentLoginRequest(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2808,10 +2808,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1638734764, nameof(ProcessingSilentLoginRequest)),
+                new(688702555, nameof(ProcessingSilentLoginRequest)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Processing silent login request";
                 });
@@ -2822,7 +2822,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Using deprecated silentlogin endpoint. This endpoint will be removed in future versions. Consider calling the BFF Login endpoint with prompt=none.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void UsingDeprecatedSilentLoginEndpoint(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2837,10 +2837,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(123372604, nameof(UsingDeprecatedSilentLoginEndpoint)),
+                new(1891295205, nameof(UsingDeprecatedSilentLoginEndpoint)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Using deprecated silentlogin endpoint. This endpoint will be removed in future versions. Consider calling the BFF Login endpoint with prompt=none.";
                 });
@@ -2851,7 +2851,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Processing user request".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ProcessingUserRequest(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2866,10 +2866,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(307967645, nameof(ProcessingUserRequest)),
+                new(1069052734, nameof(ProcessingUserRequest)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Processing user request";
                 });
@@ -2880,7 +2880,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "User endpoint indicates the user is not logged in, using status code {StatusCode}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void UserEndpointNotLoggedIn(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, int statusCode)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2891,17 +2891,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("StatusCode", statusCode);
-            state.TagArray[0] = new("{OriginalFormat}", "User endpoint indicates the user is not logged in, using status code {StatusCode}");
+            state.TagArray[1] = new("{OriginalFormat}", "User endpoint indicates the user is not logged in, using status code {StatusCode}");
+            state.TagArray[0] = new("StatusCode", statusCode);
 
             logger.Log(
                 logLevel,
-                new(837397288, nameof(UserEndpointNotLoggedIn)),
+                new(1988896519, nameof(UserEndpointNotLoggedIn)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var statusCode = s.TagArray[1].Value;
+                    var statusCode = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"User endpoint indicates the user is not logged in, using status code {statusCode}");
                     #else
@@ -2915,7 +2915,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "User endpoint indicates the user is logged in with claims {Claims}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void UserEndpointLoggedInWithClaims(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string claims)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2926,17 +2926,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Claims", claims);
-            state.TagArray[0] = new("{OriginalFormat}", "User endpoint indicates the user is logged in with claims {Claims}");
+            state.TagArray[1] = new("{OriginalFormat}", "User endpoint indicates the user is logged in with claims {Claims}");
+            state.TagArray[0] = new("Claims", claims);
 
             logger.Log(
                 logLevel,
-                new(509704106, nameof(UserEndpointLoggedInWithClaims)),
+                new(1947226275, nameof(UserEndpointLoggedInWithClaims)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var claims = s.TagArray[1].Value ?? "(null)";
+                    var claims = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"User endpoint indicates the user is logged in with claims {claims}");
                     #else
@@ -2950,7 +2950,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Nop implementation of session revocation for sub: {Sub}, and sid: {Sid}. Implement ISessionRevocationService to provide your own implementation.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NopSessionRevocation(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2961,19 +2961,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Nop implementation of session revocation for sub: {Sub}, and sid: {Sid}. Implement ISessionRevocationService to provide your own implementation.");
+            state.TagArray[2] = new("{OriginalFormat}", "Nop implementation of session revocation for sub: {Sub}, and sid: {Sid}. Implement ISessionRevocationService to provide your own implementation.");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(1523221365, nameof(NopSessionRevocation)),
+                new(51101818, nameof(NopSessionRevocation)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Nop implementation of session revocation for sub: {sub}, and sid: {sid}. Implement ISessionRevocationService to provide your own implementation.");
                     #else
@@ -2987,7 +2987,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Revoking sessions for sub {Sub} and sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RevokingSessions(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -2998,19 +2998,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Revoking sessions for sub {Sub} and sid {Sid}");
+            state.TagArray[2] = new("{OriginalFormat}", "Revoking sessions for sub {Sub} and sid {Sid}");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(699009608, nameof(RevokingSessions)),
+                new(1976629049, nameof(RevokingSessions)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Revoking sessions for sub {sub} and sid {sid}");
                     #else
@@ -3024,7 +3024,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Refresh token revoked for sub {Sub} and sid {Sid}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RefreshTokenRevoked(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string sub, string? sid)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3035,19 +3035,19 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("Sub", sub);
-            state.TagArray[1] = new("Sid", sid);
-            state.TagArray[0] = new("{OriginalFormat}", "Refresh token revoked for sub {Sub} and sid {Sid}");
+            state.TagArray[2] = new("{OriginalFormat}", "Refresh token revoked for sub {Sub} and sid {Sid}");
+            state.TagArray[1] = new("Sub", sub);
+            state.TagArray[0] = new("Sid", sid);
 
             logger.Log(
                 logLevel,
-                new(1838828912, nameof(RefreshTokenRevoked)),
+                new(1939924033, nameof(RefreshTokenRevoked)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[2].Value ?? "(null)";
-                    var sid = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sid = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Refresh token revoked for sub {sub} and sid {sid}");
                     #else
@@ -3061,7 +3061,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SessionCleanupNotRegistered(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3076,10 +3076,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1929165299, nameof(SessionCleanupNotRegistered)),
+                new(304786466, nameof(SessionCleanupNotRegistered)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "BFF session cleanup is enabled, but no IUserSessionStoreCleanup is registered in DI. BFF session cleanup will not run.";
                 });
@@ -3090,7 +3090,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to cleanup session".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToCleanupSession(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3105,10 +3105,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1657212172, nameof(FailedToCleanupSession)),
+                new(1791317797, nameof(FailedToCleanupSession)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Failed to cleanup session";
                 });
@@ -3119,7 +3119,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to cleanup expired sessions".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToCleanupExpiredSessions(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3134,10 +3134,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(818018788, nameof(FailedToCleanupExpiredSessions)),
+                new(1361626621, nameof(FailedToCleanupExpiredSessions)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Failed to cleanup expired sessions";
                 });
@@ -3148,7 +3148,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Revoking user's refresh tokens in OnSigningOut for subject id: {Sub}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void RevokingUserRefreshTokensOnSigningOut(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string? sub)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3159,17 +3159,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Sub", sub);
-            state.TagArray[0] = new("{OriginalFormat}", "Revoking user's refresh tokens in OnSigningOut for subject id: {Sub}");
+            state.TagArray[1] = new("{OriginalFormat}", "Revoking user's refresh tokens in OnSigningOut for subject id: {Sub}");
+            state.TagArray[0] = new("Sub", sub);
 
             logger.Log(
                 logLevel,
-                new(1414129037, nameof(RevokingUserRefreshTokensOnSigningOut)),
+                new(1753873664, nameof(RevokingUserRefreshTokensOnSigningOut)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var sub = s.TagArray[1].Value ?? "(null)";
+                    var sub = s.TagArray[0].Value ?? "(null)";
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Revoking user's refresh tokens in OnSigningOut for subject id: {sub}");
                     #else
@@ -3183,7 +3183,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Explicitly setting ShouldRenew=false in OnValidatePrincipal due to query param suppressing slide behavior.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SuppressingSlideBehaviorOnValidatePrincipal(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3198,10 +3198,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1610470401, nameof(SuppressingSlideBehaviorOnValidatePrincipal)),
+                new(525394436, nameof(SuppressingSlideBehaviorOnValidatePrincipal)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Explicitly setting ShouldRenew=false in OnValidatePrincipal due to query param suppressing slide behavior.";
                 });
@@ -3212,7 +3212,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void SuppressingSlideBehaviorOnCheckSlidingExpiration(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3227,10 +3227,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(199146006, nameof(SuppressingSlideBehaviorOnCheckSlidingExpiration)),
+                new(642079923, nameof(SuppressingSlideBehaviorOnCheckSlidingExpiration)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Explicitly setting ShouldRenew=false in OnCheckSlidingExpiration due to query param suppressing slide behavior.";
                 });
@@ -3241,7 +3241,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to process backchannel logout request. 'Logout token is missing'".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToProcessBackchannelLogoutRequestMissingToken(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3256,10 +3256,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1894136923, nameof(FailedToProcessBackchannelLogoutRequestMissingToken)),
+                new(1481259430, nameof(FailedToProcessBackchannelLogoutRequestMissingToken)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Failed to process backchannel logout request. 'Logout token is missing'";
                 });
@@ -3270,7 +3270,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to process backchannel logout request.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToProcessBackchannelLogoutRequest(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3285,10 +3285,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(219471514, nameof(FailedToProcessBackchannelLogoutRequest)),
+                new(708279731, nameof(FailedToProcessBackchannelLogoutRequest)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Failed to process backchannel logout request.";
                 });
@@ -3299,7 +3299,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Logout token missing sub and sid claims.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LogoutTokenMissingSubAndSidClaims(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3314,10 +3314,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(928131743, nameof(LogoutTokenMissingSubAndSidClaims)),
+                new(799139100, nameof(LogoutTokenMissingSubAndSidClaims)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Logout token missing sub and sid claims.";
                 });
@@ -3328,7 +3328,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Logout token should not contain nonce claim.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LogoutTokenShouldNotContainNonceClaim(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3343,10 +3343,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(294943236, nameof(LogoutTokenShouldNotContainNonceClaim)),
+                new(388846435, nameof(LogoutTokenShouldNotContainNonceClaim)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Logout token should not contain nonce claim.";
                 });
@@ -3357,7 +3357,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Logout token missing events claim.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LogoutTokenMissingEventsClaim(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3372,10 +3372,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(2146508878, nameof(LogoutTokenMissingEventsClaim)),
+                new(1508212581, nameof(LogoutTokenMissingEventsClaim)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Logout token missing events claim.";
                 });
@@ -3386,7 +3386,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Logout token contains missing http://schemas.openid.net/event/backchannel-logout value.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LogoutTokenMissingBackchannelLogoutValue(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3401,10 +3401,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1202315764, nameof(LogoutTokenMissingBackchannelLogoutValue)),
+                new(1611838429, nameof(LogoutTokenMissingBackchannelLogoutValue)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Logout token contains missing http://schemas.openid.net/event/backchannel-logout value.";
                 });
@@ -3415,7 +3415,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Logout token contains invalid JSON in events claim value.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LogoutTokenContainsInvalidJsonInEventsClaim(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3430,10 +3430,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(493575433, nameof(LogoutTokenContainsInvalidJsonInEventsClaim)),
+                new(1683678372, nameof(LogoutTokenContainsInvalidJsonInEventsClaim)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Logout token contains invalid JSON in events claim value.";
                 });
@@ -3444,7 +3444,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Error validating logout token.".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ErrorValidatingLogoutToken(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3459,10 +3459,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(1001889170, nameof(ErrorValidatingLogoutToken)),
+                new(554632965, nameof(ErrorValidatingLogoutToken)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Error validating logout token.";
                 });
@@ -3473,7 +3473,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "A changed frontend was detected. Clearing caches for frontend {Frontend}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ChangedFrontendDetected_ClearingCaches(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3484,17 +3484,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Frontend", frontend.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "A changed frontend was detected. Clearing caches for frontend {Frontend}");
+            state.TagArray[1] = new("{OriginalFormat}", "A changed frontend was detected. Clearing caches for frontend {Frontend}");
+            state.TagArray[0] = new("Frontend", frontend.ToString());
 
             logger.Log(
                 logLevel,
-                new(713030089, nameof(ChangedFrontendDetected_ClearingCaches)),
+                new(1904143150, nameof(ChangedFrontendDetected_ClearingCaches)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[1].Value;
+                    var frontend = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"A changed frontend was detected. Clearing caches for frontend {frontend}");
                     #else
@@ -3508,7 +3508,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to clear hybrid cache for frontend {Frontend}".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToClearSchemeCache(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend, global::System.Exception ex)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3519,17 +3519,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Frontend", frontend.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to clear hybrid cache for frontend {Frontend}");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed to clear hybrid cache for frontend {Frontend}");
+            state.TagArray[0] = new("Frontend", frontend.ToString());
 
             logger.Log(
                 logLevel,
-                new(487089464, nameof(FailedToClearSchemeCache)),
+                new(1443803337, nameof(FailedToClearSchemeCache)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[1].Value;
+                    var frontend = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to clear hybrid cache for frontend {frontend}");
                     #else
@@ -3543,7 +3543,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Error occurred while processing frontend changes".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void ErrorWhileProcessingFrontendChanges(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::System.Exception ex)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3558,10 +3558,10 @@ namespace Duende.Bff.Otel
 
             logger.Log(
                 logLevel,
-                new(336053397, nameof(ErrorWhileProcessingFrontendChanges)),
+                new(1324568550, nameof(ErrorWhileProcessingFrontendChanges)),
                 state,
                 ex,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Error occurred while processing frontend changes";
                 });
@@ -3572,7 +3572,7 @@ namespace Duende.Bff.Otel
         /// <summary>
         /// Logs "Failed to add frontend change to {Frontend} to queue".
         /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")]
+        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void FailedToAddFrontendToQueue(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, global::Duende.Bff.DynamicFrontends.BffFrontendName frontend)
         {
             if (!logger.IsEnabled(logLevel))
@@ -3583,17 +3583,17 @@ namespace Duende.Bff.Otel
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("Frontend", frontend.ToString());
-            state.TagArray[0] = new("{OriginalFormat}", "Failed to add frontend change to {Frontend} to queue");
+            state.TagArray[1] = new("{OriginalFormat}", "Failed to add frontend change to {Frontend} to queue");
+            state.TagArray[0] = new("Frontend", frontend.ToString());
 
             logger.Log(
                 logLevel,
-                new(1846665177, nameof(FailedToAddFrontendToQueue)),
+                new(36295012, nameof(FailedToAddFrontendToQueue)),
                 state,
                 null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "9.1.0.0")] static string (s, _) =>
+                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var frontend = s.TagArray[1].Value;
+                    var frontend = s.TagArray[0].Value;
                     #if NET
                     return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Failed to add frontend change to {frontend} to queue");
                     #else
@@ -3603,6 +3603,7 @@ namespace Duende.Bff.Otel
 
             state.Clear();
         }
+
         public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 
         public static string Sanitize(this PathString toSanitize) => toSanitize.ToString().ReplaceLineEndings(string.Empty);

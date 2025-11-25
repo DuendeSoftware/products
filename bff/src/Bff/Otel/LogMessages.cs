@@ -7,7 +7,7 @@
 // using Duende.Bff.SessionManagement.SessionStore;
 // using Microsoft.AspNetCore.Http;
 // using Microsoft.Extensions.Logging;
-
+//
 // namespace Duende.Bff.Otel;
 //
 // internal static partial class LogMessages

@@ -16,7 +16,6 @@ using Duende.Bff.SessionManagement.Configuration;
 using Duende.Bff.SessionManagement.Revocation;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
-using Duende.Private.Licensing;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -46,9 +45,14 @@ public static class BffBuilderExtensions
 
     internal static T AddBaseBffServices<T>(this T builder) where T : IBffServicesBuilder
     {
-        builder.Services.AddSingleton<GetLicenseKey>(sp => () => sp.GetRequiredService<IOptions<BffOptions>>().Value.LicenseKey);
-        builder.Services.AddSingleton<LicenseAccessor<BffLicense>>();
-        builder.Services.AddSingleton<BffLicense>(sp => sp.GetRequiredService<LicenseAccessor<BffLicense>>().Current);
+        builder.Services.AddSingleton<GetLicenseKey>(sp =>
+            () => sp.GetRequiredService<IOptions<BffOptions>>().Value.LicenseKey);
+        builder.Services.AddSingleton<License>(sp =>
+        {
+            var accessor = sp.GetRequiredService<LicenseAccessor>();
+            return accessor.Current;
+        });
+        builder.Services.AddSingleton<LicenseAccessor>();
         builder.Services.TryAddSingleton<LicenseValidator>();
         builder.Services.AddDistributedMemoryCache();
 
@@ -59,7 +63,8 @@ public static class BffBuilderExtensions
         builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, BffConfigureOpenIdConnectOptions>();
         builder.Services.AddOpenIdConnectAccessTokenManagement();
 
-        builder.Services.AddSingleton<IConfigureOptions<UserTokenManagementOptions>, ConfigureUserTokenManagementOptions>();
+        builder.Services
+            .AddSingleton<IConfigureOptions<UserTokenManagementOptions>, ConfigureUserTokenManagementOptions>();
 
         builder.Services.AddTransient<IReturnUrlValidator, LocalUrlReturnUrlValidator>();
         builder.Services.TryAddSingleton<IAccessTokenRetriever, DefaultAccessTokenRetriever>();
@@ -79,12 +84,16 @@ public static class BffBuilderExtensions
         builder.Services.TryAddTransient<ISessionRevocationService, NopSessionRevocationService>();
 
         // cookie configuration
-        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
-        builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieRevokeRefreshToken>();
+        builder.Services
+            .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureSlidingExpirationCheck>();
+        builder.Services
+            .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
+                PostConfigureApplicationCookieRevokeRefreshToken>();
         builder.Services.AddSingleton<ActiveCookieAuthenticationScheme>();
         builder.Services.AddSingleton<ActiveOpenIdConnectAuthenticationScheme>();
 
-        builder.Services.AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
+        builder.Services
+            .AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
 
         AddBffMetrics(builder);
 
@@ -94,13 +103,15 @@ public static class BffBuilderExtensions
 
         // Make sure the session partitioning is registered. There are a few codepaths that require this injected
         // even if you are not using session management.
-        builder.Services.AddSingleton<BuildUserSessionPartitionKey>(sp => sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
+        builder.Services.AddSingleton<BuildUserSessionPartitionKey>(sp =>
+            sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
         builder.Services.AddSingleton<UserSessionPartitionKeyBuilder>();
 
         return builder;
     }
 
-    internal static void AddBffMetrics<T>(T builder) where T : IBffBuilder => builder.Services.AddSingleton<BffMetrics>();
+    internal static void AddBffMetrics<T>(T builder) where T : IBffBuilder =>
+        builder.Services.AddSingleton<BffMetrics>();
 
 
     internal static T AddDynamicFrontends<T>(this T builder)
@@ -125,7 +136,8 @@ public static class BffBuilderExtensions
 
         // Configure the AspNet Core Authentication settings if no
         // .AddAuthentication().AddCookie().AddOpenIdConnect() was added
-        builder.Services.AddSingleton<IPostConfigureOptions<AuthenticationOptions>, BffConfigureAuthenticationOptions>();
+        builder.Services
+            .AddSingleton<IPostConfigureOptions<AuthenticationOptions>, BffConfigureAuthenticationOptions>();
 
         builder.Services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, BffConfigureCookieOptions>();
 
@@ -133,8 +145,10 @@ public static class BffBuilderExtensions
 
         // Add 'default' configure methods that would have been added by
         // .AddAuthentication().AddCookie().AddOpenIdConnect()
-        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
-        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
+        builder.Services.TryAddEnumerable(ServiceDescriptor
+            .Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
+        builder.Services.TryAddEnumerable(ServiceDescriptor
+            .Singleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureCookieAuthenticationOptions>());
 
         builder.Services.TryAddSingleton<IStaticFilesClient, StaticFilesHttpClient>();
 
@@ -180,11 +194,14 @@ public static class BffBuilderExtensions
 
     internal static void AddServerSideSessionsSupportingServices(this IServiceCollection services)
     {
-        services.AddSingleton<BuildUserSessionPartitionKey>(sp => sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
+        services.AddSingleton<BuildUserSessionPartitionKey>(sp =>
+            sp.GetRequiredService<UserSessionPartitionKeyBuilder>().BuildPartitionKey);
         services.AddSingleton<UserSessionPartitionKeyBuilder>();
 
         services.AddSingleton<UserSessionPartitionKeyBuilder>();
-        services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, PostConfigureApplicationCookieTicketStore>();
+        services
+            .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
+                PostConfigureApplicationCookieTicketStore>();
         services.AddTransient<IServerTicketStore, ServerSideTicketStore>();
         services.AddTransient<ISessionRevocationService, SessionRevocationService>();
         // only add if not already in DI
