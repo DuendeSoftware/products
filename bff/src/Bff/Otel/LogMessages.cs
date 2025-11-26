@@ -445,8 +445,6 @@
 //         message: $"Failed to add frontend change to {{{OTelParameters.Frontend}}} to queue")]
 //     public static partial void FailedToAddFrontendToQueue(this ILogger logger, LogLevel logLevel, BffFrontendName frontend);
 //
-//
-//
 //     public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 //
 //     public static string Sanitize(this PathString toSanitize) => toSanitize.ToString().ReplaceLineEndings(string.Empty);

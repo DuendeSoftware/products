@@ -44,7 +44,10 @@ internal class LicenseAccessor(GetLicenseKey getLicenseKey, ILogger<LicenseAcces
             }
 
             var licenseClaims = ValidateKey(key);
-            return new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)));
+            return new License(new ClaimsPrincipal(new ClaimsIdentity(licenseClaims)))
+            {
+                IsConfigured = licenseClaims.Length != 0
+            };
         }
     }
 

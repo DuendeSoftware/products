@@ -90,10 +90,10 @@ namespace Duende.Bff.Licensing
     internal static class LicensingLogMessages
     {
         /// <summary>
-        /// Logs "Duende BFF Security Framework License information:\r\n - Edition: {Edition}\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {NumberOfFrontends}".
+        /// Logs "Duende Software License information:\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}".
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
-        public static void LicenseDetails(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, string? edition, global::System.DateTimeOffset? expirationDate, string licenseContact, string licenseCompany, string? numberOfFrontends)
+        public static void LicenseDetails(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::System.DateTimeOffset? expirationDate, string licenseContact, string licenseCompany)
         {
             if (!logger.IsEnabled(level))
             {
@@ -102,13 +102,11 @@ namespace Duende.Bff.Licensing
 
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
-            _ = state.ReserveTagSpace(6);
-            state.TagArray[5] = new("{OriginalFormat}", "Duende BFF Security Framework License information:\r\n - Edition: {Edition}\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {NumberOfFrontends}");
-            state.TagArray[4] = new("Edition", edition);
-            state.TagArray[3] = new("ExpirationDate", expirationDate);
-            state.TagArray[2] = new("LicenseContact", licenseContact);
-            state.TagArray[1] = new("licenseCompany", licenseCompany);
-            state.TagArray[0] = new("NumberOfFrontends", numberOfFrontends);
+            _ = state.ReserveTagSpace(4);
+            state.TagArray[3] = new("{OriginalFormat}", "Duende Software License information:\r\n - Expiration: {ExpirationDate}\r\n - LicenseContact: {LicenseContact}\r\n - LicenseCompany: {licenseCompany}");
+            state.TagArray[2] = new("ExpirationDate", expirationDate);
+            state.TagArray[1] = new("LicenseContact", licenseContact);
+            state.TagArray[0] = new("licenseCompany", licenseCompany);
 
             logger.Log(
                 level,
@@ -117,15 +115,13 @@ namespace Duende.Bff.Licensing
                 null,
                 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var edition = s.TagArray[4].Value ?? "(null)";
-                    var expirationDate = s.TagArray[3].Value ?? "(null)";
-                    var licenseContact = s.TagArray[2].Value ?? "(null)";
-                    var licenseCompany = s.TagArray[1].Value ?? "(null)";
-                    var numberOfFrontends = s.TagArray[0].Value ?? "(null)";
+                    var expirationDate = s.TagArray[2].Value ?? "(null)";
+                    var licenseContact = s.TagArray[1].Value ?? "(null)";
+                    var licenseCompany = s.TagArray[0].Value ?? "(null)";
                     #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Duende BFF Security Framework License information:\r\n - Edition: {edition}\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {numberOfFrontends}");
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Duende Software License information:\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}");
                     #else
-                    return global::System.FormattableString.Invariant($"Duende BFF Security Framework License information:\r\n - Edition: {edition}\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}\r\n - Number of frontends licensed: {numberOfFrontends}");
+                    return global::System.FormattableString.Invariant($"Duende Software License information:\r\n - Expiration: {expirationDate}\r\n - LicenseContact: {licenseContact}\r\n - LicenseCompany: {licenseCompany}");
                     #endif
                 });
 
@@ -133,7 +129,7 @@ namespace Duende.Bff.Licensing
         }
 
         /// <summary>
-        /// Logs "Your license for the Duende Software has expired on {ExpirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.".
+        /// Logs "Your license for the Duende software has expired on {ExpirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.".
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void LicenseHasExpired(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel level, global::System.DateTimeOffset? expirationDate, string licenseContact, string licenseCompany)
@@ -146,7 +142,7 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("{OriginalFormat}", "Your license for the Duende Software has expired on {ExpirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
+            state.TagArray[3] = new("{OriginalFormat}", "Your license for the Duende software has expired on {ExpirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
             state.TagArray[2] = new("ExpirationDate", expirationDate);
             state.TagArray[1] = new("licenseContact", licenseContact);
             state.TagArray[0] = new("licenseCompany", licenseCompany);
@@ -162,9 +158,9 @@ namespace Duende.Bff.Licensing
                     var licenseContact = s.TagArray[1].Value ?? "(null)";
                     var licenseCompany = s.TagArray[0].Value ?? "(null)";
                     #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Your license for the Duende Software has expired on {expirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Your license for the Duende software has expired on {expirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
                     #else
-                    return global::System.FormattableString.Invariant($"Your license for the Duende Software has expired on {expirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
+                    return global::System.FormattableString.Invariant($"Your license for the Duende software has expired on {expirationDate}.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/expired for more information.");
                     #endif
                 });
 
@@ -172,7 +168,7 @@ namespace Duende.Bff.Licensing
         }
 
         /// <summary>
-        /// Logs "You do not have a valid license key for the Duende software.\r\nThis is allowed for development and testing scenarios.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/contact"".
+        /// Logs "You do not have a valid license key for the Duende software.\r\nBFF will run in trial mode. This is allowed for development and testing scenarios.\r\n\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact"".
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
         public static void NoValidLicense(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel)
@@ -185,7 +181,7 @@ namespace Duende.Bff.Licensing
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
             _ = state.ReserveTagSpace(1);
-            state.TagArray[0] = new("{OriginalFormat}", "You do not have a valid license key for the Duende software.\r\nThis is allowed for development and testing scenarios.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/contact\"");
+            state.TagArray[0] = new("{OriginalFormat}", "You do not have a valid license key for the Duende software.\r\nBFF will run in trial mode. This is allowed for development and testing scenarios.\r\n\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\"");
 
             logger.Log(
                 logLevel,
@@ -194,17 +190,17 @@ namespace Duende.Bff.Licensing
                 null,
                 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    return "You do not have a valid license key for the Duende software.\r\nThis is allowed for development and testing scenarios.\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/contact\"";
+                    return "You do not have a valid license key for the Duende software.\r\nBFF will run in trial mode. This is allowed for development and testing scenarios.\r\n\r\nIf you are running in production you are required to have a licensed version.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\"";
                 });
 
             state.Clear();
         }
 
         /// <summary>
-        /// Logs "Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.".
+        /// Logs "BFF is running in trial mode. The maximum number of allowed authenticated sessions ({MaximumAllowedSessionsInTrialMode}) has been exceeded.\r\n\r\nSee https://duende.link/l/bff/trial for more information.".
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
-        public static void NotLicensedForBff(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string licenseContact, string licenseCompany)
+        public static void TrialModeWarning(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, int maximumAllowedSessionsInTrialMode)
         {
             if (!logger.IsEnabled(logLevel))
             {
@@ -213,24 +209,22 @@ namespace Duende.Bff.Licensing
 
             var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
 
-            _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("{OriginalFormat}", "Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {LicenseContact} from {LicenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
-            state.TagArray[1] = new("LicenseContact", licenseContact);
-            state.TagArray[0] = new("LicenseCompany", licenseCompany);
+            _ = state.ReserveTagSpace(2);
+            state.TagArray[1] = new("{OriginalFormat}", "BFF is running in trial mode. The maximum number of allowed authenticated sessions ({MaximumAllowedSessionsInTrialMode}) has been exceeded.\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+            state.TagArray[0] = new("MaximumAllowedSessionsInTrialMode", maximumAllowedSessionsInTrialMode);
 
             logger.Log(
                 logLevel,
-                new(792057768, nameof(NotLicensedForBff)),
+                new(875645872, nameof(TrialModeWarning)),
                 state,
                 null,
                 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
-                    var licenseContact = s.TagArray[1].Value ?? "(null)";
-                    var licenseCompany = s.TagArray[0].Value ?? "(null)";
+                    var maximumAllowedSessionsInTrialMode = s.TagArray[0].Value;
                     #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"BFF is running in trial mode. The maximum number of allowed authenticated sessions ({maximumAllowedSessionsInTrialMode}) has been exceeded.\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
                     #else
-                    return global::System.FormattableString.Invariant($"Your license key does not include the BFF feature.\r\nBFF will run in trial mode. It will limit the number of active sessions to 5.\r\nPlease contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,\r\nor start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
+                    return global::System.FormattableString.Invariant($"BFF is running in trial mode. The maximum number of allowed authenticated sessions ({maximumAllowedSessionsInTrialMode}) has been exceeded.\r\n\r\nSee https://duende.link/l/bff/trial for more information.");
                     #endif
                 });
 
@@ -261,156 +255,6 @@ namespace Duende.Bff.Licensing
                 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
                 {
                     return "Error validating the license key.If you are running in production you are required to have a licensed version. Please start a conversation with us: https://duende.link/l/bff/contact";
-                });
-
-            state.Clear();
-        }
-
-        /// <summary>
-        /// Logs "Frontend #{FrontendsUsed} with name {FrontendName} was added. The license allows for unlimited frontends.".
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
-        public static void UnlimitedFrontends(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName, int frontendsUsed)
-        {
-            if (!logger.IsEnabled(logLevel))
-            {
-                return;
-            }
-
-            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-
-            _ = state.ReserveTagSpace(3);
-            state.TagArray[2] = new("{OriginalFormat}", "Frontend #{FrontendsUsed} with name {FrontendName} was added. The license allows for unlimited frontends.");
-            state.TagArray[1] = new("FrontendName", frontendName);
-            state.TagArray[0] = new("FrontendsUsed", frontendsUsed);
-
-            logger.Log(
-                logLevel,
-                new(1958275515, nameof(UnlimitedFrontends)),
-                state,
-                null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
-                {
-                    var frontendName = s.TagArray[1].Value ?? "(null)";
-                    var frontendsUsed = s.TagArray[0].Value;
-                    #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend #{frontendsUsed} with name {frontendName} was added. The license allows for unlimited frontends.");
-                    #else
-                    return global::System.FormattableString.Invariant($"Frontend #{frontendsUsed} with name {frontendName} was added. The license allows for unlimited frontends.");
-                    #endif
-                });
-
-            state.Clear();
-        }
-
-        /// <summary>
-        /// Logs "Frontend {FrontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.".
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
-        public static void FrontendAdded(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName, int frontendsUsed, int frontendLimit)
-        {
-            if (!logger.IsEnabled(logLevel))
-            {
-                return;
-            }
-
-            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-
-            _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("{OriginalFormat}", "Frontend {FrontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.");
-            state.TagArray[2] = new("FrontendName", frontendName);
-            state.TagArray[1] = new("frontendsUsed", frontendsUsed);
-            state.TagArray[0] = new("frontendLimit", frontendLimit);
-
-            logger.Log(
-                logLevel,
-                new(231888333, nameof(FrontendAdded)),
-                state,
-                null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
-                {
-                    var frontendName = s.TagArray[2].Value ?? "(null)";
-                    var frontendsUsed = s.TagArray[1].Value;
-                    var frontendLimit = s.TagArray[0].Value;
-                    #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend {frontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.");
-                    #else
-                    return global::System.FormattableString.Invariant($"Frontend {frontendName} was added. Currently using {frontendsUsed} of {frontendLimit} in the BFF License.");
-                    #endif
-                });
-
-            state.Clear();
-        }
-
-        /// <summary>
-        /// Logs "Frontend {FrontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.".
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
-        public static void FrontendLimitExceeded(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName, int frontendsUsed, int frontendLimit)
-        {
-            if (!logger.IsEnabled(logLevel))
-            {
-                return;
-            }
-
-            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-
-            _ = state.ReserveTagSpace(4);
-            state.TagArray[3] = new("{OriginalFormat}", "Frontend {FrontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
-            state.TagArray[2] = new("FrontendName", frontendName);
-            state.TagArray[1] = new("frontendsUsed", frontendsUsed);
-            state.TagArray[0] = new("frontendLimit", frontendLimit);
-
-            logger.Log(
-                logLevel,
-                new(438656937, nameof(FrontendLimitExceeded)),
-                state,
-                null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
-                {
-                    var frontendName = s.TagArray[2].Value ?? "(null)";
-                    var frontendsUsed = s.TagArray[1].Value;
-                    var frontendLimit = s.TagArray[0].Value;
-                    #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend {frontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
-                    #else
-                    return global::System.FormattableString.Invariant($"Frontend {frontendName} was added. This exceeds the maximum number of frontends allowed by your license.\r\nCurrently using {frontendsUsed} of {frontendLimit} in the BFF License.\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
-                    #endif
-                });
-
-            state.Clear();
-        }
-
-        /// <summary>
-        /// Logs "Frontend {FrontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.".
-        /// </summary>
-        [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")]
-        public static void NotLicensedForMultiFrontend(this global::Microsoft.Extensions.Logging.ILogger logger, global::Microsoft.Extensions.Logging.LogLevel logLevel, string frontendName)
-        {
-            if (!logger.IsEnabled(logLevel))
-            {
-                return;
-            }
-
-            var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-
-            _ = state.ReserveTagSpace(2);
-            state.TagArray[1] = new("{OriginalFormat}", "Frontend {FrontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
-            state.TagArray[0] = new("FrontendName", frontendName);
-
-            logger.Log(
-                logLevel,
-                new(289456605, nameof(NotLicensedForMultiFrontend)),
-                state,
-                null,
-                [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Gen.Logging", "10.0.0.0")] static string (s, _) =>
-                {
-                    var frontendName = s.TagArray[0].Value ?? "(null)";
-                    #if NET
-                    return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"Frontend {frontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
-                    #else
-                    return global::System.FormattableString.Invariant($"Frontend {frontendName} was added. However, your current license does not support multiple frontends.\r\nIf you are running in production you are required to have a license for each frontend.\r\nPlease start a conversation with us: https://duende.link/l/bff/contact\r\n\r\nSee https://duende.link/l/bff/threshold for more information.");
-                    #endif
                 });
 
             state.Clear();
@@ -3683,7 +3527,6 @@ namespace Duende.Bff.Otel
 
             state.Clear();
         }
-
         public static string Sanitize(this string toSanitize) => toSanitize.ReplaceLineEndings(string.Empty);
 
         public static string Sanitize(this PathString toSanitize) => toSanitize.ToString().ReplaceLineEndings(string.Empty);
