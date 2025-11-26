@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 // using Microsoft.Extensions.Logging;
-
+//
 // namespace Duende.Bff.Licensing;
-
+//
 // internal static partial class LicensingLogMessages
 // {
 //     [LoggerMessage(
@@ -19,9 +19,9 @@
 //     public static partial void LicenseDetails(this ILogger logger, LogLevel level, string? edition, DateTimeOffset? expirationDate, string licenseContact, string licenseCompany, string? numberOfFrontends);
 //
 //     [LoggerMessage(
-//         Message = """
-//                     Your license for Duende BFF Security Framework has expired on {ExpirationDate}.
-//                     Please contact {licenseContact} from {licenseCompany} to obtain a valid license for the Duende software,
+//         Message = $$"""
+//                     Your license for the Duende Software has expired on {ExpirationDate}.
+//                     Please contact {licenseContact} from {licenseCompany} to obtain a valid license for Duende software,
 //                     or start a conversation with us: https://duende.link/l/bff/contact
 //
 //                     See https://duende.link/l/bff/expired for more information.
@@ -31,12 +31,10 @@
 //
 //     [LoggerMessage(
 //         message: """
-//                    You do not have a valid license key for the Duende BFF Security Framework.
-//                    When unlicensed, BFF will run in trial mode. It will limit the number of active sessions to 5.
+//                    You do not have a valid license key for the Duende software.
+//                    This is allowed for development and testing scenarios.
 //                    If you are running in production you are required to have a licensed version.
-//                    Please start a conversation with us: https://duende.link/l/bff/contact
-//
-//                    See https://duende.link/l/bff/trial for more information.
+//                    Please start a conversation with us: https://duende.link/l/contact"
 //                    """)]
 //     public static partial void NoValidLicense(this ILogger logger, LogLevel logLevel);
 //

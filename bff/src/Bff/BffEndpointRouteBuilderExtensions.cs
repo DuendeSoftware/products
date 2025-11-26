@@ -191,22 +191,16 @@ public static class BffEndpointRouteBuilderExtensions
     internal static bool AlreadyMappedManagementEndpoint(
         this IEndpointRouteBuilder endpoints,
         PathString route) => endpoints.DataSources.Any(ds =>
-                                      ds.Endpoints
-                                          .OfType<RouteEndpoint>()
-                                          .Any(e =>
-                                              e.RoutePattern.RawText == route.Value));
+        ds.Endpoints
+            .OfType<RouteEndpoint>()
+            .Any(e =>
+                e.RoutePattern.RawText == route.Value));
 
     internal static void CheckLicense(this IEndpointRouteBuilder endpoints) => endpoints.ServiceProvider.CheckLicense();
 
     internal static void CheckLicense(this IServiceProvider serviceProvider)
     {
-        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-        var options = serviceProvider.GetRequiredService<IOptions<BffOptions>>().Value;
-
         var license = serviceProvider.GetRequiredService<LicenseValidator>();
-        if (!license.IsValid())
-        {
-            // Todo, enforce license validation
-        }
+        license.CheckLicense();
     }
 }

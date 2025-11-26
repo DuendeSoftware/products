@@ -61,13 +61,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
                     .Where(frontend => oldFrontends.All(x => x.Name != frontend.Name))
                     .ToArray();
 
-                var totalFrontends = oldFrontends.Length - removedFrontends.Length;
-
-                foreach (var frontend in addedFrontends)
-                {
-                    _licenseValidator.LogFrontendAdded(frontend.Name, ++totalFrontends);
-                }
-
                 Interlocked.Exchange(ref _frontends, newFrontends);
 
             }
@@ -160,7 +153,7 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
     public void AddOrUpdate(BffFrontend frontend)
     {
         var existingUpdated = false;
-        // Lock to avoid dirty writes from multiple threads. 
+        // Lock to avoid dirty writes from multiple threads.
         lock (_syncRoot)
         {
             var existing = _frontends.FirstOrDefault(x => x.Name == frontend.Name);
@@ -188,7 +181,6 @@ internal class FrontendCollection : IDisposable, IFrontendCollection
         }
         else
         {
-            _licenseValidator.LogFrontendAdded(frontend.Name, _frontends.Length);
             OnFrontendAdded(frontend);
         }
 

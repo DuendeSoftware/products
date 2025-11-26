@@ -7,6 +7,7 @@ using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Blazor;
 using Duende.Bff.Blazor.Client;
 using Duende.Bff.Blazor.Client.Internals;
+using Duende.Bff.Diagnostics;
 using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Endpoints.Internal;
 using Duende.Bff.EntityFramework;
@@ -25,13 +26,14 @@ public class ConventionTests(ITestOutputHelper output)
     public static readonly Assembly BffBlazorClientAssembly = typeof(BffBlazorClientOptions).Assembly;
     public static readonly Assembly BffEntityFrameworkAssembly = typeof(UserSessionEntity).Assembly;
     public static readonly Assembly BffYarpAssembly = typeof(BffYarpTransformBuilder).Assembly;
+
     public static readonly Type[] AllTypes =
         BffAssembly.GetTypes()
             .Union(BffBlazorAssembly.GetTypes())
             .Union(BffBlazorClientAssembly.GetTypes())
             .Union(BffEntityFrameworkAssembly.GetTypes())
             .Union(BffYarpAssembly.GetTypes())
-        .ToArray();
+            .ToArray();
 
     [Fact]
     public void All_strongly_typed_strings_Have_private_value()
@@ -66,7 +68,8 @@ public class ConventionTests(ITestOutputHelper output)
         {
             var buildMethod = type.GetMethods(BindingFlags.Static)
                 .FirstOrDefault(m => m.Name == "Create");
-            buildMethod.ShouldBeNull("The IStonglyTypedString defines a Create method, but it should be implemented explicitly on the interface, not on the type. \r\n IE: " +
+            buildMethod.ShouldBeNull(
+                "The IStonglyTypedString defines a Create method, but it should be implemented explicitly on the interface, not on the type. \r\n IE: " +
                 "    static AccessTokenString IStonglyTypedString<AccessTokenString>.Create(string result) => new(result);");
         }
     }
@@ -83,9 +86,11 @@ public class ConventionTests(ITestOutputHelper output)
 
             // Try to invoke the constructor with a value and expect an exception
             var ex = Should.Throw<TargetInvocationException>(() => ctor.Invoke([]));
-            ex.InnerException.ShouldBeOfType<InvalidOperationException>().Message.ShouldContain("Can't create null value");
+            ex.InnerException.ShouldBeOfType<InvalidOperationException>().Message
+                .ShouldContain("Can't create null value");
         }
     }
+
     [Fact]
     public void All_strongly_typed_strings_should_have_only_expected_constructors()
     {
@@ -96,7 +101,8 @@ public class ConventionTests(ITestOutputHelper output)
             var ctors = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             // There must be exactly two constructors
-            ctors.Length.ShouldBe(2, $"{type.Name} should have exactly two constructors: one public parameterless and one private with a single string parameter.");
+            ctors.Length.ShouldBe(2,
+                $"{type.Name} should have exactly two constructors: one public parameterless and one private with a single string parameter.");
 
             // Find the public parameterless constructor
             var publicParameterlessCtor = ctors.FirstOrDefault(c =>
@@ -111,7 +117,8 @@ public class ConventionTests(ITestOutputHelper output)
                 c.GetParameters().Length == 1 &&
                 c.GetParameters()[0].ParameterType == typeof(string));
 
-            privateStringCtor.ShouldNotBeNull($"{type.Name} should have a private constructor with a single string parameter.");
+            privateStringCtor.ShouldNotBeNull(
+                $"{type.Name} should have a private constructor with a single string parameter.");
         }
     }
 
@@ -135,13 +142,15 @@ public class ConventionTests(ITestOutputHelper output)
     [Fact()]
     public void All_types_not_in_Internal_namespace_should_be_sealed_or_static()
     {
-        Type[] exclusions = [
+        Type[] exclusions =
+        [
             typeof(SessionDbContext),
             typeof(SessionDbContext<>),
             typeof(UserSessionEntity),
             typeof(UserSession),
             typeof(UserSessionUpdate),
-            typeof(AccessTokenRetrievalError)];
+            typeof(AccessTokenRetrievalError)
+        ];
 
         // Find all types NOT in a '.Internal' namespace
         var nonInternalTypes = AllTypes
@@ -169,7 +178,8 @@ public class ConventionTests(ITestOutputHelper output)
     public void All_async_methods_should_end_with_Async_and_have_cancellation_token_as_last_parameter()
     {
         var failures = new List<string>();
-        Type[] exclusions = [
+        Type[] exclusions =
+        [
             typeof(BffAuthenticationSchemeProvider),
             typeof(BffOpenIdConnectEvents),
             typeof(BffAuthenticationService),
@@ -182,8 +192,8 @@ public class ConventionTests(ITestOutputHelper output)
             typeof(BffCacheClearingHostedService),
             typeof(SessionDbContext),
             typeof(SessionDbContext<>),
+            typeof(DiagnosticHostedService),
             typeof(ServerSideTokenStore), // This one needs to be removed after move to ATM 4.0
-
         ];
         foreach (var type in AllTypes
                      .Where(t => !exclusions.Contains(t))
@@ -206,7 +216,8 @@ public class ConventionTests(ITestOutputHelper output)
                 var parameters = method.GetParameters();
                 if (parameters.Length == 0 || parameters.Last().ParameterType != typeof(CT))
                 {
-                    failures.Add($"{type.FullName}.{method.Name}: Async method should have a CT as the last parameter.");
+                    failures.Add(
+                        $"{type.FullName}.{method.Name}: Async method should have a CT as the last parameter.");
                 }
             }
         }
@@ -218,16 +229,16 @@ public class ConventionTests(ITestOutputHelper output)
 
         failures.ShouldBeEmpty();
     }
+
     public static bool IsInternal(Type type)
     {
         if (type.IsNested)
         {
             return true;
         }
+
         return type.IsNestedPrivate || type.IsNotPublic;
     }
-
-
 
 
 #nullable disable
@@ -252,7 +263,8 @@ public class ConventionTests(ITestOutputHelper output)
             }
 
             // Check public members for forbidden types
-            var members = type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            var members = type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static |
+                                          BindingFlags.DeclaredOnly);
             foreach (var member in members)
             {
                 switch (member)
@@ -263,30 +275,36 @@ public class ConventionTests(ITestOutputHelper output)
                         {
                             break;
                         }
+
                         if (IsForbiddenType(method.ReturnType))
                         {
-                            errors.Add($"{type.FullName}.{method.Name} returns forbidden type {method.ReturnType.FullName}");
+                            errors.Add(
+                                $"{type.FullName}.{method.Name} returns forbidden type {method.ReturnType.FullName}");
                         }
 
                         foreach (var param in method.GetParameters())
                         {
                             if (IsForbiddenType(param.ParameterType))
                             {
-                                errors.Add($"{type.FullName}.{method.Name} parameter '{param.Name}' is forbidden type {param.ParameterType.FullName}");
+                                errors.Add(
+                                    $"{type.FullName}.{method.Name} parameter '{param.Name}' is forbidden type {param.ParameterType.FullName}");
                             }
                         }
+
                         break;
                     case PropertyInfo prop:
                         if (IsForbiddenType(prop.PropertyType))
                         {
-                            errors.Add($"{type.FullName}.{prop.Name} property is forbidden type {prop.PropertyType.FullName}");
+                            errors.Add(
+                                $"{type.FullName}.{prop.Name} property is forbidden type {prop.PropertyType.FullName}");
                         }
 
                         break;
                     case FieldInfo field:
                         if (IsForbiddenType(field.FieldType))
                         {
-                            errors.Add($"{type.FullName}.{field.Name} field is forbidden type {field.FieldType.FullName}");
+                            errors.Add(
+                                $"{type.FullName}.{field.Name} field is forbidden type {field.FieldType.FullName}");
                         }
 
                         break;
@@ -294,7 +312,8 @@ public class ConventionTests(ITestOutputHelper output)
 
                         if (IsForbiddenType(evt.EventHandlerType!))
                         {
-                            errors.Add($"{type.FullName}.{evt.Name} event is forbidden type {evt.EventHandlerType.FullName}");
+                            errors.Add(
+                                $"{type.FullName}.{evt.Name} event is forbidden type {evt.EventHandlerType.FullName}");
                         }
 
                         break;
@@ -331,10 +350,12 @@ public class ConventionTests(ITestOutputHelper output)
                     }
                 }
             }
+
             if (t.IsArray)
             {
                 return IsForbiddenType(t.GetElementType()!);
             }
+
             return false;
         }
     }
@@ -346,15 +367,16 @@ public class ConventionTests(ITestOutputHelper output)
         // Find all types implementing IStringValue<TSelf>
         var stringValueTypes =
             AllTypes.Where(t => t.IsValueType && !t.IsAbstract)
-            .SelectMany(t =>
-                t.GetInterfaces()
-                    .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IStronglyTypedValue<>)
-                                                && i.GenericTypeArguments[0] == t)
-                    .Select(_ => t))
-            .Distinct()
-            .ToList();
+                .SelectMany(t =>
+                    t.GetInterfaces()
+                        .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IStronglyTypedValue<>)
+                                                    && i.GenericTypeArguments[0] == t)
+                        .Select(_ => t))
+                .Distinct()
+                .ToList();
         return stringValueTypes;
     }
+
     [Fact]
     public void All_interface_async_methods_should_have_cancellation_token_with_default()
     {
@@ -368,18 +390,22 @@ public class ConventionTests(ITestOutputHelper output)
                     var parameters = method.GetParameters();
                     if (parameters.Length == 0)
                     {
-                        failures.Add($"{type.FullName}.{method.Name}: Async method should have a CancellationToken parameter with a default value.");
+                        failures.Add(
+                            $"{type.FullName}.{method.Name}: Async method should have a CancellationToken parameter with a default value.");
                         continue;
                     }
+
                     var ctParam = parameters.Last();
                     if (ctParam.ParameterType != typeof(System.Threading.CancellationToken))
                     {
                         failures.Add($"{type.FullName}.{method.Name}: Last parameter should be CancellationToken.");
                         continue;
                     }
+
                     if (!ctParam.HasDefaultValue)
                     {
-                        failures.Add($"{type.FullName}.{method.Name}: CancellationToken parameter should have a default value.");
+                        failures.Add(
+                            $"{type.FullName}.{method.Name}: CancellationToken parameter should have a default value.");
                     }
                 }
             }

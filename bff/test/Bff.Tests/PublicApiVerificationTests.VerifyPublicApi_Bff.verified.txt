@@ -309,6 +309,7 @@ namespace Duende.Bff.Configuration
         public System.Net.Http.HttpMessageHandler? BackchannelHttpHandler { get; set; }
         public bool BackchannelLogoutAllUserSessions { get; set; }
         public Duende.Bff.AccessTokenManagement.DPoPProofKey? DPoPJsonWebKey { get; set; }
+        public Duende.Bff.Configuration.DiagnosticsOptions Diagnostics { get; set; }
         public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; }
         public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
         public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
@@ -343,6 +344,12 @@ namespace Duende.Bff.Configuration
         public bool ForceRenewal { get; init; }
         public Duende.Bff.AccessTokenManagement.Resource? Resource { get; init; }
         public Duende.Bff.AccessTokenManagement.Scheme? SignInScheme { get; init; }
+    }
+    public sealed class DiagnosticsOptions
+    {
+        public DiagnosticsOptions() { }
+        public int ChunkSize { get; set; }
+        public System.TimeSpan LogFrequency { get; set; }
     }
     public delegate bool DisableAntiForgeryCheck(Microsoft.AspNetCore.Http.HttpContext context);
 }

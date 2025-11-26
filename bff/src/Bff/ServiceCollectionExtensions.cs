@@ -28,7 +28,8 @@ public static class ServiceCollectionExtensions
 
         return builder
             .AddBaseBffServices()
-            .AddDynamicFrontends();
+            .AddDynamicFrontends()
+            .AddDiagnostics();
     }
 }
 

@@ -20,7 +20,7 @@ public class TestDataBuilder(TestData the)
     public readonly TestData The = the;
 
     internal LicenseValidator LicenseValidator =>
-        new LicenseValidator(new NullLogger<LicenseValidator>(), new ClaimsPrincipal(), The.Clock);
+        new(new NullLogger<LicenseValidator>(), new ClaimsPrincipal(), The.Clock);
 
     public BffFrontend BffFrontend(BffFrontendName? name = null) =>
         new()
