@@ -97,6 +97,11 @@ public static class BffBuilderExtensions
         builder.Services
             .AddSingleton<IPostConfigureOptions<OpenIdConnectOptions>, PostConfigureOidcOptionsForSilentLogin>();
 
+        builder.Services.AddSingleton<TrialModeAuthenticatedSessionTracker>();
+        builder.Services
+            .AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>,
+                PostConfigureApplicationCookieTrialModeCheck>();
+
         AddBffMetrics(builder);
 
         // wrap ASP.NET Core
