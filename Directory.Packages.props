@@ -1,9 +1,9 @@
-<!-- We have agreed to explicitly target where possible version 10 of the package(s) 
+<!-- We have agreed to explicitly target where possible version 10 of the package(s)
 that supports the target frameworks our products target (8, 9, 10) -->
 <Project>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
     <FrameworkVersion>8.0.1</FrameworkVersion>
-    <!-- Package Versions Note: 
+    <!-- Package Versions Note:
          These versions are here because they don't explicitly have a version 10 of the package that supports .NET 8, 9 and 10 -->
     <EFCoreVersion>9.0.9</EFCoreVersion>
     <IdentityEFCoreVersion>8.0.20</IdentityEFCoreVersion>
@@ -38,13 +38,13 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <!-- Added aspire transitive package to resolve package vulnerability -->
     <PackageVersion Include="KubernetesClient" Version="17.0.14" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="[3.3.0-rc.1, 4.0.0)" Condition="'$(IsBffProject)' == 'true'" />
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.0-rc.1" Condition="'$(IsBffProject)' != 'true'" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="[3.3.0-rc.1, 4.0.0)" Condition="'$(IsBffProject)' == 'true'" />
-    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.0-rc.1" Condition="'$(IsBffProject)' != 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="[3.3.0, 4.0.0)" Condition="'$(IsBffProject)' == 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.0" Condition="'$(IsBffProject)' != 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="[3.3.0, 4.0.0)" Condition="'$(IsBffProject)' == 'true'" />
+    <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.0" Condition="'$(IsBffProject)' != 'true'" />
     <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.1.3" />
-    <PackageVersion Include="Duende.IdentityModel" Version="8.0.0-rc.1" />
-    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0-rc.1" />
+    <PackageVersion Include="Duende.IdentityModel" Version="8.0.0" />
+    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.4.0-preview.2" />
     <PackageVersion Include="Duende.Private.Licensing" Version="1.0.0" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
