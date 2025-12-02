@@ -16,7 +16,7 @@
     }
     public sealed class BffServerAuthenticationStateProvider : Microsoft.AspNetCore.Components.Server.RevalidatingServerAuthenticationStateProvider, System.IDisposable
     {
-        public BffServerAuthenticationStateProvider(Duende.Bff.IUserSessionStore sessionStore, Microsoft.AspNetCore.Components.PersistentComponentState persistentComponentState, Microsoft.AspNetCore.Components.NavigationManager navigation, Microsoft.Extensions.Options.IOptions<Duende.Bff.Blazor.BffBlazorServerOptions> blazorOptions, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory) { }
+        public BffServerAuthenticationStateProvider(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory serviceScopeFactory, Microsoft.AspNetCore.Components.PersistentComponentState persistentComponentState, Microsoft.AspNetCore.Components.NavigationManager navigation, Microsoft.Extensions.Options.IOptions<Duende.Bff.Blazor.BffBlazorServerOptions> blazorOptions, Microsoft.Extensions.Options.IOptions<Duende.Bff.BffOptions> bffOptions, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory) { }
         protected override System.TimeSpan RevalidationInterval { get; }
         public void Dispose() { }
         protected override System.Threading.Tasks.Task<bool> ValidateAuthenticationStateAsync(Microsoft.AspNetCore.Components.Authorization.AuthenticationState authenticationState, System.Threading.CancellationToken cancellationToken) { }
