@@ -13,9 +13,11 @@ using Microsoft.IdentityModel.Tokens;
 namespace Duende;
 
 // shared APIs needed for Duende license validation
-internal class LicenseValidator<T>
+internal class LicenseValidator<T>(TimeProvider clock)
     where T : License, new()
 {
+    private readonly TimeProvider _clock = clock;
+
     private static readonly string[] LicenseFileNames = new[]
     {
         "Duende_License.key",
@@ -126,7 +128,7 @@ internal class LicenseValidator<T>
     {
         if (License.Expiration.HasValue)
         {
-            var diff = DateTime.UtcNow.Date.Subtract(License.Expiration.Value.Date).TotalDays;
+            var diff = _clock.GetUtcNow().Date.Subtract(License.Expiration.Value.Date).TotalDays;
             if (diff > 0)
             {
                 errors.Add($"Your license for the Duende software expired {diff} days ago.");
