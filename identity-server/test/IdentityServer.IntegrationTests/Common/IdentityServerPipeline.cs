@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Tokens;
 using JsonWebKey = Microsoft.IdentityModel.Tokens.JsonWebKey;
 
@@ -58,6 +59,7 @@ public class IdentityServerPipeline
     public const string FederatedSignOutUrl = BaseUrl + FederatedSignOutPath;
 
     public IdentityServerOptions Options { get; set; }
+    public string LicenseKey { get; set; }
     public List<Client> Clients { get; set; } = new List<Client>();
     public Dictionary<string, JsonWebKey> ClientKeys { get; set; } = new Dictionary<string, JsonWebKey>();
     public List<IdentityResource> IdentityScopes { get; set; } = new List<IdentityResource>();
@@ -79,6 +81,7 @@ public class IdentityServerPipeline
     public MockMessageHandler JwtRequestMessageHandler { get; set; } = new MockMessageHandler();
 
     public MockLogger MockLogger { get; set; } = MockLogger.Create();
+    public FakeTimeProvider Clock { get; } = new();
 
     public event Action<IServiceCollection> OnPreConfigureServices = services => { };
     public event Action<IServiceCollection> OnPostConfigureServices = services => { };
@@ -170,6 +173,8 @@ public class IdentityServerPipeline
 
                 options.MutualTls.Enabled = true;
 
+                options.LicenseKey = LicenseKey;
+
                 Options = options;
             })
             .AddInMemoryClients(Clients)
@@ -186,6 +191,8 @@ public class IdentityServerPipeline
 
         services.AddHttpClient(IdentityServerConstants.HttpClients.JwtRequestUriHttpClient)
             .AddHttpMessageHandler(() => JwtRequestMessageHandler);
+
+        services.AddSingleton(Clock);
 
         OnPostConfigureServices(services);
     }

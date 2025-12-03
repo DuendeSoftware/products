@@ -379,7 +379,7 @@ public class IdentityServerLicenseValidatorTests
 
     private class MockLicenseValidator : IdentityServerLicenseValidator
     {
-        public MockLicenseValidator()
+        public MockLicenseValidator() : base(TimeProvider.System)
         {
             ErrorLog = (str, obj) => { ErrorLogCount++; };
             WarningLog = (str, obj) => { WarningLogCount++; };
