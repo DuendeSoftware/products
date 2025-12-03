@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Text.RegularExpressions;
+using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
@@ -44,6 +46,24 @@ public class CheckSessionResultTests
         using var rdr = new StreamReader(_context.Response.Body);
         var html = await rdr.ReadToEndAsync();
         html.ShouldContain("<script id='cookie-name' type='application/json'>foobar</script>");
+    }
+
+    [Fact]
+    public async Task csp_hash_should_match_inline_script()
+    {
+        await _subject.WriteHttpResponse(new CheckSessionResult(), _context);
+
+        _context.Response.StatusCode.ShouldBe(200);
+        _context.Response.ContentType.ShouldStartWith("text/html");
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        var match = Regex.Match(html, "<script>(.*?)</script>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        match.Success.ShouldBeTrue();
+
+        var scriptSha256 = "sha256-" + match.Groups[1].Value.ToSha256();
+        IdentityServerConstants.ContentSecurityPolicyHashes.CheckSessionScript.ShouldContain(scriptSha256);
     }
 
     [Fact]

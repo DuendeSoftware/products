@@ -2,6 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Text.RegularExpressions;
+using Duende.IdentityModel;
+using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
@@ -52,16 +55,37 @@ public class EndSessionCallbackResultTests
         _context.Response.Headers.CacheControl.First().ShouldContain("no-cache");
         _context.Response.Headers.CacheControl.First().ShouldContain("max-age=0");
         _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain("default-src 'none';");
-        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain("style-src 'sha256-e6FQZewefmod2S/5T11pTXjzE2vn3/8GRwWOs917YE4=';");
+        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain($"style-src '{IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle}';");
         _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain("frame-src http://foo.com http://bar.com");
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("default-src 'none';");
-        _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("style-src 'sha256-e6FQZewefmod2S/5T11pTXjzE2vn3/8GRwWOs917YE4=';");
+        _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"style-src '{IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle}';");
         _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("frame-src http://foo.com http://bar.com");
         _context.Response.Body.Seek(0, SeekOrigin.Begin);
         using var rdr = new StreamReader(_context.Response.Body);
         var html = await rdr.ReadToEndAsync();
         html.ShouldContain("<iframe loading='eager' allow='' src='http://foo.com'></iframe>");
         html.ShouldContain("<iframe loading='eager' allow='' src='http://bar.com'></iframe>");
+    }
+
+    [Fact]
+    public async Task csp_hash_should_match_inline_style()
+    {
+        _result.IsError = false;
+        _result.FrontChannelLogoutUrls = new string[] { "http://foo.com", "http://bar.com" };
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.StatusCode.ShouldBe(200);
+        _context.Response.ContentType.ShouldStartWith("text/html");
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        var match = Regex.Match(html, "<style>(.*?)</style>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        match.Success.ShouldBeTrue();
+
+        var styleSha256 = "sha256-" + match.Groups[1].Value.ToSha256();
+        IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle.ShouldContain(styleSha256);
     }
 
     [Fact]
@@ -73,8 +97,8 @@ public class EndSessionCallbackResultTests
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
 
-        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain("style-src 'unsafe-inline' 'sha256-e6FQZewefmod2S/5T11pTXjzE2vn3/8GRwWOs917YE4='");
-        _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain("style-src 'unsafe-inline' 'sha256-e6FQZewefmod2S/5T11pTXjzE2vn3/8GRwWOs917YE4='");
+        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain($"style-src 'unsafe-inline' '{IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle}'");
+        _context.Response.Headers["X-Content-Security-Policy"].First().ShouldContain($"style-src 'unsafe-inline' '{IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle}'");
     }
 
     [Fact]
@@ -86,7 +110,7 @@ public class EndSessionCallbackResultTests
 
         await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
 
-        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain("style-src 'sha256-e6FQZewefmod2S/5T11pTXjzE2vn3/8GRwWOs917YE4='");
+        _context.Response.Headers.ContentSecurityPolicy.First().ShouldContain($"style-src '{IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle}'");
         _context.Response.Headers["X-Content-Security-Policy"].ShouldBeEmpty();
     }
 }
