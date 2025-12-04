@@ -139,7 +139,7 @@ internal class IdentityServerLicenseValidator : LicenseValidator<IdentityServerL
             {
                 ErrorLog.Invoke(
                     "Your license for IdentityServer includes {issuerLimit} issuers but you have processed requests for {issuerCount} issuers. This indicates that requests for each issuer are being sent to this instance of IdentityServer, which may be due to a network infrastructure configuration issue. If you intend to use multiple issuers, please contact {contactInfo} at {companyName} or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The issuers used were {issuers}.",
-                    [license.IssuerLimit, _issuers.Count, _issuers.ToArray()]);
+                    [license.IssuerLimit, _issuers.Count, license.ContactInfo, license.CompanyName, _issuers.ToArray()]);
             }
         }
     }
