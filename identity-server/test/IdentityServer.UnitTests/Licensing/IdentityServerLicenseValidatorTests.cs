@@ -4,13 +4,94 @@
 
 using System.Security.Claims;
 using Duende.IdentityServer;
+using Duende.IdentityServer.Configuration;
+using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 using static Duende.License;
 
 namespace UnitTests.Licensing;
 
-public class IdentityServerLicenseValidatorTests
+public class IdentityServerLicenseValidatorTests(ITestOutputHelper output)
 {
     private const string Category = "License validator tests";
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void When_calling_validate_issuer_and_license_doesnt_include_enough_issuers_then_error_is_logged()
+    {
+        var licenseValidator = new IdentityServerLicenseValidator();
+        var mockLogger = MockLogger.Create();
+        var identityServerOptions = new IdentityServerOptions
+        {
+            LicenseKey = TestLicenses.RedistributionBusinessLicense
+        };
+        licenseValidator.Initialize(new LoggerFactory([new MockLoggerProvider(mockLogger)]), identityServerOptions);
+        licenseValidator.ValidateIssuer("c1");
+
+        licenseValidator.ValidateIssuer("c2");
+
+        var logMessages = string.Join(Environment.NewLine, mockLogger.LogMessages);
+        output.WriteLine(logMessages);
+        mockLogger.LogMessages.ShouldContain("Your license for IdentityServer includes 1 issuers but you have processed requests for 2 issuers. This indicates that requests for each issuer are being sent to this instance of IdentityServer, which may be due to a network infrastructure configuration issue. If you intend to use multiple issuers, please contact contact@duendesoftware.com at _test or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The issuers used were c1, c2.");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public void When_calling_validate_client_and_license_doesnt_include_enough_clients_then_error_is_logged()
+    {
+        var licenseValidator = new IdentityServerLicenseValidator();
+        var mockLogger = MockLogger.Create();
+        var identityServerOptions = new IdentityServerOptions
+        {
+            LicenseKey = TestLicenses.RedistributionBusinessLicense
+        };
+        licenseValidator.Initialize(new LoggerFactory([new MockLoggerProvider(mockLogger)]), identityServerOptions);
+        licenseValidator.ValidateClient("c1");
+        licenseValidator.ValidateClient("c2");
+        licenseValidator.ValidateClient("c3");
+        licenseValidator.ValidateClient("c4");
+        licenseValidator.ValidateClient("c5");
+
+        licenseValidator.ValidateClient("c6");
+
+        var logMessages = string.Join(Environment.NewLine, mockLogger.LogMessages);
+        output.WriteLine(logMessages);
+        mockLogger.LogMessages.ShouldContain("Your license for IdentityServer includes 5 clients but you have processed requests for 6 clients. Please contact contact@duendesoftware.com at _test or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The clients used were: c1, c2, c3, c4, c5, c6.");
+    }
+
+    private static class TestLicenses
+    {
+        // Redistribution licenses
+        public const string RedistributionBusinessLicense =
+            "eyJhbGciOiJQUzI1NiIsImtpZCI6IklkZW50aXR5U2VydmVyTGljZW5zZWtleS83Y2VhZGJiNzgxMzA0NjllODgwNjg5MTAyNTQxNGYxNiIsInR5cCI6ImxpY2Vuc2Urand0In0.eyJpc3MiOiJodHRwczovL2R1ZW5kZXNvZnR3YXJlLmNvbSIsImF1ZCI6IklkZW50aXR5U2VydmVyIiwiaWF0IjoxNzMwNDE5MjAwLCJleHAiOjE3MzE2Mjg4MDAsImNvbXBhbnlfbmFtZSI6Il90ZXN0IiwiY29udGFjdF9pbmZvIjoiY29udGFjdEBkdWVuZGVzb2Z0d2FyZS5jb20iLCJlZGl0aW9uIjoiQnVzaW5lc3MiLCJpZCI6IjY2ODMiLCJmZWF0dXJlIjoiaXN2IiwicHJvZHVjdCI6IlRCRCJ9.rYDrY6UUKgZfnfx7GA1PILYj9XICIjC9aS06P8rUAuXYjxiagEIEkacKt3GcccJI6k0lMb6qbd3Hv-Q9rDDyDSxUZxwvGzVlhRrIditOI38FoN3trUd5RU6S7A_RSDd4uV0L1T8NKUKGlOvu8_7egcIy-E8q34GA5BNU2lV2Gsaa7yWAyTKZh7YPIP4y_TwLxOcw2GRn6dQq73-O_XaAIf0AxFowW1GsiBrirzE_TKwJ8VkbvN3O-yVT-ntPvoK0tHRKoG5yh8GPuDORQtlis_5bZHHFzazXVMul1rkYWSU9OhIdixvI44q1q1_5VGoGJ3SLFIFsdWM0ZvnPx7_Bqg";
+    }
+
+    public class MockLogger : ILogger
+    {
+        public static MockLogger Create() => new MockLogger(new LoggerExternalScopeProvider());
+        public MockLogger(LoggerExternalScopeProvider scopeProvider) => _scopeProvider = scopeProvider;
+
+        public readonly List<string> LogMessages = new();
+
+
+        private readonly LoggerExternalScopeProvider _scopeProvider;
+
+
+        public IDisposable BeginScope<TState>(TState state) where TState : notnull => _scopeProvider.Push(state);
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception, string> formatter) => LogMessages.Add(formatter(state, exception!));
+    }
+
+    public class MockLoggerProvider(MockLogger logger) : ILoggerProvider
+    {
+        public void Dispose()
+        {
+        }
+
+        public ILogger CreateLogger(string categoryName) => logger;
+    }
 
     [Fact]
     [Trait("Category", Category)]
