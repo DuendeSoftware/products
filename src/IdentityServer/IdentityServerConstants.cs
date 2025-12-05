@@ -247,7 +247,7 @@ public static class IdentityServerConstants
         /// <summary>
         /// The hash of the inline script used on the check session endpoint. 
         /// </summary>
-        public const string CheckSessionScript = "sha256-J6GWO8YhaMP0H1aXn/SlE97gt36c3juYVaDzq10V5+c=";
+        public const string CheckSessionScript = "sha256-ggZc4AqxfGM6xEhTTCP73mAIftgriHLgJ2qTdbY7eNE=";
     }
 
     public static class ProtocolRoutePaths
