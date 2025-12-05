@@ -58,7 +58,7 @@ internal class CheckSessionHttpWriter : IHttpResponseWriter<CheckSessionResult>
                 {
                     FormattedHtml = Html.Replace("{cookieName}", cookieName)
                         .Replace("{script}", CheckSessionScript, StringComparison.InvariantCulture)
-                        .ReplaceLineEndings("\r");
+                        .ReplaceLineEndings("\n");
                     LastCheckSessionCookieName = cookieName;
                 }
             }
