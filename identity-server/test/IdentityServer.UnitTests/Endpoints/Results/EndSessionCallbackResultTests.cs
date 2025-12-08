@@ -4,7 +4,10 @@
 
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Duende.IdentityModel;
+using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Models;
@@ -69,6 +72,27 @@ public class EndSessionCallbackResultTests
             html.Should().Contain("<iframe loading='eager' allow='' src='http://foo.com'></iframe>");
             html.Should().Contain("<iframe loading='eager' allow='' src='http://bar.com'></iframe>");
         }
+    }
+    
+    [Fact]
+    public async Task csp_hash_should_match_inline_style()
+    {
+        _result.IsError = false;
+        _result.FrontChannelLogoutUrls = new string[] { "http://foo.com", "http://bar.com" };
+
+        await _subject.WriteHttpResponse(new EndSessionCallbackResult(_result), _context);
+
+        _context.Response.StatusCode.Should().Be(200);
+        _context.Response.ContentType.Should().StartWith("text/html");
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        var match = Regex.Match(html, "<style>(.*?)</style>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        match.Success.Should().BeTrue();
+
+        var styleSha256 = "sha256-" + match.Groups[1].Value.ToSha256();
+        IdentityServerConstants.ContentSecurityPolicyHashes.EndSessionStyle.Should().Contain(styleSha256);
     }
 
     [Fact]
