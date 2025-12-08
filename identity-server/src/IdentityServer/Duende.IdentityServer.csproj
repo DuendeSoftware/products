@@ -31,4 +31,9 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Endpoints\Results\check-session-result.js" />
+    <EmbeddedResource Include="Endpoints\Results\check-session-result.js" />
+  </ItemGroup>
+
 </Project>
