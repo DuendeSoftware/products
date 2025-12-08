@@ -221,19 +221,19 @@ public static class IdentityServerConstants
     public static class ContentSecurityPolicyHashes
     {
         /// <summary>
-        /// The hash of the inline style used on the end session endpoint. 
+        /// The hash of the inline style used on the end session endpoint.
         /// </summary>
         public const string EndSessionStyle = "sha256-e6FQZewefmod2S/5T11pTXjzE2vn3/8GRwWOs917YE4=";
 
         /// <summary>
-        /// The hash of the inline script used on the authorize endpoint. 
+        /// The hash of the inline script used on the authorize endpoint.
         /// </summary>
         public const string AuthorizeScript = "sha256-orD0/VhH8hLqrLxKHD/HUEMdwqX6/0ve7c5hspX5VJ8=";
 
         /// <summary>
-        /// The hash of the inline script used on the check session endpoint. 
+        /// The hash of the inline script used on the check session endpoint.
         /// </summary>
-        public const string CheckSessionScript = "sha256-fa5rxHhZ799izGRP38+h4ud5QXNT0SFaFlh4eqDumBI=";
+        public const string CheckSessionScript = "sha256-jyguj/c+mxOUX7TJrFnIkEQlj4jinO1nejo8qnuF1jc=";
     }
 
     public static class ProtocolRoutePaths
