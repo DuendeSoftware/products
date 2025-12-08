@@ -12,9 +12,11 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 public sealed class DPoPOptions
 {
     /// <summary>
-    /// Controls if both DPoP and Bearer tokens are allowed, or only DPoP. Defaults to <see cref="DPoPMode.DPoPOnly"/>.
+    /// Controls if bearer tokens are accepted in addition to DPoP tokens. If
+    /// set, both Bearer and DPoP tokens can be used for authentication. If not,
+    /// DPoP tokens must be used. Defaults to false.
     /// </summary>
-    public DPoPMode TokenMode { get; set; } = DPoPMode.DPoPOnly;
+    public bool AllowBearerTokens { get; set; }
 
     /// <summary>
     /// The amount of time that a proof token is valid for. Defaults to 1 second.

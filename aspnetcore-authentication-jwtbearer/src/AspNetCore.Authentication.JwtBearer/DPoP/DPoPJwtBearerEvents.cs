@@ -24,7 +24,7 @@ internal class DPoPJwtBearerEvents
     private readonly ILogger<DPoPJwtBearerEvents> _logger;
 
     /// <summary>
-    /// Constructs a new instance of <see cref="DPoPJwtBearerEvents"/>. 
+    /// Constructs a new instance of <see cref="DPoPJwtBearerEvents"/>.
     /// </summary>
     public DPoPJwtBearerEvents(IOptionsMonitor<DPoPOptions> optionsMonitor, IDPoPProofValidator validator, ILogger<DPoPJwtBearerEvents> logger)
     {
@@ -47,10 +47,10 @@ internal class DPoPJwtBearerEvents
         {
             context.Token = token;
         }
-        else if (dpopOptions.TokenMode == DPoPMode.DPoPOnly)
+        else if (!dpopOptions.AllowBearerTokens)
         {
-            // this rejects the attempt for this handler,
-            // since we don't want to attempt Bearer given the Mode
+            // this rejects the attempt for this handler.
+            // we don't want to attempt Bearer when it is disabled by configuration.
             context.NoResult();
         }
 
@@ -114,10 +114,10 @@ internal class DPoPJwtBearerEvents
                 }
             }
         }
-        else if (dPoPOptions.TokenMode == DPoPMode.DPoPAndBearer)
+        else if (dPoPOptions.AllowBearerTokens)
         {
             // if the scheme used was not DPoP, then it was Bearer
-            // and if an access token was presented with a cnf, then the 
+            // and if an access token was presented with a cnf, then the
             // client should have sent it as DPoP, so we fail the request
             if (context.Principal?.HasClaim(x => x.Type == JwtClaimTypes.Confirmation) ?? false)
             {
@@ -172,7 +172,7 @@ internal class DPoPJwtBearerEvents
         _logger.LogDebug("Challenge invoked in a JWT bearer authentication scheme using DPoP");
         var dPoPOptions = _optionsMonitor.Get(context.Scheme.Name);
 
-        if (dPoPOptions.TokenMode == DPoPMode.DPoPOnly)
+        if (!dPoPOptions.AllowBearerTokens)
         {
             // if we are using DPoP only, then we don't need/want the default
             // JwtBearerHandler to add its WWW-Authenticate response header,
