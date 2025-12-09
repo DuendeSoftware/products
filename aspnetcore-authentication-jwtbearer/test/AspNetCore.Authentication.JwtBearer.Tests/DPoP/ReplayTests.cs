@@ -1,8 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using NSubstitute;
-
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 public class ReplayTests : DPoPProofValidatorTestBase
@@ -11,7 +9,7 @@ public class ReplayTests : DPoPProofValidatorTestBase
     [Trait("Category", "Unit")]
     public async Task replays_detected_in_ValidateReplay_fail()
     {
-        ReplayCache.Exists(TokenIdHash).Returns(true);
+        ReplayCache.ExistsFunc = jti => jti == TokenIdHash;
         Result.TokenIdHash = TokenIdHash;
 
         await ProofValidator.ValidateReplay(Context, Result);
@@ -28,7 +26,7 @@ public class ReplayTests : DPoPProofValidatorTestBase
     [InlineData(true, true, ClockSkew * 2, ClockSkew * 2)]
     public async Task new_proof_tokens_are_added_to_replay_cache(bool validateIat, bool validateNonce, int clientClockSkew, int serverClockSkew)
     {
-        ReplayCache.Exists(TokenIdHash).Returns(false);
+        ReplayCache.ExistsFunc = _ => false;
 
         Options.ValidationMode = (validateIat && validateNonce) ? ExpirationValidationMode.Both
             : validateIat ? ExpirationValidationMode.IssuedAt : ExpirationValidationMode.Nonce;
@@ -46,6 +44,6 @@ public class ReplayTests : DPoPProofValidatorTestBase
             : (validateIat ? clientClockSkew : serverClockSkew);
         var expectedExpiration = TimeSpan.FromSeconds(skew * 2)
             .Add(TimeSpan.FromSeconds(ValidFor));
-        await ReplayCache.Received().Add(TokenIdHash, expectedExpiration);
+        ReplayCache.VerifyAddWasCalled(TokenIdHash, expectedExpiration);
     }
 }

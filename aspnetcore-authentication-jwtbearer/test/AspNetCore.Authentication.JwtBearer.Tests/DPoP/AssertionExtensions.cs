@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityModel;
-using NSubstitute;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
@@ -16,5 +15,9 @@ public static class AssertionExtensions
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidDPoPProof);
     }
 
-    public static void ReplayCacheShouldNotBeCalled(this TestDPoPProofValidator validator) => validator.TestReplayCache.DidNotReceive().Add(Arg.Any<string>(), Arg.Any<TimeSpan>());
+    public static void ReplayCacheShouldNotBeCalled(this TestDPoPProofValidator validator)
+    {
+        var mockCache = (TestReplayCache)validator.TestReplayCache;
+        mockCache.VerifyAddWasNotCalled();
+    }
 }

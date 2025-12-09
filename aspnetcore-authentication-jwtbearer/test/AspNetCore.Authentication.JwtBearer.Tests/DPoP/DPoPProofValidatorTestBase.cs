@@ -6,11 +6,10 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Duende.AspNetCore.Authentication.JwtBearer.DPoP.TestFramework;
 using Duende.IdentityModel;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using NSubstitute;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
@@ -37,12 +36,11 @@ public abstract class DPoPProofValidatorTestBase
 
     protected DPoPProofValidationContext Context;
     protected DPoPOptions Options = new();
-    protected IReplayCache ReplayCache = Substitute.For<IReplayCache>();
+    protected TestReplayCache ReplayCache = new();
 
     public TestDPoPProofValidator CreateProofValidator()
     {
-        var optionsMonitor = Substitute.For<IOptionsMonitor<DPoPOptions>>();
-        optionsMonitor.Get(Arg.Any<string>()).Returns(Options);
+        var optionsMonitor = new TestOptionsMonitor<DPoPOptions>(Options);
 
         return new TestDPoPProofValidator(
             optionsMonitor,
