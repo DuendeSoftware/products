@@ -34,8 +34,8 @@
     <PackageVersion Include="Microsoft.AspNetCore.DataProtection.Abstractions" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.20" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.9" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
@@ -43,16 +43,16 @@
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.AspNetCore.TestHost" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.11" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
@@ -134,8 +134,8 @@
             that future versions of the intermediate dependencies that don't have this
             problem exist someday). -->
     <PackageVersion Include="Azure.Identity" Version="1.11.4" />
-    <PackageVersion Include="System.Formats.Asn1" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.1" />
-    <PackageVersion Include="System.Formats.Asn1" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.3" />
+    <PackageVersion Include="System.Formats.Asn1" Condition="'$(TargetFramework)' == 'net8.0'" Version="8.0.2" />
+    <PackageVersion Include="System.Formats.Asn1" Condition="'$(TargetFramework)' == 'net9.0'" Version="9.0.9" />
     <PackageVersion Include="System.Drawing.Common" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
   </ItemGroup>

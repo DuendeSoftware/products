@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Text.RegularExpressions;
 using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
@@ -219,6 +220,32 @@ public class AuthorizeResultTests
         html.ShouldContain("<base target='_self'/>");
         html.ShouldContain("<form method='post' action='http://client/callback'>");
         html.ShouldContain("<input type='hidden' name='state' value='state' />");
+    }
+
+    [Fact]
+    public async Task csp_hash_should_match_inline_script()
+    {
+        _response.Request = new ValidatedAuthorizeRequest
+        {
+            ClientId = "client",
+            ResponseMode = OidcConstants.ResponseModes.FormPost,
+            RedirectUri = "http://client/callback",
+            State = "state"
+        };
+
+        await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
+
+        _context.Response.StatusCode.ShouldBe(200);
+        _context.Response.ContentType.ShouldStartWith("text/html");
+        _context.Response.Body.Seek(0, SeekOrigin.Begin);
+        using var rdr = new StreamReader(_context.Response.Body);
+        var html = await rdr.ReadToEndAsync();
+
+        var match = Regex.Match(html, "<script>(.*?)</script>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        match.Success.ShouldBeTrue();
+
+        var scriptSha256 = "sha256-" + match.Groups[1].Value.ToSha256();
+        IdentityServerConstants.ContentSecurityPolicyHashes.AuthorizeScript.ShouldContain(scriptSha256);
     }
 
     [Fact]
