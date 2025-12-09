@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
@@ -64,7 +64,7 @@ public class CustomTokenCreationServiceTests
 
         var accessToken = result.AccessToken;
         var payload = accessToken.Split('.')[1];
-        var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
+        var json = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload));
         var obj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         obj["aud"].ToStringList().ShouldContain("custom1");

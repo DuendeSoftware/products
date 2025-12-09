@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text;
@@ -582,7 +583,7 @@ public class ExtensionGrantClient
     {
         var token = response.AccessToken.Split('.').Skip(1).Take(1).First();
         var dictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
-            Encoding.UTF8.GetString(Base64Url.Decode(token)));
+            Encoding.UTF8.GetString(Base64Url.DecodeFromChars(token)));
 
         return dictionary;
     }

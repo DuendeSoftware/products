@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
@@ -212,11 +213,11 @@ public class LocalApiAuthenticationTests
 
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
-            // ath: hash of the access token. The value MUST be the result of a base64url encoding 
+            // ath: hash of the access token. The value MUST be the result of a base64url encoding
             // the SHA-256 hash of the ASCII encoding of the associated access token's value.
             using var sha256 = SHA256.Create();
             var hash = sha256.ComputeHash(Encoding.ASCII.GetBytes(accessToken));
-            var ath = Base64Url.Encode(hash);
+            var ath = Base64Url.EncodeToString(hash);
 
             payload.Add(JwtClaimTypes.DPoPAccessTokenHash, ath);
         }
@@ -293,7 +294,7 @@ public class LocalApiAuthenticationTests
         // so it should fail.
         var newKey = GenerateJwk();
         var newJwk = new Microsoft.IdentityModel.Tokens.JsonWebKey(newKey);
-        var newJkt = Base64Url.Encode(newJwk.ComputeJwkThumbprint());
+        var newJkt = Base64Url.EncodeToString(newJwk.ComputeJwkThumbprint());
         var proofToken = CreateProofToken("GET", "https://server/api", at, jwkString: newKey);
         req.Headers.Add("DPoP", proofToken);
 
@@ -328,7 +329,7 @@ public class LocalApiAuthenticationTests
         // so it should fail.
         var newKey = GenerateJwk();
         var newJwk = new Microsoft.IdentityModel.Tokens.JsonWebKey(newKey);
-        var newJkt = Base64Url.Encode(newJwk.ComputeJwkThumbprint());
+        var newJkt = Base64Url.EncodeToString(newJwk.ComputeJwkThumbprint());
         var proofToken = CreateProofToken("GET", "https://server/api", at, jwkString: newKey);
         req.Headers.Add("DPoP", proofToken);
 
