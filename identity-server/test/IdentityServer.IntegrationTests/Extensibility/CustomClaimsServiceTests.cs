@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -64,7 +64,7 @@ public class CustomClaimsServiceTests
 
         var accessToken = result.AccessToken;
         var payload = accessToken.Split('.')[1];
-        var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
+        var json = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload));
         var obj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         obj["foo"].GetString().ShouldBe("foo1");

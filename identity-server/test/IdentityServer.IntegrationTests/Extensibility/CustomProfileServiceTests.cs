@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Buffers.Text;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using IntegrationTests.Common;
@@ -73,7 +73,7 @@ public class CustomProfileServiceTests
         authorization.IdentityToken.ShouldNotBeNull();
 
         var payload = authorization.IdentityToken.Split('.')[1];
-        var json = Encoding.UTF8.GetString(Base64Url.Decode(payload));
+        var json = Encoding.UTF8.GetString(Base64Url.DecodeFromChars(payload));
         var obj = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
 
         obj["foo"].GetString().ShouldBe("bar");
