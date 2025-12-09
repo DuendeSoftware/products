@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 using Duende.AspNetCore.TestFramework;

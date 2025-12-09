@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" />
-    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" VersionOverride="4.0.0" />
+    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" VersionOverride="3.2.0" />
     <PackageReference Include="Duende.IdentityModel" VersionOverride="7.1.0" />
     <PackageReference Include="Duende.IdentityServer" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
