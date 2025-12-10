@@ -17,7 +17,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Meziantou.Extensions.Logging.Xunit" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
-    <PackageReference Include="NSubstitute" />
     <PackageReference Include="RichardSzalay.MockHttp" />
   </ItemGroup>
 
