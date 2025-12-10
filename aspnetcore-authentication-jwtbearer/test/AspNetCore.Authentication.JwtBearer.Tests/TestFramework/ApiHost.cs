@@ -28,6 +28,7 @@ public class ApiHost : GenericHost
 
     private void ConfigureServices(IServiceCollection services)
     {
+        services.AddHybridCache();
         services.AddRouting();
         services.AddAuthorization();
 

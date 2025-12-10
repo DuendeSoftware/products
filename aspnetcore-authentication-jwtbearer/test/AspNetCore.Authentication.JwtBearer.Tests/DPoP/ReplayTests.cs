@@ -44,8 +44,7 @@ public class ReplayTests : DPoPProofValidatorTestBase
         var skew = validateIat && validateNonce
             ? Math.Max(clientClockSkew, serverClockSkew)
             : (validateIat ? clientClockSkew : serverClockSkew);
-        var expectedExpiration = ProofValidator.TestTimeProvider.GetUtcNow()
-            .Add(TimeSpan.FromSeconds(skew * 2))
+        var expectedExpiration = TimeSpan.FromSeconds(skew * 2)
             .Add(TimeSpan.FromSeconds(ValidFor));
         await ReplayCache.Received().Add(TokenIdHash, expectedExpiration);
     }

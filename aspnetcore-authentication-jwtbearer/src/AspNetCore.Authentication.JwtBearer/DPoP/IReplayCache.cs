@@ -11,7 +11,7 @@ public interface IReplayCache
     /// <summary>
     /// Adds a hashed jti to the cache.
     /// </summary>
-    Task Add(string jtiHash, DateTimeOffset expiration, CancellationToken cancellationToken = default);
+    Task Add(string jtiHash, TimeSpan expiration, CancellationToken cancellationToken = default);
 
 
     /// <summary>

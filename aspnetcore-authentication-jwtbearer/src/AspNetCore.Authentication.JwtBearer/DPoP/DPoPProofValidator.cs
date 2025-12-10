@@ -387,8 +387,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         // longer than the likelihood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dPoPOptions.ProofTokenValidityDuration + skew;
-        var expiration = TimeProvider.GetUtcNow().Add(cacheDuration);
-        await ReplayCache.Add(result.TokenIdHash!, expiration, cancellationToken);
+        await ReplayCache.Add(result.TokenIdHash!, cacheDuration, cancellationToken);
     }
 
     /// <summary>
