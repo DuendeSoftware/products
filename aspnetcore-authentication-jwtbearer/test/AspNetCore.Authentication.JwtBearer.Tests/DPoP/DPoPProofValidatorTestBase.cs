@@ -8,6 +8,9 @@ using System.Text;
 using System.Text.Json;
 using Duende.AspNetCore.Authentication.JwtBearer.DPoP.TestFramework;
 using Duende.IdentityModel;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,7 +20,20 @@ public abstract class DPoPProofValidatorTestBase
 {
     public DPoPProofValidatorTestBase()
     {
-        ProofValidator = CreateProofValidator();
+        Clock = new FakeTimeProvider();
+        DataProtectionProvider = new EphemeralDataProtectionProvider();
+        OptionsMonitor = new TestOptionsMonitor<DPoPOptions>(Options);
+        NonceValidator = new DefaultDPoPNonceValidator(
+            OptionsMonitor,
+            DataProtectionProvider,
+            Clock,
+            new NullLogger<DefaultDPoPNonceValidator>());
+        ProofValidator = new(
+            OptionsMonitor,
+            NonceValidator,
+            ReplayCache,
+            Clock,
+            new NullLogger<DPoPProofValidator>());
         var jtiBytes = Encoding.UTF8.GetBytes(TokenId);
         TokenIdHash = Base64Url.EncodeToString(SHA256.HashData(jtiBytes));
         Context = new()
@@ -31,22 +47,16 @@ public abstract class DPoPProofValidatorTestBase
         };
     }
 
-    // This is our system under test
-    protected TestDPoPProofValidator ProofValidator { get; init; }
+    protected FakeTimeProvider Clock { get; init; }
+    protected IDataProtectionProvider DataProtectionProvider { get; init; }
+    protected IDataProtector DataProtector => NonceValidator.DataProtector;
+    protected DPoPOptions Options = new();
+    protected TestOptionsMonitor<DPoPOptions> OptionsMonitor { get; init; }
+    internal DefaultDPoPNonceValidator NonceValidator { get; init; }
+    internal DPoPProofValidator ProofValidator { get; init; }
 
     protected DPoPProofValidationContext Context;
-    protected DPoPOptions Options = new();
     protected TestReplayCache ReplayCache = new();
-
-    public TestDPoPProofValidator CreateProofValidator()
-    {
-        var optionsMonitor = new TestOptionsMonitor<DPoPOptions>(Options);
-
-        return new TestDPoPProofValidator(
-            optionsMonitor,
-            ReplayCache
-        );
-    }
 
 
     protected DPoPProofValidationResult Result = new();

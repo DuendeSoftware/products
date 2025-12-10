@@ -102,8 +102,11 @@ internal class DPoPJwtBearerEvents
             {
                 context.Fail(result.ErrorDescription ?? result.Error ?? throw new Exception("No ErrorDescription or Error set."));
 
-                // we need to stash these values away, so they are available later when the Challenge method is called later
-                context.HttpContext.Items["DPoP-Error"] = result.Error;
+                // we need to stash these values away, so they are available later when the Challenge method is called
+                if (!string.IsNullOrWhiteSpace(result.Error))
+                {
+                    context.HttpContext.Items["DPoP-Error"] = result.Error;
+                }
                 if (!string.IsNullOrWhiteSpace(result.ErrorDescription))
                 {
                     context.HttpContext.Items["DPoP-ErrorDescription"] = result.ErrorDescription;
@@ -180,10 +183,12 @@ internal class DPoPJwtBearerEvents
             context.Response.StatusCode = 401;
             context.HandleResponse();
         }
-        else if (context.HttpContext.Items.ContainsKey("Bearer-ErrorDescription"))
+        else
         {
-            var description = context.HttpContext.Items["Bearer-ErrorDescription"] as string;
-            context.ErrorDescription = description;
+            if (context.HttpContext.Items.TryGetValue("Bearer-ErrorDescription", out var bearerErrorDesc) && bearerErrorDesc is string description)
+            {
+                context.ErrorDescription = description;
+            }
         }
 
         if (IsDPoPAuthorizationScheme(context.HttpContext.Request))
@@ -198,17 +203,14 @@ internal class DPoPJwtBearerEvents
         var sb = new StringBuilder();
         sb.Append(OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP);
 
-        if (context.HttpContext.Items.ContainsKey("DPoP-Error"))
+        if (context.HttpContext.Items.TryGetValue("DPoP-Error", out var dpopErrorObj) && dpopErrorObj is string error)
         {
-            var error = context.HttpContext.Items["DPoP-Error"] as string;
             sb.Append(" error=\"");
             sb.Append(error);
             sb.Append('\"');
 
-            if (context.HttpContext.Items.ContainsKey("DPoP-ErrorDescription"))
+            if (context.HttpContext.Items.TryGetValue("DPoP-ErrorDescription", out var dpopErrorDescObj) && dpopErrorDescObj is string description)
             {
-                var description = context.HttpContext.Items["DPoP-ErrorDescription"] as string;
-
                 sb.Append(", error_description=\"");
                 sb.Append(description);
                 sb.Append('\"');
@@ -217,18 +219,9 @@ internal class DPoPJwtBearerEvents
 
         context.Response.Headers.Append(HeaderNames.WWWAuthenticate, sb.ToString());
 
-        if (context.HttpContext.Items.ContainsKey("DPoP-Nonce"))
+        if (context.HttpContext.Items.TryGetValue("DPoP-Nonce", out var nonceObj) && nonceObj is string nonce)
         {
-            var nonce = context.HttpContext.Items["DPoP-Nonce"] as string;
             context.Response.Headers[HttpHeaders.DPoPNonce] = nonce;
-        }
-        else
-        {
-            var nonce = context.Properties.GetDPoPNonce();
-            if (nonce != null)
-            {
-                context.Response.Headers[HttpHeaders.DPoPNonce] = nonce;
-            }
         }
 
         return Task.CompletedTask;
