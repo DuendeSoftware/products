@@ -232,7 +232,7 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
             services.ConfigureDPoPTokensForScheme(ApiHost.AuthenticationScheme,
                 opt =>
                 {
-                    opt.TokenMode = DPoPMode.DPoPOnly;
+                    opt.AllowBearerTokens = false;
                     configureDPoP?.Invoke(opt);
                 });
 
