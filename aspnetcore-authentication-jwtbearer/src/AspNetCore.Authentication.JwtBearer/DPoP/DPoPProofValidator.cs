@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -19,17 +18,15 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// </summary>
 internal class DPoPProofValidator : IDPoPProofValidator
 {
-    private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
-
     /// <summary>
     /// Provides the options for DPoP proof validation.
     /// </summary>
     internal readonly IOptionsMonitor<DPoPOptions> OptionsMonitor;
 
     /// <summary>
-    /// Protects and unprotects nonce values.
+    /// Validates and creates DPoP nonces.
     /// </summary>
-    internal readonly IDataProtector DataProtector;
+    internal readonly IDPoPNonceValidator NonceValidator;
 
     /// <summary>
     /// Caches proof tokens to detect replay.
@@ -50,11 +47,11 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// Constructs a new instance of the <see cref="DPoPProofValidator"/>.
     /// </summary>
     public DPoPProofValidator(IOptionsMonitor<DPoPOptions> optionsMonitor,
-        IDataProtectionProvider dataProtectionProvider, IReplayCache replayCache,
+        IDPoPNonceValidator nonceValidator, IReplayCache replayCache,
         TimeProvider timeProvider, ILogger<DPoPProofValidator> logger)
     {
         OptionsMonitor = optionsMonitor;
-        DataProtector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
+        NonceValidator = nonceValidator;
         ReplayCache = replayCache;
         TimeProvider = timeProvider;
         Logger = logger;
@@ -441,62 +438,19 @@ internal class DPoPProofValidator : IDPoPProofValidator
         DPoPProofValidationContext context,
         DPoPProofValidationResult result)
     {
-        if (string.IsNullOrWhiteSpace(result.Nonce))
+        var validationResult = NonceValidator.ValidateNonce(context, result.Nonce);
+
+        if (validationResult != NonceValidationResult.Valid)
         {
-            result.SetError("Missing 'nonce' value.", OidcConstants.TokenErrors.UseDPoPNonce);
-            result.ServerIssuedNonce = CreateNonce(context, result);
-            return;
-        }
-
-        var time = GetUnixTimeFromNonce(context, result);
-        if (time <= 0)
-        {
-            Logger.LogDebug("Invalid time value read from the 'nonce' value");
-
-            result.SetError("Invalid 'nonce' value.", OidcConstants.TokenErrors.UseDPoPNonce);
-            result.ServerIssuedNonce = CreateNonce(context, result);
-            return;
-        }
-
-        if (IsExpired(context, result, time, ExpirationValidationMode.Nonce))
-        {
-            Logger.LogDebug("DPoP 'nonce' expired. Issuing new value to client.");
-
-            result.SetError("Invalid 'nonce' value.", OidcConstants.TokenErrors.UseDPoPNonce);
-            result.ServerIssuedNonce = CreateNonce(context, result);
-            return;
-        }
-    }
-
-    /// <summary>
-    /// Creates a nonce value to return to the client.
-    /// </summary>
-    internal string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-    {
-        var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
-        return DataProtector.Protect(now.ToString());
-    }
-
-    /// <summary>
-    /// Reads the time the nonce was created.
-    /// </summary>
-    internal long GetUnixTimeFromNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-    {
-        try
-        {
-            var value = DataProtector.Unprotect(result.Nonce!); // nonce is required by an earlier validation
-            if (long.TryParse(value, out var iat))
+            var error = validationResult switch
             {
-                return iat;
-            }
+                NonceValidationResult.Missing => "Missing 'nonce' value.",
+                NonceValidationResult.Invalid => "Invalid 'nonce' value.",
+                _ => throw new InvalidOperationException("Invalid NonceValidationResult value"),
+            };
+            result.SetError(error, OidcConstants.TokenErrors.UseDPoPNonce);
+            result.ServerIssuedNonce = NonceValidator.CreateNonce(context);
         }
-        catch (Exception ex)
-        {
-            Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
-        }
-
-        // We return 0 to indicate failure.
-        return 0;
     }
 
     /// <summary>

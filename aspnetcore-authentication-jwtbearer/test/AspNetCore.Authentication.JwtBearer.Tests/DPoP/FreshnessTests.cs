@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
@@ -12,9 +11,9 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Trait("Category", "Unit")]
     public void can_retrieve_issued_at_unix_time_from_nonce()
     {
-        Result.Nonce = ProofValidator.TestDataProtector.Protect(IssuedAt.ToString());
+        var nonce = ProofValidator.TestDataProtector.Protect(IssuedAt.ToString());
 
-        var actual = ProofValidator.GetUnixTimeFromNonce(Context, Result);
+        var actual = ProofValidator.GetUnixTimeFromNonce(nonce);
 
         actual.ShouldBe(IssuedAt);
     }
@@ -23,9 +22,9 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Trait("Category", "Unit")]
     public void invalid_nonce_is_treated_as_zero()
     {
-        Result.Nonce = ProofValidator.TestDataProtector.Protect("garbage that isn't a long");
+        var nonce = ProofValidator.TestDataProtector.Protect("garbage that isn't a long");
 
-        var actual = ProofValidator.GetUnixTimeFromNonce(Context, Result);
+        var actual = ProofValidator.GetUnixTimeFromNonce(nonce);
 
         actual.ShouldBe(0);
     }
@@ -36,7 +35,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     {
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
 
-        var actual = ProofValidator.CreateNonce(Context, new DPoPProofValidationResult());
+        var actual = ProofValidator.CreateNonce(Context);
 
         ProofValidator.TestDataProtector.Unprotect(actual).ShouldBe(IssuedAt.ToString());
     }
@@ -46,41 +45,31 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [InlineData((string?)null)]
     [InlineData("")]
     [InlineData(" ")]
-    public void missing_nonce_returns_use_dpop_nonce_with_server_issued_nonce(string? nonce)
+    public void missing_nonce_returns_missing_result(string? nonce)
     {
-        Result.Nonce = nonce;
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
 
-        ProofValidator.ValidateNonce(Context, Result);
+        var validationResult = ProofValidator.ValidateNonce(Context, nonce);
 
-        Result.IsError.ShouldBeTrue();
-        Result.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
-        Result.ErrorDescription.ShouldBe("Missing 'nonce' value.");
-        Result.ServerIssuedNonce.ShouldNotBeNull();
-        ProofValidator.TestDataProtector.Unprotect(Result.ServerIssuedNonce).ShouldBe(IssuedAt.ToString());
+        validationResult.ShouldBe(NonceValidationResult.Missing);
     }
 
     [Theory]
     [Trait("Category", "Unit")]
     [InlineData("null")]
     [InlineData("garbage")]
-    public void invalid_nonce_returns_use_dpop_nonce_with_server_issued_nonce(string? nonce)
+    public void invalid_nonce_returns_invalid_result(string? nonce)
     {
-        Result.Nonce = nonce;
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
 
-        ProofValidator.ValidateNonce(Context, Result);
+        var validationResult = ProofValidator.ValidateNonce(Context, nonce);
 
-        Result.IsError.ShouldBeTrue();
-        Result.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
-        Result.ErrorDescription.ShouldBe("Invalid 'nonce' value.");
-        Result.ServerIssuedNonce.ShouldNotBeNull();
-        ProofValidator.TestDataProtector.Unprotect(Result.ServerIssuedNonce).ShouldBe(IssuedAt.ToString());
+        validationResult.ShouldBe(NonceValidationResult.Invalid);
     }
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void expired_nonce_returns_use_dpop_nonce_with_server_issued_nonce()
+    public void expired_nonce_returns_invalid_result()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
         Options.ServerClockSkew = TimeSpan.FromSeconds(ClockSkew);
@@ -90,15 +79,11 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 
         ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(now));
 
-        Result.Nonce = ProofValidator.TestDataProtector.Protect(IssuedAt.ToString());
+        var nonce = ProofValidator.TestDataProtector.Protect(IssuedAt.ToString());
 
-        ProofValidator.ValidateNonce(Context, Result);
+        var validationResult = ProofValidator.ValidateNonce(Context, nonce);
 
-        Result.IsError.ShouldBeTrue();
-        Result.Error.ShouldBe(OidcConstants.TokenErrors.UseDPoPNonce);
-        Result.ErrorDescription.ShouldBe("Invalid 'nonce' value.");
-        Result.ServerIssuedNonce.ShouldNotBeNull();
-        ProofValidator.TestDataProtector.Unprotect(Result.ServerIssuedNonce).ShouldBe(now.ToString());
+        validationResult.ShouldBe(NonceValidationResult.Invalid);
     }
 
 

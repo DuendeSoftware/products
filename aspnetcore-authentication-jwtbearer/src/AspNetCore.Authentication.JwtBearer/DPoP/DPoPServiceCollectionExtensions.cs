@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
@@ -20,6 +21,7 @@ public static class DPoPServiceCollectionExtensions
         services.AddOptions<DPoPOptions>();
 
         services.AddTransient<DPoPJwtBearerEvents>();
+        services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
         services.AddTransient<IDPoPProofValidator, DPoPProofValidator>();
         services.AddDistributedMemoryCache();
         services.AddTransient<IReplayCache, ReplayCache>();
@@ -31,7 +33,7 @@ public static class DPoPServiceCollectionExtensions
             opt.Scheme = scheme;
             return opt;
         });
-        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
+        // services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
 
         return services;
     }

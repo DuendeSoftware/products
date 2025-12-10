@@ -12,17 +12,22 @@ public class TestDPoPProofValidator
 {
     public TestDPoPProofValidator(
         IOptionsMonitor<DPoPOptions> optionsMonitor,
-        IReplayCache replayCache) => _internalValidator = new(
+        IReplayCache replayCache)
+    {
+        _nonceValidator = new TestDPoPNonceValidator(optionsMonitor);
+        _internalValidator = new(
             optionsMonitor,
-            new EphemeralDataProtectionProvider(),
+            _nonceValidator._internalValidator,
             replayCache,
-            new FakeTimeProvider(),
+            _nonceValidator.TestTimeProvider,
             new NullLogger<DPoPProofValidator>());
+    }
 
     internal DPoPProofValidator _internalValidator;
+    internal TestDPoPNonceValidator _nonceValidator;
 
-    public IDataProtector TestDataProtector => _internalValidator.DataProtector;
-    public FakeTimeProvider TestTimeProvider => (FakeTimeProvider)_internalValidator.TimeProvider;
+    public IDataProtector TestDataProtector => _nonceValidator.TestDataProtector;
+    public FakeTimeProvider TestTimeProvider => _nonceValidator.TestTimeProvider;
     public IReplayCache TestReplayCache => _internalValidator.ReplayCache;
 
     public void ValidatePayload(DPoPProofValidationContext context, DPoPProofValidationResult result)
@@ -37,14 +42,14 @@ public class TestDPoPProofValidator
     public void ValidateIat(DPoPProofValidationContext context, DPoPProofValidationResult result)
         => _internalValidator.ValidateIat(context, result);
 
-    public void ValidateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-        => _internalValidator.ValidateNonce(context, result);
+    public NonceValidationResult ValidateNonce(DPoPProofValidationContext context, string? nonce)
+        => _nonceValidator.ValidateNonce(context, nonce);
 
-    public string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-        => _internalValidator.CreateNonce(context, result);
+    public string CreateNonce(DPoPProofValidationContext context)
+        => _nonceValidator.CreateNonce(context);
 
-    public long GetUnixTimeFromNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-        => _internalValidator.GetUnixTimeFromNonce(context, result);
+    public long GetUnixTimeFromNonce(string nonce)
+        => _nonceValidator.GetUnixTimeFromNonce(nonce);
 
     public bool IsExpired(TimeSpan validityDuration, TimeSpan clockSkew, long issuedAtTime)
         => _internalValidator.IsExpired(validityDuration, clockSkew, issuedAtTime);
