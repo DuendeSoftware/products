@@ -90,42 +90,55 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Theory]
     [Trait("Category", "Unit")]
     // Around the maximum
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt + ValidFor + ClockSkew + 1, true)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt + ValidFor + ClockSkew, false)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt + ValidFor + ClockSkew - 1, false)]
+    [InlineData(ClockSkew, IssuedAt + ValidFor + ClockSkew + 1, true)]
+    [InlineData(ClockSkew, IssuedAt + ValidFor + ClockSkew, false)]
+    [InlineData(ClockSkew, IssuedAt + ValidFor + ClockSkew - 1, false)]
 
     // Around the maximum, neglecting clock skew
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt + ValidFor - 1, false)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt + ValidFor, false)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt + ValidFor + 1, false)]
-
+    [InlineData(ClockSkew, IssuedAt + ValidFor - 1, false)]
+    [InlineData(ClockSkew, IssuedAt + ValidFor, false)]
+    [InlineData(ClockSkew, IssuedAt + ValidFor + 1, false)]
     // Around the maximum, with clock skew disabled
-    [InlineData(IssuedAt, ValidFor, 0, IssuedAt + ValidFor - 1, false)]
-    [InlineData(IssuedAt, ValidFor, 0, IssuedAt + ValidFor, false)]
-    [InlineData(IssuedAt, ValidFor, 0, IssuedAt + ValidFor + 1, true)]
-
-    // Around the minimum
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt - ClockSkew - 1, true)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt - ClockSkew, false)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt - ClockSkew + 1, false)]
-
-    // Around the minimum, neglecting clock skew
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt - 1, false)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt, false)]
-    [InlineData(IssuedAt, ValidFor, ClockSkew, IssuedAt + 1, false)]
-
-    // Around the minimum, with clock skew disabled
-    [InlineData(IssuedAt, ValidFor, 0, IssuedAt - 1, true)]
-    [InlineData(IssuedAt, ValidFor, 0, IssuedAt, false)]
-    [InlineData(IssuedAt, ValidFor, 0, IssuedAt + 1, false)]
-    public void expiration_check_is_correct_at_boundaries(long issuedAt, long validFor, long clockSkew, long now, bool expected)
+    [InlineData(0, IssuedAt + ValidFor - 1, false)]
+    [InlineData(0, IssuedAt + ValidFor, false)]
+    [InlineData(0, IssuedAt + ValidFor + 1, true)]
+    public void expiration_check_is_correct_near_maximum(long clockSkew, long now, bool expected)
     {
         Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(now));
 
-        var actual = ProofValidator.IsExpired(TimeSpan.FromSeconds(validFor), TimeSpan.FromSeconds(clockSkew), issuedAt);
+        var actual = ExpirationValidator.IsExpired(TimeSpan.FromSeconds(ValidFor), TimeSpan.FromSeconds(clockSkew), IssuedAt);
         actual.ShouldBe(expected);
+        if (expected)
+        {
+            Logger.LogMessages.ShouldContain(msg => msg.StartsWith("Expiration check failed. Expiration has already happened."));
+        }
     }
 
+    // Around the minimum
+    [InlineData(ClockSkew, IssuedAt - ClockSkew - 1, true)]
+    [InlineData(ClockSkew, IssuedAt - ClockSkew, false)]
+    [InlineData(ClockSkew, IssuedAt - ClockSkew + 1, false)]
+
+    // Around the minimum, neglecting clock skew
+    [InlineData(ClockSkew, IssuedAt - 1, false)]
+    [InlineData(ClockSkew, IssuedAt, false)]
+    [InlineData(ClockSkew, IssuedAt + 1, false)]
+
+    // Around the minimum, with clock skew disabled
+    [InlineData(0, IssuedAt - 1, true)]
+    [InlineData(0, IssuedAt, false)]
+    [InlineData(0, IssuedAt + 1, false)]
+    public void expiration_check_is_correct_near_minimum(long clockSkew, long now, bool expected)
+    {
+        Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(now));
+
+        var actual = ExpirationValidator.IsExpired(TimeSpan.FromSeconds(ValidFor), TimeSpan.FromSeconds(clockSkew), IssuedAt);
+        actual.ShouldBe(expected);
+        if (expected)
+        {
+            Logger.LogMessages.ShouldContain(msg => msg.StartsWith("Expiration check failed. Creation time was too far in the future."));
+        }
+    }
     [Theory]
     [Trait("Category", "Unit")]
     [InlineData(ClockSkew, 0, ExpirationValidationMode.IssuedAt)]
@@ -141,7 +154,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + 1));
 
         // We're not expired because we're using the right clock skew
-        ProofValidator.IsExpired(Context, Result, IssuedAt, mode).ShouldBeFalse();
+        ProofValidator.IsExpired(Context, IssuedAt, mode).ShouldBeFalse();
     }
 
     [Fact]

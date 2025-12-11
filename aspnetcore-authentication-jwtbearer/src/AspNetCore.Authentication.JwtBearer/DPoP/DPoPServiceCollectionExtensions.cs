@@ -23,6 +23,7 @@ public static class DPoPServiceCollectionExtensions
         services.AddTransient<DPoPJwtBearerEvents>();
         services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
         services.AddTransient<IDPoPProofValidator, DPoPProofValidator>();
+        services.AddTransient<DPoPExpirationValidator>();
         services.AddDistributedMemoryCache();
         services.AddTransient<IReplayCache, ReplayCache>();
 

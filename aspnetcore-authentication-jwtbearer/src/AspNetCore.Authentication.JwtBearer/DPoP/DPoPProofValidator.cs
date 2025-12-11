@@ -44,17 +44,27 @@ internal class DPoPProofValidator : IDPoPProofValidator
     internal readonly ILogger<DPoPProofValidator> Logger;
 
     /// <summary>
+    /// Validates expiration of DPoP proofs.
+    /// </summary>
+    internal readonly DPoPExpirationValidator ExpirationValidator;
+
+    /// <summary>
     /// Constructs a new instance of the <see cref="DPoPProofValidator"/>.
     /// </summary>
-    public DPoPProofValidator(IOptionsMonitor<DPoPOptions> optionsMonitor,
-        IDPoPNonceValidator nonceValidator, IReplayCache replayCache,
-        TimeProvider timeProvider, ILogger<DPoPProofValidator> logger)
+    public DPoPProofValidator(
+        IOptionsMonitor<DPoPOptions> optionsMonitor,
+        IDPoPNonceValidator nonceValidator,
+        IReplayCache replayCache,
+        TimeProvider timeProvider,
+        ILogger<DPoPProofValidator> logger,
+        DPoPExpirationValidator expirationValidator)
     {
         OptionsMonitor = optionsMonitor;
         NonceValidator = nonceValidator;
         ReplayCache = replayCache;
         TimeProvider = timeProvider;
         Logger = logger;
+        ExpirationValidator = expirationValidator;
     }
 
     /// <summary>
@@ -425,7 +435,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         DPoPProofValidationResult result)
     {
         // iat is required by an earlier validation, so result.IssuedAt will not be null
-        if (IsExpired(context, result, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt))
+        if (IsExpired(context, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt))
         {
             result.SetError("Invalid 'iat' value.");
         }
@@ -457,37 +467,13 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// Validates the expiration of the DPoP proof.
     /// Returns true if the time is beyond the allowed limits, false otherwise.
     /// </summary>
-    internal bool IsExpired(DPoPProofValidationContext context, DPoPProofValidationResult result, long time,
-        ExpirationValidationMode mode)
+    internal bool IsExpired(DPoPProofValidationContext context, long time, ExpirationValidationMode mode)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
         var validityDuration = dpopOptions.ProofTokenValidityDuration;
         var skew = mode == ExpirationValidationMode.Nonce ? dpopOptions.ServerClockSkew
             : dpopOptions.ClientClockSkew;
 
-        return IsExpired(validityDuration, skew, time);
-    }
-
-    internal bool IsExpired(TimeSpan validityDuration, TimeSpan clockSkew, long time)
-    {
-        var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
-        var start = now + (int)clockSkew.TotalSeconds;
-        if (start < time)
-        {
-            var diff = time - now;
-            Logger.LogDebug("Expiration check failed. Creation time was too far in the future. The time being checked was {iat}, and clock is now {now}. The time difference is {diff}", time, now, diff);
-            return true;
-        }
-
-        var expiration = time + (int)validityDuration.TotalSeconds;
-        var end = now - (int)clockSkew.TotalSeconds;
-        if (expiration < end)
-        {
-            var diff = now - expiration;
-            Logger.LogDebug("Expiration check failed. Expiration has already happened. The expiration was at {exp}, and clock is now {now}. The time difference is {diff}", expiration, now, diff);
-            return true;
-        }
-
-        return false;
+        return ExpirationValidator.IsExpired(validityDuration, skew, time);
     }
 }

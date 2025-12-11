@@ -19,17 +19,20 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
     internal readonly IDataProtector DataProtector;
     internal readonly TimeProvider TimeProvider;
     internal readonly ILogger<DefaultDPoPNonceValidator> Logger;
+    internal readonly DPoPExpirationValidator ExpirationValidator;
 
     public DefaultDPoPNonceValidator(
         IOptionsMonitor<DPoPOptions> optionsMonitor,
         IDataProtectionProvider dataProtectionProvider,
         TimeProvider timeProvider,
-        ILogger<DefaultDPoPNonceValidator> logger)
+        ILogger<DefaultDPoPNonceValidator> logger,
+        DPoPExpirationValidator expirationValidator)
     {
         OptionsMonitor = optionsMonitor;
         DataProtector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
         TimeProvider = timeProvider;
         Logger = logger;
+        ExpirationValidator = expirationValidator;
     }
 
     public string CreateNonce(DPoPProofValidationContext context)
@@ -86,24 +89,6 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
         var validityDuration = dpopOptions.ProofTokenValidityDuration;
         var skew = dpopOptions.ServerClockSkew;
 
-        var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
-        var start = now + (int)skew.TotalSeconds;
-        if (start < time)
-        {
-            var diff = time - now;
-            Logger.LogDebug("Expiration check failed. Creation time was too far in the future. The time being checked was {iat}, and clock is now {now}. The time difference is {diff}", time, now, diff);
-            return true;
-        }
-
-        var expiration = time + (int)validityDuration.TotalSeconds;
-        var end = now - (int)skew.TotalSeconds;
-        if (expiration < end)
-        {
-            var diff = now - expiration;
-            Logger.LogDebug("Expiration check failed. Expiration has already happened. The expiration was at {exp}, and clock is now {now}. The time difference is {diff}", expiration, now, diff);
-            return true;
-        }
-
-        return false;
+        return ExpirationValidator.IsExpired(validityDuration, skew, time);
     }
 }
