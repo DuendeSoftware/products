@@ -40,7 +40,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="KubernetesClient" Version="17.0.14" />
     <PackageVersion Include="Duende.AccessTokenManagement" Version="4.1.0" />
     <PackageVersion Include="Duende.AccessTokenManagement.OpenIdConnect" Version="4.1.0" />
-    <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.1.3" />
+    <PackageVersion Include="Duende.AspNetCore.Authentication.JwtBearer" Version="0.3.0" />
     <PackageVersion Include="Duende.IdentityModel" Version="8.0.0" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.4.0-preview.2" />
