@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Filters;
 
-namespace IdentityServerAspNetIdentity;
+namespace IdentityServerHost;
 
 internal static class HostingExtensions
 {
