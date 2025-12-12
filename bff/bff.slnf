@@ -2,8 +2,6 @@
   "solution": {
     "path": "..\\products.slnx",
     "projects": [
-      "bff\\performance\\Bff.Benchmarks\\Bff.Benchmarks.csproj",
-      "bff\\performance\\Bff.Performance\\Bff.Performance.csproj",
       ".github\\workflow-gen\\workflow-gen.csproj",
       "bff\\hosts\\Blazor\\PerComponent\\Hosts.Bff.Blazor.PerComponent.Client\\Hosts.Bff.Blazor.PerComponent.Client.csproj",
       "bff\\hosts\\Blazor\\PerComponent\\Hosts.Bff.Blazor.PerComponent\\Hosts.Bff.Blazor.PerComponent.csproj",
@@ -13,8 +11,8 @@
       "bff\\hosts\\Hosts.Bff.DPoP\\Hosts.Bff.DPoP.csproj",
       "bff\\hosts\\Hosts.Bff.EF\\Hosts.Bff.EF.csproj",
       "bff\\hosts\\Hosts.Bff.InMemory\\Hosts.Bff.InMemory.csproj",
-      "bff\\hosts\\Hosts.Bff.Performance\\Hosts.Bff.Performance.csproj",
       "bff\\hosts\\Hosts.Bff.MultiFrontend\\Hosts.Bff.MultiFrontend.csproj",
+      "bff\\hosts\\Hosts.Bff.Performance\\Hosts.Bff.Performance.csproj",
       "bff\\hosts\\Hosts.IdentityServer\\Hosts.IdentityServer.csproj",
       "bff\\hosts\\Hosts.ServiceDefaults\\Hosts.ServiceDefaults.csproj",
       "bff\\hosts\\RemoteApis\\Hosts.RemoteApi.DPoP\\Hosts.RemoteApi.DPoP.csproj",
@@ -22,6 +20,7 @@
       "bff\\hosts\\RemoteApis\\Hosts.RemoteApi\\Hosts.RemoteApi.csproj",
       "bff\\migrations\\UserSessionDb\\UserSessionDb.csproj",
       "bff\\performance\\Bff.Benchmarks\\Bff.Benchmarks.csproj",
+      "bff\\performance\\Bff.Performance\\Bff.Performance.csproj",
       "bff\\src\\Bff.Blazor.Client\\Bff.Blazor.Client.csproj",
       "bff\\src\\Bff.Blazor\\Bff.Blazor.csproj",
       "bff\\src\\Bff.EntityFramework\\Bff.EntityFramework.csproj",
@@ -33,8 +32,8 @@
       "bff\\templates\\src\\BffRemoteApi\\BffRemoteApi.csproj",
       "bff\\test\\Bff.Tests\\Bff.Tests.csproj",
       "bff\\test\\Hosts.Tests\\Hosts.Tests.csproj",
-      "shared\\Xunit.Playwright\\Duende.Xunit.Playwright.csproj",
-      "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj"
+      "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj",
+      "shared\\Xunit.Playwright\\Duende.Xunit.Playwright.csproj"
     ]
   }
 }
