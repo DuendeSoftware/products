@@ -1,6 +1,6 @@
+using System.Buffers.Text;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServerHost.Pages.Diagnostics;
@@ -11,11 +11,11 @@ public class ViewModel
     {
         AuthenticateResult = result;
 
-        if (result?.Properties?.Items.TryGetValue("client_list", out var encoded) == true)
+        if (result.Properties?.Items.TryGetValue("client_list", out var encoded) == true)
         {
             if (encoded != null)
             {
-                var bytes = Base64Url.Decode(encoded);
+                var bytes = Base64Url.DecodeFromChars(encoded);
                 var value = Encoding.UTF8.GetString(bytes);
                 Clients = JsonSerializer.Deserialize<string[]>(value) ?? Enumerable.Empty<string>();
                 return;
@@ -25,5 +25,6 @@ public class ViewModel
     }
 
     public AuthenticateResult AuthenticateResult { get; }
+
     public IEnumerable<string> Clients { get; }
 }

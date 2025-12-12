@@ -12,11 +12,11 @@
             Admin Dashboard
         </h1>
         <span class="text-muted">
-            Get a high-level overview of your Duende IdentityServer instance.
-            Click <a href="/.well-known/openid-configuration" target="_blank">here</a> to access the Discovery Document.
+            Get a high-level overview of your Duende IdentityServer instance.<br/>
+            Click <a href="/.well-known/openid-configuration" target="_blank">here</a> to access the Discovery Document.<br/>
+            <a asp-page-handler="Diagnostics">Download diagnostics data</a>
         </span>
     </header>
-
     <div class="row">
         <div class="col-lg-8">
             <h2 class="my-3">System Information</h2>
@@ -55,10 +55,8 @@
             </div>
         </div>
         <div class="col-lg-4">
-
             <h2 class="my-3">License Usage</h2>
             <vc:license-summary></vc:license-summary>
-
         </div>
     </div>
 </div>

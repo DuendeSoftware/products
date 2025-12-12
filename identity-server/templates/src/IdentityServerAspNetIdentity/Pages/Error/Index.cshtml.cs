@@ -21,7 +21,7 @@ public class Index : PageModel
 
     public async Task OnGet(string? errorId)
     {
-        // retrieve error details from identityserver
+        // retrieve error details from IdentityServer
         var message = await _interaction.GetErrorContextAsync(errorId);
         if (message != null)
         {

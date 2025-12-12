@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace IdentityServerHost.Pages.Create;
+namespace IdentityServerHost.Pages.Account.Create;
 
 public class InputModel
 {

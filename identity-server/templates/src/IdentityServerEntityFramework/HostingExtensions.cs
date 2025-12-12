@@ -1,6 +1,6 @@
 using System.Globalization;
 using Duende.IdentityServer;
-using IdentityServerHost;
+using IdentityServerHost.Pages;
 using IdentityServerHost.Pages.Admin.ApiScopes;
 using IdentityServerHost.Pages.Admin.Clients;
 using IdentityServerHost.Pages.Admin.IdentityScopes;
@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Filters;
 
-namespace IdentityServerEntityFramework;
+namespace IdentityServerHost;
 
 internal static class HostingExtensions
 {

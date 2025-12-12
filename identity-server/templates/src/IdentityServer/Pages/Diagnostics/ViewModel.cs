@@ -1,6 +1,6 @@
+using System.Buffers.Text;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServerTemplate.Pages.Diagnostics;
@@ -15,7 +15,7 @@ public class ViewModel
         {
             if (encoded != null)
             {
-                var bytes = Base64Url.Decode(encoded);
+                var bytes = Base64Url.DecodeFromChars(encoded);
                 var value = Encoding.UTF8.GetString(bytes);
                 Clients = JsonSerializer.Deserialize<string[]>(value) ?? Enumerable.Empty<string>();
                 return;

@@ -1,4 +1,4 @@
-namespace IdentityServerHost.Pages.Login;
+namespace IdentityServerHost.Pages.Account.Login;
 
 public class ViewModel
 {

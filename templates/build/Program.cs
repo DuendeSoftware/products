@@ -82,10 +82,10 @@ void CopyFile(DirectoryInfo directoryInfo, FileInfo fileInfo)
 
 bool TryFindFile(string fileName, [NotNullWhen(true)] out FileInfo? found)
 {
+    var executingAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+                                    ?? throw new InvalidOperationException("Failed to find executing assembly location");
 
-
-    var currentDir = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-                                       ?? throw new InvalidOperationException("Failed to find directory for current assembly"));
+    var currentDir = new DirectoryInfo(executingAssemblyLocation);
 
     while (currentDir != null && currentDir.Exists)
     {

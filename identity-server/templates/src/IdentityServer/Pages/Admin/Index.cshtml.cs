@@ -1,17 +1,23 @@
-using System.Reflection;
-using Duende.IdentityServer;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace IdentityServerTemplate.Pages.Admin;
 
 [Authorize(Config.Policies.Admin)]
-public class Index(IdentityServerLicense? license = null) : PageModel
+public class Index(DiagnosticDataService? diagnosticDataService = null) : PageModel
 {
-    public string Version => typeof(Duende.IdentityServer.Hosting.IdentityServerMiddleware).Assembly
-                                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                 ?.InformationalVersion.Split('+').First()
-                             ?? "unavailable";
+    public async Task<IActionResult> OnGetDiagnostics()
+    {
+        if (diagnosticDataService == null)
+        {
+            return NotFound();
+        }
 
-    public IdentityServerLicense? License { get; } = license;
+        var diagnosticsJson = await diagnosticDataService.GetJsonStringAsync();
+
+        Response.Headers.ContentDisposition = "attachment; filename=diagnostics.json";
+        return Content(diagnosticsJson, "application/json");
+    }
 }
