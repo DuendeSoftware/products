@@ -50,6 +50,17 @@ public sealed class DPoPOptions
     /// </summary>
     public int ProofTokenMaxLength { get; set; } = 4000;
 
+    /// <summary>
+    /// The <see cref="TokenValidationParameters"/> used when validating DPoP proof tokens.
+    /// </summary>
+    /// <remarks>
+    /// By default, the validation parameters are configured as follows:
+    /// <list type="bullet">
+    /// <item>Audience and Issuer validation are disabled, as they are not required in a DPoP proof.</item>
+    /// <item>Lifetime validation is disabled, as complex lifetime checks are performed separately using the `iat` claim, a server-issued nonce, or both.</item>
+    /// <item>Signatures are allowed from RSA, PSA, or ECDSA algorithms with key sizes of 256, 384, or 512 bits.</item>
+    /// </list>
+    /// </remarks>
     public TokenValidationParameters ProofTokenValidationParameters = new()
     {
         ValidateAudience = false,
