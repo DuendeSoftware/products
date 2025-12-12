@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text;
 using Duende.IdentityServer.Licensing;
-using IdentityServerAspNetIdentity;
 using IdentityServerHost;
 using Serilog;
 
