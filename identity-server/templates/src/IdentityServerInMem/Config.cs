@@ -1,6 +1,6 @@
 using Duende.IdentityServer.Models;
 
-namespace IdentityServerInMem;
+namespace IdentityServerHost;
 
 public static class Config
 {

@@ -1,11 +1,11 @@
 using System.Globalization;
 using Duende.IdentityServer;
-using IdentityServerHost;
+using IdentityServerHost.Pages;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Filters;
 
-namespace IdentityServerInMem;
+namespace IdentityServerHost;
 
 internal static class HostingExtensions
 {
