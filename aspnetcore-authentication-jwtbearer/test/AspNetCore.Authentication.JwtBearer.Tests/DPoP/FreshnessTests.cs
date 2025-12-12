@@ -110,7 +110,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         actual.ShouldBe(expected);
         if (expected)
         {
-            Logger.LogMessages.ShouldContain(msg => msg.StartsWith("Expiration check failed. Expiration has already happened."));
+            ExpirationLogger.Collector.GetSnapshot().ShouldContain(record => record.Message.StartsWith("Expiration check failed. Expiration has already happened."));
         }
     }
 
@@ -136,7 +136,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         actual.ShouldBe(expected);
         if (expected)
         {
-            Logger.LogMessages.ShouldContain(msg => msg.StartsWith("Expiration check failed. Creation time was too far in the future."));
+            ExpirationLogger.Collector.GetSnapshot().ShouldContain(record => record.Message.StartsWith("Expiration check failed. Creation time was too far in the future."));
         }
     }
     [Theory]

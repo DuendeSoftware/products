@@ -7,9 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Duende.AspNetCore.Authentication.JwtBearer.DPoP.TestFramework;
-using Duende.AspNetCore.TestFramework;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -20,25 +20,25 @@ public abstract class DPoPProofValidatorTestBase
 {
     public DPoPProofValidatorTestBase()
     {
-        Logger = MockLogger.Create();
+        ExpirationLogger = new FakeLogger<DPoPExpirationValidator>();
         Clock = new FakeTimeProvider();
         DataProtectionProvider = new EphemeralDataProtectionProvider();
         OptionsMonitor = new TestOptionsMonitor<DPoPOptions>(Options);
         ExpirationValidator = new DPoPExpirationValidator(
             Clock,
-            Logger.For<DPoPExpirationValidator>());
+            ExpirationLogger);
         NonceValidator = new DefaultDPoPNonceValidator(
             OptionsMonitor,
             DataProtectionProvider,
             Clock,
-            Logger.For<DefaultDPoPNonceValidator>(),
+            new FakeLogger<DefaultDPoPNonceValidator>(),
             ExpirationValidator);
         ProofValidator = new(
             OptionsMonitor,
             NonceValidator,
             ReplayCache,
             Clock,
-            Logger.For<DPoPProofValidator>(),
+            new FakeLogger<DPoPProofValidator>(),
             ExpirationValidator);
         var jtiBytes = Encoding.UTF8.GetBytes(TokenId);
         TokenIdHash = Base64Url.EncodeToString(SHA256.HashData(jtiBytes));
@@ -53,7 +53,7 @@ public abstract class DPoPProofValidatorTestBase
         };
     }
 
-    protected MockLogger Logger { get; }
+    internal FakeLogger<DPoPExpirationValidator> ExpirationLogger { get; }
     protected FakeTimeProvider Clock { get; }
     protected IDataProtectionProvider DataProtectionProvider { get; }
     protected IDataProtector DataProtector => NonceValidator.DataProtector;
