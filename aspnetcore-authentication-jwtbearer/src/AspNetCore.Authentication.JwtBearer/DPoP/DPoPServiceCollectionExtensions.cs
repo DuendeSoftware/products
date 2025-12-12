@@ -21,6 +21,7 @@ public static class DPoPServiceCollectionExtensions
         services.AddOptions<DPoPOptions>();
 
         services.AddTransient<DPoPJwtBearerEvents>();
+        services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
         services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
         services.AddTransient<DPoPExpirationValidator>();
         services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
