@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.IdentityModel;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
@@ -70,4 +71,11 @@ public sealed class DPoPOptions
             SecurityAlgorithms.EcdsaSha512
         ],
     };
+
+    /// <summary>
+    /// Prevent token replay attacks by caching used DPoP proof token jti values. Defaults to false. By default, an
+    /// in-memory cache is used. If you enable this, you should consider registering an implementation of
+    /// <see cref="IDistributedCache"/>.
+    /// </summary>
+    public bool EnableReplayDetection { get; set; } = false;
 }
