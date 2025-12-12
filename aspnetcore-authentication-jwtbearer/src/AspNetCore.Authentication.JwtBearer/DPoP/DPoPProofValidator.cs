@@ -371,6 +371,11 @@ internal class DPoPProofValidator : IDPoPProofValidator
     {
         var dPoPOptions = OptionsMonitor.Get(context.Scheme);
 
+        if (!dPoPOptions.EnableReplayDetection)
+        {
+            return;
+        }
+
         if (await ReplayCache.Exists(result.TokenIdHash!, cancellationToken))
         {
             result.SetError("Detected DPoP proof token replay.");

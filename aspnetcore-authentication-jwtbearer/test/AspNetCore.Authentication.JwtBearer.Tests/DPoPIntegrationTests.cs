@@ -141,6 +141,58 @@ public class DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [Trait("Category", "Integration")]
+    public async Task replayed_proofs_fail_when_replay_detection_is_enabled(bool enableReplayDetection)
+    {
+        var identityServer = await CreateIdentityServer();
+        identityServer.Clients.Add(DPoPOnlyClient);
+        var jwk = CreateJwk();
+        var api = await CreateDPoPApi(opt => opt.EnableReplayDetection = enableReplayDetection);
+
+        var app = new AppHost(identityServer, api, "client1", testOutputHelper,
+            configureUserTokenManagementOptions: opt => opt.DPoPJsonWebKey = jwk);
+        await app.Initialize();
+
+        // Login and get token for api call
+        await app.LoginAsync("sub");
+        var response = await app.BrowserClient.GetAsync(app.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
+        token.ShouldNotBeNull();
+        token.AccessToken.ToString().ShouldNotBeNull();
+        token.DPoPJsonWebKey.ShouldNotBeNull();
+        api.HttpClient.SetToken("DPoP", token.AccessToken);
+
+        // Create proof token for api call
+        var dpopService = app.Server.Services.GetRequiredService<IDPoPProofService>();
+        var proof = await dpopService.CreateProofTokenAsync(new DPoPProofRequest
+        {
+            AccessToken = token.AccessToken,
+            DPoPProofKey = jwk,
+            Method = HttpMethod.Get,
+            Url = new Uri("http://localhost/")
+        });
+        proof.ShouldNotBeNull();
+        api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof.Value);
+
+        var result = await api.HttpClient.GetAsync("/");
+
+        result.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        // Attempt to reuse the proof
+        var secondResult = await api.HttpClient.GetAsync("/");
+        if (enableReplayDetection)
+        {
+            secondResult.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+        }
+        else
+        {
+            secondResult.StatusCode.ShouldBe(HttpStatusCode.OK);
+        }
+    }
+
     [Fact]
     [Trait("Category", "Integration")]
     public async Task access_token_without_proof_token_should_fail()

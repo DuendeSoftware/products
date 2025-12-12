@@ -22,10 +22,11 @@ public static class DPoPServiceCollectionExtensions
 
         services.AddTransient<DPoPJwtBearerEvents>();
         services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
-        services.AddTransient<IDPoPProofValidator, DPoPProofValidator>();
         services.AddTransient<DPoPExpirationValidator>();
+        services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
         services.AddDistributedMemoryCache();
-        services.AddTransient<IReplayCache, ReplayCache>();
+        services.AddHybridCache();
+        services.TryAddTransient<IReplayCache, ReplayCache>();
 
         services.AddSingleton<ConfigureJwtBearerOptions>();
         services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(sp =>

@@ -9,6 +9,7 @@ public class ReplayTests : DPoPProofValidatorTestBase
     [Trait("Category", "Unit")]
     public async Task replays_detected_in_ValidateReplay_fail()
     {
+        Options.EnableReplayDetection = true;
         ReplayCache.ExistsFunc = jti => jti == TokenIdHash;
         Result.TokenIdHash = TokenIdHash;
 
@@ -33,6 +34,7 @@ public class ReplayTests : DPoPProofValidatorTestBase
         Options.ClientClockSkew = TimeSpan.FromSeconds(clientClockSkew);
         Options.ServerClockSkew = TimeSpan.FromSeconds(serverClockSkew);
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
+        Options.EnableReplayDetection = true;
 
         Result.TokenIdHash = TokenIdHash;
 
