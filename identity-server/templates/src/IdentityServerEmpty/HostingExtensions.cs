@@ -2,7 +2,7 @@ using System.Globalization;
 using Serilog;
 using Serilog.Filters;
 
-namespace IdentityServerEmpty;
+namespace IdentityServerHost;
 
 internal static class HostingExtensions
 {
