@@ -13,7 +13,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     {
         var nonce = DataProtector.Protect(IssuedAt.ToString());
 
-        var actual = NonceValidator.GetUnixTimeFromNonce(nonce);
+        NonceValidator.TryGetUnixTimeFromNonce(nonce, out var actual);
 
         actual.ShouldBe(IssuedAt);
     }
@@ -24,7 +24,7 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     {
         var nonce = DataProtector.Protect("garbage that isn't a long");
 
-        var actual = NonceValidator.GetUnixTimeFromNonce(nonce);
+        NonceValidator.TryGetUnixTimeFromNonce(nonce, out var actual);
 
         actual.ShouldBe(0);
     }

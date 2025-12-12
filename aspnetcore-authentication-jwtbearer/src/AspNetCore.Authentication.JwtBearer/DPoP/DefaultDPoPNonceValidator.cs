@@ -48,8 +48,7 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
             return NonceValidationResult.Missing;
         }
 
-        var time = GetUnixTimeFromNonce(nonce);
-        if (time <= 0)
+        if (!TryGetUnixTimeFromNonce(nonce, out var time))
         {
             Logger.LogDebug("Invalid time value read from the 'nonce' value");
             return NonceValidationResult.Invalid;
@@ -64,14 +63,14 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
         return NonceValidationResult.Valid;
     }
 
-    internal long GetUnixTimeFromNonce(string nonce)
+    internal bool TryGetUnixTimeFromNonce(string nonce, out long time)
     {
         try
         {
             var value = DataProtector.Unprotect(nonce);
-            if (long.TryParse(value, out var iat))
+            if (long.TryParse(value, out time))
             {
-                return iat;
+                return true;
             }
         }
         catch (Exception ex)
@@ -79,8 +78,8 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
             Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
         }
 
-        // We return 0 to indicate failure.
-        return 0;
+        time = 0;
+        return false;
     }
 
     internal bool IsExpired(DPoPProofValidationContext context, long time)
