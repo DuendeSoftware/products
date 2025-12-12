@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore.Migrations;
-
 #nullable disable
 
-namespace IdentityServerEntityFramework.Migrations.PersistedGrantDb;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace IdentityServerHost.Migrations.PersistedGrantDb;
 
 /// <inheritdoc />
 public partial class Grants : Migration

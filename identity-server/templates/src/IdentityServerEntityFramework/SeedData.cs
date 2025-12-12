@@ -4,7 +4,7 @@ using Duende.IdentityServer.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-namespace IdentityServerEntityFramework;
+namespace IdentityServerHost;
 
 public class SeedData
 {

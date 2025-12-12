@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore.Migrations;
-
 #nullable disable
 
-namespace IdentityServerEntityFramework.Migrations.ConfigurationDb;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace IdentityServerHost.Migrations.ConfigurationDb;
 
 /// <inheritdoc />
 public partial class Configuration : Migration

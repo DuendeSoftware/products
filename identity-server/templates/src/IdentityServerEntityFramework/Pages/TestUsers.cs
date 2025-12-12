@@ -4,7 +4,7 @@ using Duende.IdentityModel;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Test;
 
-namespace IdentityServerHost;
+namespace IdentityServerHost.Pages;
 
 public static class TestUsers
 {

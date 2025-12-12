@@ -1,6 +1,6 @@
+using System.Buffers.Text;
 using System.Text;
 using System.Text.Json;
-using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServerHost.Pages.Diagnostics;
@@ -25,5 +25,6 @@ public class ViewModel
     }
 
     public AuthenticateResult AuthenticateResult { get; }
+
     public IEnumerable<string> Clients { get; }
 }
