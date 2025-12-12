@@ -16,7 +16,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Missing payload");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
     [Fact]
@@ -29,7 +29,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'ath' value.");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'ath' value.");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'jti' value.");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'htm' value.");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'htu' value.");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
     [Theory]
@@ -111,7 +111,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.IssuedAt, IssuedAt }
         };
 
-        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
+        Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
@@ -134,7 +134,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.IssuedAt, IssuedAt }
         };
 
-        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
+        Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
@@ -156,7 +156,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.IssuedAt, IssuedAt }
         };
 
-        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
+        Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);
@@ -177,7 +177,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'iat' value.");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
     [Fact]
@@ -195,11 +195,11 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.IssuedAt, IssuedAt },
         };
 
-        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + ClockSkew + 1));
+        Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + ClockSkew + 1));
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.ShouldBeInvalidProofWithDescription("Invalid 'iat' value.");
-        ProofValidator.ReplayCacheShouldNotBeCalled();
+        ReplayCache.ShouldNotHaveBeenAdded();
     }
 
 
@@ -216,7 +216,7 @@ public class PayloadTests : DPoPProofValidatorTestBase
             { JwtClaimTypes.IssuedAt, IssuedAt }
         };
 
-        ProofValidator.TestTimeProvider.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
+        Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
         ProofValidator.ValidatePayload(Context, Result);
 
         Result.IsError.ShouldBeFalse(Result.ErrorDescription);

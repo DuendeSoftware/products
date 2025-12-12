@@ -31,30 +31,6 @@ public class TestReplayCache : IReplayCache
         return Task.FromResult(_cache.ContainsKey(jtiHash));
     }
 
-    // Verification methods
-    public void VerifyAddWasCalled(string jtiHash, TimeSpan expectedExpiration)
-    {
-        var call = _addCalls.FirstOrDefault(c => c.jtiHash == jtiHash);
-        if (call == default)
-        {
-            throw new Exception($"Add was not called with jtiHash: {jtiHash}");
-        }
-        if (call.expiration != expectedExpiration)
-        {
-            throw new Exception($"Add was called with wrong expiration. Expected: {expectedExpiration}, Actual: {call.expiration}");
-        }
-    }
-
-    public void VerifyAddWasNotCalled()
-    {
-        if (_addCalls.Count > 0)
-        {
-            throw new Exception($"Add was called {_addCalls.Count} time(s) but should not have been called");
-        }
-    }
-
-    public bool WasAddCalled => _addCalls.Count > 0;
-
     public IReadOnlyList<(string jtiHash, TimeSpan expiration)> AddCalls => _addCalls;
 
     public void Clear()

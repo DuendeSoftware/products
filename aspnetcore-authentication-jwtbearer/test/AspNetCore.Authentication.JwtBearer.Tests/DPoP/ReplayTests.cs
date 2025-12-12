@@ -46,6 +46,6 @@ public class ReplayTests : DPoPProofValidatorTestBase
             : (validateIat ? clientClockSkew : serverClockSkew);
         var expectedExpiration = TimeSpan.FromSeconds(skew * 2)
             .Add(TimeSpan.FromSeconds(ValidFor));
-        ReplayCache.VerifyAddWasCalled(TokenIdHash, expectedExpiration);
+        ReplayCache.ShouldHaveAdded(TokenIdHash, expectedExpiration);
     }
 }

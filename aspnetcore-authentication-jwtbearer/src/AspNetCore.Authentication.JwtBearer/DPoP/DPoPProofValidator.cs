@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Duende.IdentityModel;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -19,17 +18,15 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// </summary>
 internal class DPoPProofValidator : IDPoPProofValidator
 {
-    private const string DataProtectorPurpose = "DPoPJwtBearerEvents-DPoPProofValidation-nonce";
-
     /// <summary>
     /// Provides the options for DPoP proof validation.
     /// </summary>
     internal readonly IOptionsMonitor<DPoPOptions> OptionsMonitor;
 
     /// <summary>
-    /// Protects and unprotects nonce values.
+    /// Validates and creates DPoP nonces.
     /// </summary>
-    internal readonly IDataProtector DataProtector;
+    internal readonly IDPoPNonceValidator NonceValidator;
 
     /// <summary>
     /// Caches proof tokens to detect replay.
@@ -47,17 +44,27 @@ internal class DPoPProofValidator : IDPoPProofValidator
     internal readonly ILogger<DPoPProofValidator> Logger;
 
     /// <summary>
+    /// Validates expiration of DPoP proofs.
+    /// </summary>
+    internal readonly DPoPExpirationValidator ExpirationValidator;
+
+    /// <summary>
     /// Constructs a new instance of the <see cref="DPoPProofValidator"/>.
     /// </summary>
-    public DPoPProofValidator(IOptionsMonitor<DPoPOptions> optionsMonitor,
-        IDataProtectionProvider dataProtectionProvider, IReplayCache replayCache,
-        TimeProvider timeProvider, ILogger<DPoPProofValidator> logger)
+    public DPoPProofValidator(
+        IOptionsMonitor<DPoPOptions> optionsMonitor,
+        IDPoPNonceValidator nonceValidator,
+        IReplayCache replayCache,
+        TimeProvider timeProvider,
+        ILogger<DPoPProofValidator> logger,
+        DPoPExpirationValidator expirationValidator)
     {
         OptionsMonitor = optionsMonitor;
-        DataProtector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
+        NonceValidator = nonceValidator;
         ReplayCache = replayCache;
         TimeProvider = timeProvider;
         Logger = logger;
+        ExpirationValidator = expirationValidator;
     }
 
     /// <summary>
@@ -433,7 +440,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         DPoPProofValidationResult result)
     {
         // iat is required by an earlier validation, so result.IssuedAt will not be null
-        if (IsExpired(context, result, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt))
+        if (IsExpired(context, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt))
         {
             result.SetError("Invalid 'iat' value.");
         }
@@ -446,99 +453,32 @@ internal class DPoPProofValidator : IDPoPProofValidator
         DPoPProofValidationContext context,
         DPoPProofValidationResult result)
     {
-        if (string.IsNullOrWhiteSpace(result.Nonce))
+        var validationResult = NonceValidator.ValidateNonce(context, result.Nonce);
+
+        if (validationResult != NonceValidationResult.Valid)
         {
-            result.SetError("Missing 'nonce' value.", OidcConstants.TokenErrors.UseDPoPNonce);
-            result.ServerIssuedNonce = CreateNonce(context, result);
-            return;
-        }
-
-        var time = GetUnixTimeFromNonce(context, result);
-        if (time <= 0)
-        {
-            Logger.LogDebug("Invalid time value read from the 'nonce' value");
-
-            result.SetError("Invalid 'nonce' value.", OidcConstants.TokenErrors.UseDPoPNonce);
-            result.ServerIssuedNonce = CreateNonce(context, result);
-            return;
-        }
-
-        if (IsExpired(context, result, time, ExpirationValidationMode.Nonce))
-        {
-            Logger.LogDebug("DPoP 'nonce' expired. Issuing new value to client.");
-
-            result.SetError("Invalid 'nonce' value.", OidcConstants.TokenErrors.UseDPoPNonce);
-            result.ServerIssuedNonce = CreateNonce(context, result);
-            return;
-        }
-    }
-
-    /// <summary>
-    /// Creates a nonce value to return to the client.
-    /// </summary>
-    internal string CreateNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-    {
-        var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
-        return DataProtector.Protect(now.ToString());
-    }
-
-    /// <summary>
-    /// Reads the time the nonce was created.
-    /// </summary>
-    internal long GetUnixTimeFromNonce(DPoPProofValidationContext context, DPoPProofValidationResult result)
-    {
-        try
-        {
-            var value = DataProtector.Unprotect(result.Nonce!); // nonce is required by an earlier validation
-            if (long.TryParse(value, out var iat))
+            var error = validationResult switch
             {
-                return iat;
-            }
+                NonceValidationResult.Missing => "Missing 'nonce' value.",
+                NonceValidationResult.Invalid => "Invalid 'nonce' value.",
+                _ => throw new InvalidOperationException("Invalid NonceValidationResult value"),
+            };
+            result.SetError(error, OidcConstants.TokenErrors.UseDPoPNonce);
+            result.ServerIssuedNonce = NonceValidator.CreateNonce(context);
         }
-        catch (Exception ex)
-        {
-            Logger.LogDebug("Error parsing DPoP 'nonce' value: {error}", ex.ToString());
-        }
-
-        // We return 0 to indicate failure.
-        return 0;
     }
 
     /// <summary>
     /// Validates the expiration of the DPoP proof.
     /// Returns true if the time is beyond the allowed limits, false otherwise.
     /// </summary>
-    internal bool IsExpired(DPoPProofValidationContext context, DPoPProofValidationResult result, long time,
-        ExpirationValidationMode mode)
+    internal bool IsExpired(DPoPProofValidationContext context, long time, ExpirationValidationMode mode)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
         var validityDuration = dpopOptions.ProofTokenValidityDuration;
         var skew = mode == ExpirationValidationMode.Nonce ? dpopOptions.ServerClockSkew
             : dpopOptions.ClientClockSkew;
 
-        return IsExpired(validityDuration, skew, time);
-    }
-
-    internal bool IsExpired(TimeSpan validityDuration, TimeSpan clockSkew, long time)
-    {
-        var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
-        var start = now + (int)clockSkew.TotalSeconds;
-        if (start < time)
-        {
-            var diff = time - now;
-            Logger.LogDebug("Expiration check failed. Creation time was too far in the future. The time being checked was {iat}, and clock is now {now}. The time difference is {diff}", time, now, diff);
-            return true;
-        }
-
-        var expiration = time + (int)validityDuration.TotalSeconds;
-        var end = now - (int)clockSkew.TotalSeconds;
-        if (expiration < end)
-        {
-            var diff = now - expiration;
-            Logger.LogDebug("Expiration check failed. Expiration has already happened. The expiration was at {exp}, and clock is now {now}. The time difference is {diff}", expiration, now, diff);
-            return true;
-        }
-
-        return false;
+        return ExpirationValidator.IsExpired(validityDuration, skew, time);
     }
 }
