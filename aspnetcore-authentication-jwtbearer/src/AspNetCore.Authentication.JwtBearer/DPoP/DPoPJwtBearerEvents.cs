@@ -39,7 +39,7 @@ internal class DPoPJwtBearerEvents
     /// </summary>
     public Task MessageReceived(MessageReceivedContext context)
     {
-        _logger.LogDebug("MessageReceived invoked in a JWT bearer authentication scheme using DPoP");
+        using var activity = Tracing.ActivitySource.StartActivity("DPoPJwtBearerEvents.MessageReceived");
 
         var dpopOptions = _optionsMonitor.Get(context.Scheme.Name);
 
@@ -62,7 +62,7 @@ internal class DPoPJwtBearerEvents
     /// </summary>
     public async Task TokenValidated(TokenValidatedContext context)
     {
-        _logger.LogDebug("TokenValidated invoked in a JWT bearer authentication scheme using DPoP");
+        using var activity = Tracing.ActivitySource.StartActivity("DPoPJwtBearerEvents.TokenValidated");
 
         var dPoPOptions = _optionsMonitor.Get(context.Scheme.Name);
 
@@ -135,7 +135,7 @@ internal class DPoPJwtBearerEvents
     /// <summary>
     /// Checks if the HTTP authorization header's 'scheme' is DPoP.
     /// </summary>
-    protected static bool IsDPoPAuthorizationScheme(HttpRequest request)
+    private static bool IsDPoPAuthorizationScheme(HttpRequest request)
     {
         var authz = request.Headers.Authorization.FirstOrDefault();
         return authz?.StartsWith(DPoPPrefix, StringComparison.OrdinalIgnoreCase) == true;
@@ -144,7 +144,7 @@ internal class DPoPJwtBearerEvents
     /// <summary>
     /// Attempts to retrieve a DPoP access token from an <see cref="HttpRequest"/>.
     /// </summary>
-    public bool TryGetDPoPAccessToken(HttpRequest request,
+    private bool TryGetDPoPAccessToken(HttpRequest request,
         int maxLength,
         [NotNullWhen(true)] out string? token)
     {
@@ -172,7 +172,8 @@ internal class DPoPJwtBearerEvents
     /// </summary>
     public Task Challenge(JwtBearerChallengeContext context)
     {
-        _logger.LogDebug("Challenge invoked in a JWT bearer authentication scheme using DPoP");
+        using var activity = Tracing.ActivitySource.StartActivity("DPoPJwtBearerEvents.Challenge");
+
         var dPoPOptions = _optionsMonitor.Get(context.Scheme.Name);
 
         if (!dPoPOptions.AllowBearerTokens)

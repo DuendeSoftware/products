@@ -32,7 +32,8 @@ try
 
     builder.Services.ConfigureDPoPTokensForScheme("token", options =>
     {
-        options.TokenMode = DPoPMode.DPoPAndBearer;
+        options.AllowBearerTokens = true;
+        options.EnableReplayDetection = true;
     });
 
     var app = builder.Build();

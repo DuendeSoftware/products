@@ -62,6 +62,7 @@ public static class Extensions
                     .AddSource(IdentityServerConstants.Tracing.Services)
                     .AddSource(IdentityServerConstants.Tracing.Stores)
                     .AddSource(IdentityServerConstants.Tracing.Validation)
+                    .AddSource("Duende.AspNetCore.Authentication.JwtBearer")
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation();
             });

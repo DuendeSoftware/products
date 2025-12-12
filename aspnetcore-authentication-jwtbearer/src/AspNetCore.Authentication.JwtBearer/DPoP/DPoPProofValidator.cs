@@ -72,13 +72,14 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// </summary>
     public async Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, CancellationToken cancellationToken = default)
     {
-        Logger.LogDebug("Validating DPoP proof token");
+        using var activity = Tracing.ActivitySource.StartActivity("DPoPProofValidator.Validate");
+
         var result = new DPoPProofValidationResult();
 
         if (string.IsNullOrEmpty(context.ProofToken))
         {
             Logger.LogDebug("Missing DPoP proof value");
-            result.SetError("Missing DPoP proof value", OidcConstants.TokenErrors.InvalidRequest);
+            result.SetError("Missing DPoP proof token.", OidcConstants.TokenErrors.InvalidRequest);
             return result;
         }
 
@@ -115,7 +116,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         await ValidateReplay(context, result, cancellationToken);
         if (result.IsError)
         {
-            Logger.LogDebug("Detected replay of DPoP proof token");
+            Logger.LogInformation("Detected replay of DPoP proof token");
         }
 
         Logger.LogDebug("Successfully validated DPoP proof token");

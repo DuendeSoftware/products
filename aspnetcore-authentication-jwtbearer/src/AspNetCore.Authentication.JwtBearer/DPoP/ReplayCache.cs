@@ -21,6 +21,8 @@ internal class ReplayCache : IReplayCache
 
     public async Task Add(string handle, TimeSpan expiration, CancellationToken ct)
     {
+        using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Add");
+
         var options = new HybridCacheEntryOptions
         {
             Expiration = expiration
@@ -36,10 +38,15 @@ internal class ReplayCache : IReplayCache
                 | HybridCacheEntryFlags.DisableUnderlyingData
     };
 
-    public async Task<bool> Exists(string handle, CancellationToken ct) => await _cache.GetOrCreateAsync<bool>(
+    public async Task<bool> Exists(string handle, CancellationToken ct)
+    {
+        using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Exists");
+
+        return await _cache.GetOrCreateAsync<bool>(
             Prefix + handle,
             // The factory will never be invoked because the ReadOnlyEntryOptions set the DisableUnderlyingData flag
             cancel => throw new InvalidOperationException("Can't Happen"),
             ReadOnlyEntryOptions,
             cancellationToken: ct);
+    }
 }
