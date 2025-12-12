@@ -95,7 +95,7 @@ internal static class HttpContextExtensions
 
                     return new DPoPTokenResult()
                     {
-                        AccessToken = AccessToken.Parse(userToken.ToString()),
+                        AccessToken = AccessToken.Parse(userToken.AccessToken.ToString()),
                         DPoPJsonWebKey = DPoPProofKey.Parse(userToken.DPoPJsonWebKey!.ToString()!)
                     };
                 }
@@ -156,7 +156,7 @@ internal static class HttpContextExtensions
 
             return new DPoPTokenResult()
             {
-                AccessToken = AccessToken.Parse(clientToken.ToString()),
+                AccessToken = AccessToken.Parse(clientToken.AccessToken.ToString()),
                 DPoPJsonWebKey = DPoPProofKey.Parse(clientToken.DPoPJsonWebKey!.ToString()!)
             };
 
