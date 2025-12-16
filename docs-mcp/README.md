@@ -27,7 +27,7 @@ Alternatively, you can add a `.vscode/mcp.json` file to your workspace:
     "duende-mcp": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["Duende.Documentation.Mcp.Server", "--yes"],
+      "args": ["Duende.Documentation.Mcp", "--yes"],
       "env": {}
     }
   }
@@ -46,7 +46,7 @@ Next, add a new MCP server. In the dialog that opens, select **As JSON** and ent
   "mcpServers": {
     "duende-mcp": {
       "command": "dnx",
-      "args": ["Duende.Documentation.Mcp.Server", "--yes"]
+      "args": ["Duende.Documentation.Mcp", "--yes"]
     }
   }
 }
