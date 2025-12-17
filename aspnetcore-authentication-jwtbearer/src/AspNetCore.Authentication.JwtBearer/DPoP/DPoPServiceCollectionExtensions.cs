@@ -22,7 +22,7 @@ public static class DPoPServiceCollectionExtensions
         {
             services.AddOptions<DPoPOptions>();
 
-            services.AddTransient<DPoPJwtBearerEvents>();
+            services.AddSingleton<DPoPJwtBearerEvents>();
             services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
             services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
             services.AddTransient<DPoPExpirationValidator>();
@@ -31,13 +31,13 @@ public static class DPoPServiceCollectionExtensions
             services.TryAddTransient<DPoPHybridCacheProvider>();
             services.TryAddTransient<IReplayCache, ReplayCache>();
 
-            services.AddSingleton<ConfigureJwtBearerOptions>();
-
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>(sp =>
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(sp =>
             {
-                var postConfigure = sp.GetRequiredService<ConfigureJwtBearerOptions>();
-                postConfigure.Scheme = scheme;
-                return postConfigure;
+                var events = sp.GetRequiredService<DPoPJwtBearerEvents>();
+                return new ConfigureJwtBearerOptions(events)
+                {
+                    Scheme = scheme
+                };
             });
 
             return services;

@@ -19,10 +19,7 @@ internal class ReplayCache(DPoPHybridCacheProvider cacheProvider) : IReplayCache
     {
         get
         {
-            if (field == null)
-            {
-                field = cacheProvider.GetCache();
-            }
+            field ??= cacheProvider.GetCache();
             return field;
         }
     }

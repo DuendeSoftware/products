@@ -200,15 +200,14 @@ public class DPoPIntegrationTests
     public async Task custom_nonce_validator_generates_and_validates_custom_nonce()
     {
         var customValidator = new CustomDPoPNonceValidator();
+
+        ApiOptions = opt =>
+        {
+            opt.ValidationMode = ExpirationValidationMode.Nonce;
+        };
         Api.OnConfigureServices += services =>
         {
             services.AddSingleton<IDPoPNonceValidator>(customValidator);
-            services.ConfigureDPoPTokensForScheme(ApiHost.AuthenticationScheme,
-                opt =>
-                {
-                    opt.AllowBearerTokens = false;
-                    opt.ValidationMode = ExpirationValidationMode.Nonce;
-                });
         };
         await Initialize();
 
@@ -246,7 +245,6 @@ public class DPoPIntegrationTests
         {
             services.AddKeyedSingleton<HybridCache>(ServiceProviderKeys.ProofTokenReplayHybridCache, cache);
         };
-        ApiOptions = opt => opt.EnableReplayDetection = true;
         await Initialize();
 
         var token = await LoginAndGetToken();

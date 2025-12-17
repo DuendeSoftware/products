@@ -18,9 +18,10 @@ internal class DPoPHybridCacheProvider(IServiceProvider serviceProvider)
         {
             throw new InvalidOperationException(
                 "Replay detection is enabled, but no HybridCache implementation is registered for the key " +
-                "ServiceProviderKeys.ProofTokenReplayHybridCache. Either disable replay detection by setting " +
-                "DPoPOptions.EnableReplayDetection to false, or register a HybridCache implementation by calling " +
-                $"AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache, ...).");
+                $"{nameof(ServiceProviderKeys.ProofTokenReplayHybridCache)}. Either disable replay detection by setting " +
+                $"the {nameof(DPoPOptions.EnableReplayDetection)} option to false, or register a HybridCache implementation." +
+                "The default hybrid cache can be registered by calling " +
+                $"AddKeyedHybridCache({nameof(ServiceProviderKeys)}.{nameof(ServiceProviderKeys.ProofTokenReplayHybridCache)}, ...).");
         }
         return cache;
     }
