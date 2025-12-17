@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
@@ -17,7 +18,7 @@ internal class ReplayCache : IReplayCache
     /// <summary>
     /// Constructs new instances of <see cref="ReplayCache"/>.
     /// </summary>
-    public ReplayCache(HybridCache cache) => _cache = cache;
+    public ReplayCache([FromKeyedServices(ServiceProviderKeys.ProofTokenReplayHybridCache)] HybridCache cache) => _cache = cache;
 
     public async Task Add(string handle, TimeSpan expiration, CancellationToken ct)
     {

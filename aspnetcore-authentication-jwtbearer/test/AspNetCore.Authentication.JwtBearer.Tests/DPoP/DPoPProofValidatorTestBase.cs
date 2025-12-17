@@ -6,7 +6,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Duende.AspNetCore.Authentication.JwtBearer.DPoP.TestFramework;
+using Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Testing;
