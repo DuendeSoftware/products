@@ -2,23 +2,30 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 /// <summary>
 /// Default implementation of the replay cache using Hybrid Cache
 /// </summary>
-internal class ReplayCache : IReplayCache
+/// <remarks>
+/// Constructs new instances of <see cref="ReplayCache"/>.
+/// </remarks>
+internal class ReplayCache(DPoPHybridCacheProvider cacheProvider) : IReplayCache
 {
     private const string Prefix = "DPoPJwtBearerEvents-DPoPReplay-jti-";
 
-    private readonly HybridCache _cache;
-
-    /// <summary>
-    /// Constructs new instances of <see cref="ReplayCache"/>.
-    /// </summary>
-    public ReplayCache([FromKeyedServices(ServiceProviderKeys.ProofTokenReplayHybridCache)] HybridCache cache) => _cache = cache;
+    private HybridCache Cache
+    {
+        get
+        {
+            if (field == null)
+            {
+                field = cacheProvider.GetCache();
+            }
+            return field;
+        }
+    }
 
     public async Task Add(string handle, TimeSpan expiration, CancellationToken ct)
     {
@@ -29,7 +36,7 @@ internal class ReplayCache : IReplayCache
             Expiration = expiration
         };
 
-        await _cache.SetAsync(Prefix + handle, true, options, cancellationToken: ct);
+        await Cache.SetAsync(Prefix + handle, true, options, cancellationToken: ct);
     }
 
     private static readonly HybridCacheEntryOptions ReadOnlyEntryOptions = new()
@@ -43,7 +50,7 @@ internal class ReplayCache : IReplayCache
     {
         using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Exists");
 
-        return await _cache.GetOrCreateAsync<bool>(
+        return await Cache.GetOrCreateAsync<bool>(
             Prefix + handle,
             // The factory will never be invoked because the ReadOnlyEntryOptions set the DisableUnderlyingData flag
             cancel => throw new InvalidOperationException("Can't Happen"),

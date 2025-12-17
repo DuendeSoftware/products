@@ -7,41 +7,38 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Duende.AccessTokenManagement.DPoP;
 using Duende.AccessTokenManagement.OpenIdConnect;
-using Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 using Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 using Duende.IdentityModel;
 using Duende.IdentityModel.Client;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Xunit.Abstractions;
 
-namespace Duende.AspNetCore.Authentication.JwtBearer;
+namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 public class DPoPIntegrationTests
 {
-    private readonly ITestOutputHelper testOutputHelper;
+    private readonly ITestOutputHelper _testOutputHelper;
 
     public DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
     {
-        this.testOutputHelper = testOutputHelper;
+        _testOutputHelper = testOutputHelper;
         IdentityServer = CreateIdentityServer();
         App = CreateApp();
         Api = CreateApi();
         Jwk = CreateJwk();
     }
 
-    protected IdentityServerHost IdentityServer { get; private set; } = null!;
-    protected ApiHost Api { get; private set; } = null!;
-    protected AppHost App { get; private set; } = null!;
-    protected DPoPProofKey Jwk { get; private set; }
+    private IdentityServerHost IdentityServer { get; }
+    private ApiHost Api { get; }
+    private AppHost App { get; }
+    private DPoPProofKey Jwk { get; }
 
-    protected Action<DPoPOptions>? ApiOptions { get; set; }
+    private Action<DPoPOptions>? ApiOptions { get; set; }
 
     [Fact]
     public async Task missing_token_fails()
@@ -267,34 +264,8 @@ public class DPoPIntegrationTests
         cache.GetOrCreateAsyncCalls.Count.ShouldBeGreaterThan(0);
     }
 
-    [Fact]
-    public async Task replay_cache_can_be_customized_by_replacing_keyed_distributed_cache()
-    {
-        var cache = new TestDistributedCache();
-        Api.OnConfigureServices += services =>
-        {
-            services.AddKeyedSingleton<IDistributedCache>(ServiceProviderKeys.ProofTokenReplayDistributedCache, cache);
-        };
-        ApiOptions = opt => opt.EnableReplayDetection = true;
-        await Initialize();
-
-        var token = await LoginAndGetToken();
-        Api.HttpClient.SetToken("DPoP", token.AccessToken);
-
-        var proof = await CreateProofToken(token, Jwk, HttpMethod.Get, new Uri("http://localhost/"));
-        Api.HttpClient.DefaultRequestHeaders.Add(OidcConstants.HttpHeaders.DPoP, proof);
-
-        var result = await Api.HttpClient.GetAsync("/");
-
-        result.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-        // Verify that the custom cache was used for replay detection
-        cache.SetAsyncCalls.Count.ShouldBeGreaterThan(0);
-        cache.GetAsyncCalls.Count.ShouldBeGreaterThan(0);
-    }
-
     // Initialize all the hosts. We separate this from creation of the hosts so that tests can customize their behavior
-    protected async Task Initialize()
+    private async Task Initialize()
     {
         await IdentityServer.Initialize();
         await Api.Initialize();
@@ -343,7 +314,7 @@ public class DPoPIntegrationTests
 
     private IdentityServerHost CreateIdentityServer(Action<IdentityServerHost>? setup = null)
     {
-        var host = new IdentityServerHost(testOutputHelper);
+        var host = new IdentityServerHost(_testOutputHelper);
         setup?.Invoke(host);
 
         host.Clients.Add(new Client
@@ -362,28 +333,28 @@ public class DPoPIntegrationTests
     private ApiHost CreateApi()
     {
         var baseAddress = "https://api";
-        Api = new ApiHost(IdentityServer, testOutputHelper, baseAddress);
-        Api.OnConfigureServices += services =>
+        var api = new ApiHost(IdentityServer, _testOutputHelper, baseAddress);
+        api.OnConfigureServices += services =>
         {
             services.ConfigureDPoPTokensForScheme(ApiHost.AuthenticationScheme,
                 opt => ApiOptions?.Invoke(opt));
 
-            services.TryAddKeyedSingleton<IDistributedCache, MemoryDistributedCache>(ServiceProviderKeys.ProofTokenReplayDistributedCache);
+            services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
+
         };
-        Api.OnConfigure += app =>
+        api.OnConfigure += app =>
             app.MapGet("/", () => "default route")
                 .RequireAuthorization();
 
-        return Api;
+        return api;
     }
 
-    private AppHost CreateApp() =>
-        App = new AppHost(
-            IdentityServer,
-            Api,
-            "client1",
-            testOutputHelper,
-            configureUserTokenManagementOptions: opt => opt.DPoPJsonWebKey = Jwk);
+    private AppHost CreateApp() => new(
+        IdentityServer,
+        Api,
+        "client1",
+        _testOutputHelper,
+        configureUserTokenManagementOptions: opt => opt.DPoPJsonWebKey = Jwk);
 
     private DPoPProofKey CreateJwk()
     {

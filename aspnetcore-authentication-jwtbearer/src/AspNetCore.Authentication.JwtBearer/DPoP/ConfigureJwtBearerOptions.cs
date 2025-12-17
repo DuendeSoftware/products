@@ -12,16 +12,19 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 internal sealed class ConfigureJwtBearerOptions(DPoPJwtBearerEvents dpopEvents) : IPostConfigureOptions<JwtBearerOptions>
 {
     public string? Scheme { get; set; }
-
+    private bool _callbacksCreated; // Track if we have already wrapped the callbacks.
     public void PostConfigure(string? name, JwtBearerOptions options)
     {
-        if (Scheme == name)
+        if (_callbacksCreated || Scheme != name)
         {
-            options.Events ??= new JwtBearerEvents(); // Despite nullability annotations saying this is unnecessary, it sometimes is null
-            options.Events.OnChallenge = CreateChallengeCallback(options.Events.OnChallenge, dpopEvents);
-            options.Events.OnMessageReceived = CreateMessageReceivedCallback(options.Events.OnMessageReceived, dpopEvents);
-            options.Events.OnTokenValidated = CreateTokenValidatedCallback(options.Events.OnTokenValidated, dpopEvents);
+            return;
         }
+
+        _callbacksCreated = true;
+        options.Events ??= new JwtBearerEvents(); // Despite nullability annotations saying this is unnecessary, it sometimes is null
+        options.Events.OnChallenge = CreateChallengeCallback(options.Events.OnChallenge, dpopEvents);
+        options.Events.OnMessageReceived = CreateMessageReceivedCallback(options.Events.OnMessageReceived, dpopEvents);
+        options.Events.OnTokenValidated = CreateTokenValidatedCallback(options.Events.OnTokenValidated, dpopEvents);
     }
 
     private Func<JwtBearerChallengeContext, Task> CreateChallengeCallback(Func<JwtBearerChallengeContext, Task> inner, DPoPJwtBearerEvents dpopEvents)

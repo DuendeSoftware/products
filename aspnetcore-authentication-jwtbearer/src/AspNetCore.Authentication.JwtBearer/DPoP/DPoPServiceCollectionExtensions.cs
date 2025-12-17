@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -29,28 +28,17 @@ public static class DPoPServiceCollectionExtensions
             services.AddTransient<DPoPExpirationValidator>();
             services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
 
-            services.AddKeyedHybridCache(
-                serviceKey: ServiceProviderKeys.ProofTokenReplayHybridCache,
-                opt => opt.DistributedCacheServiceKey = ServiceProviderKeys.ProofTokenReplayDistributedCache);
-
+            services.TryAddTransient<DPoPHybridCacheProvider>();
             services.TryAddTransient<IReplayCache, ReplayCache>();
 
             services.AddSingleton<ConfigureJwtBearerOptions>();
 
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(sp =>
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>(sp =>
             {
-                var distributedCache =
-                    sp.GetKeyedService<IDistributedCache>(ServiceProviderKeys.ProofTokenReplayDistributedCache);
-                if (distributedCache is null)
-                {
-                    throw new InvalidOperationException("Replay detection (DPoPOptions.EnableReplayDetection) is enabled, but no IDistributedCache implementation is registered for the key ServiceProviderKeys.ProofTokenReplayDistributedCache. Either disable replay detection or register an IDistributedCache for the key ServiceProviderKeys.ProofTokenReplayDistributedCache. See TODO for more information.");
-                }
-
-                var opt = sp.GetRequiredService<ConfigureJwtBearerOptions>();
-                opt.Scheme = scheme;
-                return opt;
+                var postConfigure = sp.GetRequiredService<ConfigureJwtBearerOptions>();
+                postConfigure.Scheme = scheme;
+                return postConfigure;
             });
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
 
             return services;
         }
@@ -72,5 +60,4 @@ public static class DPoPServiceCollectionExtensions
 public static class ServiceProviderKeys
 {
     public const string ProofTokenReplayHybridCache = nameof(ProofTokenReplayHybridCache);
-    public const string ProofTokenReplayDistributedCache = nameof(ProofTokenReplayDistributedCache);
 }
