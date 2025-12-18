@@ -1,12 +1,13 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
+
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 public class ReplayTests : DPoPProofValidatorTestBase
 {
     [Fact]
-    [Trait("Category", "Unit")]
     public async Task replays_detected_in_ValidateReplay_fail()
     {
         Options.EnableReplayDetection = true;
@@ -19,7 +20,6 @@ public class ReplayTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [Trait("Category", "Unit")]
     [InlineData(true, false, ClockSkew, 0)]
     [InlineData(false, true, 0, ClockSkew)]
     [InlineData(true, true, ClockSkew, ClockSkew * 2)]

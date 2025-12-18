@@ -12,16 +12,16 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 internal sealed class ConfigureJwtBearerOptions(DPoPJwtBearerEvents dpopEvents) : IPostConfigureOptions<JwtBearerOptions>
 {
     public string? Scheme { get; set; }
-
     public void PostConfigure(string? name, JwtBearerOptions options)
     {
-        if (Scheme == name)
+        if (Scheme != name)
         {
-            options.Events ??= new JwtBearerEvents(); // Despite nullability annotations saying this is unnecessary, it sometimes is null
-            options.Events.OnChallenge = CreateChallengeCallback(options.Events.OnChallenge, dpopEvents);
-            options.Events.OnMessageReceived = CreateMessageReceivedCallback(options.Events.OnMessageReceived, dpopEvents);
-            options.Events.OnTokenValidated = CreateTokenValidatedCallback(options.Events.OnTokenValidated, dpopEvents);
+            return;
         }
+        options.Events ??= new JwtBearerEvents(); // Despite nullability annotations saying this is unnecessary, it sometimes is null
+        options.Events.OnChallenge = CreateChallengeCallback(options.Events.OnChallenge, dpopEvents);
+        options.Events.OnMessageReceived = CreateMessageReceivedCallback(options.Events.OnMessageReceived, dpopEvents);
+        options.Events.OnTokenValidated = CreateTokenValidatedCallback(options.Events.OnTokenValidated, dpopEvents);
     }
 
     private Func<JwtBearerChallengeContext, Task> CreateChallengeCallback(Func<JwtBearerChallengeContext, Task> inner, DPoPJwtBearerEvents dpopEvents)

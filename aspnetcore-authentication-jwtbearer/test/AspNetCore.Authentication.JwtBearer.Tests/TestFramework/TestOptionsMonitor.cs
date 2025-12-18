@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Options;
 
-namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP.TestFramework;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class TestOptionsMonitor<T>(T options) : IOptionsMonitor<T>
 {
