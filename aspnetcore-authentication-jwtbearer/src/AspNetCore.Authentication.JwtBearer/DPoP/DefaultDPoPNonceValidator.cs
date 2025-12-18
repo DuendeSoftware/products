@@ -85,8 +85,8 @@ internal class DefaultDPoPNonceValidator : IDPoPNonceValidator
     internal bool IsExpired(DPoPProofValidationContext context, long time)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
-        var validityDuration = dpopOptions.ProofTokenValidityDuration;
-        var skew = dpopOptions.ServerClockSkew;
+        var validityDuration = dpopOptions.ProofTokenLifetime;
+        var skew = dpopOptions.ProofTokenNonceClockSkew;
 
         return ExpirationValidator.IsExpired(validityDuration, skew, time);
     }

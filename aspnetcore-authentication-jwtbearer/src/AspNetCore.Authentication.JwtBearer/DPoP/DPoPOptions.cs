@@ -20,29 +20,29 @@ public sealed class DPoPOptions
     public bool AllowBearerTokens { get; set; }
 
     /// <summary>
-    /// The amount of time that a proof token is valid for. Defaults to 1 second.
+    /// The amount of time that a proof token is valid for. Defaults to 5 seconds.
     /// </summary>
-    public TimeSpan ProofTokenValidityDuration { get; set; } = TimeSpan.FromSeconds(1);
+    public TimeSpan ProofTokenLifetime { get; set; } = TimeSpan.FromSeconds(5);
 
     /// <summary>
     /// The amount of time to add to account for clock skew when checking the
     /// issued at time supplied by the client in the form of the iat claim in
-    /// the proof token. Defaults to 5 minutes.
+    /// the proof token. Defaults to 25 seconds.
     /// </summary>
-    public TimeSpan ClientClockSkew { get; set; } = TimeSpan.FromMinutes(5);
+    public TimeSpan ProofTokenIssuedAtClockSkew { get; set; } = TimeSpan.FromSeconds(25);
 
     /// <summary>
     /// The amount of time to add to account for clock skew when checking the
     /// issued at time supplied by the server (that is, by this API) in the form
-    /// of a nonce. Defaults to zero.
+    /// of a nonce. Defaults to 5 seconds.
     /// </summary>
-    public TimeSpan ServerClockSkew { get; set; } = TimeSpan.Zero;
+    public TimeSpan ProofTokenNonceClockSkew { get; set; } = TimeSpan.FromSeconds(5);
 
     /// <summary>
     /// Controls how the issued at time of proof tokens is validated. Defaults to <see
-    /// cref="ExpirationValidationMode.IssuedAt"/>.
+    /// cref="ExpirationMode.IssuedAt"/>.
     /// </summary>
-    public ExpirationValidationMode ValidationMode { get; set; } = ExpirationValidationMode.IssuedAt;
+    public ExpirationMode ProofTokenExpirationMode { get; set; } = ExpirationMode.IssuedAt;
 
     /// <summary>
     /// The maximum allowed length of a proof token, which is enforced to
