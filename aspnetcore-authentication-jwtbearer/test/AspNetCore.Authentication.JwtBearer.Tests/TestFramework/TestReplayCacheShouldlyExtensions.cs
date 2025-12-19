@@ -3,7 +3,7 @@
 
 using System.Diagnostics;
 
-namespace Shouldly;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 [ShouldlyMethods]
 [DebuggerStepThrough]
@@ -13,7 +13,7 @@ public static class TestReplayCacheShouldlyExtensions
     /// Asserts that Add was called on the replay cache with the specified jtiHash and expiration.
     /// </summary>
     public static void ShouldHaveAdded(
-        this Duende.AspNetCore.Authentication.JwtBearer.DPoP.TestReplayCache cache,
+        this TestFramework.TestReplayCache cache,
         string jtiHash,
         TimeSpan expectedExpiration,
         string? customMessage = null)
@@ -40,7 +40,8 @@ public static class TestReplayCacheShouldlyExtensions
     /// Asserts that Add was not called on the replay cache.
     /// </summary>
     public static void ShouldNotHaveBeenAdded(
-        this Duende.AspNetCore.Authentication.JwtBearer.DPoP.TestReplayCache cache,
+
+        this TestReplayCache cache,
         string? customMessage = null)
     {
         if (cache.AddCalls.Count > 0)

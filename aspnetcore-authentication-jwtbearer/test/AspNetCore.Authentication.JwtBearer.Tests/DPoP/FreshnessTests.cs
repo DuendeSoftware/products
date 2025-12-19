@@ -8,7 +8,6 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 public class FreshnessTests : DPoPProofValidatorTestBase
 {
     [Fact]
-    [Trait("Category", "Unit")]
     public void can_retrieve_issued_at_unix_time_from_nonce()
     {
         var nonce = DataProtector.Protect(IssuedAt.ToString());
@@ -19,7 +18,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void invalid_nonce_is_treated_as_zero()
     {
         var nonce = DataProtector.Protect("garbage that isn't a long");
@@ -30,7 +28,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void nonce_contains_data_protected_issued_at_unix_time()
     {
         Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
@@ -41,7 +38,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [Trait("Category", "Unit")]
     [InlineData((string?)null)]
     [InlineData("")]
     [InlineData(" ")]
@@ -55,7 +51,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [Trait("Category", "Unit")]
     [InlineData("null")]
     [InlineData("garbage")]
     public void invalid_nonce_returns_invalid_result(string? nonce)
@@ -68,7 +63,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void expired_nonce_returns_invalid_result()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
@@ -88,7 +82,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
 
 
     [Theory]
-    [Trait("Category", "Unit")]
     // Around the maximum
     [InlineData(ClockSkew, IssuedAt + ValidFor + ClockSkew + 1, true)]
     [InlineData(ClockSkew, IssuedAt + ValidFor + ClockSkew, false)]
@@ -140,7 +133,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         }
     }
     [Theory]
-    [Trait("Category", "Unit")]
     [InlineData(ClockSkew, 0, ExpirationValidationMode.IssuedAt)]
     [InlineData(0, ClockSkew, ExpirationValidationMode.Nonce)]
     public void use_client_or_server_clock_skew_depending_on_validation_mode(int clientClockSkew, int serverClockSkew,
@@ -158,7 +150,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void unexpired_proofs_do_not_set_errors()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
@@ -175,7 +166,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void expired_proofs_set_errors()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
@@ -194,7 +184,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Theory]
     [InlineData(ExpirationValidationMode.IssuedAt)]
     [InlineData(ExpirationValidationMode.Both)]
-    [Trait("Category", "Unit")]
     public void validate_iat_when_option_is_set(ExpirationValidationMode mode)
     {
         Options.ValidationMode = mode;
@@ -222,7 +211,6 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Theory]
     [InlineData(ExpirationValidationMode.Nonce)]
     [InlineData(ExpirationValidationMode.Both)]
-    [Trait("Category", "Unit")]
     public void validate_nonce_when_option_is_set(ExpirationValidationMode mode)
     {
         Options.ValidationMode = mode;

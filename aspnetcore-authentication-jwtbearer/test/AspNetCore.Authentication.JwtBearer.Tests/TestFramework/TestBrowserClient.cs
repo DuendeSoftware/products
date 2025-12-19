@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Net;
 
-namespace Duende.AspNetCore.TestFramework;
+namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class TestBrowserClient : HttpClient
 {
@@ -84,7 +84,7 @@ public class TestBrowserClient : HttpClient
     // {
     //     return ReadFormAsync(LastResponse, selector);
     // }
-    //     
+    //
     // public async Task<HtmlForm> ReadFormAsync(HttpResponseMessage response, string? selector = null)
     // {
     //     response.StatusCode.ShouldBe(HttpStatusCode.OK);

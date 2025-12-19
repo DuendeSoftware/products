@@ -8,7 +8,6 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 public class TokenValidationTests : DPoPProofValidatorTestBase
 {
     [Fact]
-    [Trait("Category", "Unit")]
     public async Task malformed_proof_tokens_fail()
     {
         Context = Context with { ProofToken = "This is obviously not a jwt" };
@@ -19,7 +18,6 @@ public class TokenValidationTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public async Task proof_tokens_with_incorrect_typ_header_fail()
     {
         Context = Context with { ProofToken = CreateDPoPProofToken(typ: "dpop+at") }; //Not dpop+jwt!
@@ -31,7 +29,6 @@ public class TokenValidationTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [Trait("Category", "Unit")]
     [InlineData(SecurityAlgorithms.RsaSha256)]
     [InlineData(SecurityAlgorithms.RsaSha384)]
     [InlineData(SecurityAlgorithms.RsaSha512)]
@@ -58,7 +55,6 @@ public class TokenValidationTests : DPoPProofValidatorTestBase
 
 
     [Theory]
-    [Trait("Category", "Unit")]
     [InlineData(SecurityAlgorithms.None)]
     [InlineData(SecurityAlgorithms.HmacSha256)]
     [InlineData(SecurityAlgorithms.HmacSha384)]

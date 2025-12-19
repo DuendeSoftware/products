@@ -12,7 +12,6 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 public class AccessTokenCnfTests : DPoPProofValidatorTestBase
 {
     [Fact]
-    [Trait("Category", "Unit")]
     public void missing_cnf_should_fail()
     {
         Context.AccessTokenClaims
@@ -24,7 +23,6 @@ public class AccessTokenCnfTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void empty_cnf_value_should_fail()
     {
         Context = Context with { AccessTokenClaims = [new Claim(JwtClaimTypes.Confirmation, string.Empty)] };
@@ -35,7 +33,6 @@ public class AccessTokenCnfTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [Trait("Category", "Unit")]
     [InlineData("not-a-json-object")]
     [InlineData("1")]
     [InlineData("0")]
@@ -56,7 +53,6 @@ public class AccessTokenCnfTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void cnf_missing_jkt_should_fail()
     {
         var cnfObject = new Dictionary<string, string>
@@ -71,7 +67,6 @@ public class AccessTokenCnfTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void mismatched_jkt_should_fail()
     {
         // Generate a new key, and use that in the access token's cnf claim

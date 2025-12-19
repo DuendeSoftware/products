@@ -13,40 +13,51 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 /// </summary>
 public static class DPoPServiceCollectionExtensions
 {
-    /// <summary>
-    /// Sets up DPoP on a JwtBearer authentication scheme.
-    /// </summary>
-    public static IServiceCollection ConfigureDPoPTokensForScheme(this IServiceCollection services, string scheme)
+    extension(IServiceCollection services)
     {
-        services.AddOptions<DPoPOptions>();
-
-        services.AddTransient<DPoPJwtBearerEvents>();
-        services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
-        services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
-        services.AddTransient<DPoPExpirationValidator>();
-        services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
-        services.AddDistributedMemoryCache();
-        services.AddHybridCache();
-        services.TryAddTransient<IReplayCache, ReplayCache>();
-
-        services.AddSingleton<ConfigureJwtBearerOptions>();
-        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(sp =>
+        /// <summary>
+        /// Sets up DPoP on a JwtBearer authentication scheme.
+        /// </summary>
+        public IServiceCollection ConfigureDPoPTokensForScheme(string scheme)
         {
-            var opt = sp.GetRequiredService<ConfigureJwtBearerOptions>();
-            opt.Scheme = scheme;
-            return opt;
-        });
-        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
+            services.AddOptions<DPoPOptions>();
 
-        return services;
-    }
+            services.AddSingleton<DPoPJwtBearerEvents>();
+            services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
+            services.TryAddTransient<IDPoPNonceValidator, DefaultDPoPNonceValidator>();
+            services.AddTransient<DPoPExpirationValidator>();
+            services.TryAddTransient<IDPoPProofValidator, DPoPProofValidator>();
 
-    /// <summary>
-    /// Sets up DPoP on a JwtBearer authentication scheme, and configures <see cref="DPoPOptions"/>.
-    /// </summary>
-    public static IServiceCollection ConfigureDPoPTokensForScheme(this IServiceCollection services, string scheme, Action<DPoPOptions> configure)
-    {
-        services.Configure(scheme, configure);
-        return services.ConfigureDPoPTokensForScheme(scheme);
+            services.TryAddTransient<DPoPHybridCacheProvider>();
+            services.TryAddTransient<IReplayCache, ReplayCache>();
+
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(sp =>
+            {
+                var events = sp.GetRequiredService<DPoPJwtBearerEvents>();
+                return new ConfigureJwtBearerOptions(events)
+                {
+                    Scheme = scheme
+                };
+            });
+
+            return services;
+        }
+
+        /// <summary>
+        /// Sets up DPoP on a JwtBearer authentication scheme, and configures <see cref="DPoPOptions"/>.
+        /// </summary>
+        public IServiceCollection ConfigureDPoPTokensForScheme(string scheme, Action<DPoPOptions> configure)
+        {
+            services.Configure(scheme, configure);
+            return services.ConfigureDPoPTokensForScheme(scheme);
+        }
     }
+}
+
+/// <summary>
+/// Keys that are used to inject different implementations into a specific service.
+/// </summary>
+public static class ServiceProviderKeys
+{
+    public const string ProofTokenReplayHybridCache = nameof(ProofTokenReplayHybridCache);
 }

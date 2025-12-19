@@ -1,6 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 using Duende.IdentityModel;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
@@ -8,7 +9,6 @@ namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 public class PayloadTests : DPoPProofValidatorTestBase
 {
     [Fact]
-    [Trait("Category", "Unit")]
     public void missing_payload_fails()
     {
         Result.Payload = null;
@@ -20,7 +20,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void missing_ath_fails()
     {
         Result.Payload = new Dictionary<string, object>();
@@ -33,7 +32,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void mismatched_ath_fails()
     {
         Result.Payload = new Dictionary<string, object>
@@ -48,7 +46,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void missing_jti_fails()
     {
         Result.Payload = new Dictionary<string, object>
@@ -63,7 +60,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void missing_htm_fails()
     {
         Result.Payload = new Dictionary<string, object>
@@ -79,7 +75,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void missing_htu_fails()
     {
         Result.Payload = new Dictionary<string, object>
@@ -99,7 +94,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     [InlineData("https://example.com?query=1#fragment")]
     [InlineData("https://example.com/#fragment")]
     [InlineData("https://example.com/?query=1")]
-    [Trait("Category", "Unit")]
     public void htu_ignores_query_and_fragment_parts_in_comparison_against_requested_url(string payloadUrl)
     {
         Result.Payload = new Dictionary<string, object>
@@ -122,7 +116,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     [InlineData("HTTPS://EXAMPLE.COM")]
     [InlineData("https://EXAMPLE.com")]
     [InlineData("HtTpS://eXaMpLe.CoM")]
-    [Trait("Category", "Unit")]
     public void htu_ignores_casing_in_comparison_against_requested_url(string payloadUrl)
     {
         Result.Payload = new Dictionary<string, object>
@@ -143,7 +136,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     [Theory]
     [InlineData("https://example.com", "https://example.com:443")]
     [InlineData("http://example.com", "http://example.com:80")]
-    [Trait("Category", "Unit")]
     public void htu_uses_scheme_based_normalization_in_comparison_against_requested_url(string expectedUrl, string payloadUrl)
     {
         Context = Context with { ExpectedUrl = expectedUrl };
@@ -163,7 +155,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void missing_iat_fails()
     {
         Result.Payload = new Dictionary<string, object>
@@ -181,7 +172,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
     }
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void expired_payload_fails()
     {
         Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
@@ -204,7 +194,6 @@ public class PayloadTests : DPoPProofValidatorTestBase
 
 
     [Fact]
-    [Trait("Category", "Unit")]
     public void valid_payload_succeeds()
     {
         Result.Payload = new Dictionary<string, object>
