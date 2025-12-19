@@ -53,8 +53,10 @@ Next, add a new MCP server. In the dialog that opens, select **As JSON** and ent
 ```
 
 ### Claude Code
+
 Execute the following command:
-```
+
+```shell
 claude mcp add --transport stdio duende-mcp -- dnx Duende.Documentation.Mcp --yes
 ```
 
