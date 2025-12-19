@@ -52,6 +52,14 @@ Next, add a new MCP server. In the dialog that opens, select **As JSON** and ent
 }
 ```
 
+### Claude Code
+
+Execute the following command:
+
+```shell
+claude mcp add --transport stdio duende-mcp -- dnx Duende.Documentation.Mcp --yes
+```
+
 Set the working directory to a path on your machine where the Duende Documentation MCP Server can store its database
 index. Not setting the working directory will result in the MCP server failing to start because it cannot create the
 database file.
