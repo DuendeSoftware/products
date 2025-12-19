@@ -174,8 +174,8 @@ public class PayloadTests : DPoPProofValidatorTestBase
     [Fact]
     public void expired_payload_fails()
     {
-        Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
-        Options.ClientClockSkew = TimeSpan.FromSeconds(ClockSkew);
+        Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
+        Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(ClockSkew);
         Result.Payload = new Dictionary<string, object>
         {
             { JwtClaimTypes.DPoPAccessTokenHash, AccessTokenHash },

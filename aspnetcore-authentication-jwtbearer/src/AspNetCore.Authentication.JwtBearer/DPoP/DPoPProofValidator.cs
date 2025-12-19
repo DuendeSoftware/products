@@ -384,22 +384,22 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
 
         // get the largest skew based on how the client's freshness is validated
-        var validateIat = dPoPOptions.ValidationMode != ExpirationValidationMode.Nonce;
-        var validateNonce = dPoPOptions.ValidationMode != ExpirationValidationMode.IssuedAt;
+        var validateIat = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.Nonce;
+        var validateNonce = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.IssuedAt;
         var skew = TimeSpan.Zero;
-        if (validateIat && dPoPOptions.ClientClockSkew > skew)
+        if (validateIat && dPoPOptions.ProofTokenIssuedAtClockSkew > skew)
         {
-            skew = dPoPOptions.ClientClockSkew;
+            skew = dPoPOptions.ProofTokenIssuedAtClockSkew;
         }
-        if (validateNonce && dPoPOptions.ServerClockSkew > skew)
+        if (validateNonce && dPoPOptions.ProofTokenNonceClockSkew > skew)
         {
-            skew = dPoPOptions.ServerClockSkew;
+            skew = dPoPOptions.ProofTokenNonceClockSkew;
         }
 
         // we do x2 here because the clock might be before or after, so we're making cache duration
         // longer than the likelihood of proof token expiration, which is done before replay
         skew *= 2;
-        var cacheDuration = dPoPOptions.ProofTokenValidityDuration + skew;
+        var cacheDuration = dPoPOptions.ProofTokenLifetime + skew;
         await ReplayCache.Add(result.TokenIdHash!, cacheDuration, cancellationToken);
     }
 
@@ -412,7 +412,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     {
         var dPoPOptions = OptionsMonitor.Get(context.Scheme);
 
-        var validateIat = dPoPOptions.ValidationMode != ExpirationValidationMode.Nonce;
+        var validateIat = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.Nonce;
         if (validateIat)
         {
             ValidateIat(context, result);
@@ -422,7 +422,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
             }
         }
 
-        var validateNonce = dPoPOptions.ValidationMode != ExpirationValidationMode.IssuedAt;
+        var validateNonce = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.IssuedAt;
         if (validateNonce)
         {
             ValidateNonce(context, result);
@@ -441,7 +441,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         DPoPProofValidationResult result)
     {
         // iat is required by an earlier validation, so result.IssuedAt will not be null
-        if (IsExpired(context, result.IssuedAt!.Value, ExpirationValidationMode.IssuedAt))
+        if (IsExpired(context, result.IssuedAt!.Value, ExpirationMode.IssuedAt))
         {
             result.SetError("Invalid 'iat' value.");
         }
@@ -473,12 +473,12 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// Validates the expiration of the DPoP proof.
     /// Returns true if the time is beyond the allowed limits, false otherwise.
     /// </summary>
-    internal bool IsExpired(DPoPProofValidationContext context, long time, ExpirationValidationMode mode)
+    internal bool IsExpired(DPoPProofValidationContext context, long time, ExpirationMode mode)
     {
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
-        var validityDuration = dpopOptions.ProofTokenValidityDuration;
-        var skew = mode == ExpirationValidationMode.Nonce ? dpopOptions.ServerClockSkew
-            : dpopOptions.ClientClockSkew;
+        var validityDuration = dpopOptions.ProofTokenLifetime;
+        var skew = mode == ExpirationMode.Nonce ? dpopOptions.ProofTokenNonceClockSkew
+            : dpopOptions.ProofTokenIssuedAtClockSkew;
 
         return ExpirationValidator.IsExpired(validityDuration, skew, time);
     }

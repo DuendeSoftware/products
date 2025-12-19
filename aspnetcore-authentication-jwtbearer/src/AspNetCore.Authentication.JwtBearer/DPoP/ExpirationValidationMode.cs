@@ -4,9 +4,9 @@
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 /// <summary>
-/// Controls how the issued at time of proof tokens is validated. 
+/// Controls how the issued at time of proof tokens is validated.
 /// </summary>
-public enum ExpirationValidationMode
+public enum ExpirationMode
 {
     /// <summary>
     /// Validate the time from the server-issued nonce.

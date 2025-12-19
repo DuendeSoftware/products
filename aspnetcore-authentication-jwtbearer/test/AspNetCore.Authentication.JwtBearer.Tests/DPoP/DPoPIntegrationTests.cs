@@ -162,7 +162,7 @@ public class DPoPIntegrationTests
     [Fact]
     public async Task missing_nonce_generates_server_issued_nonce()
     {
-        ApiOptions = opt => opt.ValidationMode = ExpirationValidationMode.Nonce;
+        ApiOptions = opt => opt.ProofTokenExpirationMode = ExpirationMode.Nonce;
         await Initialize();
         var token = await LoginAndGetToken();
         Api.HttpClient.SetToken("DPoP", token.AccessToken);
@@ -203,7 +203,7 @@ public class DPoPIntegrationTests
 
         ApiOptions = opt =>
         {
-            opt.ValidationMode = ExpirationValidationMode.Nonce;
+            opt.ProofTokenExpirationMode = ExpirationMode.Nonce;
         };
         Api.OnConfigureServices += services =>
         {
