@@ -7,7 +7,9 @@ using System.Text;
 using Duende.IdentityServer.Licensing;
 using IdentityServerHost;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging.Abstractions;
 using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 // Note: This is necessary for localization to work correctly since our root namespace does
 // not match the assembly name.
@@ -27,6 +29,8 @@ try
     builder.AddServiceDefaults()
         .AddOpenTelemetryMeters(Duende.IdentityServer.UI.Pages.Telemetry.ServiceName);
 
+    builder.Services.AddSingleton<ILogger>(_ => NullLogger.Instance);
+    builder.Services.AddSingleton<ILoggerFactory>(_ => new NullLoggerFactory());
     var app = builder
         .ConfigureServices()
         .ConfigurePipeline();
