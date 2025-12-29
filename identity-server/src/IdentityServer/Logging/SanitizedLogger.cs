@@ -10,8 +10,6 @@ internal class SanitizedLogger<T>
 {
     private readonly ILogger _logger;
 
-    public SanitizedLogger(ILogger<T> logger) => _logger = logger;
-
     public SanitizedLogger(ILogger logger) => _logger = logger;
 
     public void LogTrace(string message, params object[] args)
