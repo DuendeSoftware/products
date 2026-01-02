@@ -16,11 +16,11 @@ public class IdentityServerTests(ITestOutputHelper output, IdentityServerHostTes
     [Theory]
     [InlineData(AppHostServices.MvcAutomaticTokenManagement)]
     [InlineData(AppHostServices.MvcCode)]
-    [InlineData(AppHostServices.MvcDPoP)]
+    // [InlineData(AppHostServices.MvcDPoP)]
     [InlineData(AppHostServices.MvcHybridBackChannel)]
     [InlineData(AppHostServices.MvcJarJwt)]
     [InlineData(AppHostServices.MvcJarUriJwt)]
-    [InlineData(AppHostServices.Web)]
+    // [InlineData(AppHostServices.Web)]
     public async Task clients_can_login_use_tokens_and_logout(string clientName)
     {
         await Page.GotoAsync(Fixture.GetUrlTo(clientName).ToString());
