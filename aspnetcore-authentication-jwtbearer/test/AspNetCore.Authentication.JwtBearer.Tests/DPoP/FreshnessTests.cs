@@ -65,8 +65,8 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Fact]
     public void expired_nonce_returns_invalid_result()
     {
-        Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
-        Options.ServerClockSkew = TimeSpan.FromSeconds(ClockSkew);
+        Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
+        Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(ClockSkew);
 
         // We go past validity and clock skew nonce to cause expiration
         var now = IssuedAt + ClockSkew + ValidFor + 1;
@@ -133,14 +133,14 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         }
     }
     [Theory]
-    [InlineData(ClockSkew, 0, ExpirationValidationMode.IssuedAt)]
-    [InlineData(0, ClockSkew, ExpirationValidationMode.Nonce)]
+    [InlineData(ClockSkew, 0, ExpirationMode.IssuedAt)]
+    [InlineData(0, ClockSkew, ExpirationMode.Nonce)]
     public void use_client_or_server_clock_skew_depending_on_validation_mode(int clientClockSkew, int serverClockSkew,
-        ExpirationValidationMode mode)
+        ExpirationMode mode)
     {
-        Options.ClientClockSkew = TimeSpan.FromSeconds(clientClockSkew);
-        Options.ServerClockSkew = TimeSpan.FromSeconds(serverClockSkew);
-        Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
+        Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(clientClockSkew);
+        Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(serverClockSkew);
+        Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
 
         // We pick a time that needs some clock skew to be valid
         Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt + ValidFor + 1));
@@ -152,8 +152,8 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Fact]
     public void unexpired_proofs_do_not_set_errors()
     {
-        Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
-        Options.ClientClockSkew = TimeSpan.FromSeconds(ClockSkew);
+        Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
+        Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(ClockSkew);
         Result.IssuedAt = IssuedAt;
 
         Clock.SetUtcNow(DateTimeOffset.FromUnixTimeSeconds(IssuedAt));
@@ -168,8 +168,8 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     [Fact]
     public void expired_proofs_set_errors()
     {
-        Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
-        Options.ClientClockSkew = TimeSpan.FromSeconds(ClockSkew);
+        Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
+        Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(ClockSkew);
         Result.IssuedAt = IssuedAt;
 
         // Go forward into the future beyond the expiration and clock skew
@@ -182,17 +182,17 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [InlineData(ExpirationValidationMode.IssuedAt)]
-    [InlineData(ExpirationValidationMode.Both)]
-    public void validate_iat_when_option_is_set(ExpirationValidationMode mode)
+    [InlineData(ExpirationMode.IssuedAt)]
+    [InlineData(ExpirationMode.Both)]
+    public void validate_iat_when_option_is_set(ExpirationMode mode)
     {
-        Options.ValidationMode = mode;
-        Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
-        Options.ClientClockSkew = TimeSpan.FromSeconds(ClockSkew);
+        Options.ProofTokenExpirationMode = mode;
+        Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
+        Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(ClockSkew);
         Result.IssuedAt = IssuedAt;
-        if (mode == ExpirationValidationMode.Both)
+        if (mode == ExpirationMode.Both)
         {
-            Options.ServerClockSkew = TimeSpan.FromSeconds(ClockSkew);
+            Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(ClockSkew);
             Result.Nonce = DataProtector.Protect(IssuedAt.ToString());
         }
 
@@ -209,15 +209,15 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [InlineData(ExpirationValidationMode.Nonce)]
-    [InlineData(ExpirationValidationMode.Both)]
-    public void validate_nonce_when_option_is_set(ExpirationValidationMode mode)
+    [InlineData(ExpirationMode.Nonce)]
+    [InlineData(ExpirationMode.Both)]
+    public void validate_nonce_when_option_is_set(ExpirationMode mode)
     {
-        Options.ValidationMode = mode;
-        Options.ProofTokenValidityDuration = TimeSpan.FromSeconds(ValidFor);
-        Options.ServerClockSkew = TimeSpan.FromSeconds(ClockSkew);
+        Options.ProofTokenExpirationMode = mode;
+        Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
+        Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(ClockSkew);
         Result.Nonce = DataProtector.Protect(IssuedAt.ToString());
-        if (mode == ExpirationValidationMode.Both)
+        if (mode == ExpirationMode.Both)
         {
             Result.IssuedAt = IssuedAt;
         }
