@@ -16,11 +16,12 @@ To get started, install this package and then add some minimal configuration:
 
 ```cs
 // Keep your existing code that configures the JwtBearer handler unchanged:
-builder.Services.AddAuthentication("token")
+var schemeName = "token";
+builder.Services.AddAuthentication(schemeName)
     .AddJwtBearer("token", options => { /* Your existing configuration here */ });
 
 // Add DPoP support with our extensions:
-builder.Services.ConfigureDPoPTokensForScheme("token", options =>
+builder.Services.ConfigureDPoPTokensForScheme(schemeName, options =>
 {
     options.EnableReplayDetection = false; // Disable replay detection to show a minimal setup
     options.AllowBearerTokens = true; // Allow both Bearer and DPoP tokens, to facilitate migration to DPoP
