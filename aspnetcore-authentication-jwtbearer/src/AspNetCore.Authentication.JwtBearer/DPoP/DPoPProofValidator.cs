@@ -475,6 +475,14 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// </summary>
     internal bool IsExpired(DPoPProofValidationContext context, long time, ExpirationMode mode)
     {
+        // It is the responsibility of the caller to call this method with either ExpirationMode.IssuedAt or ExpirationMode.Nonce.
+        // Even if the configured ExpirationMode is Both, we are validating one or the other at this point, and the
+        // caller should make two calls, passing the more specific modes.
+        if (mode == ExpirationMode.Both)
+        {
+            throw new ArgumentException("IsExpired should be called with a specific mode (IssuedAt or Nonce), not Both.", nameof(mode));
+        }
+
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
         var validityDuration = dpopOptions.ProofTokenLifetime;
         var skew = mode == ExpirationMode.Nonce ? dpopOptions.ProofTokenNonceClockSkew
