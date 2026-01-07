@@ -3,7 +3,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace Duende.Bff.Blazor.Client;
+namespace Duende.Bff.Blazor.Client.Internals;
 
 /// <summary>
 /// Serialization friendly claim.

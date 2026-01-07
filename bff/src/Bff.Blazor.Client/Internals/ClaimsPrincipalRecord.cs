@@ -1,9 +1,7 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.Bff.Blazor.Client;
-
-namespace Duende.Bff.Internal;
+namespace Duende.Bff.Blazor.Client.Internals;
 
 /// <summary>
 /// Serialization friendly ClaimsPrincipal

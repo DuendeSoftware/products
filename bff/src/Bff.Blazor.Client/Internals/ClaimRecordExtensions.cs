@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using Duende.Bff.Blazor.Client;
 
-namespace Duende.Bff.Internal;
+namespace Duende.Bff.Blazor.Client.Internals;
 
 internal static class ClaimRecordExtensions
 {
