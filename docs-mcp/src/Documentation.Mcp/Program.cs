@@ -20,9 +20,24 @@ builder.Logging.AddConsole(consoleLogOptions =>
     consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace;
 });
 
+// Determine database path
+var databasePath = "mcp.db";
+if (args.Length > 0)
+{
+    var dbParameterIndex = args.IndexOf("--database");
+    if (dbParameterIndex >= 0 && args.Length > dbParameterIndex + 1)
+    {
+        var dbPathParameter = args[dbParameterIndex + 1].Replace("\"", "", StringComparison.OrdinalIgnoreCase);
+        if (Path.IsPathFullyQualified(dbPathParameter))
+        {
+            databasePath = dbPathParameter;
+        }
+    }
+}
+
 // Setup services
 builder.Services.AddHttpClient();
-builder.Services.AddSqlite<McpDb>("Data Source=mcp.db;Cache=Shared");
+builder.Services.AddSqlite<McpDb>("Data Source=" + databasePath + ";Cache=Shared");
 
 builder.Services.AddHostedService<DocsArticleIndexer>();
 builder.Services.AddHostedService<BlogArticleIndexer>();
@@ -73,6 +88,8 @@ async Task EnsureDb(IServiceProvider services, ILogger logger)
     await using var db = scope.ServiceProvider.GetRequiredService<McpDb>();
     if (db.Database.IsRelational())
     {
+        logger.LogInformation("Using database: {DatabasePath}", databasePath);
+
         logger.LogInformation("Updating database...");
         await db.Database.MigrateAsync();
         logger.LogInformation("Updated database");
