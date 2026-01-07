@@ -28,13 +28,13 @@ internal class ClaimRecord()
     /// The type
     /// </summary>
     [JsonPropertyName("type")]
-    public string Type { get; init; } = default!;
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// The value
     /// </summary>
     [JsonPropertyName("value")]
-    public object Value { get; init; } = default!;
+    public object Value { get; init; } = string.Empty;
 
     /// <summary>
     /// The value type

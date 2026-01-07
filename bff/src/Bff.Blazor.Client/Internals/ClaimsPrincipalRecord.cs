@@ -28,5 +28,5 @@ internal class ClaimsPrincipalRecord
     /// <summary>
     /// The claims
     /// </summary>
-    public ClaimRecord[] Claims { get; init; } = default!;
+    public ClaimRecord[] Claims { get; init; } = [];
 }
