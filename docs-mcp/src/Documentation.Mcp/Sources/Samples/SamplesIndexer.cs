@@ -173,10 +173,12 @@ internal sealed class SamplesIndexer(IServiceProvider services, ILogger<SamplesI
                 }
 
                 var sampleRootPath = $"samples-main{link.Url![sampleRootIndex..]}";
+                const string sharedHostRootPath = "samples-main/IdentityServer/v7/IdentityServerHost";
                 var sampleEntries = repositoryArchive.Entries
                     .Where(e =>
 
-                        e.FullName.StartsWith(sampleRootPath, StringComparison.OrdinalIgnoreCase) &&
+                        (e.FullName.StartsWith(sampleRootPath, StringComparison.OrdinalIgnoreCase) ||
+                         e.FullName.StartsWith(sharedHostRootPath, StringComparison.OrdinalIgnoreCase)) &&
 
                         // Only C# files
                         (e.FullName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) ||
