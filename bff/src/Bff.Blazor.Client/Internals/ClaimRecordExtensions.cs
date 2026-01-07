@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
-using Duende.Bff.Blazor.Client;
 
 namespace Duende.Bff.Blazor.Client.Internals;
 
