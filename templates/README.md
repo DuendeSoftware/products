@@ -21,7 +21,7 @@ Or, for a more drastic complete reset of all templates back to the "factory defa
 dotnet new --debug:reinit
 ```
 
-## Identity Server Templates
+## IdentityServer Templates
 
 ### dotnet new duende-is-empty
 Creates a minimal Duende IdentityServer host without a UI.
@@ -44,7 +44,6 @@ The Duende IdentityServer template is our most feature-rich offering and a great
 The template is built on the Entity Framework Core template but provides an administrative UI for managing clients, scopes, and claims against a database storage engine.
 It also has a diagnostics dashboard showing system information, including the licensing tier and features currently used in your IdentityServer deployment.
 
-
 # BFF Templates
 
 ### dotnet new duende-bff-remoteapi
@@ -56,3 +55,9 @@ Creates a basic JavaScript-based BFF host that invokes a local API co-hosted wit
 ### dotnet new duende-bff-blazor
 Creates a Blazor application that uses the interactive auto render mode, and secures the application across all render modes consistently using Duende.BFF.Blazor.
 
+## Source Code
+
+Source code for the Duende Tenmplates is available:
+
+* [IdentityServer Templates](https://github.com/DuendeSoftware/products/tree/main/identity-server/templates/src/)
+* [BFF Templates](https://github.com/DuendeSoftware/products/tree/main/bff/templates/src)
