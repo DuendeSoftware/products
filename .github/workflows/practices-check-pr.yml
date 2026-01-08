@@ -8,6 +8,13 @@ jobs:
   check-pr:
     runs-on: ubuntu-latest
     steps:
+    - name: Generate token from Duende GitHub Bot
+      id: generate-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.DUENDE_GITHUB_BOT_APP_ID }}
+        private-key: ${{ secrets.DUENDE_GITHUB_BOT_APP_PRIVATE_KEY }}
+        owner: ${{ github.repository_owner }}
     - name: Check PR title and labels
       uses: actions/github-script@v7
       with:
@@ -32,11 +39,42 @@ jobs:
           } else {
             console.log('PR label check passed.');
           }
-
-          if (context.payload.pull_request.assignees.length === 0) {
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check PR assignee
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const { data: pr } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request.number
+          });
+          if (pr.assignees.length === 0) {
             core.setFailed(`This pull request does not have any assignees. The assignee is responsible for merging, please set one.`);
           } else {
             console.log('PR assignee check passed.');
           }
+    - name: Check for linked issues in Development section
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+      run: |
+        echo "Checking PR #${{ github.event.pull_request.number }} for linked issues..."
+          
+        # Get linked issues from the Development section
+        LINKED_ISSUES=$(gh pr view ${{ github.event.pull_request.number }} \
+          --repo ${{ github.repository }} \
+          --json closingIssuesReferences \
+          --jq '.closingIssuesReferences | length')
+          
+        echo "Found $LINKED_ISSUES linked issue(s)"
+          
+        if [ "$LINKED_ISSUES" -eq 0 ]; then
+          echo "::error::This PR must have at least one issue linked in the Development section."
+          echo "::error::Please link an issue by adding it to the Development section on the right side of the PR page."
+          echo "::error::After linking an issue, manually re-run this check from the Actions tab or push a new commit."
+          exit 1
+        fi
+          
+        echo "✓ PR has linked issues in Development section"
