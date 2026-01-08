@@ -39,12 +39,6 @@ jobs:
           } else {
             console.log('PR label check passed.');
           }
-
-          if (context.payload.pull_request.assignees.length === 0) {
-            core.setFailed(`This pull request does not have any assignees. The assignee is responsible for merging, please set one.`);
-          } else {
-            console.log('PR assignee check passed.');
-          }
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Check PR assignee
