@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using System.Text.Json;
 using Duende.Bff.Internal;
 
 namespace Duende.Bff.Tests.Internal;
@@ -48,11 +49,41 @@ public class ClaimsPrincipalRecordTests
     {
         var original = new ClaimsPrincipalRecord
         {
-            Claims = [
+            Claims =
+            [
                 new ClaimRecord()
             ]
         };
 
         Should.NotThrow(() => original.ToClaimsPrincipal());
+    }
+
+    [Fact]
+    public void ToClaimsPrincipal_handles_null_Claims_from_deserialization()
+    {
+        var serializedClaimsPrincipal = """{"Claims": null}""";
+        var record = JsonSerializer.Deserialize<ClaimsPrincipalRecord>(serializedClaimsPrincipal);
+
+        Should.NotThrow(() => record!.ToClaimsPrincipal());
+    }
+
+    [Fact]
+    public void ToClaimsPrincipal_handles_null_Type_in_ClaimRecord_from_deserialization()
+    {
+        var serializedClaimsPrincipal = """{"Claims": [{"type": null, "value": "test"}]}""";
+        var record = JsonSerializer.Deserialize<ClaimsPrincipalRecord>(serializedClaimsPrincipal);
+
+        var principal = record!.ToClaimsPrincipal();
+        principal.Claims.Single().Type.ShouldBe(string.Empty);
+    }
+
+    [Fact]
+    public void ToClaimsPrincipal_handles_null_Value_in_ClaimRecord_from_deserialization()
+    {
+        var serializedClaimsPrincipal = """{"Claims": [{"type": "sub", "value": null}]}""";
+        var record = JsonSerializer.Deserialize<ClaimsPrincipalRecord>(serializedClaimsPrincipal);
+
+        var principal = record!.ToClaimsPrincipal();
+        principal.Claims.Single().Value.ShouldBe(string.Empty);
     }
 }
