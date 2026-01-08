@@ -12,8 +12,13 @@ internal static class ClaimRecordExtensions
     /// </summary>
     public static ClaimsPrincipal ToClaimsPrincipal(this ClaimsPrincipalRecord principal)
     {
-        var claims = principal.Claims.Select(x => new Claim(x.Type, x.Value.ToString() ?? string.Empty, x.ValueType ?? ClaimValueTypes.String))
-            .ToArray();
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        var claims = principal.Claims is null
+            ? []
+            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+            : principal.Claims.Select(x => new Claim(x.Type ?? string.Empty, x.Value?.ToString() ?? string.Empty, x.ValueType ?? ClaimValueTypes.String)).ToArray();
+
         var id = new ClaimsIdentity(claims, principal.AuthenticationType, principal.NameClaimType,
             principal.RoleClaimType);
 

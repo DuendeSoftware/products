@@ -3,7 +3,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
-using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 

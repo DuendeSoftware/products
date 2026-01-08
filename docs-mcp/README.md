@@ -34,6 +34,21 @@ Alternatively, you can add a `.vscode/mcp.json` file to your workspace:
 }
 ```
 
+You can also add the `--database` parameter with a path to the database file to use:
+
+```json
+{
+  "servers": {
+    "duende-mcp": {
+      "type": "stdio",
+      "command": "dnx",
+      "args": ["Duende.Documentation.Mcp", "--yes", "--", "--database", "/path/to/database.db"],
+      "env": {}
+    }
+  }
+}
+```
+
 Open GitHub Copilot and select Agent Mode to work with the MCP server.
 
 ### JetBrains Rider
@@ -63,6 +78,19 @@ claude mcp add --transport stdio duende-mcp -- dnx Duende.Documentation.Mcp --ye
 Set the working directory to a path on your machine where the Duende Documentation MCP Server can store its database
 index. Not setting the working directory will result in the MCP server failing to start because it cannot create the
 database file.
+
+Alternatively, you can add the `--database` parameter with a path to the database file to use:
+
+```json
+{
+  "mcpServers": {
+    "duende-mcp": {
+      "command": "dnx",
+      "args": ["Duende.Documentation.Mcp", "--yes", "--", "--database", "/path/to/database.db"]
+    }
+  }
+}
+```
 
 ## Tools and Example Prompts
 

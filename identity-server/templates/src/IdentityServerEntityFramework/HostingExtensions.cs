@@ -18,7 +18,7 @@ internal static class HostingExtensions
     {
         // Write most logs to the console but diagnostic data to a file.
         // See https://docs.duendesoftware.com/identityserver/diagnostics/data
-        builder.Host.UseSerilog((ctx, lc) =>
+        builder.Services.AddSerilog(lc =>
         {
             lc.WriteTo.Logger(consoleLogger =>
             {
@@ -42,7 +42,7 @@ internal static class HostingExtensions
                             formatProvider: CultureInfo.InvariantCulture)
                         .Filter
                         .ByIncludingOnly(Matching.FromSource("Duende.IdentityServer.Diagnostics.Summary"));
-                }).Enrich.FromLogContext().ReadFrom.Configuration(ctx.Configuration);
+                }).Enrich.FromLogContext().ReadFrom.Configuration(builder.Configuration);
             }
         });
         return builder;

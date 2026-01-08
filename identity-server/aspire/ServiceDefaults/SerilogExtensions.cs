@@ -11,10 +11,10 @@ namespace Microsoft.Extensions.Hosting;
 public static class SerilogExtensions
 {
     public static void ConfigureSerilogDefaults(this WebApplicationBuilder builder) =>
-        builder.Host.UseSerilog((context, services, configuration) =>
+        builder.Services.AddSerilog((services, configuration) =>
         {
             configuration
-                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Configuration(builder.Configuration)
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext()
                 .MinimumLevel.Debug()
