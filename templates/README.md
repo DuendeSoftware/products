@@ -57,7 +57,7 @@ Creates a Blazor application that uses the interactive auto render mode, and sec
 
 ## Source Code
 
-Source code for the Duende Tenmplates is available:
+Source code for the Duende Templates is available:
 
 * [IdentityServer Templates](https://github.com/DuendeSoftware/products/tree/main/identity-server/templates/src/)
 * [BFF Templates](https://github.com/DuendeSoftware/products/tree/main/bff/templates/src)
