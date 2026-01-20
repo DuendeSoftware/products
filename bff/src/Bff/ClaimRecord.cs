@@ -3,12 +3,12 @@
 
 using System.Text.Json.Serialization;
 
-namespace Duende.Bff.Internal;
+namespace Duende.Bff;
 
 /// <summary>
 /// Serialization friendly claim
 /// </summary>
-internal class ClaimRecord()
+public sealed class ClaimRecord()
 {
     /// <summary>
     ///

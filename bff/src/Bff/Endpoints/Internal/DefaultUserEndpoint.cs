@@ -18,7 +18,7 @@ namespace Duende.Bff.Endpoints.Internal;
 /// <summary>
 /// Service for handling user requests
 /// </summary>
-internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<DefaultUserEndpoint> logger) : IUserEndpoint
+internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<DefaultUserEndpoint> logger, IUserEndpointClaimsEnricher? claimsEnricher = null) : IUserEndpoint
 {
     /// <summary>
     /// The options
@@ -51,9 +51,16 @@ internal class DefaultUserEndpoint(IOptions<BffOptions> options, ILogger<Default
         }
         else
         {
-            var claims = new List<ClaimRecord>();
-            claims.AddRange(await GetUserClaimsAsync(result, ct));
-            claims.AddRange(await GetManagementClaimsAsync(context, result, ct));
+
+            IReadOnlyList<ClaimRecord> claims = [
+                .. await GetUserClaimsAsync(result, ct)
+                , .. await GetManagementClaimsAsync(context, result, ct)
+            ];
+
+            if (claimsEnricher != null)
+            {
+                claims = await claimsEnricher.EnrichClaimsAsync(result, claims, ct);
+            }
 
             var json = JsonSerializer.Serialize(claims);
 

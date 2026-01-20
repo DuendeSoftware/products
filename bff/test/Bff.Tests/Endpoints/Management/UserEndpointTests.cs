@@ -3,7 +3,10 @@
 
 using System.Net;
 using System.Security.Claims;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Duende.Bff.Configuration;
+using Duende.Bff.Endpoints;
+using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
@@ -29,6 +32,67 @@ public class UserEndpointTests : BffTestBase
         };
 
     public ClaimsPrincipal? UserToSignIn { get; set; }
+
+    private class TestClaimsEnricher(IHttpClientFactory factory) : IUserEndpointClaimsEnricher
+    {
+        public async Task<IReadOnlyList<ClaimRecord>> EnrichClaimsAsync(AuthenticateResult authenticateResult, IReadOnlyList<ClaimRecord> claims, CT ct = default)
+        {
+            var client = factory.CreateClient("c1");
+
+            var response = await client.GetFromJsonAsync<ApiCallDetails>("/", ct);
+
+            return [
+                // We read the sub from the api endpoint, to prove that we can use access token management
+                // to perform an api call. 
+                new ClaimRecord("sub", response?.Sub ?? ""),
+
+                // We're getting the number of claims, to prove that we can replace all claims.
+                new ClaimRecord("count", claims.Count),
+
+                // We keep a single claim (ie: the logout endpoint), to prove we're able to access it.
+                new ClaimRecord("logoutUrl", claims.FirstOrDefault(x => x.Type == Constants.ClaimTypes.LogoutUrl)?.Value ?? "unknown"),
+            ];
+        }
+    }
+
+    [Fact]
+    public async Task can_enrich_claims_in_user_endpoint_by_performing_a_call_to_a_remote_service()
+    {
+        Bff.OnConfigureServices += services =>
+        {
+            // We're adding an AccessTokenManagement HTTP Client that can access the API Endpoint. 
+            services.AddUserAccessTokenHttpClient("c1",
+                configureClient: client =>
+                {
+                    client.BaseAddress = Api.Url();
+                }).ConfigurePrimaryHttpMessageHandler(() => Internet);
+
+            // Then we're adding the claims enricher that will call the endpoint. 
+            services.AddSingleton<IUserEndpointClaimsEnricher, TestClaimsEnricher>();
+        };
+
+        Bff.OnConfigureBff += bff => bff.ConfigureOpenIdConnect(opt =>
+        {
+            The.DefaultOpenIdConnectConfiguration(opt);
+            opt.BackchannelHttpHandler = Internet;
+        });
+
+        AddOrUpdateFrontend(Some.BffFrontend());
+
+        await InitializeAsync();
+
+        AddCustomUserClaims(new Claim("foo", "foo1"), new Claim("foo", "foo2"));
+        await Bff.BrowserClient.Login();
+
+        var data = await Bff.BrowserClient.CallUserEndpointAsync();
+
+        // The claims enricher replaces all claims with a single claim (only the count of original claims)
+        data.Count.ShouldBe(3);
+        data.First(x => x.Type == "count").Value.GetInt32().ShouldBe(8);
+        data.First(x => x.Type == "sub").Value.GetString().ShouldBe(The.Sub);
+        data.First(x => x.Type == "logoutUrl").Value.GetString().ShouldStartWith("/bff/logout?");
+
+    }
 
     [Theory]
     [MemberData(nameof(AllSetups))]
