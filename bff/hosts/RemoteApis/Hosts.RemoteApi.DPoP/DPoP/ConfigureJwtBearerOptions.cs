@@ -20,10 +20,15 @@ public class ConfigureJwtBearerOptions : IPostConfigureOptions<JwtBearerOptions>
             {
                 throw new InvalidOperationException("EventsType on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
             }
+
+#if NET10_0_OR_GREATER
+            // .NET 10 will (re)initialize Events from EventsType even if Events is already set. See AuthenticationHandler.InitializeEventsAsync
+#else
             if (options.Events != null && !typeof(DPoPJwtBearerEvents).IsAssignableFrom(options.Events.GetType()))
             {
                 throw new InvalidOperationException("Events on JwtBearerOptions must derive from DPoPJwtBearerEvents to work with the DPoP support.");
             }
+#endif
 
             if (options.Events == null && options.EventsType == null)
             {

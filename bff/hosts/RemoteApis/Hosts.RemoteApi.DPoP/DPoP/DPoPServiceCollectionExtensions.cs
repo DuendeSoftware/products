@@ -17,8 +17,12 @@ internal static class DPoPServiceCollectionExtensions
         services.AddDistributedMemoryCache();
         services.AddTransient<IReplayCache, DefaultReplayCache>();
 
-        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(new ConfigureJwtBearerOptions(scheme));
+        services.Configure<JwtBearerOptions>(scheme, options =>
+        {
+            options.EventsType = typeof(DPoPJwtBearerEvents);
+        });
 
+        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(new ConfigureJwtBearerOptions(scheme));
 
         return services;
     }
