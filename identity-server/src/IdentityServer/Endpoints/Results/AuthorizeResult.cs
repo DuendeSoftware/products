@@ -131,7 +131,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
             response.Request.ResponseMode == OidcConstants.ResponseModes.Fragment)
         {
             context.Response.SetNoCache();
-            context.Response.Redirect(BuildRedirectUri(response));
+            context.Response.RedirectWithStatusCode(BuildRedirectUri(response), _options.UserInteraction.UseHttp303Redirects);
         }
         else if (response.Request.ResponseMode == OidcConstants.ResponseModes.FormPost)
         {
@@ -231,7 +231,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         var errorUrl = _options.UserInteraction.ErrorUrl;
 
         var url = errorUrl.AddQueryString(_options.UserInteraction.ErrorIdParameter, id);
-        context.Response.Redirect(_urls.GetAbsoluteUrl(url));
+        context.Response.RedirectWithStatusCode(_urls.GetAbsoluteUrl(url), _options.UserInteraction.UseHttp303Redirects);
     }
 
     protected virtual Task<ErrorMessage> CreateErrorMessage(AuthorizeResponse response, HttpContext context)

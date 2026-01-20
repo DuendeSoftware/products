@@ -109,4 +109,25 @@ public static class HttpResponseExtensions
             headers.Append("X-Content-Security-Policy", cspHeader);
         }
     }
+
+    /// <summary>
+    /// Redirects the response to the specified URL using the appropriate HTTP status code.
+    /// When useHttp303 is true, uses HTTP 303 (See Other) instead of HTTP 302 (Found).
+    /// HTTP 303 is recommended by FAPI 2.0 Security Profile to prevent POST data resubmission.
+    /// </summary>
+    /// <param name="response">The HTTP response.</param>
+    /// <param name="url">The URL to redirect to.</param>
+    /// <param name="useHttp303">If true, uses HTTP 303; otherwise uses HTTP 302.</param>
+    public static void RedirectWithStatusCode(this HttpResponse response, string url, bool useHttp303)
+    {
+        if (useHttp303)
+        {
+            response.StatusCode = StatusCodes.Status303SeeOther;
+            response.Headers.Location = url;
+        }
+        else
+        {
+            response.Redirect(url);
+        }
+    }
 }

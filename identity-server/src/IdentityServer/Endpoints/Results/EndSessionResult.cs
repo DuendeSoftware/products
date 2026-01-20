@@ -83,6 +83,6 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
             redirect = redirect.AddQueryString(_options.UserInteraction.LogoutIdParameter, id);
         }
 
-        context.Response.Redirect(redirect);
+        context.Response.RedirectWithStatusCode(redirect, _options.UserInteraction.UseHttp303Redirects);
     }
 }
