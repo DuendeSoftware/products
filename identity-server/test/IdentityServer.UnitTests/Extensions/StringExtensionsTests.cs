@@ -3,10 +3,11 @@
 
 
 using Duende.IdentityServer.Extensions;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace UnitTests.Extensions;
 
-public class StringExtensionsTests
+public class StringExtensionsTests()
 {
     private const string Category = "StringExtensions Tests";
 
@@ -228,6 +229,35 @@ public class StringExtensionsTests
         var nvc = url.ReadQueryStringAsNameValueCollection();
         nvc["foo"].ShouldBe("bar baz");
         nvc["baz"].ShouldBe("qux+test");
+    }
+
+    private IEnumerable<string> AllCharactersAndEncodings()
+    {
+        for (var i = 0; i < 256; i++)
+        {
+            var c = Convert.ToChar(i);
+            var s = Convert.ToString(c);
+            yield return s;
+            yield return Uri.EscapeDataString(s);
+        }
+    }
+
+    [Fact]
+    public void ReadQueryStringAsNameValueCollection_should_decode_urlencoded_values_identically_to_QueryHelpersParseNullableQuery()
+    {
+        foreach (var c in AllCharactersAndEncodings())
+        {
+            var url = $"https://example.com?foo{c}bar=baz{c}quux";
+
+            var queryIndex = url.IndexOf('?');
+            var query = url.Substring(queryIndex + 1);
+            var oldParseResult = QueryHelpers.ParseNullableQuery(query);
+            oldParseResult.ShouldNotBeNull();
+            var oldNvc = oldParseResult.AsNameValueCollection();
+            var newNvc = url.ReadQueryStringAsNameValueCollection();
+
+            newNvc.ShouldBeEquivalentTo(oldNvc, "Failure for character or encoding:" + c);
+        }
     }
 
     [Fact]
