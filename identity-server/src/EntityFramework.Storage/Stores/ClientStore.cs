@@ -85,4 +85,34 @@ public class ClientStore : IClientStore
 
         return model;
     }
+
+#if NET10_0_OR_GREATER
+    /// <inheritdoc/>
+    public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync()
+    {
+        using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.GetAllClients");
+
+        var query = Context.Clients
+            .Include(x => x.AllowedCorsOrigins)
+            .Include(x => x.AllowedGrantTypes)
+            .Include(x => x.AllowedScopes)
+            .Include(x => x.Claims)
+            .Include(x => x.ClientSecrets)
+            .Include(x => x.IdentityProviderRestrictions)
+            .Include(x => x.PostLogoutRedirectUris)
+            .Include(x => x.Properties)
+            .Include(x => x.RedirectUris)
+            .AsNoTracking()
+            .AsSplitQuery();
+
+        var clientCount = 0;
+        await foreach (var client in query.AsAsyncEnumerable().WithCancellation(CancellationTokenProvider.CancellationToken))
+        {
+            clientCount++;
+            yield return client.ToModel();
+        }
+
+        Logger.LogDebug("Retrieved {clientCount} clients for enumeration", clientCount);
+    }
+#endif
 }

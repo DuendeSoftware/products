@@ -171,4 +171,112 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             }
         }
     }
+
+#if NET10_0_OR_GREATER
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task GetAllClientsAsync_WhenNoClientsExist_ExpectEmptyCollection(DbContextOptions<ConfigurationDbContext> options)
+    {
+        await using var context = new ConfigurationDbContext(options);
+        var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+
+        var clients = new List<Client>();
+        await foreach (var client in store.GetAllClientsAsync())
+        {
+            clients.Add(client);
+        }
+
+        clients.ShouldNotBeNull();
+        clients.ShouldBeEmpty();
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task GetAllClientsAsync_WhenClientsExist_ExpectAllClientsReturned(DbContextOptions<ConfigurationDbContext> options)
+    {
+        var testClients = new List<Client>
+        {
+            new Client { ClientId = "enum_client1", ClientName = "Enum Client 1" },
+            new Client { ClientId = "enum_client2", ClientName = "Enum Client 2" },
+            new Client { ClientId = "enum_client3", ClientName = "Enum Client 3" }
+        };
+
+        await using (var context = new ConfigurationDbContext(options))
+        {
+            foreach (var client in testClients)
+            {
+                context.Clients.Add(client.ToEntity());
+            }
+            await context.SaveChangesAsync();
+        }
+
+        await using (var context = new ConfigurationDbContext(options))
+        {
+            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+
+            var clients = new List<Client>();
+            await foreach (var client in store.GetAllClientsAsync())
+            {
+                clients.Add(client);
+            }
+
+            clients.ShouldNotBeNull();
+            clients.Count.ShouldBeGreaterThanOrEqualTo(3);
+            clients.ShouldContain(c => c.ClientId == "enum_client1");
+            clients.ShouldContain(c => c.ClientId == "enum_client2");
+            clients.ShouldContain(c => c.ClientId == "enum_client3");
+        }
+    }
+
+    [Theory, MemberData(nameof(TestDatabaseProviders))]
+    public async Task GetAllClientsAsync_WhenClientsExistWithCollections_ExpectCollectionsIncluded(DbContextOptions<ConfigurationDbContext> options)
+    {
+        var testClient = new Client
+        {
+            ClientId = "enum_collections_client",
+            ClientName = "Enum Collections Client",
+            AllowedCorsOrigins = { "https://localhost" },
+            AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
+            AllowedScopes = { "openid", "profile", "api1" },
+            Claims = { new ClientClaim("test", "value") },
+            ClientSecrets = { new Secret("secret".Sha256()) },
+            IdentityProviderRestrictions = { "AD" },
+            PostLogoutRedirectUris = { "https://localhost/signout-callback" },
+            Properties = { { "foo1", "bar1" } },
+            RedirectUris = { "https://localhost/signin" }
+        };
+
+        await using (var context = new ConfigurationDbContext(options))
+        {
+            context.Clients.Add(testClient.ToEntity());
+            await context.SaveChangesAsync();
+        }
+
+        await using (var context = new ConfigurationDbContext(options))
+        {
+            var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
+
+            var clients = new List<Client>();
+            await foreach (var c in store.GetAllClientsAsync())
+            {
+                clients.Add(c);
+            }
+            var client = clients.FirstOrDefault(c => c.ClientId == testClient.ClientId);
+
+            client.ShouldSatisfyAllConditions(c =>
+            {
+                c.ShouldNotBeNull();
+                c.ClientId.ShouldBe(testClient.ClientId);
+                c.ClientName.ShouldBe(testClient.ClientName);
+                c.AllowedCorsOrigins.ShouldBe(testClient.AllowedCorsOrigins);
+                c.AllowedGrantTypes.ShouldBe(testClient.AllowedGrantTypes, true);
+                c.AllowedScopes.ShouldBe(testClient.AllowedScopes, true);
+                c.Claims.ShouldBe(testClient.Claims);
+                c.ClientSecrets.ShouldBe(testClient.ClientSecrets, true);
+                c.IdentityProviderRestrictions.ShouldBe(testClient.IdentityProviderRestrictions);
+                c.PostLogoutRedirectUris.ShouldBe(testClient.PostLogoutRedirectUris);
+                c.Properties.ShouldBe(testClient.Properties);
+                c.RedirectUris.ShouldBe(testClient.RedirectUris);
+            });
+        }
+    }
+#endif
 }
