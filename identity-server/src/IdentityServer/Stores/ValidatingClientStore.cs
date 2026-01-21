@@ -77,4 +77,31 @@ public class ValidatingClientStore<T> : IClientStore
 
         return null;
     }
+
+#if NET10_0_OR_GREATER
+    /// <inheritdoc/>
+    public async IAsyncEnumerable<Client> GetAllClientsAsync()
+    {
+        using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.GetAllClients");
+        await foreach (var client in _inner.GetAllClientsAsync())
+        {
+            _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
+            var context = new ClientConfigurationValidationContext(client);
+            await _validator.ValidateAsync(context);
+            if (context.IsValid)
+            {
+                _logger.LogDebug("client configuration validation for client {clientId} succeeded.", client.ClientId);
+                Telemetry.Metrics.ClientValidation(client.ClientId);
+                yield return client;
+            }
+            else
+            {
+                _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
+                Telemetry.Metrics.ClientValidationFailure(client.ClientId, context.ErrorMessage);
+                await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage));
+                // Skip invalid clients - do not yield
+            }
+        }
+    }
+#endif
 }
