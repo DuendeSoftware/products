@@ -212,4 +212,98 @@ public class Http303RedirectTests
         var location = response.Headers.Location!.ToString();
         location.ShouldContain("/home/error");
     }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task EndSession_WithHttp303Disabled_Returns302Redirect()
+    {
+        InitializeWithHttp303(enableHttp303: false);
+
+        await _pipeline.LoginAsync("bob");
+        _pipeline.BrowserClient.AllowAutoRedirect = false;
+
+        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.EndSessionEndpoint);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ShouldNotBeNull();
+        response.Headers.Location!.ToString().ShouldContain("/account/logout");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task EndSession_WithHttp303Enabled_Returns303Redirect()
+    {
+        InitializeWithHttp303(enableHttp303: true);
+
+        await _pipeline.LoginAsync("bob");
+        _pipeline.BrowserClient.AllowAutoRedirect = false;
+
+        var response = await _pipeline.BrowserClient.GetAsync(IdentityServerPipeline.EndSessionEndpoint);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
+        response.Headers.Location.ShouldNotBeNull();
+        response.Headers.Location!.ToString().ShouldContain("/account/logout");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task EndSession_WithIdTokenHint_WithHttp303Disabled_Returns302Redirect()
+    {
+        InitializeWithHttp303(enableHttp303: false);
+
+        await _pipeline.LoginAsync("bob");
+        _pipeline.BrowserClient.AllowAutoRedirect = false;
+
+        // First get an id_token
+        var url = _pipeline.CreateAuthorizeUrl(
+            clientId: "implicit_client",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://implicit/callback",
+            state: "123_state",
+            nonce: "123_nonce");
+
+        var authorizeResponse = await _pipeline.BrowserClient.GetAsync(url);
+        var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(authorizeResponse.Headers.Location!.ToString());
+        var idToken = authorization.IdentityToken;
+
+        // Now call end session with the id_token_hint
+        var response = await _pipeline.BrowserClient.GetAsync(
+            IdentityServerPipeline.EndSessionEndpoint + "?id_token_hint=" + idToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.Headers.Location.ShouldNotBeNull();
+        response.Headers.Location!.ToString().ShouldContain("/account/logout");
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task EndSession_WithIdTokenHint_WithHttp303Enabled_Returns303Redirect()
+    {
+        InitializeWithHttp303(enableHttp303: true);
+
+        await _pipeline.LoginAsync("bob");
+        _pipeline.BrowserClient.AllowAutoRedirect = false;
+
+        // First get an id_token
+        var url = _pipeline.CreateAuthorizeUrl(
+            clientId: "implicit_client",
+            responseType: "id_token",
+            scope: "openid",
+            redirectUri: "https://implicit/callback",
+            state: "123_state",
+            nonce: "123_nonce");
+
+        var authorizeResponse = await _pipeline.BrowserClient.GetAsync(url);
+        var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(authorizeResponse.Headers.Location!.ToString());
+        var idToken = authorization.IdentityToken;
+
+        // Now call end session with the id_token_hint
+        var response = await _pipeline.BrowserClient.GetAsync(
+            IdentityServerPipeline.EndSessionEndpoint + "?id_token_hint=" + idToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
+        response.Headers.Location.ShouldNotBeNull();
+        response.Headers.Location!.ToString().ShouldContain("/account/logout");
+    }
 }
