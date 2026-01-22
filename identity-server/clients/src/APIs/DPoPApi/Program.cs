@@ -18,9 +18,7 @@ try
 
     builder.Services.AddControllers();
     builder.Services.AddCors();
-    builder.Services.AddDistributedMemoryCache();
 
-    // this API will accept any access token from the authority
     builder.Services.AddAuthentication("token")
         .AddJwtBearer("token", options =>
         {
@@ -30,10 +28,13 @@ try
             options.TokenValidationParameters.ValidTypes = ["at+jwt"];
         });
 
+    builder.AddRedisDistributedCache(connectionName: "replay-cache");
+    builder.Services.AddKeyedHybridCache(ServiceProviderKeys.ProofTokenReplayHybridCache);
     builder.Services.ConfigureDPoPTokensForScheme("token", options =>
     {
+        options.EnableReplayDetection = true; // (Default value)
         options.AllowBearerTokens = true;
-        options.EnableReplayDetection = true;
+        options.ProofTokenExpirationMode = ExpirationMode.Nonce;
     });
 
     var app = builder.Build();

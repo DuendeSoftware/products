@@ -31,8 +31,11 @@ that supports the target frameworks our products target (8, 9, 10) -->
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.1.0" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.0.0" />
     <PackageVersion Include="Aspire.Hosting.SqlServer" Version="13.0.0" />
+    <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.1.0" />
+    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.0" />
     <PackageVersion Include="BullsEye" Version="5.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
@@ -126,6 +129,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="SimpleFeedReader" Version="2.0.4" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Json" Version="0.53.0" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.10.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="$(IdentityModelVersion)" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Text.Json" Version="10.0.0" />
