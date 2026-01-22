@@ -29,8 +29,8 @@ public class ReplayTests : DPoPProofValidatorTestBase
     {
         ReplayCache.ExistsFunc = _ => false;
 
-        Options.ProofTokenExpirationMode = (validateIat && validateNonce) ? ExpirationMode.Both
-            : validateIat ? ExpirationMode.IssuedAt : ExpirationMode.Nonce;
+        Options.ProofTokenExpirationMode = (validateIat && validateNonce) ? DPoPProofExpirationMode.Both
+            : validateIat ? DPoPProofExpirationMode.IssuedAt : DPoPProofExpirationMode.Nonce;
         Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(clientClockSkew);
         Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(serverClockSkew);
         Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
