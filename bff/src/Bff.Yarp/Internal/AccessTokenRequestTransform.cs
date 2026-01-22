@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Model;
 using Yarp.ReverseProxy.Transforms;
 
@@ -156,14 +157,17 @@ internal class AccessTokenRequestTransform(
 
     private async Task ApplyDPoPToken(RequestTransformContext context, DPoPTokenResult token)
     {
+        var url = RequestUtilities.MakeDestinationAddress(
+            context.DestinationPrefix,
+            context.Path,
+            QueryString.Empty);
 
-        var baseUri = new Uri(context.DestinationPrefix);
         var proofToken = await proofService.CreateProofTokenAsync(new DPoPProofRequest
         {
             AccessToken = token.AccessToken,
             DPoPProofKey = token.DPoPJsonWebKey,
             Method = context.ProxyRequest.Method,
-            Url = new Uri(baseUri, context.Path)
+            Url = url
         });
         if (proofToken != null)
         {
