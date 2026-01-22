@@ -260,14 +260,18 @@ internal static class StringExtensions
             }
 
             var kvp = pair.Split('=', 2);
-            var key = Uri.UnescapeDataString(kvp[0]);
+            var key = kvp[0];
             var value = kvp.Length > 1 ? kvp[1] : null;
-            var unescaped = value.IsPresent() ? Uri.UnescapeDataString(kvp[1]) : null;
-            collection.Add(key, unescaped);
+            if (value.IsPresent())
+            {
+                collection.Add(Decode(key), Decode(value));
+            }
         }
 
         return collection;
     }
+
+    private static string Decode(string value) => Uri.UnescapeDataString(value.Replace('+', ' '));
 
     private static string? QueryString(this string url)
     {
