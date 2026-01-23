@@ -193,6 +193,17 @@ namespace Duende.Bff
         public static TBuilder WithUserAccessTokenParameter<TBuilder>(this TBuilder builder, Duende.Bff.Configuration.BffUserAccessTokenParameters bffUserAccessTokenParameters)
             where TBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder { }
     }
+    public sealed class ClaimRecord
+    {
+        public ClaimRecord() { }
+        public ClaimRecord(string type, object value) { }
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        public string Type { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("valueType")]
+        public string? ValueType { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("value")]
+        public object Value { get; init; }
+    }
     public static class Constants
     {
         public static class BffFlags
@@ -472,6 +483,10 @@ namespace Duende.Bff.Endpoints
         "w handled by passing the prompt=none parameter to the login endpoint."))]
     public interface ISilentLoginEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
     public interface IUserEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
+    public interface IUserEndpointClaimsEnricher
+    {
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Duende.Bff.ClaimRecord>> EnrichClaimsAsync(Microsoft.AspNetCore.Authentication.AuthenticateResult authenticateResult, System.Collections.Generic.IReadOnlyList<Duende.Bff.ClaimRecord> claims, System.Threading.CancellationToken ct = default);
+    }
 }
 namespace Duende.Bff.Otel
 {
