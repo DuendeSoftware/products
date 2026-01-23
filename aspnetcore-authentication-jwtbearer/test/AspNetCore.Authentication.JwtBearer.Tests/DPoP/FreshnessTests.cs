@@ -133,10 +133,10 @@ public class FreshnessTests : DPoPProofValidatorTestBase
         }
     }
     [Theory]
-    [InlineData(ClockSkew, 0, ExpirationMode.IssuedAt)]
-    [InlineData(0, ClockSkew, ExpirationMode.Nonce)]
+    [InlineData(ClockSkew, 0, DPoPProofExpirationMode.IssuedAt)]
+    [InlineData(0, ClockSkew, DPoPProofExpirationMode.Nonce)]
     public void use_client_or_server_clock_skew_depending_on_validation_mode(int clientClockSkew, int serverClockSkew,
-        ExpirationMode mode)
+        DPoPProofExpirationMode mode)
     {
         Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(clientClockSkew);
         Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(serverClockSkew);
@@ -182,15 +182,15 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [InlineData(ExpirationMode.IssuedAt)]
-    [InlineData(ExpirationMode.Both)]
-    public void validate_iat_when_option_is_set(ExpirationMode mode)
+    [InlineData(DPoPProofExpirationMode.IssuedAt)]
+    [InlineData(DPoPProofExpirationMode.Both)]
+    public void validate_iat_when_option_is_set(DPoPProofExpirationMode mode)
     {
         Options.ProofTokenExpirationMode = mode;
         Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
         Options.ProofTokenIssuedAtClockSkew = TimeSpan.FromSeconds(ClockSkew);
         Result.IssuedAt = IssuedAt;
-        if (mode == ExpirationMode.Both)
+        if (mode == DPoPProofExpirationMode.Both)
         {
             Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(ClockSkew);
             Result.Nonce = DataProtector.Protect(IssuedAt.ToString());
@@ -209,15 +209,15 @@ public class FreshnessTests : DPoPProofValidatorTestBase
     }
 
     [Theory]
-    [InlineData(ExpirationMode.Nonce)]
-    [InlineData(ExpirationMode.Both)]
-    public void validate_nonce_when_option_is_set(ExpirationMode mode)
+    [InlineData(DPoPProofExpirationMode.Nonce)]
+    [InlineData(DPoPProofExpirationMode.Both)]
+    public void validate_nonce_when_option_is_set(DPoPProofExpirationMode mode)
     {
         Options.ProofTokenExpirationMode = mode;
         Options.ProofTokenLifetime = TimeSpan.FromSeconds(ValidFor);
         Options.ProofTokenNonceClockSkew = TimeSpan.FromSeconds(ClockSkew);
         Result.Nonce = DataProtector.Protect(IssuedAt.ToString());
-        if (mode == ExpirationMode.Both)
+        if (mode == DPoPProofExpirationMode.Both)
         {
             Result.IssuedAt = IssuedAt;
         }

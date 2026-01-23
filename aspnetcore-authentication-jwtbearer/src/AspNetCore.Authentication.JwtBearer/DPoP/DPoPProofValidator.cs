@@ -384,8 +384,8 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
 
         // get the largest skew based on how the client's freshness is validated
-        var validateIat = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.Nonce;
-        var validateNonce = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.IssuedAt;
+        var validateIat = dPoPOptions.ProofTokenExpirationMode != DPoPProofExpirationMode.Nonce;
+        var validateNonce = dPoPOptions.ProofTokenExpirationMode != DPoPProofExpirationMode.IssuedAt;
         var skew = TimeSpan.Zero;
         if (validateIat && dPoPOptions.ProofTokenIssuedAtClockSkew > skew)
         {
@@ -412,7 +412,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     {
         var dPoPOptions = OptionsMonitor.Get(context.Scheme);
 
-        var validateIat = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.Nonce;
+        var validateIat = dPoPOptions.ProofTokenExpirationMode != DPoPProofExpirationMode.Nonce;
         if (validateIat)
         {
             ValidateIat(context, result);
@@ -422,7 +422,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
             }
         }
 
-        var validateNonce = dPoPOptions.ProofTokenExpirationMode != ExpirationMode.IssuedAt;
+        var validateNonce = dPoPOptions.ProofTokenExpirationMode != DPoPProofExpirationMode.IssuedAt;
         if (validateNonce)
         {
             ValidateNonce(context, result);
@@ -441,7 +441,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         DPoPProofValidationResult result)
     {
         // iat is required by an earlier validation, so result.IssuedAt will not be null
-        if (IsExpired(context, result.IssuedAt!.Value, ExpirationMode.IssuedAt))
+        if (IsExpired(context, result.IssuedAt!.Value, DPoPProofExpirationMode.IssuedAt))
         {
             result.SetError("Invalid 'iat' value.");
         }
@@ -473,19 +473,19 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// Validates the expiration of the DPoP proof.
     /// Returns true if the time is beyond the allowed limits, false otherwise.
     /// </summary>
-    internal bool IsExpired(DPoPProofValidationContext context, long time, ExpirationMode mode)
+    internal bool IsExpired(DPoPProofValidationContext context, long time, DPoPProofExpirationMode mode)
     {
         // It is the responsibility of the caller to call this method with either ExpirationMode.IssuedAt or ExpirationMode.Nonce.
         // Even if the configured ExpirationMode is Both, we are validating one or the other at this point, and the
         // caller should make two calls, passing the more specific modes.
-        if (mode == ExpirationMode.Both)
+        if (mode == DPoPProofExpirationMode.Both)
         {
             throw new ArgumentException("IsExpired should be called with a specific mode (IssuedAt or Nonce), not Both.", nameof(mode));
         }
 
         var dpopOptions = OptionsMonitor.Get(context.Scheme);
         var validityDuration = dpopOptions.ProofTokenLifetime;
-        var skew = mode == ExpirationMode.Nonce ? dpopOptions.ProofTokenNonceClockSkew
+        var skew = mode == DPoPProofExpirationMode.Nonce ? dpopOptions.ProofTokenNonceClockSkew
             : dpopOptions.ProofTokenIssuedAtClockSkew;
 
         return ExpirationValidator.IsExpired(validityDuration, skew, time);

@@ -40,9 +40,9 @@ public sealed class DPoPOptions
 
     /// <summary>
     /// Controls how the issued at time of proof tokens is validated. Defaults to <see
-    /// cref="ExpirationMode.IssuedAt"/>.
+    /// cref="DPoPProofExpirationMode.IssuedAt"/>.
     /// </summary>
-    public ExpirationMode ProofTokenExpirationMode { get; set; } = ExpirationMode.IssuedAt;
+    public DPoPProofExpirationMode ProofTokenExpirationMode { get; set; } = DPoPProofExpirationMode.IssuedAt;
 
     /// <summary>
     /// The maximum allowed length of a proof token, which is enforced to
