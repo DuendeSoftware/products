@@ -3,6 +3,7 @@
 
 
 using Duende.IdentityModel;
+using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
@@ -52,6 +53,7 @@ public abstract class AuthorizeInteractionPageResult : EndpointResult<AuthorizeI
 
 internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<AuthorizeInteractionPageResult>
 {
+    private readonly IdentityServerOptions _options;
     private readonly IServerUrls _urls;
     private readonly IUiLocalesService _localesService;
     private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;
@@ -60,10 +62,12 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
     /// Initializes a new instance of the <see cref="AuthorizeInteractionPageResult"/> class.
     /// </summary>
     public AuthorizeInteractionPageHttpWriter(
+        IdentityServerOptions options,
         IServerUrls urls,
         IUiLocalesService localesService,
         IAuthorizationParametersMessageStore authorizationParametersMessageStore = null)
     {
+        _options = options;
         _urls = urls;
         _localesService = localesService;
         _authorizationParametersMessageStore = authorizationParametersMessageStore;
@@ -122,6 +126,6 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
         }
 
         url = url.AddQueryString(result.ReturnUrlParameterName, returnUrl);
-        context.Response.Redirect(_urls.GetAbsoluteUrl(url));
+        context.Response.RedirectWithStatusCode(_urls.GetAbsoluteUrl(url), _options.UserInteraction.UseHttp303Redirects);
     }
 }
