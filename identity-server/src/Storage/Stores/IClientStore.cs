@@ -19,4 +19,14 @@ public interface IClientStore
     /// <param name="clientId">The client id</param>
     /// <returns>The client</returns>
     Task<Client?> FindClientByIdAsync(string clientId);
+
+#if NET10_0_OR_GREATER
+    /// <summary>
+    /// Returns all clients for enumeration purposes (e.g., conformance assessment).
+    /// This method has a default implementation that throws <see cref="NotSupportedException"/>.
+    /// </summary>
+    /// <returns>An async enumerable of all clients.</returns>
+    IAsyncEnumerable<Client> GetAllClientsAsync()
+        => throw new NotSupportedException("Client enumeration is not supported by this store implementation.");
+#endif
 }

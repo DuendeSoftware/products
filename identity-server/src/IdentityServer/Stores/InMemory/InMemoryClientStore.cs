@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 
@@ -46,4 +45,18 @@ public class InMemoryClientStore : IClientStore
 
         return Task.FromResult(query.SingleOrDefault());
     }
+
+#if NET10_0_OR_GREATER
+    /// <inheritdoc/>
+    public async IAsyncEnumerable<Client> GetAllClientsAsync()
+    {
+        using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.GetAllClients");
+
+        foreach (var client in _clients)
+        {
+            yield return client;
+        }
+    }
+#endif
 }
+

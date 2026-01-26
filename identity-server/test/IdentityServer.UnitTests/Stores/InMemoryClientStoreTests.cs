@@ -35,4 +35,48 @@ public class InMemoryClientStoreTests
 
         new InMemoryClientStore(clients);
     }
+
+#if NET10_0_OR_GREATER
+    [Fact]
+    public async Task GetAllClientsAsync_should_return_all_clients()
+    {
+        var clients = new List<Client>
+        {
+            new Client { ClientId = "client1", ClientName = "Client One" },
+            new Client { ClientId = "client2", ClientName = "Client Two" },
+            new Client { ClientId = "client3", ClientName = "Client Three" }
+        };
+
+        var store = new InMemoryClientStore(clients);
+
+        var result = new List<Client>();
+        await foreach (var client in store.GetAllClientsAsync())
+        {
+            result.Add(client);
+        }
+
+        result.ShouldNotBeNull();
+        result.Count.ShouldBe(3);
+        result.ShouldContain(c => c.ClientId == "client1");
+        result.ShouldContain(c => c.ClientId == "client2");
+        result.ShouldContain(c => c.ClientId == "client3");
+    }
+
+    [Fact]
+    public async Task GetAllClientsAsync_should_return_empty_when_no_clients()
+    {
+        var clients = new List<Client>();
+
+        var store = new InMemoryClientStore(clients);
+
+        var result = new List<Client>();
+        await foreach (var client in store.GetAllClientsAsync())
+        {
+            result.Add(client);
+        }
+
+        result.ShouldNotBeNull();
+        result.ShouldBeEmpty();
+    }
+#endif
 }
