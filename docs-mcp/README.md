@@ -34,7 +34,8 @@ Alternatively, you can add a `.vscode/mcp.json` file to your workspace:
 }
 ```
 
-You can also add the `--database` parameter with a path to the database file to use:
+You can also add the `--database` parameter with a path to the database file to use.
+The database file will be created by the MCP server at the specified path:
 
 ```json
 {
@@ -67,19 +68,8 @@ Next, add a new MCP server. In the dialog that opens, select **As JSON** and ent
 }
 ```
 
-### Claude Code
-
-Execute the following command:
-
-```shell
-claude mcp add --transport stdio duende-mcp -- dnx Duende.Documentation.Mcp --yes
-```
-
-Set the working directory to a path on your machine where the Duende Documentation MCP Server can store its database
-index. Not setting the working directory will result in the MCP server failing to start because it cannot create the
-database file.
-
-Alternatively, you can add the `--database` parameter with a path to the database file to use:
+Alternatively, you can add the `--database` parameter with a path to the database file to use.
+The database file will be created by the MCP server at the specified path:
 
 ```json
 {
@@ -92,6 +82,21 @@ Alternatively, you can add the `--database` parameter with a path to the databas
 }
 ```
 
+### Claude Code
+
+Execute the following command:
+
+```shell
+claude mcp add --transport stdio duende-mcp -- dnx Duende.Documentation.Mcp --yes
+```
+
+Set the working directory to a path on your machine where the Duende Documentation MCP Server can store its database
+index. Not setting the working directory will result in the MCP server failing to start because it cannot create the
+database file.
+
+Alternatively, you can add the `--database` parameter with a path to a database file that the MCP server has write access to.
+The file will be created and mnaaged by the MCP server.
+
 ## Tools and Example Prompts
 
 The Duende Documentation MCP Server has several tools available:
@@ -101,7 +106,7 @@ The Duende Documentation MCP Server has several tools available:
 * Get all content for a sample
 * Get a specific file from a sample
 
-The Duende Documentation MCP Server has [instructions](src/Duende.Documentation.Mcp.Server/Program.cs) to announce the
+The Duende Documentation MCP Server has [instructions](src/Documentation.Mcp/Program.cs) to announce the
 tools it provides, and instructs the LLM to use them. While this MCP prompt is elaborate, you may need to be explicit
 in prompts and for example, add "Use Duende samples" when you expect to update code with your LLM.
 
