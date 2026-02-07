@@ -38,14 +38,8 @@ public class ServerSideSessionCleanupHost(
 #pragma warning restore CA5394
             : options.ServerSideSessions.RemoveExpiredSessionsFrequency;
 
-        while (true)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            if (stoppingToken.IsCancellationRequested)
-            {
-                logger.LogDebug("CancellationRequested. Exiting.");
-                break;
-            }
-
             try
             {
                 await Task.Delay(delay, stoppingToken);
@@ -63,7 +57,6 @@ public class ServerSideSessionCleanupHost(
 
             if (stoppingToken.IsCancellationRequested)
             {
-                logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
