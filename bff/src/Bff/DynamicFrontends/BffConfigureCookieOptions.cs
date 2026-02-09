@@ -1,7 +1,9 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
+using Duende.Bff.DynamicFrontends.Internal;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -12,7 +14,7 @@ internal class BffConfigureCookieOptions(
     TimeProvider timeProvider,
     IOptions<BffConfiguration> bffConfiguration,
     IOptions<BffOptions> bffOptions,
-    CurrentFrontendAccessor currentFrontendAccessor
+    FrontendSelector frontendSelector
     ) : IConfigureNamedOptions<CookieAuthenticationOptions>
 {
     private readonly BffOptions _bffOptions = bffOptions.Value;
@@ -23,8 +25,10 @@ internal class BffConfigureCookieOptions(
     {
         // Normally, this is added by AuthenticationBuilder.PostConfigureAuthenticationSchemeOptions
         // but this is private API, so we need to do it ourselves.
+
+        var schemeName = Scheme.ParseOrDefault(name);
         options.TimeProvider = timeProvider;
-        if (currentFrontendAccessor.TryGet(out var frontEnd))
+        if (frontendSelector.TryGetFrontendByCookieScheme(schemeName, out var frontEnd))
         {
             if (frontEnd.MatchingCriteria.MatchingPath != null)
             {

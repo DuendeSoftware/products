@@ -3,6 +3,7 @@
 
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Configuration;
+using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Internal;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
@@ -11,7 +12,7 @@ namespace Duende.Bff.DynamicFrontends;
 
 internal class BffConfigureOpenIdConnectOptions(
     TimeProvider timeProvider,
-    CurrentFrontendAccessor currentFrontendAccessor,
+    FrontendSelector frontendSelector,
     ActiveOpenIdConnectAuthenticationScheme activeOpenIdConnectScheme,
     IOptions<BffConfiguration> bffConfiguration,
     IOptions<BffOptions> bffOptions
@@ -21,7 +22,8 @@ internal class BffConfigureOpenIdConnectOptions(
 
     public void Configure(string? name, OpenIdConnectOptions options)
     {
-        if (!activeOpenIdConnectScheme.ShouldConfigureScheme(Scheme.ParseOrDefault(name)))
+        var schemeName = Scheme.ParseOrDefault(name);
+        if (!activeOpenIdConnectScheme.ShouldConfigureScheme(schemeName))
         {
             return;
         }
@@ -45,7 +47,7 @@ internal class BffConfigureOpenIdConnectOptions(
 
         // See if there is a frontend selected
         // If so, apply the frontend's OpenID Connect options
-        if (!currentFrontendAccessor.TryGet(out var frontEnd))
+        if (!frontendSelector.TryGetFrontendByOidcScheme(schemeName, out var frontEnd))
         {
             return;
         }
