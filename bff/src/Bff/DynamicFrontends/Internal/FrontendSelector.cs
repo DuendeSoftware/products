@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -45,4 +46,10 @@ internal class FrontendSelector
 
         return _bffIndex.TryMatch(request, out selectedFrontend);
     }
+
+    public bool TryGetFrontendByOidcScheme(Scheme? scheme, [NotNullWhen(true)] out BffFrontend? frontend) =>
+        _bffIndex.TryGetFrontendByOidcScheme(scheme, out frontend);
+
+    public bool TryGetFrontendByCookieScheme(Scheme? scheme, [NotNullWhen(true)] out BffFrontend? frontend) =>
+        _bffIndex.TryGetFrontendByCookieScheme(scheme, out frontend);
 }
