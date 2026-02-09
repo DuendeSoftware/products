@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Diagnostics.CodeAnalysis;
+using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Otel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,8 @@ namespace Duende.Bff.DynamicFrontends.Internal;
 internal class BffIndex
 {
     private readonly ILogger _logger;
+    private readonly Dictionary<Scheme, BffFrontend> _frontendsByOidcScheme = new();
+    private readonly Dictionary<Scheme, BffFrontend> _frontendsByCookieScheme = new();
     private readonly Dictionary<HostString, PathTrie<BffFrontend>> _perHostHeader = new();
     private readonly PathTrie<BffFrontend> _perPath = new();
     private BffFrontend? _defaultFrontend;
@@ -24,8 +27,30 @@ internal class BffIndex
         }
     }
 
+    public bool TryGetFrontendByOidcScheme(Scheme? scheme, [NotNullWhen(true)] out BffFrontend? frontend)
+    {
+        if (scheme == null)
+        {
+            frontend = null;
+            return false;
+        }
+        return _frontendsByOidcScheme.TryGetValue(scheme.Value, out frontend);
+    }
+
+    public bool TryGetFrontendByCookieScheme(Scheme? scheme, [NotNullWhen(true)] out BffFrontend? frontend)
+    {
+        if (scheme == null)
+        {
+            frontend = null;
+            return false;
+        }
+        return _frontendsByCookieScheme.TryGetValue(scheme.Value, out frontend);
+    }
+
     public void AddFrontend(BffFrontend frontend)
     {
+        _frontendsByOidcScheme.Add(frontend.OidcSchemeName, frontend);
+        _frontendsByCookieScheme.Add(frontend.CookieSchemeName, frontend);
         var frontendMatchingCriteria = frontend.MatchingCriteria;
 
         if (!_registeredCriteria.TryAdd(frontendMatchingCriteria, frontend.Name))
