@@ -37,4 +37,20 @@ public class ObjectSerializerTests
 
         result.ShouldNotBeNull();
     }
+
+    [Fact]
+    public void Can_serialize_jwk_with_plus_character_in_x5c()
+    {
+        var jwk = new Dictionary<string, object>
+        {
+            { "kty", "RSA" },
+            { "x5c", new List<string> { "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+test+value+with+plus" } }
+        };
+
+        var json = Duende.IdentityServer.ObjectSerializer.ToUnescapedString(jwk);
+
+        // The '+' character should not be escaped as \u002B
+        json.ShouldNotContain("\\u002B");
+        json.ShouldContain("+");
+    }
 }
