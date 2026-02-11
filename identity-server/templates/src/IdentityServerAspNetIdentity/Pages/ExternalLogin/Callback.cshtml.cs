@@ -76,7 +76,7 @@ public class Callback : PageModel
             // remove the user id and name identifier claims so we don't include it as an extra claim if/when we provision the user
             var claims = externalUser.Claims.ToList();
             claims.RemoveAll(c => c.Type is JwtClaimTypes.Subject or ClaimTypes.NameIdentifier);
-            user = await AutoProvisionUserAsync(provider, providerUserId, externalUser.Claims);
+            user = await AutoProvisionUserAsync(provider, providerUserId, claims.ToList());
         }
 
         // this allows us to collect any additional claims or properties
@@ -113,8 +113,7 @@ public class Callback : PageModel
         return Redirect(returnUrl);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1851:Possible multiple enumerations of 'IEnumerable' collection", Justification = "<Pending>")]
-    private async Task<ApplicationUser> AutoProvisionUserAsync(string provider, string providerUserId, IEnumerable<Claim> claims)
+    private async Task<ApplicationUser> AutoProvisionUserAsync(string provider, string providerUserId, List<Claim> claims)
     {
         var sub = Guid.NewGuid().ToString();
 
