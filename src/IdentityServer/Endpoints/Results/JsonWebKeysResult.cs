@@ -55,6 +55,8 @@ class JsonWebKeysHttpWriter : IHttpResponseWriter<JsonWebKeysResult>
             context.Response.SetCache(result.MaxAge.Value, "Origin");
         }
 
-        return context.Response.WriteJsonAsync(new { keys = result.WebKeys }, "application/json; charset=UTF-8");
+        var json = ObjectSerializer.ToUnescapedString(new { keys = result.WebKeys });
+
+        return context.Response.WriteJsonAsync(json, "application/json; charset=UTF-8");
     }
 }
