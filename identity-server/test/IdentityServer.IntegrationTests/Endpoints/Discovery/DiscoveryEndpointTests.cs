@@ -194,6 +194,62 @@ public class DiscoveryEndpointTests
 
     [Fact]
     [Trait("Category", Category)]
+    public async Task Jwks_x5c_should_not_escape_plus_character()
+    {
+        var cert = TestCert.Load();
+
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            services.AddIdentityServerBuilder()
+                .AddSigningCredential(cert);
+        };
+        pipeline.Initialize();
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration/jwks");
+        var json = await result.Content.ReadAsStringAsync();
+
+        // The x5c property contains base64-encoded certificate data which commonly has '+' characters.
+        // These should not be escaped as \u002B in the JSON response.
+        json.ShouldNotContain("\\u002B");
+        json.ShouldContain('+');
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Jwks_x5t_should_not_escape_base64url_encoded_characters()
+    {
+        var cert = TestCert.Load();
+
+        var pipeline = new IdentityServerPipeline();
+        pipeline.OnPostConfigureServices += services =>
+        {
+            services.AddIdentityServerBuilder()
+                .AddSigningCredential(cert);
+        };
+        pipeline.Initialize();
+
+        var result = await pipeline.BackChannelClient.GetAsync("https://server/.well-known/openid-configuration/jwks");
+        var json = await result.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+
+        var keys = data["keys"].EnumerateArray().ToList();
+        var keyWithX5t = keys.First(k => k.TryGetProperty("x5t", out _));
+        var x5t = keyWithX5t.GetProperty("x5t").GetString();
+
+        // The x5t property is a base64url-encoded SHA-1 thumbprint (per RFC 7517).
+        // Base64url encoding uses '-' and '_' instead of '+' and '/', so '+' and '/' must not appear.
+        x5t.ShouldNotContain("+");
+        x5t.ShouldNotContain("/");
+        x5t.ShouldContain("_"); // The cert we are using happens to contain '_' but not '-' in its thumbprint
+
+        // Verify the value matches the expected base64url-encoded thumbprint
+        var expectedThumbprint = Base64UrlEncoder.Encode(cert.GetCertHash());
+        x5t.ShouldBe(expectedThumbprint);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
     public async Task Unicode_values_in_url_should_be_processed_correctly()
     {
         var pipeline = new IdentityServerPipeline();
