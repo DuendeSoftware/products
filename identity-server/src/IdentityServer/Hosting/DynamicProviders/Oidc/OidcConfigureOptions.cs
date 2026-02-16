@@ -41,14 +41,7 @@ internal class OidcConfigureOptions : ConfigureAuthenticationOptions<OpenIdConne
         context.AuthenticationOptions.SaveTokens = true;
         context.AuthenticationOptions.GetClaimsFromUserInfoEndpoint = context.IdentityProvider.GetClaimsFromUserInfoEndpoint;
         context.AuthenticationOptions.DisableTelemetry = true;
-#if NET5_0_OR_GREATER
         context.AuthenticationOptions.MapInboundClaims = false;
-#else
-            context.AuthenticationOptions.SecurityTokenValidator = new JwtSecurityTokenHandler
-            {
-                MapInboundClaims = false
-            };
-#endif
         context.AuthenticationOptions.TokenValidationParameters.NameClaimType = JwtClaimTypes.Name;
         context.AuthenticationOptions.TokenValidationParameters.RoleClaimType = JwtClaimTypes.Role;
 
