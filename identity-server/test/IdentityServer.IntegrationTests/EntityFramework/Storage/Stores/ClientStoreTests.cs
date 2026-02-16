@@ -172,7 +172,6 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         }
     }
 
-#if NET10_0_OR_GREATER
     [Theory, MemberData(nameof(TestDatabaseProviders))]
     public async Task GetAllClientsAsync_WhenNoClientsExist_ExpectEmptyCollection(DbContextOptions<ConfigurationDbContext> options)
     {
@@ -278,5 +277,4 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             });
         }
     }
-#endif
 }
