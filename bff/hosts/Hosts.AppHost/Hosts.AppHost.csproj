@@ -1,6 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.2" />
+<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,10 +6,6 @@
     <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>616547e2-3a28-4c9d-8685-f4ac02581162</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Hosts.Bff.MultiFrontend\Hosts.Bff.MultiFrontend.csproj" />
