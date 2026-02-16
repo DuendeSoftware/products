@@ -11,7 +11,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
     <PackageReference Include="Microsoft.Extensions.Http" />
-    <PackageReference Include="System.Text.Json" />
     <PackageReference Include="Duende.Private.Licensing" />
   </ItemGroup>
 
