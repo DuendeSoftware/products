@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <PackageType>Template</PackageType>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <language>en-US</language>
