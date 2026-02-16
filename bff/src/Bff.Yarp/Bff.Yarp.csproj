@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Duende.BFF.Yarp</AssemblyName>
     <Description>Backend for frontend (BFF) host for ASP.NET Core (YARP integration)</Description>
   </PropertyGroup>
