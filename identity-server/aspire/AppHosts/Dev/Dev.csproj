@@ -10,10 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\clients\src\APIs\DPoPApi\DPoPApi.csproj" />
     <ProjectReference Include="..\..\..\clients\src\Web\Web.csproj" />
     <ProjectReference Include="..\..\..\hosts\Main10\Host.Main10.csproj" />
