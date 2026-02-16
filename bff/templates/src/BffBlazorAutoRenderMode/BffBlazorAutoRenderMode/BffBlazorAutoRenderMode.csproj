@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
     <PackageReference Include="Duende.BFF" Version="3.0.0" />
     <PackageReference Include="Duende.BFF.Blazor" Version="3.0.0" />
   </ItemGroup>
