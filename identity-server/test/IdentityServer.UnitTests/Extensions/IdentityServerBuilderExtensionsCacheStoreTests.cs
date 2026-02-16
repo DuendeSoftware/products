@@ -14,6 +14,10 @@ public class IdentityServerBuilderExtensionsCacheStoreTests
     private class CustomClientStore : IClientStore
     {
         public Task<Client> FindClientByIdAsync(string clientId) => throw new System.NotImplementedException();
+
+#if NET10_0_OR_GREATER
+        public IAsyncEnumerable<Client> GetAllClientsAsync() => throw new System.NotImplementedException();
+#endif
     }
 
     private class CustomResourceStore : IResourceStore

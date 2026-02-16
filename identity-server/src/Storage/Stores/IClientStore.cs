@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-
 #nullable enable
 
 using Duende.IdentityServer.Models;
@@ -23,10 +22,8 @@ public interface IClientStore
 #if NET10_0_OR_GREATER
     /// <summary>
     /// Returns all clients for enumeration purposes (e.g., conformance assessment).
-    /// This method has a default implementation that throws <see cref="NotSupportedException"/>.
     /// </summary>
     /// <returns>An async enumerable of all clients.</returns>
-    IAsyncEnumerable<Client> GetAllClientsAsync()
-        => throw new NotSupportedException("Client enumeration is not supported by this store implementation.");
+    IAsyncEnumerable<Client> GetAllClientsAsync();
 #endif
 }

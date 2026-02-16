@@ -51,4 +51,13 @@ public class CachingClientStore<T> : IClientStore
 
         return client;
     }
+
+#if NET10_0_OR_GREATER
+    /// <inheritdoc/>
+    public IAsyncEnumerable<Client> GetAllClientsAsync()
+    {
+        using var activity = Tracing.StoreActivitySource.StartActivity("CachingClientStore.GetAllClients");
+        return _inner.GetAllClientsAsync();
+    }
+#endif
 }
