@@ -1,33 +1,4 @@
-<!-- We have agreed to explicitly target where possible version 10 of the package(s)
-that supports the target frameworks our products target (8, 9, 10) -->
 <Project>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
-    <FrameworkVersion>8.0.1</FrameworkVersion>
-    <!-- Package Versions Note:
-         These versions are here because they don't explicitly have a version 10 of the package that supports .NET 8, 9 and 10 -->
-    <EFCoreVersion>9.0.9</EFCoreVersion>
-    <IdentityEFCoreVersion>8.0.20</IdentityEFCoreVersion>
-    <MvcRazorRuntimeCompilationVersion>8.0.20</MvcRazorRuntimeCompilationVersion>
-    <AuthenticationCertificateVersion>8.0.16</AuthenticationCertificateVersion>
-    <!-- /End Note -->
-    <IdentityModelVersion>7.1.2</IdentityModelVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0'">
-    <FrameworkVersion>9.0.3</FrameworkVersion>
-    <EFCoreVersion>9.0.9</EFCoreVersion>
-    <IdentityEFCoreVersion>9.0.3</IdentityEFCoreVersion>
-    <MvcRazorRuntimeCompilationVersion>9.0.3</MvcRazorRuntimeCompilationVersion>
-    <AuthenticationCertificateVersion>9.0.3</AuthenticationCertificateVersion>
-    <IdentityModelVersion>8.0.1</IdentityModelVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0'">
-    <FrameworkVersion>10.0.0</FrameworkVersion>
-    <EFCoreVersion>10.0.0</EFCoreVersion>
-    <IdentityEFCoreVersion>10.0.0</IdentityEFCoreVersion>
-    <MvcRazorRuntimeCompilationVersion>10.0.0</MvcRazorRuntimeCompilationVersion>
-    <AuthenticationCertificateVersion>10.0.0</AuthenticationCertificateVersion>
-    <IdentityModelVersion>8.0.1</IdentityModelVersion>
-  </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AngleSharp" Version="1.1.2" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.0" />
@@ -49,26 +20,26 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Markdig" Version="0.43.0" />
     <PackageVersion Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.8" />
     <!-- Review Packages -->
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="$(AuthenticationCertificateVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(FrameworkVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(FrameworkVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(FrameworkVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="$(FrameworkVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="$(FrameworkVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(IdentityEFCoreVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="$(MvcRazorRuntimeCompilationVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(FrameworkVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="$(FrameworkVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
     <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.14.28" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(EFCoreVersion)" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(EFCoreVersion)" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EFCoreVersion)" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EFCoreVersion)" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EFCoreVersion)" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EFCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" />
@@ -88,9 +59,9 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="$(IdentityModelVersion)" />
-    <PackageVersion Include="Microsoft.IdentityModel.Logging" Version="$(IdentityModelVersion)" />
-    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="$(IdentityModelVersion)" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Logging" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="Microsoft.NETCore.Jit" Version="2.0.8" />
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
@@ -126,7 +97,7 @@ that supports the target frameworks our products target (8, 9, 10) -->
     <PackageVersion Include="SimpleFeedReader" Version="2.0.4" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Json" Version="0.53.0" />
-    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="$(IdentityModelVersion)" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Text.Json" Version="10.0.0" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
