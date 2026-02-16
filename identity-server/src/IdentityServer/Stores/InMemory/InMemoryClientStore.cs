@@ -46,7 +46,6 @@ public class InMemoryClientStore : IClientStore
         return Task.FromResult(query.SingleOrDefault());
     }
 
-#if NET10_0_OR_GREATER
     /// <inheritdoc/>
     public async IAsyncEnumerable<Client> GetAllClientsAsync()
     {
@@ -57,6 +56,5 @@ public class InMemoryClientStore : IClientStore
             yield return client;
         }
     }
-#endif
 }
 
