@@ -36,7 +36,6 @@ public class InMemoryClientStoreTests
         new InMemoryClientStore(clients);
     }
 
-#if NET10_0_OR_GREATER
     [Fact]
     public async Task GetAllClientsAsync_should_return_all_clients()
     {
@@ -78,5 +77,4 @@ public class InMemoryClientStoreTests
         result.ShouldNotBeNull();
         result.ShouldBeEmpty();
     }
-#endif
 }
