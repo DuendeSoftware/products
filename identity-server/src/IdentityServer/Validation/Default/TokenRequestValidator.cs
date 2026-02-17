@@ -37,7 +37,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly IProfileService _profile;
     private readonly IDeviceCodeValidator _deviceCodeValidator;
     private readonly IBackchannelAuthenticationRequestIdValidator _backchannelAuthenticationRequestIdValidator;
-    private readonly TimeProvider _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly LicenseUsageTracker _licenseUsage;
     private readonly ClientLoadedTracker _clientLoadedTracker;
     private readonly ResourceLoadedTracker _resourceLoadedTracker;
@@ -62,7 +62,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         IRefreshTokenService refreshTokenService,
         IDPoPProofValidator dPoPProofValidator,
         IEventService events,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         LicenseUsageTracker licenseUsage,
         ClientLoadedTracker clientLoadedTracker,
         ResourceLoadedTracker resourceLoadedTracker,
@@ -74,7 +74,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _options = options;
         _issuerNameService = issuerNameService;
         _serverUrls = serverUrls;
-        _clock = clock;
+        _timeProvider = timeProvider;
         _authorizationCodeStore = authorizationCodeStore;
         _resourceOwnerValidator = resourceOwnerValidator;
         _profile = profile;
@@ -393,7 +393,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // todo: set to consumed in the future?
         await _authorizationCodeStore.RemoveAuthorizationCodeAsync(code);
 
-        if (authZcode.CreationTime.HasExceeded(authZcode.Lifetime, _clock.GetUtcNow().UtcDateTime))
+        if (authZcode.CreationTime.HasExceeded(authZcode.Lifetime, _timeProvider.GetUtcNow().UtcDateTime))
         {
             LogError("Authorization code expired", new { code });
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);
@@ -410,7 +410,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         /////////////////////////////////////////////
         // validate code expiration
         /////////////////////////////////////////////
-        if (authZcode.CreationTime.HasExceeded(_validatedRequest.Client.AuthorizationCodeLifetime, _clock.GetUtcNow().UtcDateTime))
+        if (authZcode.CreationTime.HasExceeded(_validatedRequest.Client.AuthorizationCodeLifetime, _timeProvider.GetUtcNow().UtcDateTime))
         {
             LogError("Authorization code is expired");
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);

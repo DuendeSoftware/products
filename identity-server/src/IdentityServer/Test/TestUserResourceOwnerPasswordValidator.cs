@@ -14,17 +14,17 @@ namespace Duende.IdentityServer.Test;
 public class TestUserResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
 {
     private readonly TestUserStore _users;
-    private readonly TimeProvider _clock;
+    private readonly TimeProvider _timeProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestUserResourceOwnerPasswordValidator"/> class.
     /// </summary>
     /// <param name="users">The users.</param>
-    /// <param name="clock">The clock.</param>
-    public TestUserResourceOwnerPasswordValidator(TestUserStore users, TimeProvider clock)
+    /// <param name="timeProvider">The time provider.</param>
+    public TestUserResourceOwnerPasswordValidator(TestUserStore users, TimeProvider timeProvider)
     {
         _users = users;
-        _clock = clock;
+        _timeProvider = timeProvider;
     }
 
     /// <summary>
@@ -39,7 +39,7 @@ public class TestUserResourceOwnerPasswordValidator : IResourceOwnerPasswordVali
             var user = _users.FindByUsername(context.UserName);
             context.Result = new GrantValidationResult(
                 user.SubjectId ?? throw new ArgumentException("Subject ID not set", nameof(user.SubjectId)),
-                OidcConstants.AuthenticationMethods.Password, _clock.GetUtcNow().UtcDateTime,
+                OidcConstants.AuthenticationMethods.Password, _timeProvider.GetUtcNow().UtcDateTime,
                 user.Claims);
         }
 

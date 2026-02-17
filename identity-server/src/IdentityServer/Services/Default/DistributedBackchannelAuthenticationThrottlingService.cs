@@ -16,7 +16,7 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
 {
     private readonly IDistributedCache _cache;
     private readonly IClientStore _clientStore;
-    private readonly TimeProvider _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly IdentityServerOptions _options;
 
     private const string KeyPrefix = "backchannel_";
@@ -27,12 +27,12 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
     public DistributedBackchannelAuthenticationThrottlingService(
         IDistributedCache cache,
         IClientStore clientStore,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         IdentityServerOptions options)
     {
         _cache = cache;
         _clientStore = clientStore;
-        _clock = clock;
+        _timeProvider = timeProvider;
         _options = options;
     }
 
@@ -44,14 +44,14 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
         ArgumentNullException.ThrowIfNull(requestId);
 
         var key = KeyPrefix + requestId;
-        var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _clock.GetUtcNow().AddSeconds(details.Lifetime) };
+        var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _timeProvider.GetUtcNow().AddSeconds(details.Lifetime) };
 
         var lastSeenAsString = await _cache.GetStringAsync(key);
 
         // record new
         if (lastSeenAsString == null)
         {
-            await _cache.SetStringAsync(key, _clock.GetUtcNow().ToString("O"), options);
+            await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
             return false;
         }
 
@@ -62,15 +62,15 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
 
             var client = await _clientStore.FindEnabledClientByIdAsync(details.ClientId);
             var interval = client?.PollingInterval ?? _options.Ciba.DefaultPollingInterval;
-            if (_clock.GetUtcNow().UtcDateTime < lastSeen.AddSeconds(interval))
+            if (_timeProvider.GetUtcNow().UtcDateTime < lastSeen.AddSeconds(interval))
             {
-                await _cache.SetStringAsync(key, _clock.GetUtcNow().ToString("O"), options);
+                await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
                 return true;
             }
         }
 
         // store current and continue
-        await _cache.SetStringAsync(key, _clock.GetUtcNow().ToString("O"), options);
+        await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
 
         return false;
     }

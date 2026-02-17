@@ -32,9 +32,9 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     protected readonly IdentityServerOptions Options;
 
     /// <summary>
-    /// The clock
+    /// The time provider
     /// </summary>
-    protected readonly TimeProvider Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The replay cache
@@ -57,12 +57,12 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     public DefaultDPoPProofValidator(
         IdentityServerOptions options,
         IReplayCache replayCache,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         IDataProtectionProvider dataProtectionProvider,
         ILogger<DefaultDPoPProofValidator> logger)
     {
         Options = options;
-        Clock = clock;
+        TimeProvider = timeProvider;
         ReplayCache = replayCache;
         DataProtector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
         Logger = logger;
@@ -410,7 +410,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         Logger.LogDebug("Adding proof token with jti {jti} to replay cache for duration {cacheDuration}", result.TokenId, cacheDuration);
 
-        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, Clock.GetUtcNow().Add(cacheDuration));
+        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, TimeProvider.GetUtcNow().Add(cacheDuration));
     }
 
     /// <summary>
@@ -498,7 +498,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <returns></returns>
     protected virtual string CreateNonce(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
-        var now = Clock.GetUtcNow().ToUnixTimeSeconds();
+        var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
         return DataProtector.Protect(now.ToString(CultureInfo.InvariantCulture));
     }
 
@@ -530,7 +530,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// </summary>
     protected virtual bool IsExpired(DPoPProofValidatonContext context, DPoPProofValidatonResult result, TimeSpan clockSkew, long issuedAtTime)
     {
-        var now = Clock.GetUtcNow().ToUnixTimeSeconds();
+        var now = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
         var start = now + (int)clockSkew.TotalSeconds;
         if (start < issuedAtTime)
         {

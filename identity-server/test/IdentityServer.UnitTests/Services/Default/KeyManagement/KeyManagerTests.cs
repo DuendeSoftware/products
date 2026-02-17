@@ -25,7 +25,7 @@ public class KeyManagerTests
     private MockSigningKeyStore _mockKeyStore = new MockSigningKeyStore();
     private MockSigningKeyStoreCache _mockKeyStoreCache = new MockSigningKeyStoreCache();
     private MockSigningKeyProtector _mockKeyProtector = new MockSigningKeyProtector();
-    private FakeTimeProvider _mockClock = new FakeTimeProvider(new DateTimeOffset(new DateTime(2018, 3, 10, 9, 0, 0)));
+    private FakeTimeProvider _mockTimeProvider = new FakeTimeProvider(new DateTimeOffset(new DateTime(2018, 3, 10, 9, 0, 0)));
 
     public KeyManagerTests()
     {
@@ -39,7 +39,7 @@ public class KeyManagerTests
             _mockKeyStore,
             _mockKeyStoreCache,
             _mockKeyProtector,
-            _mockClock,
+            _mockTimeProvider,
             new NopConcurrencyLock<KeyManager>(),
             new LoggerFactory().CreateLogger<KeyManager>(),
             new TestIssuerNameService());
@@ -55,7 +55,7 @@ public class KeyManagerTests
     {
         var key = _options.KeyManagement.CreateRsaSecurityKey();
 
-        var date = _mockClock.GetUtcNow().UtcDateTime;
+        var date = _mockTimeProvider.GetUtcNow().UtcDateTime;
         if (age.HasValue)
         {
             date = date.Subtract(age.Value);
@@ -104,7 +104,7 @@ public class KeyManagerTests
                 _mockKeyStore,
                 _mockKeyStoreCache,
                 _mockKeyProtector,
-                _mockClock,
+                _mockTimeProvider,
                 new NopConcurrencyLock<KeyManager>(),
                 new LoggerFactory().CreateLogger<KeyManager>(),
                 new TestIssuerNameService());
@@ -930,7 +930,7 @@ public class KeyManagerTests
         _mockKeyProtector.ProtectWasCalled.ShouldBeTrue();
         _mockKeyStore.Keys.Count.ShouldBe(1);
         _mockKeyStore.Keys.Single().Id.ShouldBe(result.Id);
-        result.Created.ShouldBe(_mockClock.GetUtcNow().UtcDateTime);
+        result.Created.ShouldBe(_mockTimeProvider.GetUtcNow().UtcDateTime);
         result.Algorithm.ShouldBe("RS256");
     }
 

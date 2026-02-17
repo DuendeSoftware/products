@@ -20,7 +20,7 @@ public class DefaultRefreshTokenServiceTests
     private PersistentGrantOptions _options;
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
-    private FakeTimeProvider _clock = new FakeTimeProvider();
+    private FakeTimeProvider _timeProvider = new FakeTimeProvider();
 
     public DefaultRefreshTokenServiceTests()
     {
@@ -35,7 +35,7 @@ public class DefaultRefreshTokenServiceTests
         _subject = new DefaultRefreshTokenService(
             _store,
             new TestProfileService(),
-            _clock,
+            _timeProvider,
             _options,
             TestLogger.Create<DefaultRefreshTokenService>());
     }
@@ -144,7 +144,7 @@ public class DefaultRefreshTokenServiceTests
         };
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var handle = await _store.StoreRefreshTokenAsync(new RefreshToken
         {
@@ -175,7 +175,7 @@ public class DefaultRefreshTokenServiceTests
         };
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var handle = await _store.StoreRefreshTokenAsync(new RefreshToken
         {
@@ -206,7 +206,7 @@ public class DefaultRefreshTokenServiceTests
         };
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var handle = await _store.StoreRefreshTokenAsync(new RefreshToken
         {
@@ -237,7 +237,7 @@ public class DefaultRefreshTokenServiceTests
         };
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var handle = await _store.StoreRefreshTokenAsync(new RefreshToken
         {
@@ -278,7 +278,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var newHandle = await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client });
 
@@ -313,7 +313,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var newHandle = await _subject.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest { Handle = handle, RefreshToken = refreshToken, Client = client });
 
@@ -361,7 +361,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
@@ -389,7 +389,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
@@ -417,7 +417,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         var now = DateTime.UtcNow.AddSeconds(20);
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
@@ -446,7 +446,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
@@ -474,7 +474,7 @@ public class DefaultRefreshTokenServiceTests
         var handle = await _store.StoreRefreshTokenAsync(refreshToken);
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var result = await _subject.ValidateRefreshTokenAsync(handle, client);
 
@@ -503,7 +503,7 @@ public class DefaultRefreshTokenServiceTests
         await _store.UpdateRefreshTokenAsync("key", refreshToken);
 
         var now = DateTime.UtcNow;
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var result = await _subject.ValidateRefreshTokenAsync("key", client);
 

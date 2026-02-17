@@ -171,8 +171,8 @@ internal static class Factory
     }
 
     internal static ITokenCreationService CreateDefaultTokenCreator(IdentityServerOptions options = null,
-        TimeProvider clock = null) => new DefaultTokenCreationService(
-            clock ?? new FakeTimeProvider(DateTimeOffset.UtcNow),
+        TimeProvider timeProvider = null) => new DefaultTokenCreationService(
+            timeProvider ?? new FakeTimeProvider(DateTimeOffset.UtcNow),
             new DefaultKeyMaterialService(
                 new IValidationKeysStore[] { },
                 new ISigningCredentialStore[] { new InMemorySigningCredentialsStore(TestCert.LoadSigningCredentials()) },
@@ -303,12 +303,12 @@ internal static class Factory
         IProfileService profile = null,
         IIssuerNameService issuerNameService = null,
         IdentityServerOptions options = null,
-        TimeProvider clock = null)
+        TimeProvider timeProvider = null)
     {
         options ??= TestIdentityServerOptions.Create();
         profile ??= new TestProfileService();
         store ??= CreateReferenceTokenStore();
-        clock ??= new FakeTimeProvider(DateTimeOffset.UtcNow);
+        timeProvider ??= new FakeTimeProvider(DateTimeOffset.UtcNow);
         refreshTokenStore ??= CreateRefreshTokenStore();
         issuerNameService ??= new TestIssuerNameService(options.IssuerUri);
 
@@ -324,7 +324,7 @@ internal static class Factory
 
         var validator = new TokenValidator(
             clients: clients,
-            clock: clock,
+            timeProvider: timeProvider,
             profile: profile,
             referenceTokenStore: store,
             customValidator: new DefaultCustomTokenValidator(),
@@ -345,13 +345,13 @@ internal static class Factory
         IDeviceFlowCodeService service,
         IProfileService profile = null,
         IDeviceFlowThrottlingService throttlingService = null,
-        TimeProvider clock = null)
+        TimeProvider timeProvider = null)
     {
         profile = profile ?? new TestProfileService();
         throttlingService = throttlingService ?? new TestDeviceFlowThrottlingService();
-        clock = clock ?? new FakeTimeProvider(DateTimeOffset.UtcNow);
+        timeProvider = timeProvider ?? new FakeTimeProvider(DateTimeOffset.UtcNow);
 
-        var validator = new DeviceCodeValidator(service, profile, throttlingService, clock, TestLogger.Create<DeviceCodeValidator>());
+        var validator = new DeviceCodeValidator(service, profile, throttlingService, timeProvider, TestLogger.Create<DeviceCodeValidator>());
 
         return validator;
     }

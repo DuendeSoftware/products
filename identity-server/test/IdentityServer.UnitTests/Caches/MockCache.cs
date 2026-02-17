@@ -9,7 +9,7 @@ namespace IdentityServer.UnitTests.Caches;
 public class MockCache<T> : ICache<T>
     where T : class
 {
-    public MockCache(TimeProvider clock) => _clock = clock;
+    public MockCache(TimeProvider clock) => _timeProvider = clock;
 
     public class CacheItem
     {
@@ -19,13 +19,13 @@ public class MockCache<T> : ICache<T>
 
     public Dictionary<string, CacheItem> CacheItems = new Dictionary<string, CacheItem>();
 
-    private readonly TimeProvider _clock;
+    private readonly TimeProvider _timeProvider;
 
     private bool TryGetValue(string key, out T item)
     {
         if (CacheItems.TryGetValue(key, out var cacheItem))
         {
-            if (cacheItem.Expiration <= _clock.GetUtcNow())
+            if (cacheItem.Expiration <= _timeProvider.GetUtcNow())
             {
                 item = cacheItem.Value;
                 return true;
@@ -41,7 +41,7 @@ public class MockCache<T> : ICache<T>
         var ci = new CacheItem
         {
             Value = item,
-            Expiration = _clock.GetUtcNow().Add(duration),
+            Expiration = _timeProvider.GetUtcNow().Add(duration),
         };
         CacheItems[key] = ci;
     }

@@ -28,9 +28,9 @@ public class DefaultTokenCreationService : ITokenCreationService
     protected readonly ILogger Logger;
 
     /// <summary>
-    ///  The clock
+    ///  The time provider
     /// </summary>
-    protected readonly TimeProvider Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The options
@@ -40,17 +40,17 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultTokenCreationService"/> class.
     /// </summary>
-    /// <param name="clock">The options.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="keys">The keys.</param>
     /// <param name="options">The options.</param>
     /// <param name="logger">The logger.</param>
     public DefaultTokenCreationService(
-        TimeProvider clock,
+        TimeProvider timeProvider,
         IKeyMaterialService keys,
         IdentityServerOptions options,
         ILogger<DefaultTokenCreationService> logger)
     {
-        Clock = clock;
+        TimeProvider = timeProvider;
         Keys = keys;
         Options = options;
         Logger = logger;
@@ -80,7 +80,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <returns></returns>
     protected virtual Task<string> CreatePayloadAsync(Token token)
     {
-        var payload = token.CreateJwtPayloadDictionary(Options, Clock, Logger);
+        var payload = token.CreateJwtPayloadDictionary(Options, TimeProvider, Logger);
         return Task.FromResult(JsonSerializer.Serialize(payload));
     }
 

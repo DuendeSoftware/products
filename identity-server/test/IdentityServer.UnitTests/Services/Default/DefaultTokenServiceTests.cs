@@ -21,7 +21,7 @@ public class DefaultTokenServiceTests
     private MockClaimsService _mockClaimsService = new MockClaimsService();
     private MockReferenceTokenStore _mockReferenceTokenStore = new MockReferenceTokenStore();
     private MockTokenCreationService _mockTokenCreationService = new MockTokenCreationService();
-    private FakeTimeProvider _mockSystemClock = new FakeTimeProvider();
+    private FakeTimeProvider _mockTimeProvider = new FakeTimeProvider();
     private MockKeyMaterialService _mockKeyMaterialService = new MockKeyMaterialService();
     private IdentityServerOptions _options = new IdentityServerOptions();
 
@@ -36,7 +36,7 @@ public class DefaultTokenServiceTests
             _mockClaimsService,
             _mockReferenceTokenStore,
             _mockTokenCreationService,
-            _mockSystemClock,
+            _mockTimeProvider,
             _mockKeyMaterialService,
             _options,
             TestLogger.Create<DefaultTokenService>());

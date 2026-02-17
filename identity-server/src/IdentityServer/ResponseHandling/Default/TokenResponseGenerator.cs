@@ -49,23 +49,23 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     protected readonly IClientStore Clients;
 
     /// <summary>
-    ///  The clock
+    ///  The time provider
     /// </summary>
-    protected readonly TimeProvider Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TokenResponseGenerator" /> class.
     /// </summary>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="tokenService">The token service.</param>
     /// <param name="refreshTokenService">The refresh token service.</param>
     /// <param name="scopeParser">The scope parser.</param>
     /// <param name="resources">The resources.</param>
     /// <param name="clients">The clients.</param>
     /// <param name="logger">The logger.</param>
-    public TokenResponseGenerator(TimeProvider clock, ITokenService tokenService, IRefreshTokenService refreshTokenService, IScopeParser scopeParser, IResourceStore resources, IClientStore clients, ILogger<TokenResponseGenerator> logger)
+    public TokenResponseGenerator(TimeProvider timeProvider, ITokenService tokenService, IRefreshTokenService refreshTokenService, IScopeParser scopeParser, IResourceStore resources, IClientStore clients, ILogger<TokenResponseGenerator> logger)
     {
-        Clock = clock;
+        TimeProvider = timeProvider;
         TokenService = tokenService;
         RefreshTokenService = refreshTokenService;
         ScopeParser = scopeParser;
@@ -191,7 +191,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
         else
         {
             // todo: do we want a new JTI?
-            accessToken.CreationTime = Clock.GetUtcNow().UtcDateTime;
+            accessToken.CreationTime = TimeProvider.GetUtcNow().UtcDateTime;
             accessToken.Lifetime = request.ValidatedRequest.AccessTokenLifetime;
 
             // always take the current request confirmation values (this would be because the proof token changed from last time)

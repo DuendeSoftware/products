@@ -26,7 +26,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
 {
     private readonly IAuthenticationService _inner;
     private readonly IAuthenticationSchemeProvider _schemes;
-    private readonly TimeProvider _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly IUserSession _session;
     private readonly IIssuerNameService _issuerNameService;
     private readonly ISessionCoordinationService _sessionCoordinationService;
@@ -35,7 +35,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
     public IdentityServerAuthenticationService(
         Decorator<IAuthenticationService> decorator,
         IAuthenticationSchemeProvider schemes,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         IUserSession session,
         IIssuerNameService issuerNameService,
         ISessionCoordinationService sessionCoordinationService,
@@ -44,7 +44,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         _inner = decorator.Instance;
 
         _schemes = schemes;
-        _clock = clock;
+        _timeProvider = timeProvider;
         _session = session;
         _issuerNameService = issuerNameService;
         _sessionCoordinationService = sessionCoordinationService;
@@ -72,7 +72,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
         _logger.LogDebug("Augmenting SignInContext");
 
         AssertRequiredClaims(principal);
-        AugmentMissingClaims(principal, _clock.GetUtcNow().UtcDateTime);
+        AugmentMissingClaims(principal, _timeProvider.GetUtcNow().UtcDateTime);
     }
 
     public async Task SignOutAsync(HttpContext context, string scheme, AuthenticationProperties properties)

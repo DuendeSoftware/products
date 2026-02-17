@@ -21,7 +21,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
     private InMemoryClientStore _clientStore;
     private List<Client> _clients = new List<Client>();
     private MockUserSession _mockUserSession = new MockUserSession();
-    private FakeTimeProvider _mockSystemClock = new FakeTimeProvider(DateTimeOffset.UtcNow);
+    private FakeTimeProvider _mockTimeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow);
     private MockResourceValidator _mockResourceValidator = new MockResourceValidator();
 
     public DefaultBackchannelAuthenticationInteractionServiceTests()
@@ -37,7 +37,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             _clientStore,
             _mockUserSession,
             _mockResourceValidator,
-            _mockSystemClock,
+            _mockTimeProvider,
             TestLogger.Create<DefaultBackchannelAuthenticationInteractionService>());
     }
 
@@ -318,7 +318,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123")
             {
                 DisplayName = "name",
-                //AuthenticationTime = _mockSystemClock.UtcNow.UtcDateTime,
+                //AuthenticationTime = _mockTimeProvider.UtcNow.UtcDateTime,
                 //IdentityProvider = "idp",
                 AdditionalClaims = { new Claim("foo", "bar") },
                 AuthenticationMethods = { "phone", "pin" }
@@ -327,6 +327,6 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
 
         var item = _mockStore.Items[requestId];
         item.Subject.HasClaim("idp", "local").ShouldBeTrue();
-        item.Subject.HasClaim("auth_time", _mockSystemClock.GetUtcNow().ToUnixTimeSeconds().ToString()).ShouldBeTrue();
+        item.Subject.HasClaim("auth_time", _mockTimeProvider.GetUtcNow().ToUnixTimeSeconds().ToString()).ShouldBeTrue();
     }
 }

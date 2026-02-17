@@ -19,7 +19,7 @@ public class AccessTokenValidation
 
     private IClientStore _clients = Factory.CreateClientStore();
     private IdentityServerOptions _options = new IdentityServerOptions();
-    private FakeTimeProvider _clock = new FakeTimeProvider();
+    private FakeTimeProvider _timeProvider = new FakeTimeProvider();
 
     static AccessTokenValidation() => JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -37,7 +37,7 @@ public class AccessTokenValidation
         }
     }
 
-    public AccessTokenValidation() => _clock.SetUtcNow(UtcNow);
+    public AccessTokenValidation() => _timeProvider.SetUtcNow(UtcNow);
 
     [Fact]
     [Trait("Category", Category)]
@@ -133,7 +133,7 @@ public class AccessTokenValidation
         now = DateTime.UtcNow;
 
         var store = Factory.CreateReferenceTokenStore();
-        var validator = Factory.CreateTokenValidator(store, clock: _clock);
+        var validator = Factory.CreateTokenValidator(store, clock: _timeProvider);
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 2, "read", "write");
         token.CreationTime = now;
@@ -141,7 +141,7 @@ public class AccessTokenValidation
         var handle = await store.StoreReferenceTokenAsync(token);
 
         now = now.AddSeconds(3);
-        _clock.SetUtcNow(now);
+        _timeProvider.SetUtcNow(now);
 
         var result = await validator.ValidateAccessTokenAsync(handle);
 
@@ -232,7 +232,7 @@ public class AccessTokenValidation
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task JWT_respects_clock_skew_setting_to_allow_token_with_off_time()
+    public async Task JWT_respects_timeProvider_skew_setting_to_allow_token_with_off_time()
     {
         var futureClock = new FakeTimeProvider();
         var definitelyNotNow = DateTime.UtcNow.AddSeconds(9);
@@ -251,7 +251,7 @@ public class AccessTokenValidation
 
     [Fact]
     [Trait("Category", Category)]
-    public async Task Jwt_when_token_time_outside_of_configured_clock_skew_token_is_considered_invalid()
+    public async Task Jwt_when_token_time_outside_of_configured_timeProvider_skew_token_is_considered_invalid()
     {
         var futureClock = new FakeTimeProvider();
         var definitelyNotNow = DateTime.UtcNow.AddSeconds(10);

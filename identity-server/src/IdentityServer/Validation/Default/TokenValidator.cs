@@ -29,7 +29,7 @@ internal class TokenValidator : ITokenValidator
     private readonly IProfileService _profile;
     private readonly IKeyMaterialService _keys;
     private readonly ISessionCoordinationService _sessionCoordinationService;
-    private readonly TimeProvider _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly TokenValidationLog _log;
 
     public TokenValidator(
@@ -41,7 +41,7 @@ internal class TokenValidator : ITokenValidator
         ICustomTokenValidator customValidator,
         IKeyMaterialService keys,
         ISessionCoordinationService sessionCoordinationService,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         ILogger<TokenValidator> logger)
     {
         _options = options;
@@ -52,7 +52,7 @@ internal class TokenValidator : ITokenValidator
         _customValidator = customValidator;
         _keys = keys;
         _sessionCoordinationService = sessionCoordinationService;
-        _clock = clock;
+        _timeProvider = timeProvider;
         _logger = logger;
 
         _log = new TokenValidationLog();
@@ -379,7 +379,7 @@ internal class TokenValidator : ITokenValidator
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
-        if (token.CreationTime.HasExceeded(token.Lifetime, _clock.GetUtcNow().UtcDateTime))
+        if (token.CreationTime.HasExceeded(token.Lifetime, _timeProvider.GetUtcNow().UtcDateTime))
         {
             LogError("Token expired.");
 

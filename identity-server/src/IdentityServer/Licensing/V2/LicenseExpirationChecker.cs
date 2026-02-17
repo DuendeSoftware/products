@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Licensing.V2;
 
 internal class LicenseExpirationChecker(
     LicenseAccessor license,
-    TimeProvider clock,
+    TimeProvider timeProvider,
     ILoggerFactory loggerFactory)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.License");
@@ -25,5 +25,5 @@ internal class LicenseExpirationChecker(
         }
     }
 
-    private bool IsExpired => clock.GetUtcNow() > license.Current.Expiration;
+    private bool IsExpired => timeProvider.GetUtcNow() > license.Current.Expiration;
 }

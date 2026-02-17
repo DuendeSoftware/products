@@ -33,9 +33,9 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
     protected readonly IBackchannelAuthenticationUserNotificationService UserLoginService;
 
     /// <summary>
-    /// The clock
+    /// The time provider
     /// </summary>
-    protected readonly TimeProvider Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The logger
@@ -48,18 +48,18 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
     /// <param name="options">The options.</param>
     /// <param name="backChannelAuthenticationRequestStore"></param>
     /// <param name="userLoginService"></param>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="logger">The logger.</param>
     public BackchannelAuthenticationResponseGenerator(IdentityServerOptions options,
         IBackChannelAuthenticationRequestStore backChannelAuthenticationRequestStore,
         IBackchannelAuthenticationUserNotificationService userLoginService,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         ILogger<BackchannelAuthenticationResponseGenerator> logger)
     {
         Options = options;
         BackChannelAuthenticationRequestStore = backChannelAuthenticationRequestStore;
         UserLoginService = userLoginService;
-        Clock = clock;
+        TimeProvider = timeProvider;
         Logger = logger;
     }
 
@@ -83,7 +83,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
 
         var request = new BackChannelAuthenticationRequest
         {
-            CreationTime = Clock.GetUtcNow().UtcDateTime,
+            CreationTime = TimeProvider.GetUtcNow().UtcDateTime,
             ClientId = validationResult.ValidatedRequest.ClientId,
             RequestedScopes = validationResult.ValidatedRequest.ValidatedResources.RawScopeValues,
             RequestedResourceIndicators = validationResult.ValidatedRequest.RequestedResourceIndicators,

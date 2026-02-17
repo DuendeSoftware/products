@@ -34,9 +34,9 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     protected readonly IProfileService Profile;
 
     /// <summary>
-    /// The clock
+    /// The time provider
     /// </summary>
-    protected readonly TimeProvider Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The options
@@ -47,19 +47,19 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// Initializes a new instance of the <see cref="AuthorizeInteractionResponseGenerator"/> class.
     /// </summary>
     /// <param name="options"></param>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="logger">The logger.</param>
     /// <param name="consent">The consent.</param>
     /// <param name="profile">The profile.</param>
     public AuthorizeInteractionResponseGenerator(
         IdentityServerOptions options,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         ILogger<AuthorizeInteractionResponseGenerator> logger,
         IConsentService consent,
         IProfileService profile)
     {
         Options = options;
-        Clock = clock;
+        TimeProvider = timeProvider;
         Logger = logger;
         Consent = consent;
         Profile = profile;
@@ -257,7 +257,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         if (request.MaxAge.HasValue)
         {
             var authTime = request.Subject.GetAuthenticationTime();
-            if (Clock.GetUtcNow().UtcDateTime > authTime.AddSeconds(request.MaxAge.Value))
+            if (TimeProvider.GetUtcNow().UtcDateTime > authTime.AddSeconds(request.MaxAge.Value))
             {
                 Logger.LogInformation("Showing login: Requested MaxAge exceeded.");
 
@@ -287,7 +287,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         if (request.Client.UserSsoLifetime.HasValue)
         {
             var authTimeEpoch = request.Subject.GetAuthenticationTimeEpoch();
-            var nowEpoch = Clock.GetUtcNow().ToUnixTimeSeconds();
+            var nowEpoch = TimeProvider.GetUtcNow().ToUnixTimeSeconds();
 
             var diff = nowEpoch - authTimeEpoch;
             if (diff > request.Client.UserSsoLifetime.Value)

@@ -19,10 +19,10 @@ public class CustomAuthorizeInteractionResponseGenerator : Duende.IdentityServer
 {
     public CustomAuthorizeInteractionResponseGenerator(
         IdentityServerOptions options,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         ILogger<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator> logger,
         IConsentService consent,
-        IProfileService profile) : base(options, clock, logger, consent, profile)
+        IProfileService profile) : base(options, timeProvider, logger, consent, profile)
     {
     }
 
@@ -53,11 +53,11 @@ public class AuthorizeInteractionResponseGeneratorTests_Custom
     private IdentityServerOptions _options = new IdentityServerOptions();
     private CustomAuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
-    private FakeTimeProvider _clock = new FakeTimeProvider();
+    private FakeTimeProvider _timeProvider = new FakeTimeProvider();
 
     public AuthorizeInteractionResponseGeneratorTests_Custom() => _subject = new CustomAuthorizeInteractionResponseGenerator(
             _options,
-            _clock,
+            _timeProvider,
             TestLogger.Create<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator>(),
             _mockConsentService,
             new MockProfileService());

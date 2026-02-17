@@ -8,10 +8,10 @@ namespace UnitTests.Common;
 
 public class TestReplayCache : IReplayCache
 {
-    private readonly TimeProvider _clock;
+    private readonly TimeProvider _timeProvider;
     private Dictionary<string, DateTimeOffset> _values = new Dictionary<string, DateTimeOffset>();
 
-    public TestReplayCache(TimeProvider clock) => _clock = clock;
+    public TestReplayCache(TimeProvider clock) => _timeProvider = clock;
 
     public Task AddAsync(string purpose, string handle, DateTimeOffset expiration)
     {
@@ -23,7 +23,7 @@ public class TestReplayCache : IReplayCache
     {
         if (_values.TryGetValue(purpose + handle, out var expiration))
         {
-            return Task.FromResult(_clock.GetUtcNow() <= expiration);
+            return Task.FromResult(_timeProvider.GetUtcNow() <= expiration);
         }
         return Task.FromResult(false);
     }

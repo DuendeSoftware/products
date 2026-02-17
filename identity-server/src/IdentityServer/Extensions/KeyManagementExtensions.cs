@@ -20,9 +20,9 @@ public static class KeyManagementExtensions
 
     internal static bool IsWithinInitializationDuration(this KeyManagementOptions options, TimeSpan age) => (age <= options.InitializationDuration);
 
-    internal static TimeSpan GetAge(this TimeProvider clock, DateTime date)
+    internal static TimeSpan GetAge(this TimeProvider timeProvider, DateTime date)
     {
-        var now = clock.GetUtcNow().UtcDateTime;
+        var now = timeProvider.GetUtcNow().UtcDateTime;
         if (date > now)
         {
             now = date;

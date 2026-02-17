@@ -72,7 +72,7 @@ public class CustomTokenCreationServiceTests
 
 public class CustomTokenCreationService : DefaultTokenCreationService
 {
-    public CustomTokenCreationService(TimeProvider clock, IKeyMaterialService keys, IdentityServerOptions options, ILogger<DefaultTokenCreationService> logger) : base(clock, keys, options, logger)
+    public CustomTokenCreationService(TimeProvider timeProvider, IKeyMaterialService keys, IdentityServerOptions options, ILogger<DefaultTokenCreationService> logger) : base(timeProvider, keys, options, logger)
     {
     }
 

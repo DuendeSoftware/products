@@ -13,7 +13,7 @@ public class LicenseExpirationCheckerTests
 {
     private readonly IdentityServerOptions _options;
     private readonly LicenseAccessor _licenseAccessor;
-    private readonly FakeTimeProvider _mockSystemClock;
+    private readonly FakeTimeProvider _mockTimeProvider;
     private readonly FakeLogger<LicenseExpirationChecker> _logger;
     private readonly LicenseExpirationChecker _expirationCheck;
 
@@ -27,9 +27,9 @@ public class LicenseExpirationCheckerTests
     {
         _options = new IdentityServerOptions();
         _licenseAccessor = new LicenseAccessor(_options, new NullLogger<LicenseAccessor>());
-        _mockSystemClock = new FakeTimeProvider();
+        _mockTimeProvider = new FakeTimeProvider();
         _logger = new FakeLogger<LicenseExpirationChecker>();
-        _expirationCheck = new LicenseExpirationChecker(_licenseAccessor, _mockSystemClock, new StubLoggerFactory(_logger));
+        _expirationCheck = new LicenseExpirationChecker(_licenseAccessor, _mockTimeProvider, new StubLoggerFactory(_logger));
     }
 
     [Theory]
@@ -37,7 +37,7 @@ public class LicenseExpirationCheckerTests
     public void warning_is_logged_for_expired_license(string licenseKey)
     {
         _options.LicenseKey = licenseKey;
-        _mockSystemClock.SetUtcNow(_licenseExpiration.AddDays(1));
+        _mockTimeProvider.SetUtcNow(_licenseExpiration.AddDays(1));
 
         _expirationCheck.CheckExpiration();
 
@@ -53,7 +53,7 @@ public class LicenseExpirationCheckerTests
     public void no_warning_is_logged_for_unexpired_license(string licenseKey)
     {
         _options.LicenseKey = licenseKey;
-        _mockSystemClock.SetUtcNow(_licenseExpiration.AddDays(-1));
+        _mockTimeProvider.SetUtcNow(_licenseExpiration.AddDays(-1));
 
         _expirationCheck.CheckExpiration();
 
@@ -66,7 +66,7 @@ public class LicenseExpirationCheckerTests
     public void no_expired_license_warning_for_redistribution_license(string licenseKey)
     {
         _options.LicenseKey = licenseKey;
-        _mockSystemClock.SetUtcNow(_licenseExpiration.AddDays(1));
+        _mockTimeProvider.SetUtcNow(_licenseExpiration.AddDays(1));
 
         _licenseAccessor.Current.Redistribution.ShouldBeTrue();
 

@@ -45,9 +45,9 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     protected readonly ILogger Logger;
 
     /// <summary>
-    /// The clock
+    /// The time provider
     /// </summary>
-    protected readonly TimeProvider Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The key material service
@@ -58,7 +58,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Initializes a new instance of the <see cref="AuthorizeResponseGenerator"/> class.
     /// </summary>
     /// <param name="options">The options.</param>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="logger">The logger.</param>
     /// <param name="tokenService">The token service.</param>
     /// <param name="keyMaterialService"></param>
@@ -66,7 +66,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// <param name="events">The events.</param>
     public AuthorizeResponseGenerator(
         IdentityServerOptions options,
-        TimeProvider clock,
+        TimeProvider timeProvider,
         ITokenService tokenService,
         IKeyMaterialService keyMaterialService,
         IAuthorizationCodeStore authorizationCodeStore,
@@ -74,7 +74,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
         IEventService events)
     {
         Options = options;
-        Clock = clock;
+        TimeProvider = timeProvider;
         TokenService = tokenService;
         KeyMaterialService = keyMaterialService;
         AuthorizationCodeStore = authorizationCodeStore;
@@ -249,7 +249,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
 
         var code = new AuthorizationCode
         {
-            CreationTime = Clock.GetUtcNow().UtcDateTime,
+            CreationTime = TimeProvider.GetUtcNow().UtcDateTime,
             ClientId = request.Client.ClientId,
             Lifetime = request.Client.AuthorizationCodeLifetime,
             Subject = request.Subject,
