@@ -14,6 +14,7 @@ using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 
@@ -46,7 +47,7 @@ public class AuthorizeResultTests
         _options.UserInteraction.ErrorUrl = "~/error";
         _options.UserInteraction.ErrorIdParameter = "errorId";
 
-        _subject = new AuthorizeHttpWriter(_options, _mockUserSession, new TestPushedAuthorizationService(), _mockErrorMessageStore, _urls, new StubClock());
+        _subject = new AuthorizeHttpWriter(_options, _mockUserSession, new TestPushedAuthorizationService(), _mockErrorMessageStore, _urls, new FakeTimeProvider());
     }
 
     [Fact]

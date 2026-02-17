@@ -8,6 +8,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -33,7 +34,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
     public async Task First_Poll()
     {
         var handle = Guid.NewGuid().ToString();
-        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
+        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new FakeTimeProvider(testDate), options);
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 
@@ -46,7 +47,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
     public async Task Second_Poll_Too_Fast()
     {
         var handle = Guid.NewGuid().ToString();
-        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
+        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new FakeTimeProvider(testDate), options);
 
         await cache.SetAsync(CacheKey + handle, Encoding.UTF8.GetBytes(testDate.AddSeconds(-1).ToString("O")));
 
@@ -62,7 +63,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
     {
         var handle = Guid.NewGuid().ToString();
 
-        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
+        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new FakeTimeProvider(testDate), options);
 
         await cache.SetAsync($"devicecode_{handle}", Encoding.UTF8.GetBytes(testDate.AddSeconds(-deviceCode.Lifetime - 1).ToString("O")));
 
@@ -82,7 +83,7 @@ public class DistributedDeviceFlowThrottlingServiceTests
         var handle = Guid.NewGuid().ToString();
         deviceCode.CreationTime = testDate.AddSeconds(-deviceCode.Lifetime * 2);
 
-        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new StubClock { UtcNowFunc = () => testDate }, options);
+        var service = new DistributedDeviceFlowThrottlingService(cache, _store, new FakeTimeProvider(testDate), options);
 
         var result = await service.ShouldSlowDown(handle, deviceCode);
 

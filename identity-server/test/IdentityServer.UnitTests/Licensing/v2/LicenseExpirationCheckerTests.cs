@@ -5,6 +5,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace IdentityServer.UnitTests.Licensing.V2;
@@ -13,7 +14,7 @@ public class LicenseExpirationCheckerTests
 {
     private readonly IdentityServerOptions _options;
     private readonly LicenseAccessor _licenseAccessor;
-    private readonly MockSystemClock _mockSystemClock;
+    private readonly FakeTimeProvider _mockSystemClock;
     private readonly FakeLogger<LicenseExpirationChecker> _logger;
     private readonly LicenseExpirationChecker _expirationCheck;
 
@@ -27,7 +28,7 @@ public class LicenseExpirationCheckerTests
     {
         _options = new IdentityServerOptions();
         _licenseAccessor = new LicenseAccessor(_options, new NullLogger<LicenseAccessor>());
-        _mockSystemClock = new MockSystemClock();
+        _mockSystemClock = new FakeTimeProvider();
         _logger = new FakeLogger<LicenseExpirationChecker>();
         _expirationCheck = new LicenseExpirationChecker(_licenseAccessor, _mockSystemClock, new StubLoggerFactory(_logger));
     }
@@ -37,7 +38,7 @@ public class LicenseExpirationCheckerTests
     public void warning_is_logged_for_expired_license(string licenseKey)
     {
         _options.LicenseKey = licenseKey;
-        _mockSystemClock.Now = _licenseExpiration.AddDays(1);
+        _mockSystemClock.SetUtcNow(_licenseExpiration.AddDays(1));
 
         _expirationCheck.CheckExpiration();
 
@@ -53,7 +54,7 @@ public class LicenseExpirationCheckerTests
     public void no_warning_is_logged_for_unexpired_license(string licenseKey)
     {
         _options.LicenseKey = licenseKey;
-        _mockSystemClock.Now = _licenseExpiration.AddDays(-1);
+        _mockSystemClock.SetUtcNow(_licenseExpiration.AddDays(-1));
 
         _expirationCheck.CheckExpiration();
 
@@ -66,7 +67,7 @@ public class LicenseExpirationCheckerTests
     public void no_expired_license_warning_for_redistribution_license(string licenseKey)
     {
         _options.LicenseKey = licenseKey;
-        _mockSystemClock.Now = _licenseExpiration.AddDays(1);
+        _mockSystemClock.SetUtcNow(_licenseExpiration.AddDays(1));
 
         _licenseAccessor.Current.Redistribution.ShouldBeTrue();
 

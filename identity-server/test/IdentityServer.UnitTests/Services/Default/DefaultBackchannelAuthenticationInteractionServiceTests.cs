@@ -7,6 +7,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -20,7 +21,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
     private InMemoryClientStore _clientStore;
     private List<Client> _clients = new List<Client>();
     private MockUserSession _mockUserSession = new MockUserSession();
-    private MockSystemClock _mockSystemClock = new MockSystemClock() { Now = DateTimeOffset.UtcNow };
+    private FakeTimeProvider _mockSystemClock = new FakeTimeProvider(DateTimeOffset.UtcNow);
     private MockResourceValidator _mockResourceValidator = new MockResourceValidator();
 
     public DefaultBackchannelAuthenticationInteractionServiceTests()
@@ -326,6 +327,6 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
 
         var item = _mockStore.Items[requestId];
         item.Subject.HasClaim("idp", "local").ShouldBeTrue();
-        item.Subject.HasClaim("auth_time", _mockSystemClock.UtcNow.ToUnixTimeSeconds().ToString()).ShouldBeTrue();
+        item.Subject.HasClaim("auth_time", _mockSystemClock.GetUtcNow().ToUnixTimeSeconds().ToString()).ShouldBeTrue();
     }
 }

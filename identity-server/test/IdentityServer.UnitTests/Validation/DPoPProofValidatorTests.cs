@@ -13,6 +13,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using UnitTests.Common;
@@ -24,7 +25,7 @@ public class DPoPProofValidatorTests
     private const string Category = "DPoP validator tests";
 
     private IdentityServerOptions _options = new IdentityServerOptions();
-    private StubClock _clock = new StubClock();
+    private FakeTimeProvider _clock = new FakeTimeProvider();
     private TestReplayCache _testReplayCache;
     private StubDataProtectionProvider _stubDataProtectionProvider = new StubDataProtectionProvider();
 
@@ -62,7 +63,7 @@ public class DPoPProofValidatorTests
         _options.DPoP.ProofTokenValidityDuration = TimeSpan.FromMinutes(1);
         _options.DPoP.ServerClockSkew = TimeSpan.Zero;
 
-        _clock.UtcNowFunc = () => UtcNow;
+        _clock.SetUtcNow(UtcNow);
         _testReplayCache = new TestReplayCache(_clock);
 
         _subject = new DefaultDPoPProofValidator(
@@ -77,7 +78,7 @@ public class DPoPProofValidatorTests
             { "jti", "random" },
             { "htm", "POST" },
             { "htu", "https://identityserver/connect/token" },
-            { "iat", _clock.UtcNow.ToUnixTimeSeconds() },
+            { "iat", _clock.GetUtcNow().ToUnixTimeSeconds() },
         };
 
         CreateHeaderValuesFromPublicKey();
@@ -706,7 +707,7 @@ public class DPoPProofValidatorTests
     [Trait("Category", Category)]
     public async Task too_old_iat_should_fail_validation()
     {
-        _payload["iat"] = _clock.UtcNow.Subtract(TimeSpan.FromSeconds(61)).ToUnixTimeSeconds();
+        _payload["iat"] = _clock.GetUtcNow().Subtract(TimeSpan.FromSeconds(61)).ToUnixTimeSeconds();
 
         _context.ProofToken = CreateDPoPProofToken();
 
@@ -720,7 +721,7 @@ public class DPoPProofValidatorTests
     [Trait("Category", Category)]
     public async Task too_new_iat_should_fail_validation()
     {
-        _payload["iat"] = _clock.UtcNow.Add(TimeSpan.FromSeconds(1)).ToUnixTimeSeconds();
+        _payload["iat"] = _clock.GetUtcNow().Add(TimeSpan.FromSeconds(1)).ToUnixTimeSeconds();
 
         _context.ProofToken = CreateDPoPProofToken();
 
@@ -734,7 +735,7 @@ public class DPoPProofValidatorTests
     [Trait("Category", Category)]
     public async Task too_old_but_within_clock_skew_iat_should_succeed()
     {
-        _payload["iat"] = _clock.UtcNow.Subtract(TimeSpan.FromSeconds(61)).ToUnixTimeSeconds();
+        _payload["iat"] = _clock.GetUtcNow().Subtract(TimeSpan.FromSeconds(61)).ToUnixTimeSeconds();
 
         _context.ProofToken = CreateDPoPProofToken();
         _context.ClientClockSkew = TimeSpan.FromMinutes(1);
@@ -750,7 +751,7 @@ public class DPoPProofValidatorTests
     {
         _context.ClientClockSkew = TimeSpan.FromMinutes(1);
 
-        _payload["iat"] = _clock.UtcNow.Subtract(TimeSpan.FromSeconds(121)).ToUnixTimeSeconds();
+        _payload["iat"] = _clock.GetUtcNow().Subtract(TimeSpan.FromSeconds(121)).ToUnixTimeSeconds();
 
         _context.ProofToken = CreateDPoPProofToken();
 
@@ -766,7 +767,7 @@ public class DPoPProofValidatorTests
     {
         _context.ClientClockSkew = TimeSpan.FromMinutes(1);
 
-        _payload["iat"] = _clock.UtcNow.Add(TimeSpan.FromSeconds(59)).ToUnixTimeSeconds();
+        _payload["iat"] = _clock.GetUtcNow().Add(TimeSpan.FromSeconds(59)).ToUnixTimeSeconds();
 
         _context.ProofToken = CreateDPoPProofToken();
 
@@ -781,7 +782,7 @@ public class DPoPProofValidatorTests
     {
         _context.ClientClockSkew = TimeSpan.FromMinutes(1);
 
-        _payload["iat"] = _clock.UtcNow.Add(TimeSpan.FromSeconds(61)).ToUnixTimeSeconds();
+        _payload["iat"] = _clock.GetUtcNow().Add(TimeSpan.FromSeconds(61)).ToUnixTimeSeconds();
 
         _context.ProofToken = CreateDPoPProofToken();
 

@@ -8,6 +8,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Tokens;
 using UnitTests.Common;
 using UnitTests.Services.Default.KeyManagement;
@@ -20,7 +21,7 @@ public class DefaultBackChannelLogoutServiceTests
     private class ServiceTestHarness : DefaultBackChannelLogoutService
     {
         public ServiceTestHarness(
-            IClock clock,
+            TimeProvider clock,
             IIdentityServerTools tools,
             ILogoutNotificationService logoutNotificationService,
             IBackChannelLogoutHttpClient backChannelLogoutHttpClient,
@@ -44,13 +45,13 @@ public class DefaultBackChannelLogoutServiceTests
         var signingKey = new SigningCredentials(CryptoHelper.CreateRsaSecurityKey(), CryptoHelper.GetRsaSigningAlgorithmValue(IdentityServerConstants.RsaSigningAlgorithm.RS256));
         mockKeyMaterialService.SigningCredentials.Add(signingKey);
 
-        var tokenCreation = new DefaultTokenCreationService(new MockClock(), mockKeyMaterialService, TestIdentityServerOptions.Create(), TestLogger.Create<DefaultTokenCreationService>());
+        var tokenCreation = new DefaultTokenCreationService(new FakeTimeProvider(), mockKeyMaterialService, TestIdentityServerOptions.Create(), TestLogger.Create<DefaultTokenCreationService>());
 
         var issuerNameService = new TestIssuerNameService(expected);
         var tools = new IdentityServerTools(
             issuerNameService,
             tokenCreation,
-            new MockClock(),
+            new FakeTimeProvider(),
             TestIdentityServerOptions.Create()
         );
 

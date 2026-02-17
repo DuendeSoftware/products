@@ -9,6 +9,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -21,13 +22,13 @@ public class DefaultConsentServiceTests
     private ClaimsPrincipal _user;
     private Client _client;
     private TestUserConsentStore _userConsentStore = new TestUserConsentStore();
-    private StubClock _clock = new StubClock();
+    private FakeTimeProvider _clock = new FakeTimeProvider();
 
     private DateTime now;
 
     public DefaultConsentServiceTests()
     {
-        _clock.UtcNowFunc = () => UtcNow;
+        _clock.SetUtcNow(UtcNow);
 
         _client = new Client
         {

@@ -7,6 +7,7 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 using UnitTests.Validation.Setup;
 
@@ -18,7 +19,7 @@ public class AccessTokenValidation
 
     private IClientStore _clients = Factory.CreateClientStore();
     private IdentityServerOptions _options = new IdentityServerOptions();
-    private StubClock _clock = new StubClock();
+    private FakeTimeProvider _clock = new FakeTimeProvider();
 
     static AccessTokenValidation() => JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -36,7 +37,7 @@ public class AccessTokenValidation
         }
     }
 
-    public AccessTokenValidation() => _clock.UtcNowFunc = () => UtcNow;
+    public AccessTokenValidation() => _clock.SetUtcNow(UtcNow);
 
     [Fact]
     [Trait("Category", Category)]
@@ -232,9 +233,9 @@ public class AccessTokenValidation
     [Trait("Category", Category)]
     public async Task JWT_respects_clock_skew_setting_to_allow_token_with_off_time()
     {
-        var futureClock = new StubClock();
+        var futureClock = new FakeTimeProvider();
         var definitelyNotNow = DateTime.UtcNow.AddSeconds(9);
-        futureClock.UtcNowFunc = () => definitelyNotNow;
+        futureClock.SetUtcNow(definitelyNotNow);
         var signer = Factory.CreateDefaultTokenCreator(clock: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
         var jwt = await signer.CreateTokenAsync(token);
@@ -251,9 +252,9 @@ public class AccessTokenValidation
     [Trait("Category", Category)]
     public async Task Jwt_when_token_time_outside_of_configured_clock_skew_token_is_considered_invalid()
     {
-        var futureClock = new StubClock();
+        var futureClock = new FakeTimeProvider();
         var definitelyNotNow = DateTime.UtcNow.AddSeconds(10);
-        futureClock.UtcNowFunc = () => definitelyNotNow;
+        futureClock.SetUtcNow(definitelyNotNow);
         var signer = Factory.CreateDefaultTokenCreator(clock: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
         var jwt = await signer.CreateTokenAsync(token);

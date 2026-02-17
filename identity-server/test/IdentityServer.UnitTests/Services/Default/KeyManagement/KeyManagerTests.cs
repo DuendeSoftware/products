@@ -9,6 +9,7 @@ using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services.KeyManagement;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Validation.Setup;
 
 namespace UnitTests.Services.Default.KeyManagement;
@@ -24,7 +25,7 @@ public class KeyManagerTests
     private MockSigningKeyStore _mockKeyStore = new MockSigningKeyStore();
     private MockSigningKeyStoreCache _mockKeyStoreCache = new MockSigningKeyStoreCache();
     private MockSigningKeyProtector _mockKeyProtector = new MockSigningKeyProtector();
-    private MockClock _mockClock = new MockClock(new DateTime(2018, 3, 10, 9, 0, 0));
+    private FakeTimeProvider _mockClock = new FakeTimeProvider(new DateTimeOffset(new DateTime(2018, 3, 10, 9, 0, 0)));
 
     public KeyManagerTests()
     {
@@ -54,7 +55,7 @@ public class KeyManagerTests
     {
         var key = _options.KeyManagement.CreateRsaSecurityKey();
 
-        var date = _mockClock.UtcNow.UtcDateTime;
+        var date = _mockClock.GetUtcNow().UtcDateTime;
         if (age.HasValue)
         {
             date = date.Subtract(age.Value);
@@ -929,7 +930,7 @@ public class KeyManagerTests
         _mockKeyProtector.ProtectWasCalled.ShouldBeTrue();
         _mockKeyStore.Keys.Count.ShouldBe(1);
         _mockKeyStore.Keys.Single().Id.ShouldBe(result.Id);
-        result.Created.ShouldBe(_mockClock.UtcNow.UtcDateTime);
+        result.Created.ShouldBe(_mockClock.GetUtcNow().UtcDateTime);
         result.Algorithm.ShouldBe("RS256");
     }
 

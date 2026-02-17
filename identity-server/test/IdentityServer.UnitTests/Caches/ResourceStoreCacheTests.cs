@@ -7,6 +7,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Services.Default.KeyManagement;
 
 
@@ -19,7 +20,7 @@ public class ResourceStoreCacheTests
     private List<ApiResource> _resources { get; set; } = new List<ApiResource>();
     private List<ApiScope> _scopes { get; set; } = new List<ApiScope>();
 
-    private MockClock _mockClock = new MockClock() { UtcNow = new DateTimeOffset(2022, 8, 9, 9, 0, 0, TimeSpan.Zero) };
+    private FakeTimeProvider _mockClock = new FakeTimeProvider(new DateTimeOffset(2022, 8, 9, 9, 0, 0, TimeSpan.Zero));
     private ServiceProvider _provider;
 
     public ResourceStoreCacheTests()
@@ -44,7 +45,7 @@ public class ResourceStoreCacheTests
 
         services.AddSingleton(typeof(MockCache<>));
         services.AddSingleton(typeof(ICache<>), typeof(MockCache<>));
-        services.AddSingleton<IClock>(_mockClock);
+        services.AddSingleton<TimeProvider>(_mockClock);
 
         _provider = services.BuildServiceProvider();
     }

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer;
 using Duende.IdentityServer.Services;
 
 namespace IdentityServer.UnitTests.Caches;
@@ -10,7 +9,7 @@ namespace IdentityServer.UnitTests.Caches;
 public class MockCache<T> : ICache<T>
     where T : class
 {
-    public MockCache(IClock clock) => _clock = clock;
+    public MockCache(TimeProvider clock) => _clock = clock;
 
     public class CacheItem
     {
@@ -20,13 +19,13 @@ public class MockCache<T> : ICache<T>
 
     public Dictionary<string, CacheItem> CacheItems = new Dictionary<string, CacheItem>();
 
-    private readonly IClock _clock;
+    private readonly TimeProvider _clock;
 
     private bool TryGetValue(string key, out T item)
     {
         if (CacheItems.TryGetValue(key, out var cacheItem))
         {
-            if (cacheItem.Expiration <= _clock.UtcNow)
+            if (cacheItem.Expiration <= _clock.GetUtcNow())
             {
                 item = cacheItem.Value;
                 return true;
@@ -42,7 +41,7 @@ public class MockCache<T> : ICache<T>
         var ci = new CacheItem
         {
             Value = item,
-            Expiration = _clock.UtcNow.Add(duration),
+            Expiration = _clock.GetUtcNow().Add(duration),
         };
         CacheItems[key] = ci;
     }
