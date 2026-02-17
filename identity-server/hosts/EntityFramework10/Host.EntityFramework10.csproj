@@ -25,10 +25,10 @@
   <ItemGroup>
     <ProjectReference Include="..\UI\EntityFramework\UI.EntityFramework.csproj" />
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
-    <ProjectReference Include="..\..\src\Configuration.EntityFramework\Duende.IdentityServer.Configuration.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\src\Configuration\IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\Configuration.EntityFramework\IdentityServer.Configuration.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\EntityFramework\IdentityServer.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
     <ProjectReference Include="..\Shared\Host.Shared.csproj" />
   </ItemGroup>
 </Project>

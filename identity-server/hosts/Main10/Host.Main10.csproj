@@ -23,8 +23,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
-    <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\src\Configuration\IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
     <ProjectReference Include="..\UI\Main\UI.Main.csproj" />
     <ProjectReference Include="..\Shared\Host.Shared.csproj" />
   </ItemGroup>

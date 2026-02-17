@@ -40,9 +40,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\ShouldlyExtensions\ShouldlyExtensions.csproj" />
-    <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
-    <ProjectReference Include="..\..\src\Configuration.EntityFramework\Duende.IdentityServer.Configuration.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\src\Configuration\IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\Configuration.EntityFramework\IdentityServer.Configuration.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\EntityFramework\IdentityServer.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
 </Project>

@@ -29,7 +29,7 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\..\src\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

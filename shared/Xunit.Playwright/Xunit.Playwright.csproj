@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>Duende.Xunit.Playwright</AssemblyName>
     <RootNamespace>Duende.Xunit.Playwright</RootNamespace>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <IsTestProject>false</IsTestProject>

@@ -4,6 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
 
     <PackageId>Duende.IdentityServer.Storage</PackageId>
+    <AssemblyName>Duende.IdentityServer.Storage</AssemblyName>
+    <RootNamespace>Duende.IdentityServer.Storage</RootNamespace>
     <Description>Storage interfaces and models for Duende IdentityServer</Description>
   </PropertyGroup>
 

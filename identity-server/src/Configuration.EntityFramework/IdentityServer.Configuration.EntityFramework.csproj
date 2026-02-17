@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Duende.IdentityServer.Configuration.EntityFramework</PackageId>
+    <AssemblyName>Duende.IdentityServer.Configuration.EntityFramework</AssemblyName>
+    <RootNamespace>Duende.IdentityServer.Configuration.EntityFramework</RootNamespace>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Configuration\IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\Storage\IdentityServer.Storage.csproj" />
+    <ProjectReference
+      Include="..\EntityFramework.Storage\IdentityServer.EntityFramework.Storage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
+</Project>

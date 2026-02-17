@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\..\src\AspNetIdentity\IdentityServer.AspNetIdentity.csproj" />
     <ProjectReference Include="..\Main\UI.Main.csproj" />
   </ItemGroup>
 </Project>

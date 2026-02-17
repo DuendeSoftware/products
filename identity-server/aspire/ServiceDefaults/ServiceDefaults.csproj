@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Duende.Xunit.Playwright.csproj" />
-    <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
 
 </Project>

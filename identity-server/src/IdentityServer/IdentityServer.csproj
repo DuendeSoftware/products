@@ -5,6 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Description>OpenID Connect and OAuth 2.0 Framework for ASP.NET Core</Description>
     <AssemblyName>Duende.IdentityServer</AssemblyName>
+    <RootNamespace>Duende.IdentityServer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
+    <ProjectReference Include="..\Storage\IdentityServer.Storage.csproj" />
   </ItemGroup>
 
   <ItemGroup>
