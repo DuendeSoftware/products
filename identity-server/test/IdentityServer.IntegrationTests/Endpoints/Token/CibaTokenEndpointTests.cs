@@ -8,9 +8,8 @@ using System.Text.Json;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using Duende.IdentityServer.Test;
-using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
 
@@ -484,8 +483,8 @@ public class CibaTokenEndpointTests
     [Trait("Category", Category)]
     public async Task expired_request_should_return_error()
     {
-        var clock = new MockClock();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<IClock>(clock);
+        var clock = new FakeTimeProvider();
+        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -523,7 +522,7 @@ public class CibaTokenEndpointTests
 
 
         // token request
-        clock.UtcNow = DateTimeOffset.UtcNow.AddHours(1);
+        clock.SetUtcNow(DateTimeOffset.UtcNow.AddHours(1));
 
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(await cibaResponse.Content.ReadAsStringAsync());
         var requestId = values["auth_req_id"].ToString();
@@ -553,8 +552,8 @@ public class CibaTokenEndpointTests
     [Trait("Category", Category)]
     public async Task too_frequent_request_should_return_error()
     {
-        var clock = new MockClock();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<IClock>(clock);
+        var clock = new FakeTimeProvider();
+        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -628,8 +627,8 @@ public class CibaTokenEndpointTests
     [Trait("Category", Category)]
     public async Task calls_past_interval_should_reset_throttling()
     {
-        var clock = new MockClock();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<IClock>(clock);
+        var clock = new FakeTimeProvider();
+        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -698,7 +697,7 @@ public class CibaTokenEndpointTests
             values["error"].ToString().ShouldBe("slow_down");
         }
 
-        clock.UtcNow = clock.UtcNow.AddSeconds(_mockPipeline.Options.Ciba.DefaultPollingInterval);
+        clock.Advance(TimeSpan.FromSeconds(_mockPipeline.Options.Ciba.DefaultPollingInterval));
 
         {
             var tokenBody = new Dictionary<string, string>
@@ -750,8 +749,8 @@ public class CibaTokenEndpointTests
     {
         _cibaClient.PollingInterval = 10;
 
-        var clock = new MockClock();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<IClock>(clock);
+        var clock = new FakeTimeProvider();
+        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -820,7 +819,7 @@ public class CibaTokenEndpointTests
             values["error"].ToString().ShouldBe("slow_down");
         }
 
-        clock.UtcNow = clock.UtcNow.AddSeconds(6);
+        clock.Advance(TimeSpan.FromSeconds(6));
 
         {
             var tokenBody = new Dictionary<string, string>
@@ -844,7 +843,7 @@ public class CibaTokenEndpointTests
             values["error"].ToString().ShouldBe("slow_down");
         }
 
-        clock.UtcNow = clock.UtcNow.AddSeconds(10);
+        clock.Advance(TimeSpan.FromSeconds(10));
 
         {
             var tokenBody = new Dictionary<string, string>
@@ -896,8 +895,8 @@ public class CibaTokenEndpointTests
     {
         _cibaClient.CibaLifetime = 100;
 
-        var clock = new MockClock();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<IClock>(clock);
+        var clock = new FakeTimeProvider();
+        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -945,7 +944,7 @@ public class CibaTokenEndpointTests
             values["error"].ToString().ShouldBe("authorization_pending");
         }
 
-        clock.UtcNow = clock.UtcNow.AddSeconds(_cibaClient.CibaLifetime.Value + 1);
+        clock.Advance(TimeSpan.FromSeconds(_cibaClient.CibaLifetime.Value + 1));
 
         {
             var tokenBody = new Dictionary<string, string>

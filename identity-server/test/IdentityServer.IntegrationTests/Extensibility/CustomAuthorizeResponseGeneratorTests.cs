@@ -85,7 +85,7 @@ public class CustomAuthorizeResponseGeneratorTests
 
 public class CustomAuthorizeResponseGenerator(
     IdentityServerOptions options,
-    IClock clock,
+    TimeProvider clock,
     ITokenService tokenService,
     IKeyMaterialService keyMaterialService,
     IAuthorizationCodeStore authorizationCodeStore,
