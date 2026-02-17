@@ -10,3 +10,10 @@
 *.css linguist-vendored=true
 *.html linguist-vendored=true
 *.json linguist-vendored=true
+
+# Line endings - enforce LF for all text files
+* text=auto eol=lf
+
+# Binary files
+*.pfx binary
+*.snk binary
