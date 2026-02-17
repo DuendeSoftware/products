@@ -28,9 +28,7 @@ public class InMemoryKeyStoreCacheTests
         var result = await _subject.GetKeysAsync();
         result.ShouldBeSameAs(keys);
 
-        // Note: FakeTimeProvider doesn't support going backwards in time,
-        // so we skip that test case and just verify the forward time cases
-
+        // Verify keys remain cached as time advances within expiration window
         _mockTimeProvider.SetUtcNow(now.Add(TimeSpan.FromSeconds(59)));
         result = await _subject.GetKeysAsync();
         result.ShouldBeSameAs(keys);
