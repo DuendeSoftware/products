@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using System.Net;
+using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication;
@@ -310,5 +311,60 @@ public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
 
         var response = await Bff.BrowserClient.GetAsync(Bff.Url("/not-found"));
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+
+    public async Task authorization_policy_failure_should_return_403()
+    {
+        var identityServer = new IdentityServerTestHost(Context);
+        var bff = new BffTestHost(Context, identityServer);
+        identityServer.AddClient(The.ClientId, bff.Url());
+
+        bff.OnConfigureBffOptions += opt =>
+        {
+            opt.BackchannelHttpHandler = Internet;
+            opt.ConfigureOpenIdConnectDefaults = The.DefaultOpenIdConnectConfiguration;
+        };
+
+        // this is regards to an issue reported by one of our users:
+        // https://github.com/orgs/DuendeSoftware/discussions/488
+        // We have to explicitly configure the authentication schemes, but
+        // not set the DefaultForbidScheme, otherwise when an authorization policy
+        // fails, the BFF doesn't know which scheme to use for the forbid response,
+        // and that causes a StackOverflowException.
+        bff.OnConfigureServices += s => s.AddAuthentication(options =>
+        {
+            options.DefaultScheme = BffAuthenticationSchemes.BffCookie;
+            options.DefaultChallengeScheme = BffAuthenticationSchemes.BffOpenIdConnect;
+            options.DefaultSignOutScheme = BffAuthenticationSchemes.BffOpenIdConnect;
+        });
+
+        // This test verifies that when an authorization policy fails (not just RequireAuthenticatedUser,
+        // but a custom policy like RequireClaim), the BFF correctly returns 403 without causing
+        // a StackOverflowException. This was a bug when DefaultForbidScheme was not set.
+        AddCustomUserClaims(new System.Security.Claims.Claim("given_name", "Alice"));
+
+        bff.OnConfigureApp += app =>
+        {
+            app.Map(The.Path, c => ApiHost.ReturnApiCallDetails(c, () => LocalApiResponseStatus))
+                .RequireAuthorization(policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("given_name", "Bob"); // Alice won't have this claim
+                })
+                .AsBffApiEndpoint();
+        };
+
+        await identityServer.InitializeAsync();
+        await bff.InitializeAsync();
+
+        await bff.BrowserClient.Login();
+        bff.BrowserClient.RedirectHandler.AutoFollowRedirects = false;
+
+        await bff.BrowserClient.CallBffHostApi(
+            url: Bff.Url(The.Path),
+            expectedStatusCode: HttpStatusCode.Forbidden
+        );
     }
 }
