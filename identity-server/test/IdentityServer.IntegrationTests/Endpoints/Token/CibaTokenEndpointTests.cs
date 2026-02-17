@@ -11,6 +11,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Test;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Token;
@@ -554,8 +555,8 @@ public class CibaTokenEndpointTests
     [Trait("Category", Category)]
     public async Task too_frequent_request_should_return_error()
     {
-        var clock = new FakeTimeProvider();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
+        var clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        _mockPipeline.OnPreConfigureServices += s => s.TryAddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -629,8 +630,8 @@ public class CibaTokenEndpointTests
     [Trait("Category", Category)]
     public async Task calls_past_interval_should_reset_throttling()
     {
-        var clock = new FakeTimeProvider();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
+        var clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        _mockPipeline.OnPreConfigureServices += s => s.TryAddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -751,8 +752,8 @@ public class CibaTokenEndpointTests
     {
         _cibaClient.PollingInterval = 10;
 
-        var clock = new FakeTimeProvider();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
+        var clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        _mockPipeline.OnPreConfigureServices += s => s.TryAddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
