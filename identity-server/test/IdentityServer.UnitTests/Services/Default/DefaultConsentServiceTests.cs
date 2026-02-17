@@ -183,6 +183,7 @@ public class DefaultConsentServiceTests
         await _subject.UpdateConsentAsync(_user, _client, scopes);
 
         now = now.AddSeconds(3);
+        _clock.SetUtcNow(now);
 
         var result = await _subject.RequiresConsentAsync(_user, _client, scopes);
 
@@ -200,6 +201,7 @@ public class DefaultConsentServiceTests
         await _subject.UpdateConsentAsync(_user, _client, scopes);
 
         now = now.AddSeconds(3);
+        _clock.SetUtcNow(now);
 
         await _subject.RequiresConsentAsync(_user, _client, scopes);
 

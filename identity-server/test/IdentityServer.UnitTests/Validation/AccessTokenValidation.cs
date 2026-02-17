@@ -141,6 +141,7 @@ public class AccessTokenValidation
         var handle = await store.StoreReferenceTokenAsync(token);
 
         now = now.AddSeconds(3);
+        _clock.SetUtcNow(now);
 
         var result = await validator.ValidateAccessTokenAsync(handle);
 

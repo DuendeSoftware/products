@@ -23,7 +23,7 @@ public class SecretValidation
     private IdentityServerOptions _options = new IdentityServerOptions();
 
     public SecretValidation() => _validator = new SecretValidator(
-            new FakeTimeProvider(),
+            new FakeTimeProvider(DateTimeOffset.UtcNow),
             new[] { _hashedSecretValidator },
             new Logger<SecretValidator>(new LoggerFactory()));
 

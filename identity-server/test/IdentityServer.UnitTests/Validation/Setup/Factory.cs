@@ -135,9 +135,9 @@ internal static class Factory
             resourceValidator,
             resourceStore,
             refreshTokenService,
-            new DefaultDPoPProofValidator(options, new MockReplayCache(), new FakeTimeProvider(), new StubDataProtectionProvider(), new LoggerFactory().CreateLogger<DefaultDPoPProofValidator>()),
+            new DefaultDPoPProofValidator(options, new MockReplayCache(), new FakeTimeProvider(DateTimeOffset.UtcNow), new StubDataProtectionProvider(), new LoggerFactory().CreateLogger<DefaultDPoPProofValidator>()),
             new TestEventService(),
-            new FakeTimeProvider(),
+            new FakeTimeProvider(DateTimeOffset.UtcNow),
             new LicenseUsageTracker(new LicenseAccessor(new IdentityServerOptions(), NullLogger<LicenseAccessor>.Instance), new NullLoggerFactory()),
             new ClientLoadedTracker(),
             new ResourceLoadedTracker(),
@@ -157,7 +157,7 @@ internal static class Factory
         var service = new DefaultRefreshTokenService(
             store,
             profile,
-            new FakeTimeProvider(),
+            new FakeTimeProvider(DateTimeOffset.UtcNow),
             options,
             TestLogger.Create<DefaultRefreshTokenService>());
 
@@ -172,7 +172,7 @@ internal static class Factory
 
     internal static ITokenCreationService CreateDefaultTokenCreator(IdentityServerOptions options = null,
         TimeProvider clock = null) => new DefaultTokenCreationService(
-            clock ?? new FakeTimeProvider(),
+            clock ?? new FakeTimeProvider(DateTimeOffset.UtcNow),
             new DefaultKeyMaterialService(
                 new IValidationKeysStore[] { },
                 new ISigningCredentialStore[] { new InMemorySigningCredentialsStore(TestCert.LoadSigningCredentials()) },
@@ -308,7 +308,7 @@ internal static class Factory
         options ??= TestIdentityServerOptions.Create();
         profile ??= new TestProfileService();
         store ??= CreateReferenceTokenStore();
-        clock ??= new FakeTimeProvider();
+        clock ??= new FakeTimeProvider(DateTimeOffset.UtcNow);
         refreshTokenStore ??= CreateRefreshTokenStore();
         issuerNameService ??= new TestIssuerNameService(options.IssuerUri);
 
@@ -349,7 +349,7 @@ internal static class Factory
     {
         profile = profile ?? new TestProfileService();
         throttlingService = throttlingService ?? new TestDeviceFlowThrottlingService();
-        clock = clock ?? new FakeTimeProvider();
+        clock = clock ?? new FakeTimeProvider(DateTimeOffset.UtcNow);
 
         var validator = new DeviceCodeValidator(service, profile, throttlingService, clock, TestLogger.Create<DeviceCodeValidator>());
 
@@ -384,7 +384,7 @@ internal static class Factory
                 new PlainTextSharedSecretValidator(TestLogger.Create<PlainTextSharedSecretValidator>())
             };
 
-            validator = new SecretValidator(new FakeTimeProvider(), validators, TestLogger.Create<SecretValidator>());
+            validator = new SecretValidator(new FakeTimeProvider(DateTimeOffset.UtcNow), validators, TestLogger.Create<SecretValidator>());
         }
 
         return new ClientSecretValidator(clients, parser, validator, new TestEventService(), TestLogger.Create<ClientSecretValidator>());
