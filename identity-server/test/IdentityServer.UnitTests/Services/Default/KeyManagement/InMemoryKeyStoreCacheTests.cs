@@ -30,7 +30,7 @@ public class InMemoryKeyStoreCacheTests
 
         // Note: FakeTimeProvider doesn't support going backwards in time,
         // so we skip that test case and just verify the forward time cases
-        
+
         _mockClock.SetUtcNow(now.Add(TimeSpan.FromSeconds(59)));
         result = await _subject.GetKeysAsync();
         result.ShouldBeSameAs(keys);

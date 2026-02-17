@@ -892,7 +892,7 @@ public class DPoPProofValidatorTests
         // Note: FakeTimeProvider doesn't support going backwards in time,
         // so we cannot test the "too early" case by subtracting seconds
         // The forward time test case above is sufficient to validate nonce expiration
-        
+
         //_payload["nonce"] = result.ServerIssuedNonce;
         //// too early
         //_now = _now.AddSeconds(-61);
