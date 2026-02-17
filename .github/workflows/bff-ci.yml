@@ -50,10 +50,7 @@ jobs:
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
-        dotnet-version: |-
-          8.0.x
-          9.0.203
-          10.0.100
+        dotnet-version: 10.0.100
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Verify Formatting
@@ -84,10 +81,7 @@ jobs:
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
-        dotnet-version: |-
-          8.0.x
-          9.0.203
-          10.0.100
+        dotnet-version: 10.0.100
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
@@ -133,10 +127,7 @@ jobs:
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
-        dotnet-version: |-
-          8.0.x
-          9.0.203
-          10.0.100
+        dotnet-version: 10.0.100
     - name: Restore
       run: dotnet restore bff.slnf
     - name: Build
@@ -220,10 +211,7 @@ jobs:
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
-        dotnet-version: |-
-          8.0.x
-          9.0.203
-          10.0.100
+        dotnet-version: 10.0.100
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack bff.slnf

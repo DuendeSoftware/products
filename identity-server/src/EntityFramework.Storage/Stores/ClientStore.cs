@@ -86,7 +86,6 @@ public class ClientStore : IClientStore
         return model;
     }
 
-#if NET10_0_OR_GREATER
     /// <inheritdoc/>
     public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync()
     {
@@ -114,5 +113,5 @@ public class ClientStore : IClientStore
 
         Logger.LogDebug("Retrieved {clientCount} clients for enumeration", clientCount);
     }
-#endif
 }
+

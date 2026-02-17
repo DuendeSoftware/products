@@ -258,7 +258,6 @@ public class DynamicProvidersTests
         response.Headers.Location.ToString().ShouldStartWith("https://idp2/connect/authorize");
     }
 
-#if NET5_0_OR_GREATER
     // the cookie processing in this workflow requires updates to .NET5 for our test browser and cookie container
     // https://github.com/dotnet/runtime/issues/26776
 
@@ -372,7 +371,7 @@ public class DynamicProvidersTests
         response = await _host.BrowserClient.GetAsync(_host.Url("/user"));
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
-#endif
+
 
     [Theory]
     [ClassData(typeof(DynamicProviderConfigurationData))]

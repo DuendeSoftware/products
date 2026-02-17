@@ -78,7 +78,6 @@ public class ValidatingClientStore<T> : IClientStore
         return null;
     }
 
-#if NET10_0_OR_GREATER
     /// <inheritdoc/>
     public async IAsyncEnumerable<Client> GetAllClientsAsync()
     {
@@ -103,5 +102,4 @@ public class ValidatingClientStore<T> : IClientStore
             }
         }
     }
-#endif
 }

@@ -18,7 +18,6 @@ public class ValidatingClientStoreTests
     private readonly TestEventService _events = new();
     private readonly NullLogger<ValidatingClientStore<StubClientStore>> _logger = new();
 
-#if NET10_0_OR_GREATER
     [Fact]
     public async Task GetAllClientsAsync_WhenAllClientsAreValid_ShouldReturnAllClients()
     {
@@ -133,7 +132,7 @@ public class ValidatingClientStoreTests
         result.ShouldBeEmpty();
         eventService.RaisedEventCount.ShouldBe(2);
     }
-#endif
+
 
     private class StubClientStore : IClientStore
     {
@@ -154,7 +153,6 @@ public class ValidatingClientStoreTests
 
         public Task<Client?> FindClientByIdAsync(string clientId) => Task.FromResult(_client);
 
-#if NET10_0_OR_GREATER
         public async IAsyncEnumerable<Client> GetAllClientsAsync()
         {
             foreach (var client in _clients)
@@ -162,7 +160,6 @@ public class ValidatingClientStoreTests
                 yield return client;
             }
         }
-#endif
     }
 
     private class StubClientConfigurationValidator : IClientConfigurationValidator
