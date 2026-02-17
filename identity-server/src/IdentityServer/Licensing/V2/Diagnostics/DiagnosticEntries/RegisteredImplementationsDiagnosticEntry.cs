@@ -35,7 +35,6 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
         },
         {
             "Infrastructure", [
-                new(typeof(IClock), [typeof(DefaultClock)]),
                 new(typeof(IConcurrencyLock<>), [typeof(DefaultConcurrencyLock<>)]),
             ]
         },

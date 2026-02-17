@@ -33,7 +33,7 @@ public class DefaultEventService : IEventService
     /// <summary>
     /// The clock
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider Clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultEventService"/> class.
@@ -42,7 +42,7 @@ public class DefaultEventService : IEventService
     /// <param name="context">The context.</param>
     /// <param name="sink">The sink.</param>
     /// <param name="clock">The clock.</param>
-    public DefaultEventService(IdentityServerOptions options, IHttpContextAccessor context, IEventSink sink, IClock clock)
+    public DefaultEventService(IdentityServerOptions options, IHttpContextAccessor context, IEventSink sink, TimeProvider clock)
     {
         Options = options;
         Context = context;
@@ -99,7 +99,7 @@ public class DefaultEventService : IEventService
     /// <returns></returns>
     protected virtual async Task PrepareEventAsync(Event evt)
     {
-        evt.TimeStamp = Clock.UtcNow.DateTime;
+        evt.TimeStamp = Clock.GetUtcNow().DateTime;
         using var process = Process.GetCurrentProcess();
         evt.ProcessId = process.Id;
 

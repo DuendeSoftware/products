@@ -34,7 +34,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// The clock
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider Clock;
 
     /// <summary>
     /// The replay cache
@@ -57,7 +57,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     public DefaultDPoPProofValidator(
         IdentityServerOptions options,
         IReplayCache replayCache,
-        IClock clock,
+        TimeProvider clock,
         IDataProtectionProvider dataProtectionProvider,
         ILogger<DefaultDPoPProofValidator> logger)
     {
@@ -410,7 +410,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         Logger.LogDebug("Adding proof token with jti {jti} to replay cache for duration {cacheDuration}", result.TokenId, cacheDuration);
 
-        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, Clock.UtcNow.Add(cacheDuration));
+        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, Clock.GetUtcNow().Add(cacheDuration));
     }
 
     /// <summary>
@@ -498,7 +498,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// <returns></returns>
     protected virtual string CreateNonce(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
-        var now = Clock.UtcNow.ToUnixTimeSeconds();
+        var now = Clock.GetUtcNow().ToUnixTimeSeconds();
         return DataProtector.Protect(now.ToString(CultureInfo.InvariantCulture));
     }
 
@@ -530,7 +530,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// </summary>
     protected virtual bool IsExpired(DPoPProofValidatonContext context, DPoPProofValidatonResult result, TimeSpan clockSkew, long issuedAtTime)
     {
-        var now = Clock.UtcNow.ToUnixTimeSeconds();
+        var now = Clock.GetUtcNow().ToUnixTimeSeconds();
         var start = now + (int)clockSkew.TotalSeconds;
         if (start < issuedAtTime)
         {

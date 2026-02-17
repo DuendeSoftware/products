@@ -35,7 +35,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
     /// <summary>
     /// The clock
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider Clock;
 
     /// <summary>
     /// The logger
@@ -53,7 +53,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
     public BackchannelAuthenticationResponseGenerator(IdentityServerOptions options,
         IBackChannelAuthenticationRequestStore backChannelAuthenticationRequestStore,
         IBackchannelAuthenticationUserNotificationService userLoginService,
-        IClock clock,
+        TimeProvider clock,
         ILogger<BackchannelAuthenticationResponseGenerator> logger)
     {
         Options = options;
@@ -83,7 +83,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
 
         var request = new BackChannelAuthenticationRequest
         {
-            CreationTime = Clock.UtcNow.UtcDateTime,
+            CreationTime = Clock.GetUtcNow().UtcDateTime,
             ClientId = validationResult.ValidatedRequest.ClientId,
             RequestedScopes = validationResult.ValidatedRequest.ValidatedResources.RawScopeValues,
             RequestedResourceIndicators = validationResult.ValidatedRequest.RequestedResourceIndicators,

@@ -51,7 +51,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <summary>
     ///  The clock
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider Clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TokenResponseGenerator" /> class.
@@ -63,7 +63,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// <param name="resources">The resources.</param>
     /// <param name="clients">The clients.</param>
     /// <param name="logger">The logger.</param>
-    public TokenResponseGenerator(IClock clock, ITokenService tokenService, IRefreshTokenService refreshTokenService, IScopeParser scopeParser, IResourceStore resources, IClientStore clients, ILogger<TokenResponseGenerator> logger)
+    public TokenResponseGenerator(TimeProvider clock, ITokenService tokenService, IRefreshTokenService refreshTokenService, IScopeParser scopeParser, IResourceStore resources, IClientStore clients, ILogger<TokenResponseGenerator> logger)
     {
         Clock = clock;
         TokenService = tokenService;
@@ -191,7 +191,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
         else
         {
             // todo: do we want a new JTI?
-            accessToken.CreationTime = Clock.UtcNow.UtcDateTime;
+            accessToken.CreationTime = Clock.GetUtcNow().UtcDateTime;
             accessToken.Lifetime = request.ValidatedRequest.AccessTokenLifetime;
 
             // always take the current request confirmation values (this would be because the proof token changed from last time)

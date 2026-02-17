@@ -9,7 +9,7 @@ namespace Duende.IdentityServer.Services.KeyManagement;
 /// </summary>
 internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
 {
-    private readonly IClock _clock;
+    private readonly TimeProvider _clock;
 
     private object _lock = new object();
 
@@ -20,7 +20,7 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     /// Constructor for InMemoryKeyStoreCache.
     /// </summary>
     /// <param name="clock"></param>
-    public InMemoryKeyStoreCache(IClock clock) => _clock = clock;
+    public InMemoryKeyStoreCache(TimeProvider clock) => _clock = clock;
 
     /// <summary>
     /// Returns cached keys.
@@ -37,7 +37,7 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
             keys = _cache;
         }
 
-        if (keys != null && expires >= _clock.UtcNow.UtcDateTime)
+        if (keys != null && expires >= _clock.GetUtcNow().UtcDateTime)
         {
             return Task.FromResult(keys);
         }
@@ -55,7 +55,7 @@ internal class InMemoryKeyStoreCache : ISigningKeyStoreCache
     {
         lock (_lock)
         {
-            _expires = _clock.UtcNow.UtcDateTime.Add(duration);
+            _expires = _clock.GetUtcNow().UtcDateTime.Add(duration);
             _cache = keys;
         }
 

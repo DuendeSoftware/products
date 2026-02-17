@@ -22,7 +22,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// <summary>
     /// The system clock;
     /// </summary>
-    protected IClock Clock { get; }
+    protected TimeProvider Clock { get; }
 
     /// <summary>
     /// The IdentityServerTools used to create the JWT.
@@ -59,7 +59,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// <param name="issuerNameService"></param>
     /// <param name="logger"></param>
     public DefaultBackChannelLogoutService(
-        IClock clock,
+        TimeProvider clock,
         IIdentityServerTools tools,
         ILogoutNotificationService logoutNotificationService,
         IBackChannelLogoutHttpClient backChannelLogoutHttpClient,

@@ -17,7 +17,7 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
 {
     private readonly IDistributedCache _cache;
     private readonly IClientStore _clientStore;
-    private readonly IClock _clock;
+    private readonly TimeProvider _clock;
     private readonly IdentityServerOptions _options;
 
     private const string KeyPrefix = "devicecode_";
@@ -32,7 +32,7 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
     public DistributedDeviceFlowThrottlingService(
         IDistributedCache cache,
         IClientStore clientStore,
-        IClock clock,
+        TimeProvider clock,
         IdentityServerOptions options)
     {
         _cache = cache;
@@ -55,14 +55,14 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
         ArgumentNullException.ThrowIfNull(deviceCode);
 
         var key = KeyPrefix + deviceCode;
-        var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _clock.UtcNow.AddSeconds(details.Lifetime) };
+        var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _clock.GetUtcNow().AddSeconds(details.Lifetime) };
 
         var lastSeenAsString = await _cache.GetStringAsync(key);
 
         // record new
         if (lastSeenAsString == null)
         {
-            await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+            await _cache.SetStringAsync(key, _clock.GetUtcNow().ToString("O"), options);
             return false;
         }
 
@@ -73,15 +73,15 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
 
             var client = await _clientStore.FindEnabledClientByIdAsync(details.ClientId);
             var interval = client?.PollingInterval ?? _options.DeviceFlow.Interval;
-            if (_clock.UtcNow.UtcDateTime < lastSeen.AddSeconds(interval))
+            if (_clock.GetUtcNow().UtcDateTime < lastSeen.AddSeconds(interval))
             {
-                await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+                await _cache.SetStringAsync(key, _clock.GetUtcNow().ToString("O"), options);
                 return true;
             }
         }
 
         // store current and continue
-        await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+        await _cache.SetStringAsync(key, _clock.GetUtcNow().ToString("O"), options);
         return false;
     }
 }

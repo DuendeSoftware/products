@@ -48,7 +48,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         IPushedAuthorizationService pushedAuthorizationService,
         IMessageStore<ErrorMessage> errorMessageStore,
         IServerUrls urls,
-        IClock clock)
+        TimeProvider clock)
     {
         _options = options;
         _userSession = userSession;
@@ -63,7 +63,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
     private readonly IPushedAuthorizationService _pushedAuthorizationService;
     private readonly IMessageStore<ErrorMessage> _errorMessageStore;
     private readonly IServerUrls _urls;
-    private readonly IClock _clock;
+    private readonly TimeProvider _clock;
 
     /// <inheritdoc />
     public async Task WriteHttpResponse(AuthorizeResult result, HttpContext context)
@@ -225,7 +225,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
 
         var errorModel = await CreateErrorMessage(response, context);
 
-        var message = new Message<ErrorMessage>(errorModel, _clock.UtcNow.UtcDateTime);
+        var message = new Message<ErrorMessage>(errorModel, _clock.GetUtcNow().UtcDateTime);
         var id = await _errorMessageStore.WriteAsync(message);
 
         var errorUrl = _options.UserInteraction.ErrorUrl;

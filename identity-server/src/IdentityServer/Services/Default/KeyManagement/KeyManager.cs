@@ -21,7 +21,7 @@ public class KeyManager : IKeyManager
     private readonly ISigningKeyStore _store;
     private readonly ISigningKeyStoreCache _cache;
     private readonly ISigningKeyProtector _protector;
-    private readonly IClock _clock;
+    private readonly TimeProvider _clock;
     private readonly IConcurrencyLock<KeyManager> _newKeyLock;
     private readonly ILogger<KeyManager> _logger;
     private readonly IIssuerNameService _issuerNameService;
@@ -42,7 +42,7 @@ public class KeyManager : IKeyManager
         ISigningKeyStore store,
         ISigningKeyStoreCache cache,
         ISigningKeyProtector protector,
-        IClock clock,
+        TimeProvider clock,
         IConcurrencyLock<KeyManager> newKeyLock,
         ILogger<KeyManager> logger,
         IIssuerNameService issuerNameService)
@@ -269,7 +269,7 @@ public class KeyManager : IKeyManager
     {
         _logger.LogTrace("Creating new key.");
 
-        var now = _clock.UtcNow.UtcDateTime;
+        var now = _clock.GetUtcNow().UtcDateTime;
 
         KeyContainer container;
 
@@ -662,7 +662,7 @@ public class KeyManager : IKeyManager
             return false;
         }
 
-        var now = _clock.UtcNow.UtcDateTime;
+        var now = _clock.GetUtcNow().UtcDateTime;
 
         // newly created key check
         var start = key.Created;

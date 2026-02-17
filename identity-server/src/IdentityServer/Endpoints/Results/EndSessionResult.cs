@@ -36,7 +36,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
 {
     public EndSessionHttpWriter(
         IdentityServerOptions options,
-        IClock clock,
+        TimeProvider clock,
         IServerUrls urls,
         IMessageStore<LogoutMessage> logoutMessageStore,
         IUiLocalesService localesService)
@@ -49,7 +49,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
     }
 
     private IdentityServerOptions _options;
-    private IClock _clock;
+    private TimeProvider _clock;
     private IServerUrls _urls;
     private IMessageStore<LogoutMessage> _logoutMessageStore;
     private readonly IUiLocalesService _localesService;
@@ -65,7 +65,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
             var logoutMessage = new LogoutMessage(validatedRequest);
             if (logoutMessage.ContainsPayload)
             {
-                var msg = new Message<LogoutMessage>(logoutMessage, _clock.UtcNow.UtcDateTime);
+                var msg = new Message<LogoutMessage>(logoutMessage, _clock.GetUtcNow().UtcDateTime);
                 id = await _logoutMessageStore.WriteAsync(msg);
             }
         }

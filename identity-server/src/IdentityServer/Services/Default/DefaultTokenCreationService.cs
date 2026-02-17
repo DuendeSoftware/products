@@ -30,7 +30,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <summary>
     ///  The clock
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider Clock;
 
     /// <summary>
     /// The options
@@ -45,7 +45,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <param name="options">The options.</param>
     /// <param name="logger">The logger.</param>
     public DefaultTokenCreationService(
-        IClock clock,
+        TimeProvider clock,
         IKeyMaterialService keys,
         IdentityServerOptions options,
         ILogger<DefaultTokenCreationService> logger)
