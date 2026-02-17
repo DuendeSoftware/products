@@ -153,13 +153,13 @@
     <Project Path="identity-server/perf/IdentityServer.PerfTests/IdentityServer.PerfTests.csproj" />
   </Folder>
   <Folder Name="/identity-server/src/">
-    <Project Path="identity-server/src/AspNetIdentity/Duende.IdentityServer.AspNetIdentity.csproj" />
-    <Project Path="identity-server/src/Configuration.EntityFramework/Duende.IdentityServer.Configuration.EntityFramework.csproj" />
-    <Project Path="identity-server/src/Configuration/Duende.IdentityServer.Configuration.csproj" />
-    <Project Path="identity-server/src/EntityFramework.Storage/Duende.IdentityServer.EntityFramework.Storage.csproj" />
-    <Project Path="identity-server/src/EntityFramework/Duende.IdentityServer.EntityFramework.csproj" />
-    <Project Path="identity-server/src/IdentityServer/Duende.IdentityServer.csproj" />
-    <Project Path="identity-server/src/Storage/Duende.IdentityServer.Storage.csproj" />
+    <Project Path="identity-server/src/AspNetIdentity/IdentityServer.AspNetIdentity.csproj" />
+    <Project Path="identity-server/src/Configuration.EntityFramework/IdentityServer.Configuration.EntityFramework.csproj" />
+    <Project Path="identity-server/src/Configuration/IdentityServer.Configuration.csproj" />
+    <Project Path="identity-server/src/EntityFramework.Storage/IdentityServer.EntityFramework.Storage.csproj" />
+    <Project Path="identity-server/src/EntityFramework/IdentityServer.EntityFramework.csproj" />
+    <Project Path="identity-server/src/IdentityServer/IdentityServer.csproj" />
+    <Project Path="identity-server/src/Storage/IdentityServer.Storage.csproj" />
   </Folder>
   <Folder Name="/identity-server/templates/" />
   <Folder Name="/identity-server/templates/src/">
@@ -192,7 +192,7 @@
   </Folder>
   <Folder Name="/shared/">
     <Project Path="shared/ShouldlyExtensions/ShouldlyExtensions.csproj" />
-    <Project Path="shared/Xunit.Playwright/Duende.Xunit.Playwright.csproj" />
+    <Project Path="shared/Xunit.Playwright/Xunit.Playwright.csproj" />
   </Folder>
   <Folder Name="/templates/">
     <Project Path="templates/build/build.csproj" />

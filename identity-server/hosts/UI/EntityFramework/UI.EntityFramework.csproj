@@ -16,11 +16,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\EntityFramework\Duende.IdentityServer.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\..\src\EntityFramework\IdentityServer.EntityFramework.csproj" />
     <ProjectReference Include="..\Main\UI.Main.csproj" />
   </ItemGroup>
 </Project>

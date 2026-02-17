@@ -8,7 +8,7 @@
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\hosts\AspNetIdentity10\Host.AspNetIdentity10.csproj" />
     <ProjectReference Include="..\..\hosts\UI\AspNetIdentity\UI.AspNetIdentity.csproj" />
-    <ProjectReference Include="..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\src\AspNetIdentity\IdentityServer.AspNetIdentity.csproj" />
   </ItemGroup>
 
 </Project>

@@ -18,7 +18,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
   <!-- Workaround for https://github.com/dotnet/aspnetcore/issues/63719 -->
@@ -29,7 +28,7 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\..\src\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

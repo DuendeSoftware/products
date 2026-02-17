@@ -22,8 +22,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
-    <ProjectReference Include="..\..\src\AspNetIdentity\Duende.IdentityServer.AspNetIdentity.csproj" />
-    <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\AspNetIdentity\IdentityServer.AspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\src\Configuration\IdentityServer.Configuration.csproj" />
     <ProjectReference Include="..\UI\AspNetIdentity\UI.AspNetIdentity.csproj" />
     <ProjectReference Include="..\Shared\Host.Shared.csproj" />
   </ItemGroup>

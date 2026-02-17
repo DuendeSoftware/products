@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -27,8 +27,8 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <ProjectReference Include="..\..\src\Configuration\Duende.IdentityServer.Configuration.csproj" />
-    <ProjectReference Include="..\..\src\IdentityServer\Duende.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\src\Configuration\IdentityServer.Configuration.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
   </ItemGroup>
 
 </Project>

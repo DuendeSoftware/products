@@ -33,7 +33,7 @@
       "bff\\test\\Bff.Tests\\Bff.Tests.csproj",
       "bff\\test\\Hosts.Tests\\Hosts.Tests.csproj",
       "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj",
-      "shared\\Xunit.Playwright\\Duende.Xunit.Playwright.csproj"
+      "shared\\Xunit.Playwright\\Xunit.Playwright.csproj"
     ]
   }
 }

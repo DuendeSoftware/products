@@ -1,10 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>Duende.IdentityServer.Configuration</PackageId>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Description>Configuration system for Duende IdentityServer</Description>
     <AssemblyName>Duende.IdentityServer.Configuration</AssemblyName>
+    <RootNamespace>Duende.IdentityServer.Configuration</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Storage\Duende.IdentityServer.Storage.csproj" />
+    <ProjectReference Include="..\Storage\IdentityServer.Storage.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net10.0</TargetFrameworks>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Duende.Xunit.Playwright.csproj" />
+    <ProjectReference Include="..\..\..\shared\Xunit.Playwright\Xunit.Playwright.csproj" />
     <ProjectReference Include="..\..\aspire\AppHosts\All\All.csproj" />
     <ProjectReference Include="..\..\aspire\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
