@@ -5,7 +5,6 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
 using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
-using UnitTests.Services.Default.KeyManagement;
 
 namespace UnitTests.Services.Default;
 

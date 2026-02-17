@@ -4,7 +4,6 @@
 #nullable enable
 using System.Security.Claims;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -13,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
-using UnitTests.Services.Default.KeyManagement;
 
 namespace UnitTests.Extensions;
 

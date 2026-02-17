@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;

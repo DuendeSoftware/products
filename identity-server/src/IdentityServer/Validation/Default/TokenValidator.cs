@@ -379,7 +379,7 @@ internal class TokenValidator : ITokenValidator
             return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
         }
 
-        if (token.CreationTime.HasExceeded(token.Lifetime,                 _clock.GetUtcNow().UtcDateTime))
+        if (token.CreationTime.HasExceeded(token.Lifetime, _clock.GetUtcNow().UtcDateTime))
         {
             LogError("Token expired.");
 

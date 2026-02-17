@@ -5,7 +5,6 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
