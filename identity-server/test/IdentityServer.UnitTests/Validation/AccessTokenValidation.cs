@@ -133,7 +133,7 @@ public class AccessTokenValidation
         now = DateTime.UtcNow;
 
         var store = Factory.CreateReferenceTokenStore();
-        var validator = Factory.CreateTokenValidator(store, clock: _timeProvider);
+        var validator = Factory.CreateTokenValidator(store, timeProvider: _timeProvider);
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 2, "read", "write");
         token.CreationTime = now;
@@ -237,7 +237,7 @@ public class AccessTokenValidation
         var futureClock = new FakeTimeProvider();
         var definitelyNotNow = DateTime.UtcNow.AddSeconds(9);
         futureClock.SetUtcNow(definitelyNotNow);
-        var signer = Factory.CreateDefaultTokenCreator(clock: futureClock);
+        var signer = Factory.CreateDefaultTokenCreator(timeProvider: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
         var jwt = await signer.CreateTokenAsync(token);
 
@@ -256,7 +256,7 @@ public class AccessTokenValidation
         var futureClock = new FakeTimeProvider();
         var definitelyNotNow = DateTime.UtcNow.AddSeconds(10);
         futureClock.SetUtcNow(definitelyNotNow);
-        var signer = Factory.CreateDefaultTokenCreator(clock: futureClock);
+        var signer = Factory.CreateDefaultTokenCreator(timeProvider: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
         var jwt = await signer.CreateTokenAsync(token);
 
