@@ -9,6 +9,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -38,7 +39,7 @@ public class DefaultIdentityServerInteractionServiceTests
         _mockMockHttpContextAccessor = new MockHttpContextAccessor(_options, _mockUserSession, _mockEndSessionStore,
             _mockServerUrls, configureServices: services => services.AddSingleton<IClientStore>(_mockClientStore));
 
-        _subject = new DefaultIdentityServerInteractionService(new StubClock(),
+        _subject = new DefaultIdentityServerInteractionService(new FakeTimeProvider(),
             _mockMockHttpContextAccessor,
             _mockLogoutMessageStore,
             _mockErrorMessageStore,

@@ -8,7 +8,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging;
-using UnitTests.Common;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Validation.Setup;
 
 namespace UnitTests.Validation.Secrets;
@@ -23,7 +23,7 @@ public class SecretValidation
     private IdentityServerOptions _options = new IdentityServerOptions();
 
     public SecretValidation() => _validator = new SecretValidator(
-            new StubClock(),
+            new FakeTimeProvider(DateTimeOffset.UtcNow),
             new[] { _hashedSecretValidator },
             new Logger<SecretValidator>(new LoggerFactory()));
 

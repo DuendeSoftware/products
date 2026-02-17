@@ -22,7 +22,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     private readonly IClientStore _clientStore;
     private readonly IUserSession _session;
     private readonly IResourceValidator _resourceValidator;
-    private readonly IClock _systemClock;
+    private readonly TimeProvider _systemClock;
     private readonly ILogger<DefaultBackchannelAuthenticationInteractionService> _logger;
 
     /// <summary>
@@ -33,7 +33,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         IClientStore clients,
         IUserSession session,
         IResourceValidator resourceValidator,
-        IClock systemClock,
+        TimeProvider systemClock,
         ILogger<DefaultBackchannelAuthenticationInteractionService> logger
     )
     {
@@ -156,7 +156,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         var subjectClone = subject.Clone();
         if (!subject.HasClaim(x => x.Type == JwtClaimTypes.AuthenticationTime))
         {
-            subjectClone.Identities.First().AddClaim(new Claim(JwtClaimTypes.AuthenticationTime, _systemClock.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer));
+            subjectClone.Identities.First().AddClaim(new Claim(JwtClaimTypes.AuthenticationTime, _systemClock.GetUtcNow().ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer));
         }
 
         if (!subject.HasClaim(x => x.Type == JwtClaimTypes.IdentityProvider))

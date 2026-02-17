@@ -438,7 +438,7 @@ public class DPoPTokenEndpointTests : DPoPEndpointTestBase
 
     internal class MockDPoPProofValidator : DefaultDPoPProofValidator
     {
-        public MockDPoPProofValidator(IdentityServerOptions options, IReplayCache replayCache, IClock clock, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dataProtectionProvider, ILogger<DefaultDPoPProofValidator> logger) : base(options, replayCache, clock, dataProtectionProvider, logger)
+        public MockDPoPProofValidator(IdentityServerOptions options, IReplayCache replayCache, TimeProvider timeProvider, Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dataProtectionProvider, ILogger<DefaultDPoPProofValidator> logger) : base(options, replayCache, timeProvider, dataProtectionProvider, logger)
         {
         }
 

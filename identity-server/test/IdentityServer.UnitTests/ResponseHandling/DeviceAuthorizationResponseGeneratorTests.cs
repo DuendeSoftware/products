@@ -10,6 +10,7 @@ using Duende.IdentityServer.Services.Default;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.ResponseHandling;
@@ -23,7 +24,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     private readonly FakeUserCodeGenerator fakeUserCodeGenerator = new FakeUserCodeGenerator();
     private readonly IDeviceFlowCodeService deviceFlowCodeService = new DefaultDeviceFlowCodeService(new InMemoryDeviceFlowStore(), new StubHandleGenerationService());
     private readonly IdentityServerOptions options = new IdentityServerOptions();
-    private readonly StubClock clock = new StubClock();
+    private readonly FakeTimeProvider timeProvider = new FakeTimeProvider();
 
     private readonly DeviceAuthorizationResponseGenerator generator;
     private readonly DeviceAuthorizationRequestValidationResult testResult;
@@ -42,7 +43,7 @@ public class DeviceAuthorizationResponseGeneratorTests
             options,
             new DefaultUserCodeService(new IUserCodeGenerator[] { new NumericUserCodeGenerator(), fakeUserCodeGenerator }),
             deviceFlowCodeService,
-            clock,
+            timeProvider,
             new NullLogger<DeviceAuthorizationResponseGenerator>());
     }
 
@@ -72,7 +73,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     public async Task ProcessAsync_when_user_code_collision_expect_retry()
     {
         var creationTime = DateTime.UtcNow;
-        clock.UtcNowFunc = () => creationTime;
+        timeProvider.SetUtcNow(creationTime);
 
         testResult.ValidatedRequest.Client.UserCodeType = FakeUserCodeGenerator.UserCodeTypeValue;
         await deviceFlowCodeService.StoreDeviceAuthorizationAsync(FakeUserCodeGenerator.TestCollisionUserCode, new DeviceCode());
@@ -86,7 +87,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     public async Task ProcessAsync_when_user_code_collision_retry_limit_reached_expect_error()
     {
         var creationTime = DateTime.UtcNow;
-        clock.UtcNowFunc = () => creationTime;
+        timeProvider.SetUtcNow(creationTime);
 
         fakeUserCodeGenerator.RetryLimit = 1;
         testResult.ValidatedRequest.Client.UserCodeType = FakeUserCodeGenerator.UserCodeTypeValue;
@@ -101,7 +102,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     public async Task ProcessAsync_when_generated_expect_user_code_stored()
     {
         var creationTime = DateTime.UtcNow;
-        clock.UtcNowFunc = () => creationTime;
+        timeProvider.SetUtcNow(creationTime);
 
         testResult.ValidatedRequest.RequestedScopes = new List<string> { "openid", "api1" };
         testResult.ValidatedRequest.ValidatedResources = new ResourceValidationResult(new Resources(
@@ -128,7 +129,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     public async Task ProcessAsync_when_generated_expect_device_code_stored()
     {
         var creationTime = DateTime.UtcNow;
-        clock.UtcNowFunc = () => creationTime;
+        timeProvider.SetUtcNow(creationTime);
 
         var response = await generator.ProcessAsync(testResult, TestBaseUrl);
 

@@ -21,7 +21,7 @@ public class KeyManager : IKeyManager
     private readonly ISigningKeyStore _store;
     private readonly ISigningKeyStoreCache _cache;
     private readonly ISigningKeyProtector _protector;
-    private readonly IClock _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly IConcurrencyLock<KeyManager> _newKeyLock;
     private readonly ILogger<KeyManager> _logger;
     private readonly IIssuerNameService _issuerNameService;
@@ -33,7 +33,7 @@ public class KeyManager : IKeyManager
     /// <param name="store"></param>
     /// <param name="cache"></param>
     /// <param name="protector"></param>
-    /// <param name="clock"></param>
+    /// <param name="timeProvider"></param>
     /// <param name="newKeyLock"></param>
     /// <param name="logger"></param>
     /// <param name="issuerNameService"></param>
@@ -42,7 +42,7 @@ public class KeyManager : IKeyManager
         ISigningKeyStore store,
         ISigningKeyStoreCache cache,
         ISigningKeyProtector protector,
-        IClock clock,
+        TimeProvider timeProvider,
         IConcurrencyLock<KeyManager> newKeyLock,
         ILogger<KeyManager> logger,
         IIssuerNameService issuerNameService)
@@ -53,7 +53,7 @@ public class KeyManager : IKeyManager
         _store = store;
         _cache = cache;
         _protector = protector;
-        _clock = clock;
+        _timeProvider = timeProvider;
         _newKeyLock = newKeyLock;
         _logger = logger;
         _issuerNameService = issuerNameService;
@@ -72,7 +72,7 @@ public class KeyManager : IKeyManager
         {
             foreach (var key in currentKeys)
             {
-                var age = _clock.GetAge(key.Created);
+                var age = _timeProvider.GetAge(key.Created);
                 var expiresIn = _options.KeyManagement.RotationInterval.Subtract(age);
                 var retiresIn = _options.KeyManagement.KeyRetirementAge.Subtract(age);
                 _logger.LogInformation("Active signing key found with kid {kid} for alg {alg}. Expires in {KeyExpiration}. Retires in {KeyRetirement}", key.Id, key.Algorithm, expiresIn, retiresIn);
@@ -247,7 +247,7 @@ public class KeyManager : IKeyManager
 
             // if no younger keys, then check if we're nearing the expiration of active key
             // and see if that's within the window of activation delay.
-            var age = _clock.GetAge(activeKey.Created);
+            var age = _timeProvider.GetAge(activeKey.Created);
             var diff = _options.KeyManagement.RotationInterval.Subtract(age);
             var needed = (diff <= _options.KeyManagement.PropagationTime);
 
@@ -269,7 +269,7 @@ public class KeyManager : IKeyManager
     {
         _logger.LogTrace("Creating new key.");
 
-        var now = _clock.UtcNow.UtcDateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
         KeyContainer container;
 
@@ -332,7 +332,7 @@ public class KeyManager : IKeyManager
 
         var result = keys.All(x =>
         {
-            var age = _clock.GetAge(x.Created);
+            var age = _timeProvider.GetAge(x.Created);
             var isNew = _options.KeyManagement.IsWithinInitializationDuration(age);
             return isNew;
         });
@@ -346,7 +346,7 @@ public class KeyManager : IKeyManager
             .Where(x =>
             {
                 return (x != null) &&
-                    _options.KeyManagement.IsRetired(_clock.GetAge(x.Created));
+                    _options.KeyManagement.IsRetired(_timeProvider.GetAge(x.Created));
             })
             .ToArray();
 
@@ -391,7 +391,7 @@ public class KeyManager : IKeyManager
         var result = keys
             .Where(x =>
             {
-                var age = _clock.GetAge(x.Created);
+                var age = _timeProvider.GetAge(x.Created);
                 var isExpired = _options.KeyManagement.IsExpired(age);
                 return !isExpired;
             });
@@ -662,7 +662,7 @@ public class KeyManager : IKeyManager
             return false;
         }
 
-        var now = _clock.UtcNow.UtcDateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
         // newly created key check
         var start = key.Created;

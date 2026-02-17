@@ -22,9 +22,9 @@ public class DefaultConsentService : IConsentService
     protected readonly IUserConsentStore UserConsentStore;
 
     /// <summary>
-    ///  The clock
+    ///  The time provider
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The logger
@@ -34,13 +34,13 @@ public class DefaultConsentService : IConsentService
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultConsentService" /> class.
     /// </summary>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="userConsentStore">The user consent store.</param>
     /// <param name="logger">The logger.</param>
     /// <exception cref="System.ArgumentNullException">store</exception>
-    public DefaultConsentService(IClock clock, IUserConsentStore userConsentStore, ILogger<DefaultConsentService> logger)
+    public DefaultConsentService(TimeProvider timeProvider, IUserConsentStore userConsentStore, ILogger<DefaultConsentService> logger)
     {
-        Clock = clock;
+        TimeProvider = timeProvider;
         UserConsentStore = userConsentStore;
         Logger = logger;
     }
@@ -108,7 +108,7 @@ public class DefaultConsentService : IConsentService
             return true;
         }
 
-        if (consent.Expiration.HasExpired(Clock.UtcNow.UtcDateTime))
+        if (consent.Expiration.HasExpired(TimeProvider.GetUtcNow().UtcDateTime))
         {
             Logger.LogDebug("Consent found in consent store is expired, consent is required");
             await UserConsentStore.RemoveUserConsentAsync(consent.SubjectId, consent.ClientId);
@@ -168,7 +168,7 @@ public class DefaultConsentService : IConsentService
 
                 var consent = new Consent
                 {
-                    CreationTime = Clock.UtcNow.UtcDateTime,
+                    CreationTime = TimeProvider.GetUtcNow().UtcDateTime,
                     SubjectId = subjectId,
                     ClientId = clientId,
                     Scopes = scopes

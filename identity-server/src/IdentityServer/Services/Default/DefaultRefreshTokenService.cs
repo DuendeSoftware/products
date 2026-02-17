@@ -34,9 +34,9 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     protected IProfileService Profile { get; }
 
     /// <summary>
-    /// The clock
+    /// The time provider
     /// </summary>
-    protected IClock Clock { get; }
+    protected TimeProvider TimeProvider { get; }
 
     /// <summary>
     /// The persistent grant options
@@ -48,19 +48,19 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     /// </summary>
     /// <param name="refreshTokenStore">The refresh token store</param>
     /// <param name="profile"></param>
-    /// <param name="clock">The clock</param>
+    /// <param name="timeProvider">The time provider</param>
     /// <param name="options">The persistent grant options</param>
     /// <param name="logger">The logger</param>
     public DefaultRefreshTokenService(
         IRefreshTokenStore refreshTokenStore,
         IProfileService profile,
-        IClock clock,
+        TimeProvider timeProvider,
         PersistentGrantOptions options,
         ILogger<DefaultRefreshTokenService> logger)
     {
         RefreshTokenStore = refreshTokenStore;
         Profile = profile;
-        Clock = clock;
+        TimeProvider = timeProvider;
         Options = options;
 
         Logger = logger;
@@ -97,7 +97,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         /////////////////////////////////////////////
         // check if refresh token has expired
         /////////////////////////////////////////////
-        if (refreshToken.CreationTime.HasExceeded(refreshToken.Lifetime, Clock.UtcNow.UtcDateTime))
+        if (refreshToken.CreationTime.HasExceeded(refreshToken.Lifetime, TimeProvider.GetUtcNow().UtcDateTime))
         {
             Logger.LogWarning("Refresh token has expired.");
             return invalidGrant;
@@ -213,7 +213,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             AuthorizedResourceIndicators = request.AuthorizedResourceIndicators,
             ProofType = request.ProofType,
 
-            CreationTime = Clock.UtcNow.UtcDateTime,
+            CreationTime = TimeProvider.GetUtcNow().UtcDateTime,
             Lifetime = lifetime,
         };
         refreshToken.SetAccessToken(request.AccessToken, request.RequestedResourceIndicator);
@@ -254,7 +254,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
                 // flag as consumed
                 if (request.RefreshToken.ConsumedTime == null)
                 {
-                    request.RefreshToken.ConsumedTime = Clock.UtcNow.UtcDateTime;
+                    request.RefreshToken.ConsumedTime = TimeProvider.GetUtcNow().UtcDateTime;
                     await RefreshTokenStore.UpdateRefreshTokenAsync(handle, request.RefreshToken);
                 }
             }
@@ -269,7 +269,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
 
             // if absolute exp > 0, make sure we don't exceed absolute exp
             // if absolute exp = 0, allow indefinite slide
-            var currentLifetime = request.RefreshToken.CreationTime.GetLifetimeInSeconds(Clock.UtcNow.UtcDateTime);
+            var currentLifetime = request.RefreshToken.CreationTime.GetLifetimeInSeconds(TimeProvider.GetUtcNow().UtcDateTime);
             Logger.LogDebug("Current lifetime: {currentLifetime}", currentLifetime.ToString(CultureInfo.InvariantCulture));
 
             var newLifetime = currentLifetime + request.Client.SlidingRefreshTokenLifetime;

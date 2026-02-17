@@ -100,15 +100,15 @@ public class IdentityServerTools : IIdentityServerTools
 {
     private readonly IIssuerNameService _issuerNameService;
     private readonly ITokenCreationService _tokenCreation;
-    private readonly IClock _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly IdentityServerOptions _options;
 
     /// <inheritdoc/>
-    public IdentityServerTools(IIssuerNameService issuerNameService, ITokenCreationService tokenCreation, IClock clock, IdentityServerOptions options)
+    public IdentityServerTools(IIssuerNameService issuerNameService, ITokenCreationService tokenCreation, TimeProvider timeProvider, IdentityServerOptions options)
     {
         _issuerNameService = issuerNameService;
         _tokenCreation = tokenCreation;
-        _clock = clock;
+        _timeProvider = timeProvider;
         _options = options;
     }
 
@@ -135,7 +135,7 @@ public class IdentityServerTools : IIdentityServerTools
 
         var token = new Token(tokenType)
         {
-            CreationTime = _clock.UtcNow.UtcDateTime,
+            CreationTime = _timeProvider.GetUtcNow().UtcDateTime,
             Issuer = issuer,
             Lifetime = lifetime,
 

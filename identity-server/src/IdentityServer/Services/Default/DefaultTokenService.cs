@@ -39,9 +39,9 @@ public class DefaultTokenService : ITokenService
     protected readonly ITokenCreationService CreationService;
 
     /// <summary>
-    /// The clock
+    /// The time provider
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The key material service
@@ -59,7 +59,7 @@ public class DefaultTokenService : ITokenService
     /// <param name="claimsProvider">The claims provider.</param>
     /// <param name="referenceTokenStore">The reference token store.</param>
     /// <param name="creationService">The signing service.</param>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="keyMaterialService"></param>
     /// <param name="options">The IdentityServer options</param>
     /// <param name="logger">The logger.</param>
@@ -67,7 +67,7 @@ public class DefaultTokenService : ITokenService
         IClaimsService claimsProvider,
         IReferenceTokenStore referenceTokenStore,
         ITokenCreationService creationService,
-        IClock clock,
+        TimeProvider timeProvider,
         IKeyMaterialService keyMaterialService,
         IdentityServerOptions options,
         ILogger<DefaultTokenService> logger)
@@ -75,7 +75,7 @@ public class DefaultTokenService : ITokenService
         ClaimsProvider = claimsProvider;
         ReferenceTokenStore = referenceTokenStore;
         CreationService = creationService;
-        Clock = clock;
+        TimeProvider = timeProvider;
         KeyMaterialService = keyMaterialService;
         Options = options;
         Logger = logger;
@@ -146,7 +146,7 @@ public class DefaultTokenService : ITokenService
         var issuer = request.ValidatedRequest.IssuerName;
         var token = new Token(OidcConstants.TokenTypes.IdentityToken)
         {
-            CreationTime = Clock.UtcNow.UtcDateTime,
+            CreationTime = TimeProvider.GetUtcNow().UtcDateTime,
             Audiences = { request.ValidatedRequest.Client.ClientId },
             Issuer = issuer,
             Lifetime = request.ValidatedRequest.Client.IdentityTokenLifetime,
@@ -187,7 +187,7 @@ public class DefaultTokenService : ITokenService
         var issuer = request.ValidatedRequest.IssuerName;
         var token = new Token(OidcConstants.TokenTypes.AccessToken)
         {
-            CreationTime = Clock.UtcNow.UtcDateTime,
+            CreationTime = TimeProvider.GetUtcNow().UtcDateTime,
             Issuer = issuer,
             Lifetime = request.ValidatedRequest.AccessTokenLifetime,
             IncludeJwtId = request.ValidatedRequest.Client.IncludeJwtId,

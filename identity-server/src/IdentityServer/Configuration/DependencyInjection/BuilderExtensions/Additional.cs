@@ -574,15 +574,4 @@ public static class IdentityServerBuilderExtensionsAdditional
         return builder;
     }
 
-    /// <summary>
-    /// Adds the legacy clock based on the pre-.NET8 ISystemClock.
-    /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
-    public static IIdentityServerBuilder AddLegacyClock(this IIdentityServerBuilder builder)
-    {
-        builder.Services.AddTransient<IClock, LegacyClock>();
-
-        return builder;
-    }
 }

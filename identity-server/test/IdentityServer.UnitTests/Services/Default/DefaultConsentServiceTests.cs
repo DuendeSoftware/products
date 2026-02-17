@@ -9,6 +9,7 @@ using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -21,13 +22,13 @@ public class DefaultConsentServiceTests
     private ClaimsPrincipal _user;
     private Client _client;
     private TestUserConsentStore _userConsentStore = new TestUserConsentStore();
-    private StubClock _clock = new StubClock();
+    private FakeTimeProvider _timeProvider = new FakeTimeProvider();
 
     private DateTime now;
 
     public DefaultConsentServiceTests()
     {
-        _clock.UtcNowFunc = () => UtcNow;
+        _timeProvider.SetUtcNow(UtcNow);
 
         _client = new Client
         {
@@ -48,7 +49,7 @@ public class DefaultConsentServiceTests
             }
         }.CreatePrincipal();
 
-        _subject = new DefaultConsentService(_clock, _userConsentStore, TestLogger.Create<DefaultConsentService>());
+        _subject = new DefaultConsentService(_timeProvider, _userConsentStore, TestLogger.Create<DefaultConsentService>());
     }
 
     public DateTime UtcNow
@@ -182,6 +183,7 @@ public class DefaultConsentServiceTests
         await _subject.UpdateConsentAsync(_user, _client, scopes);
 
         now = now.AddSeconds(3);
+        _timeProvider.SetUtcNow(now);
 
         var result = await _subject.RequiresConsentAsync(_user, _client, scopes);
 
@@ -199,6 +201,7 @@ public class DefaultConsentServiceTests
         await _subject.UpdateConsentAsync(_user, _client, scopes);
 
         now = now.AddSeconds(3);
+        _timeProvider.SetUtcNow(now);
 
         await _subject.RequiresConsentAsync(_user, _client, scopes);
 

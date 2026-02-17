@@ -9,6 +9,7 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Endpoints.Results;
@@ -34,7 +35,7 @@ public class EndSessionResultTests
         _options.UserInteraction.LogoutUrl = "~/logout";
         _options.UserInteraction.LogoutIdParameter = "logoutId";
 
-        _subject = new EndSessionHttpWriter(_options, new StubClock(), _urls, _mockLogoutMessageStore, new MockUiLocaleService());
+        _subject = new EndSessionHttpWriter(_options, new FakeTimeProvider(), _urls, _mockLogoutMessageStore, new MockUiLocaleService());
     }
 
     [Fact]

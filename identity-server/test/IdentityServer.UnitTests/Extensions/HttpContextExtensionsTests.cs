@@ -4,15 +4,14 @@
 #nullable enable
 using System.Security.Claims;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
-using UnitTests.Services.Default.KeyManagement;
 
 namespace UnitTests.Extensions;
 
@@ -221,7 +220,7 @@ public class HttpContextExtensionsTests
         var services = new ServiceCollection();
         services.AddSingleton<IUserSession>(userSession);
         services.AddSingleton<IClientStore>(clientStore);
-        services.AddSingleton<IClock>(new MockClock());
+        services.AddSingleton<TimeProvider>(new FakeTimeProvider());
         services.AddSingleton<IMessageStore<LogoutNotificationContext>, MockMessageStore<LogoutNotificationContext>>();
         services.AddSingleton<IServerUrls>(new MockServerUrls());
 

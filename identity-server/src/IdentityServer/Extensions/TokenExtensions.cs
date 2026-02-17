@@ -23,11 +23,11 @@ public static class TokenExtensions
     /// </summary>
     /// <param name="token"></param>
     /// <param name="options"></param>
-    /// <param name="clock"></param>
+    /// <param name="timeProvider"></param>
     /// <param name="logger"></param>
     /// <returns></returns>
     public static Dictionary<string, object> CreateJwtPayloadDictionary(this Token token,
-        IdentityServerOptions options, IClock clock, ILogger logger)
+        IdentityServerOptions options, TimeProvider timeProvider, ILogger logger)
     {
         try
         {
@@ -37,7 +37,7 @@ public static class TokenExtensions
             };
 
             // set times (nbf, exp, iat)
-            var now = clock.UtcNow.ToUnixTimeSeconds();
+            var now = timeProvider.GetUtcNow().ToUnixTimeSeconds();
             var exp = now + token.Lifetime;
 
             payload.Add(JwtClaimTypes.NotBefore, now);

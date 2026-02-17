@@ -15,17 +15,17 @@ public class SecretValidator : ISecretsListValidator
 {
     private readonly ILogger _logger;
     private readonly IEnumerable<ISecretValidator> _validators;
-    private readonly IClock _clock;
+    private readonly TimeProvider _timeProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SecretValidator"/> class.
     /// </summary>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="validators">The validators.</param>
     /// <param name="logger">The logger.</param>
-    public SecretValidator(IClock clock, IEnumerable<ISecretValidator> validators, ILogger<ISecretsListValidator> logger)
+    public SecretValidator(TimeProvider timeProvider, IEnumerable<ISecretValidator> validators, ILogger<ISecretsListValidator> logger)
     {
-        _clock = clock;
+        _timeProvider = timeProvider;
         _validators = validators;
         _logger = logger;
     }
@@ -40,12 +40,12 @@ public class SecretValidator : ISecretsListValidator
     {
         var secretsArray = secrets as Secret[] ?? secrets.ToArray();
 
-        foreach (var expired in secretsArray.Where(s => s.Expiration.HasExpired(_clock.UtcNow.UtcDateTime)))
+        foreach (var expired in secretsArray.Where(s => s.Expiration.HasExpired(_timeProvider.GetUtcNow().UtcDateTime)))
         {
             _logger.LogInformation("Secret [{description}] is expired", expired.Description ?? "no description");
         }
 
-        var currentSecrets = secretsArray.Where(s => !s.Expiration.HasExpired(_clock.UtcNow.UtcDateTime)).ToArray();
+        var currentSecrets = secretsArray.Where(s => !s.Expiration.HasExpired(_timeProvider.GetUtcNow().UtcDateTime)).ToArray();
 
         // see if a registered validator can validate the secret
         foreach (var validator in _validators)

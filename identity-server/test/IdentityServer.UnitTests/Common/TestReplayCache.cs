@@ -2,17 +2,16 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer;
 using Duende.IdentityServer.Services;
 
 namespace UnitTests.Common;
 
 public class TestReplayCache : IReplayCache
 {
-    private readonly IClock _clock;
+    private readonly TimeProvider _timeProvider;
     private Dictionary<string, DateTimeOffset> _values = new Dictionary<string, DateTimeOffset>();
 
-    public TestReplayCache(IClock clock) => _clock = clock;
+    public TestReplayCache(TimeProvider clock) => _timeProvider = clock;
 
     public Task AddAsync(string purpose, string handle, DateTimeOffset expiration)
     {
@@ -24,7 +23,7 @@ public class TestReplayCache : IReplayCache
     {
         if (_values.TryGetValue(purpose + handle, out var expiration))
         {
-            return Task.FromResult(_clock.UtcNow <= expiration);
+            return Task.FromResult(_timeProvider.GetUtcNow() <= expiration);
         }
         return Task.FromResult(false);
     }

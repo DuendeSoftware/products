@@ -12,7 +12,7 @@ namespace Duende.IdentityServer.Services;
 
 internal class DefaultIdentityServerInteractionService : IIdentityServerInteractionService
 {
-    private readonly IClock _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly IHttpContextAccessor _context;
     private readonly IMessageStore<LogoutMessage> _logoutMessageStore;
     private readonly IMessageStore<ErrorMessage> _errorMessageStore;
@@ -23,7 +23,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     private readonly ReturnUrlParser _returnUrlParser;
 
     public DefaultIdentityServerInteractionService(
-        IClock clock,
+        TimeProvider timeProvider,
         IHttpContextAccessor context,
         IMessageStore<LogoutMessage> logoutMessageStore,
         IMessageStore<ErrorMessage> errorMessageStore,
@@ -33,7 +33,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         ReturnUrlParser returnUrlParser,
         ILogger<DefaultIdentityServerInteractionService> logger)
     {
-        _clock = clock;
+        _timeProvider = timeProvider;
         _context = context;
         _logoutMessageStore = logoutMessageStore;
         _errorMessageStore = errorMessageStore;
@@ -87,7 +87,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
                     SubjectId = user.GetSubjectId(),
                     SessionId = sid,
                     ClientIds = clientIds
-                }, _clock.UtcNow.UtcDateTime);
+                }, _timeProvider.GetUtcNow().UtcDateTime);
                 var id = await _logoutMessageStore.WriteAsync(msg);
                 return id;
             }
@@ -136,7 +136,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         }
 
         var consentRequest = new ConsentRequest(request, subject);
-        await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _clock.UtcNow.UtcDateTime));
+        await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _timeProvider.GetUtcNow().UtcDateTime));
     }
 
     public Task DenyAuthorizationAsync(AuthorizationRequest request, AuthorizationError error, string errorDescription = null)

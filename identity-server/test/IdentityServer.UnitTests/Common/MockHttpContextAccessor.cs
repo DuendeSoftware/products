@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -34,7 +33,7 @@ internal class MockHttpContextAccessor : IHttpContextAccessor
 
         services.AddSingleton<IAuthenticationSchemeProvider>(Schemes);
         services.AddSingleton<IAuthenticationService>(AuthenticationService);
-        services.AddTransient<IClock, DefaultClock>();
+        services.AddSingleton(TimeProvider.System);
 
         services.AddAuthentication(auth =>
         {

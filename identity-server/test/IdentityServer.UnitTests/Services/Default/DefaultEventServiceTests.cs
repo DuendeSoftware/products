@@ -3,8 +3,8 @@
 
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Events;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
-using UnitTests.Services.Default.KeyManagement;
 
 namespace UnitTests.Services.Default;
 
@@ -24,7 +24,7 @@ public class DefaultEventServiceTests
             // that we don't throw exceptions when there is no http context available.
             new NullHttpContextAccessor(),
             sink,
-            new MockClock());
+            new FakeTimeProvider());
 
         var evt = new TestEvent(id: 123);
 

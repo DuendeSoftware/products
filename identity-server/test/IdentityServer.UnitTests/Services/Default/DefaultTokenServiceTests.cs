@@ -9,6 +9,7 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.Services.Default;
@@ -20,7 +21,7 @@ public class DefaultTokenServiceTests
     private MockClaimsService _mockClaimsService = new MockClaimsService();
     private MockReferenceTokenStore _mockReferenceTokenStore = new MockReferenceTokenStore();
     private MockTokenCreationService _mockTokenCreationService = new MockTokenCreationService();
-    private MockSystemClock _mockSystemClock = new MockSystemClock();
+    private FakeTimeProvider _mockTimeProvider = new FakeTimeProvider();
     private MockKeyMaterialService _mockKeyMaterialService = new MockKeyMaterialService();
     private IdentityServerOptions _options = new IdentityServerOptions();
 
@@ -35,7 +36,7 @@ public class DefaultTokenServiceTests
             _mockClaimsService,
             _mockReferenceTokenStore,
             _mockTokenCreationService,
-            _mockSystemClock,
+            _mockTimeProvider,
             _mockKeyMaterialService,
             _options,
             TestLogger.Create<DefaultTokenService>());

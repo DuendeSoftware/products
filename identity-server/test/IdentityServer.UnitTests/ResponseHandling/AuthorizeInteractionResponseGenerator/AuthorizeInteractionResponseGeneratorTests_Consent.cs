@@ -7,6 +7,7 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.ResponseHandling.AuthorizeInteractionResponseGenerator;
@@ -74,7 +75,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
 
     public AuthorizeInteractionResponseGeneratorTests_Consent() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,
-            new StubClock(),
+            new FakeTimeProvider(),
             TestLogger.Create<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator>(),
             _mockConsent,
             _fakeUserService);

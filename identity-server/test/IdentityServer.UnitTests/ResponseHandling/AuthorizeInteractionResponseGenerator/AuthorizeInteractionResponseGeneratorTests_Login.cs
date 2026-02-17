@@ -8,6 +8,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 
 namespace UnitTests.ResponseHandling.AuthorizeInteractionResponseGenerator;
@@ -17,11 +18,11 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
     private IdentityServerOptions _options = new IdentityServerOptions();
     private Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
-    private StubClock _clock = new StubClock();
+    private FakeTimeProvider _timeProvider = new FakeTimeProvider();
 
     public AuthorizeInteractionResponseGeneratorTests_Login() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,
-            _clock,
+            _timeProvider,
             TestLogger.Create<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator>(),
             _mockConsentService,
             new MockProfileService());
@@ -163,7 +164,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             Subject = new IdentityServerUser("123")
             {
                 IdentityProvider = "local",
-                AuthenticationTime = _clock.UtcNow.UtcDateTime.Subtract(TimeSpan.FromSeconds(10))
+                AuthenticationTime = _timeProvider.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromSeconds(10))
             }.CreatePrincipal()
         };
 
@@ -185,7 +186,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Login
             Subject = new IdentityServerUser("123")
             {
                 IdentityProvider = "local",
-                AuthenticationTime = _clock.UtcNow.UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
+                AuthenticationTime = _timeProvider.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
             }.CreatePrincipal()
         };
 

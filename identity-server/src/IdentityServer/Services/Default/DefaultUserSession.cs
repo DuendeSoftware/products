@@ -34,9 +34,9 @@ public class DefaultUserSession : IUserSession
     protected readonly IdentityServerOptions Options;
 
     /// <summary>
-    /// The clock
+    /// The time provider
     /// </summary>
-    protected readonly IClock Clock;
+    protected readonly TimeProvider TimeProvider;
 
     /// <summary>
     /// The server URL service.
@@ -96,21 +96,21 @@ public class DefaultUserSession : IUserSession
     /// <param name="httpContextAccessor">The HTTP context accessor.</param>
     /// <param name="handlers">The handlers.</param>
     /// <param name="options">The options.</param>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="urls"></param>
     /// <param name="logger">The logger.</param>
     public DefaultUserSession(
         IHttpContextAccessor httpContextAccessor,
         IAuthenticationHandlerProvider handlers,
         IdentityServerOptions options,
-        IClock clock,
+        TimeProvider timeProvider,
         IServerUrls urls,
         ILogger<IUserSession> logger)
     {
         HttpContextAccessor = httpContextAccessor;
         Handlers = handlers;
         Options = options;
-        Clock = clock;
+        TimeProvider = timeProvider;
         Urls = urls;
         Logger = logger;
     }
@@ -246,7 +246,7 @@ public class DefaultUserSession : IUserSession
         {
             // only remove it if we have it in the request
             var options = CreateSessionIdCookieOptions();
-            options.Expires = Clock.UtcNow.UtcDateTime.AddYears(-1);
+            options.Expires = TimeProvider.GetUtcNow().UtcDateTime.AddYears(-1);
 
             HttpContext.Response.Cookies.Append(CheckSessionCookieName, ".", options);
         }

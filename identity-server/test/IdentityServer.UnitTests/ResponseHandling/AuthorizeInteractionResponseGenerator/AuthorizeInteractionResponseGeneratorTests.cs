@@ -6,6 +6,7 @@ using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Validation;
+using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
 using static Duende.IdentityModel.OidcConstants;
 
@@ -16,11 +17,11 @@ public class AuthorizeInteractionResponseGeneratorTests
     private IdentityServerOptions _options = new IdentityServerOptions();
     private Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator _subject;
     private MockConsentService _mockConsentService = new MockConsentService();
-    private StubClock _clock = new StubClock();
+    private FakeTimeProvider _timeProvider = new FakeTimeProvider();
 
     public AuthorizeInteractionResponseGeneratorTests() => _subject = new Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator(
             _options,
-            _clock,
+            _timeProvider,
             TestLogger.Create<Duende.IdentityServer.ResponseHandling.AuthorizeInteractionResponseGenerator>(),
             _mockConsentService,
             new MockProfileService());
@@ -56,7 +57,7 @@ public class AuthorizeInteractionResponseGeneratorTests
     [Fact]
     public async Task Authenticated_User_with_maxage_with_prompt_none_must_error()
     {
-        _clock.UtcNowFunc = () => new DateTime(2020, 02, 03, 9, 0, 0);
+        _timeProvider.SetUtcNow(new DateTimeOffset(new DateTime(2020, 02, 03, 9, 0, 0)));
 
         var request = new ValidatedAuthorizeRequest
         {
@@ -116,7 +117,7 @@ public class AuthorizeInteractionResponseGeneratorTests
             Subject = new IdentityServerUser("123")
             {
                 IdentityProvider = "local",
-                AuthenticationTime = _clock.UtcNow.UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
+                AuthenticationTime = _timeProvider.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
             }.CreatePrincipal(),
             PromptModes = new[] { PromptModes.None }
         };

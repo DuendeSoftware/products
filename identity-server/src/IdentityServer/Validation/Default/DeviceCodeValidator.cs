@@ -18,7 +18,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
     private readonly IDeviceFlowCodeService _devices;
     private readonly IProfileService _profile;
     private readonly IDeviceFlowThrottlingService _throttlingService;
-    private readonly IClock _systemClock;
+    private readonly TimeProvider _systemClock;
     private readonly ILogger<DeviceCodeValidator> _logger;
 
     /// <summary>
@@ -33,7 +33,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         IDeviceFlowCodeService devices,
         IProfileService profile,
         IDeviceFlowThrottlingService throttlingService,
-        IClock systemClock,
+        TimeProvider systemClock,
         ILogger<DeviceCodeValidator> logger)
     {
         _devices = devices;
@@ -77,7 +77,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         }
 
         // validate lifetime
-        if (deviceCode.CreationTime.AddSeconds(deviceCode.Lifetime) < _systemClock.UtcNow.UtcDateTime)
+        if (deviceCode.CreationTime.AddSeconds(deviceCode.Lifetime) < _systemClock.GetUtcNow().UtcDateTime)
         {
             _logger.LogError("Expired device code");
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.ExpiredToken);

@@ -17,7 +17,7 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
 {
     private readonly IDistributedCache _cache;
     private readonly IClientStore _clientStore;
-    private readonly IClock _clock;
+    private readonly TimeProvider _timeProvider;
     private readonly IdentityServerOptions _options;
 
     private const string KeyPrefix = "devicecode_";
@@ -27,17 +27,17 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
     /// </summary>
     /// <param name="cache">The cache.</param>
     /// <param name="clientStore"></param>
-    /// <param name="clock">The clock.</param>
+    /// <param name="timeProvider">The time provider.</param>
     /// <param name="options">The options.</param>
     public DistributedDeviceFlowThrottlingService(
         IDistributedCache cache,
         IClientStore clientStore,
-        IClock clock,
+        TimeProvider timeProvider,
         IdentityServerOptions options)
     {
         _cache = cache;
         _clientStore = clientStore;
-        _clock = clock;
+        _timeProvider = timeProvider;
         _options = options;
     }
 
@@ -55,14 +55,14 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
         ArgumentNullException.ThrowIfNull(deviceCode);
 
         var key = KeyPrefix + deviceCode;
-        var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _clock.UtcNow.AddSeconds(details.Lifetime) };
+        var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _timeProvider.GetUtcNow().AddSeconds(details.Lifetime) };
 
         var lastSeenAsString = await _cache.GetStringAsync(key);
 
         // record new
         if (lastSeenAsString == null)
         {
-            await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+            await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
             return false;
         }
 
@@ -73,15 +73,15 @@ public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingServi
 
             var client = await _clientStore.FindEnabledClientByIdAsync(details.ClientId);
             var interval = client?.PollingInterval ?? _options.DeviceFlow.Interval;
-            if (_clock.UtcNow.UtcDateTime < lastSeen.AddSeconds(interval))
+            if (_timeProvider.GetUtcNow().UtcDateTime < lastSeen.AddSeconds(interval))
             {
-                await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+                await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
                 return true;
             }
         }
 
         // store current and continue
-        await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+        await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
         return false;
     }
 }

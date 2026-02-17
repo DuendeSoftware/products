@@ -5,7 +5,6 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Duende.IdentityModel;
-using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
@@ -38,7 +37,7 @@ public class TokenExtensionsTests
             Claims = new List<Claim> { new Claim(type, value, valueType) },
         };
 
-        var payloadDict = token.CreateJwtPayloadDictionary(new IdentityServerOptions(), new DefaultClock(),
+        var payloadDict = token.CreateJwtPayloadDictionary(new IdentityServerOptions(), TimeProvider.System,
             TestLogger.Create<TokenExtensionsTests>());
 
         var payloadJson = JsonSerializer.Serialize(payloadDict);
@@ -80,7 +79,7 @@ public class TokenExtensionsTests
             Issuer = "issuer"
         };
 
-        var result = token.CreateJwtPayloadDictionary(new IdentityServerOptions(), new DefaultClock(),
+        var result = token.CreateJwtPayloadDictionary(new IdentityServerOptions(), TimeProvider.System,
             TestLogger.Create<TokenExtensionsTests>());
 
         result.Keys.ShouldNotContain(JwtClaimTypes.Expiration);

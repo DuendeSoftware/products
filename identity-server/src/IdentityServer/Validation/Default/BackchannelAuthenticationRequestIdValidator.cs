@@ -19,14 +19,14 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
     private readonly IBackChannelAuthenticationRequestStore _backchannelAuthenticationStore;
     private readonly IProfileService _profile;
     private readonly IBackchannelAuthenticationThrottlingService _throttlingService;
-    private readonly IClock _systemClock;
+    private readonly TimeProvider _systemClock;
     private readonly ILogger<BackchannelAuthenticationRequestIdValidator> _logger;
 
     public BackchannelAuthenticationRequestIdValidator(
         IBackChannelAuthenticationRequestStore backchannelAuthenticationStore,
         IProfileService profile,
         IBackchannelAuthenticationThrottlingService throttlingService,
-        IClock systemClock,
+        TimeProvider systemClock,
         ILogger<BackchannelAuthenticationRequestIdValidator> logger)
     {
         _backchannelAuthenticationStore = backchannelAuthenticationStore;
@@ -66,7 +66,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
         }
 
         // validate lifetime
-        if (request.CreationTime.AddSeconds(request.Lifetime) < _systemClock.UtcNow.UtcDateTime)
+        if (request.CreationTime.AddSeconds(request.Lifetime) < _systemClock.GetUtcNow().UtcDateTime)
         {
             _logger.LogError("Expired authentication request id");
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.ExpiredToken);

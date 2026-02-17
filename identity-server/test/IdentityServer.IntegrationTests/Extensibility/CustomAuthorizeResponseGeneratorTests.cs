@@ -85,13 +85,13 @@ public class CustomAuthorizeResponseGeneratorTests
 
 public class CustomAuthorizeResponseGenerator(
     IdentityServerOptions options,
-    IClock clock,
+    TimeProvider timeProvider,
     ITokenService tokenService,
     IKeyMaterialService keyMaterialService,
     IAuthorizationCodeStore authorizationCodeStore,
     ILogger<AuthorizeResponseGenerator> logger,
     IEventService events)
-    : AuthorizeResponseGenerator(options, clock, tokenService, keyMaterialService, authorizationCodeStore, logger,
+    : AuthorizeResponseGenerator(options, timeProvider, tokenService, keyMaterialService, authorizationCodeStore, logger,
         events)
 {
     public override async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request)
