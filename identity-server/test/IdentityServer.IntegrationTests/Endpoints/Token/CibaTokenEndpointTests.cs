@@ -8,6 +8,8 @@ using System.Text.Json;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
+using Duende.IdentityServer.Test;
+using Duende.IdentityServer.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
