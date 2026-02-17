@@ -486,8 +486,8 @@ public class CibaTokenEndpointTests
     [Trait("Category", Category)]
     public async Task expired_request_should_return_error()
     {
-        var clock = new FakeTimeProvider();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
+        var clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        _mockPipeline.OnPreConfigureServices += s => s.TryAddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
@@ -898,8 +898,8 @@ public class CibaTokenEndpointTests
     {
         _cibaClient.CibaLifetime = 100;
 
-        var clock = new FakeTimeProvider();
-        _mockPipeline.OnPostConfigureServices += s => s.AddSingleton<TimeProvider>(clock);
+        var clock = new FakeTimeProvider(DateTimeOffset.UtcNow);
+        _mockPipeline.OnPreConfigureServices += s => s.TryAddSingleton<TimeProvider>(clock);
         _mockPipeline.Initialize();
 
         // ciba request
