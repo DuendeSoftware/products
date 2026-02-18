@@ -75,7 +75,7 @@ public class TestBrowserClient : HttpClient
 
     public async Task FollowRedirectAsync()
     {
-        LastResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
+        LastResponse.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         var location = LastResponse.Headers.Location.ToString();
         await GetAsync(location);
     }

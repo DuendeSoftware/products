@@ -58,7 +58,7 @@ public class AuthorizeResultTests
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
         _mockErrorMessageStore.Messages.Count.ShouldBe(1);
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         var location = _context.Response.Headers.Location.First();
         location.ShouldStartWith("https://server/error");
         var query = QueryHelpers.ParseQuery(new Uri(location).Query);
@@ -83,7 +83,7 @@ public class AuthorizeResultTests
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
         _mockUserSession.Clients.Count.ShouldBe(0);
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         var location = _context.Response.Headers.Location.First();
         location.ShouldStartWith("http://client/callback");
     }
@@ -107,7 +107,7 @@ public class AuthorizeResultTests
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
         _mockUserSession.Clients.Count.ShouldBe(0);
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         var location = _context.Response.Headers.Location.First();
         location.ShouldContain("session_state=some_session_state");
     }
@@ -128,7 +128,7 @@ public class AuthorizeResultTests
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
         _mockUserSession.Clients.Count.ShouldBe(0);
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         var location = _context.Response.Headers.Location.First();
         location.ShouldStartWith("http://client/callback");
 
@@ -167,7 +167,7 @@ public class AuthorizeResultTests
 
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         _context.Response.Headers.CacheControl.First().ShouldContain("no-store");
         _context.Response.Headers.CacheControl.First().ShouldContain("no-cache");
         _context.Response.Headers.CacheControl.First().ShouldContain("max-age=0");
@@ -189,7 +189,7 @@ public class AuthorizeResultTests
 
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         _context.Response.Headers.CacheControl.First().ShouldContain("no-store");
         _context.Response.Headers.CacheControl.First().ShouldContain("no-cache");
         _context.Response.Headers.CacheControl.First().ShouldContain("max-age=0");
@@ -314,7 +314,7 @@ public class AuthorizeResultTests
 
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         var location = _context.Response.Headers.Location.First();
         location.ShouldStartWith("http://client/callback");
         location.ShouldContain("#_");
@@ -346,7 +346,7 @@ public class AuthorizeResultTests
 
         await _subject.WriteHttpResponse(new AuthorizeResult(_response), _context);
 
-        _context.Response.StatusCode.ShouldBe(302);
+        _context.Response.StatusCode.ShouldBe(StatusCodes.Status303SeeOther);
         var location = _context.Response.Headers.Location.First();
         var queryString = new Uri(location).Query;
         var queryParams = QueryHelpers.ParseQuery(queryString);

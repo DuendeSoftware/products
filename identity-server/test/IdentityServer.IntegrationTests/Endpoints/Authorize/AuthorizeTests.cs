@@ -245,7 +245,7 @@ public class AuthorizeTests
             nonce: "123_nonce");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
@@ -271,7 +271,7 @@ public class AuthorizeTests
             nonce: "123_nonce");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client4/callback");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
@@ -301,7 +301,7 @@ public class AuthorizeTests
             nonce: "123_nonce");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
@@ -332,7 +332,7 @@ public class AuthorizeTests
             nonce: "123_nonce");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
@@ -375,7 +375,7 @@ public class AuthorizeTests
             nonce: "123_nonce");
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client2/callback");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
@@ -1342,7 +1342,7 @@ public class AuthorizeTests
         // this simulates the login page returning to the returnUrl which is the authorize callback page
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + _mockPipeline.LoginReturnUrl);
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
         response.Headers.Location.ToString().ShouldContain("id_token=");
     }
@@ -1368,7 +1368,7 @@ public class AuthorizeTests
         // this simulates the login page returning to the returnUrl which is the authorize callback page
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + _mockPipeline.LoginReturnUrl);
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client1/callback");
         response.Headers.Location.ToString().ShouldContain("id_token=");
     }

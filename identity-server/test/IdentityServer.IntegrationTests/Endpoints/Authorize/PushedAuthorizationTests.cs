@@ -60,7 +60,7 @@ public class PushedAuthorizationTests
             requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
         var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location!.AbsoluteUri.ShouldMatch($"{expectedCallback}.*");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
@@ -91,7 +91,7 @@ public class PushedAuthorizationTests
             requestUri: parJson.RootElement.GetProperty("request_uri").GetString());
         var response = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location!.AbsoluteUri.ShouldMatch($"{expectedCallback}.*");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
@@ -145,7 +145,7 @@ public class PushedAuthorizationTests
 
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location!.ToString().ShouldMatch(".*/error.*");
     }
 
@@ -167,7 +167,7 @@ public class PushedAuthorizationTests
 
         // We expect to be redirected to the error page, as this is an interactive
         // call to authorize
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location!.ToString().ShouldMatch(".*/error.*");
     }
 
@@ -193,7 +193,7 @@ public class PushedAuthorizationTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var authorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
-        authorizeResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
+        authorizeResponse.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         authorizeResponse.Headers.Location!.ToString().ShouldMatch(".*/error.*");
     }
 
@@ -216,7 +216,7 @@ public class PushedAuthorizationTests
         var firstAuthorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
         var secondAuthorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
-        secondAuthorizeResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
+        secondAuthorizeResponse.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         secondAuthorizeResponse.Headers.Location!.ToString().ShouldMatch(".*/error.*");
     }
 
@@ -271,7 +271,7 @@ public class PushedAuthorizationTests
         var authorizeResponse = await _mockPipeline.BrowserClient.GetAsync(authorizeUrl);
 
         // Verify that authorize redirects to login
-        authorizeResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
+        authorizeResponse.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         var isPromptCreate = parameterName == "prompt" && parameterValue == "create";
         var expectedLocation = isPromptCreate ? IdentityServerPipeline.CreateAccountPage : IdentityServerPipeline.LoginPage;
         authorizeResponse.Headers.Location.ToString().ToLower().ShouldMatch($"{expectedLocation.ToLower()}*");
@@ -287,7 +287,7 @@ public class PushedAuthorizationTests
         var authorizeCallbackResponse = await _mockPipeline.BrowserClient.GetAsync(returnUrl);
 
         // The authorize callback should continue back to the application (the prompt parameter is processed so we don't go back to the UI)
-        authorizeCallbackResponse.StatusCode.ShouldBe(HttpStatusCode.Found);
+        authorizeCallbackResponse.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         authorizeCallbackResponse.Headers.Location!.ToString().ShouldStartWith(expectedCallback);
     }
 

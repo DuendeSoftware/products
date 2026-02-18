@@ -1,5 +1,10 @@
 # IdentityServer Changelog
 
+# 8.0.0
+
+## Breaking Changes
+- HTTP 303 (See Other) is now the unconditional redirect status code for all authorization and end-session redirects. The `UserInteractionOptions.UseHttp303Redirects` opt-in flag has been removed. This aligns IdentityServer with the FAPI 2.0 Security Profile (Section 5.3.2.2, item 11).
+
 # 7.4.0-preview.1
 
 ## Breaking Changes

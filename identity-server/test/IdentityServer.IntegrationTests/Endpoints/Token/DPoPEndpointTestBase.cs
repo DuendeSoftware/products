@@ -361,7 +361,7 @@ public abstract class DPoPEndpointTestBase
         }
         var response = await Pipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith($"https://{clientId}/callback");
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());

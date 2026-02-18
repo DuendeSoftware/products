@@ -141,13 +141,4 @@ public class UserInteractionOptions
     /// handle those values.
     /// </summary>
     public ICollection<string> PromptValuesSupported { get; set; } = new HashSet<string>(Constants.SupportedPromptModes);
-
-    /// <summary>
-    /// When enabled, uses HTTP 303 (See Other) status code for redirects instead of HTTP 302 (Found).
-    /// This is recommended by the FAPI 2.0 Security Profile (Section 5.3.2.2, item 11) to prevent
-    /// user agents from resubmitting POST data when following redirects.
-    /// See: https://openid.net/specs/fapi-security-profile-2_0-final.html
-    /// Default: false (uses HTTP 302 for backward compatibility)
-    /// </summary>
-    public bool UseHttp303Redirects { get; set; }
 }
