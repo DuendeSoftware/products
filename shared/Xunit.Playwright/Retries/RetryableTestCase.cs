@@ -12,7 +12,7 @@ internal class RetryableTestCase : XunitTestCase, ISelfExecutingXunitTestCase
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     [Obsolete("Called by the de-serializer; should only be called by deriving classes for de-serialization purposes")]
-    public RetryableTestCase() { }
+    public RetryableTestCase() => MaxRetries = 0;
 
     public RetryableTestCase(
         int maxRetries,
@@ -30,10 +30,7 @@ internal class RetryableTestCase : XunitTestCase, ISelfExecutingXunitTestCase
         string? sourceFilePath = null,
         int? sourceLineNumber = null,
         int? timeout = null) :
-            base(testMethod, testCaseDisplayName, uniqueID, @explicit, skipExceptions, skipReason, skipType, skipUnless, skipWhen, traits, testMethodArguments, sourceFilePath, sourceLineNumber, timeout)
-    {
-        MaxRetries = maxRetries;
-    }
+            base(testMethod, testCaseDisplayName, uniqueID, @explicit, skipExceptions, skipReason, skipType, skipUnless, skipWhen, traits, testMethodArguments, sourceFilePath, sourceLineNumber, timeout) => MaxRetries = maxRetries;
 
     public int MaxRetries { get; private set; }
 

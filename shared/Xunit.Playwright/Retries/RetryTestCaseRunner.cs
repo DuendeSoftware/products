@@ -1,7 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Xunit;
 using Xunit.Sdk;
 using Xunit.v3;
 
@@ -28,6 +27,7 @@ internal class RetryTestCaseRunner :
         if (aggregator.ToException() is Exception ex)
         {
             if (ex.Message.StartsWith(DynamicSkipToken.Value, StringComparison.Ordinal))
+            {
                 return XunitRunnerHelper.SkipTestCases(
                     messageBus,
                     cancellationTokenSource,
@@ -35,7 +35,9 @@ internal class RetryTestCaseRunner :
                     ex.Message.Substring(DynamicSkipToken.Value.Length),
                     sendTestCaseMessages: false
                 );
+            }
             else
+            {
                 return XunitRunnerHelper.FailTestCases(
                     messageBus,
                     cancellationTokenSource,
@@ -43,6 +45,7 @@ internal class RetryTestCaseRunner :
                     ex,
                     sendTestCaseMessages: false
                 );
+            }
         }
 
         await using var ctxt = new RetryTestCaseRunnerContext(maxRetries, testCase, tests, messageBus, aggregator, cancellationTokenSource, displayName, skipReason, explicitOption, constructorArguments);
@@ -59,7 +62,9 @@ internal class RetryTestCaseRunner :
         var maxRetries = ctxt.MaxRetries;
 
         if (maxRetries < 1)
+        {
             maxRetries = 5;
+        }
 
         while (true)
         {

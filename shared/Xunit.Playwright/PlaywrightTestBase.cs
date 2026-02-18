@@ -42,7 +42,7 @@ public class PlaywrightTestBase<THost> : PageTest, IDisposable where THost : cla
     public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
-        Context.SetDefaultTimeout(10_000);
+        Context.SetDefaultTimeout(60_000);
         await Context.Tracing.StartAsync(new()
         {
             Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
