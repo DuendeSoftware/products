@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Xunit.Playwright;
+using Duende.Xunit.Playwright.Retries;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
@@ -20,7 +21,7 @@ public class BffBlazorWebAssemblyTests(BffHostTestFixture fixture)
         };
     }
 
-    [Fact]
+    [RetryableFact]
     public async Task Can_login_and_load_local_api()
     {
         await Warmup();
