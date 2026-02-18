@@ -126,6 +126,7 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
         }
 
         url = url.AddQueryString(result.ReturnUrlParameterName, returnUrl);
-        context.Response.RedirectWithStatusCode(_urls.GetAbsoluteUrl(url), _options.UserInteraction.UseHttp303Redirects);
+        context.Response.StatusCode = StatusCodes.Status303SeeOther;
+        context.Response.Headers.Location = _urls.GetAbsoluteUrl(url);
     }
 }

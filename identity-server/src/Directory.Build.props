@@ -10,7 +10,7 @@
     <Product>Duende IdentityServer</Product>
     <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
     <MinVerTagPrefix>is-</MinVerTagPrefix>
-    <MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
+    <MinVerMinimumMajorMinor>8.0</MinVerMinimumMajorMinor>
     <IsIdSrvProject>true</IsIdSrvProject>
   </PropertyGroup>
 
