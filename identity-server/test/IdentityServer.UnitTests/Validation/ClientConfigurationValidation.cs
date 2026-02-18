@@ -514,13 +514,13 @@ public class ClientConfigurationValidation
         context.ErrorMessage.ShouldBe(expectedError);
     }
 
-    public static TheoryData<ICollection<string>> GrantTypesWithClientCredentialsTestData =>
-    [
+    public static TheoryData<ICollection<string>> GrantTypesWithClientCredentialsTestData => new()
+    {
         GrantTypes.ImplicitAndClientCredentials,
         GrantTypes.CodeAndClientCredentials,
         GrantTypes.HybridAndClientCredentials,
         GrantTypes.ClientCredentials,
         GrantTypes.ResourceOwnerPasswordAndClientCredentials
-    ];
+    };
 
 }

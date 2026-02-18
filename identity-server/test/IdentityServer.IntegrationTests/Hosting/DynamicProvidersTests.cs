@@ -406,8 +406,8 @@ public class DynamicProvidersTests
     {
         public DynamicProviderConfigurationData()
         {
-            Add(new("Default PathPrefix", _ => { }));
-            Add(new("PathPrefix Callback",
+            Add(new DynamicProviderTestScenario("Default PathPrefix", _ => { }));
+            Add(new DynamicProviderTestScenario("PathPrefix Callback",
                 options => options.DynamicProviders.PathMatchingCallback = ctx =>
                 {
                     if (ctx.Request.Path.StartsWithSegments("/federation/idp1", StringComparison.InvariantCulture))
