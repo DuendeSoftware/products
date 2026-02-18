@@ -50,10 +50,7 @@ jobs:
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
-        dotnet-version: |-
-          8.0.x
-          9.0.203
-          10.0.100
+        dotnet-version: 10.0.100
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Verify Formatting
@@ -84,10 +81,7 @@ jobs:
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
-        dotnet-version: |-
-          8.0.x
-          9.0.203
-          10.0.100
+        dotnet-version: 10.0.100
     - name: Restore
       run: dotnet restore aspnetcore-authentication-jwtbearer.slnf
     - name: Build
@@ -95,14 +89,18 @@ jobs:
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test - test/AspNetCore.Authentication.JwtBearer.Tests
-      run: dotnet test test/AspNetCore.Authentication.JwtBearer.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/AspNetCore.Authentication.JwtBearer.Tests-tests.trx" --collect:"XPlat Code Coverage"
+      run: >-
+        dotnet run --project test/AspNetCore.Authentication.JwtBearer.Tests -c Release --no-build -- \
+          --report-xunit-trx --report-xunit-trx-filename AspNetCore.Authentication.JwtBearer.Tests.trx \
+          --coverage --coverage-output-format cobertura \
+          --coverage-output AspNetCore.Authentication.JwtBearer.Tests.cobertura.xml
     - id: test-report-test-AspNetCore-Authentication-JwtBearer-Tests
       name: Test report - test/AspNetCore.Authentication.JwtBearer.Tests
       if: github.event_name == 'push' && (success() || failure())
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
       with:
         name: Test Report - test/AspNetCore.Authentication.JwtBearer.Tests
-        path: '**/test/AspNetCore.Authentication.JwtBearer.Tests-tests.trx'
+        path: '**/AspNetCore.Authentication.JwtBearer.Tests.trx'
         reporter: dotnet-trx
         fail-on-error: true
         fail-on-empty: true
@@ -173,17 +171,14 @@ jobs:
     - name: Setup Dotnet
       uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25
       with:
-        dotnet-version: |-
-          8.0.x
-          9.0.203
-          10.0.100
+        dotnet-version: 10.0.100
     - name: Tool restore
       run: dotnet tool restore
     - name: Pack aspnetcore-authentication-jwtbearer.slnf
       run: dotnet pack -c Release aspnetcore-authentication-jwtbearer.slnf -o artifacts
     - name: Sign packages
       if: github.event == 'push'
-      run: |-
+      run: >-
         for file in artifacts/*.nupkg; do
            dotnet NuGetKeyVaultSignTool sign "$file" --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ --azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 --azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 --azure-key-vault-client-secret ${{ secrets.SignClientSecret }} --azure-key-vault-certificate NuGetPackageSigning
         done

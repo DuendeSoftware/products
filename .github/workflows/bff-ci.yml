@@ -89,14 +89,18 @@ jobs:
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test - test/Bff.Tests
-      run: dotnet test test/Bff.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Bff.Tests-tests.trx" --collect:"XPlat Code Coverage"
+      run: >-
+        dotnet run --project test/Bff.Tests -c Release --no-build -- \
+          --report-xunit-trx --report-xunit-trx-filename Bff.Tests.trx \
+          --coverage --coverage-output-format cobertura \
+          --coverage-output Bff.Tests.cobertura.xml
     - id: test-report-test-Bff-Tests
       name: Test report - test/Bff.Tests
       if: github.event_name == 'push' && (success() || failure())
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
       with:
         name: Test Report - test/Bff.Tests
-        path: '**/test/Bff.Tests-tests.trx'
+        path: '**/Bff.Tests.trx'
         reporter: dotnet-trx
         fail-on-error: true
         fail-on-empty: true
@@ -145,14 +149,18 @@ jobs:
     - name: Dotnet devcerts
       run: dotnet dev-certs https --trust
     - name: Test - test/Hosts.Tests
-      run: dotnet test test/Hosts.Tests -c Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=test/Hosts.Tests-tests.trx" --collect:"XPlat Code Coverage"
+      run: >-
+        dotnet run --project test/Hosts.Tests -c Release --no-build -- \
+          --report-xunit-trx --report-xunit-trx-filename Hosts.Tests.trx \
+          --coverage --coverage-output-format cobertura \
+          --coverage-output Hosts.Tests.cobertura.xml
     - id: test-report-test-Hosts-Tests
       name: Test report - test/Hosts.Tests
       if: github.event_name == 'push' && (success() || failure())
       uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
       with:
         name: Test Report - test/Hosts.Tests
-        path: '**/test/Hosts.Tests-tests.trx'
+        path: '**/Hosts.Tests.trx'
         reporter: dotnet-trx
         fail-on-error: true
         fail-on-empty: true
@@ -218,7 +226,7 @@ jobs:
       run: dotnet pack -c Release bff.slnf -o artifacts
     - name: Sign packages
       if: github.event == 'push'
-      run: |-
+      run: >-
         for file in artifacts/*.nupkg; do
            dotnet NuGetKeyVaultSignTool sign "$file" --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ --azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 --azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 --azure-key-vault-client-secret ${{ secrets.SignClientSecret }} --azure-key-vault-certificate NuGetPackageSigning
         done
