@@ -4,19 +4,20 @@
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
-using Meziantou.Extensions.Logging.Xunit;
+using MartinCostello.Logging.XUnit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
 
 namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class GenericHost
 {
-    public GenericHost(ITestOutputHelper testOutputHelper, string baseAddress = "https://server")
+    private readonly ITestOutputHelper _testOutputHelper = TestContext.Current.TestOutputHelper!;
+
+    public GenericHost(string baseAddress = "https://server")
     {
         if (baseAddress.EndsWith("/"))
         {
@@ -24,7 +25,6 @@ public class GenericHost
         }
 
         _baseAddress = baseAddress;
-        _testOutputHelper = testOutputHelper;
     }
 
     protected readonly string _baseAddress;
@@ -57,8 +57,6 @@ public class GenericHost
                 $"Attempt to use ${nameof(HttpClient)} before is was initialized. Did you forget to call {nameof(Initialize)}");
         private set => _httpClient = value;
     }
-
-    private readonly ITestOutputHelper _testOutputHelper;
 
     public T Resolve<T>()
         where T : notnull =>
@@ -104,7 +102,6 @@ public class GenericHost
     private void ConfigureServices(IServiceCollection services)
     {
         // This adds log messages to the output of our tests when they fail.
-        // See https://www.meziantou.net/how-to-view-logs-from-ilogger-in-xunitdotnet.htm
         services.AddLogging(options =>
         {
             // If you need different log output to understand a test failure, configure it here
@@ -113,10 +110,7 @@ public class GenericHost
             options.AddFilter("Duende.IdentityServer.License", LogLevel.Error);
             options.AddFilter("Duende.IdentityServer.Startup", LogLevel.Error);
 
-            options.AddProvider(new XUnitLoggerProvider(_testOutputHelper, new XUnitLoggerOptions
-            {
-                IncludeCategory = true,
-            }));
+            options.AddXUnit(_testOutputHelper);
         });
 
         OnConfigureServices(services);

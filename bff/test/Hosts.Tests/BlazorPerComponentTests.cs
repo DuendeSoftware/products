@@ -2,16 +2,14 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Xunit.Playwright;
-using Duende.Xunit.Playwright.Retries;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
-using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
-public class BlazorPerComponentTests(ITestOutputHelper output, BffHostTestFixture fixture)
-    : BffPlaywrightTestBase(output, fixture)
+public class BlazorPerComponentTests(BffHostTestFixture fixture)
+    : BffPlaywrightTestBase(fixture)
 {
 
     public async Task<PerComponentPageModel> GoToHome()
@@ -23,7 +21,7 @@ public class BlazorPerComponentTests(ITestOutputHelper output, BffHostTestFixtur
         };
     }
 
-    [RetryableFact]
+    [Fact]
     public async Task Can_load_blazor_webassembly_app()
     {
         await Warmup();
