@@ -18,8 +18,8 @@
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class AccessTokenRetrievalContext : System.IEquatable<Duende.Bff.AccessTokenManagement.AccessTokenRetrievalContext>
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public AccessTokenRetrievalContext() { }
         [System.Runtime.CompilerServices.RequiredMember]
@@ -36,8 +36,8 @@
     [System.Runtime.CompilerServices.RequiredMember]
     public class AccessTokenRetrievalError : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.AccessTokenRetrievalError>
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public AccessTokenRetrievalError() { }
         public string? ErrorDescription { get; init; }
@@ -47,8 +47,8 @@
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class BearerTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.BearerTokenResult>
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public BearerTokenResult() { }
         [System.Runtime.CompilerServices.RequiredMember]
@@ -72,8 +72,8 @@
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class DPoPTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult, System.IEquatable<Duende.Bff.AccessTokenManagement.DPoPTokenResult>
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public DPoPTokenResult() { }
         [System.Runtime.CompilerServices.RequiredMember]
@@ -176,8 +176,8 @@ namespace Duende.Bff
         public static void MapBffManagementEndpoints(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         public static void MapBffManagementLoginEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         public static void MapBffManagementLogoutEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
-        [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
-            "w handled by passing the prompt=none parameter to the login endpoint."))]
+        [System.Obsolete("The silent login endpoint will be removed in a future version. Silent login is no" +
+            "w handled by passing the prompt=none parameter to the login endpoint.")]
         public static void MapBffManagementSilentLoginEndpoints(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
         public static void MapBffManagementUserEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
     }
@@ -273,8 +273,8 @@ namespace Duende.Bff.Builder
         public Microsoft.AspNetCore.Builder.IApplicationBuilder CreateApplicationBuilder() { }
         public Microsoft.AspNetCore.Builder.IApplicationBuilder New() { }
         public Microsoft.AspNetCore.Builder.IApplicationBuilder Use(System.Func<Microsoft.AspNetCore.Http.RequestDelegate, Microsoft.AspNetCore.Http.RequestDelegate> middleware) { }
-        [System.Obsolete(("Don\'t call UseEndpoints on WebApp. The WebApp directly implements IEndpointRouteB" +
-            "uilder."))]
+        [System.Obsolete("Don\'t call UseEndpoints on WebApp. The WebApp directly implements IEndpointRouteB" +
+            "uilder.")]
         public Duende.Bff.Builder.BffWebApplication UseEndpoints(System.Action<Microsoft.AspNetCore.Routing.IEndpointRouteBuilder> configure) { }
     }
     public interface IBffBuilder
@@ -335,8 +335,8 @@ namespace Duende.Bff.Configuration
         public bool RevokeRefreshTokenOnLogout { get; set; }
         public System.TimeSpan SessionCleanupInterval { get; set; }
         public Microsoft.AspNetCore.Http.PathString SilentLoginCallbackPath { get; }
-        [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
-            "w handled by passing the prompt=none parameter to the login endpoint."))]
+        [System.Obsolete("The silent login endpoint will be removed in a future version. Silent login is no" +
+            "w handled by passing the prompt=none parameter to the login endpoint.")]
         public Microsoft.AspNetCore.Http.PathString SilentLoginPath { get; }
         public string StaticAssetsClientName { get; set; }
         public Microsoft.AspNetCore.Http.PathString UserPath { get; }
@@ -374,8 +374,8 @@ namespace Duende.Bff.DynamicFrontends
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class BffFrontend : System.IEquatable<Duende.Bff.DynamicFrontends.BffFrontend>
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public BffFrontend() { }
         [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
@@ -430,8 +430,8 @@ namespace Duende.Bff.DynamicFrontends
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class HostHeaderValue : System.IEquatable<Duende.Bff.DynamicFrontends.HostHeaderValue>, System.IEquatable<Microsoft.AspNetCore.Http.HttpRequest>
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public HostHeaderValue() { }
         [System.Runtime.CompilerServices.RequiredMember]
@@ -479,8 +479,8 @@ namespace Duende.Bff.Endpoints
         bool IsValidAsync(System.Uri returnUrl);
     }
     public interface ISilentLoginCallbackEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
-    [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
-        "w handled by passing the prompt=none parameter to the login endpoint."))]
+    [System.Obsolete("The silent login endpoint will be removed in a future version. Silent login is no" +
+        "w handled by passing the prompt=none parameter to the login endpoint.")]
     public interface ISilentLoginEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
     public interface IUserEndpoint : Duende.Bff.Endpoints.IBffEndpoint { }
     public interface IUserEndpointClaimsEnricher
