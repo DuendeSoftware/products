@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Reflection;
-using Duende.AccessTokenManagement;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Blazor;
 using Duende.Bff.Blazor.Client;

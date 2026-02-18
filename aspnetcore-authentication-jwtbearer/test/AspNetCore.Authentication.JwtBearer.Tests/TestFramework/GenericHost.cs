@@ -4,7 +4,6 @@
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
-using MartinCostello.Logging.XUnit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
