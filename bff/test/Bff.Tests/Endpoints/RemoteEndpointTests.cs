@@ -14,7 +14,6 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Xunit.Abstractions;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.Transforms;
 using Yarp.ReverseProxy.Transforms.Builder;
@@ -24,7 +23,7 @@ namespace Duende.Bff.Tests.Endpoints;
 
 public class RemoteEndpointTests : BffTestBase
 {
-    public RemoteEndpointTests(ITestOutputHelper output) : base(output)
+    public RemoteEndpointTests() : base()
     {
         Bff.OnConfigureServices += services =>
         {

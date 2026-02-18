@@ -6,8 +6,6 @@ using Duende.Bff.Internal;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
 /// <summary>
@@ -17,7 +15,7 @@ public class IAccessTokenRetriever_Extensibility_tests : BffTestBase
 {
     private ContextCapturingAccessTokenRetriever _customAccessTokenReceiver { get; } = new(NullLogger<DefaultAccessTokenRetriever>.Instance);
 
-    public IAccessTokenRetriever_Extensibility_tests(ITestOutputHelper output) : base(output)
+    public IAccessTokenRetriever_Extensibility_tests() : base()
     {
         IdentityServer.AddClient(The.ClientId, Bff.Url());
         Bff.OnConfigureBff += bff => bff

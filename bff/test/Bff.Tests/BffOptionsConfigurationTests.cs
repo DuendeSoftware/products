@@ -7,11 +7,9 @@ using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
-public class BffOptionsConfigurationTests(ITestOutputHelper output) : BffTestBase(output)
+public class BffOptionsConfigurationTests : BffTestBase
 {
     [Theory]
     [MemberData(nameof(AllSetups))]

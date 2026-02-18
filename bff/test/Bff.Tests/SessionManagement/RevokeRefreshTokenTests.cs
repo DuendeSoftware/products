@@ -3,11 +3,9 @@
 
 using Duende.Bff.Tests.TestInfra;
 using Duende.IdentityServer.Stores;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.SessionManagement;
 
-public class RevokeRefreshTokenTests(ITestOutputHelper output) : BffTestBase(output)
+public class RevokeRefreshTokenTests : BffTestBase
 {
     [Theory, MemberData(nameof(AllSetups))]
     public async Task logout_should_revoke_refreshtoken(BffSetupType setup)

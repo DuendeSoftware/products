@@ -3,11 +3,9 @@
 
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Diagnostics;
 
-public class FrontendCountDiagnosticEntryTests(ITestOutputHelper testOutputHelper) : BffTestBase(testOutputHelper)
+public class FrontendCountDiagnosticEntryTests : BffTestBase
 {
     [Fact]
     public async Task Should_print_the_number_of_frontends_during_defined_interval()

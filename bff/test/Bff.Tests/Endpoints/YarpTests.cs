@@ -7,14 +7,13 @@ using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
-using Xunit.Abstractions;
 using Yarp.ReverseProxy.Configuration;
 
 namespace Duende.Bff.Tests.Endpoints;
 
 public class YarpTests : BffTestBase
 {
-    public YarpTests(ITestOutputHelper output) : base(output) =>
+    public YarpTests() : base() =>
         Bff.OnConfigureApp += app =>
         {
             app.MapReverseProxy(proxyApp =>

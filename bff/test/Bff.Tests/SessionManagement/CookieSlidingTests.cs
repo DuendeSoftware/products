@@ -6,16 +6,13 @@ using Duende.Bff.SessionManagement.TicketStore;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Xunit.Abstractions;
-
-
 namespace Duende.Bff.Tests.SessionManagement;
 
 public class CookieSlidingTests : BffTestBase
 {
     private InMemoryUserSessionStore _sessionStore => (InMemoryUserSessionStore)Bff.Resolve<IUserSessionStore>();
 
-    public CookieSlidingTests(ITestOutputHelper output) : base(output) =>
+    public CookieSlidingTests() : base() =>
         Bff.OnConfigureBff += bff =>
             bff.AddServerSideSessions();
 

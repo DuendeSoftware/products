@@ -10,14 +10,13 @@ using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
-using Xunit.Abstractions;
 using Resource = Duende.Bff.AccessTokenManagement.Resource;
 
 namespace Duende.Bff.Tests;
 
 public class BffRemoteApiTests : BffTestBase
 {
-    public BffRemoteApiTests(ITestOutputHelper output) : base(output) =>
+    public BffRemoteApiTests() : base() =>
         Bff.OnConfigureBff += bff =>
         {
             bff.AddRemoteApis();

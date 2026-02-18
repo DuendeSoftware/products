@@ -4,11 +4,9 @@
 using System.Net;
 using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Endpoints.Management;
 
-public class ManagementBasePathTests(ITestOutputHelper output) : BffTestBase(output)
+public class ManagementBasePathTests : BffTestBase
 {
     [Theory]
     [InlineData(Constants.ManagementEndpoints.Login, HttpStatusCode.Redirect)]

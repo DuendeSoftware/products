@@ -1,0 +1,31 @@
+## Progress - xUnit v3 with MTP Migration
+
+### Story 1: Upgrade shared test infrastructure (COMPLETED)
+- Commit: c85a70f32
+- Branch: dh/xunit-v3-mtp
+
+#### Changes Made:
+1. **Directory.Packages.props**: Removed xUnit v2 packages (xunit.core, xunit.runner.visualstudio, Xunit.SkippableFact, Verify.Xunit, Serilog.Sinks.XUnit, Meziantou.Extensions.Logging.Xunit, Microsoft.Playwright.Xunit, coverlet.collector). Added xUnit v3 packages (xunit.v3.core, xunit.v3.core.mtp-v2, xunit.v3.extensibility.core, Microsoft.Testing.Extensions.CodeCoverage, Verify.XunitV3, MartinCostello.Logging.XUnit.v3, Microsoft.Playwright.Xunit.v3).
+
+2. **test.props**: Updated to use xunit.v3.core.mtp-v2 and Microsoft.Testing.Extensions.CodeCoverage. Added OutputType=exe and UseMicrosoftTestingPlatformRunner=true for MTP support.
+
+3. **shared/Xunit.Playwright/Xunit.Playwright.csproj**: Changed xunit.core to xunit.v3.extensibility.core (since it's a library, not a test project). Changed Microsoft.Playwright.Xunit to Microsoft.Playwright.Xunit.v3. Removed Serilog.Sinks.XUnit and Xunit.SkippableFact.
+
+4. **shared/Xunit.Playwright/PlaywrightTestBase.cs**: Updated to xUnit v3 APIs. Changed namespace from Microsoft.Playwright.Xunit to Microsoft.Playwright.Xunit.v3. Added using Xunit.v3 for BeforeAfterTestAttribute. Constructor no longer takes ITestOutputHelper (uses TestContext.Current.TestOutputHelper). Changed InitializeAsync/DisposeAsync from Task to ValueTask. Updated BeforeAfterTestAttribute.Before/After signatures to include IXunitTest parameter. Renamed Output to TestOutputHelper.
+
+5. **shared/Xunit.Playwright/IntegrationTestBase.cs**: Same pattern as PlaywrightTestBase - removed ITestOutputHelper from constructor, use TestContext.Current.TestOutputHelper. Renamed Output to TestOutputHelper. Changed Skip.If to Assert.Skip.
+
+6. **shared/Xunit.Playwright/AppHostFixture.cs**: Changed InitializeAsync/DisposeAsync from Task to ValueTask. Changed Skip.If to Assert.Skip.
+
+7. **Deleted files**: Retries directory (RetryableFact.cs, RetryableTestCase.cs, RetryableTestDiscoverer.cs) - incompatible with v3. xunit.runner.json files from IdentityServer test projects.
+
+#### Important Notes for Next Stories:
+- `xunit.v3.extensibility.core` is needed for library projects (like Xunit.Playwright) that aren't test projects themselves. `xunit.v3.core` requires OutputType=exe.
+- xUnit v3 `BeforeAfterTestAttribute` is in `Xunit.v3` namespace and methods take `(MethodInfo, IXunitTest)` instead of just `(MethodInfo)`.
+- `IAsyncLifetime.InitializeAsync()` returns `ValueTask` (not `Task`) in xUnit v3. Same for `DisposeAsync()`.
+- `PageTest` from Microsoft.Playwright.Xunit.v3 also uses `ValueTask` for InitializeAsync/DisposeAsync.
+- `ITestOutputHelper` is in `Xunit` namespace (not `Xunit.Abstractions`).
+- `TestContext.Current.TestOutputHelper!` replaces constructor-injected `ITestOutputHelper`.
+- Property renamed from `Output` to `TestOutputHelper` - downstream test classes that reference `Output` will need updating.
+- `Skip.If(true, ...)` replaced with `Assert.Skip(...)` (built-in to xUnit v3).
+- Test projects (Stories 2-5) still reference old packages and won't build until they are migrated.

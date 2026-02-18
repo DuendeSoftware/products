@@ -5,13 +5,11 @@ using Duende.Bff.DynamicFrontends;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.SessionManagement;
 
 public class ServerSideTicketStoreTests : BffTestBase
 {
-    public ServerSideTicketStoreTests(ITestOutputHelper output) : base(output) =>
+    public ServerSideTicketStoreTests() : base() =>
         Bff.OnConfigureBff += bff =>
         {
             bff.AddServerSideSessions();

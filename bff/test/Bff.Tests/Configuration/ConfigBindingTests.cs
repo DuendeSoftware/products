@@ -6,7 +6,6 @@ using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.Extensions.Options;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Configuration;
 
@@ -133,9 +132,9 @@ public class OptionsMonitorExplorationTests
 
 }
 
-public class ConfigBindingTests(ITestOutputHelper output) : BffTestBase(output)
+public class ConfigBindingTests : BffTestBase
 {
-    private readonly ITestOutputHelper _output = output;
+    private readonly ITestOutputHelper _output = TestContext.Current.TestOutputHelper!;
 
 
     /// <summary>

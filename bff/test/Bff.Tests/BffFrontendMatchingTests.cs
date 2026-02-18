@@ -5,15 +5,13 @@ using System.Net;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.HttpOverrides;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
 public class BffFrontendMatchingTests : BffTestBase
 {
     private static readonly BffFrontendName NoFrontendSelected = BffFrontendName.Parse("no_frontend_selected");
 
-    public BffFrontendMatchingTests(ITestOutputHelper output) : base(output)
+    public BffFrontendMatchingTests() : base()
     {
         // Add a frontend that should never be matched
         AddOrUpdateFrontend(Some.NeverMatchingFrontEnd());

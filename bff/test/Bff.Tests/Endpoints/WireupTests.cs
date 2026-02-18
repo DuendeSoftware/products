@@ -3,11 +3,9 @@
 
 using System.Net;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Endpoints;
 
-public class WireupTests(ITestOutputHelper output) : BffTestBase(output)
+public class WireupTests : BffTestBase
 {
     [Fact]
     public async Task Without_auto_wireup_management_endpoints_are_not_mapped()

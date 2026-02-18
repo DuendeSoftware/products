@@ -3,11 +3,9 @@
 
 using Duende.Bff.Licensing;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
-public class LicensingTests(ITestOutputHelper output) : BffTestBase(output)
+public class LicensingTests : BffTestBase
 {
     [Fact]
     public async Task Given_no_license_then_error_log()

@@ -6,11 +6,9 @@ using Duende.Bff.DynamicFrontends;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Endpoints;
 
-public class LocalEndpointTests(ITestOutputHelper output) : BffTestBase(output)
+public class LocalEndpointTests : BffTestBase
 {
     public HttpStatusCode LocalApiResponseStatus { get; set; } = HttpStatusCode.OK;
 

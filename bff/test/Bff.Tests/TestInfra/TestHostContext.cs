@@ -3,8 +3,6 @@
 
 using System.Diagnostics;
 using System.Text;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.TestInfra;
 
 public record TestHostContext(ITestOutputHelper OutputHelper)

@@ -6,11 +6,9 @@ using System.Security.Claims;
 using Duende.Bff.Tests.TestInfra;
 using Duende.IdentityModel;
 using Microsoft.AspNetCore.Authentication;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Endpoints.Management;
 
-public class LogoutEndpointTests(ITestOutputHelper output) : BffTestBase(output)
+public class LogoutEndpointTests : BffTestBase
 {
     [Theory]
     [MemberData(nameof(AllSetups))]
