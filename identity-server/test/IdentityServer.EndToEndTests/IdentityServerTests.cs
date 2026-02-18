@@ -5,13 +5,12 @@ using Duende.IdentityServer.EndToEndTests.TestInfra;
 using Duende.Xunit.Playwright;
 using Projects;
 using ServiceDefaults;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.EndToEndTests;
 
 [Collection(IdentityServerAppHostCollection.CollectionName)]
-public class IdentityServerTests(ITestOutputHelper output, IdentityServerHostTestFixture fixture)
-    : PlaywrightTestBase<All>(output, fixture)
+public class IdentityServerTests(IdentityServerHostTestFixture fixture)
+    : PlaywrightTestBase<All>(fixture)
 {
     [Theory]
     [InlineData(AppHostServices.MvcAutomaticTokenManagement)]

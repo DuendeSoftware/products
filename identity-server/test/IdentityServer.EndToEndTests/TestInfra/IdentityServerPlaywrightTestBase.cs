@@ -3,10 +3,9 @@
 
 using Duende.Xunit.Playwright;
 using Projects;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.EndToEndTests.TestInfra;
 
 [Collection(IdentityServerAppHostCollection.CollectionName)]
-public class IdentityServerPlaywrightTestBase(ITestOutputHelper output, AppHostFixture<All> fixture)
-    : PlaywrightTestBase<All>(output, fixture);
+public class IdentityServerPlaywrightTestBase(AppHostFixture<All> fixture)
+    : PlaywrightTestBase<All>(fixture);
