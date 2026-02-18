@@ -5,6 +5,7 @@
 #nullable enable
 
 using System.Security.Claims;
+using Duende.IdentityServer.Saml.Models;
 using Microsoft.AspNetCore.Authentication;
 
 namespace Duende.IdentityServer.Services;
@@ -62,4 +63,26 @@ public interface IUserSession
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<IEnumerable<string>> GetClientListAsync(Ct ct);
+
+    /// <summary>
+    /// Adds a SAML SP session to the user's session.
+    /// </summary>
+    /// <param name="session">The SAML session data.</param>
+    /// <remarks>
+    /// Session data is stored in AuthenticationProperties. For deployments with many SAML service providers,
+    /// server-side sessions should be enabled to avoid cookie size limitations.
+    /// See <see cref="SamlSpSessionData"/> for details.
+    /// </remarks>
+    Task AddSamlSessionAsync(SamlSpSessionData session);
+
+    /// <summary>
+    /// Gets the list of SAML SP sessions for the user's session.
+    /// </summary>
+    Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync();
+
+    /// <summary>
+    /// Removes a SAML SP session by EntityId.
+    /// </summary>
+    /// <param name="entityId">The SP's entity ID.</param>
+    Task RemoveSamlSessionAsync(string entityId);
 }

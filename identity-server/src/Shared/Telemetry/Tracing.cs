@@ -109,5 +109,6 @@ public static class Tracing
         public const string ScopeNames = "scope_names";
         public const string ApiResourceNames = "api_resource_names";
 
+        public const string SamlEntityId = "saml_entity_id";
     }
 }

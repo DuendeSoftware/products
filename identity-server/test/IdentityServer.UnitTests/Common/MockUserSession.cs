@@ -3,6 +3,7 @@
 
 
 using System.Security.Claims;
+using Duende.IdentityServer.Saml.Models;
 using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 
@@ -11,6 +12,7 @@ namespace UnitTests.Common;
 public class MockUserSession : IUserSession
 {
     public List<string> Clients = new List<string>();
+    public List<SamlSpSessionData> SamlSessions = new List<SamlSpSessionData>();
 
     public bool EnsureSessionIdCookieWasCalled { get; set; }
     public bool RemoveSessionIdCookieWasCalled { get; set; }
@@ -50,6 +52,21 @@ public class MockUserSession : IUserSession
     public Task AddClientIdAsync(string clientId, Ct _)
     {
         Clients.Add(clientId);
+        return Task.CompletedTask;
+    }
+
+    public Task AddSamlSessionAsync(SamlSpSessionData session)
+    {
+        SamlSessions.RemoveAll(s => s.EntityId == session.EntityId);
+        SamlSessions.Add(session);
+        return Task.CompletedTask;
+    }
+
+    public Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync() => Task.FromResult<IEnumerable<SamlSpSessionData>>(SamlSessions);
+
+    public Task RemoveSamlSessionAsync(string entityId)
+    {
+        SamlSessions.RemoveAll(s => s.EntityId == entityId);
         return Task.CompletedTask;
     }
 }

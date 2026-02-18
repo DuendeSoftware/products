@@ -4,6 +4,8 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Saml;
+
 namespace Duende.IdentityServer.Validation;
 
 /// <summary>
@@ -16,4 +18,9 @@ public class EndSessionCallbackValidationResult : ValidationResult
     /// Gets the client front-channel logout urls.
     /// </summary>
     public IEnumerable<string>? FrontChannelLogoutUrls { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SAML front-channel logout requests.
+    /// </summary>
+    public IEnumerable<ISamlFrontChannelLogout> SamlFrontChannelLogouts { get; set; } = [];
 }

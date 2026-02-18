@@ -25,6 +25,12 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
     private long _token;
     private long _userInfo;
     private long _oAuthMetadata;
+    private long _samlMetadata;
+    private long _samlSignIn;
+    private long _samlSignInCallback;
+    private long _samlIdPInitiated;
+    private long _samlLogout;
+    private long _samlLogoutCallback;
     private long _other;
 
     private readonly MeterListener _meterListener;
@@ -65,6 +71,12 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.Token.EnsureLeadingSlash(), _token);
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.UserInfo.EnsureLeadingSlash(), _userInfo);
         writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.OAuthMetadata.EnsureLeadingSlash(), _oAuthMetadata);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.SamlMetadata.EnsureLeadingSlash(), _samlMetadata);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.SamlSignin.EnsureLeadingSlash(), _samlSignIn);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.SamlSigninCallback.EnsureLeadingSlash(), _samlSignInCallback);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.SamlIdpInitiated.EnsureLeadingSlash(), _samlIdPInitiated);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.SamlLogout.EnsureLeadingSlash(), _samlLogout);
+        writer.WriteNumber(IdentityServerConstants.ProtocolRoutePaths.SamlLogoutCallback.EnsureLeadingSlash(), _samlLogoutCallback);
         writer.WriteNumber("other", _other);
 
         writer.WriteEndObject();
@@ -140,6 +152,24 @@ internal class EndpointUsageDiagnosticEntry : IDiagnosticEntry, IDisposable
             //NOTE: need to use StartsWith because this route can have additional segments
             case { } s when s.StartsWith(IdentityServerConstants.ProtocolRoutePaths.OAuthMetadata, StringComparison.OrdinalIgnoreCase):
                 Interlocked.Increment(ref _oAuthMetadata);
+                break;
+            case IdentityServerConstants.ProtocolRoutePaths.SamlMetadata:
+                Interlocked.Increment(ref _samlMetadata);
+                break;
+            case IdentityServerConstants.ProtocolRoutePaths.SamlSignin:
+                Interlocked.Increment(ref _samlSignIn);
+                break;
+            case IdentityServerConstants.ProtocolRoutePaths.SamlSigninCallback:
+                Interlocked.Increment(ref _samlSignInCallback);
+                break;
+            case IdentityServerConstants.ProtocolRoutePaths.SamlIdpInitiated:
+                Interlocked.Increment(ref _samlIdPInitiated);
+                break;
+            case IdentityServerConstants.ProtocolRoutePaths.SamlLogout:
+                Interlocked.Increment(ref _samlLogout);
+                break;
+            case IdentityServerConstants.ProtocolRoutePaths.SamlLogoutCallback:
+                Interlocked.Increment(ref _samlLogoutCallback);
                 break;
             default:
                 Interlocked.Increment(ref _other);

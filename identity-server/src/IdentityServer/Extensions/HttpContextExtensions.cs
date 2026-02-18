@@ -57,23 +57,28 @@ public static class HttpContextExtensions
         LogoutNotificationContext endSessionMsg = null;
 
         // if we have a logout message, then that take precedence over the current user
-        if (logoutMessage?.ClientIds?.Any() == true)
+        if (logoutMessage?.ClientIds?.Any() == true || logoutMessage?.SamlSessions?.Any() == true)
         {
-            var clientIds = logoutMessage.ClientIds;
+            var clientIds = logoutMessage.ClientIds ?? [];
+            var samlSessions = logoutMessage.SamlSessions?.ToList() ?? [];
 
             // check if current user is same, since we might have new clients (albeit unlikely)
             if (currentSubId == logoutMessage.SubjectId)
             {
                 clientIds = clientIds.Union(await userSession.GetClientListAsync(context.RequestAborted));
+                var currentSamlSessions = await userSession.GetSamlSessionListAsync();
+                samlSessions = samlSessions.Union(currentSamlSessions).ToList();
             }
 
-            if (await AnyClientHasFrontChannelLogout(logoutMessage.ClientIds))
+            var samlEntityIds = samlSessions.Select(s => s.EntityId);
+            if (await AnyClientHasFrontChannelLogout(logoutMessage.ClientIds) || await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds))
             {
                 endSessionMsg = new LogoutNotificationContext
                 {
                     SubjectId = logoutMessage.SubjectId,
                     SessionId = logoutMessage.SessionId,
-                    ClientIds = clientIds
+                    ClientIds = clientIds,
+                    SamlSessions = samlSessions
                 };
             }
         }
@@ -81,13 +86,18 @@ public static class HttpContextExtensions
         {
             // see if current user has any clients they need to signout of
             var clientIds = await userSession.GetClientListAsync(context.RequestAborted);
-            if (clientIds.Any() && await AnyClientHasFrontChannelLogout(clientIds))
+            var samlSessions = await userSession.GetSamlSessionListAsync();
+            var samlEntityIds = samlSessions.Select(s => s.EntityId);
+
+            if ((clientIds.Any() && await AnyClientHasFrontChannelLogout(clientIds)) ||
+                (samlEntityIds.Any() && await AnySamlServiceProviderHasFrontChannelLogout(samlEntityIds)))
             {
                 endSessionMsg = new LogoutNotificationContext
                 {
                     SubjectId = currentSubId,
                     SessionId = await userSession.GetSessionIdAsync(context.RequestAborted),
-                    ClientIds = clientIds
+                    ClientIds = clientIds,
+                    SamlSessions = samlSessions
                 };
             }
         }
@@ -117,6 +127,21 @@ public static class HttpContextExtensions
             {
                 var client = await clientStore.FindEnabledClientByIdAsync(clientId, context.RequestAborted);
                 if (client?.FrontChannelLogoutUri.IsPresent() == true)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        async Task<bool> AnySamlServiceProviderHasFrontChannelLogout(IEnumerable<string> entityIds)
+        {
+            var serviceProviderStore = context.RequestServices.GetRequiredService<ISamlServiceProviderStore>();
+            foreach (var entityId in entityIds)
+            {
+                var sp = await serviceProviderStore.FindByEntityIdAsync(entityId);
+                if (sp?.Enabled == true && sp.SingleLogoutServiceUrl != null)
                 {
                     return true;
                 }

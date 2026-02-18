@@ -293,4 +293,9 @@ public class IdentityServerOptions
     /// Options that control the diagnostic data that is logged by IdentityServer.
     /// </summary>
     public DiagnosticOptions Diagnostics { get; set; } = new DiagnosticOptions();
+
+    /// <summary>
+    /// Gets or sets the SAML 2.0 Identity Provider options.
+    /// </summary>
+    public SamlOptions Saml { get; set; } = new SamlOptions();
 }

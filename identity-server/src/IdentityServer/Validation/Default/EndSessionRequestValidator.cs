@@ -9,6 +9,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Logging.Models;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
@@ -51,6 +52,11 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     public ILogoutNotificationService LogoutNotificationService { get; }
 
     /// <summary>
+    /// The SAML logout notification service.
+    /// </summary>
+    protected ISamlLogoutNotificationService SamlLogoutNotificationService { get; }
+
+    /// <summary>
     /// The end session message store.
     /// </summary>
     protected readonly IMessageStore<LogoutNotificationContext> EndSessionMessageStore;
@@ -63,6 +69,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     /// <param name="uriValidator"></param>
     /// <param name="userSession"></param>
     /// <param name="logoutNotificationService"></param>
+    /// <param name="samlLogoutNotificationService"></param>
     /// <param name="endSessionMessageStore"></param>
     /// <param name="logger"></param>
     public EndSessionRequestValidator(
@@ -71,6 +78,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         IRedirectUriValidator uriValidator,
         IUserSession userSession,
         ILogoutNotificationService logoutNotificationService,
+        ISamlLogoutNotificationService samlLogoutNotificationService,
         IMessageStore<LogoutNotificationContext> endSessionMessageStore,
         ILogger<EndSessionRequestValidator> logger)
     {
@@ -79,6 +87,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         UriValidator = uriValidator;
         UserSession = userSession;
         LogoutNotificationService = logoutNotificationService;
+        SamlLogoutNotificationService = samlLogoutNotificationService;
         EndSessionMessageStore = endSessionMessageStore;
         Logger = logger;
     }
@@ -140,6 +149,9 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 validatedRequest.Subject = subject;
                 validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
                 validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
+
+                var samlSessions = await UserSession.GetSamlSessionListAsync();
+                validatedRequest.SamlSessions = samlSessions;
             }
 
             var redirectUri = parameters.Get(OidcConstants.EndSessionRequest.PostLogoutRedirectUri);
@@ -170,6 +182,9 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
             validatedRequest.Subject = subject;
             validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
             validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
+
+            var samlSessions = await UserSession.GetSamlSessionListAsync();
+            validatedRequest.SamlSessions = samlSessions;
         }
 
         LogSuccess(validatedRequest);
@@ -231,10 +246,13 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
 
         var endSessionId = parameters[Constants.UIConstants.DefaultRoutePathParams.EndSessionCallback];
         var endSessionMessage = await EndSessionMessageStore.ReadAsync(endSessionId, ct);
-        if (endSessionMessage?.Data?.ClientIds?.Any() == true)
+        if (endSessionMessage?.Data?.ClientIds?.Any() == true || endSessionMessage?.Data?.SamlSessions?.Any() == true)
         {
             result.IsError = false;
             result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data, ct);
+
+            var samlFrontChannelLogouts = await SamlLogoutNotificationService.GetSamlFrontChannelLogoutsAsync(endSessionMessage.Data);
+            result.SamlFrontChannelLogouts = samlFrontChannelLogouts;
         }
         else
         {

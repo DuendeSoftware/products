@@ -218,6 +218,12 @@ public static class IdentityServerConstants
         public const string PushedAuthorization = "PushedAuthorization";
         public const string OAuthMetadata = "OAuthMetadata";
 
+        public const string SamlMetadata = "SamlMetadata";
+        public const string SamlSignin = "SamlSignin";
+        public const string SamlSigninCallback = "SamlSigninCallback";
+        public const string SamlIdpInitiated = "SamlIdpInitiated";
+        public const string SamlLogout = "SamlLogout";
+        public const string SamlLogoutCallback = "SamlLogoutCallback";
     }
 
     public static class ContentSecurityPolicyHashes
@@ -236,6 +242,11 @@ public static class IdentityServerConstants
         /// The hash of the inline script used on the check session endpoint.
         /// </summary>
         public const string CheckSessionScript = "sha256-jyguj/c+mxOUX7TJrFnIkEQlj4jinO1nejo8qnuF1jc=";
+
+        /// <summary>
+        /// The hash of the inline script used for SAML auto-post form submissions.
+        /// </summary>
+        public const string SamlAutoPostScript = "sha256-x5thY6OTOhOhd8GSiineDdcCYxqXyCOfbLSHMWmHPjw=";
     }
 
     public static class ProtocolRoutePaths
@@ -265,6 +276,14 @@ public static class IdentityServerConstants
         public const string MtlsRevocation = MtlsPathPrefix + "/revocation";
         public const string MtlsIntrospection = MtlsPathPrefix + "/introspect";
         public const string MtlsDeviceAuthorization = MtlsPathPrefix + "/deviceauthorization";
+
+        public const string SamlPathPrefix = "saml";
+        public const string SamlMetadata = SamlPathPrefix + "/metadata";
+        public const string SamlSignin = SamlPathPrefix + "/sso";
+        public const string SamlSigninCallback = SamlSignin + "/callback";
+        public const string SamlIdpInitiated = SamlPathPrefix + "/idp-initiated";
+        public const string SamlLogout = SamlPathPrefix + "/slo";
+        public const string SamlLogoutCallback = SamlLogout + "/callback";
 
         public static readonly string[] CorsPaths =
         {

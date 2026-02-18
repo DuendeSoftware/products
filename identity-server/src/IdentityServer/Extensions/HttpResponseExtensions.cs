@@ -98,6 +98,20 @@ public static class HttpResponseExtensions
         AddCspHeaders(response.Headers, options, cspHeader);
     }
 
+    public static void AddStyleAndScriptCspHeaders(this HttpResponse response, CspOptions options, string styleHash, string scriptHash, string frameSources)
+    {
+        var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
+
+        var cspHeader = $"default-src 'none'; style-src {csp1part}'{styleHash}'; script-src {csp1part}'{scriptHash}'";
+
+        if (!string.IsNullOrEmpty(frameSources))
+        {
+            cspHeader += $"; frame-src {frameSources}";
+        }
+
+        AddCspHeaders(response.Headers, options, cspHeader);
+    }
+
     public static void AddCspHeaders(IHeaderDictionary headers, CspOptions options, string cspHeader)
     {
         if (!headers.ContainsKey("Content-Security-Policy"))

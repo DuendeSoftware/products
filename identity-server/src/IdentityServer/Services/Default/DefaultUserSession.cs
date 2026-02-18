@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Extensions;
+using Duende.IdentityServer.Saml.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -223,7 +224,7 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Ensures the session identifier cookie is synchronized with the current
     /// session identifier. If there is no sid, the cookie is removed. If there
-    /// is a sid, and the session identifier cookie is missing, it is issued. 
+    /// is a sid, and the session identifier cookie is missing, it is issued.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
@@ -360,5 +361,51 @@ public class DefaultUserSession : IUserSession
 
         var scheme = await HttpContext.GetCookieAuthenticationSchemeAsync();
         await HttpContext.SignInAsync(scheme, Principal, Properties);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task AddSamlSessionAsync(SamlSpSessionData session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        await AuthenticateAsync();
+        if (Properties != null)
+        {
+            Properties.AddSamlSession(session);
+            await UpdateSessionCookie();
+        }
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<IEnumerable<SamlSpSessionData>> GetSamlSessionListAsync()
+    {
+        await AuthenticateAsync();
+
+        if (Properties != null)
+        {
+            try
+            {
+                return Properties.GetSamlSessionList();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting SAML session list");
+            }
+        }
+
+        return Array.Empty<SamlSpSessionData>();
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task RemoveSamlSessionAsync(string entityId)
+    {
+        ArgumentNullException.ThrowIfNull(entityId);
+
+        await AuthenticateAsync();
+        if (Properties != null)
+        {
+            Properties.RemoveSamlSession(entityId);
+            await UpdateSessionCookie();
+        }
     }
 }

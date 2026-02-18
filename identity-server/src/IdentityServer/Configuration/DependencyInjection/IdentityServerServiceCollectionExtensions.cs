@@ -37,6 +37,7 @@ public static class IdentityServerServiceCollectionExtensions
             .AddCookieAuthentication()
             .AddCoreServices()
             .AddDefaultEndpoints()
+            .AddSamlServices()
             .AddPluggableServices()
             .AddKeyManagement()
             .AddDynamicProvidersCore()

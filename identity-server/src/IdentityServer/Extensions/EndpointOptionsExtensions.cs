@@ -22,6 +22,12 @@ internal static class EndpointOptionsExtensions
         IdentityServerConstants.EndpointNames.UserInfo => options.EnableUserInfoEndpoint,
         IdentityServerConstants.EndpointNames.PushedAuthorization => options.EnablePushedAuthorizationEndpoint,
         IdentityServerConstants.EndpointNames.BackchannelAuthentication => options.EnableBackchannelAuthenticationEndpoint,
+        IdentityServerConstants.EndpointNames.SamlMetadata => options.EnableSamlMetadataEndpoint,
+        IdentityServerConstants.EndpointNames.SamlSignin => options.EnableSamlSigninEndpoint,
+        IdentityServerConstants.EndpointNames.SamlSigninCallback => options.EnableSamlSigninCallbackEndpoint,
+        IdentityServerConstants.EndpointNames.SamlIdpInitiated => options.EnableSamlIdpInitiatedEndpoint,
+        IdentityServerConstants.EndpointNames.SamlLogout => options.EnableSamlLogoutEndpoint,
+        IdentityServerConstants.EndpointNames.SamlLogoutCallback => options.EnableSamlLogoutCallbackEndpoint,
         _ => true
     };
 }

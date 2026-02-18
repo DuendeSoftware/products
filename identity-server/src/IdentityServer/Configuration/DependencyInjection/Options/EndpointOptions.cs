@@ -111,4 +111,52 @@ public class EndpointsOptions
     /// <c>true</c> if the OAuth 2.0 discovery metadata is enabled; otherwise, <c>false</c>.
     /// </value>
     public bool EnableOAuth2MetadataEndpoint { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the SAML metadata endpoint is enabled.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the SAML metadata endpoint is enabled; otherwise, <c>false</c>.
+    /// </value>
+    public bool EnableSamlMetadataEndpoint { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the SAML sign-in (SSO) endpoint is enabled.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the SAML sign-in endpoint is enabled; otherwise, <c>false</c>.
+    /// </value>
+    public bool EnableSamlSigninEndpoint { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the SAML sign-in callback endpoint is enabled.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the SAML sign-in callback endpoint is enabled; otherwise, <c>false</c>.
+    /// </value>
+    public bool EnableSamlSigninCallbackEndpoint { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the SAML IdP-initiated SSO endpoint is enabled.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the SAML IdP-initiated endpoint is enabled; otherwise, <c>false</c>.
+    /// </value>
+    public bool EnableSamlIdpInitiatedEndpoint { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the SAML Single Logout (SLO) endpoint is enabled.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the SAML logout endpoint is enabled; otherwise, <c>false</c>.
+    /// </value>
+    public bool EnableSamlLogoutEndpoint { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the SAML Single Logout callback endpoint is enabled.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the SAML logout callback endpoint is enabled; otherwise, <c>false</c>.
+    /// </value>
+    public bool EnableSamlLogoutCallbackEndpoint { get; set; } = true;
 }

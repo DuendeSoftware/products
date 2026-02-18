@@ -4,6 +4,8 @@
 
 #nullable enable
 
+using Duende.IdentityServer.Saml.Models;
+
 namespace Duende.IdentityServer.Models;
 
 /// <summary>
@@ -30,6 +32,13 @@ public class LogoutNotificationContext
     /// The list of client Ids that the user has authenticated to.
     /// </summary>
     public IEnumerable<string> ClientIds { get; set; } = default!;
+
+    /// <summary>
+    /// The SAML Service Provider sessions that the user has authenticated to.
+    /// Contains full session data including NameId, SessionIndex, and NameIdFormat
+    /// required to construct logout requests.
+    /// </summary>
+    public IEnumerable<SamlSpSessionData> SamlSessions { get; set; } = [];
 
     /// <summary>
     /// Indicates why the user's session ended, if known.
