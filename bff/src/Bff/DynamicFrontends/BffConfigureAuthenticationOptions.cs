@@ -18,13 +18,16 @@ internal class BffConfigureAuthenticationOptions : IPostConfigureOptions<Authent
             options.DefaultScheme = BffAuthenticationSchemes.BffCookie;
             options.DefaultChallengeScheme = BffAuthenticationSchemes.BffOpenIdConnect;
             options.DefaultSignOutScheme = BffAuthenticationSchemes.BffOpenIdConnect;
+        }
 
-            // If we don't set this forbid scheme, when calling forbid, it can trigger a stackoverflow exception
-            // when calling HttpContext.Forbid(). 
-            if (options.DefaultForbidScheme == null)
-            {
-                options.DefaultForbidScheme = BffAuthenticationSchemes.BffCookie;
-            }
+        // If we don't set this forbid scheme, when calling forbid, it can trigger a stackoverflow exception
+        // when calling HttpContext.Forbid(). This happens because BffAuthenticationService decorates
+        // IAuthenticationService, and if the default forbid scheme is not set, the cookie handler's base
+        // class calls Context.ForbidAsync() which resolves BffAuthenticationService again, creating an
+        // infinite loop. We set the forbid scheme to the default scheme to break this cycle.
+        if (options.DefaultForbidScheme == null)
+        {
+            options.DefaultForbidScheme = options.DefaultScheme ?? options.DefaultAuthenticateScheme;
         }
     }
 }
