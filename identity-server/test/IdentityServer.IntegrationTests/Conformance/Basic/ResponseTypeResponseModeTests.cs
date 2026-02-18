@@ -77,7 +77,7 @@ public class ResponseTypeResponseModeTests
             state: state,
             nonce: nonce);
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
 
         var authorization = new AuthorizeResponse(response.Headers.Location.ToString());
         authorization.IsError.ShouldBeFalse();

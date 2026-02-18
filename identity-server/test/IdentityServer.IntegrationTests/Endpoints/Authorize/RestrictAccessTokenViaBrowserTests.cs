@@ -94,7 +94,7 @@ public class RestrictAccessTokenViaBrowserTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client1/callback");
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
         authorization.IdentityToken.ShouldNotBeNull();
@@ -113,7 +113,7 @@ public class RestrictAccessTokenViaBrowserTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client1/callback");
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
         authorization.IdentityToken.ShouldNotBeNull();
@@ -132,7 +132,7 @@ public class RestrictAccessTokenViaBrowserTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client2/callback");
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
         authorization.IdentityToken.ShouldNotBeNull();
@@ -165,7 +165,7 @@ public class RestrictAccessTokenViaBrowserTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client3/callback");
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
         authorization.IdentityToken.ShouldNotBeNull();
@@ -185,7 +185,7 @@ public class RestrictAccessTokenViaBrowserTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client3/callback");
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
         authorization.IdentityToken.ShouldNotBeNull();
@@ -206,7 +206,7 @@ public class RestrictAccessTokenViaBrowserTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.AbsoluteUri.ShouldStartWith("https://client4/callback");
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
         authorization.IdentityToken.ShouldNotBeNull();

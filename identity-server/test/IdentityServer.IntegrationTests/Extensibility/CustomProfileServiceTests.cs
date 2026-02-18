@@ -65,7 +65,7 @@ public class CustomProfileServiceTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client/callback");
 
         var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());

@@ -540,7 +540,7 @@ public class IdentityServerPipeline
 
         var url = CreateAuthorizeUrl(clientId, responseType, scope, redirectUri, state, nonce, loginHint, acrValues, responseMode, codeChallenge, codeChallengeMethod, requestUri, extra);
         var result = await BrowserClient.GetAsync(url);
-        result.StatusCode.ShouldBe(HttpStatusCode.Found);
+        result.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
 
         BrowserClient.AllowAutoRedirect = old;
 

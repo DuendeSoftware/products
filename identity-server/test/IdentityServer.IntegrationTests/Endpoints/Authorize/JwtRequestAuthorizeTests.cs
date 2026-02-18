@@ -1374,7 +1374,7 @@ public class JwtRequestAuthorizeTests
         _mockPipeline.BrowserClient.AllowAutoRedirect = false;
         response = await _mockPipeline.BrowserClient.GetAsync(IdentityServerPipeline.BaseUrl + _mockPipeline.LoginReturnUrl);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Found);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location!.ToString().ShouldSatisfyAllConditions(
             l => l.ShouldStartWith("https://client/callback"),
             l => l.ShouldContain("id_token="),
@@ -1431,7 +1431,7 @@ public class JwtRequestAuthorizeTests
         var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
 
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         response.Headers.Location.ToString().ShouldStartWith("https://client/callback");
         response.Headers.Location.ToString().ShouldContain("id_token=");
         response.Headers.Location.ToString().ShouldContain("state=state123");

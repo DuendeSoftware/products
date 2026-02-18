@@ -119,7 +119,7 @@ public class ResourceTests
     }
     private string GetCode(HttpResponseMessage response)
     {
-        response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        response.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
         var url = response.Headers.Location.ToString();
         var idx = url.IndexOf("code=", StringComparison.Ordinal);
         idx.ShouldBeGreaterThan(-1);
