@@ -50,11 +50,104 @@ internal static class SecureXmlParser
         ConformanceLevel = ConformanceLevel.Document
     };
 
+    internal static XElement LoadXElement(Stream input)
+    {
+        try
+        {
+            var streamReader = new StreamReader(input);
+            using var xmlReader = XmlReader.Create(streamReader, SecureSettings);
+            return XElement.Load(xmlReader);
+        }
+        catch (XmlException ex)
+        {
+            throw new XmlException(
+                "Failed to parse XML document with secure settings. " +
+                "The document may contain prohibited constructs (DTD, external entities) or be malformed.",
+                ex);
+        }
+    }
+
+    /// <summary>
+    /// Loads an XElement from a string with secure settings.
+    /// </summary>
+    /// <param name="xml">The XML string to parse</param>
+    /// <returns>A parsed XElement</returns>
+    /// <exception cref="ArgumentNullException">Thrown when xml is null or empty</exception>
+    /// <exception cref="XmlException">Thrown when XML is malformed or violates security constraints</exception>
+    internal static XElement LoadXElement(string xml)
+    {
+        if (string.IsNullOrEmpty(xml))
+        {
+            throw new ArgumentNullException(nameof(xml), "XML content cannot be null or empty");
+        }
+
+        // Check size before parsing
+        if (xml.Length > MaxMessageSize)
+        {
+            throw new XmlException(
+                $"XML document exceeds maximum allowed size of {MaxMessageSize} bytes. " +
+                $"Actual size: {xml.Length} bytes.");
+        }
+
+        try
+        {
+            using var stringReader = new StringReader(xml);
+            using var xmlReader = XmlReader.Create(stringReader, SecureSettings);
+
+            return XElement.Load(xmlReader);
+        }
+        catch (XmlException ex)
+        {
+            throw new XmlException(
+                "Failed to parse XML document with secure settings. " +
+                "The document may contain prohibited constructs (DTD, external entities) or be malformed.",
+                ex);
+        }
+    }
+
     internal static XDocument LoadXDocument(Stream input)
     {
         try
         {
             using var xmlReader = XmlReader.Create(input, SecureSettings);
+            return XDocument.Load(xmlReader);
+        }
+        catch (XmlException ex)
+        {
+            throw new XmlException(
+                "Failed to parse XML document with secure settings. " +
+                "The document may contain prohibited constructs (DTD, external entities) or be malformed.",
+                ex);
+        }
+    }
+
+    /// <summary>
+    /// Loads an XDocument from a string with secure settings.
+    /// </summary>
+    /// <param name="xml">The XML string to parse</param>
+    /// <returns>A parsed XDocument</returns>
+    /// <exception cref="ArgumentNullException">Thrown when xml is null or empty</exception>
+    /// <exception cref="XmlException">Thrown when XML is malformed or violates security constraints</exception>
+    internal static XDocument LoadXDocument(string xml)
+    {
+        if (string.IsNullOrEmpty(xml))
+        {
+            throw new ArgumentNullException(nameof(xml), "XML content cannot be null or empty");
+        }
+
+        // Check size before parsing
+        if (xml.Length > MaxMessageSize)
+        {
+            throw new XmlException(
+                $"XML document exceeds maximum allowed size of {MaxMessageSize} bytes. " +
+                $"Actual size: {xml.Length} bytes.");
+        }
+
+        try
+        {
+            using var stringReader = new StringReader(xml);
+            using var xmlReader = XmlReader.Create(stringReader, SecureSettings);
+
             return XDocument.Load(xmlReader);
         }
         catch (XmlException ex)

@@ -5,6 +5,7 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Saml.Models;
 using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Duende.IdentityServer.Validation;
@@ -173,5 +174,81 @@ public class DefaultIdentityServerInteractionServiceTests
         _mockConsentStore.Messages.ShouldNotBeEmpty();
         var consentRequest = new ConsentRequest(req, "bob");
         _mockConsentStore.Messages.First().Key.ShouldBe(consentRequest.Id);
+    }
+
+    [Fact]
+    public async Task CreateLogoutContextAsync_with_saml_sessions_only_should_create_context()
+    {
+        _mockUserSession.User = new IdentityServerUser("123").CreatePrincipal();
+        _mockUserSession.SessionId = "session";
+        _mockUserSession.SamlSessions.Add(new SamlSpSessionData
+        {
+            EntityId = "https://sp1.example.com",
+            SessionIndex = "idx1",
+            NameId = "user123"
+        });
+
+        var context = await _subject.CreateLogoutContextAsync();
+
+        context.ShouldNotBeNull();
+        _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();
+        var message = _mockLogoutMessageStore.Messages[context];
+        message.Data.SamlSessions.ShouldNotBeNull();
+        message.Data.SamlSessions.Select(s => s.EntityId).ShouldContain("https://sp1.example.com");
+        message.Data.ClientIds.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateLogoutContextAsync_with_mixed_sessions_should_include_both()
+    {
+        _mockUserSession.User = new IdentityServerUser("123").CreatePrincipal();
+        _mockUserSession.SessionId = "session";
+        _mockUserSession.Clients.Add("client1");
+        _mockUserSession.Clients.Add("client2");
+        _mockUserSession.SamlSessions.Add(new SamlSpSessionData
+        {
+            EntityId = "https://sp1.example.com",
+            SessionIndex = "idx1",
+            NameId = "user123"
+        });
+        _mockUserSession.SamlSessions.Add(new SamlSpSessionData
+        {
+            EntityId = "https://sp2.example.com",
+            SessionIndex = "idx2",
+            NameId = "user123"
+        });
+
+        var context = await _subject.CreateLogoutContextAsync();
+
+        context.ShouldNotBeNull();
+        _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();
+        var message = _mockLogoutMessageStore.Messages[context];
+
+        message.Data.ClientIds.ShouldNotBeNull();
+        message.Data.ClientIds.Count().ShouldBe(2);
+        message.Data.ClientIds.ShouldContain("client1");
+        message.Data.ClientIds.ShouldContain("client2");
+
+        message.Data.SamlSessions.ShouldNotBeNull();
+        message.Data.SamlSessions.Count().ShouldBe(2);
+        message.Data.SamlSessions.Select(s => s.EntityId).ShouldContain("https://sp1.example.com");
+        message.Data.SamlSessions.Select(s => s.EntityId).ShouldContain("https://sp2.example.com");
+    }
+
+    [Fact]
+    public async Task CreateLogoutContextAsync_with_oidc_sessions_should_not_populate_saml()
+    {
+        _mockUserSession.User = new IdentityServerUser("123").CreatePrincipal();
+        _mockUserSession.SessionId = "session";
+        _mockUserSession.Clients.Add("client1");
+
+        var context = await _subject.CreateLogoutContextAsync();
+
+        context.ShouldNotBeNull();
+        _mockLogoutMessageStore.Messages.ShouldNotBeEmpty();
+        var message = _mockLogoutMessageStore.Messages[context];
+        message.Data.ClientIds?.ShouldContain("client1");
+
+        message.Data.SamlSessions.ShouldBeEmpty();
     }
 }
