@@ -5,15 +5,14 @@ using System.Net;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml.Models;
 using Duende.IdentityServer.Stores;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SamlSingleLogoutCallbackEndpointTests(ITestOutputHelper output)
+public class SamlSingleLogoutCallbackEndpointTests
 {
     private const string Category = "SAML single logout callback endpoint";
 
-    private SamlFixture Fixture = new(output);
+    private SamlFixture Fixture = new();
 
     private SamlData Data => Fixture.Data;
 

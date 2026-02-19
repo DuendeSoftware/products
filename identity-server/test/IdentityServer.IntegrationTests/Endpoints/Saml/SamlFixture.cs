@@ -13,11 +13,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-internal class SamlFixture(ITestOutputHelper output) : IAsyncLifetime
+internal class SamlFixture : IAsyncLifetime
 {
     public SamlData Data = new SamlData();
     public SamlDataBuilder Builder => new SamlDataBuilder(Data);
@@ -78,7 +77,7 @@ internal class SamlFixture(ITestOutputHelper output) : IAsyncLifetime
 
     public T Get<T>() where T : notnull => Host!.Resolve<T>();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var selfSignedCertificate = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(StableSigningCert), null);
 
@@ -178,7 +177,7 @@ internal class SamlFixture(ITestOutputHelper output) : IAsyncLifetime
         NonRedirectingClient = Host!.Server.CreateClient();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (Host != null)
         {

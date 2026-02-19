@@ -8,16 +8,15 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Saml;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SamlClaimsMappingTests(ITestOutputHelper output)
+public class SamlClaimsMappingTests
 {
     private const string Category = "SAML Claims Mapping";
 
-    private SamlFixture Fixture = new(output);
+    private SamlFixture Fixture = new();
     private SamlDataBuilder Build => Fixture.Builder;
 
     [Fact]

@@ -8,16 +8,15 @@ using System.Web;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Internal.Saml;
 using Microsoft.AspNetCore.Mvc;
-using Xunit.Abstractions;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SamlIdpInitiatedEndpointTests(ITestOutputHelper output)
+public class SamlIdpInitiatedEndpointTests
 {
     private const string Category = "SAML IdP-Initiated Endpoint";
 
-    private SamlFixture Fixture = new(output);
+    private SamlFixture Fixture = new();
 
     private SamlData Data => Fixture.Data;
 
@@ -293,7 +292,7 @@ public class SamlIdpInitiatedEndpointTests(ITestOutputHelper output)
         var samlResponse = await ExtractSamlSuccessFromPostAsync(callbackResult, CancellationToken.None);
 
         samlResponse.ShouldNotBeNull();
-        samlResponse.Issuer.ShouldBe(Fixture.Host!.Uri());
+        samlResponse.Issuer.ShouldBe(Fixture.Host!.Url());
         samlResponse.Destination.ShouldBe(Data.AcsUrl.ToString());
         samlResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Success");
 

@@ -3,16 +3,15 @@
 
 using System.Net;
 using System.Web;
-using Xunit.Abstractions;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SustainSysSigninTests(ITestOutputHelper output)
+public class SustainSysSigninTests
 {
     private const string Category = "SustainSys SAML signin";
 
-    private SustainSysSamlTestFixture Fixture = new(output);
+    private SustainSysSamlTestFixture Fixture = new();
 
     [Fact]
     [Trait("Category", Category)]

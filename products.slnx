@@ -165,6 +165,7 @@
     <Project Path="identity-server/src/Configuration/IdentityServer.Configuration.csproj" />
     <Project Path="identity-server/src/EntityFramework.Storage/IdentityServer.EntityFramework.Storage.csproj" />
     <Project Path="identity-server/src/EntityFramework/IdentityServer.EntityFramework.csproj" />
+    <Project Path="identity-server/src/IdentityServer.ConformanceReport/IdentityServer.ConformanceReport.csproj" />
     <Project Path="identity-server/src/IdentityServer/IdentityServer.csproj" />
     <Project Path="identity-server/src/Storage/IdentityServer.Storage.csproj" />
   </Folder>

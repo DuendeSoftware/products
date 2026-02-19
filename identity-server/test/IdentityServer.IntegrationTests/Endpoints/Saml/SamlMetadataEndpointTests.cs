@@ -4,15 +4,14 @@
 using System.Net;
 using System.Xml.Linq;
 using Duende.IdentityServer.Internal.Saml;
-using Xunit.Abstractions;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SamlMetadataEndpointTests(ITestOutputHelper output)
+public class SamlMetadataEndpointTests
 {
     private const string Category = "SAML Metadata Endpoint";
 
-    private SamlFixture Fixture = new(output);
+    private SamlFixture Fixture = new();
 
     [Fact]
     [Trait("Category", Category)]
@@ -30,7 +29,7 @@ public class SamlMetadataEndpointTests(ITestOutputHelper output)
         var content = await result.Content.ReadAsStringAsync(CancellationToken.None);
 
         var settings = new VerifySettings();
-        var hostUri = Fixture.Host!.Uri();
+        var hostUri = Fixture.Host!.Url();
         settings.AddScrubber(sb =>
         {
             sb.Replace(hostUri, "https://localhost");
@@ -189,7 +188,7 @@ public class SamlMetadataEndpointTests(ITestOutputHelper output)
     public async Task metadata_urls_should_handle_edge_case_route_configurations()
     {
         // Verify that default configuration produces clean URLs
-        // Edge cases (empty routes, whitespace, etc.) are comprehensively tested 
+        // Edge cases (empty routes, whitespace, etc.) are comprehensively tested
         // at the unit level in BuildServiceUrl unit tests
         await Fixture.InitializeAsync();
 

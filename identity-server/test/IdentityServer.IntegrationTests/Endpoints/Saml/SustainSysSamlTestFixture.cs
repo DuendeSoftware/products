@@ -17,12 +17,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Sustainsys.Saml2.AspNetCore2;
-using Xunit.Abstractions;
 using IdentityProvider = Sustainsys.Saml2.IdentityProvider;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifetime
+internal class SustainSysSamlTestFixture : IAsyncLifetime
 {
     public TestFramework.GenericHost? Host = null!;
     public HttpClient? BrowserClient = null!;
@@ -30,7 +29,7 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
 
     public Uri IdentityProviderLoginUri => new Uri(new Uri(_samlFixture.Host!.Url()), _samlFixture.LoginUrl);
 
-    private readonly SamlFixture _samlFixture = new(output);
+    private readonly SamlFixture _samlFixture = new();
     private bool _shouldGenerateSigningCertificate;
     private bool _shouldRequireEncryptedAssertions;
 
@@ -49,7 +48,7 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
 
     public void RequireEncryptedAssertions() => _shouldRequireEncryptedAssertions = true;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         // need to use current time because the SustainSys library does not rely on an abstraction such
         // as TimeProvider and times need to be current
@@ -152,7 +151,7 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
         BrowserClient = Host.HttpClient;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (Host != null)
         {

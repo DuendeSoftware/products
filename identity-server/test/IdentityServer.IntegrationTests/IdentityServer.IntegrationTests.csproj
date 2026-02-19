@@ -18,6 +18,7 @@
     <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Verify.XunitV3" />
 
   </ItemGroup>
 

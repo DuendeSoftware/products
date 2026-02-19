@@ -9,17 +9,16 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
-using Xunit.Abstractions;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 using SamlStatusCode = Duende.IdentityServer.Saml.Models.SamlStatusCode;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SamlEncryptionTests(ITestOutputHelper output)
+public class SamlEncryptionTests
 {
     private const string Category = "SAML Encryption";
 
-    private SamlFixture Fixture = new(output);
+    private SamlFixture Fixture = new();
     private SamlData Data => Fixture.Data;
     private SamlDataBuilder Build => Fixture.Builder;
 

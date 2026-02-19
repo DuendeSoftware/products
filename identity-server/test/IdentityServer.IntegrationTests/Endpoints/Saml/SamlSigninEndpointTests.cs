@@ -15,19 +15,18 @@ using Duende.IdentityServer.Internal.Saml;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml.Models;
 using Microsoft.AspNetCore.Mvc;
-using Xunit.Abstractions;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 using SamlStatusCode = Duende.IdentityServer.Saml.Models.SamlStatusCode;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SamlSigninEndpointTests(ITestOutputHelper output)
+public class SamlSigninEndpointTests
 {
     private const string Category = "SAML Signin Endpoint";
 
     private readonly CancellationToken _ct = CancellationToken.None;
 
-    private SamlFixture Fixture = new(output);
+    private SamlFixture Fixture = new();
 
     private SamlData Data => Fixture.Data;
 
@@ -106,7 +105,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:VersionMismatch");
         errorResponse.StatusMessage.ShouldNotBeNull();
         errorResponse.StatusMessage.ShouldContain("Only Version 2.0 is supported");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Uri());
+        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -223,7 +222,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:VersionMismatch");
         errorResponse.StatusMessage.ShouldNotBeNull();
         errorResponse.StatusMessage.ShouldContain("Only Version 2.0 is supported");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Uri());
+        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -316,7 +315,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
 
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
         errorResponse.StatusMessage.ShouldBe("Request IssueInstant is in the future");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Uri());
+        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -498,7 +497,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
         await Fixture.InitializeAsync();
 
         // Use the correct Destination attribute
-        var correctDestination = new Uri(Fixture.Host!.Uri() + "/saml/signin");
+        var correctDestination = new Uri(Fixture.Host!.Url() + "/saml/signin");
         var authnRequestXml = Build.AuthNRequestXml(destination: correctDestination);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
@@ -540,7 +539,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
         successResponse.ResponseId.ShouldNotBeNullOrEmpty();
         successResponse.Destination.ShouldBe(Fixture.Data.AcsUrl.ToString());
         successResponse.IssueInstant.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        successResponse.Issuer.ShouldBe(Fixture.Host?.Uri());
+        successResponse.Issuer.ShouldBe(Fixture.Host?.Url());
         successResponse.InResponseTo.ShouldBe(Data.RequestId);
 
         successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
@@ -550,7 +549,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
         assertion.Id.ShouldNotBeNullOrEmpty();
         assertion.Version.ShouldBe("2.0");
         assertion.IssueInstant.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        assertion.Issuer.ShouldBe(Fixture.Host?.Uri());
+        assertion.Issuer.ShouldBe(Fixture.Host?.Url());
 
         var subject = assertion.Subject;
         subject.ShouldNotBeNull();
@@ -789,7 +788,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
 
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:NoPassive");
         errorResponse.StatusMessage.ShouldBe("The user is not currently logged in and passive login was requested.");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Uri());
+        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -814,7 +813,7 @@ public class SamlSigninEndpointTests(ITestOutputHelper output)
 
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:NoPassive");
         errorResponse.StatusMessage.ShouldBe("The user is not currently logged in");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Uri());
+        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }

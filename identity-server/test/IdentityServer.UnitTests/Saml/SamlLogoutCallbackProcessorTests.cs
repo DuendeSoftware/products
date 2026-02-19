@@ -9,7 +9,6 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
-using UnitTests.Common;
 
 namespace UnitTests.Saml;
 

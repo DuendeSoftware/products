@@ -7,6 +7,7 @@ using Duende.IdentityServer.Internal.Saml.Infrastructure;
 using Duende.IdentityServer.Internal.Saml.SingleLogout;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml.Models;
+using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
 using UnitTests.Common;
@@ -30,7 +31,7 @@ public class SamlLogoutNotificationServiceTests
 
         return new SamlLogoutNotificationService(
             _issuerNameService,
-            new InMemoryTestServiceProviderStore(samlServiceProviders),
+            new InMemorySamlServiceProviderStore(samlServiceProviders),
             frontChannelLogoutRequestBuilder,
             NullLogger<SamlLogoutNotificationService>.Instance);
     }

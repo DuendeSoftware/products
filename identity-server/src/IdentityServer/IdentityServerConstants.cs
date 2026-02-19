@@ -279,8 +279,8 @@ public static class IdentityServerConstants
 
         public const string SamlPathPrefix = "saml";
         public const string SamlMetadata = SamlPathPrefix + "/metadata";
-        public const string SamlSignin = SamlPathPrefix + "/sso";
-        public const string SamlSigninCallback = SamlSignin + "/callback";
+        public const string SamlSignin = SamlPathPrefix + "/signin";
+        public const string SamlSigninCallback = SamlPathPrefix + "/signin_callback";
         public const string SamlIdpInitiated = SamlPathPrefix + "/idp-initiated";
         public const string SamlLogout = SamlPathPrefix + "/slo";
         public const string SamlLogoutCallback = SamlLogout + "/callback";

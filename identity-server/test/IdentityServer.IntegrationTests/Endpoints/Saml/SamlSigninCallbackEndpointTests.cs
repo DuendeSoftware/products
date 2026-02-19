@@ -10,17 +10,16 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.Internal.Saml.SingleSignin;
 using Duende.IdentityServer.Models;
 using Microsoft.AspNetCore.Mvc;
-using Xunit.Abstractions;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 using StateId = Duende.IdentityServer.Internal.Saml.SingleSignin.Models.StateId;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SamlSigninCallbackEndpointTests(ITestOutputHelper output)
+public class SamlSigninCallbackEndpointTests
 {
     private const string Category = "SAML Signin Callback Endpoint";
 
-    private SamlFixture Fixture = new(output);
+    private SamlFixture Fixture = new();
 
     private SamlData Data => Fixture.Data;
 
