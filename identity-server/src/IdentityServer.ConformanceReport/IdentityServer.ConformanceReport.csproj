@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <PackageId>Duende.IdentityServer.ConformanceReport</PackageId>
+    <AssemblyName>Duende.IdentityServer.ConformanceReport</AssemblyName>
+    <RootNamespace>Duende.IdentityServer.ConformanceReport</RootNamespace>
+    <Description>IdentityServer adapter for Duende ConformanceReport assessment</Description>
+    <MinVerTagPrefix>cr-</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <PackageReadmePath>README.md</PackageReadmePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../IdentityServer/IdentityServer.csproj" />
+    <!-- TODO when conformance package ships, this should be a package reference instead -->
+    <ProjectReference Include="../../../conformance-report/src/ConformanceReport/ConformanceReport.csproj" /> 
+  </ItemGroup>
+
+</Project>

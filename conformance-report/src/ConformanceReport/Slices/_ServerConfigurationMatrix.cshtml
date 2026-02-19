@@ -1,0 +1,129 @@
+@inherits RazorSlice<IReadOnlyList<Finding>>
+@{
+    // Collect all findings ordered by rule ID
+    var findings = Model.OrderBy(f => f.RuleId).ToList();
+
+    // Collect footnotes (warnings and failures with messages/recommendations)
+    var footnotes = new List<Finding>();
+    var footnoteIndex = 1;
+    var footnoteMap = new Dictionary<string, int>(); // key: ruleId, value: footnote number
+
+    foreach (var finding in findings.Where(f => f.Status == FindingStatus.Fail || f.Status == FindingStatus.Warning))
+    {
+        if (!footnoteMap.ContainsKey(finding.RuleId))
+        {
+            footnoteMap[finding.RuleId] = footnoteIndex++;
+            footnotes.Add(finding);
+        }
+    }
+}
+
+<div class="matrix-section">
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th class="entity-col">Component</th>
+        @foreach (var finding in findings)
+        {
+          <th title="@finding.RuleName">@finding.RuleId</th>
+        }
+        <th class="status-col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="entity-col">Authorization Server</td>
+        @foreach (var finding in findings)
+        {
+          var cellClass = GetCellClass(finding.Status);
+          var statusText = GetCellText(finding.Status);
+          var hasFootnote = footnoteMap.ContainsKey(finding.RuleId);
+          var title = $"{finding.RuleName}: {finding.Message}";
+          
+          <td class="@cellClass" title="@title">
+            @statusText@if (hasFootnote)
+            {<a href="#server-finding-@footnoteMap[finding.RuleId]" class="ref-link">[@footnoteMap[finding.RuleId]]</a>}
+          </td>
+        }
+        <td class="status-col @GetOverallStatusClass(findings)">@GetOverallStatusText(findings)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+@if (findings.Count > 0)
+{
+  <div class="rule-legend">
+    <h4>Rule Reference</h4>
+    <div class="legend-grid">
+      @foreach (var finding in findings)
+      {
+        <div class="legend-item">
+          <span class="legend-code">@finding.RuleId</span>
+          <span class="legend-text">@finding.RuleName</span>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (footnotes.Count > 0)
+{
+  <div class="findings-section">
+    <h4>Server Configuration Findings</h4>
+    <div class="finding-group">
+      <ul class="finding-list">
+        @{ var findingNum = 1; }
+        @foreach (var finding in footnotes)
+        {
+          <li class="finding-item" id="server-finding-@findingNum">
+            <span class="finding-number">@findingNum.</span>
+            <span class="finding-action">@(!string.IsNullOrEmpty(finding.Recommendation) ? finding.Recommendation : finding.RuleName)</span>
+            <span class="finding-detail">@finding.Message</span>
+          </li>
+          findingNum++;
+        }
+      </ul>
+    </div>
+  </div>
+}
+
+@functions {
+    private string GetCellClass(FindingStatus status) => status switch
+    {
+        FindingStatus.Pass => "cell-pass",
+        FindingStatus.Fail => "cell-fail",
+        FindingStatus.Warning => "cell-warn",
+        FindingStatus.NotApplicable => "cell-na",
+        FindingStatus.Error => "cell-fail",
+        _ => ""
+    };
+
+    private string GetCellText(FindingStatus status) => status switch
+    {
+        FindingStatus.Pass => "PASS",
+        FindingStatus.Fail => "FAIL",
+        FindingStatus.Warning => "WARN",
+        FindingStatus.NotApplicable => "N/A",
+        FindingStatus.Error => "ERR",
+        _ => "?"
+    };
+
+    private string GetOverallStatusClass(List<Finding> findings)
+    {
+        if (findings.Any(f => f.Status == FindingStatus.Fail || f.Status == FindingStatus.Error))
+            return "cell-fail";
+        if (findings.Any(f => f.Status == FindingStatus.Warning))
+            return "cell-warn";
+        return "cell-pass";
+    }
+
+    private string GetOverallStatusText(List<Finding> findings)
+    {
+        if (findings.Any(f => f.Status == FindingStatus.Fail || f.Status == FindingStatus.Error))
+            return "FAIL";
+        if (findings.Any(f => f.Status == FindingStatus.Warning))
+            return "WARN";
+        return "PASS";
+    }
+}

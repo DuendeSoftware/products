@@ -44,5 +44,6 @@
     <ProjectReference Include="..\..\src\Configuration.EntityFramework\IdentityServer.Configuration.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\EntityFramework\IdentityServer.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\IdentityServer\IdentityServer.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer.ConformanceReport\IdentityServer.ConformanceReport.csproj" />
   </ItemGroup>
 </Project>

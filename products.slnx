@@ -14,6 +14,13 @@
   <Folder Name="/aspnetcore-authentication-jwtbearer/test/">
     <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
   </Folder>
+  <Folder Name="/conformance-report/" />
+  <Folder Name="/conformance-report/src/">
+    <Project Path="conformance-report/src/ConformanceReport/ConformanceReport.csproj" />
+  </Folder>
+  <Folder Name="/conformance-report/test/">
+    <Project Path="conformance-report/test/ConformanceReport.Tests/ConformanceReport.Tests.csproj" />
+  </Folder>
   <Folder Name="/bff/" />
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
@@ -156,6 +163,7 @@
     <Project Path="identity-server/src/AspNetIdentity/IdentityServer.AspNetIdentity.csproj" />
     <Project Path="identity-server/src/Configuration.EntityFramework/IdentityServer.Configuration.EntityFramework.csproj" />
     <Project Path="identity-server/src/Configuration/IdentityServer.Configuration.csproj" />
+    <Project Path="identity-server/src/IdentityServer.ConformanceReport/IdentityServer.ConformanceReport.csproj" />
     <Project Path="identity-server/src/EntityFramework.Storage/IdentityServer.EntityFramework.Storage.csproj" />
     <Project Path="identity-server/src/EntityFramework/IdentityServer.EntityFramework.csproj" />
     <Project Path="identity-server/src/IdentityServer/IdentityServer.csproj" />

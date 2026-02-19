@@ -1,0 +1,11 @@
+{
+  "solution": {
+    "path": "..\\products.slnx",
+    "projects": [
+      "conformance-report\\src\\ConformanceReport\\ConformanceReport.csproj",
+      "conformance-report\\test\\ConformanceReport.Tests\\ConformanceReport.Tests.csproj",
+      "identity-server\\src\\IdentityServer.ConformanceReport\\IdentityServer.ConformanceReport.csproj",
+      "shared\\ShouldlyExtensions\\ShouldlyExtensions.csproj"
+    ]
+  }
+}
