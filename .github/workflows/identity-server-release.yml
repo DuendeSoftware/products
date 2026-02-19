@@ -44,12 +44,13 @@ jobs:
       if: github.event.inputs.branch != 'main'
       run: git checkout ${{ github.event.inputs.branch }}
     - name: Git Config
-      run: |-
+      run: >-
         git config --global user.email "github-bot@duendesoftware.com"
+
         git config --global user.name "Duende Software GitHub Bot"
     - name: Git Config
       if: github.event.inputs['remove-tag-if-exists'] == 'true'
-      run: |-
+      run: >-
         if git rev-parse is-${{ github.event.inputs.version }} >/dev/null 2>&1; then
           git tag -d is-${{ github.event.inputs.version }}
           git push --delete origin is-${{ github.event.inputs.version }}
@@ -57,8 +58,9 @@ jobs:
           echo 'Tag is-${{ github.event.inputs.version }} does not exist.'
         fi
     - name: Git Config
-      run: |-
+      run: >-
         git tag -a is-${{ github.event.inputs.version }} -m "Release v${{ github.event.inputs.version }}"
+
         git push origin is-${{ github.event.inputs.version }}
     - name: List .net sdks
       run: dotnet --list-sdks
@@ -71,7 +73,7 @@ jobs:
     - name: Tool restore
       run: dotnet tool restore
     - name: Sign packages
-      run: |-
+      run: >-
         for file in artifacts/*.nupkg; do
            dotnet NuGetKeyVaultSignTool sign "$file" --file-digest sha256 --timestamp-rfc3161 http://timestamp.digicert.com --azure-key-vault-url https://duendecodesigninghsm.vault.azure.net/ --azure-key-vault-client-id 18e3de68-2556-4345-8076-a46fad79e474 --azure-key-vault-tenant-id ed3089f0-5401-4758-90eb-066124e2d907 --azure-key-vault-client-secret ${{ secrets.SignClientSecret }} --azure-key-vault-certificate NuGetPackageSigning
         done

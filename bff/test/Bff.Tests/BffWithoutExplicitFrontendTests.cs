@@ -3,13 +3,11 @@
 
 using Duende.Bff.Tests.TestInfra;
 using Duende.IdentityServer.Extensions;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
-public class BffWithoutExplicitFrontendTests(ITestOutputHelper output) : BffTestBase(output)
+public class BffWithoutExplicitFrontendTests : BffTestBase
 {
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         Bff.OnConfigureApp += app =>
         {

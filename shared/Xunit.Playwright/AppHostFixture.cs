@@ -24,7 +24,7 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
     public bool UsingAlreadyRunningInstance { get; private set; }
     public string StartupLogs => _startupLogs.ToString() ?? string.Empty;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         using var startupLogWriter = ConnectLogger(s => _startupLogs.Write(s));
 
@@ -103,7 +103,7 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
     }
 
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (_app != null)
         {
@@ -237,7 +237,7 @@ public class AppHostFixture<THost>(IAppHostServiceRoutes routes) : IAsyncLifetim
 
             return _app.GetEndpoint(hostName);
 #else
-            Skip.If(true, "When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
+            Assert.Skip("When running the Host.Tests using NCrunch, you must start the Hosts.AppHost project manually. IE: dotnet run -p bff/samples/Hosts.AppHost. Or start without debugging from the UI. ");
             return null!;
 #endif
         }

@@ -5,8 +5,6 @@ using System.Security.Claims;
 using Duende.Bff.DynamicFrontends;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.TestInfra;
 
 public abstract class BffTestBase : IAsyncDisposable
@@ -22,9 +20,9 @@ public abstract class BffTestBase : IAsyncDisposable
     private readonly List<BffFrontend> _frontendBuffer = new();
 
 
-    protected BffTestBase(ITestOutputHelper output)
+    protected BffTestBase()
     {
-        Context = new TestHostContext(output);
+        Context = new TestHostContext(TestContext.Current.TestOutputHelper!);
 
         IdentityServer = new IdentityServerTestHost(Context);
         The = Context.The;
@@ -131,7 +129,7 @@ public abstract class BffTestBase : IAsyncDisposable
     protected IdentityServerTestHost IdentityServer { get; }
     protected SimulatedInternet Internet => Context.Internet;
 
-    public virtual async Task InitializeAsync()
+    public virtual async ValueTask InitializeAsync()
     {
         if (_initialized)
         {
@@ -177,7 +175,7 @@ public abstract class BffTestBase : IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    public async Task DisposeAsync() => await ((IAsyncDisposable)this).DisposeAsync();
+    public async ValueTask DisposeAsync() => await ((IAsyncDisposable)this).DisposeAsync();
 
     protected void AddOrUpdateFrontend(BffFrontend frontend)
     {

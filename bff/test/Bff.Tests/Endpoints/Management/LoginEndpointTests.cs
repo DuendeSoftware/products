@@ -4,13 +4,11 @@
 using System.Net;
 using Duende.Bff.Configuration;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Endpoints.Management;
 
-public class LoginEndpointTests(ITestOutputHelper output) : BffTestBase(output)
+public class LoginEndpointTests : BffTestBase
 {
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         Bff.BffOptions.ConfigureOpenIdConnectDefaults = opt => { The.DefaultOpenIdConnectConfiguration(opt); };

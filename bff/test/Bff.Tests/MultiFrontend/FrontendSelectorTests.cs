@@ -6,7 +6,6 @@ using Duende.Bff.Configuration;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.DynamicFrontends.Internal;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
 using TestLoggerProvider = Duende.Bff.Tests.TestFramework.TestLoggerProvider;
 
 namespace Duende.Bff.Tests.MultiFrontend;
@@ -19,8 +18,9 @@ public class FrontendSelectorTests
     private static readonly TestData The = new();
     internal TestDataBuilder Some => new(The);
     private readonly StringBuilder _logMessages = new();
+    private readonly ITestOutputHelper _output = TestContext.Current.TestOutputHelper!;
 
-    public FrontendSelectorTests(ITestOutputHelper output)
+    public FrontendSelectorTests()
     {
         _frontendCollection = new(plugins: [],
             bffConfiguration: TestOptionsMonitor.Create(new BffConfiguration()),
@@ -28,7 +28,7 @@ public class FrontendSelectorTests
         );
         var testLoggerProvider = new TestLoggerProvider((s) =>
         {
-            output.WriteLine(s);
+            _output.WriteLine(s);
             _logMessages.AppendLine(s);
         }, "", forceToWriteOutput: true);
         var loggerFactory = new LoggerFactory([testLoggerProvider]);

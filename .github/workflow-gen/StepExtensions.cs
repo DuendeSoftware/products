@@ -82,24 +82,27 @@ public static class StepExtensions
 
     public static void StepTest(this Job job, string project)
     {
-        var logFileName = $"{project}-tests.trx";
-        var loggingFlags = $"--logger \"console;verbosity=normal\" " +
-                           $"--logger \"trx;LogFileName={logFileName}\" " +
-                           $"--collect:\"XPlat Code Coverage\"";
+        var projectName = project.Split('/').Last();
+        var trxFileName = $"{projectName}.trx";
+        var coberturaFileName = $"{projectName}.cobertura.xml";
 
         job.Step()
             .Name($"Test - {project}")
-            .Run($"dotnet test {project} -c Release --no-build {loggingFlags}");
+            .Run($"""
+                dotnet run --project {project} -c Release --no-build -- \
+                  --report-xunit-trx --report-xunit-trx-filename {trxFileName} \
+                  --coverage --coverage-output-format cobertura \
+                  --coverage-output {coberturaFileName}
+                """);
 
         var id = $"test-report-{project.Replace("/", "-").Replace(".", "-")}";
         job.Step(id)
             .Name($"Test report - {project}")
-            .WorkingDirectory("test")
             .Uses("dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5") // v1.9.1
             .If("github.event_name == 'push' && (success() || failure())")
             .With(
                 ("name", $"Test Report - {project}"),
-                ("path", $"**/{logFileName}"),
+                ("path", $"**/{trxFileName}"),
                 ("reporter", "dotnet-trx"),
                 ("fail-on-error", "true"),
                 ("fail-on-empty", "true"));

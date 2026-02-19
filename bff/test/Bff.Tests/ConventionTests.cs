@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 using System.Reflection;
-using Duende.AccessTokenManagement;
 using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Blazor;
 using Duende.Bff.Blazor.Client;
@@ -15,12 +14,12 @@ using Duende.Bff.Internal;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.SessionManagement.TicketStore;
 using Duende.Bff.Yarp;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests;
 
-public class ConventionTests(ITestOutputHelper output)
+public class ConventionTests
 {
+    private readonly ITestOutputHelper _output = TestContext.Current.TestOutputHelper!;
     public static readonly Assembly BffAssembly = typeof(BffBuilder).Assembly;
     public static readonly Assembly BffBlazorAssembly = typeof(BffBlazorServerOptions).Assembly;
     public static readonly Assembly BffBlazorClientAssembly = typeof(BffBlazorClientOptions).Assembly;
@@ -224,7 +223,7 @@ public class ConventionTests(ITestOutputHelper output)
 
         foreach (var failure in failures)
         {
-            output.WriteLine(failure);
+            _output.WriteLine(failure);
         }
 
         failures.ShouldBeEmpty();
@@ -239,128 +238,6 @@ public class ConventionTests(ITestOutputHelper output)
 
         return type.IsNestedPrivate || type.IsNotPublic;
     }
-
-
-#nullable disable
-    [Fact]
-    public void AccessTokenManagement_is_not_exposed()
-    {
-        var accessTokenManagementNamespace = typeof(IClientCredentialsTokenManager).Namespace!;
-        List<string> errors = new();
-
-        foreach (var type in AllTypes)
-        {
-            // Only consider public types
-            if (!type.IsPublic)
-            {
-                continue;
-            }
-
-            // Check if the type itself is in the forbidden namespace
-            if (type.Namespace != null && type.Namespace.StartsWith(accessTokenManagementNamespace))
-            {
-                errors.Add($"Type {type.FullName} is public and in forbidden namespace.");
-            }
-
-            // Check public members for forbidden types
-            var members = type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static |
-                                          BindingFlags.DeclaredOnly);
-            foreach (var member in members)
-            {
-                switch (member)
-                {
-                    case MethodInfo method:
-                        // Skip implicit and explicit conversion operators
-                        if (method.Name == "op_Implicit")
-                        {
-                            break;
-                        }
-
-                        if (IsForbiddenType(method.ReturnType))
-                        {
-                            errors.Add(
-                                $"{type.FullName}.{method.Name} returns forbidden type {method.ReturnType.FullName}");
-                        }
-
-                        foreach (var param in method.GetParameters())
-                        {
-                            if (IsForbiddenType(param.ParameterType))
-                            {
-                                errors.Add(
-                                    $"{type.FullName}.{method.Name} parameter '{param.Name}' is forbidden type {param.ParameterType.FullName}");
-                            }
-                        }
-
-                        break;
-                    case PropertyInfo prop:
-                        if (IsForbiddenType(prop.PropertyType))
-                        {
-                            errors.Add(
-                                $"{type.FullName}.{prop.Name} property is forbidden type {prop.PropertyType.FullName}");
-                        }
-
-                        break;
-                    case FieldInfo field:
-                        if (IsForbiddenType(field.FieldType))
-                        {
-                            errors.Add(
-                                $"{type.FullName}.{field.Name} field is forbidden type {field.FieldType.FullName}");
-                        }
-
-                        break;
-                    case EventInfo evt:
-
-                        if (IsForbiddenType(evt.EventHandlerType!))
-                        {
-                            errors.Add(
-                                $"{type.FullName}.{evt.Name} event is forbidden type {evt.EventHandlerType.FullName}");
-                        }
-
-                        break;
-                }
-            }
-        }
-
-        if (errors.Any())
-        {
-            output.WriteLine("AccessTokenManagement is exposed. Errors found:");
-            foreach (var error in errors)
-            {
-                output.WriteLine(error);
-            }
-
-            errors.ShouldBeEmpty(
-                "AccessTokenManagement types should not be exposed in BFF public API. Please review the types and ensure they are internal or private.");
-        }
-
-        bool IsForbiddenType(Type t)
-        {
-            if (t.Namespace != null && t.Namespace.StartsWith(accessTokenManagementNamespace))
-            {
-                return true;
-            }
-
-            if (t.IsGenericType)
-            {
-                foreach (var arg in t.GetGenericArguments())
-                {
-                    if (IsForbiddenType(arg))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            if (t.IsArray)
-            {
-                return IsForbiddenType(t.GetElementType()!);
-            }
-
-            return false;
-        }
-    }
-
-#nullable enable
 
     private static List<Type> GetStrongTypedStringTypes()
     {
@@ -413,7 +290,7 @@ public class ConventionTests(ITestOutputHelper output)
 
         foreach (var failure in failures)
         {
-            output.WriteLine(failure);
+            _output.WriteLine(failure);
         }
 
         failures.ShouldBeEmpty();

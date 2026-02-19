@@ -4,8 +4,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
-
 namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class ApiHost : GenericHost
@@ -17,8 +15,8 @@ public class ApiHost : GenericHost
     private readonly IdentityServerHost _identityServerHost;
     public event Action<HttpContext> ApiInvoked = ctx => { };
 
-    public ApiHost(IdentityServerHost identityServerHost, ITestOutputHelper testOutputHelper, string baseAddress = "https://api")
-        : base(testOutputHelper, baseAddress)
+    public ApiHost(IdentityServerHost identityServerHost, string baseAddress = "https://api")
+        : base(baseAddress)
     {
         _identityServerHost = identityServerHost;
 

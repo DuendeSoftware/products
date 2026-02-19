@@ -3,11 +3,9 @@
 
 using Duende.AccessTokenManagement;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
-public class BffScenarioTests(ITestOutputHelper output) : BffTestBase(output)
+public class BffScenarioTests : BffTestBase
 {
     [Fact]
     public async Task When_using_bff_as_host_and_client_credentials_token_manager_with_no_http_context_still_works()

@@ -7,13 +7,12 @@ using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints;
 
-public class DPoPTestsWithManualAuthentication(ITestOutputHelper output) : BffTestBase(output), IAsyncLifetime
+public class DPoPTestsWithManualAuthentication : BffTestBase, IAsyncLifetime
 {
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         Bff.EnableBackChannelHandler = false;
         var idSrvClient = IdentityServer.AddClient(The.ClientId, Bff.Url());

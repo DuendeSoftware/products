@@ -5,7 +5,6 @@ using Duende.Xunit.Playwright;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.TestInfra;
 using Projects;
-using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
@@ -15,20 +14,20 @@ public class BffTests : IntegrationTestBase<Hosts_AppHost>
     private readonly HttpClient _httpClient;
     private readonly BffClient _bffClient;
 
-    public BffTests(ITestOutputHelper output, BffHostTestFixture fixture) : base(output: output, fixture: fixture)
+    public BffTests(BffHostTestFixture fixture) : base(fixture: fixture)
     {
         _httpClient = CreateHttpClient(AppHostServices.Bff);
         _bffClient = new BffClient(CreateHttpClient(AppHostServices.Bff));
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_invoke_home()
     {
         var response = await _httpClient.GetAsync("/");
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_initiate_login()
     {
         var response = await _httpClient.GetAsync("/");
@@ -41,7 +40,7 @@ public class BffTests : IntegrationTestBase<Hosts_AppHost>
         claims.Any().ShouldBeTrue();
     }
 
-    [SkippableTheory]
+    [Theory]
     [InlineData("/local/self-contained")]
     [InlineData("/local/invokes-external-api")]
     [InlineData("/api/user-token")]
@@ -57,7 +56,7 @@ public class BffTests : IntegrationTestBase<Hosts_AppHost>
         await _bffClient.InvokeApi(url);
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Can_logout()
     {
         await _bffClient.TriggerLogin();

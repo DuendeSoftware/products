@@ -6,13 +6,11 @@ using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Endpoints;
 
-public class DPoPRemoteEndpointTests(ITestOutputHelper output) : BffTestBase(output)
+public class DPoPRemoteEndpointTests : BffTestBase
 {
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         var idSrvClient = IdentityServer.AddClient(The.ClientId, Bff.Url());
 

@@ -6,11 +6,9 @@ using Duende.Bff.EntityFramework.Internal;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.EntityFrameworkCore;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.BffHostBuilder;
 
-public class HostBuilder_SessionTests(ITestOutputHelper output) : BffTestBase(output)
+public class HostBuilder_SessionTests : BffTestBase
 {
     private string _databaseName = Guid.NewGuid().ToString();
 
@@ -167,7 +165,7 @@ public class HostBuilder_SessionTests(ITestOutputHelper output) : BffTestBase(ou
         };
         IdentityServer.AddClient(The.ClientId, Bff.Url());
 
-        var exception = await Should.ThrowAsync<InvalidOperationException>(InitializeAsync);
+        var exception = await Should.ThrowAsync<InvalidOperationException>(() => InitializeAsync().AsTask());
         exception.Message.ShouldBe("No IUserSessionStoreCleanup is registered. Did you add session storage, such as EntityFramework?");
 
     }

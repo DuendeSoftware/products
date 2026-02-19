@@ -6,13 +6,13 @@ using System.Security.Claims;
 using Duende.IdentityServer;
 using Duende.IdentityServer.Configuration;
 using Microsoft.Extensions.Logging;
-using Xunit.Abstractions;
 using static Duende.License;
 
 namespace UnitTests.Licensing;
 
-public class IdentityServerLicenseValidatorTests(ITestOutputHelper output)
+public class IdentityServerLicenseValidatorTests
 {
+    private readonly ITestOutputHelper _output = TestContext.Current.TestOutputHelper!;
     private const string Category = "License validator tests";
 
     [Fact]
@@ -31,7 +31,7 @@ public class IdentityServerLicenseValidatorTests(ITestOutputHelper output)
         licenseValidator.ValidateIssuer("c2");
 
         var logMessages = string.Join(Environment.NewLine, mockLogger.LogMessages);
-        output.WriteLine(logMessages);
+        _output.WriteLine(logMessages);
         mockLogger.LogMessages.ShouldContain("Your license for IdentityServer includes 1 issuers but you have processed requests for 2 issuers. This indicates that requests for each issuer are being sent to this instance of IdentityServer, which may be due to a network infrastructure configuration issue. If you intend to use multiple issuers, please contact contact@duendesoftware.com at _test or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The issuers used were c1, c2.");
     }
 
@@ -55,7 +55,7 @@ public class IdentityServerLicenseValidatorTests(ITestOutputHelper output)
         licenseValidator.ValidateClient("c6");
 
         var logMessages = string.Join(Environment.NewLine, mockLogger.LogMessages);
-        output.WriteLine(logMessages);
+        _output.WriteLine(logMessages);
         mockLogger.LogMessages.ShouldContain("Your license for IdentityServer includes 5 clients but you have processed requests for 6 clients. Please contact contact@duendesoftware.com at _test or start a conversation with us at https://duende.link/l/contact to upgrade your license as soon as possible. In a future version, this limit will be enforced after a threshold is exceeded. The clients used were: c1, c2, c3, c4, c5, c6.");
     }
 

@@ -9,14 +9,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Xunit.Abstractions;
-
 namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class IdentityServerHost : GenericHost
 {
-    public IdentityServerHost(ITestOutputHelper testOutputHelper, string baseAddress = "https://identityserver")
-        : base(testOutputHelper, baseAddress)
+    public IdentityServerHost(string baseAddress = "https://identityserver")
+        : base(baseAddress)
     {
         OnConfigureServices += ConfigureServices;
         OnConfigure += Configure;

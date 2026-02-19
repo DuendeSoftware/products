@@ -6,12 +6,11 @@ using Duende.Xunit.Playwright.Retries;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
-using Xunit.Abstractions;
 
 namespace Hosts.Tests;
 
-public class BffBlazorWebAssemblyTests(ITestOutputHelper output, BffHostTestFixture fixture)
-    : BffPlaywrightTestBase(output, fixture)
+public class BffBlazorWebAssemblyTests(BffHostTestFixture fixture)
+    : BffPlaywrightTestBase(fixture)
 {
     public async Task<WebAssemblyPageModel> GoToHome()
     {

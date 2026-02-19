@@ -10,14 +10,12 @@ using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Endpoints.Management;
 
 public class UserEndpointTests : BffTestBase
 {
 
-    public UserEndpointTests(ITestOutputHelper output) : base(output) =>
+    public UserEndpointTests() : base() =>
         Bff.OnConfigureApp += app =>
         {
             // Setup a login endpoint that allows you to simulate signing in as a specific

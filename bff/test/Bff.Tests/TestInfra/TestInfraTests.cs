@@ -3,11 +3,9 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.TestInfra;
 
-public class TestInfraTests(ITestOutputHelper output) : BffTestBase(output)
+public class TestInfraTests : BffTestBase
 {
     [Fact]
     public async Task Can_login_to_identity_server()

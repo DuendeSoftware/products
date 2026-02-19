@@ -33,8 +33,8 @@ namespace Duende.Bff.Yarp
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class RemoteApi : System.IEquatable<Duende.Bff.Yarp.RemoteApi>
     {
-        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
-            "your compiler."), true)]
+        [System.Obsolete("Constructors of types with required members are not supported in this version of " +
+            "your compiler.", true)]
         [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
         public RemoteApi() { }
         [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]

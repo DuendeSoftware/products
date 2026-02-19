@@ -10,13 +10,21 @@ public static class BenchmarkTests
     public class Login(Login.Fixture fixture)
         : TestBase<Login.Fixture, MultiFrontendBenchmarks>(fixture)
     {
-        public class Fixture : MultiFrontendBenchmarks, IAsyncLifetime;
+        public class Fixture : MultiFrontendBenchmarks, IAsyncLifetime
+        {
+            ValueTask IAsyncLifetime.InitializeAsync() => new ValueTask(InitializeAsync());
+            ValueTask IAsyncDisposable.DisposeAsync() => new ValueTask(DisposeAsync());
+        }
     }
 
     public class Proxy(Proxy.Fixture fixture)
         : TestBase<Proxy.Fixture, SingleFrontendBenchmarks>(fixture)
     {
-        public class Fixture : SingleFrontendBenchmarks, IAsyncLifetime;
+        public class Fixture : SingleFrontendBenchmarks, IAsyncLifetime
+        {
+            ValueTask IAsyncLifetime.InitializeAsync() => new ValueTask(InitializeAsync());
+            ValueTask IAsyncDisposable.DisposeAsync() => new ValueTask(DisposeAsync());
+        }
     }
 
     //public class Yarp(Yarp.Fixture fixture)

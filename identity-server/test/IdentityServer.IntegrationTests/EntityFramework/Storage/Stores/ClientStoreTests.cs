@@ -167,15 +167,20 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             }
             else
             {
-                throw new TestTimeoutException(timeout);
+                throw TestTimeoutException.ForTimedOutTest(timeout);
             }
         }
     }
 
-    [Theory, MemberData(nameof(TestDatabaseProviders))]
-    public async Task GetAllClientsAsync_WhenNoClientsExist_ExpectEmptyCollection(DbContextOptions<ConfigurationDbContext> options)
+    [Fact]
+    public async Task GetAllClientsAsync_WhenNoClientsExist_ExpectEmptyCollection()
     {
-        await using var context = new ConfigurationDbContext(options);
+        // Use a fresh isolated database so data inserted by other tests in this class doesn't interfere.
+        var freshOptions = DatabaseProviderBuilder.BuildSqlite<ConfigurationDbContext, ConfigurationStoreOptions>(
+            nameof(GetAllClientsAsync_WhenNoClientsExist_ExpectEmptyCollection), StoreOptions);
+        await using var context = new ConfigurationDbContext(freshOptions);
+        context.Database.EnsureCreated();
+
         var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
 
         var clients = new List<Client>();

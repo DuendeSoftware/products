@@ -12,13 +12,11 @@ using Duende.Bff.Yarp;
 using Duende.IdentityServer.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
 public class BffFrontendSigninTests : BffTestBase
 {
-    public BffFrontendSigninTests(ITestOutputHelper output) : base(output) =>
+    public BffFrontendSigninTests() : base() =>
         Bff.OnConfigureApp += app =>
         {
             app.MapGet("/secret", (HttpContext c) =>

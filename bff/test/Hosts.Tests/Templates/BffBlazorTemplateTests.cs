@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 using Duende.Xunit.Playwright;
+using Duende.Xunit.Playwright.Retries;
 using Hosts.ServiceDefaults;
 using Hosts.Tests.PageModels;
 using Hosts.Tests.TestInfra;
-using Xunit.Abstractions;
 
 namespace Hosts.Tests.Templates;
 
-public class BffBlazorTemplateTests(ITestOutputHelper output, BffHostTestFixture fixture)
-    : BffPlaywrightTestBase(output, fixture)
+public class BffBlazorTemplateTests(BffHostTestFixture fixture)
+    : BffPlaywrightTestBase(fixture)
 {
     public async Task<WebAssemblyPageModel> GoToHome()
     {
@@ -21,7 +21,7 @@ public class BffBlazorTemplateTests(ITestOutputHelper output, BffHostTestFixture
         };
     }
 
-    [SkippableFact]
+    [RetryableFact]
     public async Task Can_login_and_load_local_api()
     {
         await Warmup();

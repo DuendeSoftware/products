@@ -8,13 +8,11 @@ using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Hybrid;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests;
 
 public class BffFrontendIndexTests : BffTestBase
 {
-    public BffFrontendIndexTests(ITestOutputHelper output) : base(output) =>
+    public BffFrontendIndexTests() : base() =>
         // Disable the map to '/' for the test
         Bff.MapGetForRoot = false;
 

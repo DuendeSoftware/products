@@ -11,8 +11,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
-using Xunit.Abstractions;
-
 namespace Duende.AspNetCore.Authentication.JwtBearer.TestFramework;
 
 public class AppHost : GenericHost
@@ -26,10 +24,9 @@ public class AppHost : GenericHost
         IdentityServerHost identityServerHost,
         ApiHost apiHost,
         string clientId,
-        ITestOutputHelper testOutputHelper,
         string baseAddress = "https://app",
         Action<UserTokenManagementOptions>? configureUserTokenManagementOptions = default)
-        : base(testOutputHelper, baseAddress)
+        : base(baseAddress)
     {
         _identityServerHost = identityServerHost;
         _apiHost = apiHost;

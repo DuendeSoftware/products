@@ -5,18 +5,17 @@ using System.Net;
 using Duende.Bff.DynamicFrontends;
 using Duende.Bff.SessionManagement.SessionStore;
 using Duende.Bff.Tests.TestInfra;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.Tests.Endpoints.Management;
 
 public class BackchannelLogoutEndpointTests : BffTestBase
 {
-    public BackchannelLogoutEndpointTests(ITestOutputHelper output) : base(output) => Bff.OnConfigureBff += bff =>
+    public BackchannelLogoutEndpointTests() : base() => Bff.OnConfigureBff += bff =>
     {
         bff.AddServerSideSessions();
     };
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
 

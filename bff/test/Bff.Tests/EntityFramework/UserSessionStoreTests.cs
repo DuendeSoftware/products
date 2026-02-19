@@ -8,7 +8,6 @@ using Duende.Bff.Tests.TestInfra;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using UserSessionDb;
-using Xunit.Abstractions;
 
 namespace Duende.Bff.EntityFramework.Tests;
 
@@ -25,8 +24,9 @@ public class UserSessionStoreTests : IAsyncLifetime
 
     private UserSessionKey invalidUserSessionKey => new UserSessionKey(The.PartitionKey, UserKey.Parse("wrong"));
 
-    public UserSessionStoreTests(ITestOutputHelper output)
+    public UserSessionStoreTests()
     {
+        var output = TestContext.Current.TestOutputHelper!;
         var services = new ServiceCollection();
         _fakeHttpContextAccessor = new FakeHttpContextAccessor();
         _dbFilePath = Path.Combine(Path.GetTempPath(), $"test-{Guid.NewGuid():N}.sqlite");
@@ -839,12 +839,12 @@ public class UserSessionStoreTests : IAsyncLifetime
         });
     }
 
-    public async Task InitializeAsync() =>
+    public async ValueTask InitializeAsync() =>
         // Ensure the database is created and migrations are applied
         await _database.Database.MigrateAsync();
 
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         // Close all open SQLite connections used by EF
         var dbConn = _database.Database.GetDbConnection();

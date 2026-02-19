@@ -8,14 +8,12 @@ using Duende.Bff.Tests.Blazor.Components;
 using Duende.Bff.Tests.TestInfra;
 using Microsoft.EntityFrameworkCore;
 using UserSessionDb;
-using Xunit.Abstractions;
-
 namespace Bff.Tests.Blazor;
 
-public class BffBlazorTests(ITestOutputHelper testOutputHelper) : BffTestBase(testOutputHelper)
+public class BffBlazorTests : BffTestBase
 {
     private bool _addServerSideSessions = true;
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         Bff.MapGetForRoot = false;
         Bff.OnConfigureServices += services =>

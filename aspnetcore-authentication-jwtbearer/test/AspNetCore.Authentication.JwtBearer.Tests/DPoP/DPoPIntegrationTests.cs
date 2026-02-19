@@ -16,17 +16,12 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
-using Xunit.Abstractions;
-
 namespace Duende.AspNetCore.Authentication.JwtBearer.DPoP;
 
 public class DPoPIntegrationTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public DPoPIntegrationTests(ITestOutputHelper testOutputHelper)
+    public DPoPIntegrationTests()
     {
-        _testOutputHelper = testOutputHelper;
         IdentityServer = CreateIdentityServer();
         App = CreateApp();
         Api = CreateApi();
@@ -312,7 +307,7 @@ public class DPoPIntegrationTests
 
     private IdentityServerHost CreateIdentityServer(Action<IdentityServerHost>? setup = null)
     {
-        var host = new IdentityServerHost(_testOutputHelper);
+        var host = new IdentityServerHost();
         setup?.Invoke(host);
 
         host.Clients.Add(new Client
@@ -331,7 +326,7 @@ public class DPoPIntegrationTests
     private ApiHost CreateApi()
     {
         var baseAddress = "https://api";
-        var api = new ApiHost(IdentityServer, _testOutputHelper, baseAddress);
+        var api = new ApiHost(IdentityServer, baseAddress);
         api.OnConfigureServices += services =>
         {
             services.ConfigureDPoPTokensForScheme(ApiHost.AuthenticationScheme,
@@ -351,7 +346,6 @@ public class DPoPIntegrationTests
         IdentityServer,
         Api,
         "client1",
-        _testOutputHelper,
         configureUserTokenManagementOptions: opt => opt.DPoPJsonWebKey = Jwk);
 
     private DPoPProofKey CreateJwk()

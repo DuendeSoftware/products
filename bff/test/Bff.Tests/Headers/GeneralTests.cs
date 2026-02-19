@@ -6,12 +6,11 @@ using Duende.Bff.AccessTokenManagement;
 using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
-using Xunit.Abstractions;
 using ApiHost = Duende.Bff.Tests.TestInfra.ApiHost;
 
 namespace Duende.Bff.Tests.Headers;
 
-public class GeneralTests(ITestOutputHelper output) : BffTestBase(output)
+public class GeneralTests : BffTestBase
 {
     [Theory, MemberData(nameof(AllSetups))]
     public async Task local_endpoint_should_receive_standard_headers(BffSetupType setup)

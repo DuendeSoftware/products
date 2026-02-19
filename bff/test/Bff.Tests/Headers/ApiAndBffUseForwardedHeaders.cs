@@ -5,13 +5,11 @@ using Duende.Bff.Tests.TestFramework;
 using Duende.Bff.Tests.TestInfra;
 using Duende.Bff.Yarp;
 using Microsoft.AspNetCore.HttpOverrides;
-using Xunit.Abstractions;
-
 namespace Duende.Bff.Tests.Headers;
 
 public class ApiAndBffUseForwardedHeaders : BffTestBase, IAsyncLifetime
 {
-    public ApiAndBffUseForwardedHeaders(ITestOutputHelper output) : base(output)
+    public ApiAndBffUseForwardedHeaders() : base()
     {
         Bff.OnConfigureApp += app =>
         {
