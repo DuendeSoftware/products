@@ -1,0 +1,23 @@
+@using Duende.ConformanceReport.Slices
+@inherits RazorSlice<ClientResult>
+@{
+    var statusClass = GetStatusClass(Model.Status);
+    var displayName = !string.IsNullOrEmpty(Model.ClientName) 
+        ? $"{Model.ClientName} ({Model.ClientId})" 
+        : Model.ClientId;
+}
+
+<details class="client @statusClass">
+  <summary><span class="status-indicator @statusClass"></span> @displayName</summary>
+  @await RenderPartialAsync(_FindingsTable.Create(Model.Findings))
+</details>
+
+@functions {
+    private string GetStatusClass(ConformanceReportStatus status) => status switch
+    {
+        ConformanceReportStatus.Pass => "pass",
+        ConformanceReportStatus.Warn => "warning",
+        ConformanceReportStatus.Fail => "fail",
+        _ => "unknown"
+    };
+}
