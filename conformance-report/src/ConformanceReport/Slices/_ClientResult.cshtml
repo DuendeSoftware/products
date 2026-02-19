@@ -1,3 +1,4 @@
+@using Duende.ConformanceReport.Slices
 @inherits RazorSlice<ClientResult>
 @{
     var statusClass = GetStatusClass(Model.Status);
@@ -8,19 +9,10 @@
 
 <details class="client @statusClass">
   <summary><span class="status-indicator @statusClass"></span> @displayName</summary>
-  @await RenderFindings(Model.Findings)
+  @await RenderPartialAsync(_FindingsTable.Create(Model.Findings))
 </details>
 
 @functions {
-    private async Task<IHtmlContent> RenderFindings(IReadOnlyList<Finding> findings)
-    {
-        var slice = Duende.ConformanceReport.Slices._FindingsTable.Create(findings);
-        var sb = new System.Text.StringBuilder();
-        var writer = new System.IO.StringWriter(sb);
-        await slice.RenderAsync(writer);
-        return new HtmlString(sb.ToString());
-    }
-
     private string GetStatusClass(ConformanceReportStatus status) => status switch
     {
         ConformanceReportStatus.Pass => "pass",
