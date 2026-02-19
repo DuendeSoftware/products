@@ -10,5 +10,5 @@ public class WeatherPageModel : WebAssemblyPageModel
     public async Task VerifyWeatherListIsShown() =>
         // Verify that the list is actually loading
         // Use a longer timeout as the Blazor WASM app can be slow to load in CI
-        await Expect(Page.GetByRole(AriaRole.Cell, new() { Name = "Summary" })).ToBeVisibleAsync(new() { Timeout = 60_000 });
+        await Expect(Page.GetByRole(AriaRole.Columnheader, new() { Name = "Summary" })).ToBeVisibleAsync(new() { Timeout = 60_000 });
 }
