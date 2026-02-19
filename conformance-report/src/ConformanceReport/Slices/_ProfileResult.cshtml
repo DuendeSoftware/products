@@ -1,0 +1,54 @@
+@using Duende.ConformanceReport.Slices
+@inherits RazorSlice<ProfileResult>
+@{
+    var statusClass = GetStatusClass(Model.Status);
+    var statusText = GetStatusText(Model.Status);
+}
+
+<section class="profile-section">
+  <div class="profile-header">
+    <h2 class="profile-title">@Model.Name</h2>
+    <span class="profile-status @statusClass">@statusText</span>
+  </div>
+
+  <p class="profile-meta">
+    Specification Version: @Model.SpecVersion (@Model.SpecStatus)
+  </p>
+
+  @if (!string.IsNullOrEmpty(Model.Note))
+  {
+    <p class="profile-note">@Model.Note</p>
+  }
+
+  <div class="findings-section">
+    <h3>Server Configuration Assessment</h3>
+    @await RenderPartialAsync(_ServerConfigurationMatrix.Create(Model.Server.Findings))
+  </div>
+
+  @if (Model.Clients.Count > 0)
+  {
+    <div class="findings-section">
+      <h3>Client Configuration Assessment</h3>
+      @await RenderPartialAsync(_ClientConfigurationMatrix.Create(Model.Clients))
+    </div>
+  }
+</section>
+
+@functions {
+
+    private string GetStatusClass(ConformanceReportStatus status) => status switch
+    {
+        ConformanceReportStatus.Pass => "status-pass",
+        ConformanceReportStatus.Warn => "status-warn",
+        ConformanceReportStatus.Fail => "status-fail",
+        _ => "status-unknown"
+    };
+
+    private string GetStatusText(ConformanceReportStatus status) => status switch
+    {
+        ConformanceReportStatus.Pass => "PASS",
+        ConformanceReportStatus.Warn => "WARN",
+        ConformanceReportStatus.Fail => "FAIL",
+        _ => "UNKNOWN"
+    };
+}

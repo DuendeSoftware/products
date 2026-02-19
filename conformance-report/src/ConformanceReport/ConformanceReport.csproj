@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <AssemblyName>Duende.ConformanceReport</AssemblyName>
+    <PackageId>Duende.ConformanceReport</PackageId>
+    <Description>Conformance assessment for FAPI 2.0 and OAuth 2.1 profiles</Description>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
+    <OutputType>Library</OutputType>
+    <NoWarn>$(NoWarn);NETSDK1086</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Duende.RazorSlices" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ConformanceReport.Tests" />
+    <InternalsVisibleTo Include="Duende.IdentityServer.ConformanceReport" />
+  </ItemGroup>
+
+</Project>
