@@ -14,6 +14,13 @@
   <Folder Name="/aspnetcore-authentication-jwtbearer/test/">
     <Project Path="aspnetcore-authentication-jwtbearer/test/AspNetCore.Authentication.JwtBearer.Tests/AspNetCore.Authentication.JwtBearer.Tests.csproj" />
   </Folder>
+  <Folder Name="/conformance-report/" />
+  <Folder Name="/conformance-report/src/">
+    <Project Path="conformance-report/src/ConformanceReport/ConformanceReport.csproj" />
+  </Folder>
+  <Folder Name="/conformance-report/test/">
+    <Project Path="conformance-report/test/ConformanceReport.Tests/ConformanceReport.Tests.csproj" />
+  </Folder>
   <Folder Name="/bff/" />
   <Folder Name="/bff/hosts/">
     <Project Path="bff/hosts/Hosts.AppHost/Hosts.AppHost.csproj" />
@@ -59,13 +66,13 @@
     <Project Path="bff/templates/src/BffRemoteApi/BffRemoteApi.csproj" />
   </Folder>
   <Folder Name="/bff/templates/src/BffBlazorAutoRenderMode/">
-    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj" Type="Classic C#">
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.Client\BffBlazorAutoRenderMode.Client.csproj">
       <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
       <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
       <Configuration Solution="Release|x64" Project="Release|Any CPU" />
       <Configuration Solution="Release|x86" Project="Release|Any CPU" />
     </Project>
-    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj" Type="Classic C#">
+    <Project Path="bff\templates\src\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode\BffBlazorAutoRenderMode.csproj">
       <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
       <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
       <Configuration Solution="Release|x64" Project="Release|Any CPU" />
@@ -77,7 +84,7 @@
     <Project Path="bff/test/Hosts.Tests/Hosts.Tests.csproj" />
   </Folder>
   <Folder Name="/docs-mcp/">
-    <Project Path="docs-mcp\src\Documentation.Mcp\Documentation.Mcp.csproj" >
+    <Project Path="docs-mcp\src\Documentation.Mcp\Documentation.Mcp.csproj">
       <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
       <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
       <Configuration Solution="Release|x64" Project="Release|Any CPU" />

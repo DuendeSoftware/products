@@ -1,0 +1,50 @@
+@inherits RazorSlice<IReadOnlyList<Finding>>
+
+<table class="findings">
+  <thead>
+    <tr>
+      <th>Rule</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Message</th>
+      <th>Recommendation</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var finding in Model)
+    {
+      var statusClass = GetStatusClass(finding.Status);
+      var statusText = GetStatusText(finding.Status);
+
+      <tr>
+        <td class="rule-id">@finding.RuleId</td>
+        <td>@finding.RuleName</td>
+        <td class="status @statusClass">@statusText</td>
+        <td>@finding.Message</td>
+        <td>@(finding.Recommendation ?? "-")</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@functions {
+    private string GetStatusClass(FindingStatus status) => status switch
+    {
+        FindingStatus.Pass => "pass",
+        FindingStatus.Fail => "fail",
+        FindingStatus.Warning => "warning",
+        FindingStatus.NotApplicable => "na",
+        FindingStatus.Error => "error",
+        _ => "unknown"
+    };
+
+    private string GetStatusText(FindingStatus status) => status switch
+    {
+        FindingStatus.Pass => "PASS",
+        FindingStatus.Fail => "FAIL",
+        FindingStatus.Warning => "WARNING",
+        FindingStatus.NotApplicable => "N/A",
+        FindingStatus.Error => "ERROR",
+        _ => "UNKNOWN"
+    };
+}

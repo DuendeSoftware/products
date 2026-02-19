@@ -1,0 +1,13 @@
+<Project>
+  <Import Project="../../src.props" />
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Duende.ConformanceReport.$(MSBuildProjectName)</AssemblyName>
+    <PackageId>Duende.ConformanceReport.$(MSBuildProjectName)</PackageId>
+    <RootNamespace>Duende.ConformanceReport</RootNamespace>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerTagPrefix>cr-</MinVerTagPrefix>
+    <PackageTags>OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;Conformance</PackageTags>
+    <Product>Duende Conformance Report</Product>
+  </PropertyGroup>
+</Project>

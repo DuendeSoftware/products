@@ -14,6 +14,7 @@
     <PackageVersion Include="Duende.IdentityModel" Version="8.0.0" />
     <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="7.0.0" />
     <PackageVersion Include="Duende.IdentityServer" Version="7.4.0-preview.2" />
+    <PackageVersion Include="Duende.IdentityServer.Storage" Version="7.4.0-preview.2" />
     <PackageVersion Include="Duende.Private.Licensing" Version="1.0.0" />
     <PackageVersion Include="IdentityModel.AspNetCore.OAuth2Introspection" Version="6.2.0" />
     <PackageVersion Include="Markdig" Version="0.43.0" />
@@ -82,6 +83,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.12.0-beta.2" />
     <PackageVersion Include="OpenTelemetry" Version="1.12.0" />
     <PackageVersion Include="PublicApiGenerator" Version="11.1.0" />
+    <PackageVersion Include="Duende.RazorSlices" Version="1.0.0" />
     <PackageVersion Include="ReverseMarkdown" Version="4.7.0" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
     <PackageVersion Include="Serilog" Version="4.2.0" />

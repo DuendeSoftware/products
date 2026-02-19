@@ -1,0 +1,6 @@
+<Project>
+  <Import Project="../../test.props" />
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>

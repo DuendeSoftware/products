@@ -1,0 +1,181 @@
+@inherits RazorSlice<IReadOnlyList<ClientResult>>
+@{
+    // Collect all unique rule IDs across all clients
+    var allRuleIds = Model
+        .SelectMany(c => c.Findings)
+        .Select(f => f.RuleId)
+        .Distinct()
+        .OrderBy(r => r)
+        .ToList();
+
+    // Create a dictionary for quick lookup of findings by client and rule
+    var findingsByClient = Model.ToDictionary(
+        c => c,
+        c => c.Findings.ToDictionary(f => f.RuleId)
+    );
+
+    // Collect footnotes (warnings and failures with messages/recommendations)
+    var footnotes = new List<(string ClientId, string ClientName, Finding Finding)>();
+    var footnoteIndex = 1;
+    var footnoteMap = new Dictionary<string, int>(); // key: clientId_ruleId, value: footnote number
+
+    foreach (var client in Model)
+    {
+        foreach (var finding in client.Findings.Where(f => f.Status == FindingStatus.Fail || f.Status == FindingStatus.Warning))
+        {
+            var key = $"{client.ClientId}_{finding.RuleId}";
+            if (!footnoteMap.ContainsKey(key))
+            {
+                footnoteMap[key] = footnoteIndex++;
+                footnotes.Add((client.ClientId, client.ClientName ?? client.ClientId, finding));
+            }
+        }
+    }
+}
+
+<div class="matrix-section">
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th class="entity-col">Client</th>
+        @foreach (var ruleId in allRuleIds)
+        {
+          <th title="@ruleId">@ruleId</th>
+        }
+        <th class="status-col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach (var client in Model)
+      {
+        var statusClass = GetStatusClass(client.Status);
+        var statusText = GetStatusText(client.Status);
+        var clientFindings = findingsByClient[client];
+        var displayName = !string.IsNullOrEmpty(client.ClientName) 
+            ? client.ClientName 
+            : client.ClientId;
+        
+        <tr>
+          <td class="entity-col">
+            @displayName
+            <span class="entity-id">@client.ClientId</span>
+          </td>
+          @foreach (var ruleId in allRuleIds)
+          {
+            if (clientFindings.TryGetValue(ruleId, out var finding))
+            {
+              var cellClass = GetCellClass(finding.Status);
+              var cellText = GetCellText(finding.Status);
+              var key = $"{client.ClientId}_{finding.RuleId}";
+              var hasFootnote = footnoteMap.ContainsKey(key);
+              var title = $"{finding.RuleName}: {finding.Message}";
+              
+              <td class="@cellClass" title="@title">
+                @cellText@if (hasFootnote)
+                {<a href="#client-finding-@footnoteMap[key]" class="ref-link">[@footnoteMap[key]]</a>}
+              </td>
+            }
+            else
+            {
+              <td class="cell-na" title="Not applicable">N/A</td>
+            }
+          }
+          <td class="status-col @statusClass">@statusText</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (allRuleIds.Count > 0)
+{
+  <div class="rule-legend">
+    <h4>Rule Reference</h4>
+    <div class="legend-grid">
+      @{
+        // Get unique rules with their descriptions
+        var ruleDescriptions = Model
+            .SelectMany(c => c.Findings)
+            .GroupBy(f => f.RuleId)
+            .Select(g => g.First())
+            .OrderBy(f => f.RuleId)
+            .ToList();
+      }
+      @foreach (var finding in ruleDescriptions)
+      {
+        <div class="legend-item">
+          <span class="legend-code">@finding.RuleId</span>
+          <span class="legend-text">@finding.RuleName</span>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (footnotes.Count > 0)
+{
+  // Group footnotes by client
+  var groupedByClient = footnotes
+      .GroupBy(f => new { f.ClientId, f.ClientName })
+      .ToList();
+  
+  <div class="findings-section">
+    <h4>Client Configuration Findings</h4>
+    @foreach (var clientGroup in groupedByClient)
+    {
+      <div class="finding-group">
+        <div class="finding-group-header">@clientGroup.Key.ClientName <span class="entity-id">(@clientGroup.Key.ClientId)</span></div>
+        <ul class="finding-list">
+          @foreach (var (clientId, clientName, finding) in clientGroup)
+          {
+            var key = $"{clientId}_{finding.RuleId}";
+            var num = footnoteMap[key];
+            <li class="finding-item" id="client-finding-@num">
+              <span class="finding-number">@num.</span>
+              <span class="finding-action">@(!string.IsNullOrEmpty(finding.Recommendation) ? finding.Recommendation : finding.RuleName)</span>
+              <span class="finding-detail">@finding.Message</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+}
+
+@functions {
+    private string GetStatusClass(ConformanceReportStatus status) => status switch
+    {
+        ConformanceReportStatus.Pass => "cell-pass",
+        ConformanceReportStatus.Warn => "cell-warn",
+        ConformanceReportStatus.Fail => "cell-fail",
+        _ => ""
+    };
+
+    private string GetCellClass(FindingStatus status) => status switch
+    {
+        FindingStatus.Pass => "cell-pass",
+        FindingStatus.Fail => "cell-fail",
+        FindingStatus.Warning => "cell-warn",
+        FindingStatus.NotApplicable => "cell-na",
+        FindingStatus.Error => "cell-fail",
+        _ => ""
+    };
+
+    private string GetStatusText(ConformanceReportStatus status) => status switch
+    {
+        ConformanceReportStatus.Pass => "PASS",
+        ConformanceReportStatus.Warn => "WARN",
+        ConformanceReportStatus.Fail => "FAIL",
+        _ => "?"
+    };
+
+    private string GetCellText(FindingStatus status) => status switch
+    {
+        FindingStatus.Pass => "PASS",
+        FindingStatus.Fail => "FAIL",
+        FindingStatus.Warning => "WARN",
+        FindingStatus.NotApplicable => "N/A",
+        FindingStatus.Error => "ERR",
+        _ => "?"
+    };
+}
