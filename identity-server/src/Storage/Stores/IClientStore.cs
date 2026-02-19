@@ -21,9 +21,7 @@ public interface IClientStore
 
     /// <summary>
     /// Returns all clients for enumeration purposes (e.g., conformance assessment).
-    /// This method has a default implementation that throws <see cref="NotSupportedException"/>.
     /// </summary>
     /// <returns>An async enumerable of all clients.</returns>
-    IAsyncEnumerable<Client> GetAllClientsAsync()
-        => throw new NotSupportedException("Client enumeration is not supported by this store implementation.");
+    IAsyncEnumerable<Client> GetAllClientsAsync();
 }
