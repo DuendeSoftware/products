@@ -82,19 +82,14 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
         Events = events;
     }
 
-    /// <summary>
-    /// Creates the response
-    /// </summary>
-    /// <param name="request">The request.</param>
-    /// <returns></returns>
-    /// <exception cref="System.InvalidOperationException">invalid grant type: " + request.GrantType</exception>
-    public virtual async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request)
+    /// <inheritdoc/>
+    public virtual async Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeResponseGenerator.CreateResponse");
 
         if (request.GrantType == GrantType.AuthorizationCode)
         {
-            return await CreateCodeFlowResponseAsync(request);
+            return await CreateCodeFlowResponseAsync(request, ct);
         }
         if (request.GrantType == GrantType.Implicit)
         {
@@ -102,7 +97,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
         }
         if (request.GrantType == GrantType.Hybrid)
         {
-            return await CreateHybridFlowResponseAsync(request);
+            return await CreateHybridFlowResponseAsync(request, ct);
         }
 
         Logger.LogError("Unsupported grant type: {GrantType}", request.GrantType);
@@ -113,13 +108,14 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a hybrid flow request
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request)
+    protected virtual async Task<AuthorizeResponse> CreateHybridFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         Logger.LogDebug("Creating Hybrid Flow response.");
 
         var code = await CreateCodeAsync(request);
-        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code);
+        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code, ct);
 
         var response = await CreateImplicitFlowResponseAsync(request, id);
         response.Code = id;
@@ -131,13 +127,14 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
     /// Creates the response for a code flow request
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request)
+    protected virtual async Task<AuthorizeResponse> CreateCodeFlowResponseAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         Logger.LogDebug("Creating Authorization Code Flow response.");
 
         var code = await CreateCodeAsync(request);
-        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code);
+        var id = await AuthorizationCodeStore.StoreAuthorizationCodeAsync(code, ct);
 
         var response = new AuthorizeResponse
         {

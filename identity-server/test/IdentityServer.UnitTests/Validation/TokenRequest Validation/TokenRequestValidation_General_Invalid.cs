@@ -64,7 +64,7 @@ public class TokenRequestValidation_General_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -116,7 +116,7 @@ public class TokenRequestValidation_General_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);

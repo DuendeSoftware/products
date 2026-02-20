@@ -40,7 +40,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -72,7 +72,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -106,7 +106,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -140,7 +140,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -173,7 +173,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -207,7 +207,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -240,7 +240,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -272,7 +272,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -305,7 +305,7 @@ public class TokenRequestValidation_Code_Invalid
             Subject = _subject
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -342,7 +342,7 @@ public class TokenRequestValidation_Code_Invalid
             }
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store);
@@ -387,7 +387,7 @@ public class TokenRequestValidation_Code_Invalid
             }
         };
 
-        var handle = await store.StoreAuthorizationCodeAsync(code);
+        var handle = await store.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: store,
@@ -425,7 +425,7 @@ public class TokenRequestValidation_Code_Invalid
             RequestedResourceIndicators = new[] { "urn:api1", "urn:api2" }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -489,7 +489,7 @@ public class TokenRequestValidation_Code_Invalid
                 RequestedResourceIndicators = new[] { "urn:api1", "urn:api2" }
             };
 
-            var handle = await grants.StoreAuthorizationCodeAsync(code);
+            var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
             var validator = Factory.CreateTokenRequestValidator(resourceValidator: mockResourceValidator, authorizationCodeStore: grants);
 
             var parameters = new NameValueCollection();
@@ -523,7 +523,7 @@ public class TokenRequestValidation_Code_Invalid
                 RequestedResourceIndicators = new[] { "urn:api1", "urn:api2" }
             };
 
-            var handle = await grants.StoreAuthorizationCodeAsync(code);
+            var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
             var validator = Factory.CreateTokenRequestValidator(resourceValidator: mockResourceValidator, authorizationCodeStore: grants);
 
             var parameters = new NameValueCollection();

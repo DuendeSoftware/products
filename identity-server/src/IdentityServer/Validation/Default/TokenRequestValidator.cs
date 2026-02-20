@@ -357,7 +357,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         _validatedRequest.AuthorizationCodeHandle = code;
 
-        var authZcode = await _authorizationCodeStore.GetAuthorizationCodeAsync(code);
+        var authZcode = await _authorizationCodeStore.GetAuthorizationCodeAsync(code, _ct);
         if (authZcode == null)
         {
             LogError("Invalid authorization code", new { code });
@@ -393,7 +393,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         // remove code from store
         // todo: set to consumed in the future?
-        await _authorizationCodeStore.RemoveAuthorizationCodeAsync(code);
+        await _authorizationCodeStore.RemoveAuthorizationCodeAsync(code, _ct);
 
         if (authZcode.CreationTime.HasExceeded(authZcode.Lifetime, _timeProvider.GetUtcNow().UtcDateTime))
         {
