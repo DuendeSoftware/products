@@ -207,7 +207,7 @@ internal class TokenValidator : ITokenValidator
 
             var isActiveCtx = new IsActiveContext(principal, result.Client,
                 IdentityServerConstants.ProfileIsActiveCallers.AccessTokenValidation);
-            await _profile.IsActiveAsync(isActiveCtx);
+            await _profile.IsActiveAsync(isActiveCtx, ct);
 
             if (isActiveCtx.IsActive == false)
             {

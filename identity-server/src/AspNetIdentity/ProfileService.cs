@@ -65,8 +65,9 @@ public class ProfileService<TUser> : IProfileService
     /// This method is called whenever claims about the user are requested (e.g. during token creation or via the userinfo endpoint)
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    public virtual async Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public virtual async Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
     {
         var sub = context.Subject?.GetSubjectId();
         if (sub == null)
@@ -125,8 +126,9 @@ public class ProfileService<TUser> : IProfileService
     /// (e.g. during token issuance or validation).
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    public virtual async Task IsActiveAsync(IsActiveContext context)
+    public virtual async Task IsActiveAsync(IsActiveContext context, CT ct)
     {
         var sub = context.Subject?.GetSubjectId();
         if (sub == null)

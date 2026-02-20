@@ -9,10 +9,10 @@ namespace Duende.IdentityServer.Hosts.Shared.Customization;
 
 public class HostProfileService(TestUserStore users, ILogger<TestUserProfileService> logger) : TestUserProfileService(users, logger)
 {
-    public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public override async Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
     {
         ArgumentNullException.ThrowIfNull(context);
-        await base.GetProfileDataAsync(context);
+        await base.GetProfileDataAsync(context, ct);
 
         var transaction = context.RequestedResources.ParsedScopes.FirstOrDefault(x => x.ParsedName == "transaction");
         if (transaction?.ParsedParameter != null)

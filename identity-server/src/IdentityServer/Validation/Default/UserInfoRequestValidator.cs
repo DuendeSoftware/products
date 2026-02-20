@@ -115,7 +115,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
 
         // make sure user is still active
         var isActiveContext = new IsActiveContext(subject, tokenResult.Client!, IdentityServerConstants.ProfileIsActiveCallers.UserInfoRequestValidation);
-        await _profile.IsActiveAsync(isActiveContext);
+        await _profile.IsActiveAsync(isActiveContext, ct);
 
         if (isActiveContext.IsActive == false)
         {

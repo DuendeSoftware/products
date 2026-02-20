@@ -208,7 +208,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         if (isAuthenticated)
         {
             var isActiveCtx = new IsActiveContext(request.Subject, request.Client, IdentityServerConstants.ProfileIsActiveCallers.AuthorizeEndpoint);
-            await Profile.IsActiveAsync(isActiveCtx);
+            await Profile.IsActiveAsync(isActiveCtx, ct);
 
             isActive = isActiveCtx.IsActive;
         }
