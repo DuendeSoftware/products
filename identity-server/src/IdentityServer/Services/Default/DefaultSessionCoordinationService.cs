@@ -81,14 +81,14 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
     };
 
     /// <inheritdoc/>
-    public virtual async Task ProcessLogoutAsync(UserSession session)
+    public virtual async Task ProcessLogoutAsync(UserSession session, CT ct)
     {
         if (session.ClientIds.Count > 0)
         {
             var clientsToCoordinate = new List<string>();
             foreach (var clientId in session.ClientIds)
             {
-                var client = await ClientStore.FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
+                var client = await ClientStore.FindClientByIdAsync(clientId, ct); // i don't think we care if it's an enabled client at this point
                 if (client != null)
                 {
                     var shouldCoordinate =
@@ -126,19 +126,19 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 ClientIds = session.ClientIds,
                 Issuer = session.Issuer,
                 LogoutReason = LogoutNotificationReason.UserLogout
-            });
+            }, ct);
         }
     }
 
 
     /// <inheritdoc/>
-    public virtual async Task ProcessExpirationAsync(UserSession session)
+    public virtual async Task ProcessExpirationAsync(UserSession session, CT ct)
     {
         var clientsToCoordinate = new List<string>();
 
         foreach (var clientId in session.ClientIds)
         {
-            var client = await ClientStore.FindClientByIdAsync(clientId); // i don't think we care if it's an enabled client at this point
+            var client = await ClientStore.FindClientByIdAsync(clientId, ct); // i don't think we care if it's an enabled client at this point
 
             if (client != null)
             {
@@ -187,7 +187,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                     Issuer = session.Issuer,
                     ClientIds = clientsToContact,
                     LogoutReason = LogoutNotificationReason.SessionExpiration,
-                });
+                }, ct);
             }
         }
     }

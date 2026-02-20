@@ -58,8 +58,7 @@ internal class TokenValidator : ITokenValidator
         _log = new TokenValidationLog();
     }
 
-    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId = null,
-        bool validateLifetime = true)
+    public async Task<TokenValidationResult> ValidateIdentityTokenAsync(string token, string clientId, bool validateLifetime, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateIdentityToken");
 
@@ -85,7 +84,7 @@ internal class TokenValidator : ITokenValidator
         _log.ClientId = clientId;
         _log.ValidateLifetime = validateLifetime;
 
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, ct);
         if (client == null)
         {
             _logger.LogError("Unknown or disabled client: {clientId}.", clientId);
@@ -96,7 +95,7 @@ internal class TokenValidator : ITokenValidator
         _logger.LogDebug("Client found: {clientId} / {clientName}", client.ClientId, client.ClientName);
 
         var keys = await _keys.GetValidationKeysAsync();
-        var result = await ValidateJwtAsync(token, keys, audience: clientId, validateLifetime: validateLifetime);
+        var result = await ValidateJwtAsync(token, keys, audience: clientId, validateLifetime: validateLifetime, ct: ct);
 
         result.Client = client;
 
@@ -121,7 +120,7 @@ internal class TokenValidator : ITokenValidator
         return customResult;
     }
 
-    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope = null)
+    public async Task<TokenValidationResult> ValidateAccessTokenAsync(string token, string expectedScope, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateAccessToken");
 
@@ -149,7 +148,8 @@ internal class TokenValidator : ITokenValidator
             _log.AccessTokenType = AccessTokenType.Jwt.ToString();
             result = await ValidateJwtAsync(
                 token,
-                await _keys.GetValidationKeysAsync());
+                await _keys.GetValidationKeysAsync(),
+                ct: ct);
         }
         else
         {
@@ -166,7 +166,7 @@ internal class TokenValidator : ITokenValidator
             }
 
             _log.AccessTokenType = AccessTokenType.Reference.ToString();
-            result = await ValidateReferenceAccessTokenAsync(token);
+            result = await ValidateReferenceAccessTokenAsync(token, ct);
         }
 
         _log.Claims = result.Claims.ToClaimsDictionary();
@@ -180,7 +180,7 @@ internal class TokenValidator : ITokenValidator
         var clientClaim = result.Claims.FirstOrDefault(c => c.Type == JwtClaimTypes.ClientId);
         if (clientClaim != null)
         {
-            var client = await _clients.FindEnabledClientByIdAsync(clientClaim.Value);
+            var client = await _clients.FindEnabledClientByIdAsync(clientClaim.Value, ct);
             if (client == null)
             {
                 _logger.LogError("Client deleted or disabled: {clientId}", clientClaim.Value);
@@ -269,7 +269,7 @@ internal class TokenValidator : ITokenValidator
     }
 
     private async Task<TokenValidationResult> ValidateJwtAsync(string jwtString,
-        IEnumerable<SecurityKeyInfo> validationKeys, bool validateLifetime = true, string audience = null)
+        IEnumerable<SecurityKeyInfo> validationKeys, bool validateLifetime = true, string audience = null, CT ct = default)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateJwt");
 
@@ -331,7 +331,7 @@ internal class TokenValidator : ITokenValidator
         var clientId = id.FindFirst(JwtClaimTypes.ClientId);
         if (clientId != null)
         {
-            client = await _clients.FindEnabledClientByIdAsync(clientId.Value);
+            client = await _clients.FindEnabledClientByIdAsync(clientId.Value, ct);
             if (client == null)
             {
                 LogError($"Client deleted or disabled: {clientId}");
@@ -366,7 +366,7 @@ internal class TokenValidator : ITokenValidator
         };
     }
 
-    private async Task<TokenValidationResult> ValidateReferenceAccessTokenAsync(string tokenHandle)
+    private async Task<TokenValidationResult> ValidateReferenceAccessTokenAsync(string tokenHandle, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateReferenceAccessToken");
 
@@ -391,7 +391,7 @@ internal class TokenValidator : ITokenValidator
         Client client = null;
         if (token.ClientId != null)
         {
-            client = await _clients.FindEnabledClientByIdAsync(token.ClientId);
+            client = await _clients.FindEnabledClientByIdAsync(token.ClientId, ct);
         }
 
         if (client == null)

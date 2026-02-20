@@ -78,8 +78,9 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Processes the response.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public virtual async Task<TokenResponse> ProcessAsync(TokenRequestValidationResult request)
+    public virtual async Task<TokenResponse> ProcessAsync(TokenRequestValidationResult request, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenResponseGenerator.Process");
         activity?.SetTag(Tracing.Properties.GrantType, request.ValidatedRequest.GrantType);
@@ -87,13 +88,13 @@ public class TokenResponseGenerator : ITokenResponseGenerator
 
         return request.ValidatedRequest.GrantType switch
         {
-            OidcConstants.GrantTypes.ClientCredentials => await ProcessClientCredentialsRequestAsync(request),
-            OidcConstants.GrantTypes.Password => await ProcessPasswordRequestAsync(request),
-            OidcConstants.GrantTypes.AuthorizationCode => await ProcessAuthorizationCodeRequestAsync(request),
-            OidcConstants.GrantTypes.RefreshToken => await ProcessRefreshTokenRequestAsync(request),
-            OidcConstants.GrantTypes.DeviceCode => await ProcessDeviceCodeRequestAsync(request),
-            OidcConstants.GrantTypes.Ciba => await ProcessCibaRequestAsync(request),
-            _ => await ProcessExtensionGrantRequestAsync(request)
+            OidcConstants.GrantTypes.ClientCredentials => await ProcessClientCredentialsRequestAsync(request, ct),
+            OidcConstants.GrantTypes.Password => await ProcessPasswordRequestAsync(request, ct),
+            OidcConstants.GrantTypes.AuthorizationCode => await ProcessAuthorizationCodeRequestAsync(request, ct),
+            OidcConstants.GrantTypes.RefreshToken => await ProcessRefreshTokenRequestAsync(request, ct),
+            OidcConstants.GrantTypes.DeviceCode => await ProcessDeviceCodeRequestAsync(request, ct),
+            OidcConstants.GrantTypes.Ciba => await ProcessCibaRequestAsync(request, ct),
+            _ => await ProcessExtensionGrantRequestAsync(request, ct)
         };
     }
 
@@ -101,37 +102,40 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for a client credentials request.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual Task<TokenResponse> ProcessClientCredentialsRequestAsync(TokenRequestValidationResult request)
+    protected virtual Task<TokenResponse> ProcessClientCredentialsRequestAsync(TokenRequestValidationResult request, CT ct)
     {
         Logger.LogTrace("Creating response for client credentials request");
 
-        return ProcessTokenRequestAsync(request);
+        return ProcessTokenRequestAsync(request, ct);
     }
 
     /// <summary>
     /// Creates the response for a password request.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual Task<TokenResponse> ProcessPasswordRequestAsync(TokenRequestValidationResult request)
+    protected virtual Task<TokenResponse> ProcessPasswordRequestAsync(TokenRequestValidationResult request, CT ct)
     {
         Logger.LogTrace("Creating response for password request");
 
-        return ProcessTokenRequestAsync(request);
+        return ProcessTokenRequestAsync(request, ct);
     }
 
     /// <summary>
     /// Creates the response for an authorization code request.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">Client does not exist anymore.</exception>
-    protected virtual async Task<TokenResponse> ProcessAuthorizationCodeRequestAsync(TokenRequestValidationResult request)
+    protected virtual async Task<TokenResponse> ProcessAuthorizationCodeRequestAsync(TokenRequestValidationResult request, CT ct)
     {
         Logger.LogTrace("Creating response for authorization code request");
 
-        var response = await ProcessTokenRequestAsync(request);
+        var response = await ProcessTokenRequestAsync(request, ct);
 
         if (request.ValidatedRequest.AuthorizationCode.IsOpenId)
         {
@@ -140,7 +144,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             if (request.ValidatedRequest.AuthorizationCode.ClientId != null)
             {
                 // todo: do we need this check?
-                client = await Clients.FindEnabledClientByIdAsync(request.ValidatedRequest.AuthorizationCode.ClientId);
+                client = await Clients.FindEnabledClientByIdAsync(request.ValidatedRequest.AuthorizationCode.ClientId, ct);
             }
             if (client == null)
             {
@@ -169,8 +173,9 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for a refresh token request.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<TokenResponse> ProcessRefreshTokenRequestAsync(TokenRequestValidationResult request)
+    protected virtual async Task<TokenResponse> ProcessRefreshTokenRequestAsync(TokenRequestValidationResult request, CT ct)
     {
         Logger.LogTrace("Creating response for refresh token request");
 
@@ -229,12 +234,13 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Processes the response for device code grant request.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<TokenResponse> ProcessDeviceCodeRequestAsync(TokenRequestValidationResult request)
+    protected virtual async Task<TokenResponse> ProcessDeviceCodeRequestAsync(TokenRequestValidationResult request, CT ct)
     {
         Logger.LogTrace("Creating response for device code request");
 
-        var response = await ProcessTokenRequestAsync(request);
+        var response = await ProcessTokenRequestAsync(request, ct);
 
         if (request.ValidatedRequest.DeviceCode.IsOpenId)
         {
@@ -243,7 +249,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             if (request.ValidatedRequest.DeviceCode.ClientId != null)
             {
                 // todo: do we need this check?
-                client = await Clients.FindEnabledClientByIdAsync(request.ValidatedRequest.DeviceCode.ClientId);
+                client = await Clients.FindEnabledClientByIdAsync(request.ValidatedRequest.DeviceCode.ClientId, ct);
             }
             if (client == null)
             {
@@ -270,19 +276,20 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Processes the response for CIBA request.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<TokenResponse> ProcessCibaRequestAsync(TokenRequestValidationResult request)
+    protected virtual async Task<TokenResponse> ProcessCibaRequestAsync(TokenRequestValidationResult request, CT ct)
     {
         Logger.LogTrace("Creating response for CIBA request");
 
-        var response = await ProcessTokenRequestAsync(request);
+        var response = await ProcessTokenRequestAsync(request, ct);
 
         // load the client that belongs to the device code
         Client client = null;
         if (request.ValidatedRequest.BackChannelAuthenticationRequest.ClientId != null)
         {
             // todo: do we need this check?
-            client = await Clients.FindEnabledClientByIdAsync(request.ValidatedRequest.BackChannelAuthenticationRequest.ClientId);
+            client = await Clients.FindEnabledClientByIdAsync(request.ValidatedRequest.BackChannelAuthenticationRequest.ClientId, ct);
         }
         if (client == null)
         {
@@ -308,21 +315,22 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the response for an extension grant request.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual Task<TokenResponse> ProcessExtensionGrantRequestAsync(TokenRequestValidationResult request)
+    protected virtual Task<TokenResponse> ProcessExtensionGrantRequestAsync(TokenRequestValidationResult request, CT ct)
     {
         Logger.LogTrace("Creating response for extension grant request");
 
-        return ProcessTokenRequestAsync(request);
+        return ProcessTokenRequestAsync(request, ct);
     }
 
     /// <summary>
     /// Creates a response for a token request containing an access token and a
     /// refresh token if requested.
     /// </summary>
-    protected virtual async Task<TokenResponse> ProcessTokenRequestAsync(TokenRequestValidationResult validationResult)
+    protected virtual async Task<TokenResponse> ProcessTokenRequestAsync(TokenRequestValidationResult validationResult, CT ct)
     {
-        (var accessToken, var refreshToken) = await CreateAccessTokenAsync(validationResult.ValidatedRequest);
+        (var accessToken, var refreshToken) = await CreateAccessTokenAsync(validationResult.ValidatedRequest, ct);
         var response = new TokenResponse
         {
             AccessToken = accessToken,
@@ -345,9 +353,10 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// Creates the access/refresh token.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">Client does not exist anymore.</exception>
-    protected virtual async Task<(string accessToken, string refreshToken)> CreateAccessTokenAsync(ValidatedTokenRequest request)
+    protected virtual async Task<(string accessToken, string refreshToken)> CreateAccessTokenAsync(ValidatedTokenRequest request, CT ct)
     {
         var tokenRequest = new TokenCreationRequest
         {
@@ -367,7 +376,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             if (request.AuthorizationCode.ClientId != null)
             {
                 // todo: do we need this check?
-                client = await Clients.FindEnabledClientByIdAsync(request.AuthorizationCode.ClientId);
+                client = await Clients.FindEnabledClientByIdAsync(request.AuthorizationCode.ClientId, ct);
             }
             if (client == null)
             {
@@ -387,7 +396,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             if (request.BackChannelAuthenticationRequest.ClientId != null)
             {
                 // todo: do we need this check?
-                client = await Clients.FindEnabledClientByIdAsync(request.BackChannelAuthenticationRequest.ClientId);
+                client = await Clients.FindEnabledClientByIdAsync(request.BackChannelAuthenticationRequest.ClientId, ct);
             }
             if (client == null)
             {
@@ -407,7 +416,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             if (request.DeviceCode.ClientId != null)
             {
                 // todo: do we need this check?
-                client = await Clients.FindEnabledClientByIdAsync(request.DeviceCode.ClientId);
+                client = await Clients.FindEnabledClientByIdAsync(request.DeviceCode.ClientId, ct);
             }
             if (client == null)
             {

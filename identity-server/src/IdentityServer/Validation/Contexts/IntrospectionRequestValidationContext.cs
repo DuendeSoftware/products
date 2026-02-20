@@ -29,4 +29,5 @@ public class IntrospectionRequestValidationContext
     /// The Client that is making the request
     /// </summary>
     public Client? Client { get; set; }
+
 }

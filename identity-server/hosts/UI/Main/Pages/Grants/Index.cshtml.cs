@@ -40,7 +40,7 @@ public class Index : PageModel
         var list = new List<GrantViewModel>();
         foreach (var grant in grants)
         {
-            var client = await _clients.FindClientByIdAsync(grant.ClientId);
+            var client = await _clients.FindClientByIdAsync(grant.ClientId, HttpContext.RequestAborted);
             if (client != null)
             {
                 var resources = await _resources.FindResourcesByScopeAsync(grant.Scopes);

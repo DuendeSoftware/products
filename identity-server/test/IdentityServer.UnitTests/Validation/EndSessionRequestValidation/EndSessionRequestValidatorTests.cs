@@ -17,6 +17,7 @@ public class EndSessionRequestValidatorTests
 {
     private EndSessionRequestValidator _subject;
     private IdentityServerOptions _options;
+    private readonly CT _ct = TestContext.Current.CancellationToken;
     private StubTokenValidator _stubTokenValidator = new StubTokenValidator();
     private StubRedirectUriValidator _stubRedirectUriValidator = new StubRedirectUriValidator();
     private MockUserSession _userSession = new MockUserSession();
@@ -46,13 +47,13 @@ public class EndSessionRequestValidatorTests
         _options.Authentication.RequireAuthenticatedUserForSignOutMessage = true;
 
         var parameters = new NameValueCollection();
-        var result = await _subject.ValidateAsync(parameters, null);
+        var result = await _subject.ValidateAsync(parameters, null, _ct);
         result.IsError.ShouldBeTrue();
 
-        result = await _subject.ValidateAsync(parameters, new ClaimsPrincipal());
+        result = await _subject.ValidateAsync(parameters, new ClaimsPrincipal(), _ct);
         result.IsError.ShouldBeTrue();
 
-        result = await _subject.ValidateAsync(parameters, new ClaimsPrincipal(new ClaimsIdentity()));
+        result = await _subject.ValidateAsync(parameters, new ClaimsPrincipal(new ClaimsIdentity()), _ct);
         result.IsError.ShouldBeTrue();
     }
 
@@ -73,7 +74,7 @@ public class EndSessionRequestValidatorTests
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
 
         result.ValidatedRequest.Client.ClientId.ShouldBe("client");
@@ -96,7 +97,7 @@ public class EndSessionRequestValidatorTests
         var parameters = new NameValueCollection();
         parameters.Add("id_token_hint", "id_token");
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.PostLogOutUri.ShouldBeNull();
     }
@@ -115,7 +116,7 @@ public class EndSessionRequestValidatorTests
         var parameters = new NameValueCollection();
         parameters.Add("id_token_hint", "id_token");
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.PostLogOutUri.ShouldBeNull();
     }
@@ -137,7 +138,7 @@ public class EndSessionRequestValidatorTests
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
 
         result.ValidatedRequest.Client.ClientId.ShouldBe("client");
@@ -164,7 +165,7 @@ public class EndSessionRequestValidatorTests
         parameters.Add("client_id", "client1");
         parameters.Add("state", "foo");
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeTrue();
     }
 
@@ -173,7 +174,7 @@ public class EndSessionRequestValidatorTests
     {
         var parameters = new NameValueCollection();
 
-        var result = await _subject.ValidateAsync(parameters, _user);
+        var result = await _subject.ValidateAsync(parameters, _user, _ct);
         result.IsError.ShouldBeFalse();
         result.ValidatedRequest.Raw.ShouldBeSameAs(parameters);
     }

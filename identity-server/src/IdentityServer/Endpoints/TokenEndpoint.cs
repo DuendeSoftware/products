@@ -113,7 +113,7 @@ internal class TokenEndpoint : IEndpointHandler
             return error;
         }
 
-        var requestResult = await _requestValidator.ValidateRequestAsync(requestContext);
+        var requestResult = await _requestValidator.ValidateRequestAsync(requestContext, context.RequestAborted);
         if (requestResult.IsError)
         {
             // Note: this is an expected case in the normal DPoP flow and is not a real failure event.
@@ -136,7 +136,7 @@ internal class TokenEndpoint : IEndpointHandler
 
         // create response
         _logger.LogTrace("Calling into token request response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestResult);
+        var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
         await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
 

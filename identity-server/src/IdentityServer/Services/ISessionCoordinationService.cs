@@ -16,12 +16,12 @@ public interface ISessionCoordinationService
     /// <summary>
     /// Coordinates when a user logs out.
     /// </summary>
-    Task ProcessLogoutAsync(UserSession session);
+    Task ProcessLogoutAsync(UserSession session, CT ct);
 
     /// <summary>
     /// Coordinates when a user session has expired.
     /// </summary>
-    Task ProcessExpirationAsync(UserSession session);
+    Task ProcessExpirationAsync(UserSession session, CT ct);
 
     /// <summary>
     /// Validates client request, and if valid extends server-side session.

@@ -30,10 +30,11 @@ public class InMemoryClientStore : IClientStore
     /// Finds a client by id
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="_">The cancellation token (unused).</param>
     /// <returns>
     /// The client
     /// </returns>
-    public Task<Client> FindClientByIdAsync(string clientId)
+    public Task<Client> FindClientByIdAsync(string clientId, CT _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);

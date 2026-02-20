@@ -26,7 +26,7 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnGet(string id)
     {
-        var result = await _backchannelAuthenticationInteraction.GetLoginRequestByInternalIdAsync(id);
+        var result = await _backchannelAuthenticationInteraction.GetLoginRequestByInternalIdAsync(id, HttpContext.RequestAborted);
         if (result == null)
         {
             _logger.InvalidBackchannelLoginId(id);

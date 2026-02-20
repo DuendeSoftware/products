@@ -37,17 +37,18 @@ public class CachingClientStore<T> : IClientStore
     /// Finds a client by id
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The client
     /// </returns>
-    public async Task<Client> FindClientByIdAsync(string clientId)
+    public async Task<Client> FindClientByIdAsync(string clientId, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
 
         var client = await _cache.GetOrAddAsync(clientId,
             _options.Caching.ClientStoreExpiration,
-            async () => await _inner.FindClientByIdAsync(clientId));
+            async () => await _inner.FindClientByIdAsync(clientId, ct));
 
         return client;
     }

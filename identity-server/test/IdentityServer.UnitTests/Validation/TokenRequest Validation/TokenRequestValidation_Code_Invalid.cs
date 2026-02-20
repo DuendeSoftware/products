@@ -19,6 +19,7 @@ public class TokenRequestValidation_Code_Invalid
 {
     private IClientStore _clients = Factory.CreateClientStore();
     private const string Category = "TokenRequest Validation - AuthorizationCode - Invalid";
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private ClaimsPrincipal _subject = new IdentityServerUser("bob").CreatePrincipal();
 
@@ -26,7 +27,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Missing_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -58,7 +59,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -91,7 +92,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task AuthorizationCodeTooLong()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
         var options = new IdentityServerOptions();
 
@@ -126,7 +127,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task No_Scopes_for_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -159,7 +160,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Client_Not_Authorized_For_AuthorizationCode_Flow()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("implicitclient");
+        var client = await _clients.FindEnabledClientByIdAsync("implicitclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -192,8 +193,8 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Client_Trying_To_Request_Token_Using_Another_Clients_Code()
     {
-        var client1 = await _clients.FindEnabledClientByIdAsync("codeclient");
-        var client2 = await _clients.FindEnabledClientByIdAsync("codeclient_restricted");
+        var client1 = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
+        var client2 = await _clients.FindEnabledClientByIdAsync("codeclient_restricted", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -226,7 +227,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Missing_RedirectUri()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -258,7 +259,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Different_RedirectUri_Between_Authorize_And_Token_Request()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -291,7 +292,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Expired_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -324,7 +325,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Reused_AuthorizationCode()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -370,7 +371,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Code_Request_with_disabled_User()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -407,7 +408,7 @@ public class TokenRequestValidation_Code_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_resource_indicator()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -470,7 +471,7 @@ public class TokenRequestValidation_Code_Invalid
     public async Task failed_resource_validation_should_fail()
     {
         var mockResourceValidator = new MockResourceValidator();
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         {

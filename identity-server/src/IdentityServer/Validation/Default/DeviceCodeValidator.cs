@@ -47,8 +47,9 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
     /// Validates the device code.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    public async Task ValidateAsync(DeviceCodeValidationContext context)
+    public async Task ValidateAsync(DeviceCodeValidationContext context, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceCodeValidator.Validate");
 
@@ -69,7 +70,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
             return;
         }
 
-        if (await _throttlingService.ShouldSlowDown(context.DeviceCode, deviceCode))
+        if (await _throttlingService.ShouldSlowDown(context.DeviceCode, deviceCode, ct))
         {
             _logger.LogError("Client {ClientId} is polling too fast", deviceCode.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.SlowDown);

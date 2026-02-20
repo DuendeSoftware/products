@@ -68,7 +68,7 @@ public class ClientSecretValidator : IClientSecretValidator
         }
 
         // load client
-        var client = await _clients.FindEnabledClientByIdAsync(parsedSecret.Id);
+        var client = await _clients.FindEnabledClientByIdAsync(parsedSecret.Id, context.RequestAborted);
         if (client == null)
         {
             await RaiseFailureEventAsync(parsedSecret.Id, "Unknown client");

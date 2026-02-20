@@ -14,6 +14,7 @@ namespace UnitTests.Validation;
 public class IdentityTokenValidation
 {
     private const string Category = "Identity token validation";
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     static IdentityTokenValidation() => JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -26,7 +27,7 @@ public class IdentityTokenValidation
         var jwt = await creator.CreateTokenAsync(token);
 
         var validator = Factory.CreateTokenValidator();
-        var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient");
+        var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient", true, _ct);
 
         result.IsError.ShouldBeFalse();
     }
@@ -39,7 +40,7 @@ public class IdentityTokenValidation
         var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"));
         var validator = Factory.CreateTokenValidator();
 
-        var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient");
+        var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient", true, _ct);
         result.IsError.ShouldBeFalse();
     }
 
@@ -51,7 +52,7 @@ public class IdentityTokenValidation
         var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"));
         var validator = Factory.CreateTokenValidator();
 
-        var result = await validator.ValidateIdentityTokenAsync(jwt);
+        var result = await validator.ValidateIdentityTokenAsync(jwt, null, true, _ct);
         result.IsError.ShouldBeFalse();
     }
 
@@ -63,7 +64,7 @@ public class IdentityTokenValidation
         var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"));
         var validator = Factory.CreateTokenValidator();
 
-        var result = await validator.ValidateIdentityTokenAsync(jwt, "invalid");
+        var result = await validator.ValidateIdentityTokenAsync(jwt, "invalid", true, _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }
@@ -76,7 +77,7 @@ public class IdentityTokenValidation
         var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityTokenLong("roclient", "valid", 1000));
         var validator = Factory.CreateTokenValidator();
 
-        var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient");
+        var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient", true, _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.ProtectedResourceErrors.InvalidToken);
     }

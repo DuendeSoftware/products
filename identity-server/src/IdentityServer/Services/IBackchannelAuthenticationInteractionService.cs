@@ -17,12 +17,12 @@ public interface IBackchannelAuthenticationInteractionService
     /// <summary>
     /// Returns the pending login requests for the current user.
     /// </summary>
-    Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync();
+    Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(CT ct);
 
     /// <summary>
     /// Returns the login request for the id.
     /// </summary>
-    Task<BackchannelUserLoginRequest?> GetLoginRequestByInternalIdAsync(string id);
+    Task<BackchannelUserLoginRequest?> GetLoginRequestByInternalIdAsync(string id, CT ct);
 
     /// <summary>
     /// Completes the login request with the provided response for the current user or the subject passed.

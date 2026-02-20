@@ -79,7 +79,7 @@ internal class UserInfoEndpoint : IEndpointHandler
 
         // validate the request
         _logger.LogTrace("Calling into userinfo request validator: {type}", _requestValidator.GetType().FullName);
-        var validationResult = await _requestValidator.ValidateRequestAsync(tokenUsageResult.Token);
+        var validationResult = await _requestValidator.ValidateRequestAsync(tokenUsageResult.Token, context.RequestAborted);
 
         if (validationResult.IsError)
         {

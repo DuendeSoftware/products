@@ -18,6 +18,7 @@ public class TokenRequestValidation_General_Invalid
 
     private IClientStore _clients = new InMemoryClientStore(TestClients.Get());
     private ClaimsPrincipal _subject = new IdentityServerUser("bob").CreatePrincipal();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
@@ -50,7 +51,7 @@ public class TokenRequestValidation_General_Invalid
     [Trait("Category", Category)]
     public async Task Unknown_Grant_Type()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -83,7 +84,7 @@ public class TokenRequestValidation_General_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_Protocol_Type()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client.cred.wsfed");
+        var client = await _clients.FindEnabledClientByIdAsync("client.cred.wsfed", _ct);
         var codeStore = Factory.CreateAuthorizationCodeStore();
 
         var validator = Factory.CreateTokenRequestValidator(
@@ -102,7 +103,7 @@ public class TokenRequestValidation_General_Invalid
     [Trait("Category", Category)]
     public async Task Missing_Grant_Type()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var store = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode

@@ -17,5 +17,6 @@ public interface IBackChannelLogoutService
     /// Performs http back-channel logout notification.
     /// </summary>
     /// <param name="context">The context of the back channel logout notification.</param>
-    Task SendLogoutNotificationsAsync(LogoutNotificationContext context);
+    /// <param name="ct">The cancellation token.</param>
+    Task SendLogoutNotificationsAsync(LogoutNotificationContext context, CT ct);
 }

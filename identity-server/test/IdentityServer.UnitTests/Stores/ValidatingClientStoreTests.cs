@@ -151,7 +151,7 @@ public class ValidatingClientStoreTests
 
         public static StubClientStore WithClients(IEnumerable<Client> clients) => new(clients.FirstOrDefault(), clients);
 
-        public Task<Client?> FindClientByIdAsync(string clientId) => Task.FromResult(_client);
+        public Task<Client?> FindClientByIdAsync(string clientId, CT _) => Task.FromResult(_client);
 
         public async IAsyncEnumerable<Client> GetAllClientsAsync()
         {

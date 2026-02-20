@@ -71,7 +71,7 @@ internal class EndSessionEndpoint : IEndpointHandler
 
         _logger.LogDebug("Processing signout request for {subjectId}", user?.GetSubjectId() ?? "anonymous");
 
-        var result = await _endSessionRequestValidator.ValidateAsync(parameters, user);
+        var result = await _endSessionRequestValidator.ValidateAsync(parameters, user, context.RequestAborted);
 
         if (result.IsError)
         {
