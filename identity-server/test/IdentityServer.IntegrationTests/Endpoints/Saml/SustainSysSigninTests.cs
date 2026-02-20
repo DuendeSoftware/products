@@ -7,11 +7,11 @@ using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpe
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-public class SustainSysSigninTests
+public class SustainSysSigninTests(ITestOutputHelper output)
 {
     private const string Category = "SustainSys SAML signin";
 
-    private SustainSysSamlTestFixture Fixture = new();
+    private SustainSysSamlTestFixture Fixture = new(output);
 
     [Fact]
     [Trait("Category", Category)]

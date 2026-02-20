@@ -1,19 +1,20 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-// NOTE: This file requires the Sustainsys.Saml2.AspNetCore2 package to be added to the project.
-// Add this to IdentityServer.IntegrationTests.csproj:
-// <PackageReference Include="Sustainsys.Saml2.AspNetCore2" />
-
 #nullable enable
 
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
+using Duende.IdentityServer.IntegrationTests.Common;
+using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
+using Duende.IdentityServer.Stores;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 using Sustainsys.Saml2.AspNetCore2;
@@ -21,23 +22,23 @@ using IdentityProvider = Sustainsys.Saml2.IdentityProvider;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
-internal class SustainSysSamlTestFixture : IAsyncLifetime
+internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifetime
 {
-    public TestFramework.GenericHost? Host = null!;
-    public HttpClient? BrowserClient = null!;
+    public KestrelTestHost? IdpHost;
+    public KestrelTestHost? SpHost;
+    public HttpClient? BrowserClient;
     public X509Certificate2? SigningCertificate { get; private set; }
 
-    public Uri IdentityProviderLoginUri => new Uri(new Uri(_samlFixture.Url()), _samlFixture.LoginUrl);
-
-    private readonly SamlFixture _samlFixture = new();
+    private readonly List<SamlServiceProvider> _serviceProviders = [];
+    private ClaimsPrincipal? _userToSignIn;
     private bool _shouldGenerateSigningCertificate;
     private bool _shouldRequireEncryptedAssertions;
 
     public async Task LoginUserAtIdentityProvider()
     {
-        _samlFixture.UserToSignIn =
+        _userToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id"), new Claim("name", "Test User"), new Claim(JwtClaimTypes.AuthenticationMethod, "urn:oasis:names:tc:SAML:2.0:ac:classes:Password")], "Test"));
-        await BrowserClient!.GetAsync($"{_samlFixture.Url()}/__signin", CancellationToken.None);
+        await BrowserClient!.GetAsync($"{IdpHost!.Uri()}/__signin", CancellationToken.None);
     }
 
     public void GenerateSigningCertificate() =>
@@ -52,108 +53,152 @@ internal class SustainSysSamlTestFixture : IAsyncLifetime
     {
         // need to use current time because the SustainSys library does not rely on an abstraction such
         // as TimeProvider and times need to be current
-        _samlFixture.Data.FakeTimeProvider = new FakeTimeProvider(DateTime.UtcNow);
+        var fakeTimeProvider = new FakeTimeProvider(DateTime.UtcNow);
 
         // Generate certificates before initialization if needed
         X509Certificate2? signingCertificate = null;
         X509Certificate2? publicCertificate = null;
         if (_shouldGenerateSigningCertificate)
         {
-            signingCertificate = SamlTestHelpers.CreateTestSigningCertificate(_samlFixture.Data.FakeTimeProvider);
+            signingCertificate = SamlTestHelpers.CreateTestSigningCertificate(fakeTimeProvider);
             SigningCertificate = signingCertificate; // Expose for tests
             publicCertificate = X509CertificateLoader.LoadCertificate(signingCertificate.Export(X509ContentType.Cert));
         }
 
-        // Initialize SP host first so Host is set when creating SP config for IdP
-        await InitializeServiceProvider(_samlFixture.Url(), signingCertificate);
+        await InitializeIdentityProvider(fakeTimeProvider);
 
-        // Configure the service provider with the actual host URI and add it to the SAML fixture
-        var serviceProvider = new SamlServiceProvider
+        await InitializeServiceProvider(IdpHost!.Uri(), signingCertificate);
+
+        _serviceProviders.Add(new SamlServiceProvider
         {
             EntityId = "https://localhost:5001/Saml2",
             DisplayName = "Test Service Provider",
             Enabled = true,
-            AssertionConsumerServiceUrls = [new Uri($"{Host!.Url()}/Saml2/Acs")],
+            AssertionConsumerServiceUrls = [new Uri($"{SpHost!.Uri()}/Saml2/Acs")],
             SigningBehavior = SamlSigningBehavior.SignAssertion,
             RequireSignedAuthnRequests = publicCertificate != null,
             SigningCertificates = publicCertificate == null ? null : new[] { publicCertificate },
             EncryptionCertificates = publicCertificate == null ? null : new[] { publicCertificate },
             EncryptAssertions = _shouldRequireEncryptedAssertions
-        };
+        });
 
-        // Note: With InMemorySamlServiceProviderStore, we cannot add SPs after initialization
-        // So we need to add it to the fixture before initialization
-        _samlFixture.ServiceProviders.Add(serviceProvider);
-
-        // Initialize the SAML fixture first so we can get the IDP URI
-        await _samlFixture.InitializeAsync();
+        BrowserClient = SpHost.CreateClient();
     }
 
-    private async Task InitializeServiceProvider(string identityProviderHostUri, X509Certificate2? signingCertificate = null)
+    private async Task InitializeIdentityProvider(FakeTimeProvider fakeTimeProvider)
     {
-        Host = new TestFramework.GenericHost(identityProviderHostUri.Replace("https://server", "https://sp-server"));
-        Host.OnConfigureServices += services =>
-        {
-            services.AddAuthentication(opt =>
-                {
-                    opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    opt.DefaultChallengeScheme = Saml2Defaults.Scheme;
-                })
-                .AddCookie()
-                .AddSaml2(opt =>
-                {
-                    opt.SPOptions.EntityId = new Sustainsys.Saml2.Metadata.EntityId("https://localhost:5001/Saml2");
-                    opt.SPOptions.WantAssertionsSigned = false;
-                    if (signingCertificate != null)
+        var selfSignedCertificate = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(SamlFixture.StableSigningCert), null);
+
+        IdpHost = await KestrelTestHost.Create(output,
+            services =>
+            {
+                services.AddSingleton<TimeProvider>(fakeTimeProvider);
+                services.AddSingleton<IDistributedCache>(sp => new FakeDistributedCache(sp.GetRequiredService<TimeProvider>()));
+
+                // Register the mutable service provider list before AddSamlServices
+                // so TryAdd in AddSamlServices won't overwrite our registration
+                services.AddSingleton<ISamlServiceProviderStore>(new InMemorySamlServiceProviderStore(_serviceProviders));
+
+                services.AddIdentityServer(options =>
                     {
-                        opt.SPOptions.ServiceCertificates.Add(signingCertificate);
+                        options.UserInteraction.LoginUrl = "/account/login";
+                        options.UserInteraction.LogoutUrl = "/account/logout";
+                        options.UserInteraction.ConsentUrl = "/consent";
+                        options.KeyManagement.Enabled = false;
+                    })
+                    .AddSigningCredential(selfSignedCertificate)
+                    .AddSamlServices();
+            },
+            app =>
+            {
+                app.UseIdentityServer();
+
+                app.MapGet("/account/login", () => Results.Ok());
+                app.MapGet("/account/logout", () => Results.Ok());
+                app.MapGet("/consent", () => Results.Ok());
+
+                app.MapGet("/__signin", async (HttpContext ctx) =>
+                {
+                    if (_userToSignIn?.Identity == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Must set user prior to signin and must have an identity");
                     }
 
-                    opt.IdentityProviders.Add(
-                        new IdentityProvider(new Sustainsys.Saml2.Metadata.EntityId(identityProviderHostUri), opt.SPOptions)
-                        {
-                            LoadMetadata = true,
-                            MetadataLocation = $"{identityProviderHostUri}/saml/metadata",
-                            SingleSignOnServiceUrl = new Uri($"{identityProviderHostUri}/saml/signin"),
-                            WantAuthnRequestsSigned = signingCertificate != null
-                        });
+                    await ctx.SignInAsync(_userToSignIn, new AuthenticationProperties());
+                    _userToSignIn = null;
+                    ctx.Response.StatusCode = 204;
                 });
-            services.AddAuthorization();
-        };
 
-        Host.OnConfigure += app =>
-        {
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.MapGet("/protected-resource", () => "Protected Resource").RequireAuthorization();
-
-            app.MapGet("/user-name-identifier", async context =>
-            {
-                var userId = context.User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userId == null || string.IsNullOrWhiteSpace(userId.Value))
+                app.MapGet("/__signout", async ctx =>
                 {
-                    throw new InvalidOperationException("No name identifier claim found for user or claim had no value.");
-                }
-
-                await context.Response.WriteAsync(userId.Value, context.RequestAborted);
-            }).RequireAuthorization();
-        };
-
-        await Host.InitializeAsync();
-
-        BrowserClient = Host.HttpClient;
+                    await ctx.SignOutAsync();
+                    ctx.Response.StatusCode = 204;
+                });
+            },
+            CancellationToken.None);
     }
+
+    private async Task InitializeServiceProvider(string identityProviderHostUri, X509Certificate2? signingCertificate = null) => SpHost = await KestrelTestHost.Create(output,
+            services =>
+            {
+                services.AddAuthentication(opt =>
+                    {
+                        opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                        opt.DefaultChallengeScheme = Saml2Defaults.Scheme;
+                    })
+                    .AddCookie()
+                    .AddSaml2(opt =>
+                    {
+                        opt.SPOptions.EntityId = new Sustainsys.Saml2.Metadata.EntityId("https://localhost:5001/Saml2");
+                        opt.SPOptions.WantAssertionsSigned = false;
+                        if (signingCertificate != null)
+                        {
+                            opt.SPOptions.ServiceCertificates.Add(signingCertificate);
+                        }
+
+                        opt.IdentityProviders.Add(
+                            new IdentityProvider(new Sustainsys.Saml2.Metadata.EntityId(identityProviderHostUri), opt.SPOptions)
+                            {
+                                LoadMetadata = true,
+                                MetadataLocation = $"{identityProviderHostUri}/saml/metadata",
+                                SingleSignOnServiceUrl = new Uri($"{identityProviderHostUri}/saml/signin"),
+                                WantAuthnRequestsSigned = signingCertificate != null
+                            });
+                    });
+                services.AddAuthorization();
+            },
+            app =>
+            {
+                app.UseRouting();
+                app.UseAuthentication();
+                app.UseAuthorization();
+
+                app.MapGet("/protected-resource", () => "Protected Resource").RequireAuthorization();
+
+                app.MapGet("/user-name-identifier", async context =>
+                {
+                    var userId = context.User.FindFirst(ClaimTypes.NameIdentifier);
+                    if (userId == null || string.IsNullOrWhiteSpace(userId.Value))
+                    {
+                        throw new InvalidOperationException("No name identifier claim found for user or claim had no value.");
+                    }
+
+                    await context.Response.WriteAsync(userId.Value, context.RequestAborted);
+                }).RequireAuthorization();
+            },
+            CancellationToken.None);
 
     public async ValueTask DisposeAsync()
     {
-        if (Host != null)
+        if (SpHost != null)
         {
-            // GenericHost doesn't implement IAsyncDisposable
-            await Task.CompletedTask;
+            await SpHost.DisposeAsync();
         }
 
-        await _samlFixture.DisposeAsync();
+        if (IdpHost != null)
+        {
+            await IdpHost.DisposeAsync();
+        }
     }
 }
