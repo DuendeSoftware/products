@@ -82,7 +82,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
                     return Invalid(request, error: OidcConstants.AuthorizeErrors.InvalidRequestUri, description: "request_uri is too long");
                 }
 
-                var jwt = await _jwtRequestUriHttpClient.GetJwtAsync(requestUri, request.Client);
+                var jwt = await _jwtRequestUriHttpClient.GetJwtAsync(requestUri, request.Client, ct);
                 if (jwt.IsMissing())
                 {
                     LogError("no value returned from request_uri", request);

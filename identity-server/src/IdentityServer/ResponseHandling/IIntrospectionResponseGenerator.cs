@@ -15,6 +15,7 @@ public interface IIntrospectionResponseGenerator
     /// Processes the response.
     /// </summary>
     /// <param name="validationResult">The validation result.</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult);
+    Task<Dictionary<string, object>> ProcessAsync(IntrospectionRequestValidationResult validationResult, CT ct);
 }

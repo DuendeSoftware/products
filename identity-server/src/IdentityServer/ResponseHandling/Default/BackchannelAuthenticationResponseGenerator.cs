@@ -118,7 +118,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
             Tenant = validationResult.ValidatedRequest.Tenant,
             IdP = validationResult.ValidatedRequest.IdP,
             Properties = validationResult.ValidatedRequest.Properties,
-        });
+        }, ct);
 
         return response;
     }

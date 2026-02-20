@@ -16,5 +16,7 @@ public interface IBackchannelAuthenticationUserNotificationService
     /// <summary>
     /// Sends a notification for the user to login.
     /// </summary>
-    Task SendLoginRequestAsync(BackchannelUserLoginRequest request);
+    /// <param name="request"></param>
+    /// <param name="ct"></param>
+    Task SendLoginRequestAsync(BackchannelUserLoginRequest request, CT ct);
 }

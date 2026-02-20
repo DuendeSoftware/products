@@ -23,7 +23,8 @@ public class DefaultUserCodeService : IUserCodeService
     /// Gets the user code generator.
     /// </summary>
     /// <param name="userCodeType">Type of user code.</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task<IUserCodeGenerator> GetGenerator(string userCodeType) =>
+    public Task<IUserCodeGenerator> GetGenerator(string userCodeType, CT ct) =>
         Task.FromResult(_generators.FirstOrDefault(x => x.UserCodeType == userCodeType));
 }

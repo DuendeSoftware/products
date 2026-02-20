@@ -152,7 +152,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
 
         // response generation
         _logger.LogTrace("Calling into introspection response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(validationResult);
+        var response = await _responseGenerator.ProcessAsync(validationResult, context.RequestAborted);
 
         // render result
         LogSuccess(validationResult.IsActive, callerName);

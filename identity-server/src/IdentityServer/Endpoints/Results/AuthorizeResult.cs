@@ -221,7 +221,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         var uiLocalesService = context.RequestServices.GetService<IUiLocalesService>();
         if (uiLocalesService != null)
         {
-            await uiLocalesService.StoreUiLocalesForRedirectAsync(response.Request?.UiLocales);
+            await uiLocalesService.StoreUiLocalesForRedirectAsync(response.Request?.UiLocales, context.RequestAborted);
         }
 
         var errorModel = await CreateErrorMessage(response, context);

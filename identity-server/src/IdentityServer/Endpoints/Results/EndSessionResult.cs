@@ -75,7 +75,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
         if (redirect.IsLocalUrl())
         {
             redirect = _urls.GetIdentityServerRelativeUrl(redirect);
-            await _localesService.StoreUiLocalesForRedirectAsync(result.Result.ValidatedRequest?.UiLocales);
+            await _localesService.StoreUiLocalesForRedirectAsync(result.Result.ValidatedRequest?.UiLocales, context.RequestAborted);
         }
 
         if (id != null)
