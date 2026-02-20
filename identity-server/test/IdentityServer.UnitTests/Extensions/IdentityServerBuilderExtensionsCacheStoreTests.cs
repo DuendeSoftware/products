@@ -16,7 +16,7 @@ public class IdentityServerBuilderExtensionsCacheStoreTests
         public Task<Client> FindClientByIdAsync(string clientId, CT _) => throw new System.NotImplementedException();
 
 #if NET10_0_OR_GREATER
-        public IAsyncEnumerable<Client> GetAllClientsAsync() => throw new System.NotImplementedException();
+        public IAsyncEnumerable<Client> GetAllClientsAsync(CT _) => throw new System.NotImplementedException();
 #endif
     }
 

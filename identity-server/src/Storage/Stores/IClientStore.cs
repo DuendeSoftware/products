@@ -23,6 +23,7 @@ public interface IClientStore
     /// <summary>
     /// Returns all clients for enumeration purposes (e.g., conformance assessment).
     /// </summary>
+    /// <param name="ct">The cancellation token</param>
     /// <returns>An async enumerable of all clients.</returns>
-    IAsyncEnumerable<Client> GetAllClientsAsync();
+    IAsyncEnumerable<Client> GetAllClientsAsync(CT ct);
 }

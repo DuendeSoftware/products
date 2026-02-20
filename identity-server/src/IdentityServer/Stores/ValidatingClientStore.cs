@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -80,10 +81,10 @@ public class ValidatingClientStore<T> : IClientStore
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<Client> GetAllClientsAsync()
+    public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.GetAllClients");
-        await foreach (var client in _inner.GetAllClientsAsync())
+        await foreach (var client in _inner.GetAllClientsAsync(ct))
         {
             _logger.LogTrace("Calling into client configuration validator: {validatorType}", _validatorType);
             var context = new ClientConfigurationValidationContext(client);

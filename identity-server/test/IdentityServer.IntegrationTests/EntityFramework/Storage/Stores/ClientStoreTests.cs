@@ -16,6 +16,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     public ClientStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -30,7 +32,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
     {
         await using var context = new ConfigurationDbContext(options);
         var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
-        var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString(), CancellationToken.None);
+        var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString(), _ct);
         client.ShouldBeNull();
     }
 
@@ -46,14 +48,14 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(testClient.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         Client client;
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
-            client = await store.FindClientByIdAsync(testClient.ClientId, CancellationToken.None);
+            client = await store.FindClientByIdAsync(testClient.ClientId, _ct);
         }
 
         client.ShouldNotBeNull();
@@ -80,14 +82,14 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         await using (var context = new ConfigurationDbContext(options))
         {
             context.Clients.Add(testClient.ToEntity());
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         Client client;
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
-            client = await store.FindClientByIdAsync(testClient.ClientId, CancellationToken.None);
+            client = await store.FindClientByIdAsync(testClient.ClientId, _ct);
         }
 
         client.ShouldSatisfyAllConditions(c =>
@@ -142,7 +144,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
                 }.ToEntity());
             }
 
-            context.SaveChanges();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new ConfigurationDbContext(options))
@@ -150,7 +152,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
 
             const int timeout = 5000;
-            var task = Task.Run(() => store.FindClientByIdAsync(testClient.ClientId, CancellationToken.None));
+            var task = Task.Run(() => store.FindClientByIdAsync(testClient.ClientId, _ct));
 
             if (await Task.WhenAny(task, Task.Delay(timeout)) == task)
             {
@@ -179,12 +181,12 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         var freshOptions = DatabaseProviderBuilder.BuildSqlite<ConfigurationDbContext, ConfigurationStoreOptions>(
             nameof(GetAllClientsAsync_WhenNoClientsExist_ExpectEmptyCollection), StoreOptions);
         await using var context = new ConfigurationDbContext(freshOptions);
-        context.Database.EnsureCreated();
+        await context.Database.EnsureCreatedAsync(_ct);
 
         var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
 
         var clients = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             clients.Add(client);
         }
@@ -209,7 +211,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             {
                 context.Clients.Add(client.ToEntity());
             }
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(_ct);
         }
 
         await using (var context = new ConfigurationDbContext(options))
@@ -217,7 +219,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
 
             var clients = new List<Client>();
-            await foreach (var client in store.GetAllClientsAsync())
+            await foreach (var client in store.GetAllClientsAsync(_ct))
             {
                 clients.Add(client);
             }
@@ -259,7 +261,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
 
             var clients = new List<Client>();
-            await foreach (var c in store.GetAllClientsAsync())
+            await foreach (var c in store.GetAllClientsAsync(_ct))
             {
                 clients.Add(c);
             }
