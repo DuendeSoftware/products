@@ -227,7 +227,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         var errorModel = await CreateErrorMessage(response, context);
 
         var message = new Message<ErrorMessage>(errorModel, _timeProvider.GetUtcNow().UtcDateTime);
-        var id = await _errorMessageStore.WriteAsync(message);
+        var id = await _errorMessageStore.WriteAsync(message, context.RequestAborted);
 
         var errorUrl = _options.UserInteraction.ErrorUrl;
 

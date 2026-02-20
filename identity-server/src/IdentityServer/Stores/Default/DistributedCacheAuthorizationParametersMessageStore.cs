@@ -31,7 +31,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     private static string CacheKeyPrefix => "DistributedCacheAuthorizationParametersMessageStore";
 
     /// <inheritdoc/>
-    public virtual async Task<string> WriteAsync(Message<IDictionary<string, string[]>> message)
+    public virtual async Task<string> WriteAsync(Message<IDictionary<string, string[]>> message, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Write");
 
@@ -49,18 +49,18 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
         var options = new DistributedCacheEntryOptions();
         options.SetSlidingExpiration(Constants.DefaultCacheDuration);
 
-        await _distributedCache.SetStringAsync(cacheKey, json, options);
+        await _distributedCache.SetStringAsync(cacheKey, json, options, ct);
 
         return key;
     }
 
     /// <inheritdoc/>
-    public virtual async Task<Message<IDictionary<string, string[]>>> ReadAsync(string id)
+    public virtual async Task<Message<IDictionary<string, string[]>>> ReadAsync(string id, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Read");
 
         var cacheKey = $"{CacheKeyPrefix}-{id}";
-        var json = await _distributedCache.GetStringAsync(cacheKey);
+        var json = await _distributedCache.GetStringAsync(cacheKey, ct);
 
         if (json == null)
         {
@@ -71,11 +71,11 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
     }
 
     /// <inheritdoc/>
-    public virtual Task DeleteAsync(string id)
+    public virtual Task DeleteAsync(string id, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DistributedCacheAuthorizationParametersMessageStore.Delete");
 
         var cacheKey = $"{CacheKeyPrefix}-{id}";
-        return _distributedCache.RemoveAsync(cacheKey);
+        return _distributedCache.RemoveAsync(cacheKey, ct);
     }
 }

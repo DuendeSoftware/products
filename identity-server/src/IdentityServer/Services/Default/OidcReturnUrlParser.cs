@@ -48,7 +48,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
             if (_authorizationParametersMessageStore != null)
             {
                 var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
-                var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId);
+                var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId, default);
                 parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
             }
 
