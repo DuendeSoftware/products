@@ -14,7 +14,8 @@ public interface IHandleGenerationService
     /// <summary>
     /// Generates a handle.
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <param name="length">The length.</param>
     /// <returns></returns>
-    Task<string> GenerateAsync(int length = 32);
+    Task<string> GenerateAsync(CT ct, int length = 32);
 }

@@ -36,7 +36,7 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.CreateRequest");
 
-        var handle = await CreateHandleAsync();
+        var handle = await CreateHandleAsync(ct);
         request.InternalId = GetHashedKey(handle);
         await StoreItemByHashedKeyAsync(request.InternalId, request, request.ClientId, request.Subject.GetSubjectId(), null, null, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime), ct: ct);
         return handle;

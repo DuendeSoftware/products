@@ -81,7 +81,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         var request = new ValidatedAuthorizeRequest
         {
             Options = _options,
-            IssuerName = await _issuerNameService.GetCurrentAsync(),
+            IssuerName = await _issuerNameService.GetCurrentAsync(default),
             Subject = subject ?? Principal.Anonymous,
             Raw = parameters ?? throw new ArgumentNullException(nameof(parameters)),
             AuthorizeRequestType = authorizeRequestType

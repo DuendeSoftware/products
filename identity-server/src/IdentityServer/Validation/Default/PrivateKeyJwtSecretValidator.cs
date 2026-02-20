@@ -124,7 +124,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             ValidAlgorithms = _options.SupportedClientAssertionSigningAlgorithms
         };
 
-        var issuer = await _issuerNameService.GetCurrentAsync();
+        var issuer = await _issuerNameService.GetCurrentAsync(default);
 
         if (enforceStrictAud)
         {
@@ -153,7 +153,7 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
                 // token endpoint URL
                 string.Concat(_urls.BaseUrl.EnsureTrailingSlash(), ProtocolRoutePaths.Token),
                 // issuer URL + token (legacy support)
-                string.Concat((await _issuerNameService.GetCurrentAsync()).EnsureTrailingSlash(), ProtocolRoutePaths.Token),
+                string.Concat((await _issuerNameService.GetCurrentAsync(default)).EnsureTrailingSlash(), ProtocolRoutePaths.Token),
                 // issuer URL
                 issuer,
                 // CIBA endpoint: https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html#auth_request
@@ -193,14 +193,14 @@ public class PrivateKeyJwtSecretValidator : ISecretValidator
             return fail;
         }
 
-        if (await _replayCache.ExistsAsync(Purpose, jti))
+        if (await _replayCache.ExistsAsync(Purpose, jti, default))
         {
             _logger.LogError("jti is found in replay cache. Possible replay attack.");
             return fail;
         }
         else
         {
-            await _replayCache.AddAsync(Purpose, jti, exp.AddMinutes(5));
+            await _replayCache.AddAsync(Purpose, jti, exp.AddMinutes(5), default);
         }
 
         return success;

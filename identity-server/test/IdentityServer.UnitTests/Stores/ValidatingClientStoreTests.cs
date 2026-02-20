@@ -201,7 +201,7 @@ public class ValidatingClientStoreTests
 
         public bool CanRaiseEventType(EventTypes evtType) => true;
 
-        public Task RaiseAsync(Event evt)
+        public Task RaiseAsync(Event evt, CT ct)
         {
             RaisedEventCount++;
             return Task.CompletedTask;

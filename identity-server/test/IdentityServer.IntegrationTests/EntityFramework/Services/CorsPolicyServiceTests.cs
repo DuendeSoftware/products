@@ -15,6 +15,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Services;
 
 public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     public CorsPolicyServiceTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -50,7 +52,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         await using (var context = new ConfigurationDbContext(options))
         {
             var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
-            result = await service.IsOriginAllowedAsync(testCorsOrigin);
+            result = await service.IsOriginAllowedAsync(testCorsOrigin, _ct);
         }
 
         result.ShouldBeTrue();
@@ -74,7 +76,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         await using (var context = new ConfigurationDbContext(options))
         {
             var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
-            result = await service.IsOriginAllowedAsync("InvalidOrigin");
+            result = await service.IsOriginAllowedAsync("InvalidOrigin", _ct);
         }
 
         result.ShouldBeFalse();

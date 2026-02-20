@@ -92,7 +92,8 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
                 "Request validation failed",
                 result.ValidatedRequest,
                 result.Error,
-                result.ErrorDescription);
+                result.ErrorDescription,
+                ct: ct);
         }
 
         string consentRequestId = null;
@@ -109,7 +110,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
                 if (consent != null && consent.Data == null)
                 {
-                    return await CreateErrorResultAsync("consent message is missing data", result.ValidatedRequest);
+                    return await CreateErrorResultAsync("consent message is missing data", result.ValidatedRequest, ct: ct);
                 }
             }
 
@@ -120,7 +121,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
             var interactionResult = await _interactionGenerator.ProcessInteractionAsync(request, consent?.Data, ct);
             if (interactionResult.ResponseType == InteractionResponseType.Error)
             {
-                return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error, interactionResult.ErrorDescription, false);
+                return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error, interactionResult.ErrorDescription, false, ct);
             }
 
             if (interactionResult.ResponseType == InteractionResponseType.UserInteraction)
@@ -145,7 +146,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
             var response = await _authorizeResponseGenerator.CreateResponseAsync(request, ct);
 
-            await RaiseResponseEventAsync(response);
+            await RaiseResponseEventAsync(response, ct);
 
             LogResponse(response);
 
@@ -165,7 +166,8 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         ValidatedAuthorizeRequest request = null,
         string error = OidcConstants.AuthorizeErrors.ServerError,
         string errorDescription = null,
-        bool logError = true)
+        bool logError = true,
+        CT ct = default)
     {
         if (logError)
         {
@@ -181,7 +183,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         }
 
         // TODO: should we raise a token failure event for all errors to the authorize endpoint?
-        await RaiseFailureEventAsync(request, error, errorDescription);
+        await RaiseFailureEventAsync(request, error, errorDescription, ct);
 
         return new AuthorizeResult(new AuthorizeResponse
         {
@@ -223,17 +225,17 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         }
     }
 
-    private Task RaiseFailureEventAsync(ValidatedAuthorizeRequest request, string error, string errorDescription)
+    private Task RaiseFailureEventAsync(ValidatedAuthorizeRequest request, string error, string errorDescription, CT ct)
     {
         Telemetry.Metrics.TokenIssuedFailure(
             request.ClientId,
             request.GrantType,
             request.AuthorizeRequestType,
             error);
-        return _events.RaiseAsync(new TokenIssuedFailureEvent(request, error, errorDescription));
+        return _events.RaiseAsync(new TokenIssuedFailureEvent(request, error, errorDescription), ct);
     }
 
-    private Task RaiseResponseEventAsync(AuthorizeResponse response)
+    private Task RaiseResponseEventAsync(AuthorizeResponse response, CT ct)
     {
         if (!response.IsError)
         {
@@ -247,9 +249,9 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
                 false,
                 ProofType.None,
                 response.IdentityToken.IsPresent());
-            return _events.RaiseAsync(new TokenIssuedSuccessEvent(response));
+            return _events.RaiseAsync(new TokenIssuedSuccessEvent(response), ct);
         }
 
-        return RaiseFailureEventAsync(response.Request, response.Error, response.ErrorDescription);
+        return RaiseFailureEventAsync(response.Request, response.Error, response.ErrorDescription, ct);
     }
 }

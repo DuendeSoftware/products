@@ -86,7 +86,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
 
         if (requestResult.IsError)
         {
-            await _events.RaiseAsync(new BackchannelAuthenticationFailureEvent(requestResult));
+            await _events.RaiseAsync(new BackchannelAuthenticationFailureEvent(requestResult), context.RequestAborted);
             Telemetry.Metrics.BackChannelAuthenticationFailure(clientResult.Client?.ClientId, requestResult.Error);
             return Error(requestResult.Error, requestResult.ErrorDescription);
         }
@@ -95,7 +95,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
         _logger.LogTrace("Calling into backchannel authentication request response generator: {type}", _responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
-        await _events.RaiseAsync(new BackchannelAuthenticationSuccessEvent(requestResult));
+        await _events.RaiseAsync(new BackchannelAuthenticationSuccessEvent(requestResult), context.RequestAborted);
         Telemetry.Metrics.BackChannelAuthentication(clientResult.Client.ClientId);
         LogResponse(response, requestResult);
 

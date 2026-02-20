@@ -48,7 +48,8 @@ public class CachingClientStore<T> : IClientStore
 
         var client = await _cache.GetOrAddAsync(clientId,
             _options.Caching.ClientStoreExpiration,
-            async () => await _inner.FindClientByIdAsync(clientId, ct));
+            async () => await _inner.FindClientByIdAsync(clientId, ct),
+            ct);
 
         return client;
     }

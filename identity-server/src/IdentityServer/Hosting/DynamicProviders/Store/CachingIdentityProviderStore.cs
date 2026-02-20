@@ -51,18 +51,19 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct = default)
+    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingIdentityProviderStore.GetAllSchemeNames");
 
         var result = await _allCache.GetOrAddAsync("__all__",
             _options.Caching.IdentityProviderCacheDuration,
-            async () => await _inner.GetAllSchemeNamesAsync(ct));
+            async () => await _inner.GetAllSchemeNamesAsync(ct),
+            ct);
         return result;
     }
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct = default)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingIdentityProviderStore.GetByScheme");
 
@@ -82,7 +83,8 @@ public class CachingIdentityProviderStore<T> : IIdentityProviderStore
                 var item = await _inner.GetBySchemeAsync(scheme, ct);
                 RemoveCacheEntry(item);
                 return item;
-            });
+            },
+            ct);
         return result;
     }
 

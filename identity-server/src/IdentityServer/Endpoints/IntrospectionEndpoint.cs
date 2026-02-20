@@ -128,7 +128,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         {
             _logger.LogError("Malformed request body. aborting.");
             const string error = "Malformed request body";
-            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, error));
+            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, error), context.RequestAborted);
             Telemetry.Metrics.IntrospectionFailure(callerName, error);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
@@ -145,7 +145,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         if (validationResult.IsError)
         {
             LogFailure(validationResult.Error, callerName);
-            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, validationResult.Error));
+            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, validationResult.Error), context.RequestAborted);
             Telemetry.Metrics.IntrospectionFailure(callerName, validationResult.Error);
             return new BadRequestResult(validationResult.Error);
         }

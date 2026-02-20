@@ -56,7 +56,7 @@ internal class DiscoveryEndpoint : BaseDiscoveryEndpoint, IEndpointHandler
         }
 
         var baseUrl = _urls.BaseUrl;
-        var issuerUri = await _issuerNameService.GetCurrentAsync();
+        var issuerUri = await _issuerNameService.GetCurrentAsync(context.RequestAborted);
 
         // generate response
         _logger.LogTrace("Calling into discovery response generator: {type}", ResponseGenerator.GetType().FullName);

@@ -70,7 +70,7 @@ public class ValidatingClientStore<T> : IClientStore
 
             _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
             Telemetry.Metrics.ClientValidationFailure(clientId, context.ErrorMessage);
-            await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage));
+            await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage), ct);
 
             return null;
         }
@@ -99,7 +99,7 @@ public class ValidatingClientStore<T> : IClientStore
             {
                 _logger.LogError("Invalid client configuration for client {clientId}: {errorMessage}", client.ClientId, context.ErrorMessage);
                 Telemetry.Metrics.ClientValidationFailure(client.ClientId, context.ErrorMessage);
-                await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage));
+                await _events.RaiseAsync(new InvalidClientConfigurationEvent(client, context.ErrorMessage), ct);
                 // Skip invalid clients - do not yield
             }
         }

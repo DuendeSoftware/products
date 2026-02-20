@@ -88,7 +88,8 @@ public class CachingResourceStore<T> : IResourceStore
 
         var all = await _allCache.GetOrAddAsync(key,
             _options.Caching.ResourceStoreExpiration,
-            async () => await _inner.GetAllResourcesAsync(ct));
+            async () => await _inner.GetAllResourcesAsync(ct),
+            ct);
 
         return all;
     }
@@ -103,7 +104,7 @@ public class CachingResourceStore<T> : IResourceStore
         var uncachedScopes = new List<string>();
         foreach (var scope in scopeNames)
         {
-            var apiResourceName = await _apiResourceNames.GetAsync(scope);
+            var apiResourceName = await _apiResourceNames.GetAsync(scope, ct);
             if (apiResourceName != null)
             {
                 foreach (var name in apiResourceName.Names)
@@ -135,7 +136,7 @@ public class CachingResourceStore<T> : IResourceStore
             {
                 var results = await _inner.FindApiResourcesByScopeNameAsync(uncachedScopes, ct);
                 return new Resources(null, results, null);
-            });
+            }, ct);
 
             // get the specific items from the Resources object
             var uncachedItems = resources.ApiResources;
@@ -145,14 +146,14 @@ public class CachingResourceStore<T> : IResourceStore
             {
                 var names = uncachedItems.Where(x => x.Scopes.Contains(scope)).Select(x => x.Name).ToArray();
                 var apiResourceNamesCacheItem = new ApiResourceNames { Names = names };
-                await _apiResourceNames.SetAsync(scope, apiResourceNamesCacheItem, _options.Caching.ResourceStoreExpiration);
+                await _apiResourceNames.SetAsync(scope, apiResourceNamesCacheItem, _options.Caching.ResourceStoreExpiration, ct);
             }
 
             // add each one to the specific cache
             foreach (var item in uncachedItems)
             {
                 // this adds to the ApiResource cache in the same way when FindApiResourcesByNameAsync is used
-                await _apiResourceCache.SetAsync(item.Name, item, _options.Caching.ResourceStoreExpiration);
+                await _apiResourceCache.SetAsync(item.Name, item, _options.Caching.ResourceStoreExpiration, ct);
 
                 // add this name
                 apiResourceNames.Add(item.Name);
@@ -213,7 +214,7 @@ public class CachingResourceStore<T> : IResourceStore
         var cachedItems = new List<TItem>();
         foreach (var name in names)
         {
-            var item = await cache.GetAsync(name);
+            var item = await cache.GetAsync(name, ct);
             if (item != null)
             {
                 cachedItems.Add(item);
@@ -238,14 +239,14 @@ public class CachingResourceStore<T> : IResourceStore
             // expire this entry much faster than the normal items
             var itemsDuration = _options.Caching.ResourceStoreExpiration / 20;
             // do the cache/DB lookup
-            var resources = await _allCache.GetOrAddAsync(allCacheItemsKey, itemsDuration, async () => await getResourcesFunc(uncachedNames, ct));
+            var resources = await _allCache.GetOrAddAsync(allCacheItemsKey, itemsDuration, async () => await getResourcesFunc(uncachedNames, ct), ct);
 
             // get the specific items from the Resources object
             var uncachedItems = getFromResourcesFunc(resources);
             // add each one to the specific cache
             foreach (var item in uncachedItems)
             {
-                await cache.SetAsync(getNameFunc(item), item, _options.Caching.ResourceStoreExpiration);
+                await cache.SetAsync(getNameFunc(item), item, _options.Caching.ResourceStoreExpiration, ct);
             }
 
             // add these to our result

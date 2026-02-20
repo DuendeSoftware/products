@@ -124,7 +124,7 @@ internal class TokenEndpoint : IEndpointHandler
             }
             else
             {
-                await _events.RaiseAsync(new TokenIssuedFailureEvent(requestResult));
+                await _events.RaiseAsync(new TokenIssuedFailureEvent(requestResult), context.RequestAborted);
             }
 
             Telemetry.Metrics.TokenIssuedFailure(
@@ -138,7 +138,7 @@ internal class TokenEndpoint : IEndpointHandler
         _logger.LogTrace("Calling into token request response generator: {type}", _responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
-        await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
+        await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult), context.RequestAborted);
 
         Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null,
             response.AccessToken.IsPresent(), response.AccessTokenType.IsPresent() ? requestResult.ValidatedRequest.AccessTokenType : null, response.RefreshToken.IsPresent(),

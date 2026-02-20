@@ -115,7 +115,7 @@ public class IdentityServerTools : IIdentityServerTools
     /// <inheritdoc/>
     public virtual async Task<string> IssueJwtAsync(int lifetime, IEnumerable<Claim> claims)
     {
-        var issuer = await _issuerNameService.GetCurrentAsync();
+        var issuer = await _issuerNameService.GetCurrentAsync(default);
         return await IssueJwtAsync(lifetime, issuer, claims);
     }
 
@@ -178,7 +178,7 @@ public class IdentityServerTools : IIdentityServerTools
             claims.Add(new Claim(
                 JwtClaimTypes.Audience,
 #pragma warning disable CA1863 // Would require changing a public const on a public class and be a breaking change
-                string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync()).EnsureTrailingSlash())));
+                string.Format(CultureInfo.InvariantCulture, IdentityServerConstants.AccessTokenAudience, (await _issuerNameService.GetCurrentAsync(default)).EnsureTrailingSlash())));
 #pragma warning restore CA1863
         }
 

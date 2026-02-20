@@ -62,7 +62,7 @@ internal class OAuthMetadataEndpoint(
             serverUrls.BasePath = issuerSubPath;
         }
 
-        var issuerUri = await issuerNameService.GetCurrentAsync();
+        var issuerUri = await issuerNameService.GetCurrentAsync(context.RequestAborted);
         var baseUrl = serverUrls.BaseUrl;
 
         if (!issuerUri.Equals($"{context.Request.Scheme}://{context.Request.Host}{issuerSubPath}", StringComparison.Ordinal))

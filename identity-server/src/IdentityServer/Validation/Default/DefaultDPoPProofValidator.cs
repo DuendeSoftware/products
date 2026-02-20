@@ -383,7 +383,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
     /// </summary>
     protected virtual async Task ValidateReplayAsync(DPoPProofValidatonContext context, DPoPProofValidatonResult result)
     {
-        if (await ReplayCache.ExistsAsync(ReplayCachePurpose, result.TokenId))
+        if (await ReplayCache.ExistsAsync(ReplayCachePurpose, result.TokenId, default))
         {
             Logger.LogDebug("Detected DPoP proof token replay for jti {jti}", result.TokenId);
             result.IsError = true;
@@ -410,7 +410,7 @@ public class DefaultDPoPProofValidator : IDPoPProofValidator
 
         Logger.LogDebug("Adding proof token with jti {jti} to replay cache for duration {cacheDuration}", result.TokenId, cacheDuration);
 
-        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, TimeProvider.GetUtcNow().Add(cacheDuration));
+        await ReplayCache.AddAsync(ReplayCachePurpose, result.TokenId, TimeProvider.GetUtcNow().Add(cacheDuration), default);
     }
 
     /// <summary>

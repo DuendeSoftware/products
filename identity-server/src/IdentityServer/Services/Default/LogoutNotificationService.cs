@@ -55,7 +55,7 @@ public class LogoutNotificationService : ILogoutNotificationService
                         if (client.FrontChannelLogoutSessionRequired)
                         {
                             url = url.AddQueryString(OidcConstants.EndSessionRequest.Sid, context.SessionId);
-                            url = url.AddQueryString(OidcConstants.EndSessionRequest.Issuer, await _issuerNameService.GetCurrentAsync());
+                            url = url.AddQueryString(OidcConstants.EndSessionRequest.Issuer, await _issuerNameService.GetCurrentAsync(ct));
                         }
                     }
                     else if (client.ProtocolType == IdentityServerConstants.ProtocolTypes.WsFederation)

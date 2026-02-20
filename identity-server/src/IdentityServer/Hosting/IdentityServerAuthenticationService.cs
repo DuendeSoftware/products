@@ -105,7 +105,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
                             SessionId = await _session.GetSessionIdAsync(),
                             DisplayName = user.GetDisplayName(),
                             ClientIds = (await _session.GetClientListAsync()).ToList(),
-                            Issuer = await _issuerNameService.GetCurrentAsync()
+                            Issuer = await _issuerNameService.GetCurrentAsync(context.RequestAborted)
                         };
                         await _sessionCoordinationService.ProcessLogoutAsync(session, context.RequestAborted);
                     }

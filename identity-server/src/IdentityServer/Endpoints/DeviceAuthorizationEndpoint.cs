@@ -93,7 +93,7 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
 
         if (requestResult.IsError)
         {
-            await _events.RaiseAsync(new DeviceAuthorizationFailureEvent(requestResult));
+            await _events.RaiseAsync(new DeviceAuthorizationFailureEvent(requestResult), context.RequestAborted);
             Telemetry.Metrics.DeviceAuthenticationFailure(clientResult.Client.ClientId, requestResult.Error);
             return Error(requestResult.Error, requestResult.ErrorDescription);
         }
@@ -102,7 +102,7 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
         _logger.LogTrace("Calling into device authorize response generator: {type}", _responseGenerator.GetType().FullName);
         var response = await _responseGenerator.ProcessAsync(requestResult, _urls.BaseUrl, context.RequestAborted);
 
-        await _events.RaiseAsync(new DeviceAuthorizationSuccessEvent(response, requestResult));
+        await _events.RaiseAsync(new DeviceAuthorizationSuccessEvent(response, requestResult), context.RequestAborted);
         Telemetry.Metrics.DeviceAuthentication(clientResult.Client.ClientId);
 
         // return result
