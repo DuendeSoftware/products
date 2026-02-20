@@ -40,7 +40,7 @@ public class TokenRequestValidation_Invalid
         });
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 

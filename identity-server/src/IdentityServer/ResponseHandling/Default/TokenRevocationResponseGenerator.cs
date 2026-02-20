@@ -127,14 +127,14 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     /// </summary>
     protected virtual async Task<bool> RevokeRefreshTokenAsync(TokenRevocationRequestValidationResult validationResult)
     {
-        var token = await RefreshTokenStore.GetRefreshTokenAsync(validationResult.Token);
+        var token = await RefreshTokenStore.GetRefreshTokenAsync(validationResult.Token, default);
 
         if (token != null)
         {
             if (token.ClientId == validationResult.Client.ClientId)
             {
                 Logger.LogDebug("Refresh token revoked");
-                await RefreshTokenStore.RemoveRefreshTokenAsync(validationResult.Token);
+                await RefreshTokenStore.RemoveRefreshTokenAsync(validationResult.Token, default);
                 await ReferenceTokenStore.RemoveReferenceTokensAsync(token.SubjectId, token.ClientId, token.SessionId, default);
             }
             else

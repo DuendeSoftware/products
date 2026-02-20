@@ -272,7 +272,7 @@ public class TokenRequestValidation_Valid
         });
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
@@ -304,7 +304,7 @@ public class TokenRequestValidation_Valid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted_refresh", _ct);
 
