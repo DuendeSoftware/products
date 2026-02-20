@@ -55,7 +55,7 @@ public class DefaultResourceValidator : IResourceValidator
 
         var scopeNames = parsedScopesResult.ParsedScopes.Select(x => x.ParsedName).Distinct().ToArray();
         // todo: this API might want to pass resource indicators to better filter
-        var scopeResourcesFromStore = await _store.FindEnabledResourcesByScopeAsync(scopeNames);
+        var scopeResourcesFromStore = await _store.FindEnabledResourcesByScopeAsync(scopeNames, default);
 
         if (request.ResourceIndicators?.Any() == true)
         {

@@ -11,6 +11,8 @@ namespace UnitTests.Stores.Default;
 
 public class CachingResourceStoreTests
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     private List<IdentityResource> _identityResources = new List<IdentityResource>();
     private List<ApiResource> _apiResources = new List<ApiResource>();
     private List<ApiScope> _apiScopes = new List<ApiScope>();
@@ -48,7 +50,7 @@ public class CachingResourceStoreTests
 
         _scopeCache.Items.Count.ShouldBe(0);
 
-        var items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope1", "scope2", "invalid" });
+        var items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope1", "scope2", "invalid" }, _ct);
         items.Count().ShouldBe(3);
 
         _scopeCache.Items.Count.ShouldBe(3);
@@ -64,23 +66,23 @@ public class CachingResourceStoreTests
 
         _scopeCache.Items.Count.ShouldBe(0);
 
-        var items = await _subject.FindApiScopesByNameAsync(new[] { "scope1" });
+        var items = await _subject.FindApiScopesByNameAsync(new[] { "scope1" }, _ct);
         items.Count().ShouldBe(1);
         _scopeCache.Items.Count.ShouldBe(1);
 
         _apiScopes.Remove(_apiScopes.Single(x => x.Name == "scope1"));
-        items = await _subject.FindApiScopesByNameAsync(new[] { "scope1", "scope2" });
+        items = await _subject.FindApiScopesByNameAsync(new[] { "scope1", "scope2" }, _ct);
         items.Count().ShouldBe(2);
         _scopeCache.Items.Count.ShouldBe(2);
 
         _apiScopes.Remove(_apiScopes.Single(x => x.Name == "scope2"));
-        items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope2", "scope4" });
+        items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope2", "scope4" }, _ct);
         items.Count().ShouldBe(3);
         _scopeCache.Items.Count.ShouldBe(4);
 
         // this shows we will find it in the cache, even if removed from the DB
         _apiScopes.Remove(_apiScopes.Single(x => x.Name == "scope3"));
-        items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope1", "scope2" });
+        items = await _subject.FindApiScopesByNameAsync(new[] { "scope3", "scope1", "scope2" }, _ct);
         items.Count().ShouldBe(3);
         _scopeCache.Items.Count.ShouldBe(4);
     }
@@ -98,7 +100,7 @@ public class CachingResourceStoreTests
         {
             _apiCache.Items.Count.ShouldBe(0);
             _apiResourceNamesCache.Items.Count.ShouldBe(0);
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "invalid" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "invalid" }, _ct);
             items.Count().ShouldBe(0);
             _apiCache.Items.Count.ShouldBe(0);
             _apiResourceNamesCache.Items.Count.ShouldBe(1);
@@ -111,7 +113,7 @@ public class CachingResourceStoreTests
 
             _apiCache.Items.Count.ShouldBe(0);
             _apiResourceNamesCache.Items.Count.ShouldBe(0);
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo1" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo1" }, _ct);
             items.Count().ShouldBe(1);
             items.Select(x => x.Name).ShouldBe(new[] { "foo" });
             _apiCache.Items.Count.ShouldBe(1);
@@ -119,7 +121,7 @@ public class CachingResourceStoreTests
         }
 
         {
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2" }, _ct);
             items.Count().ShouldBe(1);
             items.Select(x => x.Name).ShouldBe(["foo"]);
             _apiCache.Items.Count.ShouldBe(1);
@@ -127,7 +129,7 @@ public class CachingResourceStoreTests
         }
 
         {
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo1", "bar1" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo1", "bar1" }, _ct);
             items.Count().ShouldBe(2);
             items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
@@ -135,7 +137,7 @@ public class CachingResourceStoreTests
         }
 
         {
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" }, _ct);
             items.Count().ShouldBe(2);
             items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
@@ -147,7 +149,7 @@ public class CachingResourceStoreTests
             _apiResourceNamesCache.Items.Clear();
             _resourceCache.Items.Clear();
 
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" }, _ct);
             items.Count().ShouldBe(2);
             items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
@@ -160,7 +162,7 @@ public class CachingResourceStoreTests
             _apiScopes.Clear();
             _identityResources.Clear();
 
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo2", "foo1", "bar2", "bar1" }, _ct);
             items.Count().ShouldBe(2);
             items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
             _apiCache.Items.Count.ShouldBe(2);
@@ -179,12 +181,12 @@ public class CachingResourceStoreTests
         _apiScopes.Add(new ApiScope("bar1"));
 
         {
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo", "foo1", "bar", "bar1" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo", "foo1", "bar", "bar1" }, _ct);
             items.Count().ShouldBe(2);
             items.Select(x => x.Name).ShouldBe(["foo", "bar"], true);
         }
         {
-            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo", "foo1", "bar", "bar1" });
+            var items = await _subject.FindApiResourcesByScopeNameAsync(new[] { "foo", "foo1", "bar", "bar1" }, _ct);
             items.Count().ShouldBe(2);
             items.Select(x => x.Name).ShouldBe(["foo", "bar"]);
         }

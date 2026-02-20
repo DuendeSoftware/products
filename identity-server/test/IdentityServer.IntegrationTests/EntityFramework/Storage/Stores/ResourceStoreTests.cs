@@ -16,6 +16,8 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework.Storage.Stores;
 
 public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbContext, ConfigurationStoreOptions>
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     public ScopeStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture) : base(fixture)
     {
         foreach (var options in TestDatabaseProviders)
@@ -76,7 +78,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
-            foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name })).SingleOrDefault();
+            foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name }, _ct)).SingleOrDefault();
         }
 
         foundResource.ShouldNotBeNull();
@@ -105,7 +107,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
-            foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name })).SingleOrDefault();
+            foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name }, _ct)).SingleOrDefault();
         }
 
         foundResource.ShouldNotBeNull();
@@ -140,7 +142,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             resources = await store.FindApiResourcesByScopeNameAsync(new List<string>
             {
                 testApiScope.Name
-            });
+            }, _ct);
         }
 
         resources.ShouldNotBeNull();
@@ -171,7 +173,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
-            resources = await store.FindApiResourcesByScopeNameAsync(new[] { testApiScope.Name });
+            resources = await store.FindApiResourcesByScopeNameAsync(new[] { testApiScope.Name }, _ct);
         }
 
         resources.ShouldNotBeNull();
@@ -197,7 +199,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             resources = (await store.FindIdentityResourcesByScopeNameAsync(new List<string>
             {
                 resource.Name
-            })).ToList();
+            }, _ct)).ToList();
         }
 
         resources.ShouldNotBeNull();
@@ -228,7 +230,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             resources = (await store.FindIdentityResourcesByScopeNameAsync(new List<string>
             {
                 resource.Name
-            })).ToList();
+            }, _ct)).ToList();
         }
 
         resources.ShouldNotBeNull();
@@ -254,7 +256,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             resources = (await store.FindApiScopesByNameAsync(new List<string>
             {
                 resource.Name
-            })).ToList();
+            }, _ct)).ToList();
         }
 
         resources.ShouldNotBeNull();
@@ -285,7 +287,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
             resources = (await store.FindApiScopesByNameAsync(new List<string>
             {
                 resource.Name
-            })).ToList();
+            }, _ct)).ToList();
         }
 
         resources.ShouldNotBeNull();
@@ -329,7 +331,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
-            resources = await store.GetAllResourcesAsync();
+            resources = await store.GetAllResourcesAsync(_ct);
         }
 
         resources.ShouldNotBeNull();

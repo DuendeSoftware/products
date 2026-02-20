@@ -43,7 +43,7 @@ public class Index : PageModel
             var client = await _clients.FindClientByIdAsync(grant.ClientId, HttpContext.RequestAborted);
             if (client != null)
             {
-                var resources = await _resources.FindResourcesByScopeAsync(grant.Scopes);
+                var resources = await _resources.FindResourcesByScopeAsync(grant.Scopes, HttpContext.RequestAborted);
 
                 var item = new GrantViewModel()
                 {

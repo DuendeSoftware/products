@@ -52,8 +52,9 @@ public class ResourceStore : IResourceStore
     /// Finds the API resources by name.
     /// </summary>
     /// <param name="apiResourceNames">The names.</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames)
+    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByName");
         activity?.SetTag(Tracing.Properties.ApiResourceNames, apiResourceNames.ToSpaceSeparatedString());
@@ -72,7 +73,7 @@ public class ResourceStore : IResourceStore
             .Include(x => x.Properties)
             .AsNoTracking();
 
-        var result = (await apis.ToArrayAsync(CancellationTokenProvider.CancellationToken))
+        var result = (await apis.ToArrayAsync(ct))
             .Where(x => apiResourceNames.Contains(x.Name))
             .Select(x => x.ToModel()).ToArray();
 
@@ -92,8 +93,9 @@ public class ResourceStore : IResourceStore
     /// Gets API resources by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
+    public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -112,7 +114,7 @@ public class ResourceStore : IResourceStore
             .Include(x => x.Properties)
             .AsNoTracking();
 
-        var results = (await apis.ToArrayAsync(CancellationTokenProvider.CancellationToken))
+        var results = (await apis.ToArrayAsync(ct))
             .Where(api => api.Scopes.Any(x => names.Contains(x.Scope)));
         var models = results.Select(x => x.ToModel()).ToArray();
 
@@ -125,8 +127,9 @@ public class ResourceStore : IResourceStore
     /// Gets identity resources by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
+    public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindIdentityResourcesByScopeName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -143,7 +146,7 @@ public class ResourceStore : IResourceStore
             .Include(x => x.Properties)
             .AsNoTracking();
 
-        var results = (await resources.ToArrayAsync(CancellationTokenProvider.CancellationToken))
+        var results = (await resources.ToArrayAsync(ct))
             .Where(x => scopes.Contains(x.Name));
 
         Logger.LogDebug("Found {scopes} identity scopes in database", results.Select(x => x.Name));
@@ -155,8 +158,9 @@ public class ResourceStore : IResourceStore
     /// Gets scopes by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
+    public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.FindApiScopesByName");
         activity?.SetTag(Tracing.Properties.ScopeNames, scopeNames.ToSpaceSeparatedString());
@@ -173,7 +177,7 @@ public class ResourceStore : IResourceStore
             .Include(x => x.Properties)
             .AsNoTracking();
 
-        var results = (await resources.ToArrayAsync(CancellationTokenProvider.CancellationToken))
+        var results = (await resources.ToArrayAsync(ct))
             .Where(x => scopes.Contains(x.Name));
 
         Logger.LogDebug("Found {scopes} scopes in database", results.Select(x => x.Name));
@@ -185,7 +189,7 @@ public class ResourceStore : IResourceStore
     /// Gets all resources.
     /// </summary>
     /// <returns></returns>
-    public virtual async Task<Resources> GetAllResourcesAsync()
+    public virtual async Task<Resources> GetAllResourcesAsync(CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ResourceStore.GetAllResources");
 
@@ -207,9 +211,9 @@ public class ResourceStore : IResourceStore
             .AsNoTracking();
 
         var result = new Resources(
-            (await identity.ToArrayAsync(CancellationTokenProvider.CancellationToken)).Select(x => x.ToModel()),
-            (await apis.ToArrayAsync(CancellationTokenProvider.CancellationToken)).Select(x => x.ToModel()),
-            (await scopes.ToArrayAsync(CancellationTokenProvider.CancellationToken)).Select(x => x.ToModel())
+            (await identity.ToArrayAsync(ct)).Select(x => x.ToModel()),
+            (await apis.ToArrayAsync(ct)).Select(x => x.ToModel()),
+            (await scopes.ToArrayAsync(ct)).Select(x => x.ToModel())
         );
 
         Logger.LogDebug("Found {scopes} as all scopes, and {apis} as API resources",

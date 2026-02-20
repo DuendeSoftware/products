@@ -236,7 +236,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             Options.Discovery.ShowApiScopes ||
             Options.Discovery.ShowClaims)
         {
-            var resources = await ResourceStore.GetAllEnabledResourcesAsync();
+            var resources = await ResourceStore.GetAllEnabledResourcesAsync(default);
             var scopes = new List<string>();
 
             // scopes

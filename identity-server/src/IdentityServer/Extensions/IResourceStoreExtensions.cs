@@ -16,12 +16,13 @@ public static class IResourceStoreExtensions
     /// </summary>
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
     /// <returns></returns>
-    public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames)
+    public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct)
     {
-        var identity = await store.FindIdentityResourcesByScopeNameAsync(scopeNames);
-        var apiResources = await store.FindApiResourcesByScopeNameAsync(scopeNames);
-        var scopes = await store.FindApiScopesByNameAsync(scopeNames);
+        var identity = await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct);
+        var apiResources = await store.FindApiResourcesByScopeNameAsync(scopeNames, ct);
+        var scopes = await store.FindApiScopesByNameAsync(scopeNames, ct);
 
         ValidateNameUniqueness(identity, apiResources, scopes);
 
@@ -88,17 +89,19 @@ public static class IResourceStoreExtensions
     /// </summary>
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
     /// <returns></returns>
-    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames) => (await store.FindResourcesByScopeAsync(scopeNames)).FilterEnabled();
+    public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct) => (await store.FindResourcesByScopeAsync(scopeNames, ct)).FilterEnabled();
 
     /// <summary>
     /// Gets all enabled resources.
     /// </summary>
     /// <param name="store">The store.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
     /// <returns></returns>
-    public static async Task<Resources> GetAllEnabledResourcesAsync(this IResourceStore store)
+    public static async Task<Resources> GetAllEnabledResourcesAsync(this IResourceStore store, CT ct)
     {
-        var resources = await store.GetAllResourcesAsync();
+        var resources = await store.GetAllResourcesAsync(ct);
         ValidateNameUniqueness(resources.IdentityResources, resources.ApiResources, resources.ApiScopes);
 
         return resources.FilterEnabled();
@@ -109,11 +112,15 @@ public static class IResourceStoreExtensions
     /// </summary>
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
     /// <returns></returns>
-    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames)).Where(x => x.Enabled).ToArray();
+    public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
 
     /// <summary>
     /// Finds the enabled API resources by name.
     /// </summary>
-    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames) => (await store.FindApiResourcesByNameAsync(resourceNames)).Where(x => x.Enabled).ToArray();
+    /// <param name="store">The store.</param>
+    /// <param name="resourceNames">The resource names.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
+    public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames, CT ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
 }

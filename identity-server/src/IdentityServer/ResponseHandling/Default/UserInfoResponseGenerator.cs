@@ -121,7 +121,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
         Logger.LogDebug("Scopes in access token: {scopes}", scopeString);
 
         // if we ever parameterized identity scopes, then we would need to invoke the resource validator's parse API here
-        var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes);
+        var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes, default);
 
         var resources = new Resources(identityResources, Enumerable.Empty<ApiResource>(), Enumerable.Empty<ApiScope>());
         var result = new ResourceValidationResult(resources);
