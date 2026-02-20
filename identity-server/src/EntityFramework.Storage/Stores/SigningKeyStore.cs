@@ -52,14 +52,15 @@ public class SigningKeyStore : ISigningKeyStore
     /// <summary>
     /// Loads all keys from store.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync()
+    public async Task<IEnumerable<SerializedKey>> LoadKeysAsync(CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.LoadKeys");
 
         var entities = await Context.Keys.Where(x => x.Use == Use)
             .AsNoTracking()
-            .ToArrayAsync(CancellationTokenProvider.CancellationToken);
+            .ToArrayAsync(ct);
         return entities.Select(key => new SerializedKey
         {
             Id = key.Id,
@@ -76,8 +77,9 @@ public class SigningKeyStore : ISigningKeyStore
     /// Persists new key in store.
     /// </summary>
     /// <param name="key"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task StoreKeyAsync(SerializedKey key)
+    public async Task StoreKeyAsync(SerializedKey key, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.StoreKey");
 
@@ -93,26 +95,27 @@ public class SigningKeyStore : ISigningKeyStore
             IsX509Certificate = key.IsX509Certificate
         };
         Context.Keys.Add(entity);
-        await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+        await Context.SaveChangesAsync(ct);
     }
 
     /// <summary>
     /// Deletes key from storage.
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task DeleteKeyAsync(string id)
+    public async Task DeleteKeyAsync(string id, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("SigningKeyStore.DeleteKey");
 
         var item = await Context.Keys.Where(x => x.Use == Use && x.Id == id)
-            .FirstOrDefaultAsync(CancellationTokenProvider.CancellationToken);
+            .FirstOrDefaultAsync(ct);
         if (item != null)
         {
             try
             {
                 Context.Keys.Remove(item);
-                await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+                await Context.SaveChangesAsync(ct);
             }
             catch (DbUpdateConcurrencyException ex)
             {
