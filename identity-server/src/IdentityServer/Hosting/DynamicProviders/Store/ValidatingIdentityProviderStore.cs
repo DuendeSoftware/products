@@ -38,12 +38,12 @@ public class ValidatingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync() => _inner.GetAllSchemeNamesAsync();
+    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct = default) => _inner.GetAllSchemeNamesAsync(ct);
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct = default)
     {
-        var idp = await _inner.GetBySchemeAsync(scheme);
+        var idp = await _inner.GetBySchemeAsync(scheme, ct);
 
         if (idp != null)
         {

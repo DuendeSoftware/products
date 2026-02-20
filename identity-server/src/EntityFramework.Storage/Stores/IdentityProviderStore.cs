@@ -48,7 +48,7 @@ public class IdentityProviderStore : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync()
+    public async Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetAllSchemeNames");
 
@@ -59,17 +59,17 @@ public class IdentityProviderStore : IIdentityProviderStore
             DisplayName = x.DisplayName
         });
 
-        return await query.ToArrayAsync(CancellationTokenProvider.CancellationToken);
+        return await query.ToArrayAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("IdentityProviderStore.GetByScheme");
         activity?.SetTag(Tracing.Properties.Scheme, scheme);
 
         var idp = (await Context.IdentityProviders.AsNoTracking().Where(x => x.Scheme == scheme)
-                .ToArrayAsync(CancellationTokenProvider.CancellationToken))
+                .ToArrayAsync(ct))
             .SingleOrDefault(x => x.Scheme == scheme);
         if (idp == null)
         {

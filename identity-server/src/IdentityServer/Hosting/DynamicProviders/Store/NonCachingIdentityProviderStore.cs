@@ -38,17 +38,17 @@ public class NonCachingIdentityProviderStore<T> : IIdentityProviderStore
     }
 
     /// <inheritdoc/>
-    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync() => _inner.GetAllSchemeNamesAsync();
+    public Task<IEnumerable<IdentityProviderName>> GetAllSchemeNamesAsync(CT ct = default) => _inner.GetAllSchemeNamesAsync(ct);
 
     /// <inheritdoc/>
-    public async Task<IdentityProvider> GetBySchemeAsync(string scheme)
+    public async Task<IdentityProvider> GetBySchemeAsync(string scheme, CT ct = default)
     {
         if (_httpContextAccessor.HttpContext == null)
         {
             _logger.LogDebug("Failed to retrieve the dynamic authentication scheme \"{scheme}\" because there is no current HTTP request", scheme);
             return null;
         }
-        var item = await _inner.GetBySchemeAsync(scheme);
+        var item = await _inner.GetBySchemeAsync(scheme, ct);
         RemoveCacheEntry(item);
         return item;
     }
