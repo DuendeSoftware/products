@@ -71,7 +71,7 @@ public class DefaultConsentServiceTests
     {
         _client.AllowRememberConsent = false;
 
-        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
         var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
         consent.ShouldBeNull();
@@ -80,7 +80,7 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task UpdateConsentAsync_should_persist_consent()
     {
-        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
         var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
         consent.Scopes.Count().ShouldBe(2);
@@ -91,9 +91,9 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task UpdateConsentAsync_empty_scopes_should_remove_consent()
     {
-        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
-        await _subject.UpdateConsentAsync(_user, _client, new ParsedScopeValue[] { });
+        await _subject.UpdateConsentAsync(_user, _client, new ParsedScopeValue[] { }, _ct);
 
         var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
         consent.ShouldBeNull();
@@ -104,7 +104,7 @@ public class DefaultConsentServiceTests
     {
         _client.RequireConsent = false;
 
-        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
         result.ShouldBeFalse();
     }
@@ -114,7 +114,7 @@ public class DefaultConsentServiceTests
     {
         _client.AllowRememberConsent = false;
 
-        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
         result.ShouldBeTrue();
     }
@@ -122,7 +122,7 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task RequiresConsentAsync_no_scopes_should_not_require_consent()
     {
-        var result = await _subject.RequiresConsentAsync(_user, _client, new ParsedScopeValue[] { });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new ParsedScopeValue[] { }, _ct);
 
         result.ShouldBeFalse();
     }
@@ -130,7 +130,7 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task RequiresConsentAsync_offline_access_should_require_consent()
     {
-        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("offline_access") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("offline_access") }, _ct);
 
         result.ShouldBeTrue();
     }
@@ -138,7 +138,7 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task RequiresConsentAsync_no_prior_consent_should_require_consent()
     {
-        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
         result.ShouldBeTrue();
     }
@@ -146,9 +146,9 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task RequiresConsentAsync_prior_consent_should_not_require_consent()
     {
-        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
-        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
         result.ShouldBeFalse();
     }
@@ -156,9 +156,9 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task RequiresConsentAsync_prior_consent_with_more_scopes_should_not_require_consent()
     {
-        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2"), new ParsedScopeValue("scope3") });
+        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2"), new ParsedScopeValue("scope3") }, _ct);
 
-        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope2") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope2") }, _ct);
 
         result.ShouldBeFalse();
     }
@@ -166,9 +166,9 @@ public class DefaultConsentServiceTests
     [Fact]
     public async Task RequiresConsentAsync_prior_consent_with_too_few_scopes_should_require_consent()
     {
-        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope2"), new ParsedScopeValue("scope3") });
+        await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope2"), new ParsedScopeValue("scope3") }, _ct);
 
-        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
+        var result = await _subject.RequiresConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") }, _ct);
 
         result.ShouldBeTrue();
     }
@@ -181,12 +181,12 @@ public class DefaultConsentServiceTests
         var scopes = new[] { new ParsedScopeValue("foo"), new ParsedScopeValue("bar") };
         _client.ConsentLifetime = 2;
 
-        await _subject.UpdateConsentAsync(_user, _client, scopes);
+        await _subject.UpdateConsentAsync(_user, _client, scopes, _ct);
 
         now = now.AddSeconds(3);
         _timeProvider.SetUtcNow(now);
 
-        var result = await _subject.RequiresConsentAsync(_user, _client, scopes);
+        var result = await _subject.RequiresConsentAsync(_user, _client, scopes, _ct);
 
         result.ShouldBeTrue();
     }
@@ -199,12 +199,12 @@ public class DefaultConsentServiceTests
         var scopes = new[] { new ParsedScopeValue("foo"), new ParsedScopeValue("bar") };
         _client.ConsentLifetime = 2;
 
-        await _subject.UpdateConsentAsync(_user, _client, scopes);
+        await _subject.UpdateConsentAsync(_user, _client, scopes, _ct);
 
         now = now.AddSeconds(3);
         _timeProvider.SetUtcNow(now);
 
-        await _subject.RequiresConsentAsync(_user, _client, scopes);
+        await _subject.RequiresConsentAsync(_user, _client, scopes, _ct);
 
         var result = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
 

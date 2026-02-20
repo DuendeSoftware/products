@@ -51,6 +51,7 @@ public class DefaultConsentService : IConsentService
     /// <param name="subject">The user.</param>
     /// <param name="client">The client.</param>
     /// <param name="parsedScopes">The parsed scopes.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>
     /// Boolean if consent is required.
     /// </returns>
@@ -59,7 +60,7 @@ public class DefaultConsentService : IConsentService
     /// or
     /// subject
     /// </exception>
-    public virtual async Task<bool> RequiresConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes)
+    public virtual async Task<bool> RequiresConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultConsentService.RequiresConsent");
 
@@ -100,7 +101,7 @@ public class DefaultConsentService : IConsentService
             return true;
         }
 
-        var consent = await UserConsentStore.GetUserConsentAsync(subject.GetSubjectId(), client.ClientId, default);
+        var consent = await UserConsentStore.GetUserConsentAsync(subject.GetSubjectId(), client.ClientId, ct);
 
         if (consent == null)
         {
@@ -111,7 +112,7 @@ public class DefaultConsentService : IConsentService
         if (consent.Expiration.HasExpired(TimeProvider.GetUtcNow().UtcDateTime))
         {
             Logger.LogDebug("Consent found in consent store is expired, consent is required");
-            await UserConsentStore.RemoveUserConsentAsync(consent.SubjectId, consent.ClientId, default);
+            await UserConsentStore.RemoveUserConsentAsync(consent.SubjectId, consent.ClientId, ct);
             return true;
         }
 
@@ -143,13 +144,14 @@ public class DefaultConsentService : IConsentService
     /// <param name="client">The client.</param>
     /// <param name="subject">The subject.</param>
     /// <param name="parsedScopes">The parsed scopes.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns></returns>
     /// <exception cref="System.ArgumentNullException">
     /// client
     /// or
     /// subject
     /// </exception>
-    public virtual async Task UpdateConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes)
+    public virtual async Task UpdateConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultConsentService.UpdateConsent");
 
@@ -179,13 +181,13 @@ public class DefaultConsentService : IConsentService
                     consent.Expiration = consent.CreationTime.AddSeconds(client.ConsentLifetime.Value);
                 }
 
-                await UserConsentStore.StoreUserConsentAsync(consent, default);
+                await UserConsentStore.StoreUserConsentAsync(consent, ct);
             }
             else
             {
                 Logger.LogDebug("Client allows remembering consent, and no scopes provided. Removing consent from consent store for subject: {subject}", subject.GetSubjectId());
 
-                await UserConsentStore.RemoveUserConsentAsync(subjectId, clientId, default);
+                await UserConsentStore.RemoveUserConsentAsync(subjectId, clientId, ct);
             }
         }
     }

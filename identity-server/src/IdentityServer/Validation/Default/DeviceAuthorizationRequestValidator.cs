@@ -148,7 +148,7 @@ internal class DeviceAuthorizationRequestValidator : IDeviceAuthorizationRequest
         {
             Client = request.Client,
             Scopes = request.RequestedScopes
-        });
+        }, default);
 
         if (!validatedResources.Succeeded)
         {

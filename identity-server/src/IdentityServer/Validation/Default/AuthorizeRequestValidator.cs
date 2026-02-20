@@ -551,7 +551,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             Client = request.Client,
             Scopes = request.RequestedScopes,
             ResourceIndicators = resourceIndicators,
-        });
+        }, default);
 
         if (!validatedResources.Succeeded)
         {

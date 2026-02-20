@@ -103,6 +103,7 @@ public class ResourceValidation
     };
 
     private IResourceStore _subject;
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     public ResourceValidation() => _subject = new InMemoryResourcesStore(_identityResources, _apiResources, _scopes);
 
@@ -117,7 +118,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "offline_access" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeFalse();
         result.InvalidScopes.ShouldContain("offline_access");
@@ -132,7 +133,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "openid", "scope1" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.InvalidScopes.ShouldBeEmpty();
@@ -148,7 +149,7 @@ public class ResourceValidation
             {
                 Client = _restrictedClient,
                 Scopes = new[] { "openid", "email", "scope1", "unknown" }
-            });
+            }, _ct);
 
             result.Succeeded.ShouldBeFalse();
             result.InvalidScopes.ShouldContain("unknown");
@@ -160,7 +161,7 @@ public class ResourceValidation
             {
                 Client = _restrictedClient,
                 Scopes = new[] { "openid", "scope1", "scope2" }
-            });
+            }, _ct);
 
             result.Succeeded.ShouldBeFalse();
             result.InvalidScopes.ShouldContain("scope2");
@@ -171,7 +172,7 @@ public class ResourceValidation
             {
                 Client = _restrictedClient,
                 Scopes = new[] { "openid", "email", "scope1" }
-            });
+            }, _ct);
 
             result.Succeeded.ShouldBeFalse();
             result.InvalidScopes.ShouldContain("email");
@@ -187,7 +188,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "openid", "scope1", "disabled_scope" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeFalse();
         result.InvalidScopes.ShouldContain("disabled_scope");
@@ -202,7 +203,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "openid", "scope1" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.InvalidScopes.ShouldBeEmpty();
@@ -217,7 +218,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "openid", "email", "scope1", "scope2" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeFalse();
         result.InvalidScopes.ShouldContain("email");
@@ -233,7 +234,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "openid", "scope1" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.Resources.IdentityResources.Select(x => x.Name).ShouldBe(["openid"]);
@@ -250,7 +251,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "scope1" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.Resources.IdentityResources.ShouldBeEmpty();
@@ -267,7 +268,7 @@ public class ResourceValidation
         {
             Client = _restrictedClient,
             Scopes = new[] { "openid" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.Resources.IdentityResources.Select(x => x.Name).ShouldContain("openid");
@@ -291,7 +292,7 @@ public class ResourceValidation
         {
             Client = new Client { AllowedScopes = { "s" } },
             Scopes = new[] { "s" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.Resources.ApiResources.Count.ShouldBe(2);
@@ -312,7 +313,7 @@ public class ResourceValidation
             Client = _resourceClient,
             Scopes = new[] { "scope1", "offline_access" },
             ResourceIndicators = new[] { "isolated1" },
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1", "isolated1"]);
@@ -329,7 +330,7 @@ public class ResourceValidation
         {
             Client = _resourceClient,
             Scopes = new[] { "scope1" },
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeTrue();
         result.Resources.ApiResources.Select(x => x.Name).ShouldBe(["resource1"]);
@@ -346,7 +347,7 @@ public class ResourceValidation
             Client = _resourceClient,
             Scopes = new[] { "scope1" },
             ResourceIndicators = new[] { "invalid" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeFalse();
         result.InvalidScopes.ShouldBeEmpty();
@@ -363,7 +364,7 @@ public class ResourceValidation
             Client = _resourceClient,
             Scopes = new[] { "scope1" },
             ResourceIndicators = new[] { "resource3" }
-        });
+        }, _ct);
 
         result.Succeeded.ShouldBeFalse();
         result.InvalidScopes.ShouldBeEmpty();

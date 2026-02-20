@@ -49,7 +49,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         {
             Client = client,
             Scopes = deviceAuth.RequestedScopes,
-        });
+        }, ct);
 
         return new DeviceFlowAuthorizationRequest
         {

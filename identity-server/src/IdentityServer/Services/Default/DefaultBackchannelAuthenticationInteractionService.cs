@@ -63,7 +63,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
             Client = client,
             Scopes = request.RequestedScopes,
             ResourceIndicators = request.RequestedResourceIndicators,
-        });
+        }, ct);
 
         return new BackchannelUserLoginRequest
         {
