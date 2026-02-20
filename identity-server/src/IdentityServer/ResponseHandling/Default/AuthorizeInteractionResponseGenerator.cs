@@ -322,7 +322,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             throw new ArgumentException("Invalid PromptMode");
         }
 
-        var consentRequired = await Consent.RequiresConsentAsync(request.Subject, request.Client, request.ValidatedResources.ParsedScopes);
+        var consentRequired = await Consent.RequiresConsentAsync(request.Subject, request.Client, request.ValidatedResources.ParsedScopes, default);
 
         if (consentRequired && request.PromptModes.Contains(OidcConstants.PromptModes.None))
         {
@@ -399,7 +399,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                                 Logger.LogDebug("User indicated to remember consent for scopes: {scopes}", request.ValidatedResources.RawScopeValues);
                             }
 
-                            await Consent.UpdateConsentAsync(request.Subject, request.Client, parsedScopes);
+                            await Consent.UpdateConsentAsync(request.Subject, request.Client, parsedScopes, default);
                         }
                     }
                 }

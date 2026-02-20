@@ -465,7 +465,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.AuthorizationCode.RequestedScopes,
             ResourceIndicators = _validatedRequest.AuthorizationCode.RequestedResourceIndicators,
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -813,7 +813,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.RefreshToken.AuthorizedScopes,
             ResourceIndicators = resourceIndicators,
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -895,7 +895,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.DeviceCode.AuthorizedScopes,
             ResourceIndicators = null // not supported for device grant
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -984,7 +984,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.BackChannelAuthenticationRequest.AuthorizedScopes,
             ResourceIndicators = _validatedRequest.BackChannelAuthenticationRequest.RequestedResourceIndicators,
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -1157,7 +1157,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = requestedScopes,
             ResourceIndicators = resourceIndicators,
-        });
+        }, _ct);
 
         if (!resourceValidationResult.Succeeded)
         {
