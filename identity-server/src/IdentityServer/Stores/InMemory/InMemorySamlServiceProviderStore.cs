@@ -38,7 +38,7 @@ public class InMemorySamlServiceProviderStore : ISamlServiceProviderStore
 
         var query =
             from sp in _serviceProviders
-            where sp.EntityId == entityId
+            where sp.EntityId == entityId && sp.Enabled
             select sp;
 
         return Task.FromResult(query.SingleOrDefault());

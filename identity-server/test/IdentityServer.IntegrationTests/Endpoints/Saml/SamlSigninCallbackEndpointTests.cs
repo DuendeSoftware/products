@@ -129,7 +129,7 @@ public class SamlSigninCallbackEndpointTests
         var redirectUri = signinResult.Headers.Location;
         redirectUri.ShouldNotBeNull();
 
-        await Fixture.ClearServiceProvidersAsync();
+        Fixture.ClearServiceProvidersAsync();
 
         var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", CancellationToken.None);
 
@@ -159,10 +159,9 @@ public class SamlSigninCallbackEndpointTests
         var redirectUri = signinResult.Headers.Location;
         redirectUri.ShouldNotBeNull();
 
-        await Fixture.ClearServiceProvidersAsync();
-        var disabledSp = Build.SamlServiceProvider();
+        // Ideally we would fetch the SP via a store and update it, but since the store doesn't provide that functionality
+        // we'll rely on everything being in memory and holding onto a reference to the SP in the store for now
         sp.Enabled = false;
-        await Fixture.AddServiceProviderAsync(disabledSp);
 
         var result = await Fixture.NonRedirectingClient.GetAsync("/saml/signin_callback", CancellationToken.None);
 

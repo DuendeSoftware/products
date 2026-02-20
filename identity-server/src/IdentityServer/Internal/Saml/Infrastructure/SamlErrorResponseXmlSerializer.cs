@@ -22,7 +22,7 @@ internal class SamlErrorResponseXmlSerializer : ISamlResultSerializer<SamlErrorR
             new XAttribute("Value", result.StatusCode.ToString()));
 
         // Add sub-status code if provided
-        if (result.SubStatusCode.HasValue)
+        if (result.SubStatusCode?.Value != null)
         {
             statusCodeElement.Add(
                 new XElement(protocolNs + "StatusCode",

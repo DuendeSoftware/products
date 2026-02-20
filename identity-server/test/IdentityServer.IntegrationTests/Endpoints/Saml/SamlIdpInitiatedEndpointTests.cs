@@ -292,7 +292,7 @@ public class SamlIdpInitiatedEndpointTests
         var samlResponse = await ExtractSamlSuccessFromPostAsync(callbackResult, CancellationToken.None);
 
         samlResponse.ShouldNotBeNull();
-        samlResponse.Issuer.ShouldBe(Fixture.Host!.Url());
+        samlResponse.Issuer.ShouldBe(Fixture.Url());
         samlResponse.Destination.ShouldBe(Data.AcsUrl.ToString());
         samlResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Success");
 

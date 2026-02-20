@@ -40,7 +40,7 @@ internal class SamlResponseBuilder(
             ServiceProvider = serviceProvider,
             Binding = serviceProvider.AssertionConsumerServiceBinding,
             StatusCode = error.StatusCode,
-            SubStatusCode = error.SubStatusCode,
+            SubStatusCode = error.SubStatusCode != null ? new SamlStatusCode(error.SubStatusCode) : null,
             Message = error.Message,
             AssertionConsumerServiceUrl = acsUrl,
             Issuer = serverUrls.Origin, // Todo: not sure if this is a valid issuer

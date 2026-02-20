@@ -150,7 +150,7 @@ public class SamlSingleLogoutEndpointTests
         await Fixture.Client.GetAsync("/__signin", CancellationToken.None);
 
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
 
@@ -175,7 +175,7 @@ public class SamlSingleLogoutEndpointTests
         await Fixture.InitializeAsync();
 
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             version: "1.0");
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
 
@@ -199,7 +199,7 @@ public class SamlSingleLogoutEndpointTests
 
         var futureTime = Data.Now.AddMinutes(10);
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             issueInstant: futureTime,
             sessionIndex: "session123");
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
@@ -225,7 +225,7 @@ public class SamlSingleLogoutEndpointTests
 
         var oldTime = Data.Now.AddMinutes(-10);
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             issueInstant: oldTime,
             sessionIndex: "session123");
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
@@ -260,7 +260,7 @@ public class SamlSingleLogoutEndpointTests
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
         logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
-        logoutResponse.StatusMessage.ShouldBe($"Invalid destination. Expected '{Fixture.Host!.Url()}/saml/logout'");
+        logoutResponse.StatusMessage.ShouldBe($"Invalid destination. Expected '{Fixture.Url()}/saml/logout'");
     }
 
     [Fact]
@@ -274,7 +274,7 @@ public class SamlSingleLogoutEndpointTests
         await Fixture.InitializeAsync();
 
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
         var urlEncoded = await EncodeRequest(logoutRequestXml, CancellationToken.None);
 
@@ -300,7 +300,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Create a logout request without a signature
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
         var urlEncoded = await EncodeRequest(logoutRequestXml, CancellationToken.None);
 
@@ -351,7 +351,7 @@ public class SamlSingleLogoutEndpointTests
         // Don't sign in a user - no authenticated session
 
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "session123");
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
 
@@ -384,7 +384,7 @@ public class SamlSingleLogoutEndpointTests
         // Use a different service provider than what was established
         var logoutRequestXml = Build.LogoutRequestXml(
             issuer: anotherSp.EntityId, // Use a different SP so session will not be found
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"));
+            destination: new Uri($"{Fixture.Url()}/saml/logout"));
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
 
         // Act
@@ -412,7 +412,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Use a different session index than what was established
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: "wrong-session-index");
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
 
@@ -443,7 +443,7 @@ public class SamlSingleLogoutEndpointTests
         var sessionIndex = await PerformSigninAndExtractSessionIndex(sp);
 
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: sessionIndex);
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
 
@@ -481,7 +481,7 @@ public class SamlSingleLogoutEndpointTests
         var sessionIndex = await PerformSigninAndExtractSessionIndex(sp);
 
         var logoutRequestXml = Build.LogoutRequestXml(
-            destination: new Uri($"{Fixture.Host!.Url()}/saml/logout"),
+            destination: new Uri($"{Fixture.Url()}/saml/logout"),
             sessionIndex: sessionIndex);
         var urlEncoded = await EncodeAndSignRequest(logoutRequestXml, sp, CancellationToken.None);
 
@@ -494,7 +494,7 @@ public class SamlSingleLogoutEndpointTests
         // Verify user can no longer access protected resource and is redirected to login
         var finalProtectedResourceResult = await Fixture.Client.GetAsync("__protected-resource", CancellationToken.None);
         finalProtectedResourceResult.StatusCode.ShouldBe(HttpStatusCode.OK);
-        finalProtectedResourceResult.RequestMessage?.RequestUri?.AbsoluteUri.ShouldStartWith($"{Fixture.Host!.Url()}{Fixture.LoginUrl.ToString()}");
+        finalProtectedResourceResult.RequestMessage?.RequestUri?.AbsoluteUri.ShouldStartWith($"{Fixture.Url()}{Fixture.LoginUrl.ToString()}");
     }
 
     private static async Task<string> EncodeAndSignRequest(

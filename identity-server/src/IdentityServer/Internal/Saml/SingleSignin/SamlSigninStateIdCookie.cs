@@ -27,7 +27,7 @@ internal class SamlSigninStateIdCookie(IHttpContextAccessor httpContextAccessor)
             Expires = DateTimeOffset.UtcNow.Add(CookieLifetime)
         };
 
-        HttpContext.Response.Cookies.Append(CookieName, stateId.Value.ToString("N"), cookieOptions);
+        HttpContext.Response.Cookies.Append(CookieName, stateId.Value.ToString(), cookieOptions);
     }
 
     internal bool TryGetSamlSigninStateId([NotNullWhen(true)] out StateId? stateId)

@@ -6,12 +6,15 @@
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityServer.Configuration;
+using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
+using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
@@ -69,39 +72,71 @@ internal class SamlFixture : IAsyncLifetime
 
     public AuthenticationProperties? PropsToSignIn { get; set; }
 
-    public TestFramework.GenericHost? Host { get; private set; }
+    private IdentityServerPipeline _pipeline = null!;
 
-    public HttpClient Client { get; private set; } = null!;
+    public IdentityServerPipeline Pipeline => _pipeline;
 
-    public HttpClient NonRedirectingClient { get; private set; } = null!;
+    public BrowserClient Client { get; private set; } = null!;
 
-    public T Get<T>() where T : notnull => Host!.Resolve<T>();
+    public BrowserClient NonRedirectingClient { get; private set; } = null!;
+
+    public string Url(string path = "")
+    {
+        if (!path.StartsWith('/') && !string.IsNullOrEmpty(path))
+        {
+            path = '/' + path;
+        }
+
+        return IdentityServerPipeline.BaseUrl + path;
+    }
+
+    public T Get<T>() where T : notnull => _pipeline.Resolve<T>();
 
     public async ValueTask InitializeAsync()
     {
         var selfSignedCertificate = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(StableSigningCert), null);
 
-        Host = new TestFramework.GenericHost();
-        Host.OnConfigureServices += services =>
+        _pipeline = new IdentityServerPipeline();
+
+        _pipeline.OnPreConfigureServices += services =>
         {
             services.AddSingleton<TimeProvider>(Data.FakeTimeProvider);
-            services.AddDistributedMemoryCache();
+            services.AddSingleton<IDistributedCache>(sp => new FakeDistributedCache(sp.GetRequiredService<TimeProvider>()));
+            services.AddRouting();
+            services.AddAuthorization();
+        };
 
-            services.AddIdentityServer(options =>
+        _pipeline.OnPostConfigureServices += services =>
+        {
+            // Configure IdentityServer options (pipeline already calls AddIdentityServer)
+            services.Configure<IdentityServerOptions>(options =>
             {
                 options.UserInteraction.LoginUrl = LoginUrl.ToString();
                 options.UserInteraction.LogoutUrl = LogoutUrl.ToString();
                 options.UserInteraction.ConsentUrl = ConsentUrl.ToString();
-                ConfigureIdentityServerOptions(options);
-            })
-            .AddSigningCredential(selfSignedCertificate)
-            .AddSamlServices();
+                options.KeyManagement.Enabled = false;  // Disable key management to use our custom credential
+            });
+            services.Configure(ConfigureIdentityServerOptions);
 
             // Configure SAML options
-            services.Configure<SamlOptions>(ConfigureSamlOptions);
+            services.Configure(ConfigureSamlOptions);
 
             // Register in-memory SAML service provider store with our service providers
             services.AddSingleton<ISamlServiceProviderStore>(new InMemorySamlServiceProviderStore(_serviceProviders));
+
+            // Replace the developer signing credential with our X509 certificate
+            // Remove the ISigningCredentialStore registration added by AddDeveloperSigningCredential
+            var signingCredentialDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(ISigningCredentialStore));
+            if (signingCredentialDescriptor != null)
+            {
+                services.Remove(signingCredentialDescriptor);
+            }
+
+            // Add our X509 signing credential
+            services.AddIdentityServerBuilder()
+                .AddSigningCredential(selfSignedCertificate)
+                .AddProfileService<DefaultProfileService>()
+                .AddSamlServices();
 
             ConfigureServices(services);
 
@@ -116,123 +151,137 @@ internal class SamlFixture : IAsyncLifetime
             });
         };
 
-        Host.OnConfigure += app =>
+        _pipeline.OnPreConfigure += app =>
         {
-            app.UseExceptionHandler();
-
-            app.UseIdentityServer();
-
-            app.MapGet(LoginUrl.ToString(), () => Microsoft.AspNetCore.Http.Results.Ok());
-            app.MapGet(ConsentUrl.ToString(), () => Microsoft.AspNetCore.Http.Results.Ok());
-            app.MapGet(LogoutUrl.ToString(), () => Microsoft.AspNetCore.Http.Results.Ok());
-
-            app.MapGet("/__signin", async (HttpContext ctx, ISamlInteractionService samlInteractionService) =>
-            {
-                var props = PropsToSignIn ?? new AuthenticationProperties();
-                if (UserToSignIn?.Identity == null)
-                {
-                    throw new InvalidOperationException(
-                        $"Must set {nameof(UserToSignIn)} prior to signin and must have an identity");
-                }
-
-                await ctx.SignInAsync(UserToSignIn, props);
-
-                if (UserMetRequestedAuthnContextRequirements.HasValue)
-                {
-                    await samlInteractionService.StoreRequestedAuthnContextResultAsync(
-                        UserMetRequestedAuthnContextRequirements.Value, ctx.RequestAborted);
-                }
-
-                ctx.Response.StatusCode = 204;
-            });
-
-            app.MapGet("/__signout", async ctx =>
-            {
-                await ctx.SignOutAsync();
-                ctx.Response.StatusCode = 204;
-            });
-
-            app.MapGet("/__authentication-request", async (ISamlInteractionService samlInteractionService) =>
-            {
-                var authenticationRequest =
-                    await samlInteractionService.GetAuthenticationRequestContextAsync(CancellationToken.None);
-
-                if (authenticationRequest == null)
-                {
-                    throw new InvalidOperationException("Could not find authentication request");
-                }
-
-                return authenticationRequest.RequestedAuthnContext;
-            });
-
-            app.MapGet("/__protected-resource", () => "Protected Resource").RequireAuthorization();
+            app.UseExceptionHandler("/error");
         };
 
-        await Host.InitializeAsync();
+        _pipeline.OnPostConfigure += app =>
+        {
+            // Error handling endpoint
+            app.Map("/error", path =>
+            {
+                path.Run(async context =>
+                {
+                    var exceptionFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+                    if (exceptionFeature?.Error is Microsoft.AspNetCore.Http.BadHttpRequestException badRequestEx)
+                    {
+                        context.Response.StatusCode = badRequestEx.StatusCode;
+                        context.Response.ContentType = "application/problem+json";
+                        await context.Response.WriteAsJsonAsync(new Microsoft.AspNetCore.Mvc.ProblemDetails
+                        {
+                            Status = badRequestEx.StatusCode,
+                            Title = "Bad Request",
+                            Detail = badRequestEx.Message
+                        });
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("Internal Server Error");
+                    }
+                });
+            });
+
+            app.Map(LoginUrl.ToString(), path =>
+            {
+                path.Run(ctx =>
+                {
+                    ctx.Response.StatusCode = 200;
+                    return Task.CompletedTask;
+                });
+            });
+
+            app.Map(ConsentUrl.ToString(), path =>
+            {
+                path.Run(ctx =>
+                {
+                    ctx.Response.StatusCode = 200;
+                    return Task.CompletedTask;
+                });
+            });
+
+            app.Map(LogoutUrl.ToString(), path =>
+            {
+                path.Run(ctx =>
+                {
+                    ctx.Response.StatusCode = 200;
+                    return Task.CompletedTask;
+                });
+            });
+
+            app.Map("/__signin", path =>
+            {
+                path.Run(async ctx =>
+                {
+                    var samlInteractionService = ctx.RequestServices.GetRequiredService<ISamlInteractionService>();
+                    var props = PropsToSignIn ?? new AuthenticationProperties();
+                    if (UserToSignIn?.Identity == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Must set {nameof(UserToSignIn)} prior to signin and must have an identity");
+                    }
+
+                    await ctx.SignInAsync(UserToSignIn, props);
+
+                    if (UserMetRequestedAuthnContextRequirements.HasValue)
+                    {
+                        await samlInteractionService.StoreRequestedAuthnContextResultAsync(
+                            UserMetRequestedAuthnContextRequirements.Value, ctx.RequestAborted);
+                    }
+
+                    ctx.Response.StatusCode = 204;
+                });
+            });
+
+            app.Map("/__signout", path =>
+            {
+                path.Run(async ctx =>
+                {
+                    await ctx.SignOutAsync();
+                    ctx.Response.StatusCode = 204;
+                });
+            });
+
+            app.Map("/__authentication-request", path =>
+            {
+                path.Run(async ctx =>
+                {
+                    var samlInteractionService = ctx.RequestServices.GetRequiredService<ISamlInteractionService>();
+                    var authenticationRequest =
+                        await samlInteractionService.GetAuthenticationRequestContextAsync(CancellationToken.None);
+
+                    if (authenticationRequest == null)
+                    {
+                        throw new InvalidOperationException("Could not find authentication request");
+                    }
+
+                    await ctx.Response.WriteAsJsonAsync(authenticationRequest.RequestedAuthnContext);
+                });
+            });
+        };
+
+        _pipeline.Initialize(enableLogging: true);
 
         // Mark as initialized after seeding
         _isInitialized = true;
 
-        Client = Host!.HttpClient;
-        NonRedirectingClient = Host!.Server.CreateClient();
+        // Create two BrowserClient instances with different redirect behaviors
+        Client = _pipeline.BrowserClient;
+        Client.BaseAddress = new Uri(IdentityServerPipeline.BaseUrl);
+
+        NonRedirectingClient = new BrowserClient(new BrowserHandler(_pipeline.Handler) { AllowAutoRedirect = false })
+        {
+            BaseAddress = new Uri(IdentityServerPipeline.BaseUrl)
+        };
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        if (Host != null)
-        {
-            // GenericHost doesn't implement IAsyncDisposable, so nothing to dispose
-            await Task.CompletedTask;
-        }
-    }
-
-    /// <summary>
-    /// Adds a service provider to the fixture after initialization.
-    /// </summary>
-    public async Task AddServiceProviderAsync(SamlServiceProvider serviceProvider)
-    {
-        if (!_isInitialized)
-        {
-            throw new InvalidOperationException(
-                "Cannot call AddServiceProviderAsync before initialization. " +
-                "Add service providers to the ServiceProviders list before calling InitializeAsync.");
-        }
-
-        if (Host == null)
-        {
-            throw new InvalidOperationException("Host is not initialized");
-        }
-
-        // With InMemorySamlServiceProviderStore, we need to replace the store instance
-        // This is a limitation - in integration tests, we should add all SPs before initialization
-        _serviceProviders.Add(serviceProvider);
-
-        // Re-register the store with the updated list
-        var serviceProvider2 = Host.Server.Services;
-        var scope = serviceProvider2.CreateScope();
-
-        // This won't work properly with the current architecture
-        // The store is registered as a singleton, so we can't easily update it
-        // For now, throw an exception to indicate this is not supported
-        throw new NotSupportedException(
-            "Adding service providers after initialization is not currently supported with InMemorySamlServiceProviderStore. " +
-            "Please add all service providers to the ServiceProviders list before calling InitializeAsync.");
-    }
+    public async ValueTask DisposeAsync() =>
+        // IdentityServerPipeline doesn't implement IAsyncDisposable, so nothing to dispose
+        await Task.CompletedTask;
 
     /// <summary>
     /// Removes all service providers from the fixture after initialization.
     /// </summary>
-    public async Task ClearServiceProvidersAsync()
-    {
-        if (!_isInitialized)
-        {
-            throw new InvalidOperationException(
-                "Cannot call ClearServiceProvidersAsync before initialization. " +
-                "Modify the ServiceProviders list directly before calling InitializeAsync.");
-        }
-
-        throw new NotSupportedException(
-            "Clearing service providers after initialization is not currently supported with InMemorySamlServiceProviderStore. " +
-            "The service provider store is immutable after initialization.");
-    }
+    public void ClearServiceProvidersAsync() => _serviceProviders.Clear();
 }

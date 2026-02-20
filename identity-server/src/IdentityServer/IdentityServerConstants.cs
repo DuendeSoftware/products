@@ -282,8 +282,8 @@ public static class IdentityServerConstants
         public const string SamlSignin = SamlPathPrefix + "/signin";
         public const string SamlSigninCallback = SamlPathPrefix + "/signin_callback";
         public const string SamlIdpInitiated = SamlPathPrefix + "/idp-initiated";
-        public const string SamlLogout = SamlPathPrefix + "/slo";
-        public const string SamlLogoutCallback = SamlLogout + "/callback";
+        public const string SamlLogout = SamlPathPrefix + "/logout";
+        public const string SamlLogoutCallback = SamlPathPrefix + "/logout_callback";
 
         public static readonly string[] CorsPaths =
         {

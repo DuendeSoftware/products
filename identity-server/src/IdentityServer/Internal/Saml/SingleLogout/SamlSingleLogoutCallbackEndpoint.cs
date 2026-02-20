@@ -22,6 +22,11 @@ internal class SamlSingleLogoutCallbackEndpoint(
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("SamlSingleLogoutCallbackEndpoint");
 
+        if (!HttpMethods.IsGet(context.Request.Method))
+        {
+            return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
+        }
+
         logger.ProcessingSamlLogoutCallbackRequest(LogLevel.Debug);
 
         var logoutId = context.Request.Query["logoutId"].ToString();

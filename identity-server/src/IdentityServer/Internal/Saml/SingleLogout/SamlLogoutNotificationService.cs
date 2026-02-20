@@ -21,7 +21,7 @@ internal class SamlLogoutNotificationService(
 
         var logoutUrls = new List<ISamlFrontChannelLogout>();
 
-        if (context.SamlSessions?.Any() == true)
+        if (!context.SamlSessions.Any())
         {
             logger.NoSamlServiceProvidersToNotifyForLogout(LogLevel.Debug);
             return logoutUrls;

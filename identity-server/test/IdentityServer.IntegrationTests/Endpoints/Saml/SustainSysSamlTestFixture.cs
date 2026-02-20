@@ -27,7 +27,7 @@ internal class SustainSysSamlTestFixture : IAsyncLifetime
     public HttpClient? BrowserClient = null!;
     public X509Certificate2? SigningCertificate { get; private set; }
 
-    public Uri IdentityProviderLoginUri => new Uri(new Uri(_samlFixture.Host!.Url()), _samlFixture.LoginUrl);
+    public Uri IdentityProviderLoginUri => new Uri(new Uri(_samlFixture.Url()), _samlFixture.LoginUrl);
 
     private readonly SamlFixture _samlFixture = new();
     private bool _shouldGenerateSigningCertificate;
@@ -37,7 +37,7 @@ internal class SustainSysSamlTestFixture : IAsyncLifetime
     {
         _samlFixture.UserToSignIn =
             new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtClaimTypes.Subject, "user-id"), new Claim("name", "Test User"), new Claim(JwtClaimTypes.AuthenticationMethod, "urn:oasis:names:tc:SAML:2.0:ac:classes:Password")], "Test"));
-        await BrowserClient!.GetAsync($"{_samlFixture.Host!.Url()}/__signin", CancellationToken.None);
+        await BrowserClient!.GetAsync($"{_samlFixture.Url()}/__signin", CancellationToken.None);
     }
 
     public void GenerateSigningCertificate() =>
@@ -64,11 +64,8 @@ internal class SustainSysSamlTestFixture : IAsyncLifetime
             publicCertificate = X509CertificateLoader.LoadCertificate(signingCertificate.Export(X509ContentType.Cert));
         }
 
-        // Initialize the SAML fixture first so we can get the IDP URI
-        await _samlFixture.InitializeAsync();
-
-        // Now initialize the service provider host with the correct IDP URI
-        await InitializeServiceProvider(_samlFixture.Host!.Url(), signingCertificate);
+        // Initialize SP host first so Host is set when creating SP config for IdP
+        await InitializeServiceProvider(_samlFixture.Url(), signingCertificate);
 
         // Configure the service provider with the actual host URI and add it to the SAML fixture
         var serviceProvider = new SamlServiceProvider
@@ -86,12 +83,10 @@ internal class SustainSysSamlTestFixture : IAsyncLifetime
 
         // Note: With InMemorySamlServiceProviderStore, we cannot add SPs after initialization
         // So we need to add it to the fixture before initialization
-        // This is a known limitation of the current implementation
-        // For now, we'll add it to the _samlFixture.ServiceProviders list before it was initialized
-        // But since we already initialized it, we need to work around this
-        // The best approach is to initialize both fixtures together, but that requires refactoring
-        // For now, we'll just note this limitation
         _samlFixture.ServiceProviders.Add(serviceProvider);
+
+        // Initialize the SAML fixture first so we can get the IDP URI
+        await _samlFixture.InitializeAsync();
     }
 
     private async Task InitializeServiceProvider(string identityProviderHostUri, X509Certificate2? signingCertificate = null)

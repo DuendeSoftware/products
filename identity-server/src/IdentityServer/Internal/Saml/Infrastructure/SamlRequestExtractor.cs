@@ -64,6 +64,12 @@ internal abstract class SamlRequestExtractor<TRequest, TResult>
         var signature = request.Query[SamlConstants.RequestProperties.Signature].ToString();
         var sigAlg = request.Query[SamlConstants.RequestProperties.SigAlg].ToString();
 
+        // Normalize empty relay state to null (important for signature validation)
+        if (string.IsNullOrEmpty(relayState))
+        {
+            relayState = null;
+        }
+
         // HTTP-Redirect uses deflate compression
         byte[] compressedXmlBytes;
         try
@@ -107,6 +113,12 @@ internal abstract class SamlRequestExtractor<TRequest, TResult>
         }
 
         var relayState = form[SamlConstants.RequestProperties.RelayState].ToString();
+
+        // Normalize empty relay state to null
+        if (string.IsNullOrEmpty(relayState))
+        {
+            relayState = null;
+        }
 
         // HTTP-POST has no compression
         byte[] xmlBytes;

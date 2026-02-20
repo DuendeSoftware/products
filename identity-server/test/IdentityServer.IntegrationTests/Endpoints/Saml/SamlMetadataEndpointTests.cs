@@ -29,7 +29,7 @@ public class SamlMetadataEndpointTests
         var content = await result.Content.ReadAsStringAsync(CancellationToken.None);
 
         var settings = new VerifySettings();
-        var hostUri = Fixture.Host!.Url();
+        var hostUri = Fixture.Url();
         settings.AddScrubber(sb =>
         {
             sb.Replace(hostUri, "https://localhost");

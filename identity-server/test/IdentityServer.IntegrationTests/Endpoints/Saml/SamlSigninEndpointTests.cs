@@ -105,7 +105,7 @@ public class SamlSigninEndpointTests
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:VersionMismatch");
         errorResponse.StatusMessage.ShouldNotBeNull();
         errorResponse.StatusMessage.ShouldContain("Only Version 2.0 is supported");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
+        errorResponse.Issuer.ShouldBe(Fixture.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -222,7 +222,7 @@ public class SamlSigninEndpointTests
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:VersionMismatch");
         errorResponse.StatusMessage.ShouldNotBeNull();
         errorResponse.StatusMessage.ShouldContain("Only Version 2.0 is supported");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
+        errorResponse.Issuer.ShouldBe(Fixture.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -315,7 +315,7 @@ public class SamlSigninEndpointTests
 
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:Requester");
         errorResponse.StatusMessage.ShouldBe("Request IssueInstant is in the future");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
+        errorResponse.Issuer.ShouldBe(Fixture.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -497,7 +497,7 @@ public class SamlSigninEndpointTests
         await Fixture.InitializeAsync();
 
         // Use the correct Destination attribute
-        var correctDestination = new Uri(Fixture.Host!.Url() + "/saml/signin");
+        var correctDestination = new Uri(Fixture.Url() + "/saml/signin");
         var authnRequestXml = Build.AuthNRequestXml(destination: correctDestination);
 
         var urlEncoded = await EncodeRequest(authnRequestXml);
@@ -539,7 +539,7 @@ public class SamlSigninEndpointTests
         successResponse.ResponseId.ShouldNotBeNullOrEmpty();
         successResponse.Destination.ShouldBe(Fixture.Data.AcsUrl.ToString());
         successResponse.IssueInstant.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        successResponse.Issuer.ShouldBe(Fixture.Host?.Url());
+        successResponse.Issuer.ShouldBe(Fixture.Url());
         successResponse.InResponseTo.ShouldBe(Data.RequestId);
 
         successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
@@ -549,7 +549,7 @@ public class SamlSigninEndpointTests
         assertion.Id.ShouldNotBeNullOrEmpty();
         assertion.Version.ShouldBe("2.0");
         assertion.IssueInstant.ShouldBe(Data.FakeTimeProvider.GetUtcNow().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
-        assertion.Issuer.ShouldBe(Fixture.Host?.Url());
+        assertion.Issuer.ShouldBe(Fixture.Url());
 
         var subject = assertion.Subject;
         subject.ShouldNotBeNull();
@@ -788,7 +788,7 @@ public class SamlSigninEndpointTests
 
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:NoPassive");
         errorResponse.StatusMessage.ShouldBe("The user is not currently logged in and passive login was requested.");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
+        errorResponse.Issuer.ShouldBe(Fixture.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
@@ -813,7 +813,7 @@ public class SamlSigninEndpointTests
 
         errorResponse.StatusCode.ShouldBe("urn:oasis:names:tc:SAML:2.0:status:NoPassive");
         errorResponse.StatusMessage.ShouldBe("The user is not currently logged in");
-        errorResponse.Issuer.ShouldBe(Fixture.Host!.Url());
+        errorResponse.Issuer.ShouldBe(Fixture.Url());
         errorResponse.InResponseTo.ShouldNotBeNullOrEmpty();
         errorResponse.AssertionConsumerServiceUrl.ShouldBe(Data.AcsUrl.ToString());
     }
