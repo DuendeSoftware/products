@@ -32,38 +32,38 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
     }
 
     /// <inheritdoc/>
-    public async Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request, CT _)
+    public async Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.CreateRequest");
 
         var handle = await CreateHandleAsync();
         request.InternalId = GetHashedKey(handle);
-        await StoreItemByHashedKeyAsync(request.InternalId, request, request.ClientId, request.Subject.GetSubjectId(), null, null, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime));
+        await StoreItemByHashedKeyAsync(request.InternalId, request, request.ClientId, request.Subject.GetSubjectId(), null, null, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime), ct: ct);
         return handle;
     }
 
     /// <inheritdoc/>
-    public Task<BackChannelAuthenticationRequest> GetByInternalIdAsync(string id, CT _)
+    public Task<BackChannelAuthenticationRequest> GetByInternalIdAsync(string id, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.GetByInternalId");
 
-        return GetItemByHashedKeyAsync(id);
+        return GetItemByHashedKeyAsync(id, ct);
     }
 
     /// <inheritdoc/>
-    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId, CT _)
+    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.GetByAuthenticationRequestId");
 
-        return GetItemAsync(requestId);
+        return GetItemAsync(requestId, ct);
     }
 
     /// <inheritdoc/>
-    public Task RemoveByInternalIdAsync(string requestId, CT _)
+    public Task RemoveByInternalIdAsync(string requestId, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.RemoveByInternalId");
 
-        return RemoveItemByHashedKeyAsync(requestId);
+        return RemoveItemByHashedKeyAsync(requestId, ct);
     }
 
     /// <inheritdoc/>
@@ -75,14 +75,14 @@ public class DefaultBackChannelAuthenticationRequestStore : DefaultGrantStore<Ba
         {
             SubjectId = subjectId,
             ClientId = clientId,
-        });
+        }, ct);
     }
 
     /// <inheritdoc/>
-    public Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request, CT _)
+    public Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultBackChannelAuthenticationRequestStore.UpdateByInternalId");
 
-        return StoreItemByHashedKeyAsync(id, request, request.ClientId, request.Subject.GetSubjectId(), request.SessionId, request.Description, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime));
+        return StoreItemByHashedKeyAsync(id, request, request.ClientId, request.Subject.GetSubjectId(), request.SessionId, request.Description, request.CreationTime, request.CreationTime.AddSeconds(request.Lifetime), ct: ct);
     }
 }

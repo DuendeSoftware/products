@@ -112,7 +112,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                     SessionId = session.SessionId,
                     ClientIds = clientsToCoordinate,
                     Types = PersistedGrantTokenTypes
-                });
+                }, ct);
             }
 
             Logger.LogDebug("Due to user logout, invoking backchannel logout for subject id {subjectId} and session id {sessionId}", session.SubjectId, session.SessionId);
@@ -164,7 +164,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 SessionId = session.SessionId,
                 Types = PersistedGrantTokenTypes,
                 ClientIds = clientsToCoordinate
-            });
+            }, ct);
         }
 
         if (Options.ServerSideSessions.ExpiredSessionsTriggerBackchannelLogout || clientsToCoordinate.Count > 0)

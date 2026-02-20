@@ -66,15 +66,15 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.GetUserConsent");
 
         var key = GetConsentKey(subjectId, clientId);
-        var consent = await GetItemAsync(key);
+        var consent = await GetItemAsync(key, default);
         if (consent == null)
         {
             var legacyKey = GetConsentKey(subjectId, clientId, useHexEncoding: false);
-            consent = await GetItemAsync(legacyKey);
+            consent = await GetItemAsync(legacyKey, default);
             if (consent != null)
             {
                 await StoreUserConsentAsync(consent); // Write back the consent record to update its key
-                await RemoveItemAsync(legacyKey);
+                await RemoveItemAsync(legacyKey, default);
             }
         }
 
@@ -92,6 +92,6 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.RemoveUserConsent");
 
         var key = GetConsentKey(subjectId, clientId);
-        return RemoveItemAsync(key);
+        return RemoveItemAsync(key, default);
     }
 }

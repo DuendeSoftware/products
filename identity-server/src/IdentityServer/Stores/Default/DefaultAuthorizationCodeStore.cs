@@ -32,26 +32,26 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     }
 
     /// <inheritdoc/>
-    public Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code, CT _)
+    public Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.StoreAuthorizationCode");
 
-        return CreateItemAsync(code, code.ClientId, code.Subject.GetSubjectId(), code.SessionId, code.Description, code.CreationTime, code.Lifetime);
+        return CreateItemAsync(code, code.ClientId, code.Subject.GetSubjectId(), code.SessionId, code.Description, code.CreationTime, code.Lifetime, ct);
     }
 
     /// <inheritdoc/>
-    public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code, CT _)
+    public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.GetAuthorizationCode");
 
-        return GetItemAsync(code);
+        return GetItemAsync(code, ct);
     }
 
     /// <inheritdoc/>
-    public Task RemoveAuthorizationCodeAsync(string code, CT _)
+    public Task RemoveAuthorizationCodeAsync(string code, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.RemoveAuthorizationCode");
 
-        return RemoveItemAsync(code);
+        return RemoveItemAsync(code, ct);
     }
 }

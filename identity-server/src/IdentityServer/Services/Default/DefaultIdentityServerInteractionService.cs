@@ -177,7 +177,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         if (user != null)
         {
             var subject = user.GetSubjectId();
-            return await _grants.GetAllGrantsAsync(subject);
+            return await _grants.GetAllGrantsAsync(subject, default);
         }
 
         return Enumerable.Empty<Grant>();
