@@ -128,13 +128,13 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
                     {
                         _logger.LogDebug("Failed to validate token as access token. Possible incorrect token_type_hint parameter.");
                     }
-                    claims = await GetRefreshTokenClaimsAsync(token, client);
+                    claims = await GetRefreshTokenClaimsAsync(token, client, ct);
                 }
             }
             else
             {
                 // try refresh token
-                claims = await GetRefreshTokenClaimsAsync(token, client);
+                claims = await GetRefreshTokenClaimsAsync(token, client, ct);
                 if (claims == null)
                 {
                     // fall back to access token
@@ -181,9 +181,9 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     /// <summary>
     /// Attempt to obtain the claims for a token as a refresh token for a client.
     /// </summary>
-    private async Task<IEnumerable<Claim>> GetRefreshTokenClaimsAsync(string token, Client client)
+    private async Task<IEnumerable<Claim>> GetRefreshTokenClaimsAsync(string token, Client client, CT ct)
     {
-        var refreshValidationResult = await _refreshTokenService.ValidateRefreshTokenAsync(token, client);
+        var refreshValidationResult = await _refreshTokenService.ValidateRefreshTokenAsync(token, client, ct);
         if (!refreshValidationResult.IsError)
         {
             var iat = ((DateTimeOffset)refreshValidationResult.RefreshToken.CreationTime).ToUnixTimeSeconds();

@@ -112,7 +112,7 @@ internal class TokenRevocationEndpoint : IEndpointHandler
         }
 
         _logger.LogTrace("Calling into token revocation response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestValidationResult);
+        var response = await _responseGenerator.ProcessAsync(requestValidationResult, context.RequestAborted);
 
         if (response.Success)
         {

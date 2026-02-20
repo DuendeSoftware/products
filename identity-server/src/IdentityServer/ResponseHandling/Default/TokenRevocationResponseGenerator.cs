@@ -51,12 +51,8 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
         Logger = logger;
     }
 
-    /// <summary>
-    /// Creates the revocation endpoint response and processes the revocation request.
-    /// </summary>
-    /// <param name="validationResult">The userinfo request validation result.</param>
-    /// <returns></returns>
-    public virtual async Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult)
+    /// <inheritdoc/>
+    public virtual async Task<TokenRevocationResponse> ProcessAsync(TokenRevocationRequestValidationResult validationResult, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRevocationResponseGenerator.Process");
 
@@ -70,22 +66,22 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
         if (validationResult.TokenTypeHint == Constants.TokenTypeHints.AccessToken)
         {
             Logger.LogTrace("Hint was for access token");
-            response.Success = await RevokeAccessTokenAsync(validationResult);
+            response.Success = await RevokeAccessTokenAsync(validationResult, ct);
         }
         else if (validationResult.TokenTypeHint == Constants.TokenTypeHints.RefreshToken)
         {
             Logger.LogTrace("Hint was for refresh token");
-            response.Success = await RevokeRefreshTokenAsync(validationResult);
+            response.Success = await RevokeRefreshTokenAsync(validationResult, ct);
         }
         else
         {
             Logger.LogTrace("No hint for token type");
 
-            response.Success = await RevokeAccessTokenAsync(validationResult);
+            response.Success = await RevokeAccessTokenAsync(validationResult, ct);
 
             if (!response.Success)
             {
-                response.Success = await RevokeRefreshTokenAsync(validationResult);
+                response.Success = await RevokeRefreshTokenAsync(validationResult, ct);
                 response.TokenType = Constants.TokenTypeHints.RefreshToken;
             }
             else
@@ -100,16 +96,16 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     /// <summary>
     /// Revoke access token only if it belongs to client doing the request.
     /// </summary>
-    protected virtual async Task<bool> RevokeAccessTokenAsync(TokenRevocationRequestValidationResult validationResult)
+    protected virtual async Task<bool> RevokeAccessTokenAsync(TokenRevocationRequestValidationResult validationResult, CT ct)
     {
-        var token = await ReferenceTokenStore.GetReferenceTokenAsync(validationResult.Token, default);
+        var token = await ReferenceTokenStore.GetReferenceTokenAsync(validationResult.Token, ct);
 
         if (token != null)
         {
             if (token.ClientId == validationResult.Client.ClientId)
             {
                 Logger.LogDebug("Access token revoked");
-                await ReferenceTokenStore.RemoveReferenceTokenAsync(validationResult.Token, default);
+                await ReferenceTokenStore.RemoveReferenceTokenAsync(validationResult.Token, ct);
             }
             else
             {
@@ -125,17 +121,17 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     /// <summary>
     /// Revoke refresh token only if it belongs to client doing the request
     /// </summary>
-    protected virtual async Task<bool> RevokeRefreshTokenAsync(TokenRevocationRequestValidationResult validationResult)
+    protected virtual async Task<bool> RevokeRefreshTokenAsync(TokenRevocationRequestValidationResult validationResult, CT ct)
     {
-        var token = await RefreshTokenStore.GetRefreshTokenAsync(validationResult.Token, default);
+        var token = await RefreshTokenStore.GetRefreshTokenAsync(validationResult.Token, ct);
 
         if (token != null)
         {
             if (token.ClientId == validationResult.Client.ClientId)
             {
                 Logger.LogDebug("Refresh token revoked");
-                await RefreshTokenStore.RemoveRefreshTokenAsync(validationResult.Token, default);
-                await ReferenceTokenStore.RemoveReferenceTokensAsync(token.SubjectId, token.ClientId, token.SessionId, default);
+                await RefreshTokenStore.RemoveRefreshTokenAsync(validationResult.Token, ct);
+                await ReferenceTokenStore.RemoveReferenceTokensAsync(token.SubjectId, token.ClientId, token.SessionId, ct);
             }
             else
             {

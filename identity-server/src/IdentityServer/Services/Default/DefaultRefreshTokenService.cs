@@ -66,13 +66,8 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         Logger = logger;
     }
 
-    /// <summary>
-    /// Validates a refresh token
-    /// </summary>
-    /// <param name="tokenHandle">The token handle.</param>
-    /// <param name="client">The client.</param>
-    /// <returns></returns>
-    public virtual async Task<TokenValidationResult> ValidateRefreshTokenAsync(string tokenHandle, Client client)
+    /// <inheritdoc/>
+    public virtual async Task<TokenValidationResult> ValidateRefreshTokenAsync(string tokenHandle, Client client, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultRefreshTokenService.ValidateRefreshToken");
 
@@ -87,7 +82,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         /////////////////////////////////////////////
         // check if refresh token is valid
         /////////////////////////////////////////////
-        var refreshToken = await RefreshTokenStore.GetRefreshTokenAsync(tokenHandle, default);
+        var refreshToken = await RefreshTokenStore.GetRefreshTokenAsync(tokenHandle, ct);
         if (refreshToken == null)
         {
             Logger.LogWarning("Invalid refresh token");
@@ -174,7 +169,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     /// <returns>
     /// The refresh token handle
     /// </returns>
-    public virtual async Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request)
+    public virtual async Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultRefreshTokenService.CreateRefreshToken");
 
@@ -218,7 +213,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         };
         refreshToken.SetAccessToken(request.AccessToken, request.RequestedResourceIndicator);
 
-        var handle = await RefreshTokenStore.StoreRefreshTokenAsync(refreshToken, default);
+        var handle = await RefreshTokenStore.StoreRefreshTokenAsync(refreshToken, ct);
         return handle;
     }
 
@@ -228,7 +223,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
     /// <returns>
     /// The refresh token handle
     /// </returns>
-    public virtual async Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request)
+    public virtual async Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.UpdateRefreshToken");
 
@@ -245,7 +240,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             {
                 Logger.LogDebug("Token usage is one-time only and refresh behavior is delete. Deleting current handle, and generating new handle");
 
-                await RefreshTokenStore.RemoveRefreshTokenAsync(handle, default);
+                await RefreshTokenStore.RemoveRefreshTokenAsync(handle, ct);
             }
             else
             {
@@ -255,7 +250,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
                 if (request.RefreshToken.ConsumedTime == null)
                 {
                     request.RefreshToken.ConsumedTime = TimeProvider.GetUtcNow().UtcDateTime;
-                    await RefreshTokenStore.UpdateRefreshTokenAsync(handle, request.RefreshToken, default);
+                    await RefreshTokenStore.UpdateRefreshTokenAsync(handle, request.RefreshToken, ct);
                 }
             }
 
@@ -292,12 +287,12 @@ public class DefaultRefreshTokenService : IRefreshTokenService
         {
             // set it to null so that we save non-consumed token
             request.RefreshToken.ConsumedTime = null;
-            handle = await RefreshTokenStore.StoreRefreshTokenAsync(request.RefreshToken, default);
+            handle = await RefreshTokenStore.StoreRefreshTokenAsync(request.RefreshToken, ct);
             Logger.LogDebug("Created refresh token in store");
         }
         else if (needsUpdate)
         {
-            await RefreshTokenStore.UpdateRefreshTokenAsync(handle, request.RefreshToken, default);
+            await RefreshTokenStore.UpdateRefreshTokenAsync(handle, request.RefreshToken, ct);
             Logger.LogDebug("Updated refresh token in store");
         }
         else
