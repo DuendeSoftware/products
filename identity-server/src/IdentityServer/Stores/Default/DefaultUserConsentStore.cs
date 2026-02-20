@@ -42,56 +42,42 @@ public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentS
         }
     }
 
-    /// <summary>
-    /// Stores the user consent asynchronously.
-    /// </summary>
-    /// <param name="consent">The consent.</param>
-    /// <returns></returns>
-    public Task StoreUserConsentAsync(Consent consent)
+    /// <inheritdoc/>
+    public Task StoreUserConsentAsync(Consent consent, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.StoreUserConsent");
 
         var key = GetConsentKey(consent.SubjectId, consent.ClientId);
-        return StoreItemAsync(key, consent, consent.ClientId, consent.SubjectId, null, null, consent.CreationTime, consent.Expiration);
+        return StoreItemAsync(key, consent, consent.ClientId, consent.SubjectId, null, null, consent.CreationTime, consent.Expiration, ct: ct);
     }
 
-    /// <summary>
-    /// Gets the user consent asynchronously.
-    /// </summary>
-    /// <param name="subjectId">The subject identifier.</param>
-    /// <param name="clientId">The client identifier.</param>
-    /// <returns></returns>
-    public async Task<Consent> GetUserConsentAsync(string subjectId, string clientId)
+    /// <inheritdoc/>
+    public async Task<Consent> GetUserConsentAsync(string subjectId, string clientId, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.GetUserConsent");
 
         var key = GetConsentKey(subjectId, clientId);
-        var consent = await GetItemAsync(key, default);
+        var consent = await GetItemAsync(key, ct);
         if (consent == null)
         {
             var legacyKey = GetConsentKey(subjectId, clientId, useHexEncoding: false);
-            consent = await GetItemAsync(legacyKey, default);
+            consent = await GetItemAsync(legacyKey, ct);
             if (consent != null)
             {
-                await StoreUserConsentAsync(consent); // Write back the consent record to update its key
-                await RemoveItemAsync(legacyKey, default);
+                await StoreUserConsentAsync(consent, ct); // Write back the consent record to update its key
+                await RemoveItemAsync(legacyKey, ct);
             }
         }
 
         return consent;
     }
 
-    /// <summary>
-    /// Removes the user consent asynchronously.
-    /// </summary>
-    /// <param name="subjectId">The subject identifier.</param>
-    /// <param name="clientId">The client identifier.</param>
-    /// <returns></returns>
-    public Task RemoveUserConsentAsync(string subjectId, string clientId)
+    /// <inheritdoc/>
+    public Task RemoveUserConsentAsync(string subjectId, string clientId, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultUserConsentStore.RemoveUserConsent");
 
         var key = GetConsentKey(subjectId, clientId);
-        return RemoveItemAsync(key, default);
+        return RemoveItemAsync(key, ct);
     }
 }

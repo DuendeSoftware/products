@@ -57,21 +57,21 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             CreationTime = DateTime.UtcNow,
             ClientId = "client2",
             SubjectId = "123",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             CreationTime = DateTime.UtcNow,
             ClientId = "client1",
             SubjectId = "456",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
 
         var handle1 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -196,19 +196,19 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             ClientId = "client2",
             SubjectId = "123",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             ClientId = "client1",
             SubjectId = "456",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
 
         var handle1 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -511,7 +511,7 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
 
         var grants = await _subject.GetAllGrantsAsync("123", _ct);
 
@@ -554,13 +554,13 @@ public class DefaultPersistedGrantServiceTests
             ClientId = "client1",
             SubjectId = "123",
             Scopes = new string[] { "foo1", "foo2" }
-        });
+        }, _ct);
         await _userConsent.StoreUserConsentAsync(new Consent()
         {
             ClientId = "client2",
             SubjectId = "123",
             Scopes = new string[] { "foo3" }
-        });
+        }, _ct);
 
         var grants = await _subject.GetAllGrantsAsync("123", _ct);
 

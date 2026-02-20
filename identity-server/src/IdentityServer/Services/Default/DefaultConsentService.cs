@@ -100,7 +100,7 @@ public class DefaultConsentService : IConsentService
             return true;
         }
 
-        var consent = await UserConsentStore.GetUserConsentAsync(subject.GetSubjectId(), client.ClientId);
+        var consent = await UserConsentStore.GetUserConsentAsync(subject.GetSubjectId(), client.ClientId, default);
 
         if (consent == null)
         {
@@ -111,7 +111,7 @@ public class DefaultConsentService : IConsentService
         if (consent.Expiration.HasExpired(TimeProvider.GetUtcNow().UtcDateTime))
         {
             Logger.LogDebug("Consent found in consent store is expired, consent is required");
-            await UserConsentStore.RemoveUserConsentAsync(consent.SubjectId, consent.ClientId);
+            await UserConsentStore.RemoveUserConsentAsync(consent.SubjectId, consent.ClientId, default);
             return true;
         }
 
@@ -179,13 +179,13 @@ public class DefaultConsentService : IConsentService
                     consent.Expiration = consent.CreationTime.AddSeconds(client.ConsentLifetime.Value);
                 }
 
-                await UserConsentStore.StoreUserConsentAsync(consent);
+                await UserConsentStore.StoreUserConsentAsync(consent, default);
             }
             else
             {
                 Logger.LogDebug("Client allows remembering consent, and no scopes provided. Removing consent from consent store for subject: {subject}", subject.GetSubjectId());
 
-                await UserConsentStore.RemoveUserConsentAsync(subjectId, clientId);
+                await UserConsentStore.RemoveUserConsentAsync(subjectId, clientId, default);
             }
         }
     }
