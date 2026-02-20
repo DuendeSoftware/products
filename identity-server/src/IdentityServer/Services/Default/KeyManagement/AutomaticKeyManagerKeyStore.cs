@@ -77,7 +77,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
             return Enumerable.Empty<SigningCredentials>();
         }
 
-        var keyContainers = await _keyManager.GetCurrentKeysAsync();
+        var keyContainers = await _keyManager.GetCurrentKeysAsync(default);
         var credentials = keyContainers.Select(x => new SigningCredentials(x.ToSecurityKey(), x.Algorithm));
         return credentials;
     }
@@ -90,7 +90,7 @@ public class AutomaticKeyManagerKeyStore : IAutomaticKeyManagerKeyStore
             return Enumerable.Empty<SecurityKeyInfo>();
         }
 
-        var containers = await _keyManager.GetAllKeysAsync();
+        var containers = await _keyManager.GetAllKeysAsync(default);
         var keys = containers.Select(x => new SecurityKeyInfo
         {
             Key = x.ToSecurityKey(),

@@ -96,7 +96,7 @@ public class DefaultTokenService : ITokenService
         request.Validate();
 
         // todo: Dom, add a test for this. validate the at and c hashes are correct for the id_token when the client's alg doesn't match the server default.
-        var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.ValidatedRequest.Client.AllowedIdentityTokenSigningAlgorithms);
+        var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.ValidatedRequest.Client.AllowedIdentityTokenSigningAlgorithms, default);
         if (credential == null)
         {
             throw new InvalidOperationException("No signing credential is configured.");

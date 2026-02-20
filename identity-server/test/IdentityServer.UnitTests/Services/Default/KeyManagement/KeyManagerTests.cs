@@ -121,7 +121,7 @@ public class KeyManagerTests
     {
         var id = CreateAndStoreKey(_options.KeyManagement.PropagationTime.Add(TimeSpan.FromHours(1)));
 
-        var keys = await _subject.GetCurrentKeysAsync();
+        var keys = await _subject.GetCurrentKeysAsync(_ct);
         var key = keys.Single();
         key.Id.ShouldBe(id);
     }
@@ -496,7 +496,7 @@ public class KeyManagerTests
         var key5 = CreateAndStoreKey(_options.KeyManagement.PropagationTime);
         var key6 = CreateAndStoreKey(_options.KeyManagement.PropagationTime.Subtract(TimeSpan.FromSeconds(1)));
 
-        var keys = await _subject.GetAllKeysAsync();
+        var keys = await _subject.GetAllKeysAsync(_ct);
 
         _mockKeyStore.DeleteWasCalled.ShouldBeTrue();
         _mockKeyStore.Keys.Select(x => x.Id).ShouldBe([key3, key4, key5, key6]);
@@ -514,7 +514,7 @@ public class KeyManagerTests
         var key5 = CreateAndStoreKey(_options.KeyManagement.PropagationTime);
         var key6 = CreateAndStoreKey(_options.KeyManagement.PropagationTime.Subtract(TimeSpan.FromSeconds(1)));
 
-        var keys = await _subject.GetAllKeysAsync();
+        var keys = await _subject.GetAllKeysAsync(_ct);
 
         _mockKeyStore.DeleteWasCalled.ShouldBeFalse();
         _mockKeyStore.Keys.Select(x => x.Id).ShouldBe([key1, key2, key3, key4, key5, key6]);

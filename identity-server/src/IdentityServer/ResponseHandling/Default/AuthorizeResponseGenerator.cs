@@ -186,7 +186,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
 
             if (Options.EmitStateHash && request.State.IsPresent())
             {
-                var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms);
+                var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms, default);
                 if (credential == null)
                 {
                     throw new InvalidOperationException("No signing credential is configured.");
@@ -234,7 +234,7 @@ public class AuthorizeResponseGenerator : IAuthorizeResponseGenerator
         string stateHash = null;
         if (Options.EmitStateHash && request.State.IsPresent())
         {
-            var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms);
+            var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.Client.AllowedIdentityTokenSigningAlgorithms, default);
             if (credential == null)
             {
                 throw new InvalidOperationException("No signing credential is configured.");

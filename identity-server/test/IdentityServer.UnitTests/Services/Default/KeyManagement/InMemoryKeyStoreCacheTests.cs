@@ -10,6 +10,7 @@ namespace UnitTests.Services.Default.KeyManagement;
 public class InMemoryKeyStoreCacheTests
 {
     private InMemoryKeyStoreCache _subject;
+    private readonly CT _ct = TestContext.Current.CancellationToken;
     private FakeTimeProvider _mockTimeProvider = new FakeTimeProvider(new DateTimeOffset(new DateTime(2018, 3, 1, 9, 0, 0)));
 
     public InMemoryKeyStoreCacheTests() => _subject = new InMemoryKeyStoreCache(_mockTimeProvider);
@@ -23,18 +24,18 @@ public class InMemoryKeyStoreCacheTests
             new RsaKeyContainer() { Created = _mockTimeProvider.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromMinutes(1)) },
             new RsaKeyContainer() { Created = _mockTimeProvider.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromMinutes(2)) },
         };
-        await _subject.StoreKeysAsync(keys, TimeSpan.FromMinutes(1));
+        await _subject.StoreKeysAsync(keys, TimeSpan.FromMinutes(1), _ct);
 
-        var result = await _subject.GetKeysAsync();
+        var result = await _subject.GetKeysAsync(_ct);
         result.ShouldBeSameAs(keys);
 
         // Verify keys remain cached as time advances within expiration window
         _mockTimeProvider.SetUtcNow(now.Add(TimeSpan.FromSeconds(59)));
-        result = await _subject.GetKeysAsync();
+        result = await _subject.GetKeysAsync(_ct);
         result.ShouldBeSameAs(keys);
 
         _mockTimeProvider.SetUtcNow(now.Add(TimeSpan.FromMinutes(1)));
-        result = await _subject.GetKeysAsync();
+        result = await _subject.GetKeysAsync(_ct);
         result.ShouldBeSameAs(keys);
     }
 
@@ -47,10 +48,10 @@ public class InMemoryKeyStoreCacheTests
             new RsaKeyContainer() { Created = _mockTimeProvider.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromMinutes(1)) },
             new RsaKeyContainer() { Created = _mockTimeProvider.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromMinutes(2)) },
         };
-        await _subject.StoreKeysAsync(keys, TimeSpan.FromMinutes(1));
+        await _subject.StoreKeysAsync(keys, TimeSpan.FromMinutes(1), _ct);
 
         _mockTimeProvider.SetUtcNow(now.Add(TimeSpan.FromSeconds(61)));
-        var result = await _subject.GetKeysAsync();
+        var result = await _subject.GetKeysAsync(_ct);
         result.ShouldBeNull();
     }
 }

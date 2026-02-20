@@ -106,7 +106,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         // jwks
         if (Options.Discovery.ShowKeySet)
         {
-            if ((await Keys.GetValidationKeysAsync()).Any())
+            if ((await Keys.GetValidationKeysAsync(default)).Any())
             {
                 entries.Add(OidcConstants.Discovery.JwksUri, baseUrl + ProtocolRoutePaths.DiscoveryWebKeys);
             }
@@ -342,7 +342,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             AddSigningAlgorithmsForEndpointIfNeeded(OidcConstants.Discovery.IntrospectionEndpointAuthSigningAlgorithmsSupported, entries, supportedAuthMethods);
         }
 
-        var signingCredentials = await Keys.GetAllSigningCredentialsAsync();
+        var signingCredentials = await Keys.GetAllSigningCredentialsAsync(default);
         if (signingCredentials.Any())
         {
             var signingAlgorithms = signingCredentials.Select(c => c.Algorithm).Distinct();
@@ -464,7 +464,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
 
         var webKeys = new List<Models.JsonWebKey>();
 
-        foreach (var key in await Keys.GetValidationKeysAsync())
+        foreach (var key in await Keys.GetValidationKeysAsync(default))
         {
             if (key.Key is X509SecurityKey x509Key)
             {

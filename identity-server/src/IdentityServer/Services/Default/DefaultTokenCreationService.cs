@@ -128,7 +128,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.CreateJwt");
 
-        var credential = await Keys.GetSigningCredentialsAsync(token.AllowedSigningAlgorithms);
+        var credential = await Keys.GetSigningCredentialsAsync(token.AllowedSigningAlgorithms, default);
 
         if (credential == null)
         {

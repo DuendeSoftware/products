@@ -37,7 +37,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     }
 
     /// <inheritdoc/>
-    public async Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string> allowedAlgorithms = null)
+    public async Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string> allowedAlgorithms, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetSigningCredentials");
 
@@ -63,7 +63,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
         }
 
         var credential =
-            (await GetAllSigningCredentialsAsync()).FirstOrDefault(c => allowedAlgorithms.Contains(c.Algorithm));
+            (await GetAllSigningCredentialsAsync(ct)).FirstOrDefault(c => allowedAlgorithms.Contains(c.Algorithm));
         if (credential is null)
         {
             throw new InvalidOperationException(
@@ -74,7 +74,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync()
+    public async Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetAllSigningCredentials");
 
@@ -99,7 +99,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync()
+    public async Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultKeyMaterialService.GetValidationKeys");
 

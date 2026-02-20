@@ -94,7 +94,7 @@ internal class TokenValidator : ITokenValidator
         _log.ClientName = client.ClientName;
         _logger.LogDebug("Client found: {clientId} / {clientName}", client.ClientId, client.ClientName);
 
-        var keys = await _keys.GetValidationKeysAsync();
+        var keys = await _keys.GetValidationKeysAsync(default);
         var result = await ValidateJwtAsync(token, keys, audience: clientId, validateLifetime: validateLifetime, ct: ct);
 
         result.Client = client;
@@ -148,7 +148,7 @@ internal class TokenValidator : ITokenValidator
             _log.AccessTokenType = AccessTokenType.Jwt.ToString();
             result = await ValidateJwtAsync(
                 token,
-                await _keys.GetValidationKeysAsync(),
+                await _keys.GetValidationKeysAsync(default),
                 ct: ct);
         }
         else
