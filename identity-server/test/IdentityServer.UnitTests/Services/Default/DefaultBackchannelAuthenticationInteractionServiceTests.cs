@@ -108,7 +108,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AdditionalClaims = { new Claim("foo", "bar") },
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
-        });
+        }, _ct);
 
         var item = _mockStore.Items[requestId];
         item.IsComplete.ShouldBeTrue();
@@ -136,7 +136,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
         };
         var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
-        var f = async () => await _subject.CompleteLoginRequestAsync(null);
+        var f = async () => await _subject.CompleteLoginRequestAsync(null, _ct);
         await f.ShouldThrowAsync<ArgumentNullException>();
     }
 
@@ -165,7 +165,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AdditionalClaims = { new Claim("foo", "bar") },
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
-        });
+        }, _ct);
         var exception = await f.ShouldThrowAsync<InvalidOperationException>();
         exception.Message.ShouldBe("More scopes consented than originally requested.");
     }
@@ -195,7 +195,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AdditionalClaims = { new Claim("foo", "bar") },
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
-        });
+        }, _ct);
         var exception = await f.ShouldThrowAsync<InvalidOperationException>();
         exception.Message.ShouldBe("User's subject id: 'invalid' does not match subject id for backchannel authentication request: '123'.");
     }
@@ -224,7 +224,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             //    AdditionalClaims = { new Claim("foo", "bar") },
             //    AuthenticationMethods = { "phone", "pin" }
             //}.CreatePrincipal()
-        });
+        }, _ct);
         var exception = await f.ShouldThrowAsync<InvalidOperationException>();
         exception.Message.ShouldBe("Invalid subject.");
     }
@@ -253,7 +253,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AdditionalClaims = { new Claim("foo", "bar") },
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
-        });
+        }, _ct);
         var exception = await f.ShouldThrowAsync<InvalidOperationException>();
         exception.Message.ShouldBe("Invalid backchannel authentication request id.");
     }
@@ -286,7 +286,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             ScopesValuesConsented = new string[] { "scope1", "scope2" },
             SessionId = "ignored",
             //Subject = 
-        });
+        }, _ct);
 
         var item = _mockStore.Items[requestId];
         item.SessionId.ShouldBe("session id");
@@ -324,7 +324,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
                 AdditionalClaims = { new Claim("foo", "bar") },
                 AuthenticationMethods = { "phone", "pin" }
             }.CreatePrincipal()
-        });
+        }, _ct);
 
         var item = _mockStore.Items[requestId];
         item.Subject.HasClaim("idp", "local").ShouldBeTrue();

@@ -108,7 +108,7 @@ public class Consent : PageModel
         if (result != null)
         {
             // communicate outcome of consent back to identityserver
-            await _interaction.CompleteLoginRequestAsync(result);
+            await _interaction.CompleteLoginRequestAsync(result, HttpContext.RequestAborted);
 
             return RedirectToPage("/Ciba/All");
         }
