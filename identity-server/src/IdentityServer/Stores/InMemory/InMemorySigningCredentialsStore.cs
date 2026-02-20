@@ -24,7 +24,7 @@ public class InMemorySigningCredentialsStore : ISigningCredentialStore
     /// Gets the signing credentials.
     /// </summary>
     /// <returns></returns>
-    public Task<SigningCredentials> GetSigningCredentialsAsync()
+    public Task<SigningCredentials> GetSigningCredentialsAsync(CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemorySigningCredentialsStore.GetSigningCredentials");
 

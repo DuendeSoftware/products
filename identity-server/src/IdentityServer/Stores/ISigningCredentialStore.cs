@@ -14,6 +14,7 @@ public interface ISigningCredentialStore
     /// <summary>
     /// Gets the signing credentials.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<SigningCredentials> GetSigningCredentialsAsync();
+    Task<SigningCredentials> GetSigningCredentialsAsync(CT ct);
 }
