@@ -185,22 +185,22 @@ public class ServerSideTicketStore : IServerSideTicketStore
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<UserSession>> GetSessionsAsync(SessionFilter filter, CT ct = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetSessions");
 
-        var sessions = await _store.GetSessionsAsync(filter, cancellationToken);
+        var sessions = await _store.GetSessionsAsync(filter, ct);
 
         return AsUserSessions(sessions);
 
     }
 
     /// <inheritdoc />
-    public async Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CancellationToken cancellationToken = default)
+    public async Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CT ct = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.QuerySessions");
 
-        var results = await _store.QuerySessionsAsync(filter, cancellationToken);
+        var results = await _store.QuerySessionsAsync(filter, ct);
 
         var tickets = AsUserSessions(results.Results);
 
@@ -219,11 +219,11 @@ public class ServerSideTicketStore : IServerSideTicketStore
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<UserSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct = default)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ServerSideTicketStore.GetAndRemoveExpiredSessions");
 
-        var sessions = await _store.GetAndRemoveExpiredSessionsAsync(count, cancellationToken);
+        var sessions = await _store.GetAndRemoveExpiredSessionsAsync(count, ct);
 
         return AsUserSessions(sessions);
     }

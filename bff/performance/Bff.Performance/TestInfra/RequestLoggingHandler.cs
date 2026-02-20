@@ -12,17 +12,17 @@ public class RequestLoggingHandler(
     : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+        CT ct)
     {
         if (!shouldLog(request))
         {
-            return await base.SendAsync(request, cancellationToken);
+            return await base.SendAsync(request, ct);
         }
 
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            var result = await base.SendAsync(request, cancellationToken);
+            var result = await base.SendAsync(request, ct);
 
             log.LogInformation("Executing {method} on {url} returned {statuscode} in {ms} ms",
                 request.Method,

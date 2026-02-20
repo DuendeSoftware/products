@@ -60,7 +60,7 @@ public class BffFrontendSigninTests : BffTestBase
 
         Bff.OnConfigureApp += app =>
         {
-            app.MapGet(pathString, (HttpContext c, CancellationToken ct) => "ok");
+            app.MapGet(pathString, (HttpContext c, CT ct) => "ok");
         };
 
         await InitializeAsync();

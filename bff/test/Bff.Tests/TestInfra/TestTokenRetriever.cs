@@ -11,7 +11,7 @@ public class TestTokenRetriever : IAccessTokenRetriever
     public AccessTokenRetrievalContext? UsedContext { get; set; }
 
     public Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context,
-        CancellationToken ct = default)
+        CT ct = default)
     {
         UsedContext = context;
         return Task.FromResult<AccessTokenResult>(new NoAccessTokenResult());

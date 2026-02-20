@@ -117,7 +117,7 @@ public class ServerSideTokenStoreTests
 
 
         public Task SetUserTokenAsync(UserToken token, AuthenticationProperties authenticationProperties,
-            UserTokenRequestParameters? parameters = null, CancellationToken ct = new CancellationToken())
+            UserTokenRequestParameters? parameters = null, CT ct = new CT())
         {
             Stored = token;
             return Task.CompletedTask;
@@ -127,7 +127,7 @@ public class ServerSideTokenStoreTests
             UserTokenRequestParameters? parameters = null) => Stored = null;
 
         public Task<Scheme> GetSchemeAsync(UserTokenRequestParameters? parameters = null,
-            CancellationToken ct = new CancellationToken()) =>
+            CT ct = new CT()) =>
             Task.FromResult(Scheme.Bearer);
     }
 

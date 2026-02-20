@@ -33,11 +33,11 @@ public class DefaultSessionManagementService : ISessionManagementService
     }
 
     /// <inheritdoc/>
-    public Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CancellationToken cancellationToken = default)
+    public Task<QueryResult<UserSession>> QuerySessionsAsync(SessionQuery filter = null, CT ct = default)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSessionManagementService.QuerySessions");
 
-        return _serverSideTicketStore.QuerySessionsAsync(filter, cancellationToken);
+        return _serverSideTicketStore.QuerySessionsAsync(filter, ct);
     }
 
     private static readonly string[] OnlyTokenTypes = new[] {
@@ -48,7 +48,7 @@ public class DefaultSessionManagementService : ISessionManagementService
     };
 
     /// <inheritdoc/>
-    public async Task RemoveSessionsAsync(RemoveSessionsContext context, CancellationToken cancellationToken = default)
+    public async Task RemoveSessionsAsync(RemoveSessionsContext context, CT ct = default)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultSessionManagementService.RemoveSessions");
 
@@ -91,7 +91,7 @@ public class DefaultSessionManagementService : ISessionManagementService
                     SubjectId = context.SubjectId,
                     SessionId = context.SessionId,
                 },
-                cancellationToken);
+                ct);
 
             foreach (var session in sessions)
             {
@@ -113,7 +113,7 @@ public class DefaultSessionManagementService : ISessionManagementService
             {
                 SubjectId = context.SubjectId,
                 SessionId = context.SessionId,
-            }, cancellationToken);
+            }, ct);
         }
     }
 }

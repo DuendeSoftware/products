@@ -41,7 +41,7 @@ internal sealed partial class ConformanceReportEndpoint
     /// <summary>
     /// Processes requests for the HTML conformance report.
     /// </summary>
-    public async Task<IResult> GetHtmlReportAsync(HttpContext context, CancellationToken cancellationToken = default)
+    public async Task<IResult> GetHtmlReportAsync(HttpContext context, CT ct = default)
     {
         LogProcessingRequest();
 
@@ -53,7 +53,7 @@ internal sealed partial class ConformanceReportEndpoint
 
         try
         {
-            var report = await _assessmentService.GenerateReportAsync(cancellationToken: cancellationToken);
+            var report = await _assessmentService.GenerateReportAsync(ct: ct);
 
             using var slice = Duende.ConformanceReport.Slices.ConformanceReport.Create(report);
             var sb = new StringBuilder();

@@ -21,7 +21,7 @@ internal class DefaultSilentLoginCallbackEndpoint(
 {
 
     /// <inheritdoc />
-    public async Task ProcessRequestAsync(HttpContext context, CancellationToken cancellationToken = default)
+    public async Task ProcessRequestAsync(HttpContext context, CT ct = default)
     {
         logger.ProcessingSilentLoginCallbackRequest(LogLevel.Debug);
 
@@ -55,7 +55,7 @@ internal class DefaultSilentLoginCallbackEndpoint(
 
         logger.SilentLoginEndpointRenderingHtml(LogLevel.Debug, origin.Sanitize(), result);
 
-        await context.Response.WriteAsync(html, Encoding.UTF8, cancellationToken);
+        await context.Response.WriteAsync(html, Encoding.UTF8, ct);
     }
 
     private bool TryGetOriginFromReferer(HttpContext context, out string referer)

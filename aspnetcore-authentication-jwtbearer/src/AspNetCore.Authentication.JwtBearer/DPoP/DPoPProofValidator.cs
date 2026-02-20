@@ -70,7 +70,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     /// <summary>
     /// Validates the DPoP proof.
     /// </summary>
-    public async Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, CancellationToken cancellationToken = default)
+    public async Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, CT ct = default)
     {
         using var activity = Tracing.ActivitySource.StartActivity("DPoPProofValidator.Validate");
 
@@ -113,7 +113,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         }
 
         // we do replay at the end, so we only add to the reply cache if everything else is ok
-        await ValidateReplay(context, result, cancellationToken);
+        await ValidateReplay(context, result, ct);
         if (result.IsError)
         {
             Logger.LogInformation("Detected replay of DPoP proof token");
@@ -368,7 +368,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
     internal async Task ValidateReplay(
         DPoPProofValidationContext context,
         DPoPProofValidationResult result,
-        CancellationToken cancellationToken = default)
+        CT ct = default)
     {
         var dPoPOptions = OptionsMonitor.Get(context.Scheme);
 
@@ -377,7 +377,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
             return;
         }
 
-        if (await ReplayCache.Exists(result.TokenIdHash!, cancellationToken))
+        if (await ReplayCache.Exists(result.TokenIdHash!, ct))
         {
             result.SetError("Detected DPoP proof token replay.");
             return;
@@ -400,7 +400,7 @@ internal class DPoPProofValidator : IDPoPProofValidator
         // longer than the likelihood of proof token expiration, which is done before replay
         skew *= 2;
         var cacheDuration = dPoPOptions.ProofTokenLifetime + skew;
-        await ReplayCache.Add(result.TokenIdHash!, cacheDuration, cancellationToken);
+        await ReplayCache.Add(result.TokenIdHash!, cacheDuration, ct);
     }
 
     /// <summary>

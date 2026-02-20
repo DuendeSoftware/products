@@ -38,7 +38,7 @@ public class TokenCleanupHost : IHostedService
     /// <summary>
     /// Starts the token cleanup polling.
     /// </summary>
-    public Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CT ct)
     {
         if (_options.EnableTokenCleanup)
         {
@@ -49,9 +49,9 @@ public class TokenCleanupHost : IHostedService
 
             _logger.LogDebug("Starting grant removal");
 
-            _source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _source = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
-            Task.Factory.StartNew(() => StartInternalAsync(_source.Token), cancellationToken, TaskCreationOptions.None, TaskScheduler.Default);
+            Task.Factory.StartNew(() => StartInternalAsync(_source.Token), ct, TaskCreationOptions.None, TaskScheduler.Default);
         }
 
         return Task.CompletedTask;
@@ -60,7 +60,7 @@ public class TokenCleanupHost : IHostedService
     /// <summary>
     /// Stops the token cleanup polling.
     /// </summary>
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CT ct)
     {
         if (_options.EnableTokenCleanup)
         {
@@ -76,7 +76,7 @@ public class TokenCleanupHost : IHostedService
         }
     }
 
-    private async Task StartInternalAsync(CancellationToken cancellationToken)
+    private async Task StartInternalAsync(CT ct)
     {
         // Start the first run at a random interval.
         var delay = _options.FuzzTokenCleanupStart
@@ -87,7 +87,7 @@ public class TokenCleanupHost : IHostedService
 
         while (true)
         {
-            if (cancellationToken.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
             {
                 _logger.LogDebug("CancellationRequested. Exiting.");
                 break;
@@ -95,7 +95,7 @@ public class TokenCleanupHost : IHostedService
 
             try
             {
-                await Task.Delay(delay, cancellationToken);
+                await Task.Delay(delay, ct);
             }
             catch (TaskCanceledException)
             {
@@ -108,27 +108,27 @@ public class TokenCleanupHost : IHostedService
                 break;
             }
 
-            if (cancellationToken.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
             {
                 _logger.LogDebug("CancellationRequested. Exiting.");
                 break;
             }
 
-            await RemoveExpiredGrantsAsync(cancellationToken);
+            await RemoveExpiredGrantsAsync(ct);
 
             // For all subsequent runs use the configured interval.
             delay = CleanupInterval;
         }
     }
 
-    private async Task RemoveExpiredGrantsAsync(CancellationToken cancellationToken = default)
+    private async Task RemoveExpiredGrantsAsync(CT ct = default)
     {
         try
         {
             await using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope())
             {
                 var tokenCleanupService = serviceScope.ServiceProvider.GetRequiredService<ITokenCleanupService>();
-                await tokenCleanupService.CleanupGrantsAsync(cancellationToken);
+                await tokenCleanupService.CleanupGrantsAsync(ct);
             }
         }
         catch (Exception ex)

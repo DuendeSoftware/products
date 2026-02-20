@@ -23,7 +23,7 @@ public class AntiForgeryHandlerTests
 
         var client = new HttpClient(sut);
 
-        await client.SendAsync(request, CancellationToken.None);
+        await client.SendAsync(request, CT.None);
 
         request.Headers.ShouldContain(h => h.Key == "X-CSRF" && h.Value.Contains("1"));
     }

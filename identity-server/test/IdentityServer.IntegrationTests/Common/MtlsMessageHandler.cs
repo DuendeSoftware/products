@@ -16,7 +16,7 @@ public class MtlsMessageHandler : DelegatingHandler
     public MtlsMessageHandler(HttpMessageHandler innerHandler, X509Certificate2 clientCertificate)
         : base(innerHandler) => _clientCertificate = clientCertificate;
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
     {
         // Add the client certificate as a base64 encoded header for the test middleware to pick up
         if (_clientCertificate != null)
@@ -26,6 +26,6 @@ public class MtlsMessageHandler : DelegatingHandler
             request.Headers.Add("X-Test-Client-Certificate", certBase64);
         }
 
-        return await base.SendAsync(request, cancellationToken);
+        return await base.SendAsync(request, ct);
     }
 }

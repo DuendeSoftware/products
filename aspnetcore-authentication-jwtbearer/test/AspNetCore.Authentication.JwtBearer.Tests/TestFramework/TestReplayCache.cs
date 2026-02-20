@@ -14,14 +14,14 @@ public class TestReplayCache : IReplayCache
     // Configuration for test behavior
     public Func<string, bool>? ExistsFunc { get; set; }
 
-    public Task Add(string jtiHash, TimeSpan expiration, CancellationToken cancellationToken = default)
+    public Task Add(string jtiHash, TimeSpan expiration, CT ct = default)
     {
         _addCalls.Add((jtiHash, expiration));
         _cache[jtiHash] = (expiration, DateTime.UtcNow);
         return Task.CompletedTask;
     }
 
-    public Task<bool> Exists(string jtiHash, CancellationToken cancellationToken = default)
+    public Task<bool> Exists(string jtiHash, CT ct = default)
     {
         _existsCalls.Add(jtiHash);
 

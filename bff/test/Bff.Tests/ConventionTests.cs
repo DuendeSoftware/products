@@ -273,7 +273,7 @@ public class ConventionTests
                     }
 
                     var ctParam = parameters.Last();
-                    if (ctParam.ParameterType != typeof(System.Threading.CancellationToken))
+                    if (ctParam.ParameterType != typeof(CT))
                     {
                         failures.Add($"{type.FullName}.{method.Name}: Last parameter should be CancellationToken.");
                         continue;

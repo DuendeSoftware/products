@@ -77,7 +77,7 @@ internal class BffCacheClearingHostedService(
         }
     }
 
-    private async Task ProcessFrontendChangeAsync(BffFrontend changedFrontend, CT cancellationToken)
+    private async Task ProcessFrontendChangeAsync(BffFrontend changedFrontend, CT ct)
     {
         try
         {
@@ -86,12 +86,12 @@ internal class BffCacheClearingHostedService(
             // Clear all cached entries for the client credentials cache
             // This is necessary to ensure that the new frontend's client credentials are used
             var clientCredentialsClientName = OpenIdConnectTokenManagementDefaults.ToClientName(changedFrontend.OidcSchemeName);
-            await hybridCache.RemoveByTagAsync(clientCredentialsClientName, cancellationToken);
+            await hybridCache.RemoveByTagAsync(clientCredentialsClientName, ct);
 
             // Also clear the index.html cache for the frontend
-            await hybridCache.RemoveAsync(StaticFilesHttpClient.BuildCacheKey(changedFrontend), cancellationToken);
+            await hybridCache.RemoveAsync(StaticFilesHttpClient.BuildCacheKey(changedFrontend), ct);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             // Expected when the service is stopping
             throw;

@@ -22,5 +22,5 @@ internal class DefaultCancellationTokenProvider : ICancellationTokenProvider
     /// <summary>
     /// Provides access to the cancellation token from the http context
     /// </summary>
-    public CancellationToken CancellationToken => _httpContextAccessor.HttpContext?.RequestAborted ?? CancellationToken.None;
+    public CT CancellationToken => _httpContextAccessor.HttpContext?.RequestAborted ?? CT.None;
 }

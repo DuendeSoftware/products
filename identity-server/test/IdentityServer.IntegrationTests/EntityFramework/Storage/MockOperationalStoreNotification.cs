@@ -15,14 +15,14 @@ public class MockOperationalStoreNotification : IOperationalStoreNotification
     public Action<IEnumerable<PersistedGrant>> OnPersistedGrantsRemoved = _ => { };
     public Action<IEnumerable<DeviceFlowCodes>> OnDeviceFlowCodesRemoved = _ => { };
 
-    public Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CancellationToken cancellationToken = default)
+    public Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CT ct = default)
     {
         OnPersistedGrantsRemoved(persistedGrants);
         PersistedGrantNotifications.Add(persistedGrants);
         return Task.CompletedTask;
     }
 
-    public Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CancellationToken cancellationToken = default)
+    public Task DeviceCodesRemovedAsync(IEnumerable<DeviceFlowCodes> deviceCodes, CT ct = default)
     {
         OnDeviceFlowCodesRemoved(deviceCodes);
         DeviceFlowCodeNotifications.Append(deviceCodes);

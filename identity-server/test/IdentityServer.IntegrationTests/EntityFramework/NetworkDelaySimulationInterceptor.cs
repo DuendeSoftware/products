@@ -12,9 +12,9 @@ public class NetworkDelaySimulationInterceptor(TimeSpan delay) : DbCommandInterc
         DbCommand command,
         CommandEventData eventData,
         InterceptionResult<DbDataReader> result,
-        CancellationToken cancellationToken = default)
+        CT ct = default)
     {
-        await Task.Delay(delay, cancellationToken);
+        await Task.Delay(delay, ct);
         return result;
     }
 

@@ -15,10 +15,10 @@ internal class DiagnosticSummary(
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.BFF.Diagnostics.Summary");
 
-    public async Task PrintSummaryAsync(CancellationToken cancellationToken = default)
+    public async Task PrintSummaryAsync(CT ct = default)
     {
         var bffOptions = options.Value;
-        var jsonMemory = await diagnosticDataService.GetJsonBytesAsync(cancellationToken);
+        var jsonMemory = await diagnosticDataService.GetJsonBytesAsync(ct);
         var span = jsonMemory.Span;
 
         var chunkSize = bffOptions.Diagnostics.ChunkSize;

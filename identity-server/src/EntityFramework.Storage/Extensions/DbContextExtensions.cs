@@ -18,7 +18,7 @@ public static class DbContextExtensions
     /// <summary>
     /// Saves changes and handles concurrency exceptions.
     /// </summary>
-    public static async Task<ICollection<T>> SaveChangesWithConcurrencyCheckAsync<T>(this IPersistedGrantDbContext context, ILogger logger, CancellationToken cancellationToken = default)
+    public static async Task<ICollection<T>> SaveChangesWithConcurrencyCheckAsync<T>(this IPersistedGrantDbContext context, ILogger logger, CT ct = default)
         where T : class
     {
         var list = new List<T>();
@@ -29,7 +29,7 @@ public static class DbContextExtensions
         {
             try
             {
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(ct);
                 return list;
             }
             catch (DbUpdateConcurrencyException ex)

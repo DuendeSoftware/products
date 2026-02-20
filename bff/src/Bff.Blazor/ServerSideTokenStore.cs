@@ -32,7 +32,7 @@ internal class ServerSideTokenStore(
         ?? throw new ArgumentException("AuthenticationStateProvider must implement IHostEnvironmentAuthenticationStateProvider");
 
     public async Task<TokenResult<TokenForParameters>> GetTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null,
-        CancellationToken ct = default)
+        CT ct = default)
     {
         logger.RetrievingTokenForUser(LogLevel.Debug, user.Identity?.Name);
         var session = await GetSession(user);

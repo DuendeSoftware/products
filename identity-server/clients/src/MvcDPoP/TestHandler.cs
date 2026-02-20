@@ -8,9 +8,9 @@ public class TestHandler : DelegatingHandler
     private readonly ILogger<TestHandler> _logger;
 
     public TestHandler(ILogger<TestHandler> logger) => _logger = logger;
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
     {
-        var response = await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, ct);
         if (response.Headers.Contains("WWW-Authenticate"))
         {
             foreach (var value in response.Headers.WwwAuthenticate)

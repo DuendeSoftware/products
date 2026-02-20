@@ -11,5 +11,5 @@ public interface IDPoPProofValidator
     /// <summary>
     /// Validates the DPoP proof.
     /// </summary>
-    Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, CancellationToken cancellationToken = default);
+    Task<DPoPProofValidationResult> Validate(DPoPProofValidationContext context, CT ct = default);
 }

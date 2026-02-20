@@ -143,7 +143,7 @@ public class BffRemoteApiTests : BffTestBase
         public bool WasCalled = false;
 
         public Task<TokenResult<UserToken>> GetAccessTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null,
-            CancellationToken ct = new CancellationToken())
+            CT ct = new CT())
         {
             WasCalled = true;
             // We don't care actually about the result token. Just if it was called or not. 
@@ -151,7 +151,7 @@ public class BffRemoteApiTests : BffTestBase
         }
 
         public Task RevokeRefreshTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null,
-            CancellationToken ct = new CancellationToken()) => throw new NotImplementedException();
+            CT ct = new CT()) => throw new NotImplementedException();
     }
 
     [Fact]
