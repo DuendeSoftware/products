@@ -154,23 +154,24 @@ public class DefaultUserSession : IUserSession
     /// </summary>
     /// <param name="principal"></param>
     /// <param name="properties"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">
     /// principal
     /// or
     /// properties
     /// </exception>
-    public virtual async Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties)
+    public virtual async Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties, CT ct)
     {
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(properties);
 
-        var currentSubjectId = (await GetUserAsync())?.GetSubjectId();
+        var currentSubjectId = (await GetUserAsync(ct))?.GetSubjectId();
         var newSubjectId = principal.GetSubjectId();
 
         if (properties.GetSessionId() == null)
         {
-            var currSid = await GetSessionIdAsync();
+            var currSid = await GetSessionIdAsync(ct);
             if (newSubjectId == currentSubjectId && currSid != null)
             {
                 properties.SetSessionId(currSid);
@@ -198,8 +199,9 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Gets the current authenticated user.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task<ClaimsPrincipal> GetUserAsync()
+    public virtual async Task<ClaimsPrincipal> GetUserAsync(CT ct)
     {
         await AuthenticateAsync();
 
@@ -209,8 +211,9 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Gets the current session identifier.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task<string> GetSessionIdAsync()
+    public virtual async Task<string> GetSessionIdAsync(CT ct)
     {
         await AuthenticateAsync();
 
@@ -222,25 +225,27 @@ public class DefaultUserSession : IUserSession
     /// session identifier. If there is no sid, the cookie is removed. If there
     /// is a sid, and the session identifier cookie is missing, it is issued. 
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task EnsureSessionIdCookieAsync()
+    public virtual async Task EnsureSessionIdCookieAsync(CT ct)
     {
-        var sid = await GetSessionIdAsync();
+        var sid = await GetSessionIdAsync(ct);
         if (sid != null)
         {
             IssueSessionIdCookie(sid);
         }
         else
         {
-            await RemoveSessionIdCookieAsync();
+            await RemoveSessionIdCookieAsync(ct);
         }
     }
 
     /// <summary>
     /// Removes the session identifier cookie.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual Task RemoveSessionIdCookieAsync()
+    public virtual Task RemoveSessionIdCookieAsync(CT ct)
     {
         if (HttpContext.Request.Cookies.ContainsKey(CheckSessionCookieName))
         {
@@ -297,9 +302,10 @@ public class DefaultUserSession : IUserSession
     /// Adds a client to the list of clients the user has signed into during their session.
     /// </summary>
     /// <param name="clientId">The client identifier.</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">clientId</exception>
-    public virtual async Task AddClientIdAsync(string clientId)
+    public virtual async Task AddClientIdAsync(string clientId, CT ct)
     {
         ArgumentNullException.ThrowIfNull(clientId);
 
@@ -318,8 +324,9 @@ public class DefaultUserSession : IUserSession
     /// <summary>
     /// Gets the list of clients the user has signed into during their session.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public virtual async Task<IEnumerable<string>> GetClientListAsync()
+    public virtual async Task<IEnumerable<string>> GetClientListAsync(CT ct)
     {
         await AuthenticateAsync();
 

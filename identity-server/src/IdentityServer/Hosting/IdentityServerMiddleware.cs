@@ -56,7 +56,7 @@ public class IdentityServerMiddleware
     {
         // this will check the authentication session and from it emit the check session
         // cookie needed from JS-based signout clients.
-        await userSession.EnsureSessionIdCookieAsync();
+        await userSession.EnsureSessionIdCookieAsync(context.RequestAborted);
 
         context.Response.OnStarting(async () =>
         {

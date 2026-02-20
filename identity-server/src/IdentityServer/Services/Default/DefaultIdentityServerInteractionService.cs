@@ -75,13 +75,13 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.CreateLogoutContext");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(default);
         if (user != null)
         {
-            var clientIds = await _userSession.GetClientListAsync();
+            var clientIds = await _userSession.GetClientListAsync(default);
             if (clientIds.Any())
             {
-                var sid = await _userSession.GetSessionIdAsync();
+                var sid = await _userSession.GetSessionIdAsync(default);
                 var msg = new Message<LogoutMessage>(new LogoutMessage
                 {
                     SubjectId = user.GetSubjectId(),
@@ -126,7 +126,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
 
         if (subject == null)
         {
-            var user = await _userSession.GetUserAsync();
+            var user = await _userSession.GetUserAsync(default);
             subject = user?.GetSubjectId();
         }
 
@@ -173,7 +173,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAllUserGrants");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(default);
         if (user != null)
         {
             var subject = user.GetSubjectId();
@@ -187,7 +187,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeUserConsent");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(default);
         if (user != null)
         {
             var subject = user.GetSubjectId();
@@ -199,11 +199,11 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.RevokeTokensForCurrentSession");
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(default);
         if (user != null)
         {
             var subject = user.GetSubjectId();
-            var sessionId = await _userSession.GetSessionIdAsync();
+            var sessionId = await _userSession.GetSessionIdAsync(default);
             await _grants.RemoveAllGrantsAsync(subject, sessionId: sessionId);
         }
     }

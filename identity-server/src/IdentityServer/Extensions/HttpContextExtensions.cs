@@ -51,7 +51,7 @@ public static class HttpContextExtensions
     internal static async Task<string> GetIdentityServerSignoutFrameCallbackUrlAsync(this HttpContext context, LogoutMessage logoutMessage = null)
     {
         var userSession = context.RequestServices.GetRequiredService<IUserSession>();
-        var user = await userSession.GetUserAsync();
+        var user = await userSession.GetUserAsync(context.RequestAborted);
         var currentSubId = user?.GetSubjectId();
 
         LogoutNotificationContext endSessionMsg = null;
@@ -64,7 +64,7 @@ public static class HttpContextExtensions
             // check if current user is same, since we might have new clients (albeit unlikely)
             if (currentSubId == logoutMessage.SubjectId)
             {
-                clientIds = clientIds.Union(await userSession.GetClientListAsync());
+                clientIds = clientIds.Union(await userSession.GetClientListAsync(context.RequestAborted));
             }
 
             if (await AnyClientHasFrontChannelLogout(logoutMessage.ClientIds))
@@ -80,13 +80,13 @@ public static class HttpContextExtensions
         else if (currentSubId != null)
         {
             // see if current user has any clients they need to signout of
-            var clientIds = await userSession.GetClientListAsync();
+            var clientIds = await userSession.GetClientListAsync(context.RequestAborted);
             if (clientIds.Any() && await AnyClientHasFrontChannelLogout(clientIds))
             {
                 endSessionMsg = new LogoutNotificationContext
                 {
                     SubjectId = currentSubId,
-                    SessionId = await userSession.GetSessionIdAsync(),
+                    SessionId = await userSession.GetSessionIdAsync(context.RequestAborted),
                     ClientIds = clientIds
                 };
             }

@@ -75,13 +75,13 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
             return LogAndReturnError("Invalid client", "Device authorization failure - requesting client is invalid");
         }
 
-        var subject = await _session.GetUserAsync();
+        var subject = await _session.GetUserAsync(ct);
         if (subject == null)
         {
             return LogAndReturnError("No user present in device flow request", "Device authorization failure - no user found");
         }
 
-        var sid = await _session.GetSessionIdAsync();
+        var sid = await _session.GetSessionIdAsync(ct);
 
         deviceAuth.IsAuthorized = true;
         deviceAuth.Subject = subject;

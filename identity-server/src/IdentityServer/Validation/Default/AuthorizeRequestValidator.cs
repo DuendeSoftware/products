@@ -797,7 +797,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         if (request.Subject.IsAuthenticated())
         {
-            var sessionId = await _userSession.GetSessionIdAsync();
+            var sessionId = await _userSession.GetSessionIdAsync(default);
             if (sessionId.IsPresent())
             {
                 request.SessionId = sessionId;

@@ -94,7 +94,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
 
         var list = new List<BackchannelUserLoginRequest>();
 
-        var user = await _session.GetUserAsync();
+        var user = await _session.GetUserAsync(ct);
         if (user != null)
         {
             _logger.LogDebug("No user present");
@@ -129,7 +129,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
             throw new InvalidOperationException("Invalid backchannel authentication request id.");
         }
 
-        var subject = completionRequest.Subject ?? await _session.GetUserAsync();
+        var subject = completionRequest.Subject ?? await _session.GetUserAsync(default);
         if (subject == null)
         {
             throw new InvalidOperationException("Invalid subject.");
@@ -141,7 +141,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         }
 
         var sid = (completionRequest.Subject == null) ?
-            await _session.GetSessionIdAsync() :
+            await _session.GetSessionIdAsync(default) :
             completionRequest.SessionId;
 
         if (completionRequest.ScopesValuesConsented != null)

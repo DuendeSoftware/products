@@ -52,7 +52,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
                 parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
             }
 
-            var user = await _userSession.GetUserAsync();
+            var user = await _userSession.GetUserAsync(default);
             var result = await _validator.ValidateAsync(parameters, user);
             if (!result.IsError)
             {
