@@ -194,7 +194,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
 
 
     /// <inheritdoc/>
-    public virtual async Task<bool> ValidateSessionAsync(SessionValidationRequest request)
+    public virtual async Task<bool> ValidateSessionAsync(SessionValidationRequest request, CT ct)
     {
         if (ServerSideSessionStore != null)
         {
@@ -208,7 +208,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 {
                     SubjectId = request.SubjectId,
                     SessionId = request.SessionId
-                }, default);
+                }, ct);
 
                 var valid = sessions.Count > 0 &&
                     sessions.Any(x => x.Expires == null || DateTime.UtcNow < x.Expires.Value);
@@ -238,6 +238,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                         //result in the cookie never being renewed and expiring in a surprising way. Renewing
                         //the ticket also updates the session, so we don't need to do both.
                         if (Options.Authentication.CookieSlidingExpiration &&
+#pragma warning disable CA2016 // ITicketStore interface has no CT parameter
                             await ServerSideTicketStore.RetrieveAsync(session.Key) is
                             { Properties: { IsPersistent: true, AllowRefresh: null or true } } ticket)
                         {
@@ -245,10 +246,11 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                             ticket.Properties.IssuedUtc = session.Renewed;
                             ticket.Properties.ExpiresUtc = session.Expires;
                             await ServerSideTicketStore.RenewAsync(session.Key, ticket);
+#pragma warning restore CA2016
                         }
                         else
                         {
-                            await ServerSideSessionStore.UpdateSessionAsync(session, default);
+                            await ServerSideSessionStore.UpdateSessionAsync(session, ct);
                         }
                     }
                 }

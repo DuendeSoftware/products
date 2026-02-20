@@ -230,7 +230,7 @@ internal class TokenValidator : ITokenValidator
                     SessionId = sid,
                     Client = result.Client,
                     Type = SessionValidationType.AccessToken
-                });
+                }, ct);
 
                 if (!sessionResult)
                 {

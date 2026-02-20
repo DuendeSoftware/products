@@ -13,5 +13,5 @@ internal class StubSessionCoordinationService : ISessionCoordinationService
 
     public Task ProcessLogoutAsync(UserSession session, CT _) => Task.CompletedTask;
 
-    public Task<bool> ValidateSessionAsync(SessionValidationRequest request) => Task.FromResult(true);
+    public Task<bool> ValidateSessionAsync(SessionValidationRequest request, CT _) => Task.FromResult(true);
 }

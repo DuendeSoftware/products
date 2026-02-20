@@ -15,6 +15,8 @@ namespace UnitTests.ResponseHandling;
 
 public class UserInfoResponseGeneratorTests
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     private UserInfoResponseGenerator _subject;
     private MockProfileService _mockProfileService = new MockProfileService();
     private ClaimsPrincipal _user;
@@ -50,7 +52,7 @@ public class UserInfoResponseGeneratorTests
     [Fact]
     public async Task GetRequestedClaimTypesAsync_when_no_scopes_requested_should_return_empty_claim_types()
     {
-        var resources = await _subject.GetRequestedResourcesAsync(null);
+        var resources = await _subject.GetRequestedResourcesAsync(null, _ct);
         var claims = await _subject.GetRequestedClaimTypesAsync(resources);
         claims.ShouldBe(new string[] { });
     }
@@ -61,7 +63,7 @@ public class UserInfoResponseGeneratorTests
         _identityResources.Add(new IdentityResource("id1", new[] { "c1", "c2" }));
         _identityResources.Add(new IdentityResource("id2", new[] { "c2", "c3" }));
 
-        var resources = await _subject.GetRequestedResourcesAsync(new[] { "id1", "id2", "id3" });
+        var resources = await _subject.GetRequestedResourcesAsync(new[] { "id1", "id2", "id3" }, _ct);
         var claims = await _subject.GetRequestedClaimTypesAsync(resources);
         claims.ShouldBe(["c1", "c2", "c3"]);
     }
@@ -72,7 +74,7 @@ public class UserInfoResponseGeneratorTests
         _identityResources.Add(new IdentityResource("id1", new[] { "c1", "c2" }) { Enabled = false });
         _identityResources.Add(new IdentityResource("id2", new[] { "c2", "c3" }));
 
-        var resources = await _subject.GetRequestedResourcesAsync(new[] { "id1", "id2", "id3" });
+        var resources = await _subject.GetRequestedResourcesAsync(new[] { "id1", "id2", "id3" }, _ct);
         var claims = await _subject.GetRequestedClaimTypesAsync(resources);
         claims.ShouldBe(["c2", "c3"]);
     }
@@ -98,7 +100,7 @@ public class UserInfoResponseGeneratorTests
             }
         };
 
-        var claims = await _subject.ProcessAsync(result);
+        var claims = await _subject.ProcessAsync(result, _ct);
 
         _mockProfileService.GetProfileWasCalled.ShouldBeTrue();
         _mockProfileService.ProfileContext.RequestedClaimTypes.ShouldBe(["foo", "bar"]);
@@ -141,7 +143,7 @@ public class UserInfoResponseGeneratorTests
             }
         };
 
-        var claims = await _subject.ProcessAsync(result);
+        var claims = await _subject.ProcessAsync(result, _ct);
 
         claims.ShouldContainKey("email");
         claims["email"].ShouldBe("fred@gmail.com");
@@ -178,7 +180,7 @@ public class UserInfoResponseGeneratorTests
             }
         };
 
-        var claims = await _subject.ProcessAsync(result);
+        var claims = await _subject.ProcessAsync(result, _ct);
 
         claims.ShouldContainKey("sub");
         claims["sub"].ShouldBe("bob");
@@ -209,7 +211,7 @@ public class UserInfoResponseGeneratorTests
             }
         };
 
-        Func<Task> act = () => _subject.ProcessAsync(result);
+        Func<Task> act = () => _subject.ProcessAsync(result, _ct);
 
         var exception = await act.ShouldThrowAsync<InvalidOperationException>();
         exception.Message.ShouldMatch(".*subject.*");

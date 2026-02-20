@@ -51,9 +51,10 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     /// Creates the response.
     /// </summary>
     /// <param name="validationResult">The userinfo request validation result.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="System.InvalidOperationException">Profile service returned incorrect subject value</exception>
-    public virtual async Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult)
+    public virtual async Task<Dictionary<string, object>> ProcessAsync(UserInfoRequestValidationResult validationResult, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("UserInfoResponseGenerator.Process");
 
@@ -62,7 +63,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
         // extract scopes and turn into requested claim types
         var scopes = validationResult.TokenValidationResult.Claims.Where(c => c.Type == JwtClaimTypes.Scope).Select(c => c.Value);
 
-        var validatedResources = await GetRequestedResourcesAsync(scopes);
+        var validatedResources = await GetRequestedResourcesAsync(scopes, ct);
         var requestedClaimTypes = await GetRequestedClaimTypesAsync(validatedResources);
 
         Logger.LogDebug("Requested claim types: {claimTypes}", requestedClaimTypes.ToSpaceSeparatedString());
@@ -75,7 +76,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
             requestedClaimTypes);
         context.RequestedResources = validatedResources;
 
-        await Profile.GetProfileDataAsync(context, default);
+        await Profile.GetProfileDataAsync(context, ct);
         var profileClaims = context.IssuedClaims;
 
         // construct outgoing claims
@@ -109,8 +110,9 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     ///  Gets the identity resources from the scopes.
     /// </summary>
     /// <param name="scopes"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected internal virtual async Task<ResourceValidationResult> GetRequestedResourcesAsync(IEnumerable<string> scopes)
+    protected internal virtual async Task<ResourceValidationResult> GetRequestedResourcesAsync(IEnumerable<string> scopes, CT ct)
     {
         if (scopes == null || !scopes.Any())
         {
@@ -121,7 +123,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
         Logger.LogDebug("Scopes in access token: {scopes}", scopeString);
 
         // if we ever parameterized identity scopes, then we would need to invoke the resource validator's parse API here
-        var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes, default);
+        var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes, ct);
 
         var resources = new Resources(identityResources, Enumerable.Empty<ApiResource>(), Enumerable.Empty<ApiScope>());
         var result = new ResourceValidationResult(resources);

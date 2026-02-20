@@ -48,7 +48,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetAuthorizationContext");
 
-        var result = await _returnUrlParser.ParseAsync(returnUrl);
+        var result = await _returnUrlParser.ParseAsync(returnUrl, default);
 
         if (result != null)
         {

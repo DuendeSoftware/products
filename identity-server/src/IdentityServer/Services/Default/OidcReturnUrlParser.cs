@@ -38,7 +38,7 @@ internal class OidcReturnUrlParser : IReturnUrlParser
         _authorizationParametersMessageStore = authorizationParametersMessageStore;
     }
 
-    public async Task<AuthorizationRequest> ParseAsync(string returnUrl)
+    public async Task<AuthorizationRequest> ParseAsync(string returnUrl, CT ct)
     {
         using var activity = Tracing.ValidationActivitySource.StartActivity("OidcReturnUrlParser.Parse");
 
@@ -48,11 +48,11 @@ internal class OidcReturnUrlParser : IReturnUrlParser
             if (_authorizationParametersMessageStore != null)
             {
                 var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
-                var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId, default);
+                var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId, ct);
                 parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
             }
 
-            var user = await _userSession.GetUserAsync(default);
+            var user = await _userSession.GetUserAsync(ct);
             var result = await _validator.ValidateAsync(parameters, user);
             if (!result.IsError)
             {

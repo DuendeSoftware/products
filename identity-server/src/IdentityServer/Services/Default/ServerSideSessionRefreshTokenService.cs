@@ -57,7 +57,7 @@ internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
                 SessionId = result.RefreshToken.SessionId,
                 Client = result.Client,
                 Type = SessionValidationType.RefreshToken
-            });
+            }, ct);
 
             if (!valid)
             {

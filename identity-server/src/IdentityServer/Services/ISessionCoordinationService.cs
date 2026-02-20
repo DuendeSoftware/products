@@ -27,7 +27,9 @@ public interface ISessionCoordinationService
     /// Validates client request, and if valid extends server-side session.
     /// Returns false if the session is invalid, true otherwise.
     /// </summary>
-    Task<bool> ValidateSessionAsync(SessionValidationRequest request);
+    /// <param name="request">The session validation request.</param>
+    /// <param name="ct">The cancellation token.</param>
+    Task<bool> ValidateSessionAsync(SessionValidationRequest request, CT ct);
 }
 
 /// <summary>
