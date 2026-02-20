@@ -33,7 +33,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
 
     public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode, CT ct)
     {
-        var deviceAuth = await _devices.FindByUserCodeAsync(userCode);
+        var deviceAuth = await _devices.FindByUserCodeAsync(userCode, ct);
         if (deviceAuth == null)
         {
             return null;
@@ -63,7 +63,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         ArgumentNullException.ThrowIfNull(userCode);
         ArgumentNullException.ThrowIfNull(consent);
 
-        var deviceAuth = await _devices.FindByUserCodeAsync(userCode);
+        var deviceAuth = await _devices.FindByUserCodeAsync(userCode, ct);
         if (deviceAuth == null)
         {
             return LogAndReturnError("Invalid user code", "Device authorization failure - user code is invalid");
@@ -96,7 +96,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
             //await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _clock.UtcNow.UtcDateTime));
         }
 
-        await _devices.UpdateByUserCodeAsync(userCode, deviceAuth);
+        await _devices.UpdateByUserCodeAsync(userCode, deviceAuth, ct);
 
         return new DeviceFlowInteractionResult();
     }

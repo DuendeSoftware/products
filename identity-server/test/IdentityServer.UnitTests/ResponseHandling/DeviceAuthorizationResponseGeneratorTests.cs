@@ -17,6 +17,7 @@ namespace UnitTests.ResponseHandling;
 
 public class DeviceAuthorizationResponseGeneratorTests
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
     private readonly List<IdentityResource> identityResources = new List<IdentityResource> { new IdentityResources.OpenId(), new IdentityResources.Profile() };
     private readonly List<ApiResource> apiResources = new List<ApiResource> { new ApiResource("resource") { Scopes = { "api1" } } };
     private readonly List<ApiScope> scopes = new List<ApiScope> { new ApiScope("api1") };
@@ -50,7 +51,7 @@ public class DeviceAuthorizationResponseGeneratorTests
     [Fact]
     public async Task ProcessAsync_when_validationresult_null_expect_exception()
     {
-        Func<Task> act = () => generator.ProcessAsync(null, TestBaseUrl);
+        Func<Task> act = () => generator.ProcessAsync(null, TestBaseUrl, _ct);
         await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
@@ -58,14 +59,14 @@ public class DeviceAuthorizationResponseGeneratorTests
     public async Task ProcessAsync_when_validationresult_client_null_expect_exception()
     {
         var validationResult = new DeviceAuthorizationRequestValidationResult(new ValidatedDeviceAuthorizationRequest());
-        Func<Task> act = () => generator.ProcessAsync(validationResult, TestBaseUrl);
+        Func<Task> act = () => generator.ProcessAsync(validationResult, TestBaseUrl, _ct);
         await act.ShouldThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public async Task ProcessAsync_when_baseurl_null_expect_exception()
     {
-        Func<Task> act = () => generator.ProcessAsync(testResult, null);
+        Func<Task> act = () => generator.ProcessAsync(testResult, null, _ct);
         await act.ShouldThrowAsync<ArgumentException>();
     }
 
@@ -76,9 +77,9 @@ public class DeviceAuthorizationResponseGeneratorTests
         timeProvider.SetUtcNow(creationTime);
 
         testResult.ValidatedRequest.Client.UserCodeType = FakeUserCodeGenerator.UserCodeTypeValue;
-        await deviceFlowCodeService.StoreDeviceAuthorizationAsync(FakeUserCodeGenerator.TestCollisionUserCode, new DeviceCode());
+        await deviceFlowCodeService.StoreDeviceAuthorizationAsync(FakeUserCodeGenerator.TestCollisionUserCode, new DeviceCode(), _ct);
 
-        var response = await generator.ProcessAsync(testResult, TestBaseUrl);
+        var response = await generator.ProcessAsync(testResult, TestBaseUrl, _ct);
 
         response.UserCode.ShouldBe(FakeUserCodeGenerator.TestUniqueUserCode);
     }
@@ -91,9 +92,9 @@ public class DeviceAuthorizationResponseGeneratorTests
 
         fakeUserCodeGenerator.RetryLimit = 1;
         testResult.ValidatedRequest.Client.UserCodeType = FakeUserCodeGenerator.UserCodeTypeValue;
-        await deviceFlowCodeService.StoreDeviceAuthorizationAsync(FakeUserCodeGenerator.TestCollisionUserCode, new DeviceCode());
+        await deviceFlowCodeService.StoreDeviceAuthorizationAsync(FakeUserCodeGenerator.TestCollisionUserCode, new DeviceCode(), _ct);
 
-        var act = () => generator.ProcessAsync(testResult, TestBaseUrl);
+        var act = () => generator.ProcessAsync(testResult, TestBaseUrl, _ct);
 
         act.ShouldThrow<InvalidOperationException>();
     }
@@ -110,11 +111,11 @@ public class DeviceAuthorizationResponseGeneratorTests
             apiResources.Where(x => x.Name == "resource"),
             scopes.Where(x => x.Name == "api1")));
 
-        var response = await generator.ProcessAsync(testResult, TestBaseUrl);
+        var response = await generator.ProcessAsync(testResult, TestBaseUrl, _ct);
 
         response.UserCode.ShouldNotBeNullOrWhiteSpace();
 
-        var userCode = await deviceFlowCodeService.FindByUserCodeAsync(response.UserCode);
+        var userCode = await deviceFlowCodeService.FindByUserCodeAsync(response.UserCode, _ct);
         userCode.ShouldNotBeNull();
         userCode.ClientId.ShouldBe(testResult.ValidatedRequest.Client.ClientId);
         userCode.Lifetime.ShouldBe(testResult.ValidatedRequest.Client.DeviceCodeLifetime);
@@ -131,12 +132,12 @@ public class DeviceAuthorizationResponseGeneratorTests
         var creationTime = DateTime.UtcNow;
         timeProvider.SetUtcNow(creationTime);
 
-        var response = await generator.ProcessAsync(testResult, TestBaseUrl);
+        var response = await generator.ProcessAsync(testResult, TestBaseUrl, _ct);
 
         response.DeviceCode.ShouldNotBeNullOrWhiteSpace();
         response.Interval.ShouldBe(options.DeviceFlow.Interval);
 
-        var deviceCode = await deviceFlowCodeService.FindByDeviceCodeAsync(response.DeviceCode);
+        var deviceCode = await deviceFlowCodeService.FindByDeviceCodeAsync(response.DeviceCode, _ct);
         deviceCode.ShouldNotBeNull();
         deviceCode.ClientId.ShouldBe(testResult.ValidatedRequest.Client.ClientId);
         deviceCode.IsOpenId.ShouldBe(testResult.ValidatedRequest.IsOpenIdRequest);
@@ -155,7 +156,7 @@ public class DeviceAuthorizationResponseGeneratorTests
         options.UserInteraction.DeviceVerificationUrl = "/device";
         options.UserInteraction.DeviceVerificationUserCodeParameter = "userCode";
 
-        var response = await generator.ProcessAsync(testResult, baseUrl);
+        var response = await generator.ProcessAsync(testResult, baseUrl, _ct);
 
         response.VerificationUri.ShouldBe("http://localhost:5000/device");
         response.VerificationUriComplete.ShouldStartWith("http://localhost:5000/device?userCode=");
@@ -168,7 +169,7 @@ public class DeviceAuthorizationResponseGeneratorTests
         options.UserInteraction.DeviceVerificationUrl = "http://short/device";
         options.UserInteraction.DeviceVerificationUserCodeParameter = "userCode";
 
-        var response = await generator.ProcessAsync(testResult, baseUrl);
+        var response = await generator.ProcessAsync(testResult, baseUrl, _ct);
 
         response.VerificationUri.ShouldBe("http://short/device");
         response.VerificationUriComplete.ShouldStartWith("http://short/device?userCode=");

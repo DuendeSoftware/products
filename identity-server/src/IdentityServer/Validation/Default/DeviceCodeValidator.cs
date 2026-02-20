@@ -53,7 +53,7 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DeviceCodeValidator.Validate");
 
-        var deviceCode = await _devices.FindByDeviceCodeAsync(context.DeviceCode);
+        var deviceCode = await _devices.FindByDeviceCodeAsync(context.DeviceCode, ct);
 
         if (deviceCode == null)
         {
@@ -116,6 +116,6 @@ internal class DeviceCodeValidator : IDeviceCodeValidator
         context.Request.SessionId = deviceCode.SessionId;
 
         context.Result = new TokenRequestValidationResult(context.Request);
-        await _devices.RemoveByDeviceCodeAsync(context.DeviceCode);
+        await _devices.RemoveByDeviceCodeAsync(context.DeviceCode, ct);
     }
 }

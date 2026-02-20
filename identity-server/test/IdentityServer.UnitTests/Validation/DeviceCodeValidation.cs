@@ -56,7 +56,7 @@ public class DeviceCodeValidation
         var badActor = await _clients.FindClientByIdAsync("codeclient", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service);
 
@@ -81,7 +81,7 @@ public class DeviceCodeValidation
         var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service);
 
@@ -105,7 +105,7 @@ public class DeviceCodeValidation
         var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service);
 
@@ -129,7 +129,7 @@ public class DeviceCodeValidation
         var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service);
 
@@ -153,7 +153,7 @@ public class DeviceCodeValidation
         var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service);
 
@@ -176,7 +176,7 @@ public class DeviceCodeValidation
         var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service, new TestProfileService(false));
 
@@ -198,7 +198,7 @@ public class DeviceCodeValidation
         var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service, throttlingService: new TestDeviceFlowThrottlingService(true));
 
@@ -220,7 +220,7 @@ public class DeviceCodeValidation
         var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
-        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
+        var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode, _ct);
 
         var validator = Factory.CreateDeviceCodeValidator(service);
 
