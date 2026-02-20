@@ -11,7 +11,7 @@ public class MockConsentMessageStore : IConsentMessageStore
 {
     public Dictionary<string, Message<ConsentResponse>> Messages { get; set; } = new Dictionary<string, Message<ConsentResponse>>();
 
-    public Task DeleteAsync(string id)
+    public Task DeleteAsync(string id, CT ct)
     {
         if (id != null && Messages.ContainsKey(id))
         {
@@ -20,7 +20,7 @@ public class MockConsentMessageStore : IConsentMessageStore
         return Task.CompletedTask;
     }
 
-    public Task<Message<ConsentResponse>> ReadAsync(string id)
+    public Task<Message<ConsentResponse>> ReadAsync(string id, CT ct)
     {
         Message<ConsentResponse> val = null;
         if (id != null)
@@ -30,7 +30,7 @@ public class MockConsentMessageStore : IConsentMessageStore
         return Task.FromResult(val);
     }
 
-    public Task WriteAsync(string id, Message<ConsentResponse> message)
+    public Task WriteAsync(string id, Message<ConsentResponse> message, CT ct)
     {
         Messages[id] = message;
         return Task.CompletedTask;

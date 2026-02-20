@@ -230,7 +230,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         };
 
         var endSessionId = parameters[Constants.UIConstants.DefaultRoutePathParams.EndSessionCallback];
-        var endSessionMessage = await EndSessionMessageStore.ReadAsync(endSessionId);
+        var endSessionMessage = await EndSessionMessageStore.ReadAsync(endSessionId, ct);
         if (endSessionMessage?.Data?.ClientIds?.Any() == true)
         {
             result.IsError = false;

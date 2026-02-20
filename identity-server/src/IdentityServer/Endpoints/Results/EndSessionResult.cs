@@ -66,7 +66,7 @@ internal class EndSessionHttpWriter : IHttpResponseWriter<EndSessionResult>
             if (logoutMessage.ContainsPayload)
             {
                 var msg = new Message<LogoutMessage>(logoutMessage, _timeProvider.GetUtcNow().UtcDateTime);
-                id = await _logoutMessageStore.WriteAsync(msg);
+                id = await _logoutMessageStore.WriteAsync(msg, context.RequestAborted);
             }
         }
 

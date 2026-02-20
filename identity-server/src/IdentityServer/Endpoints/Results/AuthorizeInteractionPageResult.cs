@@ -84,7 +84,7 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
 #pragma warning disable CS0618 // Type or member is obsolete
             var msg = new Message<IDictionary<string, string[]>>(result.Request.ToOptimizedFullDictionary());
 #pragma warning restore CS0618 // Type or member is obsolete
-            var id = await _authorizationParametersMessageStore.WriteAsync(msg);
+            var id = await _authorizationParametersMessageStore.WriteAsync(msg, context.RequestAborted);
             returnUrl = returnUrl.AddQueryString(Constants.AuthorizationParamsStore.MessageStoreIdParameterName, id);
         }
         else

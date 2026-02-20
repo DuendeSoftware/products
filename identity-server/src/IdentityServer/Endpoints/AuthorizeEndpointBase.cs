@@ -77,10 +77,10 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         if (checkConsentResponse && _authorizationParametersMessageStore != null)
         {
             var messageStoreId = parameters[Constants.AuthorizationParamsStore.MessageStoreIdParameterName];
-            var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId);
+            var entry = await _authorizationParametersMessageStore.ReadAsync(messageStoreId, ct);
             parameters = entry?.Data.FromFullDictionary() ?? new NameValueCollection();
 
-            await _authorizationParametersMessageStore.DeleteAsync(messageStoreId);
+            await _authorizationParametersMessageStore.DeleteAsync(messageStoreId, ct);
         }
 
         // validate request
@@ -105,7 +105,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
             {
                 var consentRequest = new ConsentRequest(result.ValidatedRequest.Raw, user?.GetSubjectId());
                 consentRequestId = consentRequest.Id;
-                consent = await _consentResponseStore.ReadAsync(consentRequestId);
+                consent = await _consentResponseStore.ReadAsync(consentRequestId, ct);
 
                 if (consent != null && consent.Data == null)
                 {
@@ -155,7 +155,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
         {
             if (consentRequestId != null)
             {
-                await _consentResponseStore.DeleteAsync(consentRequestId);
+                await _consentResponseStore.DeleteAsync(consentRequestId, ct);
             }
         }
     }

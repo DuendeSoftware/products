@@ -16,13 +16,15 @@ public interface IMessageStore<TModel>
     /// Writes the message.
     /// </summary>
     /// <param name="message">The message.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>An identifier for the message</returns>
-    Task<string> WriteAsync(Message<TModel> message);
+    Task<string> WriteAsync(Message<TModel> message, CT ct);
 
     /// <summary>
     /// Reads the message.
     /// </summary>
     /// <param name="id">The identifier.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Message<TModel>> ReadAsync(string id);
+    Task<Message<TModel>> ReadAsync(string id, CT ct);
 }

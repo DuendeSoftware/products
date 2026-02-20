@@ -98,7 +98,7 @@ public static class HttpContextExtensions
             var msg = new Message<LogoutNotificationContext>(endSessionMsg, timeProvider.GetUtcNow().UtcDateTime);
 
             var endSessionMessageStore = context.RequestServices.GetRequiredService<IMessageStore<LogoutNotificationContext>>();
-            var id = await endSessionMessageStore.WriteAsync(msg);
+            var id = await endSessionMessageStore.WriteAsync(msg, context.RequestAborted);
 
             var urls = context.RequestServices.GetRequiredService<IServerUrls>();
             var signoutIframeUrl = urls.BaseUrl.EnsureTrailingSlash() + ProtocolRoutePaths.EndSessionCallback;

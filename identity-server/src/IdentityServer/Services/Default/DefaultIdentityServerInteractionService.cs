@@ -66,7 +66,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultIdentityServerInteractionService.GetLogoutContext");
 
-        var msg = await _logoutMessageStore.ReadAsync(logoutId);
+        var msg = await _logoutMessageStore.ReadAsync(logoutId, default);
         var iframeUrl = await _context.HttpContext.GetIdentityServerSignoutFrameCallbackUrlAsync(msg?.Data);
         return new LogoutRequest(iframeUrl, msg?.Data);
     }
@@ -88,7 +88,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
                     SessionId = sid,
                     ClientIds = clientIds
                 }, _timeProvider.GetUtcNow().UtcDateTime);
-                var id = await _logoutMessageStore.WriteAsync(msg);
+                var id = await _logoutMessageStore.WriteAsync(msg, default);
                 return id;
             }
         }
@@ -102,7 +102,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
 
         if (errorId != null)
         {
-            var result = await _errorMessageStore.ReadAsync(errorId);
+            var result = await _errorMessageStore.ReadAsync(errorId, default);
             var data = result?.Data;
             if (data != null)
             {
@@ -136,7 +136,7 @@ internal class DefaultIdentityServerInteractionService : IIdentityServerInteract
         }
 
         var consentRequest = new ConsentRequest(request, subject);
-        await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _timeProvider.GetUtcNow().UtcDateTime));
+        await _consentMessageStore.WriteAsync(consentRequest.Id, new Message<ConsentResponse>(consent, _timeProvider.GetUtcNow().UtcDateTime), default);
     }
 
     public Task DenyAuthorizationAsync(AuthorizationRequest request, AuthorizationError error, string errorDescription = null)
