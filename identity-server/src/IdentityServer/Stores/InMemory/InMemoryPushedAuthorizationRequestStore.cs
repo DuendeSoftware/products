@@ -17,7 +17,7 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     private readonly ConcurrentDictionary<string, PushedAuthorizationRequest> _repository = new ConcurrentDictionary<string, PushedAuthorizationRequest>();
 
     /// <inheritdoc/>
-    public Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest)
+    public Task StoreAsync(PushedAuthorizationRequest pushedAuthorizationRequest, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Store");
 
@@ -27,7 +27,7 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     }
 
     /// <inheritdoc/>
-    public Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash)
+    public Task<PushedAuthorizationRequest?> GetByHashAsync(string referenceValueHash, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Get");
         _repository.TryGetValue(referenceValueHash, out var request);
@@ -36,7 +36,7 @@ public class InMemoryPushedAuthorizationRequestStore : IPushedAuthorizationReque
     }
 
     /// <inheritdoc/>
-    public Task ConsumeByHashAsync(string referenceValueHash)
+    public Task ConsumeByHashAsync(string referenceValueHash, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryPushedAuthorizationRequestStore.Remove");
         _repository.TryRemove(referenceValueHash, out _);

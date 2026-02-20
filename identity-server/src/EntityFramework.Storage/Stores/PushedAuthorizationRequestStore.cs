@@ -43,13 +43,13 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     }
 
     /// <inheritdoc />
-    public async Task ConsumeByHashAsync(string referenceValueHash)
+    public async Task ConsumeByHashAsync(string referenceValueHash, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PersistedGrantStore.Remove");
         Logger.LogDebug("removing {referenceValueHash} pushed authorization from database", referenceValueHash);
         var numDeleted = await Context.PushedAuthorizationRequests
             .Where(par => par.ReferenceValueHash == referenceValueHash)
-            .ExecuteDeleteAsync(CancellationTokenProvider.CancellationToken);
+            .ExecuteDeleteAsync(ct);
         if (numDeleted != 1)
         {
             Logger.LogWarning("attempted to remove {referenceValueHash} pushed authorization request because it was consumed, but no records were actually deleted.", referenceValueHash);
@@ -57,13 +57,13 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
     }
 
     /// <inheritdoc />
-    public virtual async Task<Models.PushedAuthorizationRequest> GetByHashAsync(string referenceValueHash)
+    public virtual async Task<Models.PushedAuthorizationRequest> GetByHashAsync(string referenceValueHash, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationRequestStore.Get");
 
         var par = (await Context.PushedAuthorizationRequests
                 .AsNoTracking().Where(x => x.ReferenceValueHash == referenceValueHash)
-                .ToArrayAsync(CancellationTokenProvider.CancellationToken))
+                .ToArrayAsync(ct))
                 .SingleOrDefault(x => x.ReferenceValueHash == referenceValueHash);
         var model = par?.ToModel();
 
@@ -74,14 +74,14 @@ public class PushedAuthorizationRequestStore : IPushedAuthorizationRequestStore
 
 
     /// <inheritdoc />
-    public virtual async Task StoreAsync(Models.PushedAuthorizationRequest par)
+    public virtual async Task StoreAsync(Models.PushedAuthorizationRequest par, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("PushedAuthorizationStore.Store");
 
         Context.PushedAuthorizationRequests.Add(par.ToEntity());
         try
         {
-            await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+            await Context.SaveChangesAsync(ct);
         }
         // REVIEW - Is this exception possible, since we don't try to load (and then update) an existing entity?
         // I think it isn't, but what happens if we somehow two calls to StoreAsync with the same PAR are made?
