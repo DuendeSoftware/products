@@ -19,6 +19,7 @@ namespace Duende.IdentityServer.IntegrationTests.Hosting;
 
 public class DynamicProvidersTests
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
     private GenericHost _host;
     private GenericHost _idp1;
     private GenericHost _idp2;
@@ -321,7 +322,7 @@ public class DynamicProvidersTests
         redirectUri.ShouldStartWith("https://server/federation/idp1/signin");
 
         var cache = _host.Resolve<ICache<IdentityProvider>>() as DefaultCache<IdentityProvider>;
-        await cache.RemoveAsync("test");
+        await cache.RemoveAsync("test", _ct);
 
         response = await _host.BrowserClient.GetAsync(redirectUri);
 

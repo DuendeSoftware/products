@@ -279,7 +279,7 @@ public class KeyManager : IKeyManager
 
             if (alg.UseX509Certificate)
             {
-                var iss = await _issuerNameService.GetCurrentAsync();
+                var iss = await _issuerNameService.GetCurrentAsync(ct);
                 container = new X509KeyContainer(rsa, alg.Name, now, _options.KeyManagement.KeyRetirementAge, iss);
             }
             else

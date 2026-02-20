@@ -62,7 +62,7 @@ public class DefaultCache<T> : ICache<T>
     protected string GetKey(string key) => typeof(T).FullName + KeySeparator + key;
 
     /// <inheritdoc/>
-    public Task<T> GetAsync(string key)
+    public Task<T> GetAsync(string key, CT ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Get");
 
@@ -72,7 +72,7 @@ public class DefaultCache<T> : ICache<T>
     }
 
     /// <inheritdoc/>
-    public Task SetAsync(string key, T item, TimeSpan expiration)
+    public Task SetAsync(string key, T item, TimeSpan expiration, CT ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Set");
 
@@ -82,7 +82,7 @@ public class DefaultCache<T> : ICache<T>
     }
 
     /// <inheritdoc/>
-    public Task RemoveAsync(string key)
+    public Task RemoveAsync(string key, CT ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.Remove");
 
@@ -92,7 +92,7 @@ public class DefaultCache<T> : ICache<T>
     }
 
     /// <inheritdoc/>
-    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get)
+    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, CT ct)
     {
         using var activity = Tracing.CacheActivitySource.StartActivity("DefaultCache.GetOrAdd");
 
@@ -102,7 +102,7 @@ public class DefaultCache<T> : ICache<T>
             return null;
         }
 
-        var item = await GetAsync(key);
+        var item = await GetAsync(key, ct);
 
         if (item == null)
         {
@@ -114,7 +114,7 @@ public class DefaultCache<T> : ICache<T>
             try
             {
                 // double check
-                item = await GetAsync(key);
+                item = await GetAsync(key, ct);
 
                 if (item == null)
                 {
@@ -125,7 +125,7 @@ public class DefaultCache<T> : ICache<T>
                     if (item != null)
                     {
                         Logger.LogTrace("Setting item in cache for {cacheKey}", key);
-                        await SetAsync(key, item, duration);
+                        await SetAsync(key, item, duration, ct);
                     }
                 }
                 else

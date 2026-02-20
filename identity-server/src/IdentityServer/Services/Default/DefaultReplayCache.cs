@@ -22,7 +22,7 @@ public class DefaultReplayCache : IReplayCache
     public DefaultReplayCache(IDistributedCache cache) => _cache = cache;
 
     /// <inheritdoc />
-    public async Task AddAsync(string purpose, string handle, DateTimeOffset expiration)
+    public async Task AddAsync(string purpose, string handle, DateTimeOffset expiration, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultReplayCache.Add");
 
@@ -31,14 +31,14 @@ public class DefaultReplayCache : IReplayCache
             AbsoluteExpiration = expiration
         };
 
-        await _cache.SetAsync(Prefix + purpose + handle, [], options);
+        await _cache.SetAsync(Prefix + purpose + handle, [], options, ct);
     }
 
     /// <inheritdoc />
-    public async Task<bool> ExistsAsync(string purpose, string handle)
+    public async Task<bool> ExistsAsync(string purpose, string handle, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultReplayCache.Exists");
 
-        return (await _cache.GetAsync(Prefix + purpose + handle, default)) != null;
+        return (await _cache.GetAsync(Prefix + purpose + handle, ct)) != null;
     }
 }

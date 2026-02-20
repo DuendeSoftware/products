@@ -40,7 +40,7 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
     public async Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, CT ct)
     {
         // Create a reference value
-        var referenceValue = await _handleGeneration.GenerateAsync();
+        var referenceValue = await _handleGeneration.GenerateAsync(ct);
 
         var requestUri = $"{IdentityServerConstants.PushedAuthorizationRequestUri}:{referenceValue}";
 

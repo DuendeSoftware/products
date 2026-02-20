@@ -152,7 +152,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
             return await Tools.IssueJwtAsync(DefaultLogoutTokenLifetime, request.Issuer, IdentityServerConstants.TokenTypes.LogoutToken, claims);
         }
 
-        var issuer = await IssuerNameService.GetCurrentAsync();
+        var issuer = await IssuerNameService.GetCurrentAsync(default);
         return await Tools.IssueJwtAsync(DefaultLogoutTokenLifetime, issuer, IdentityServerConstants.TokenTypes.LogoutToken, claims);
     }
 

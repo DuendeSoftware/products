@@ -61,7 +61,7 @@ public class ValidatingIdentityProviderStore<T> : IIdentityProviderStore
 
             _logger.LogError("Invalid IdentityProvider configuration for scheme {scheme}: {errorMessage}", scheme, context.ErrorMessage);
             Telemetry.Metrics.DynamicIdentityProviderValidationFailure(scheme, context.ErrorMessage);
-            await _events.RaiseAsync(new InvalidIdentityProviderConfiguration(idp, context.ErrorMessage));
+            await _events.RaiseAsync(new InvalidIdentityProviderConfiguration(idp, context.ErrorMessage), ct);
 
             return null;
         }

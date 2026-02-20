@@ -118,7 +118,7 @@ internal class TokenRevocationEndpoint : IEndpointHandler
         {
             _logger.LogInformation("Token revocation complete");
             Telemetry.Metrics.Revocation(clientValidationResult.Client.ClientId);
-            await _events.RaiseAsync(new TokenRevokedSuccessEvent(requestValidationResult, requestValidationResult.Client));
+            await _events.RaiseAsync(new TokenRevokedSuccessEvent(requestValidationResult, requestValidationResult.Client), context.RequestAborted);
         }
         else
         {

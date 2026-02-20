@@ -46,13 +46,13 @@ public class MockCache<T> : ICache<T>
         CacheItems[key] = ci;
     }
 
-    public Task<T> GetAsync(string key)
+    public Task<T> GetAsync(string key, CT ct)
     {
         TryGetValue(key, out var item);
         return Task.FromResult(item);
     }
 
-    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get)
+    public async Task<T> GetOrAddAsync(string key, TimeSpan duration, Func<Task<T>> get, CT ct)
     {
         if (!TryGetValue(key, out var item))
         {
@@ -63,13 +63,13 @@ public class MockCache<T> : ICache<T>
         return item;
     }
 
-    public Task RemoveAsync(string key)
+    public Task RemoveAsync(string key, CT ct)
     {
         CacheItems.Remove(key);
         return Task.CompletedTask;
     }
 
-    public Task SetAsync(string key, T item, TimeSpan expiration)
+    public Task SetAsync(string key, T item, TimeSpan expiration, CT ct)
     {
         Add(key, item, expiration);
         return Task.CompletedTask;

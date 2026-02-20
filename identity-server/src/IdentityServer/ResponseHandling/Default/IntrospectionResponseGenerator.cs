@@ -65,7 +65,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         {
             Logger.LogDebug("Creating introspection response for inactive token.");
             Telemetry.Metrics.Introspection(callerName, false);
-            await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult));
+            await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult), default);
 
             return response;
         }
@@ -98,7 +98,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
         response.Add("scope", scopes.ToSpaceSeparatedString());
 
         Telemetry.Metrics.Introspection(callerName, true);
-        await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult));
+        await Events.RaiseAsync(new TokenIntrospectionSuccessEvent(validationResult), default);
         return response;
     }
 
@@ -129,7 +129,7 @@ public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
             const string errorMessage = "Expected scopes are missing";
             var callerName = validationResult.Api?.Name ?? validationResult.Client.ClientId;
             Telemetry.Metrics.IntrospectionFailure(callerName, errorMessage);
-            await Events.RaiseAsync(new TokenIntrospectionFailureEvent(validationResult.Api.Name, errorMessage, validationResult.Token, apiScopes, tokenScopes.Select(s => s.Value)));
+            await Events.RaiseAsync(new TokenIntrospectionFailureEvent(validationResult.Api.Name, errorMessage, validationResult.Token, apiScopes, tokenScopes.Select(s => s.Value)), default);
         }
 
         return result;

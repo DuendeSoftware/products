@@ -41,7 +41,7 @@ public class DistributedCacheAuthorizationParametersMessageStore : IAuthorizatio
         // same for the "request" param, but it's less of a concern (as it's just a signature check).
         message.Data.Remove(OidcConstants.AuthorizeRequest.RequestUri);
 
-        var key = await _handleGenerationService.GenerateAsync();
+        var key = await _handleGenerationService.GenerateAsync(ct);
         var cacheKey = $"{CacheKeyPrefix}-{key}";
 
         var json = ObjectSerializer.ToString(message);

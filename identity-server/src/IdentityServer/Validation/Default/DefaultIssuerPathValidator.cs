@@ -18,7 +18,7 @@ public class DefaultIssuerPathValidator(IIssuerNameService issuerNameService, IL
         }
 
         //if there is a path, then we should be matching against an explicitly configured issuer
-        var currentIssuer = await issuerNameService.GetCurrentAsync();
+        var currentIssuer = await issuerNameService.GetCurrentAsync(default);
         if (!Uri.TryCreate(currentIssuer, UriKind.Absolute, out var uri))
         {
             logger.LogDebug("Current issuer is not a valid absolute URI: {Issuer}", currentIssuer.SanitizeLogParameter());

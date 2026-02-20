@@ -36,7 +36,7 @@ public class JwtRequestValidator : IJwtRequestValidator
             return _audienceUri;
         }
 
-        return await IssuerNameService.GetCurrentAsync();
+        return await IssuerNameService.GetCurrentAsync(default);
     }
 
     /// <summary>

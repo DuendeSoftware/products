@@ -14,6 +14,7 @@ public class InMemoryCorsPolicyServiceTests
 
     private InMemoryCorsPolicyService _subject;
     private List<Client> _clients = new List<Client>();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     public InMemoryCorsPolicyServiceTests() => _subject = new InMemoryCorsPolicyService(TestLogger.Create<InMemoryCorsPolicyService>(), _clients);
 
@@ -29,7 +30,7 @@ public class InMemoryCorsPolicyServiceTests
             }
         });
 
-        var result = await _subject.IsOriginAllowedAsync("http://foo");
+        var result = await _subject.IsOriginAllowedAsync("http://foo", _ct);
         result.ShouldBeTrue();
     }
 
@@ -47,7 +48,7 @@ public class InMemoryCorsPolicyServiceTests
                 clientOrigin
             }
         });
-        var result = await _subject.IsOriginAllowedAsync("http://bar");
+        var result = await _subject.IsOriginAllowedAsync("http://bar", _ct);
         result.ShouldBe(false);
     }
 
@@ -64,7 +65,7 @@ public class InMemoryCorsPolicyServiceTests
                 "http://baz"
             }
         });
-        var result = await _subject.IsOriginAllowedAsync("http://bar");
+        var result = await _subject.IsOriginAllowedAsync("http://bar", _ct);
         result.ShouldBe(true);
     }
 
@@ -81,7 +82,7 @@ public class InMemoryCorsPolicyServiceTests
                 "http://baz"
             }
         });
-        var result = await _subject.IsOriginAllowedAsync("http://quux");
+        var result = await _subject.IsOriginAllowedAsync("http://quux", _ct);
         result.ShouldBe(false);
     }
 
@@ -105,7 +106,7 @@ public class InMemoryCorsPolicyServiceTests
                 }
             }
         });
-        var result = await _subject.IsOriginAllowedAsync("http://foo");
+        var result = await _subject.IsOriginAllowedAsync("http://foo", _ct);
         result.ShouldBeTrue();
     }
 
@@ -131,7 +132,7 @@ public class InMemoryCorsPolicyServiceTests
                 }
             }
         });
-        var result = await _subject.IsOriginAllowedAsync("http://bar");
+        var result = await _subject.IsOriginAllowedAsync("http://bar", _ct);
         result.ShouldBeTrue();
     }
 }

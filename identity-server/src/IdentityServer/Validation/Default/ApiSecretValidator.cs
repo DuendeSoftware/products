@@ -57,7 +57,7 @@ public class ApiSecretValidator : IApiSecretValidator
         var parsedSecret = await _parser.ParseAsync(context);
         if (parsedSecret == null)
         {
-            await RaiseFailureEventAsync("unknown", "No API id or secret found");
+            await RaiseFailureEventAsync("unknown", "No API id or secret found", context.RequestAborted);
 
             _logger.LogError("No API secret found");
             return fail;
@@ -67,7 +67,7 @@ public class ApiSecretValidator : IApiSecretValidator
         var apis = await _resources.FindApiResourcesByNameAsync(new[] { parsedSecret.Id }, context.RequestAborted);
         if (apis == null || !apis.Any())
         {
-            await RaiseFailureEventAsync(parsedSecret.Id, "Unknown API resource");
+            await RaiseFailureEventAsync(parsedSecret.Id, "Unknown API resource", context.RequestAborted);
 
             _logger.LogError("No API resource with that name found. aborting");
             return fail;
@@ -75,7 +75,7 @@ public class ApiSecretValidator : IApiSecretValidator
 
         if (apis.Count() > 1)
         {
-            await RaiseFailureEventAsync(parsedSecret.Id, "Invalid API resource");
+            await RaiseFailureEventAsync(parsedSecret.Id, "Invalid API resource", context.RequestAborted);
 
             _logger.LogError("More than one API resource with that name found. aborting");
             return fail;
@@ -85,7 +85,7 @@ public class ApiSecretValidator : IApiSecretValidator
 
         if (api.Enabled == false)
         {
-            await RaiseFailureEventAsync(parsedSecret.Id, "API resource not enabled");
+            await RaiseFailureEventAsync(parsedSecret.Id, "API resource not enabled", context.RequestAborted);
 
             _logger.LogError("API resource not enabled. aborting.");
             return fail;
@@ -102,25 +102,25 @@ public class ApiSecretValidator : IApiSecretValidator
                 Resource = api
             };
 
-            await RaiseSuccessEventAsync(api.Name, parsedSecret.Type);
+            await RaiseSuccessEventAsync(api.Name, parsedSecret.Type, context.RequestAborted);
             return success;
         }
 
-        await RaiseFailureEventAsync(api.Name, "Invalid API secret");
+        await RaiseFailureEventAsync(api.Name, "Invalid API secret", context.RequestAborted);
         _logger.LogError("API validation failed.");
 
         return fail;
     }
 
-    private Task RaiseSuccessEventAsync(string clientId, string authMethod)
+    private Task RaiseSuccessEventAsync(string clientId, string authMethod, CT ct)
     {
         Telemetry.Metrics.ApiSecretValidation(clientId, authMethod);
-        return _events.RaiseAsync(new ApiAuthenticationSuccessEvent(clientId, authMethod));
+        return _events.RaiseAsync(new ApiAuthenticationSuccessEvent(clientId, authMethod), ct);
     }
 
-    private Task RaiseFailureEventAsync(string clientId, string message)
+    private Task RaiseFailureEventAsync(string clientId, string message, CT ct)
     {
         Telemetry.Metrics.ApiSecretValidationFailure(clientId, message);
-        return _events.RaiseAsync(new ApiAuthenticationFailureEvent(clientId, message));
+        return _events.RaiseAsync(new ApiAuthenticationFailureEvent(clientId, message), ct);
     }
 }

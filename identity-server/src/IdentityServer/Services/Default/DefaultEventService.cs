@@ -50,20 +50,15 @@ public class DefaultEventService : IEventService
         TimeProvider = timeProvider;
     }
 
-    /// <summary>
-    /// Raises the specified event.
-    /// </summary>
-    /// <param name="evt">The event.</param>
-    /// <returns></returns>
-    /// <exception cref="System.ArgumentNullException">evt</exception>
-    public async Task RaiseAsync(Event evt)
+    /// <inheritdoc/>
+    public async Task RaiseAsync(Event evt, CT ct)
     {
         ArgumentNullException.ThrowIfNull(evt);
 
         if (CanRaiseEvent(evt))
         {
-            await PrepareEventAsync(evt);
-            await Sink.PersistAsync(evt);
+            await PrepareEventAsync(evt, ct);
+            await Sink.PersistAsync(evt, ct);
         }
     }
 
@@ -96,8 +91,9 @@ public class DefaultEventService : IEventService
     /// Prepares the event.
     /// </summary>
     /// <param name="evt">The evt.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task PrepareEventAsync(Event evt)
+    protected virtual async Task PrepareEventAsync(Event evt, CT ct)
     {
         evt.TimeStamp = TimeProvider.GetUtcNow().DateTime;
         using var process = Process.GetCurrentProcess();

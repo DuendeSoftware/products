@@ -33,7 +33,7 @@ public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultDeviceFlowCodeService.SendLogoutNotifStoreDeviceAuthorization");
 
-        var deviceCode = await _handleGenerationService.GenerateAsync();
+        var deviceCode = await _handleGenerationService.GenerateAsync(ct);
 
         await _store.StoreDeviceAuthorizationAsync(deviceCode.Sha256(), userCode.Sha256(), data, ct);
 

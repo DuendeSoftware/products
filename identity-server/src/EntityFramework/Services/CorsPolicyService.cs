@@ -45,12 +45,8 @@ public class CorsPolicyService : ICorsPolicyService
         CancellationTokenProvider = cancellationTokenProvider;
     }
 
-    /// <summary>
-    /// Determines whether origin is allowed.
-    /// </summary>
-    /// <param name="origin">The origin.</param>
-    /// <returns></returns>
-    public async Task<bool> IsOriginAllowedAsync(string origin)
+    /// <inheritdoc/>
+    public async Task<bool> IsOriginAllowedAsync(string origin, CT ct)
     {
 #pragma warning disable CA1308 // this has historically been normalized to lower case and RFC 3986 instructs to normalize to lowercase
         origin = origin.ToLowerInvariant();
@@ -60,7 +56,7 @@ public class CorsPolicyService : ICorsPolicyService
                     where o.Origin == origin
                     select o;
 
-        var isAllowed = await query.AnyAsync(CancellationTokenProvider.CancellationToken);
+        var isAllowed = await query.AnyAsync(ct);
 
         Logger.LogDebug("Origin {origin} is allowed: {originAllowed}", origin, isAllowed);
 
