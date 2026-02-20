@@ -45,7 +45,7 @@ public class IntrospectionRequestValidatorTests
                 new System.Security.Claims.Claim("scope", "b")
             }
         };
-        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token);
+        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token, _ct);
 
         var param = new NameValueCollection()
         {
@@ -135,7 +135,7 @@ public class IntrospectionRequestValidatorTests
             }
         };
 
-        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token);
+        var handle = await _referenceTokenStore.StoreReferenceTokenAsync(token, _ct);
         var param = new NameValueCollection
         {
             { "token", handle }

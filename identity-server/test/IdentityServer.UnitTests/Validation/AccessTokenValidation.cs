@@ -49,7 +49,7 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
         var result = await validator.ValidateAccessTokenAsync(handle, null, _ct);
 
@@ -73,7 +73,7 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
         var result = await validator.ValidateAccessTokenAsync(handle, "read", _ct);
 
@@ -89,7 +89,7 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
         var result = await validator.ValidateAccessTokenAsync(handle, "missing", _ct);
 
@@ -135,7 +135,7 @@ public class AccessTokenValidation
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 2, "read", "write");
         token.CreationTime = now;
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
         now = now.AddSeconds(3);
         _timeProvider.SetUtcNow(now);
@@ -292,7 +292,7 @@ public class AccessTokenValidation
 
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "unknown" }, "valid", 600, "read", "write");
 
-        var handle = await store.StoreReferenceTokenAsync(token);
+        var handle = await store.StoreReferenceTokenAsync(token, _ct);
 
         var result = await validator.ValidateAccessTokenAsync(handle, null, _ct);
 

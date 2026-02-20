@@ -371,7 +371,7 @@ internal class TokenValidator : ITokenValidator
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenValidator.ValidateReferenceAccessToken");
 
         _log.TokenHandle = tokenHandle;
-        var token = await _referenceTokenStore.GetReferenceTokenAsync(tokenHandle);
+        var token = await _referenceTokenStore.GetReferenceTokenAsync(tokenHandle, ct);
 
         if (token == null)
         {
@@ -383,7 +383,7 @@ internal class TokenValidator : ITokenValidator
         {
             LogError("Token expired.");
 
-            await _referenceTokenStore.RemoveReferenceTokenAsync(tokenHandle);
+            await _referenceTokenStore.RemoveReferenceTokenAsync(tokenHandle, ct);
             return Invalid(OidcConstants.ProtectedResourceErrors.ExpiredToken);
         }
 

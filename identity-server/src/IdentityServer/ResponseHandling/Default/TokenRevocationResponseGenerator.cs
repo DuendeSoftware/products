@@ -102,14 +102,14 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
     /// </summary>
     protected virtual async Task<bool> RevokeAccessTokenAsync(TokenRevocationRequestValidationResult validationResult)
     {
-        var token = await ReferenceTokenStore.GetReferenceTokenAsync(validationResult.Token);
+        var token = await ReferenceTokenStore.GetReferenceTokenAsync(validationResult.Token, default);
 
         if (token != null)
         {
             if (token.ClientId == validationResult.Client.ClientId)
             {
                 Logger.LogDebug("Access token revoked");
-                await ReferenceTokenStore.RemoveReferenceTokenAsync(validationResult.Token);
+                await ReferenceTokenStore.RemoveReferenceTokenAsync(validationResult.Token, default);
             }
             else
             {
@@ -135,7 +135,7 @@ public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerato
             {
                 Logger.LogDebug("Refresh token revoked");
                 await RefreshTokenStore.RemoveRefreshTokenAsync(validationResult.Token);
-                await ReferenceTokenStore.RemoveReferenceTokensAsync(token.SubjectId, token.ClientId, token.SessionId);
+                await ReferenceTokenStore.RemoveReferenceTokensAsync(token.SubjectId, token.ClientId, token.SessionId, default);
             }
             else
             {

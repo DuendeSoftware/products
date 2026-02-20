@@ -256,7 +256,7 @@ public class DefaultTokenService : ITokenService
             {
                 Logger.LogTrace("Creating reference access token");
 
-                var handle = await ReferenceTokenStore.StoreReferenceTokenAsync(token);
+                var handle = await ReferenceTokenStore.StoreReferenceTokenAsync(token, default);
 
                 tokenResult = handle;
             }
