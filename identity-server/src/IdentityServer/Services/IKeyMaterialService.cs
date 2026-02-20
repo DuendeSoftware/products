@@ -17,20 +17,23 @@ public interface IKeyMaterialService
     /// <summary>
     /// Gets all validation keys.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync();
+    Task<IEnumerable<SecurityKeyInfo>> GetValidationKeysAsync(CT ct);
 
     /// <summary>
     /// Gets the signing credentials.
     /// </summary>
     /// <param name="allowedAlgorithms">Collection of algorithms used to filter the server supported algorithms. 
     /// A value of null or empty indicates that the server default should be returned.</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string>? allowedAlgorithms = null);
+    Task<SigningCredentials> GetSigningCredentialsAsync(IEnumerable<string>? allowedAlgorithms, CT ct);
 
     /// <summary>
     /// Gets all signing credentials.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync();
+    Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(CT ct);
 }

@@ -21,6 +21,7 @@ namespace Duende.IdentityServer.IntegrationTests.EntityFramework;
 public class EntityFrameworkBasedLogoutTests
 {
     private readonly IdentityServerPipeline _mockPipeline = new();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private static readonly ICollection<Client> _clients =
     [
@@ -103,7 +104,7 @@ public class EntityFrameworkBasedLogoutTests
 
         //Clear cache to simulate needing to load from db when creating logout notifications to send
         var signingKeyStoreCache = _mockPipeline.Resolve<ISigningKeyStoreCache>();
-        await signingKeyStoreCache.StoreKeysAsync([], TimeSpan.Zero);
+        await signingKeyStoreCache.StoreKeysAsync([], TimeSpan.Zero, _ct);
 
         await _mockPipeline.LogoutAsync();
 
