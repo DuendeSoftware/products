@@ -76,7 +76,7 @@ public class DefaultClaimsService : IClaimsService
                 ValidatedRequest = request
             };
 
-            await Profile.GetProfileDataAsync(context);
+            await Profile.GetProfileDataAsync(context, ct);
 
             var claims = FilterProtocolClaims(context.IssuedClaims);
             if (claims != null)
@@ -189,7 +189,7 @@ public class DefaultClaimsService : IClaimsService
                 ValidatedRequest = request
             };
 
-            await Profile.GetProfileDataAsync(context);
+            await Profile.GetProfileDataAsync(context, ct);
 
             var claims = FilterProtocolClaims(context.IssuedClaims);
             if (claims != null)

@@ -513,7 +513,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // make sure user is enabled
         /////////////////////////////////////////////
         var isActiveCtx = new IsActiveContext(_validatedRequest.AuthorizationCode.Subject, _validatedRequest.Client, IdentityServerConstants.ProfileIsActiveCallers.AuthorizationCodeValidation);
-        await _profile.IsActiveAsync(isActiveCtx);
+        await _profile.IsActiveAsync(isActiveCtx, _ct);
 
         if (isActiveCtx.IsActive == false)
         {
@@ -663,7 +663,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // make sure user is enabled
         /////////////////////////////////////////////
         var isActiveCtx = new IsActiveContext(resourceOwnerContext.Result.Subject, _validatedRequest.Client, IdentityServerConstants.ProfileIsActiveCallers.ResourceOwnerValidation);
-        await _profile.IsActiveAsync(isActiveCtx);
+        await _profile.IsActiveAsync(isActiveCtx, _ct);
 
         if (isActiveCtx.IsActive == false)
         {
@@ -1074,7 +1074,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 _validatedRequest.Client,
                 IdentityServerConstants.ProfileIsActiveCallers.ExtensionGrantValidation);
 
-            await _profile.IsActiveAsync(isActiveCtx);
+            await _profile.IsActiveAsync(isActiveCtx, _ct);
 
             if (isActiveCtx.IsActive == false)
             {

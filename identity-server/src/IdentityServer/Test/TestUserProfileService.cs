@@ -40,8 +40,9 @@ public class TestUserProfileService : IProfileService
     /// This method is called whenever claims about the user are requested (e.g. during token creation or via the userinfo endpoint)
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    public virtual Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public virtual Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
     {
         context.LogProfileRequest(Logger);
 
@@ -64,8 +65,9 @@ public class TestUserProfileService : IProfileService
     /// (e.g. during token issuance or validation).
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    public virtual Task IsActiveAsync(IsActiveContext context)
+    public virtual Task IsActiveAsync(IsActiveContext context, CT ct)
     {
         Logger.LogDebug("IsActive called from: {caller}", context.Caller);
 

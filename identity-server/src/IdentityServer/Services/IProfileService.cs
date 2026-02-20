@@ -17,14 +17,16 @@ public interface IProfileService
     /// This method is called whenever claims about the user are requested (e.g. during token creation or via the userinfo endpoint)
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task GetProfileDataAsync(ProfileDataRequestContext context);
+    Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct);
 
     /// <summary>
     /// This method gets called whenever identity server needs to determine if the user is valid or active (e.g. if the user's account has been deactivated since they logged in).
     /// (e.g. during token issuance or validation).
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    Task IsActiveAsync(IsActiveContext context);
+    Task IsActiveAsync(IsActiveContext context, CT ct);
 }

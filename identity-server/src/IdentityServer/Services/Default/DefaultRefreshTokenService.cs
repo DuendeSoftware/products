@@ -136,7 +136,7 @@ public class DefaultRefreshTokenService : IRefreshTokenService
             client,
             IdentityServerConstants.ProfileIsActiveCallers.RefreshTokenValidation);
 
-        await Profile.IsActiveAsync(isActiveCtx);
+        await Profile.IsActiveAsync(isActiveCtx, ct);
 
         if (isActiveCtx.IsActive == false)
         {

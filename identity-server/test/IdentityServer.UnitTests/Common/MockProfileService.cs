@@ -19,14 +19,14 @@ public class MockProfileService : IProfileService
     public bool IsActiveWasCalled => ActiveContext != null;
     public IsActiveContext ActiveContext { get; set; }
 
-    public Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public Task GetProfileDataAsync(ProfileDataRequestContext context, CT ct)
     {
         ProfileContext = context;
         context.IssuedClaims = ProfileClaims.ToList();
         return Task.CompletedTask;
     }
 
-    public Task IsActiveAsync(IsActiveContext context)
+    public Task IsActiveAsync(IsActiveContext context, CT ct)
     {
         ActiveContext = context;
         context.IsActive = IsActive;

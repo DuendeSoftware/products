@@ -92,7 +92,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
 
         // make sure user is enabled
         var isActiveCtx = new IsActiveContext(request.Subject, context.Request.Client, IdentityServerConstants.ProfileIsActiveCallers.BackchannelAuthenticationRequestIdValidation);
-        await _profile.IsActiveAsync(isActiveCtx);
+        await _profile.IsActiveAsync(isActiveCtx, ct);
 
         if (isActiveCtx.IsActive == false)
         {

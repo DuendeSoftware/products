@@ -75,7 +75,7 @@ public class UserInfoResponseGenerator : IUserInfoResponseGenerator
             requestedClaimTypes);
         context.RequestedResources = validatedResources;
 
-        await Profile.GetProfileDataAsync(context);
+        await Profile.GetProfileDataAsync(context, default);
         var profileClaims = context.IssuedClaims;
 
         // construct outgoing claims
