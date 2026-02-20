@@ -83,7 +83,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetLoginRequestByInternalId");
 
-        var request = await _requestStore.GetByInternalIdAsync(id);
+        var request = await _requestStore.GetByInternalIdAsync(id, ct);
         return await CreateAsync(request, ct);
     }
 
@@ -99,7 +99,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         {
             _logger.LogDebug("No user present");
 
-            var items = await _requestStore.GetLoginsForUserAsync(user.GetSubjectId());
+            var items = await _requestStore.GetLoginsForUserAsync(user.GetSubjectId(), ct: ct);
             foreach (var item in items)
             {
                 if (!item.IsComplete)
@@ -123,7 +123,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
 
         ArgumentNullException.ThrowIfNull(completionRequest);
 
-        var request = await _requestStore.GetByInternalIdAsync(completionRequest.InternalId);
+        var request = await _requestStore.GetByInternalIdAsync(completionRequest.InternalId, default);
         if (request == null)
         {
             throw new InvalidOperationException("Invalid backchannel authentication request id.");
@@ -170,7 +170,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         request.AuthorizedScopes = completionRequest.ScopesValuesConsented;
         request.Description = completionRequest.Description;
 
-        await _requestStore.UpdateByInternalIdAsync(completionRequest.InternalId, request);
+        await _requestStore.UpdateByInternalIdAsync(completionRequest.InternalId, request, default);
 
         _logger.LogDebug("Successful update for backchannel authentication request id {id}", completionRequest.InternalId);
     }

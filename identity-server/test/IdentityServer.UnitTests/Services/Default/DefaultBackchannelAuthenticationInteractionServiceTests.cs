@@ -51,12 +51,12 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             ClientId = _client.ClientId,
             Subject = new IdentityServerUser("123").CreatePrincipal(),
         };
-        await _mockStore.CreateRequestAsync(req);
+        await _mockStore.CreateRequestAsync(req, _ct);
         await _mockStore.CreateRequestAsync(new BackChannelAuthenticationRequest
         {
             ClientId = _client.ClientId,
             Subject = new IdentityServerUser("other").CreatePrincipal()
-        });
+        }, _ct);
 
         var results = await _subject.GetPendingLoginRequestsForCurrentUserAsync(_ct);
         results.Count().ShouldBe(1);
@@ -72,12 +72,12 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             ClientId = _client.ClientId,
             Subject = new IdentityServerUser("123").CreatePrincipal(),
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
         await _mockStore.CreateRequestAsync(new BackChannelAuthenticationRequest
         {
             ClientId = _client.ClientId,
             Subject = new IdentityServerUser("other").CreatePrincipal()
-        });
+        }, _ct);
 
         var result = await _subject.GetLoginRequestByInternalIdAsync(req.InternalId, _ct);
         result.InternalId.ShouldBe(req.InternalId);
@@ -93,7 +93,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
@@ -134,7 +134,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         var f = async () => await _subject.CompleteLoginRequestAsync(null);
         await f.ShouldThrowAsync<ArgumentNullException>();
@@ -150,7 +150,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
@@ -180,7 +180,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
@@ -209,7 +209,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
@@ -238,7 +238,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         var f = async () => await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest("invalid")
         {
@@ -268,7 +268,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         _mockUserSession.User = new IdentityServerUser("123")
         {
@@ -309,7 +309,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("123").CreatePrincipal(),
             RequestedScopes = new[] { "scope1", "scope2", "scope3" },
         };
-        var requestId = await _mockStore.CreateRequestAsync(req);
+        var requestId = await _mockStore.CreateRequestAsync(req, _ct);
 
         await _subject.CompleteLoginRequestAsync(new CompleteBackchannelLoginRequest(req.InternalId)
         {
