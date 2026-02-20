@@ -37,7 +37,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
     }
 
     /// <inheritdoc/>
-    public async Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context)
+    public async Task ValidateAsync(BackchannelAuthenticationRequestIdValidationContext context, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationRequestIdValidator.Validate");
 
@@ -58,7 +58,7 @@ internal class BackchannelAuthenticationRequestIdValidator : IBackchannelAuthent
             return;
         }
 
-        if (await _throttlingService.ShouldSlowDown(context.AuthenticationRequestId, request))
+        if (await _throttlingService.ShouldSlowDown(context.AuthenticationRequestId, request, ct))
         {
             _logger.LogError("Client {ClientId} is polling too fast", request.ClientId);
             context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.SlowDown);

@@ -47,10 +47,10 @@ internal class ReplayCache(DPoPHybridCacheProvider cacheProvider) : IReplayCache
     {
         using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Exists");
 
+        // The factory will never be invoked because the ReadOnlyEntryOptions set the DisableUnderlyingData flag
         return await Cache.GetOrCreateAsync<bool>(
             Prefix + handle,
-            // The factory will never be invoked because the ReadOnlyEntryOptions set the DisableUnderlyingData flag
-            cancel => throw new InvalidOperationException("Can't Happen"),
+            _ => throw new InvalidOperationException("Can't Happen"),
             ReadOnlyEntryOptions,
             cancellationToken: ct);
     }

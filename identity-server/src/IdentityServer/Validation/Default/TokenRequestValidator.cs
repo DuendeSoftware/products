@@ -45,6 +45,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
+    private CT _ct;
 
     public TokenRequestValidator(
         IdentityServerOptions options,
@@ -98,10 +99,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
     {
         RequestParameters = parameters,
         ClientValidationResult = clientValidationResult
-    });
+    }, CancellationToken.None);
 
     /// <inheritdoc/>
-    public async Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context)
+    public async Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRequestValidator.ValidateRequest");
 
@@ -109,6 +110,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         ArgumentNullException.ThrowIfNull(context);
 
+        _ct = ct;
         var parameters = context.RequestParameters;
         var clientValidationResult = context.ClientValidationResult;
 
@@ -878,7 +880,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // validate device code
         /////////////////////////////////////////////
         var deviceCodeContext = new DeviceCodeValidationContext { DeviceCode = deviceCode, Request = _validatedRequest };
-        await _deviceCodeValidator.ValidateAsync(deviceCodeContext);
+        await _deviceCodeValidator.ValidateAsync(deviceCodeContext, _ct);
 
         if (deviceCodeContext.Result.IsError)
         {
@@ -957,7 +959,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             AuthenticationRequestId = authRequestId,
             Request = _validatedRequest
         };
-        await _backchannelAuthenticationRequestIdValidator.ValidateAsync(validationContext);
+        await _backchannelAuthenticationRequestIdValidator.ValidateAsync(validationContext, _ct);
 
         if (validationContext.Result.IsError)
         {

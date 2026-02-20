@@ -37,7 +37,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     }
 
     /// <inheritdoc/>
-    public async Task<IntrospectionRequestValidationResult> ValidateAsync(IntrospectionRequestValidationContext context)
+    public async Task<IntrospectionRequestValidationResult> ValidateAsync(IntrospectionRequestValidationContext context, CT ct)
     {
         var parameters = context.Parameters;
         var api = context.Api;
@@ -102,7 +102,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
             // APIs can only introspect access tokens. We ignore the hint and just immediately try to
             // validate the token as an access token. If that fails, claims will be null and
             // we'll return { "isActive": false }.
-            claims = await GetAccessTokenClaimsAsync(token);
+            claims = await GetAccessTokenClaimsAsync(token, ct);
         }
         else
         {
@@ -120,7 +120,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
             if (hint.IsMissing() || hint == TokenTypeHints.AccessToken)
             {
                 // try access token
-                claims = await GetAccessTokenClaimsAsync(token, client);
+                claims = await GetAccessTokenClaimsAsync(token, client, ct);
                 if (claims == null)
                 {
                     // fall back to refresh token
@@ -142,7 +142,7 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
                     {
                         _logger.LogDebug("Failed to validate token as refresh token. Possible incorrect token_type_hint parameter.");
                     }
-                    claims = await GetAccessTokenClaimsAsync(token, client);
+                    claims = await GetAccessTokenClaimsAsync(token, client, ct);
                 }
             }
         }
@@ -210,9 +210,9 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     /// <summary>
     /// Attempt to obtain the claims for a token as an access token, and validate that it belongs to the client.
     /// </summary>
-    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, Client client)
+    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, Client client, CT ct)
     {
-        var tokenValidationResult = await _tokenValidator.ValidateAccessTokenAsync(token);
+        var tokenValidationResult = await _tokenValidator.ValidateAccessTokenAsync(token, null, ct);
         if (!tokenValidationResult.IsError)
         {
             var claims = tokenValidationResult.Claims.ToList();
@@ -234,9 +234,9 @@ internal class IntrospectionRequestValidator : IIntrospectionRequestValidator
     /// token belongs to a particular client, and is intended for use when we have an API caller (any API can
     /// introspect a token).
     /// </summary>
-    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token)
+    private async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(string token, CT ct)
     {
-        var tokenValidationResult = await _tokenValidator.ValidateAccessTokenAsync(token);
+        var tokenValidationResult = await _tokenValidator.ValidateAccessTokenAsync(token, null, ct);
         if (!tokenValidationResult.IsError)
         {
             _logger.LogDebug("Validated access token");

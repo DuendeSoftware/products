@@ -107,7 +107,7 @@ internal class IdentityServerAuthenticationService : IAuthenticationService
                             ClientIds = (await _session.GetClientListAsync()).ToList(),
                             Issuer = await _issuerNameService.GetCurrentAsync()
                         };
-                        await _sessionCoordinationService.ProcessLogoutAsync(session);
+                        await _sessionCoordinationService.ProcessLogoutAsync(session, context.RequestAborted);
                     }
 
                     // this clears our session id cookie so JS clients can detect the user has signed out

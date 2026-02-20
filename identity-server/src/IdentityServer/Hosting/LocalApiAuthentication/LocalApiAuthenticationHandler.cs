@@ -100,7 +100,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
 
         _logger.LogTrace("Token found: {token}", token);
 
-        var tokenResult = await _tokenValidator.ValidateAccessTokenAsync(token, Options.ExpectedScope);
+        var tokenResult = await _tokenValidator.ValidateAccessTokenAsync(token, Options.ExpectedScope, Context.RequestAborted);
         if (tokenResult.IsError)
         {
             _logger.LogTrace("Failed to validate the token");
@@ -111,7 +111,7 @@ public class LocalApiAuthenticationHandler : AuthenticationHandler<LocalApiAuthe
         if (wasDPoPToken)
         {
             var clientId = tokenResult.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.ClientId)?.Value;
-            var client = await _clientStore.FindEnabledClientByIdAsync(clientId);
+            var client = await _clientStore.FindEnabledClientByIdAsync(clientId, Context.RequestAborted);
             if (client == null)
             {
                 // invalid or missing client id

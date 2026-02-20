@@ -36,6 +36,8 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
     private readonly ResponseTypeEqualityComparer
         _responseTypeEqualityComparer = new ResponseTypeEqualityComparer();
 
+    private CT _ct;
+
 
     public AuthorizeRequestValidator(
         IdentityServerOptions options,
@@ -71,6 +73,8 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         AuthorizeRequestType authorizeRequestType = AuthorizeRequestType.Authorize)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeRequestValidator.Validate");
+
+        _ct = CT.None;
 
         _sanitizedLogger.LogDebug("Start authorize request protocol validation");
 
@@ -212,7 +216,7 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         //////////////////////////////////////////////////////////
         // check for valid client
         //////////////////////////////////////////////////////////
-        var client = await _clients.FindEnabledClientByIdAsync(request.ClientId);
+        var client = await _clients.FindEnabledClientByIdAsync(request.ClientId, _ct);
         if (client == null)
         {
             LogError("Unknown client or not enabled", request.ClientId, request);

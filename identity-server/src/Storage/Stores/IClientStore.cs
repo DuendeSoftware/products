@@ -16,8 +16,9 @@ public interface IClientStore
     /// Finds a client by id
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="ct">The cancellation token</param>
     /// <returns>The client</returns>
-    Task<Client?> FindClientByIdAsync(string clientId);
+    Task<Client?> FindClientByIdAsync(string clientId, CT ct);
 
     /// <summary>
     /// Returns all clients for enumeration purposes (e.g., conformance assessment).

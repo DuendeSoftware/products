@@ -35,14 +35,14 @@ public class LogoutNotificationService : ILogoutNotificationService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context)
+    public async Task<IEnumerable<string>> GetFrontChannelLogoutNotificationsUrlsAsync(LogoutNotificationContext context, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetFrontChannelLogoutNotificationsUrls");
 
         var frontChannelUrls = new List<string>();
         foreach (var clientId in context.ClientIds)
         {
-            var client = await _clientStore.FindEnabledClientByIdAsync(clientId);
+            var client = await _clientStore.FindEnabledClientByIdAsync(clientId, ct);
             if (client != null)
             {
                 if (client.FrontChannelLogoutUri.IsPresent())
@@ -82,14 +82,14 @@ public class LogoutNotificationService : ILogoutNotificationService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context)
+    public async Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("LogoutNotificationService.GetBackChannelLogoutNotifications");
 
         var backChannelLogouts = new List<BackChannelLogoutRequest>();
         foreach (var clientId in context.ClientIds)
         {
-            var client = await _clientStore.FindEnabledClientByIdAsync(clientId);
+            var client = await _clientStore.FindEnabledClientByIdAsync(clientId, ct);
             if (client != null)
             {
                 if (client.BackChannelLogoutUri.IsPresent())

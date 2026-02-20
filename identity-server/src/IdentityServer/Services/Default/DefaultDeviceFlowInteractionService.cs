@@ -31,7 +31,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         _logger = logger;
     }
 
-    public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode)
+    public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode, CT ct)
     {
         var deviceAuth = await _devices.FindByUserCodeAsync(userCode);
         if (deviceAuth == null)
@@ -39,7 +39,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
             return null;
         }
 
-        var client = await _clients.FindEnabledClientByIdAsync(deviceAuth.ClientId);
+        var client = await _clients.FindEnabledClientByIdAsync(deviceAuth.ClientId, ct);
         if (client == null)
         {
             return null;
@@ -58,7 +58,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
         };
     }
 
-    public async Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent)
+    public async Task<DeviceFlowInteractionResult> HandleRequestAsync(string userCode, ConsentResponse consent, CT ct)
     {
         ArgumentNullException.ThrowIfNull(userCode);
         ArgumentNullException.ThrowIfNull(consent);
@@ -69,7 +69,7 @@ internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionServi
             return LogAndReturnError("Invalid user code", "Device authorization failure - user code is invalid");
         }
 
-        var client = await _clients.FindEnabledClientByIdAsync(deviceAuth.ClientId);
+        var client = await _clients.FindEnabledClientByIdAsync(deviceAuth.ClientId, ct);
         if (client == null)
         {
             return LogAndReturnError("Invalid client", "Device authorization failure - requesting client is invalid");

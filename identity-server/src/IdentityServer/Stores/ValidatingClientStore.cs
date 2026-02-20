@@ -43,14 +43,15 @@ public class ValidatingClientStore<T> : IClientStore
     /// Finds a client by id (and runs the validation logic)
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The client or an InvalidOperationException
     /// </returns>
-    public async Task<Client> FindClientByIdAsync(string clientId)
+    public async Task<Client> FindClientByIdAsync(string clientId, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ValidatingClientStore.FindClientById");
 
-        var client = await _inner.FindClientByIdAsync(clientId);
+        var client = await _inner.FindClientByIdAsync(clientId, ct);
 
         if (client != null)
         {

@@ -18,14 +18,14 @@ public sealed class CustomClientRegistrationProcessor(
     IClientStore clientStore) : DynamicClientRegistrationRequestProcessor(options, dcrStore)
 {
 
-    protected override async Task<IStepResult> AddClientId(DynamicClientRegistrationContext context)
+    protected override async Task<IStepResult> AddClientId(DynamicClientRegistrationContext context, CT ct)
     {
         if (context.Request.Extensions.TryGetValue("client_id", out var clientIdParameter))
         {
             var clientId = clientIdParameter.ToString();
             if (clientId != null)
             {
-                var existingClient = await clientStore.FindClientByIdAsync(clientId);
+                var existingClient = await clientStore.FindClientByIdAsync(clientId, ct);
                 if (existingClient is not null)
                 {
                     return new DynamicClientRegistrationError(
@@ -40,7 +40,7 @@ public sealed class CustomClientRegistrationProcessor(
                 }
             }
         }
-        return await base.AddClientId(context);
+        return await base.AddClientId(context, ct);
     }
 
     protected override async Task<(Secret, string)> GenerateSecret(DynamicClientRegistrationContext context)

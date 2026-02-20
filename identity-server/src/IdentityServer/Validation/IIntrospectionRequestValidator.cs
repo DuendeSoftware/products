@@ -12,5 +12,5 @@ public interface IIntrospectionRequestValidator
     /// <summary>
     /// Validates the request.
     /// </summary>
-    Task<IntrospectionRequestValidationResult> ValidateAsync(IntrospectionRequestValidationContext context);
+    Task<IntrospectionRequestValidationResult> ValidateAsync(IntrospectionRequestValidationContext context, CT ct);
 }

@@ -102,7 +102,7 @@ public class DefaultSessionManagementService : ISessionManagementService
                     Issuer = session.Issuer,
                     ClientIds = session.ClientIds.Where(x => context.ClientIds == null || context.ClientIds.Contains(x)),
                     LogoutReason = LogoutNotificationReason.Terminated
-                });
+                }, ct);
             }
         }
 

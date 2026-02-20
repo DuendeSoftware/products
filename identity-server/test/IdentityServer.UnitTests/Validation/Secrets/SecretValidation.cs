@@ -21,6 +21,7 @@ public class SecretValidation
     private IClientStore _clients = new InMemoryClientStore(ClientValidationTestClients.Get());
     private SecretValidator _validator;
     private IdentityServerOptions _options = new IdentityServerOptions();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     public SecretValidation() => _validator = new SecretValidator(
             new FakeTimeProvider(DateTimeOffset.UtcNow),
@@ -32,7 +33,7 @@ public class SecretValidation
     public async Task Valid_Single_Secret()
     {
         var clientId = "single_secret_hashed_no_expiration";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -51,7 +52,7 @@ public class SecretValidation
     public async Task Invalid_Credential_Type()
     {
         var clientId = "single_secret_hashed_no_expiration";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -70,7 +71,7 @@ public class SecretValidation
     public async Task Valid_Multiple_Secrets()
     {
         var clientId = "multiple_secrets_hashed";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -100,7 +101,7 @@ public class SecretValidation
     public async Task Invalid_Single_Secret()
     {
         var clientId = "single_secret_hashed_no_expiration";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -119,7 +120,7 @@ public class SecretValidation
     public async Task Expired_Secret()
     {
         var clientId = "multiple_secrets_hashed";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -137,7 +138,7 @@ public class SecretValidation
     public async Task Invalid_Multiple_Secrets()
     {
         var clientId = "multiple_secrets_hashed";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -155,7 +156,7 @@ public class SecretValidation
     public async Task Client_with_no_Secret_Should_Fail()
     {
         var clientId = "no_secret_client";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {

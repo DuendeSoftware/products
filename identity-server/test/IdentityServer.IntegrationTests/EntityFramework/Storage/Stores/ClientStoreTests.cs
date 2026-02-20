@@ -30,7 +30,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
     {
         await using var context = new ConfigurationDbContext(options);
         var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
-        var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString());
+        var client = await store.FindClientByIdAsync(Guid.NewGuid().ToString(), CancellationToken.None);
         client.ShouldBeNull();
     }
 
@@ -53,7 +53,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
-            client = await store.FindClientByIdAsync(testClient.ClientId);
+            client = await store.FindClientByIdAsync(testClient.ClientId, CancellationToken.None);
         }
 
         client.ShouldNotBeNull();
@@ -87,7 +87,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
         await using (var context = new ConfigurationDbContext(options))
         {
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
-            client = await store.FindClientByIdAsync(testClient.ClientId);
+            client = await store.FindClientByIdAsync(testClient.ClientId, CancellationToken.None);
         }
 
         client.ShouldSatisfyAllConditions(c =>
@@ -150,7 +150,7 @@ public class ClientStoreTests : IntegrationTest<ClientStoreTests, ConfigurationD
             var store = new ClientStore(context, new NullLogger<ClientStore>(), new NoneCancellationTokenProvider());
 
             const int timeout = 5000;
-            var task = Task.Run(() => store.FindClientByIdAsync(testClient.ClientId));
+            var task = Task.Run(() => store.FindClientByIdAsync(testClient.ClientId, CancellationToken.None));
 
             if (await Task.WhenAny(task, Task.Delay(timeout)) == task)
             {

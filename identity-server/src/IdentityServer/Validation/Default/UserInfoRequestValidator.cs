@@ -46,16 +46,18 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
     /// Validates a userinfo request.
     /// </summary>
     /// <param name="accessToken">The access token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="System.NotImplementedException"></exception>
-    public async Task<UserInfoRequestValidationResult> ValidateRequestAsync(string accessToken)
+    public async Task<UserInfoRequestValidationResult> ValidateRequestAsync(string accessToken, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("UserInfoRequestValidator.ValidateRequest");
 
         // the access token needs to be valid and have at least the openid scope
         var tokenResult = await _tokenValidator.ValidateAccessTokenAsync(
             accessToken,
-            IdentityServerConstants.StandardScopes.OpenId);
+            IdentityServerConstants.StandardScopes.OpenId,
+            ct);
 
         if (tokenResult.IsError)
         {
@@ -93,7 +95,7 @@ internal class UserInfoRequestValidator : IUserInfoRequestValidator
                 {
                     SubjectId = subClaim.Value,
                     SessionId = sid,
-                });
+                }, ct);
 
                 if (sessions.Count == 1)
                 {

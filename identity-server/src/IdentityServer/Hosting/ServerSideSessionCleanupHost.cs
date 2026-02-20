@@ -100,7 +100,7 @@ public class ServerSideSessionCleanupHost(
 
                 foreach (var session in sessions)
                 {
-                    await sessionCoordinationService.ProcessExpirationAsync(session);
+                    await sessionCoordinationService.ProcessExpirationAsync(session, ct);
                 }
             }
         }

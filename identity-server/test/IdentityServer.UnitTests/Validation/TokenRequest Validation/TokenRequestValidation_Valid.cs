@@ -16,6 +16,7 @@ public class TokenRequestValidation_Valid
 {
     private const string Category = "TokenRequest Validation - General - Valid";
 
+    private readonly CT _ct = TestContext.Current.CancellationToken;
     private IClientStore _clients = Factory.CreateClientStore();
     private TestDeviceCodeValidator _mockDeviceCodeValidator = new TestDeviceCodeValidator();
 
@@ -23,7 +24,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Missing_ResourceOwner_password_for_user_with_no_password_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -41,7 +42,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_code_request_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -76,7 +77,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_code_request_with_refresh_token_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("codeclient");
+        var client = await _clients.FindEnabledClientByIdAsync("codeclient", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -112,7 +113,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_client_credentials_request_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -129,7 +130,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_client_credentials_request_with_default_scopes_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("client_restricted", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -146,7 +147,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_client_credentials_request_for_implicit_and_client_credentials_client_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("implicit_and_client_creds_client");
+        var client = await _clients.FindEnabledClientByIdAsync("implicit_and_client_creds_client", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -163,7 +164,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_client_credentials_request_restricted_client_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("client_restricted", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -180,7 +181,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_resource_owner_request_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -199,7 +200,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_resource_wwner_request_with_refresh_token_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -218,7 +219,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task Valid_resource_owner_request_restricted_client_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -237,7 +238,7 @@ public class TokenRequestValidation_Valid
     [Trait("Category", Category)]
     public async Task valid_extension_grant_request_should_succeed()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient");
+        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -273,7 +274,7 @@ public class TokenRequestValidation_Valid
         var grants = Factory.CreateRefreshTokenStore();
         var handle = await grants.StoreRefreshTokenAsync(refreshToken);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             refreshTokenStore: grants);
@@ -305,7 +306,7 @@ public class TokenRequestValidation_Valid
         var grants = Factory.CreateRefreshTokenStore();
         var handle = await grants.StoreRefreshTokenAsync(refreshToken);
 
-        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted_refresh");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted_refresh", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             refreshTokenStore: grants);
@@ -334,7 +335,7 @@ public class TokenRequestValidation_Valid
             AuthorizedScopes = new[] { "openid", "profile", "resource" }
         };
 
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(deviceCodeValidator: _mockDeviceCodeValidator);
         _mockDeviceCodeValidator.DeviceCodeResult = deviceCode;

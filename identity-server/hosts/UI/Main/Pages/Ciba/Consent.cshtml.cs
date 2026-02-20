@@ -53,7 +53,7 @@ public class Consent : PageModel
     public async Task<IActionResult> OnPost()
     {
         // validate return url is still valid
-        var request = await _interaction.GetLoginRequestByInternalIdAsync(Input.Id ?? throw new ArgumentNullException(nameof(Input.Id)));
+        var request = await _interaction.GetLoginRequestByInternalIdAsync(Input.Id ?? throw new ArgumentNullException(nameof(Input.Id)), HttpContext.RequestAborted);
         if (request == null || request.Subject.GetSubjectId() != User.GetSubjectId())
         {
             _logger.InvalidId(Input.Id);
@@ -125,7 +125,7 @@ public class Consent : PageModel
     {
         ArgumentNullException.ThrowIfNull(id);
 
-        var request = await _interaction.GetLoginRequestByInternalIdAsync(id);
+        var request = await _interaction.GetLoginRequestByInternalIdAsync(id, HttpContext.RequestAborted);
         if (request != null && request.Subject.GetSubjectId() == User.GetSubjectId())
         {
             View = CreateConsentViewModel(request);

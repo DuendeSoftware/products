@@ -115,7 +115,7 @@ public static class HttpContextExtensions
             var clientStore = context.RequestServices.GetRequiredService<IClientStore>();
             foreach (var clientId in clientIds)
             {
-                var client = await clientStore.FindEnabledClientByIdAsync(clientId);
+                var client = await clientStore.FindEnabledClientByIdAsync(clientId, context.RequestAborted);
                 if (client?.FrontChannelLogoutUri.IsPresent() == true)
                 {
                     return true;

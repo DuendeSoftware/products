@@ -16,6 +16,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
 {
     private Client _client;
     private DefaultBackchannelAuthenticationInteractionService _subject;
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private MockBackChannelAuthenticationRequestStore _mockStore = new MockBackChannelAuthenticationRequestStore();
     private InMemoryClientStore _clientStore;
@@ -57,7 +58,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("other").CreatePrincipal()
         });
 
-        var results = await _subject.GetPendingLoginRequestsForCurrentUserAsync();
+        var results = await _subject.GetPendingLoginRequestsForCurrentUserAsync(_ct);
         results.Count().ShouldBe(1);
         results.First().InternalId.ShouldBe(req.InternalId);
     }
@@ -78,7 +79,7 @@ public class DefaultBackchannelAuthenticationInteractionServiceTests
             Subject = new IdentityServerUser("other").CreatePrincipal()
         });
 
-        var result = await _subject.GetLoginRequestByInternalIdAsync(req.InternalId);
+        var result = await _subject.GetLoginRequestByInternalIdAsync(req.InternalId, _ct);
         result.InternalId.ShouldBe(req.InternalId);
     }
 

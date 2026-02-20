@@ -70,7 +70,7 @@ public class DynamicClientRegistrationEndpoint
         }
         else
         {
-            var processingResult = await _processor.ProcessAsync(dcrContext);
+            var processingResult = await _processor.ProcessAsync(dcrContext, httpContext.RequestAborted);
             if (processingResult is DynamicClientRegistrationError processingFailure)
             {
                 await _responseGenerator.WriteError(httpContext, processingFailure);

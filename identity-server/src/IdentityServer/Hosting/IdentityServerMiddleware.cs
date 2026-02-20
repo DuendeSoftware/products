@@ -64,7 +64,7 @@ public class IdentityServerMiddleware
             {
                 _sanitizedLogger.LogDebug("Detected expired session removed; processing post-expiration cleanup.");
 
-                await sessionCoordinationService.ProcessExpirationAsync(expiredUserSession);
+                await sessionCoordinationService.ProcessExpirationAsync(expiredUserSession, context.RequestAborted);
             }
         });
 

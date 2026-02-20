@@ -84,7 +84,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     }
 
     /// <inheritdoc />
-    public async Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject)
+    public async Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("EndSessionRequestValidator.Validate");
 
@@ -120,7 +120,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         if (idTokenHint.IsPresent())
         {
             // validate id_token - no need to validate token life time
-            var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, null, false);
+            var tokenValidationResult = await TokenValidator.ValidateIdentityTokenAsync(idTokenHint, null, false, ct);
             if (tokenValidationResult.IsError)
             {
                 return Invalid("Error validating id token hint", validatedRequest);
@@ -222,7 +222,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
     }
 
     /// <inheritdoc />
-    public async Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters)
+    public async Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, CT ct)
     {
         var result = new EndSessionCallbackValidationResult
         {
@@ -234,7 +234,7 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         if (endSessionMessage?.Data?.ClientIds?.Any() == true)
         {
             result.IsError = false;
-            result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data);
+            result.FrontChannelLogoutUrls = await LogoutNotificationService.GetFrontChannelLogoutNotificationsUrlsAsync(endSessionMessage.Data, ct);
         }
         else
         {

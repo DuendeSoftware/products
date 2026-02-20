@@ -50,10 +50,11 @@ public class ClientStore : IClientStore
     /// Finds a client by id
     /// </summary>
     /// <param name="clientId">The client id</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The client
     /// </returns>
-    public virtual async Task<Duende.IdentityServer.Models.Client> FindClientByIdAsync(string clientId)
+    public virtual async Task<Duende.IdentityServer.Models.Client> FindClientByIdAsync(string clientId, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.FindClientById");
         activity?.SetTag(Tracing.Properties.ClientId, clientId);
@@ -72,7 +73,7 @@ public class ClientStore : IClientStore
           .AsNoTracking()
           .AsSplitQuery();
 
-        var client = (await query.ToArrayAsync(CancellationTokenProvider.CancellationToken)).
+        var client = (await query.ToArrayAsync(ct)).
             SingleOrDefault(x => x.ClientId == clientId);
         if (client == null)
         {

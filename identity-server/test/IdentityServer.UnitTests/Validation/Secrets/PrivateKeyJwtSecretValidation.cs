@@ -25,6 +25,7 @@ public class PrivateKeyJwtSecretValidation
     private readonly ISecretValidator _validator;
     private readonly IClientStore _clients;
     private readonly IdentityServerOptions _options;
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     public PrivateKeyJwtSecretValidation()
     {
@@ -99,7 +100,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Certificate_X5t_Only_Requires_Full_Certificate()
     {
         var clientId = "certificate_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var token = CreateToken(clientId);
         var secret = new ParsedSecret
@@ -118,7 +119,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Certificate_Thumbprint()
     {
         var clientId = "certificate_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -136,7 +137,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Valid_Certificate_Base64()
     {
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -166,7 +167,7 @@ public class PrivateKeyJwtSecretValidation
         _options.Preview.StrictClientAssertionAudienceValidation = false;
 
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -192,7 +193,7 @@ public class PrivateKeyJwtSecretValidation
         _options.Preview.StrictClientAssertionAudienceValidation = true;
 
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -218,7 +219,7 @@ public class PrivateKeyJwtSecretValidation
         _options.Preview.StrictClientAssertionAudienceValidation = false;
 
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -244,7 +245,7 @@ public class PrivateKeyJwtSecretValidation
         _options.Preview.StrictClientAssertionAudienceValidation = setStrictOption;
 
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var token = new JwtSecurityTokenHandler().WriteToken(CreateToken(
             clientId,
             audiences: ["https://idsrv.com/connect/token"],
@@ -274,7 +275,7 @@ public class PrivateKeyJwtSecretValidation
         _options.Preview.StrictClientAssertionAudienceValidation = setStrictOption;
 
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var token = new JwtSecurityTokenHandler().WriteToken(CreateToken(
             clientId,
             audiences: ["https://idsrv.com", "https://idsrv.com/"],
@@ -304,7 +305,7 @@ public class PrivateKeyJwtSecretValidation
         _options.Preview.StrictClientAssertionAudienceValidation = enforceStrict;
 
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var token = new JwtSecurityTokenHandler().WriteToken(CreateToken(clientId, typ: typ));
 
         var secret = new ParsedSecret
@@ -322,7 +323,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Replay()
     {
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var token = new JwtSecurityTokenHandler().WriteToken(CreateToken(clientId));
         var secret = new ParsedSecret
         {
@@ -342,7 +343,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Certificate_Base64()
     {
         var clientId = "certificate_base64_invalid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var secret = new ParsedSecret
         {
@@ -360,7 +361,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Issuer()
     {
         var clientId = "certificate_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var token = CreateToken(clientId);
         token.Payload.Remove(JwtClaimTypes.Issuer);
@@ -381,7 +382,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Subject()
     {
         var clientId = "certificate_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var token = CreateToken(clientId);
         token.Payload.Remove(JwtClaimTypes.Subject);
@@ -402,7 +403,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Expired_Token()
     {
         var clientId = "certificate_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var token = CreateToken(clientId, nowOverride: DateTime.UtcNow.AddHours(-1));
         var secret = new ParsedSecret
@@ -421,7 +422,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Unsigned_Token()
     {
         var clientId = "certificate_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var token = CreateToken(clientId);
         token.Header.Remove("alg");
@@ -442,7 +443,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Invalid_Not_Yet_Valid_Token()
     {
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var token = CreateToken(clientId, nowOverride: DateTime.UtcNow.AddSeconds(30));
         var secret = new ParsedSecret
@@ -463,7 +464,7 @@ public class PrivateKeyJwtSecretValidation
     public async Task Signing_Algorithm_Not_Allowed_By_Configuration()
     {
         var clientId = "certificate_base64_valid";
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
 
         var token = CreateToken(clientId);
         var secret = new ParsedSecret

@@ -15,6 +15,7 @@ public class DeviceCodeValidation
 {
     private const string Category = "Device code validation";
 
+    private readonly CT _ct = TestContext.Current.CancellationToken;
     private readonly IClientStore _clients = Factory.CreateClientStore();
 
     private readonly DeviceCode deviceCode = new DeviceCode
@@ -32,7 +33,7 @@ public class DeviceCodeValidation
     [Trait("Category", Category)]
     public async Task DeviceCode_Missing()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var validator = Factory.CreateDeviceCodeValidator(service);
@@ -42,7 +43,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = null, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -52,7 +53,7 @@ public class DeviceCodeValidation
     [Trait("Category", Category)]
     public async Task DeviceCode_From_Different_Client()
     {
-        var badActor = await _clients.FindClientByIdAsync("codeclient");
+        var badActor = await _clients.FindClientByIdAsync("codeclient", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -64,7 +65,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -77,7 +78,7 @@ public class DeviceCodeValidation
         deviceCode.CreationTime = DateTime.UtcNow.AddDays(-10);
         deviceCode.Lifetime = 300;
 
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -89,7 +90,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.ExpiredToken);
@@ -101,7 +102,7 @@ public class DeviceCodeValidation
     {
         deviceCode.AuthorizedScopes = new List<string>();
 
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -113,7 +114,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.AccessDenied);
@@ -125,7 +126,7 @@ public class DeviceCodeValidation
     {
         deviceCode.IsAuthorized = false;
 
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -137,7 +138,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.AuthorizationPending);
@@ -149,7 +150,7 @@ public class DeviceCodeValidation
     {
         deviceCode.Subject = null;
 
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -161,7 +162,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.AuthorizationPending);
@@ -172,7 +173,7 @@ public class DeviceCodeValidation
     [Trait("Category", Category)]
     public async Task User_Disabled()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -184,7 +185,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidGrant);
@@ -194,7 +195,7 @@ public class DeviceCodeValidation
     [Trait("Category", Category)]
     public async Task DeviceCode_Polling_Too_Fast()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -206,7 +207,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeTrue();
         context.Result.Error.ShouldBe(OidcConstants.TokenErrors.SlowDown);
@@ -216,7 +217,7 @@ public class DeviceCodeValidation
     [Trait("Category", Category)]
     public async Task Valid_DeviceCode()
     {
-        var client = await _clients.FindClientByIdAsync("device_flow");
+        var client = await _clients.FindClientByIdAsync("device_flow", _ct);
         var service = Factory.CreateDeviceCodeService();
 
         var handle = await service.StoreDeviceAuthorizationAsync(Guid.NewGuid().ToString(), deviceCode);
@@ -228,7 +229,7 @@ public class DeviceCodeValidation
 
         var context = new DeviceCodeValidationContext { DeviceCode = handle, Request = request };
 
-        await validator.ValidateAsync(context);
+        await validator.ValidateAsync(context, _ct);
 
         context.Result.IsError.ShouldBeFalse();
     }

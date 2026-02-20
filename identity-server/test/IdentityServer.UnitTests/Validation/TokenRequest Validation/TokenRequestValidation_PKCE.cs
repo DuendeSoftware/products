@@ -21,6 +21,7 @@ public class TokenRequestValidation_PKCE
 
     private IClientStore _clients = Factory.CreateClientStore();
     private InputLengthRestrictions lengths = new InputLengthRestrictions();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     [Theory]
     [InlineData("codeclient.pkce")]
@@ -28,7 +29,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task valid_pkce_token_request_with_plain_method_should_succeed(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
 
@@ -68,7 +69,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task valid_pkce_token_request_with_plain_method_should_succeed_hybrid()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("hybridclient.pkce");
+        var client = await _clients.FindEnabledClientByIdAsync("hybridclient.pkce", _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
 
@@ -110,7 +111,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task valid_pkce_token_request_with_sha256_method_should_succeed(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
@@ -153,7 +154,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_missing_code_challenge_and_verifier_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -191,7 +192,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_missing_code_challenge_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var code = new AuthorizationCode
@@ -231,7 +232,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_invalid_verifier_plain_method_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);
 
@@ -274,7 +275,7 @@ public class TokenRequestValidation_PKCE
     [Trait("Category", Category)]
     public async Task token_request_with_invalid_verifier_sha256_method_should_fail(string clientId)
     {
-        var client = await _clients.FindEnabledClientByIdAsync(clientId);
+        var client = await _clients.FindEnabledClientByIdAsync(clientId, _ct);
         var grants = Factory.CreateAuthorizationCodeStore();
 
         var verifier = "x".Repeat(lengths.CodeVerifierMinLength);

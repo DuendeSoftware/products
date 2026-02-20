@@ -45,14 +45,14 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         _logger = logger;
     }
 
-    private async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request)
+    private async Task<BackchannelUserLoginRequest> CreateAsync(BackChannelAuthenticationRequest request, CT ct)
     {
         if (request == null)
         {
             return null;
         }
 
-        var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
+        var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId, ct);
         if (client == null)
         {
             return null;
@@ -79,16 +79,16 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task<BackchannelUserLoginRequest> GetLoginRequestByInternalIdAsync(string id)
+    public async Task<BackchannelUserLoginRequest> GetLoginRequestByInternalIdAsync(string id, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetLoginRequestByInternalId");
 
         var request = await _requestStore.GetByInternalIdAsync(id);
-        return await CreateAsync(request);
+        return await CreateAsync(request, ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync()
+    public async Task<IEnumerable<BackchannelUserLoginRequest>> GetPendingLoginRequestsForCurrentUserAsync(CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.GetPendingLoginRequestsForCurrentUser");
 
@@ -104,7 +104,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
             {
                 if (!item.IsComplete)
                 {
-                    var req = await CreateAsync(item);
+                    var req = await CreateAsync(item, ct);
                     if (req != null)
                     {
                         list.Add(req);

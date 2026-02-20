@@ -37,7 +37,7 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ShouldSlowDown(string requestId, BackChannelAuthenticationRequest details)
+    public async Task<bool> ShouldSlowDown(string requestId, BackChannelAuthenticationRequest details, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DistributedBackchannelAuthenticationThrottlingService.ShouldSlowDown");
 
@@ -46,12 +46,12 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
         var key = KeyPrefix + requestId;
         var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _timeProvider.GetUtcNow().AddSeconds(details.Lifetime) };
 
-        var lastSeenAsString = await _cache.GetStringAsync(key);
+        var lastSeenAsString = await _cache.GetStringAsync(key, ct);
 
         // record new
         if (lastSeenAsString == null)
         {
-            await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
+            await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options, ct);
             return false;
         }
 
@@ -60,17 +60,17 @@ public class DistributedBackchannelAuthenticationThrottlingService : IBackchanne
         {
             lastSeen = lastSeen.ToUniversalTime();
 
-            var client = await _clientStore.FindEnabledClientByIdAsync(details.ClientId);
+            var client = await _clientStore.FindEnabledClientByIdAsync(details.ClientId, ct);
             var interval = client?.PollingInterval ?? _options.Ciba.DefaultPollingInterval;
             if (_timeProvider.GetUtcNow().UtcDateTime < lastSeen.AddSeconds(interval))
             {
-                await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
+                await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options, ct);
                 return true;
             }
         }
 
         // store current and continue
-        await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options);
+        await _cache.SetStringAsync(key, _timeProvider.GetUtcNow().ToString("O"), options, ct);
 
         return false;
     }

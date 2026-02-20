@@ -141,7 +141,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
             Api = api,
             Client = client,
         };
-        var validationResult = await _requestValidator.ValidateAsync(validationRequest);
+        var validationResult = await _requestValidator.ValidateAsync(validationRequest, context.RequestAborted);
         if (validationResult.IsError)
         {
             LogFailure(validationResult.Error, callerName);

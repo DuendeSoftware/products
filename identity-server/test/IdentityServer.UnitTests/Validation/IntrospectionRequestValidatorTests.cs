@@ -15,6 +15,7 @@ namespace UnitTests.Validation;
 public class IntrospectionRequestValidatorTests
 {
     private const string Category = "Introspection request validation";
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private IntrospectionRequestValidator _subject;
     private IReferenceTokenStore _referenceTokenStore;
@@ -56,7 +57,8 @@ public class IntrospectionRequestValidatorTests
             {
                 Parameters = param,
                 Api = new ApiResource("api")
-            }
+            },
+            _ct
         );
 
         result.IsError.ShouldBe(false);
@@ -83,7 +85,7 @@ public class IntrospectionRequestValidatorTests
         {
             Parameters = param,
             Api = new ApiResource("api")
-        });
+        }, _ct);
 
         result.IsError.ShouldBe(true);
         result.Error.ShouldBe("missing_token");
@@ -105,7 +107,7 @@ public class IntrospectionRequestValidatorTests
         {
             Parameters = param,
             Api = new ApiResource("api")
-        });
+        }, _ct);
 
         result.IsError.ShouldBe(false);
         result.IsActive.ShouldBe(false);
@@ -144,7 +146,8 @@ public class IntrospectionRequestValidatorTests
             {
                 Parameters = param,
                 Api = new ApiResource("api")
-            }
+            },
+            _ct
         );
 
         var claims = result.Claims.Where(c => c.Type == claimType).ToArray();

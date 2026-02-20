@@ -19,13 +19,15 @@ public interface IEndSessionRequestValidator
     /// </summary>
     /// <param name="parameters"></param>
     /// <param name="subject"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject);
+    Task<EndSessionValidationResult> ValidateAsync(NameValueCollection parameters, ClaimsPrincipal subject, CT ct);
 
     /// <summary>
     ///  Validates requests from logout page iframe to trigger single signout.
     /// </summary>
     /// <param name="parameters"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters);
+    Task<EndSessionCallbackValidationResult> ValidateCallbackAsync(NameValueCollection parameters, CT ct);
 }
