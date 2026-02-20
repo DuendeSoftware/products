@@ -56,21 +56,15 @@ public class DefaultTokenCreationService : ITokenCreationService
         Logger = logger;
     }
 
-    /// <summary>
-    /// Creates the token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    /// <returns>
-    /// A protected and serialized security token
-    /// </returns>
-    public virtual async Task<string> CreateTokenAsync(Token token)
+    /// <inheritdoc/>
+    public virtual async Task<string> CreateTokenAsync(Token token, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.CreateToken");
 
         var payload = await CreatePayloadAsync(token);
         var headerElements = await CreateHeaderElementsAsync(token);
 
-        return await CreateJwtAsync(token, payload, headerElements);
+        return await CreateJwtAsync(token, payload, headerElements, ct);
     }
 
     /// <summary>
@@ -121,14 +115,15 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <param name="token"></param>
     /// <param name="payload"></param>
     /// <param name="headerElements"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     protected virtual async Task<string> CreateJwtAsync(Token token, string payload,
-        Dictionary<string, object> headerElements)
+        Dictionary<string, object> headerElements, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenCreationService.CreateJwt");
 
-        var credential = await Keys.GetSigningCredentialsAsync(token.AllowedSigningAlgorithms, default);
+        var credential = await Keys.GetSigningCredentialsAsync(token.AllowedSigningAlgorithms, ct);
 
         if (credential == null)
         {

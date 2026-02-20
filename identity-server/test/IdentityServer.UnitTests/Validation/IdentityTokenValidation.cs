@@ -24,7 +24,7 @@ public class IdentityTokenValidation
     {
         var creator = Factory.CreateDefaultTokenCreator();
         var token = TokenFactory.CreateIdentityToken("roclient", "valid");
-        var jwt = await creator.CreateTokenAsync(token);
+        var jwt = await creator.CreateTokenAsync(token, _ct);
 
         var validator = Factory.CreateTokenValidator();
         var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient", true, _ct);
@@ -37,7 +37,7 @@ public class IdentityTokenValidation
     public async Task Valid_IdentityToken_DefaultKeyType_no_ClientId_supplied()
     {
         var creator = Factory.CreateDefaultTokenCreator();
-        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"));
+        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"), _ct);
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient", true, _ct);
@@ -49,7 +49,7 @@ public class IdentityTokenValidation
     public async Task Valid_IdentityToken_no_ClientId_supplied()
     {
         var creator = Factory.CreateDefaultTokenCreator();
-        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"));
+        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"), _ct);
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt, null, true, _ct);
@@ -61,7 +61,7 @@ public class IdentityTokenValidation
     public async Task IdentityToken_InvalidClientId()
     {
         var creator = Factory.CreateDefaultTokenCreator();
-        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"));
+        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityToken("roclient", "valid"), _ct);
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt, "invalid", true, _ct);
@@ -74,7 +74,7 @@ public class IdentityTokenValidation
     public async Task IdentityToken_Too_Long()
     {
         var creator = Factory.CreateDefaultTokenCreator();
-        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityTokenLong("roclient", "valid", 1000));
+        var jwt = await creator.CreateTokenAsync(TokenFactory.CreateIdentityTokenLong("roclient", "valid", 1000), _ct);
         var validator = Factory.CreateTokenValidator();
 
         var result = await validator.ValidateIdentityTokenAsync(jwt, "roclient", true, _ct);
@@ -91,7 +91,7 @@ public class IdentityTokenValidation
         id_token.Claims.Add(new System.Security.Claims.Claim("aud", "some_aud"));
 
         // this should not throw
-        var jwt = await creator.CreateTokenAsync(id_token);
+        var jwt = await creator.CreateTokenAsync(id_token, _ct);
 
         // check that the custom aud was ignored
         var payload = jwt.Split('.')[1];

@@ -163,7 +163,7 @@ public class AccessTokenValidation
     public async Task Valid_JWT_Token()
     {
         var signer = Factory.CreateDefaultTokenCreator();
-        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"));
+        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"), _ct);
 
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
@@ -181,7 +181,7 @@ public class AccessTokenValidation
         options.EmitScopesAsSpaceDelimitedStringInJwt = flag;
 
         var signer = Factory.CreateDefaultTokenCreator(options);
-        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"));
+        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write"), _ct);
 
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
@@ -204,7 +204,7 @@ public class AccessTokenValidation
         var signer = Factory.CreateDefaultTokenCreator();
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
         token.Issuer = "invalid";
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
@@ -218,7 +218,7 @@ public class AccessTokenValidation
     public async Task JWT_Token_Too_Long()
     {
         var signer = Factory.CreateDefaultTokenCreator();
-        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessTokenLong(new Client { ClientId = "roclient" }, "valid", 600, 1000, "read", "write"));
+        var jwt = await signer.CreateTokenAsync(TokenFactory.CreateAccessTokenLong(new Client { ClientId = "roclient" }, "valid", 600, 1000, "read", "write"), _ct);
 
         var validator = Factory.CreateTokenValidator(null);
         var result = await validator.ValidateAccessTokenAsync(jwt, null, _ct);
@@ -236,7 +236,7 @@ public class AccessTokenValidation
         futureClock.SetUtcNow(definitelyNotNow);
         var signer = Factory.CreateDefaultTokenCreator(timeProvider: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var options = TestIdentityServerOptions.Create();
         options.JwtValidationClockSkew = TimeSpan.FromSeconds(10);
@@ -255,7 +255,7 @@ public class AccessTokenValidation
         futureClock.SetUtcNow(definitelyNotNow);
         var signer = Factory.CreateDefaultTokenCreator(timeProvider: futureClock);
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var options = TestIdentityServerOptions.Create();
         options.JwtValidationClockSkew = TimeSpan.FromSeconds(5);
@@ -272,7 +272,7 @@ public class AccessTokenValidation
     {
         var signer = Factory.CreateDefaultTokenCreator();
         var token = TokenFactory.CreateAccessToken(new Client { ClientId = "roclient" }, "valid", 600, "read", "write");
-        var jwt = await signer.CreateTokenAsync(token);
+        var jwt = await signer.CreateTokenAsync(token, _ct);
 
         var options = TestIdentityServerOptions.Create();
         options.SupportedRequestObjectSigningAlgorithms = ["Test"];

@@ -38,17 +38,8 @@ public class DefaultClaimsService : IClaimsService
         Profile = profile;
     }
 
-    /// <summary>
-    /// Returns claims for an identity token
-    /// </summary>
-    /// <param name="subject">The subject</param>
-    /// <param name="resources">The requested resources</param>
-    /// <param name="includeAllIdentityClaims">Specifies if all claims should be included in the token, or if the userinfo endpoint can be used to retrieve them</param>
-    /// <param name="request">The raw request</param>
-    /// <returns>
-    /// Claims for the identity token
-    /// </returns>
-    public virtual async Task<IEnumerable<Claim>> GetIdentityTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resources, bool includeAllIdentityClaims, ValidatedRequest request)
+    /// <inheritdoc/>
+    public virtual async Task<IEnumerable<Claim>> GetIdentityTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resources, bool includeAllIdentityClaims, ValidatedRequest request, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultClaimsService.GetIdentityTokenClaims");
 
@@ -101,16 +92,8 @@ public class DefaultClaimsService : IClaimsService
         return outputClaims;
     }
 
-    /// <summary>
-    /// Returns claims for an access token.
-    /// </summary>
-    /// <param name="subject">The subject.</param>
-    /// <param name="resourceResult">The validated resource result</param>
-    /// <param name="request">The raw request.</param>
-    /// <returns>
-    /// Claims for the access token
-    /// </returns>
-    public virtual async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resourceResult, ValidatedRequest request)
+    /// <inheritdoc/>
+    public virtual async Task<IEnumerable<Claim>> GetAccessTokenClaimsAsync(ClaimsPrincipal subject, ResourceValidationResult resourceResult, ValidatedRequest request, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultClaimsService.GetAccessTokenClaims");
 
