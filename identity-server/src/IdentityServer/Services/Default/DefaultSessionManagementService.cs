@@ -78,7 +78,7 @@ public class DefaultSessionManagementService : ISessionManagementService
                 }
             }
 
-            await _persistedGrantStore.RemoveAllAsync(grantFilter);
+            await _persistedGrantStore.RemoveAllAsync(grantFilter, ct);
         }
 
         // send back channel SLO

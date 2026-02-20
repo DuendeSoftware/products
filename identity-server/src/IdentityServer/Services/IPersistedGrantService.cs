@@ -17,8 +17,9 @@ public interface IPersistedGrantService
     /// Gets all grants for a given subject ID.
     /// </summary>
     /// <param name="subjectId">The subject identifier.</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<IEnumerable<Grant>> GetAllGrantsAsync(string subjectId);
+    Task<IEnumerable<Grant>> GetAllGrantsAsync(string subjectId, CT ct);
 
     /// <summary>
     /// Removes all grants for a given subject id, and optionally client id and session id combination.
@@ -26,6 +27,7 @@ public interface IPersistedGrantService
     /// <param name="subjectId">The subject identifier.</param>
     /// <param name="clientId">The client identifier (optional).</param>
     /// <param name="sessionId">The session id (optional).</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task RemoveAllGrantsAsync(string subjectId, string? clientId = null, string? sessionId = null);
+    Task RemoveAllGrantsAsync(string subjectId, string? clientId = null, string? sessionId = null, CT ct = default);
 }

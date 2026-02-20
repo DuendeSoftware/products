@@ -22,6 +22,7 @@ public class ConsentTests
     private const string Category = "Authorize and consent tests";
 
     private IdentityServerPipeline _mockPipeline = new IdentityServerPipeline();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     public ConsentTests()
     {
@@ -392,7 +393,7 @@ public class ConsentTests
             ConsumedTime = null,
             Data = serialized
         };
-        await persistedGrantStore.StoreAsync(legacyConsent);
+        await persistedGrantStore.StoreAsync(legacyConsent, _ct);
 
         // Create a session cookie
         await _mockPipeline.LoginAsync("bob");
@@ -417,7 +418,7 @@ public class ConsentTests
         // The legacy consent should be migrated to use a new key...
 
         // Old key shouldn't find anything
-        var grant = await persistedGrantStore.GetAsync(legacyKey);
+        var grant = await persistedGrantStore.GetAsync(legacyKey, _ct);
         grant.ShouldBeNull();
 
         // New key should
@@ -427,7 +428,7 @@ public class ConsentTests
             var bytes = Encoding.UTF8.GetBytes(hexEncodedKeyNoHash);
             var hash = sha.ComputeHash(bytes);
             var hexEncodedKey = BitConverter.ToString(hash).Replace("-", "");
-            grant = await persistedGrantStore.GetAsync(hexEncodedKey);
+            grant = await persistedGrantStore.GetAsync(hexEncodedKey, _ct);
             grant.ShouldNotBeNull();
             grant.ClientId.ShouldBe(clientId);
             grant.SubjectId.ShouldBe(subjectId);

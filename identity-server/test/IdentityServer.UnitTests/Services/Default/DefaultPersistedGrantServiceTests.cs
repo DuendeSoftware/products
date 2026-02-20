@@ -174,7 +174,7 @@ public class DefaultPersistedGrantServiceTests
             RequestedScopes = new string[] { "quux3" }
         }, _ct);
 
-        var grants = await _subject.GetAllGrantsAsync("123");
+        var grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(2);
         var grant1 = grants.First(x => x.ClientId == "client1");
@@ -513,7 +513,7 @@ public class DefaultPersistedGrantServiceTests
             Scopes = new string[] { "foo1", "foo2" }
         });
 
-        var grants = await _subject.GetAllGrantsAsync("123");
+        var grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(1);
         grants.First().Scopes.ShouldBe(["foo1", "foo2"]);
@@ -530,7 +530,7 @@ public class DefaultPersistedGrantServiceTests
             RequestedScopes = new string[] { "quux3" }
         }, _ct);
 
-        grants = await _subject.GetAllGrantsAsync("123");
+        grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(1);
         grants.First().Scopes.ShouldBe(["foo1", "foo2", "quux3"]);
@@ -562,7 +562,7 @@ public class DefaultPersistedGrantServiceTests
             Scopes = new string[] { "foo3" }
         });
 
-        var grants = await _subject.GetAllGrantsAsync("123");
+        var grants = await _subject.GetAllGrantsAsync("123", _ct);
 
         grants.Count().ShouldBe(1);
         grants.First().Scopes.ShouldBe(["foo1", "foo2"]);
@@ -576,9 +576,9 @@ public class DefaultPersistedGrantServiceTests
 
         public CorruptingPersistedGrantStore(IPersistedGrantStore inner) => _inner = inner;
 
-        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
+        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, CT ct)
         {
-            var items = await _inner.GetAllAsync(filter);
+            var items = await _inner.GetAllAsync(filter, ct);
             if (ClientIdToCorrupt != null)
             {
                 var itemsToCorrupt = items.Where(x => x.ClientId == ClientIdToCorrupt);
@@ -590,12 +590,12 @@ public class DefaultPersistedGrantServiceTests
             return items;
         }
 
-        public Task<PersistedGrant> GetAsync(string key) => _inner.GetAsync(key);
+        public Task<PersistedGrant> GetAsync(string key, CT ct) => _inner.GetAsync(key, ct);
 
-        public Task RemoveAllAsync(PersistedGrantFilter filter) => _inner.RemoveAllAsync(filter);
+        public Task RemoveAllAsync(PersistedGrantFilter filter, CT ct) => _inner.RemoveAllAsync(filter, ct);
 
-        public Task RemoveAsync(string key) => _inner.RemoveAsync(key);
+        public Task RemoveAsync(string key, CT ct) => _inner.RemoveAsync(key, ct);
 
-        public Task StoreAsync(PersistedGrant grant) => _inner.StoreAsync(grant);
+        public Task StoreAsync(PersistedGrant grant, CT ct) => _inner.StoreAsync(grant, ct);
     }
 }

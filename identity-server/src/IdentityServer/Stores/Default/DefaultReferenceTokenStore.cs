@@ -35,7 +35,7 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.StoreReferenceToken");
 
-        return CreateItemAsync(token, token.ClientId, token.SubjectId, token.SessionId, token.Description, token.CreationTime, token.Lifetime);
+        return CreateItemAsync(token, token.ClientId, token.SubjectId, token.SessionId, token.Description, token.CreationTime, token.Lifetime, default);
     }
 
     /// <inheritdoc/>
@@ -43,7 +43,7 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.GetReferenceToken");
 
-        return GetItemAsync(handle);
+        return GetItemAsync(handle, default);
     }
 
     /// <inheritdoc/>
@@ -51,7 +51,7 @@ public class DefaultReferenceTokenStore : DefaultGrantStore<Token>, IReferenceTo
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultReferenceTokenStore.RemoveReferenceToken");
 
-        return RemoveItemAsync(handle);
+        return RemoveItemAsync(handle, default);
     }
 
     /// <inheritdoc/>

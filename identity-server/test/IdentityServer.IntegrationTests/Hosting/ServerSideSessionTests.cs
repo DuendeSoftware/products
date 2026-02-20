@@ -31,6 +31,7 @@ public class ServerSideSessionTests
     private IPersistedGrantStore _grantStore;
     private IRefreshTokenStore _refreshTokenStore;
     private IDataProtector _protector;
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private MockServerUrls _urls = new MockServerUrls();
 
@@ -308,7 +309,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldNotBeEmpty();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
         {
@@ -319,7 +320,7 @@ public class ServerSideSessionTests
             SendBackchannelLogoutNotification = false
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldBeEmpty();
     }
 
     [Fact]
@@ -337,7 +338,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldNotBeEmpty();
 
         await _sessionMgmt.RemoveSessionsAsync(new RemoveSessionsContext
         {
@@ -349,7 +350,7 @@ public class ServerSideSessionTests
             ClientIds = new[] { "foo" }
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -534,7 +535,7 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldNotBeEmpty();
 
         var session = (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" })).Single();
         session.Expires = System.DateTime.UtcNow.AddMinutes(-1);
@@ -542,7 +543,7 @@ public class ServerSideSessionTests
 
         await Task.Delay(1000);
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldBeEmpty();
     }
 
     [Fact]
@@ -560,11 +561,11 @@ public class ServerSideSessionTests
             RedirectUri = "https://client/callback"
         });
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldNotBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldNotBeEmpty();
 
         await _pipeline.LogoutAsync();
 
-        (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" })).ShouldBeEmpty();
+        (        await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldBeEmpty();
     }
 
     [Fact]

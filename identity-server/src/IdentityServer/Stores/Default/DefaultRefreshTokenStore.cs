@@ -39,7 +39,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.StoreRefreshTokenAsync");
 
-        return await CreateItemAsync(refreshToken, refreshToken.ClientId, refreshToken.SubjectId, refreshToken.SessionId, refreshToken.Description, refreshToken.CreationTime, refreshToken.Lifetime);
+        return await CreateItemAsync(refreshToken, refreshToken.ClientId, refreshToken.SubjectId, refreshToken.SessionId, refreshToken.Description, refreshToken.CreationTime, refreshToken.Lifetime, default);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.GetRefreshToken");
 
-        return GetItemAsync(refreshTokenHandle);
+        return GetItemAsync(refreshTokenHandle, default);
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public class DefaultRefreshTokenStore : DefaultGrantStore<RefreshToken>, IRefres
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultRefreshTokenStore.RemoveRefreshToken");
 
-        return RemoveItemAsync(refreshTokenHandle);
+        return RemoveItemAsync(refreshTokenHandle, default);
     }
 
     /// <summary>
