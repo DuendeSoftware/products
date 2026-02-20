@@ -37,7 +37,7 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
     }
 
     /// <inheritdoc />
-    public async Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request)
+    public async Task<PushedAuthorizationResponse> CreateResponseAsync(ValidatedPushedAuthorizationRequest request, CT ct)
     {
         // Create a reference value
         var referenceValue = await _handleGeneration.GenerateAsync();
@@ -53,7 +53,7 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
             ReferenceValue = referenceValue,
             ExpiresAtUtc = expiresAt,
             PushedParameters = request.Raw
-        });
+        }, ct);
 
         // Return reference and expiration
         return new PushedAuthorizationSuccess

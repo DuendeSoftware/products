@@ -68,7 +68,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
     /// <inheritdoc />
     public async Task WriteHttpResponse(AuthorizeResult result, HttpContext context)
     {
-        await ConsumePushedAuthorizationRequest(result);
+        await ConsumePushedAuthorizationRequest(result, context.RequestAborted);
 
         if (result.Response.IsError)
         {
@@ -80,12 +80,12 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         }
     }
 
-    private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result)
+    private async Task ConsumePushedAuthorizationRequest(AuthorizeResult result, CT ct)
     {
         var referenceValue = result.Response?.Request?.PushedAuthorizationReferenceValue;
         if (referenceValue.IsPresent())
         {
-            await _pushedAuthorizationService.ConsumeAsync(referenceValue);
+            await _pushedAuthorizationService.ConsumeAsync(referenceValue, ct);
         }
     }
 

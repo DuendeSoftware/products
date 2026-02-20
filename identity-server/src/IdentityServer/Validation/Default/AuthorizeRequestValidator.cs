@@ -103,14 +103,14 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         }
 
         // load request object
-        var roLoadResult = await _requestObjectValidator.LoadRequestObjectAsync(request);
+        var roLoadResult = await _requestObjectValidator.LoadRequestObjectAsync(request, _ct);
         if (roLoadResult.IsError)
         {
             return roLoadResult;
         }
 
         // validate request object
-        var roValidationResult = await _requestObjectValidator.ValidateRequestObjectAsync(request);
+        var roValidationResult = await _requestObjectValidator.ValidateRequestObjectAsync(request, _ct);
         if (roValidationResult.IsError)
         {
             return roValidationResult;

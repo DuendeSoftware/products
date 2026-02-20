@@ -110,7 +110,7 @@ internal class PushedAuthorizationEndpoint : IEndpointHandler
             throw new InvalidOperationException("Invalid PAR validation result: success without a validated request");
         }
 
-        var response = await _responseGenerator.CreateResponseAsync(parValidationResult.ValidatedRequest);
+        var response = await _responseGenerator.CreateResponseAsync(parValidationResult.ValidatedRequest, context.RequestAborted);
 
         switch (response)
         {

@@ -17,8 +17,9 @@ public interface IPushedAuthorizationService
     /// </summary>
     /// <param name="pushedAuthorizationRequest">The pushed authorization
     /// request without serialization or data protection applied</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
     ///
-    Task StoreAsync(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest);
+    Task StoreAsync(DeserializedPushedAuthorizationRequest pushedAuthorizationRequest, CT ct);
 
     /// <summary>
     /// Consumes the pushed authorization request, indicating that it should not
@@ -30,7 +31,8 @@ public interface IPushedAuthorizationService
     /// <param name="referenceValue">The reference value of the pushed
     /// authorization request. The reference value is the identifier within the
     /// request_uri parameter.</param>
-    Task ConsumeAsync(string referenceValue);
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    Task ConsumeAsync(string referenceValue, CT ct);
 
     /// <summary>
     /// Gets the raw pushed authorization parameters.
@@ -38,8 +40,9 @@ public interface IPushedAuthorizationService
     /// <param name="referenceValue">The reference value of the pushed
     /// authorization request. The reference value is the identifier within the
     /// request_uri parameter.</param>
+    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The deserialized pushed authorization request, or null if the
     /// request does not exist or was previously consumed.
     /// </returns>
-    Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(string referenceValue);
+    Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(string referenceValue, CT ct);
 }

@@ -29,12 +29,12 @@ public class PushedAuthorizationService : IPushedAuthorizationService
     }
 
     /// <inheritdoc />
-    public Task ConsumeAsync(string referenceValue) => _store.ConsumeByHashAsync(referenceValue.ToSha256());
+    public Task ConsumeAsync(string referenceValue, CT ct) => _store.ConsumeByHashAsync(referenceValue.ToSha256(), ct);
 
     /// <inheritdoc />
-    public async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(string referenceValue)
+    public async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(string referenceValue, CT ct)
     {
-        var par = await _store.GetByHashAsync(referenceValue.ToSha256());
+        var par = await _store.GetByHashAsync(referenceValue.ToSha256(), ct);
         if (par == null)
         {
             return null;
@@ -49,7 +49,7 @@ public class PushedAuthorizationService : IPushedAuthorizationService
     }
 
     /// <inheritdoc />
-    public async Task StoreAsync(DeserializedPushedAuthorizationRequest request)
+    public async Task StoreAsync(DeserializedPushedAuthorizationRequest request, CT ct)
     {
         var protectedData = _serializer.Serialize(request.PushedParameters);
         await _store.StoreAsync(new Models.PushedAuthorizationRequest
@@ -57,6 +57,6 @@ public class PushedAuthorizationService : IPushedAuthorizationService
             ReferenceValueHash = request.ReferenceValue.ToSha256(),
             ExpiresAtUtc = request.ExpiresAtUtc,
             Parameters = protectedData
-        });
+        }, ct);
     }
 }

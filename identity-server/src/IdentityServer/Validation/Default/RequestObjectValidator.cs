@@ -36,7 +36,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
     }
 
 
-    public async Task<AuthorizeRequestValidationResult> LoadRequestObjectAsync(ValidatedAuthorizeRequest request)
+    public async Task<AuthorizeRequestValidationResult> LoadRequestObjectAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         var requestObject = request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
         var requestUri = request.Raw.Get(OidcConstants.AuthorizeRequest.RequestUri);
@@ -64,7 +64,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         {
             if (IsParRequestUri(requestUri))
             {
-                var validationError = await ValidatePushedAuthorizationRequest(request);
+                var validationError = await ValidatePushedAuthorizationRequest(request, ct);
                 if (validationError != null)
                 {
                     return validationError;
@@ -116,7 +116,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
 
     private static string? LoadRequestObjectFromPushedAuthorizationRequest(ValidatedAuthorizeRequest request) => request.Raw.Get(OidcConstants.AuthorizeRequest.Request);
 
-    public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request)
+    public async Task<AuthorizeRequestValidationResult?> ValidatePushedAuthorizationRequest(ValidatedAuthorizeRequest request, CT ct)
     {
         // Check that the endpoint is still enabled at the time of validation, in case an existing PAR record
         // is used after PAR is disabled.
@@ -127,7 +127,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
                     description: "Pushed authorization is disabled.");
             }
         }
-        var pushedAuthorizationRequest = await GetPushedAuthorizationRequestAsync(request);
+        var pushedAuthorizationRequest = await GetPushedAuthorizationRequestAsync(request, ct);
         if (pushedAuthorizationRequest == null)
         {
             {
@@ -193,12 +193,12 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    private async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(ValidatedAuthorizeRequest request)
+    private async Task<DeserializedPushedAuthorizationRequest?> GetPushedAuthorizationRequestAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         var referenceValue = GetReferenceValue(request);
         if (referenceValue != null)
         {
-            return await _pushedAuthorizationService.GetPushedAuthorizationRequestAsync(referenceValue);
+            return await _pushedAuthorizationService.GetPushedAuthorizationRequestAsync(referenceValue, ct);
         }
         return null;
     }
@@ -217,7 +217,7 @@ internal class RequestObjectValidator : IRequestObjectValidator
         return null;
     }
 
-    public async Task<AuthorizeRequestValidationResult> ValidateRequestObjectAsync(ValidatedAuthorizeRequest request)
+    public async Task<AuthorizeRequestValidationResult> ValidateRequestObjectAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         //////////////////////////////////////////////////////////
         // validate request object
