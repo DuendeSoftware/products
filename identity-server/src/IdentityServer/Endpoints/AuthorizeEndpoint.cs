@@ -59,7 +59,7 @@ internal class AuthorizeEndpoint : AuthorizeEndpointBase
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        var user = await UserSession.GetUserAsync();
+        var user = await UserSession.GetUserAsync(context.RequestAborted);
         var result = await ProcessAuthorizeRequestAsync(values, user, context.RequestAborted);
 
         Logger.LogTrace("End authorize request. result type: {0}", result?.GetType().ToString() ?? "-none-");

@@ -138,8 +138,8 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
                 }
 
                 validatedRequest.Subject = subject;
-                validatedRequest.SessionId = await UserSession.GetSessionIdAsync();
-                validatedRequest.ClientIds = await UserSession.GetClientListAsync();
+                validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
+                validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
             }
 
             var redirectUri = parameters.Get(OidcConstants.EndSessionRequest.PostLogoutRedirectUri);
@@ -168,8 +168,8 @@ public class EndSessionRequestValidator : IEndSessionRequestValidator
         {
             // no id_token to authenticate the client, but we do have a user and a user session
             validatedRequest.Subject = subject;
-            validatedRequest.SessionId = await UserSession.GetSessionIdAsync();
-            validatedRequest.ClientIds = await UserSession.GetClientListAsync();
+            validatedRequest.SessionId = await UserSession.GetSessionIdAsync(ct);
+            validatedRequest.ClientIds = await UserSession.GetClientListAsync(ct);
         }
 
         LogSuccess(validatedRequest);

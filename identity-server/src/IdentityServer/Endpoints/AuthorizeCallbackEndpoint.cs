@@ -45,7 +45,7 @@ internal class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
         Logger.LogDebug("Start authorize callback request");
 
         var parameters = context.Request.Query.AsNameValueCollection();
-        var user = await UserSession.GetUserAsync();
+        var user = await UserSession.GetUserAsync(context.RequestAborted);
 
         var result = await ProcessAuthorizeRequestAsync(parameters, user, context.RequestAborted, true);
 

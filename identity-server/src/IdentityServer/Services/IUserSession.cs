@@ -17,40 +17,49 @@ public interface IUserSession
     /// <summary>
     /// Creates a session identifier for the signin context and issues the session id cookie.
     /// </summary>
-    Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties);
+    /// <param name="principal"></param>
+    /// <param name="properties"></param>
+    /// <param name="ct"></param>
+    Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties, CT ct);
 
     /// <summary>
     /// Gets the current authenticated user.
     /// </summary>
-    Task<ClaimsPrincipal?> GetUserAsync();
+    /// <param name="ct"></param>
+    Task<ClaimsPrincipal?> GetUserAsync(CT ct);
 
     /// <summary>
     /// Gets the current session identifier.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<string?> GetSessionIdAsync();
+    Task<string?> GetSessionIdAsync(CT ct);
 
     /// <summary>
     /// Ensures the session identifier cookie asynchronously.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task EnsureSessionIdCookieAsync();
+    Task EnsureSessionIdCookieAsync(CT ct);
 
     /// <summary>
     /// Removes the session identifier cookie.
     /// </summary>
-    Task RemoveSessionIdCookieAsync();
+    /// <param name="ct"></param>
+    Task RemoveSessionIdCookieAsync(CT ct);
 
     /// <summary>
     /// Adds a client to the list of clients the user has signed into during their session.
     /// </summary>
     /// <param name="clientId">The client identifier.</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task AddClientIdAsync(string clientId);
+    Task AddClientIdAsync(string clientId, CT ct);
 
     /// <summary>
     /// Gets the list of clients the user has signed into during their session.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<IEnumerable<string>> GetClientListAsync();
+    Task<IEnumerable<string>> GetClientListAsync(CT ct);
 }

@@ -119,7 +119,7 @@ public class AuthorizeHttpWriter : IHttpResponseWriter<AuthorizeResult>
         {
             // success response -- track client authorization for sign-out
             //_logger.LogDebug("Adding client {0} to client list cookie for subject {1}", request.ClientId, request.Subject.GetSubjectId());
-            await _userSession.AddClientIdAsync(response.Request.ClientId);
+            await _userSession.AddClientIdAsync(response.Request.ClientId, context.RequestAborted);
         }
 
         await RenderAuthorizeResponseAsync(response, context);

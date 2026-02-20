@@ -67,7 +67,7 @@ internal class EndSessionEndpoint : IEndpointHandler
             return new StatusCodeResult(HttpStatusCode.MethodNotAllowed);
         }
 
-        var user = await _userSession.GetUserAsync();
+        var user = await _userSession.GetUserAsync(context.RequestAborted);
 
         _logger.LogDebug("Processing signout request for {subjectId}", user?.GetSubjectId() ?? "anonymous");
 
