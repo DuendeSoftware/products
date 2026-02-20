@@ -93,7 +93,7 @@ internal class BackchannelAuthenticationEndpoint : IEndpointHandler
 
         // create response
         _logger.LogTrace("Calling into backchannel authentication request response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestResult);
+        var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
         await _events.RaiseAsync(new BackchannelAuthenticationSuccessEvent(requestResult));
         Telemetry.Metrics.BackChannelAuthentication(clientResult.Client.ClientId);

@@ -64,7 +64,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
     }
 
     /// <inheritdoc/>
-    public virtual async Task<BackchannelAuthenticationResponse> ProcessAsync(BackchannelAuthenticationRequestValidationResult validationResult)
+    public virtual async Task<BackchannelAuthenticationResponse> ProcessAsync(BackchannelAuthenticationRequestValidationResult validationResult, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("BackchannelAuthenticationResponseGenerator.Process");
 
@@ -96,7 +96,7 @@ public class BackchannelAuthenticationResponseGenerator : IBackchannelAuthentica
             Properties = validationResult.ValidatedRequest.Properties,
         };
 
-        var requestId = await BackChannelAuthenticationRequestStore.CreateRequestAsync(request);
+        var requestId = await BackChannelAuthenticationRequestStore.CreateRequestAsync(request, ct);
 
         var interval = validationResult.ValidatedRequest.Client.PollingInterval ?? Options.Ciba.DefaultPollingInterval;
         var response = new BackchannelAuthenticationResponse()

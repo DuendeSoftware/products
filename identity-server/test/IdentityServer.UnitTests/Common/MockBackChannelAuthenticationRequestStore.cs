@@ -12,7 +12,7 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
 {
     public Dictionary<string, BackChannelAuthenticationRequest> Items { get; set; } = new Dictionary<string, BackChannelAuthenticationRequest>();
 
-    public Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request)
+    public Task<string> CreateRequestAsync(BackChannelAuthenticationRequest request, CT _)
     {
         var key = Guid.NewGuid().ToString();
         request.InternalId = key.Sha256();
@@ -20,15 +20,15 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
         return Task.FromResult(key);
     }
 
-    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId) => Task.FromResult(Items[requestId]);
+    public Task<BackChannelAuthenticationRequest> GetByAuthenticationRequestIdAsync(string requestId, CT _) => Task.FromResult(Items[requestId]);
 
-    public Task<BackChannelAuthenticationRequest> GetByInternalIdAsync(string id)
+    public Task<BackChannelAuthenticationRequest> GetByInternalIdAsync(string id, CT _)
     {
         var item = Items.SingleOrDefault(x => x.Value.InternalId == id);
         return Task.FromResult(item.Value);
     }
 
-    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, string clientId = null)
+    public Task<IEnumerable<BackChannelAuthenticationRequest>> GetLoginsForUserAsync(string subjectId, string clientId = null, CT ct = default)
     {
         var items = Items.Where(x => x.Value.Subject.GetSubjectId() == subjectId
                                      && (clientId == null || x.Value.ClientId == clientId)
@@ -36,7 +36,7 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
         return Task.FromResult(items.Select(x => x.Value).AsEnumerable());
     }
 
-    public Task RemoveByInternalIdAsync(string id)
+    public Task RemoveByInternalIdAsync(string id, CT _)
     {
         var item = Items.SingleOrDefault(x => x.Value.InternalId == id);
         if (item.Key != null)
@@ -46,7 +46,7 @@ public class MockBackChannelAuthenticationRequestStore : IBackChannelAuthenticat
         return Task.CompletedTask;
     }
 
-    public Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request)
+    public Task UpdateByInternalIdAsync(string id, BackChannelAuthenticationRequest request, CT _)
     {
         var item = Items.SingleOrDefault(x => x.Value.InternalId == id);
         if (item.Key != null)
