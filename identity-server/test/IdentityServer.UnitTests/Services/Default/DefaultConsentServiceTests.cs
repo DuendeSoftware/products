@@ -23,6 +23,7 @@ public class DefaultConsentServiceTests
     private Client _client;
     private TestUserConsentStore _userConsentStore = new TestUserConsentStore();
     private FakeTimeProvider _timeProvider = new FakeTimeProvider();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private DateTime now;
 
@@ -72,7 +73,7 @@ public class DefaultConsentServiceTests
 
         await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
-        var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
+        var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
         consent.ShouldBeNull();
     }
 
@@ -81,7 +82,7 @@ public class DefaultConsentServiceTests
     {
         await _subject.UpdateConsentAsync(_user, _client, new[] { new ParsedScopeValue("scope1"), new ParsedScopeValue("scope2") });
 
-        var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
+        var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
         consent.Scopes.Count().ShouldBe(2);
         consent.Scopes.ShouldContain("scope1");
         consent.Scopes.ShouldContain("scope2");
@@ -94,7 +95,7 @@ public class DefaultConsentServiceTests
 
         await _subject.UpdateConsentAsync(_user, _client, new ParsedScopeValue[] { });
 
-        var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
+        var consent = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
         consent.ShouldBeNull();
     }
 
@@ -205,7 +206,7 @@ public class DefaultConsentServiceTests
 
         await _subject.RequiresConsentAsync(_user, _client, scopes);
 
-        var result = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId);
+        var result = await _userConsentStore.GetUserConsentAsync(_user.GetSubjectId(), _client.ClientId, _ct);
 
         result.ShouldBeNull();
     }

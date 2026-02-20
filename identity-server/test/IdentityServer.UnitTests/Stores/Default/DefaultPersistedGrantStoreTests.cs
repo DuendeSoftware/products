@@ -306,8 +306,8 @@ public class DefaultPersistedGrantStoreTests
             Scopes = new string[] { "foo", "bar" }
         };
 
-        await _userConsent.StoreUserConsentAsync(consent1);
-        var consent2 = await _userConsent.GetUserConsentAsync("123", "client");
+        await _userConsent.StoreUserConsentAsync(consent1, _ct);
+        var consent2 = await _userConsent.GetUserConsentAsync("123", "client", _ct);
 
         consent2.ClientId.ShouldBe(consent1.ClientId);
         consent2.SubjectId.ShouldBe(consent1.SubjectId);
@@ -325,9 +325,9 @@ public class DefaultPersistedGrantStoreTests
             Scopes = new string[] { "foo", "bar" }
         };
 
-        await _userConsent.StoreUserConsentAsync(consent1);
-        await _userConsent.RemoveUserConsentAsync("123", "client");
-        var consent2 = await _userConsent.GetUserConsentAsync("123", "client");
+        await _userConsent.StoreUserConsentAsync(consent1, _ct);
+        await _userConsent.RemoveUserConsentAsync("123", "client", _ct);
+        var consent2 = await _userConsent.GetUserConsentAsync("123", "client", _ct);
         consent2.ShouldBeNull();
     }
 
