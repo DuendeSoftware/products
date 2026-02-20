@@ -117,19 +117,19 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
     }
 
     /// <inheritdoc/>
-    public async Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest)
+    public async Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultBackchannelAuthenticationInteractionService.CompleteLoginRequest");
 
         ArgumentNullException.ThrowIfNull(completionRequest);
 
-        var request = await _requestStore.GetByInternalIdAsync(completionRequest.InternalId, default);
+        var request = await _requestStore.GetByInternalIdAsync(completionRequest.InternalId, ct);
         if (request == null)
         {
             throw new InvalidOperationException("Invalid backchannel authentication request id.");
         }
 
-        var subject = completionRequest.Subject ?? await _session.GetUserAsync(default);
+        var subject = completionRequest.Subject ?? await _session.GetUserAsync(ct);
         if (subject == null)
         {
             throw new InvalidOperationException("Invalid subject.");
@@ -141,7 +141,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         }
 
         var sid = (completionRequest.Subject == null) ?
-            await _session.GetSessionIdAsync(default) :
+            await _session.GetSessionIdAsync(ct) :
             completionRequest.SessionId;
 
         if (completionRequest.ScopesValuesConsented != null)
@@ -170,7 +170,7 @@ public class DefaultBackchannelAuthenticationInteractionService : IBackchannelAu
         request.AuthorizedScopes = completionRequest.ScopesValuesConsented;
         request.Description = completionRequest.Description;
 
-        await _requestStore.UpdateByInternalIdAsync(completionRequest.InternalId, request, default);
+        await _requestStore.UpdateByInternalIdAsync(completionRequest.InternalId, request, ct);
 
         _logger.LogDebug("Successful update for backchannel authentication request id {id}", completionRequest.InternalId);
     }

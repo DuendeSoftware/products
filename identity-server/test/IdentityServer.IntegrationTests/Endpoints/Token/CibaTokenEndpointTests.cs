@@ -157,7 +157,7 @@ public class CibaTokenEndpointTests
                 IdentityProvider = IdentityServerConstants.LocalIdentityProvider,
             }
                 .CreatePrincipal()
-        });
+        }, _ct);
 
 
         // token request
@@ -264,7 +264,7 @@ public class CibaTokenEndpointTests
                 IdentityProvider = IdentityServerConstants.LocalIdentityProvider,
             }
                 .CreatePrincipal()
-        });
+        }, _ct);
 
 
         // token request
@@ -327,7 +327,7 @@ public class CibaTokenEndpointTests
                 IdentityProvider = IdentityServerConstants.LocalIdentityProvider,
             }
                 .CreatePrincipal()
-        });
+        }, _ct);
 
 
         // token request
@@ -390,7 +390,7 @@ public class CibaTokenEndpointTests
                 IdentityProvider = IdentityServerConstants.LocalIdentityProvider,
             }
                 .CreatePrincipal()
-        });
+        }, _ct);
 
 
         // token request
@@ -453,7 +453,7 @@ public class CibaTokenEndpointTests
                 IdentityProvider = IdentityServerConstants.LocalIdentityProvider,
             }
                 .CreatePrincipal()
-        });
+        }, _ct);
 
 
         // token request
@@ -522,7 +522,7 @@ public class CibaTokenEndpointTests
                 IdentityProvider = IdentityServerConstants.LocalIdentityProvider,
             }
                 .CreatePrincipal()
-        });
+        }, _ct);
 
 
         // token request

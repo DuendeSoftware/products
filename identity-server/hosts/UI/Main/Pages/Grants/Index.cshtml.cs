@@ -35,7 +35,7 @@ public class Index : PageModel
 
     public async Task OnGet()
     {
-        var grants = await _interaction.GetAllUserGrantsAsync();
+        var grants = await _interaction.GetAllUserGrantsAsync(HttpContext.RequestAborted);
 
         var list = new List<GrantViewModel>();
         foreach (var grant in grants)
@@ -73,7 +73,7 @@ public class Index : PageModel
 
     public async Task<IActionResult> OnPost()
     {
-        await _interaction.RevokeUserConsentAsync(ClientId);
+        await _interaction.RevokeUserConsentAsync(ClientId, HttpContext.RequestAborted);
         await _events.RaiseAsync(new GrantsRevokedEvent(User.GetSubjectId(), ClientId), HttpContext.RequestAborted);
         Telemetry.Metrics.GrantsRevoked(ClientId);
 

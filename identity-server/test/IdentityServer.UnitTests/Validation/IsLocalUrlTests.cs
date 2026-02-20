@@ -67,7 +67,7 @@ public class IsLocalUrlTests
     {
         var interactionService = new DefaultIdentityServerInteractionService(null, null, null, null, null, null, null,
             GetReturnUrlParser(), new LoggerFactory().CreateLogger<DefaultIdentityServerInteractionService>());
-        var actual = await interactionService.GetAuthorizationContextAsync(returnUrl);
+        var actual = await interactionService.GetAuthorizationContextAsync(returnUrl, _ct);
         if (expected)
         {
             actual.ShouldNotBeNull();

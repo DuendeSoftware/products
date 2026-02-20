@@ -86,7 +86,7 @@ public class DynamicProvidersTests
             app.MapGet("/account/logout", async ctx =>
             {
                 var isis = ctx.RequestServices.GetRequiredService<IIdentityServerInteractionService>();
-                var logoutCtx = await isis.GetLogoutContextAsync(ctx.Request.Query["logoutId"]);
+                var logoutCtx = await isis.GetLogoutContextAsync(ctx.Request.Query["logoutId"], ctx.RequestAborted);
                 Idp1FrontChannelLogoutUri = logoutCtx.SignOutIFrameUrl;
                 await ctx.SignOutAsync();
             });
