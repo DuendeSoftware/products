@@ -161,8 +161,8 @@ public class TokenResponseGenerator : ITokenResponseGenerator
                 ValidatedRequest = request.ValidatedRequest
             };
 
-            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest);
-            var jwt = await TokenService.CreateSecurityTokenAsync(idToken);
+            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest, ct);
+            var jwt = await TokenService.CreateSecurityTokenAsync(idToken, ct);
             response.IdentityToken = jwt;
         }
 
@@ -191,7 +191,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
                 ValidatedRequest = request.ValidatedRequest,
                 ValidatedResources = request.ValidatedRequest.ValidatedResources
             };
-            accessToken = await TokenService.CreateAccessTokenAsync(creationRequest);
+            accessToken = await TokenService.CreateAccessTokenAsync(creationRequest, ct);
         }
         else
         {
@@ -207,7 +207,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             }
         }
 
-        var accessTokenString = await TokenService.CreateSecurityTokenAsync(accessToken);
+        var accessTokenString = await TokenService.CreateSecurityTokenAsync(accessToken, ct);
         request.ValidatedRequest.RefreshToken.SetAccessToken(accessToken, request.ValidatedRequest.RequestedResourceIndicator);
 
         var handle = await RefreshTokenService.UpdateRefreshTokenAsync(new RefreshTokenUpdateRequest
@@ -220,7 +220,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
 
         return new TokenResponse
         {
-            IdentityToken = await CreateIdTokenFromRefreshTokenRequestAsync(request.ValidatedRequest, accessTokenString),
+            IdentityToken = await CreateIdTokenFromRefreshTokenRequestAsync(request.ValidatedRequest, accessTokenString, ct),
             AccessToken = accessTokenString,
             AccessTokenType = request.ValidatedRequest.ProofType == ProofType.DPoP ? OidcConstants.TokenResponse.DPoPTokenType : OidcConstants.TokenResponse.BearerTokenType,
             AccessTokenLifetime = request.ValidatedRequest.AccessTokenLifetime,
@@ -264,8 +264,8 @@ public class TokenResponseGenerator : ITokenResponseGenerator
                 ValidatedRequest = request.ValidatedRequest
             };
 
-            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest);
-            var jwt = await TokenService.CreateSecurityTokenAsync(idToken);
+            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest, ct);
+            var jwt = await TokenService.CreateSecurityTokenAsync(idToken, ct);
             response.IdentityToken = jwt;
         }
 
@@ -304,8 +304,8 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             ValidatedRequest = request.ValidatedRequest
         };
 
-        var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest);
-        var jwt = await TokenService.CreateSecurityTokenAsync(idToken);
+        var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest, ct);
+        var jwt = await TokenService.CreateSecurityTokenAsync(idToken, ct);
         response.IdentityToken = jwt;
 
         return response;
@@ -433,8 +433,8 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             authorizedScopes = request.ValidatedResources.RawScopeValues;
         }
 
-        var at = await TokenService.CreateAccessTokenAsync(tokenRequest);
-        var accessToken = await TokenService.CreateSecurityTokenAsync(at);
+        var at = await TokenService.CreateAccessTokenAsync(tokenRequest, ct);
+        var accessToken = await TokenService.CreateSecurityTokenAsync(at, ct);
 
         if (createRefreshToken)
         {
@@ -461,8 +461,9 @@ public class TokenResponseGenerator : ITokenResponseGenerator
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="newAccessToken">The new access token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected virtual async Task<string> CreateIdTokenFromRefreshTokenRequestAsync(ValidatedTokenRequest request, string newAccessToken)
+    protected virtual async Task<string> CreateIdTokenFromRefreshTokenRequestAsync(ValidatedTokenRequest request, string newAccessToken, CT ct)
     {
         if (request.RefreshToken.AuthorizedScopes.Contains(OidcConstants.StandardScopes.OpenId))
         {
@@ -474,8 +475,8 @@ public class TokenResponseGenerator : ITokenResponseGenerator
                 AccessTokenToHash = newAccessToken
             };
 
-            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest);
-            return await TokenService.CreateSecurityTokenAsync(idToken);
+            var idToken = await TokenService.CreateIdentityTokenAsync(tokenRequest, ct);
+            return await TokenService.CreateSecurityTokenAsync(idToken, ct);
         }
 
         return null;

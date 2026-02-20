@@ -81,14 +81,8 @@ public class DefaultTokenService : ITokenService
         Logger = logger;
     }
 
-    /// <summary>
-    /// Creates an identity token.
-    /// </summary>
-    /// <param name="request">The token creation request.</param>
-    /// <returns>
-    /// An identity token
-    /// </returns>
-    public virtual async Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request)
+    /// <inheritdoc/>
+    public virtual async Task<Token> CreateIdentityTokenAsync(TokenCreationRequest request, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateIdentityToken");
 
@@ -96,7 +90,7 @@ public class DefaultTokenService : ITokenService
         request.Validate();
 
         // todo: Dom, add a test for this. validate the at and c hashes are correct for the id_token when the client's alg doesn't match the server default.
-        var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.ValidatedRequest.Client.AllowedIdentityTokenSigningAlgorithms, default);
+        var credential = await KeyMaterialService.GetSigningCredentialsAsync(request.ValidatedRequest.Client.AllowedIdentityTokenSigningAlgorithms, ct);
         if (credential == null)
         {
             throw new InvalidOperationException("No signing credential is configured.");
@@ -159,14 +153,8 @@ public class DefaultTokenService : ITokenService
         return token;
     }
 
-    /// <summary>
-    /// Creates an access token.
-    /// </summary>
-    /// <param name="request">The token creation request.</param>
-    /// <returns>
-    /// An access token
-    /// </returns>
-    public virtual async Task<Token> CreateAccessTokenAsync(TokenCreationRequest request)
+    /// <inheritdoc/>
+    public virtual async Task<Token> CreateAccessTokenAsync(TokenCreationRequest request, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateAccessToken");
 
@@ -220,15 +208,8 @@ public class DefaultTokenService : ITokenService
         return token;
     }
 
-    /// <summary>
-    /// Creates a serialized and protected security token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    /// <returns>
-    /// A security token in serialized form
-    /// </returns>
-    /// <exception cref="System.InvalidOperationException">Invalid token type.</exception>
-    public virtual async Task<string> CreateSecurityTokenAsync(Token token)
+    /// <inheritdoc/>
+    public virtual async Task<string> CreateSecurityTokenAsync(Token token, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultTokenService.CreateSecurityToken");
 
@@ -256,7 +237,7 @@ public class DefaultTokenService : ITokenService
             {
                 Logger.LogTrace("Creating reference access token");
 
-                var handle = await ReferenceTokenStore.StoreReferenceTokenAsync(token, default);
+                var handle = await ReferenceTokenStore.StoreReferenceTokenAsync(token, ct);
 
                 tokenResult = handle;
             }
