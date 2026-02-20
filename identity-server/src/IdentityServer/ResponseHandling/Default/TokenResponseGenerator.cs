@@ -216,7 +216,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
             RefreshToken = request.ValidatedRequest.RefreshToken,
             Client = request.ValidatedRequest.Client,
             MustUpdate = mustUpdate
-        });
+        }, ct);
 
         return new TokenResponse
         {
@@ -449,7 +449,7 @@ public class TokenResponseGenerator : ITokenResponseGenerator
                 RequestedResourceIndicator = request.RequestedResourceIndicator,
                 ProofType = request.ProofType
             };
-            var refreshToken = await RefreshTokenService.CreateRefreshTokenAsync(rtRequest);
+            var refreshToken = await RefreshTokenService.CreateRefreshTokenAsync(rtRequest, ct);
             return (accessToken, refreshToken);
         }
 

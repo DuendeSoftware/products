@@ -43,9 +43,9 @@ internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
 
 
     /// <inheritdoc/>
-    public virtual async Task<TokenValidationResult> ValidateRefreshTokenAsync(string tokenHandle, Client client)
+    public virtual async Task<TokenValidationResult> ValidateRefreshTokenAsync(string tokenHandle, Client client, CT ct)
     {
-        var result = await Inner.ValidateRefreshTokenAsync(tokenHandle, client);
+        var result = await Inner.ValidateRefreshTokenAsync(tokenHandle, client, ct);
 
         using var activity = Tracing.ServiceActivitySource.StartActivity("ServerSideSessionRefreshTokenService.ValidateRefreshToken");
 
@@ -69,8 +69,8 @@ internal class ServerSideSessionRefreshTokenService : IRefreshTokenService
     }
 
     /// <inheritdoc/>
-    public Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request) => Inner.CreateRefreshTokenAsync(request);
+    public Task<string> CreateRefreshTokenAsync(RefreshTokenCreationRequest request, CT ct) => Inner.CreateRefreshTokenAsync(request, ct);
 
     /// <inheritdoc/>
-    public Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request) => Inner.UpdateRefreshTokenAsync(request);
+    public Task<string> UpdateRefreshTokenAsync(RefreshTokenUpdateRequest request, CT ct) => Inner.UpdateRefreshTokenAsync(request, ct);
 }
