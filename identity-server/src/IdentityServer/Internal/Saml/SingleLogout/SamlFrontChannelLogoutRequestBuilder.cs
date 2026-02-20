@@ -11,7 +11,6 @@ using Duende.IdentityServer.Internal.Saml.SingleLogout.Models;
 using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml;
-using Duende.IdentityServer.Saml.Models;
 using LogoutRequest = Duende.IdentityServer.Internal.Saml.SingleLogout.Models.LogoutRequest;
 
 namespace Duende.IdentityServer.Internal.Saml.SingleLogout;

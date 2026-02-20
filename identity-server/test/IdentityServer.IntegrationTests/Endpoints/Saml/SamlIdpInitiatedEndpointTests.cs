@@ -30,6 +30,10 @@ public class SamlIdpInitiatedEndpointTests
         var sp = Build.SamlServiceProvider();
         sp.AllowIdpInitiated = true;
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         Fixture.UserToSignIn =
@@ -55,6 +59,10 @@ public class SamlIdpInitiatedEndpointTests
         var sp = Build.SamlServiceProvider();
         sp.AllowIdpInitiated = true;
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         Fixture.UserToSignIn =
@@ -87,6 +95,10 @@ public class SamlIdpInitiatedEndpointTests
         var sp = Build.SamlServiceProvider();
         sp.AllowIdpInitiated = true;
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         // Act
@@ -106,6 +118,10 @@ public class SamlIdpInitiatedEndpointTests
     {
         // Arrange
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         // Act
@@ -130,6 +146,10 @@ public class SamlIdpInitiatedEndpointTests
         sp.Enabled = false;
         sp.AllowIdpInitiated = true;
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         // Act
@@ -152,6 +172,10 @@ public class SamlIdpInitiatedEndpointTests
         var sp = Build.SamlServiceProvider();
         sp.AllowIdpInitiated = false;
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         // Act
@@ -178,6 +202,10 @@ public class SamlIdpInitiatedEndpointTests
         var sp = Build.SamlServiceProvider();
         sp.AllowIdpInitiated = true;
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         // Act
@@ -202,6 +230,10 @@ public class SamlIdpInitiatedEndpointTests
         sp.AllowIdpInitiated = true;
         sp.AssertionConsumerServiceUrls = Array.Empty<Uri>();
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         // Act
@@ -227,6 +259,10 @@ public class SamlIdpInitiatedEndpointTests
         sp.AllowIdpInitiated = true;
         sp.AssertionConsumerServiceUrls = [firstAcsUrl, secondAcsUrl];
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         Fixture.UserToSignIn =
@@ -257,6 +293,10 @@ public class SamlIdpInitiatedEndpointTests
         var sp = Build.SamlServiceProvider();
         sp.AllowIdpInitiated = true;
         Fixture.ServiceProviders.Add(sp);
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         Fixture.UserToSignIn =
@@ -332,6 +372,10 @@ public class SamlIdpInitiatedEndpointTests
     public async Task missing_sp_entity_id_parameter_returns_bad_request()
     {
         Fixture.ServiceProviders.Add(Build.SamlServiceProvider());
+        Fixture.ConfigureIdentityServerOptions = options =>
+        {
+            options.Endpoints.EnableSamlIdpInitiatedEndpoint = true;
+        };
         await Fixture.InitializeAsync();
 
         var result = await Fixture.Client.GetAsync("/saml/idp-initiated", CancellationToken.None);

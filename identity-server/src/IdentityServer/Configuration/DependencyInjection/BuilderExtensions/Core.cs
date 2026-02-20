@@ -17,12 +17,6 @@ using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Hosting.FederatedSignOut;
 using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Internal.Saml;
-using Duende.IdentityServer.Internal.Saml.Infrastructure;
-using Duende.IdentityServer.Internal.Saml.Metadata;
-using Duende.IdentityServer.Internal.Saml.SingleLogout;
-using Duende.IdentityServer.Internal.Saml.SingleLogout.Models;
-using Duende.IdentityServer.Internal.Saml.SingleSignin;
-using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 using Duende.IdentityServer.Licensing;
 using Duende.IdentityServer.Licensing.V2;
 using Duende.IdentityServer.Licensing.V2.Diagnostics;
@@ -135,14 +129,6 @@ public static class IdentityServerBuilderExtensionsCore
         builder.AddEndpoint<TokenEndpoint>(EndpointNames.Token, ProtocolRoutePaths.Token.EnsureLeadingSlash());
         builder.AddEndpoint<UserInfoEndpoint>(EndpointNames.UserInfo, ProtocolRoutePaths.UserInfo.EnsureLeadingSlash());
 
-        // SAML 2.0 endpoints
-        builder.AddEndpoint<SamlMetaDataEndpoint>(EndpointNames.SamlMetadata, ProtocolRoutePaths.SamlMetadata.EnsureLeadingSlash());
-        builder.AddEndpoint<SamlSigninEndpoint>(EndpointNames.SamlSignin, ProtocolRoutePaths.SamlSignin.EnsureLeadingSlash());
-        builder.AddEndpoint<SamlSigninCallbackEndpoint>(EndpointNames.SamlSigninCallback, ProtocolRoutePaths.SamlSigninCallback.EnsureLeadingSlash());
-        builder.AddEndpoint<SamlIdpInitiatedEndpoint>(EndpointNames.SamlIdpInitiated, ProtocolRoutePaths.SamlIdpInitiated.EnsureLeadingSlash());
-        builder.AddEndpoint<SamlSingleLogoutEndpoint>(EndpointNames.SamlLogout, ProtocolRoutePaths.SamlLogout.EnsureLeadingSlash());
-        builder.AddEndpoint<SamlSingleLogoutCallbackEndpoint>(EndpointNames.SamlLogoutCallback, ProtocolRoutePaths.SamlLogoutCallback.EnsureLeadingSlash());
-
         builder.AddHttpWriter<AuthorizeInteractionPageResult, AuthorizeInteractionPageHttpWriter>();
         builder.AddHttpWriter<AuthorizeResult, AuthorizeHttpWriter>();
         builder.AddHttpWriter<BackchannelAuthenticationResult, BackchannelAuthenticationHttpWriter>();
@@ -162,67 +148,6 @@ public static class IdentityServerBuilderExtensionsCore
         builder.AddHttpWriter<TokenResult, TokenHttpWriter>();
         builder.AddHttpWriter<TokenRevocationErrorResult, TokenRevocationErrorHttpWriter>();
         builder.AddHttpWriter<UserInfoResult, UserInfoHttpWriter>();
-
-        return builder;
-    }
-
-    /// <summary>
-    /// Adds SAML 2.0 protocol services.
-    /// </summary>
-    /// <param name="builder">The builder.</param>
-    /// <returns></returns>
-    public static IIdentityServerBuilder AddSamlServices(this IIdentityServerBuilder builder)
-    {
-        // Serializers (Transient)
-        builder.Services.AddTransient<ISamlResultSerializer<SamlErrorResponse>, SamlErrorResponseXmlSerializer>();
-        builder.Services.AddTransient<ISamlResultSerializer<SamlResponse>, SamlResponse.Serializer>();
-        builder.Services.AddTransient<ISamlResultSerializer<LogoutResponse>, LogoutResponse.Serializer>();
-
-        // HTTP response writers
-        builder.AddHttpWriter<SamlErrorResponse, SamlErrorResponse.ResponseWriter>();
-        builder.AddHttpWriter<SamlResponse, SamlResponse.ResponseWriter>();
-        builder.AddHttpWriter<LogoutResponse, LogoutResponse.ResponseWriter>();
-
-        // Processors (Scoped)
-        builder.Services.AddScoped<SamlSigninRequestProcessor>();
-        builder.Services.AddScoped<SamlSigninCallbackRequestProcessor>();
-        builder.Services.AddScoped<SamlIdpInitiatedRequestProcessor>();
-        builder.Services.AddScoped<SamlLogoutRequestProcessor>();
-        builder.Services.AddScoped<SamlLogoutCallbackProcessor>();
-
-        // Builders (Scoped)
-        builder.Services.AddScoped<SamlResponseBuilder>();
-        builder.Services.AddScoped<LogoutResponseBuilder>();
-        builder.Services.AddScoped<SamlFrontChannelLogoutRequestBuilder>();
-
-        // Parsers / Extractors (Scoped)
-        builder.Services.AddScoped<AuthNRequestParser>();
-        builder.Services.AddScoped<LogoutRequestParser>();
-        builder.Services.AddScoped<SamlSigninRequestExtractor>();
-        builder.Services.AddScoped<SamlLogoutRequestExtractor>();
-
-        // Infrastructure (Scoped)
-        builder.Services.AddScoped<SamlUrlBuilder>();
-        builder.Services.AddScoped<SamlClaimsService>();
-        builder.Services.AddScoped<SamlNameIdGenerator>();
-        builder.Services.AddScoped<SamlResponseSigner>();
-        builder.Services.AddScoped<SamlProtocolMessageSigner>();
-        builder.Services.AddScoped<SamlAssertionEncryptor>();
-        builder.Services.AddScoped<SamlRequestValidator>();
-        builder.Services.TryAddScoped(typeof(SamlRequestSignatureValidator<,>));
-
-        // Interface → Implementation (TryAddScoped for extensibility)
-        builder.Services.TryAddScoped<ISamlSigninInteractionResponseGenerator, DefaultSamlSigninInteractionResponseGenerator>();
-        builder.Services.TryAddScoped<ISamlSigningService, SamlSigningService>();
-        builder.Services.TryAddScoped<ISamlLogoutNotificationService, SamlLogoutNotificationService>();
-        builder.Services.TryAddScoped<ISamlInteractionService, DefaultSamlInteractionService>();
-
-        // State management (Singleton)
-        builder.Services.TryAddSingleton<SamlSigninStateIdCookie>();
-        builder.Services.TryAddSingleton<ISamlSigninStateStore, DistributedCacheSamlSigninStateStore>();
-
-        // Default no-op service provider store (can be overridden by user)
-        builder.Services.TryAddTransient<ISamlServiceProviderStore, InMemorySamlServiceProviderStore>();
 
         return builder;
     }
@@ -286,6 +211,12 @@ public static class IdentityServerBuilderExtensionsCore
         builder.Services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
         builder.Services.TryAddTransient<IBackchannelAuthenticationUserValidator, NopBackchannelAuthenticationUserValidator>();
+
+        // Register no-op SAML services for services used in logout paths
+        // These are replaced by actual implementations in AddSaml and ISamlServiceProviderStore
+        // can be replaced with a call to AddSamlServiceProviderStore
+        builder.Services.TryAddTransient<ISamlServiceProviderStore, EmptySamlServiceProviderStore>();
+        builder.Services.TryAddScoped<ISamlLogoutNotificationService, NopSamlLogoutNotificationService>();
 
         builder.Services.TryAddSingleton(typeof(IConcurrencyLock<>), typeof(DefaultConcurrencyLock<>));
 

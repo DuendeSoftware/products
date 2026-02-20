@@ -9,7 +9,6 @@ using Duende.IdentityModel;
 using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -95,10 +94,6 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
                 services.AddSingleton<TimeProvider>(fakeTimeProvider);
                 services.AddSingleton<IDistributedCache>(sp => new FakeDistributedCache(sp.GetRequiredService<TimeProvider>()));
 
-                // Register the mutable service provider list before AddSamlServices
-                // so TryAdd in AddSamlServices won't overwrite our registration
-                services.AddSingleton<ISamlServiceProviderStore>(new InMemorySamlServiceProviderStore(_serviceProviders));
-
                 services.AddIdentityServer(options =>
                     {
                         options.UserInteraction.LoginUrl = "/account/login";
@@ -107,7 +102,8 @@ internal class SustainSysSamlTestFixture(ITestOutputHelper output) : IAsyncLifet
                         options.KeyManagement.Enabled = false;
                     })
                     .AddSigningCredential(selfSignedCertificate)
-                    .AddSamlServices();
+                    .AddSaml()
+                    .AddInMemorySamlServiceProviders(_serviceProviders);
             },
             app =>
             {

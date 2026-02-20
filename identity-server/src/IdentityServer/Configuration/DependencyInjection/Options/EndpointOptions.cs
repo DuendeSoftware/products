@@ -118,7 +118,7 @@ public class EndpointsOptions
     /// <value>
     /// <c>true</c> if the SAML metadata endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
-    public bool EnableSamlMetadataEndpoint { get; set; } = true;
+    public bool EnableSamlMetadataEndpoint { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the SAML sign-in (SSO) endpoint is enabled.
@@ -126,7 +126,7 @@ public class EndpointsOptions
     /// <value>
     /// <c>true</c> if the SAML sign-in endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
-    public bool EnableSamlSigninEndpoint { get; set; } = true;
+    public bool EnableSamlSigninEndpoint { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the SAML sign-in callback endpoint is enabled.
@@ -134,7 +134,7 @@ public class EndpointsOptions
     /// <value>
     /// <c>true</c> if the SAML sign-in callback endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
-    public bool EnableSamlSigninCallbackEndpoint { get; set; } = true;
+    public bool EnableSamlSigninCallbackEndpoint { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the SAML IdP-initiated SSO endpoint is enabled.
@@ -142,7 +142,7 @@ public class EndpointsOptions
     /// <value>
     /// <c>true</c> if the SAML IdP-initiated endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
-    public bool EnableSamlIdpInitiatedEndpoint { get; set; } = true;
+    public bool EnableSamlIdpInitiatedEndpoint { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the SAML Single Logout (SLO) endpoint is enabled.
@@ -150,7 +150,7 @@ public class EndpointsOptions
     /// <value>
     /// <c>true</c> if the SAML logout endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
-    public bool EnableSamlLogoutEndpoint { get; set; } = true;
+    public bool EnableSamlLogoutEndpoint { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the SAML Single Logout callback endpoint is enabled.
@@ -158,5 +158,5 @@ public class EndpointsOptions
     /// <value>
     /// <c>true</c> if the SAML logout callback endpoint is enabled; otherwise, <c>false</c>.
     /// </value>
-    public bool EnableSamlLogoutCallbackEndpoint { get; set; } = true;
+    public bool EnableSamlLogoutCallbackEndpoint { get; set; }
 }

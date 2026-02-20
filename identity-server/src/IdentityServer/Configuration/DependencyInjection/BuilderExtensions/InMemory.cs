@@ -190,4 +190,17 @@ public static class IdentityServerBuilderExtensionsInMemory
         builder.Services.TryAddSingleton<IPushedAuthorizationRequestStore, InMemoryPushedAuthorizationRequestStore>();
         return builder;
     }
+
+    /// <summary>
+    /// Adds the in-memory SAML service provider store.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <param name="serviceProviders">The SAML service providers.</param>
+    /// <returns></returns>
+    public static IIdentityServerBuilder AddInMemorySamlServiceProviders(this IIdentityServerBuilder builder, IEnumerable<SamlServiceProvider> serviceProviders)
+    {
+        builder.Services.AddSingleton(serviceProviders);
+        builder.AddSamlServiceProviderStore<InMemorySamlServiceProviderStore>();
+        return builder;
+    }
 }

@@ -8,7 +8,6 @@ using Duende.IdentityServer.Hosting.DynamicProviders;
 using Duende.IdentityServer.Internal;
 using Duende.IdentityServer.Internal.Saml;
 using Duende.IdentityServer.Internal.Saml.SingleLogout;
-using Duende.IdentityServer.Internal.Saml.SingleSignin;
 using Duende.IdentityServer.ResponseHandling;
 using Duende.IdentityServer.Saml;
 using Duende.IdentityServer.Services;
@@ -60,9 +59,9 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
             "SAML", [
                 new(typeof(ISamlClaimsMapper), []),
                 new(typeof(ISamlFrontChannelLogout), [typeof(SamlHttpPostFrontChannelLogout), typeof(SamlHttpRedirectFrontChannelLogout)]),
-                new(typeof(ISamlInteractionService),[typeof(DefaultSamlInteractionService)]),
-                new(typeof(ISamlLogoutNotificationService), [typeof(SamlLogoutNotificationService)]),
-                new(typeof(ISamlSigninInteractionResponseGenerator),[typeof(DefaultSamlSigninInteractionResponseGenerator)]),
+                new(typeof(ISamlInteractionService),[]),
+                new(typeof(ISamlLogoutNotificationService), [typeof(NopSamlLogoutNotificationService)]),
+                new(typeof(ISamlSigninInteractionResponseGenerator),[]),
             ]
         },
         {
@@ -96,7 +95,6 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IRefreshTokenService), [typeof(DefaultRefreshTokenService)]),
                 new(typeof(IReplayCache), [typeof(DefaultReplayCache)]),
                 new(typeof(IReturnUrlParser), [typeof(OidcReturnUrlParser)]),
-                new(typeof(ISamlServiceProviderStore), [typeof(InMemorySamlServiceProviderStore)]),
                 new(typeof(IServerUrls), [typeof(DefaultServerUrls)]),
                 new(typeof(ISessionCoordinationService), [typeof(DefaultSessionCoordinationService)]),
                 new(typeof(ISessionManagementService), []),
@@ -126,6 +124,7 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IReferenceTokenStore), [typeof(DefaultReferenceTokenStore)]),
                 new(typeof(IRefreshTokenStore), [typeof(DefaultRefreshTokenStore)]),
                 new(typeof(IResourceStore), [typeof(EmptyResourceStore)]),
+                new(typeof(ISamlServiceProviderStore), [typeof(EmptySamlServiceProviderStore)]),
                 new(typeof(IServerSideSessionsMarker), []),
                 new(typeof(IServerSideSessionStore),[]),
                 new(typeof(IServerSideTicketStore),[]),

@@ -121,9 +121,6 @@ internal class SamlFixture : IAsyncLifetime
             // Configure SAML options
             services.Configure(ConfigureSamlOptions);
 
-            // Register in-memory SAML service provider store with our service providers
-            services.AddSingleton<ISamlServiceProviderStore>(new InMemorySamlServiceProviderStore(_serviceProviders));
-
             // Replace the developer signing credential with our X509 certificate
             // Remove the ISigningCredentialStore registration added by AddDeveloperSigningCredential
             var signingCredentialDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(ISigningCredentialStore));
@@ -136,7 +133,8 @@ internal class SamlFixture : IAsyncLifetime
             services.AddIdentityServerBuilder()
                 .AddSigningCredential(selfSignedCertificate)
                 .AddProfileService<DefaultProfileService>()
-                .AddSamlServices();
+                .AddSaml()
+                .AddInMemorySamlServiceProviders(_serviceProviders);
 
             ConfigureServices(services);
 

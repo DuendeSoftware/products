@@ -9,8 +9,8 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
-using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 using Duende.IdentityServer.Saml.Models;
+using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 

@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
-using Duende.IdentityServer.Saml.Models;
-
 namespace Duende.IdentityServer.Internal.Saml.Infrastructure;
 
 /// <summary>
