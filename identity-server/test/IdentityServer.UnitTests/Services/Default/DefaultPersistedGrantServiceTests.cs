@@ -85,7 +85,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("scope", "bar1"),
                 new Claim("scope", "bar2")
             }
-        });
+        }, _ct);
 
         var handle2 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -98,7 +98,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "123"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle3 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -111,7 +111,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "456"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle4 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
@@ -223,7 +223,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("scope", "bar1"),
                 new Claim("scope", "bar2")
             }
-        });
+        }, _ct);
 
         var handle2 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -237,7 +237,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "123"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle3 = await _referenceTokens.StoreReferenceTokenAsync(new Token()
         {
@@ -251,7 +251,7 @@ public class DefaultPersistedGrantServiceTests
                 new Claim("sub", "456"),
                 new Claim("scope", "bar3")
             }
-        });
+        }, _ct);
 
         var handle4 = await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
         {
@@ -316,9 +316,9 @@ public class DefaultPersistedGrantServiceTests
 
         await _subject.RemoveAllGrantsAsync("123", "client1");
 
-        (await _referenceTokens.GetReferenceTokenAsync(handle1)).ShouldBeNull();
-        (await _referenceTokens.GetReferenceTokenAsync(handle2)).ShouldNotBeNull();
-        (await _referenceTokens.GetReferenceTokenAsync(handle3)).ShouldNotBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle1, _ct)).ShouldBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle2, _ct)).ShouldNotBeNull();
+        (await _referenceTokens.GetReferenceTokenAsync(handle3, _ct)).ShouldNotBeNull();
         (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldBeNull();
         (await _refreshTokens.GetRefreshTokenAsync(handle5)).ShouldNotBeNull();
         (await _refreshTokens.GetRefreshTokenAsync(handle6)).ShouldNotBeNull();
