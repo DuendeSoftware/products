@@ -135,7 +135,8 @@ public class DefaultTokenService : ITokenService
             request.Subject,
             request.ValidatedResources,
             request.IncludeAllIdentityClaims,
-            request.ValidatedRequest));
+            request.ValidatedRequest,
+            ct));
 
         var issuer = request.ValidatedRequest.IssuerName;
         var token = new Token(OidcConstants.TokenTypes.IdentityToken)
@@ -165,7 +166,8 @@ public class DefaultTokenService : ITokenService
         claims.AddRange(await ClaimsProvider.GetAccessTokenClaimsAsync(
             request.Subject,
             request.ValidatedResources,
-            request.ValidatedRequest));
+            request.ValidatedRequest,
+            ct));
 
         if (request.ValidatedRequest.SessionId.IsPresent())
         {
@@ -231,7 +233,7 @@ public class DefaultTokenService : ITokenService
             {
                 Logger.LogTrace("Creating JWT access token");
 
-                tokenResult = await CreationService.CreateTokenAsync(token);
+                tokenResult = await CreationService.CreateTokenAsync(token, ct);
             }
             else
             {
@@ -246,7 +248,7 @@ public class DefaultTokenService : ITokenService
         {
             Logger.LogTrace("Creating JWT identity token");
 
-            tokenResult = await CreationService.CreateTokenAsync(token);
+            tokenResult = await CreationService.CreateTokenAsync(token, ct);
         }
         else
         {
