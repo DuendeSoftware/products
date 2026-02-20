@@ -22,6 +22,7 @@ public class DefaultPersistedGrantStoreTests
     private StubHandleGenerationService _stubHandleGenerationService = new StubHandleGenerationService();
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     public DefaultPersistedGrantStoreTests()
     {
@@ -58,8 +59,8 @@ public class DefaultPersistedGrantStoreTests
             RequestedScopes = new string[] { "scope1", "scope2" }
         };
 
-        var handle = await _codes.StoreAuthorizationCodeAsync(code1);
-        var code2 = await _codes.GetAuthorizationCodeAsync(handle);
+        var handle = await _codes.StoreAuthorizationCodeAsync(code1, _ct);
+        var code2 = await _codes.GetAuthorizationCodeAsync(handle, _ct);
 
         code1.ClientId.ShouldBe(code2.ClientId);
         code1.CreationTime.ShouldBe(code2.CreationTime);
@@ -86,9 +87,9 @@ public class DefaultPersistedGrantStoreTests
             RequestedScopes = new string[] { "scope1", "scope2" }
         };
 
-        var handle = await _codes.StoreAuthorizationCodeAsync(code1);
-        await _codes.RemoveAuthorizationCodeAsync(handle);
-        var code2 = await _codes.GetAuthorizationCodeAsync(handle);
+        var handle = await _codes.StoreAuthorizationCodeAsync(code1, _ct);
+        await _codes.RemoveAuthorizationCodeAsync(handle, _ct);
+        var code2 = await _codes.GetAuthorizationCodeAsync(handle, _ct);
         code2.ShouldBeNull();
     }
 
@@ -368,10 +369,10 @@ public class DefaultPersistedGrantStoreTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux1", "quux2" }
-        });
+        }, _ct);
 
         // the -1 is needed because internally we append a version/suffix the handle for encoding
-        (await _codes.GetAuthorizationCodeAsync("key-1")).Lifetime.ShouldBe(30);
+        (await _codes.GetAuthorizationCodeAsync("key-1", _ct)).Lifetime.ShouldBe(30);
         (await _refreshTokens.GetRefreshTokenAsync("key-1")).Lifetime.ShouldBe(20);
         (await _referenceTokens.GetReferenceTokenAsync("key-1")).Lifetime.ShouldBe(10);
     }

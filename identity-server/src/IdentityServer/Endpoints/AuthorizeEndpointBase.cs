@@ -63,7 +63,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
 
     public abstract Task<IEndpointResult> ProcessAsync(HttpContext context);
 
-    internal async Task<IEndpointResult> ProcessAuthorizeRequestAsync(NameValueCollection parameters, ClaimsPrincipal user, bool checkConsentResponse = false)
+    internal async Task<IEndpointResult> ProcessAuthorizeRequestAsync(NameValueCollection parameters, ClaimsPrincipal user, CT ct, bool checkConsentResponse = false)
     {
         if (user != null)
         {
@@ -143,7 +143,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
                 }
             }
 
-            var response = await _authorizeResponseGenerator.CreateResponseAsync(request);
+            var response = await _authorizeResponseGenerator.CreateResponseAsync(request, ct);
 
             await RaiseResponseEventAsync(response);
 

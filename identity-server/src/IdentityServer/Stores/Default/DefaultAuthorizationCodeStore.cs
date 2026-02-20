@@ -31,36 +31,24 @@ public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode
     {
     }
 
-    /// <summary>
-    /// Stores the authorization code asynchronously.
-    /// </summary>
-    /// <param name="code">The code.</param>
-    /// <returns></returns>
-    public Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code)
+    /// <inheritdoc/>
+    public Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code, CT _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.StoreAuthorizationCode");
 
         return CreateItemAsync(code, code.ClientId, code.Subject.GetSubjectId(), code.SessionId, code.Description, code.CreationTime, code.Lifetime);
     }
 
-    /// <summary>
-    /// Gets the authorization code asynchronously.
-    /// </summary>
-    /// <param name="code">The code.</param>
-    /// <returns></returns>
-    public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code)
+    /// <inheritdoc/>
+    public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code, CT _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.GetAuthorizationCode");
 
         return GetItemAsync(code);
     }
 
-    /// <summary>
-    /// Removes the authorization code asynchronously.
-    /// </summary>
-    /// <param name="code">The code.</param>
-    /// <returns></returns>
-    public Task RemoveAuthorizationCodeAsync(string code)
+    /// <inheritdoc/>
+    public Task RemoveAuthorizationCodeAsync(string code, CT _)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DefaultAuthorizationCodeStore.RemoveAuthorizationCode");
 

@@ -50,6 +50,8 @@ public class AuthorizeEndpointBaseTests
 
     private ValidatedAuthorizeRequest _validatedAuthorizeRequest;
 
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     public AuthorizeEndpointBaseTests() => Init();
 
     [Fact]
@@ -64,7 +66,7 @@ public class AuthorizeEndpointBaseTests
         _stubAuthorizeRequestValidator.Result.IsError = true;
         _stubAuthorizeRequestValidator.Result.Error = "login_required";
 
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<AuthorizeResult>();
         ((AuthorizeResult)result).Response.IsError.ShouldBeTrue();
@@ -78,7 +80,7 @@ public class AuthorizeEndpointBaseTests
         _stubAuthorizeRequestValidator.Result.IsError = true;
         _stubAuthorizeRequestValidator.Result.Error = "some_error";
 
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<AuthorizeResult>();
         ((AuthorizeResult)result).Response.IsError.ShouldBeTrue();
@@ -90,7 +92,7 @@ public class AuthorizeEndpointBaseTests
     {
         _stubInteractionGenerator.Response.IsConsent = true;
 
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<ConsentPageResult>();
     }
@@ -101,7 +103,7 @@ public class AuthorizeEndpointBaseTests
     {
         _stubInteractionGenerator.Response.Error = "error";
 
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<AuthorizeResult>();
         ((AuthorizeResult)result).Response.IsError.ShouldBeTrue();
@@ -116,7 +118,7 @@ public class AuthorizeEndpointBaseTests
         _stubInteractionGenerator.Response.Error = "error";
         _stubInteractionGenerator.Response.ErrorDescription = errorDescription;
 
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<AuthorizeResult>();
         var authorizeResult = ((AuthorizeResult)result);
@@ -130,7 +132,7 @@ public class AuthorizeEndpointBaseTests
     {
         _stubInteractionGenerator.Response.IsLogin = true;
 
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<LoginPageResult>();
     }
@@ -142,7 +144,7 @@ public class AuthorizeEndpointBaseTests
         _mockUserSession.User = _user;
         _stubInteractionGenerator.Response.RedirectUrl = "http://foo.com";
 
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<CustomRedirectResult>();
     }
@@ -151,7 +153,7 @@ public class AuthorizeEndpointBaseTests
     [Trait("Category", Category)]
     public async Task successful_authorization_request_should_generate_authorize_result()
     {
-        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user);
+        var result = await _subject.ProcessAuthorizeRequestAsync(_params, _user, _ct);
 
         result.ShouldBeOfType<AuthorizeResult>();
     }

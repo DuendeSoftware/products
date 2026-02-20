@@ -60,7 +60,7 @@ internal class AuthorizeEndpoint : AuthorizeEndpointBase
         }
 
         var user = await UserSession.GetUserAsync();
-        var result = await ProcessAuthorizeRequestAsync(values, user);
+        var result = await ProcessAuthorizeRequestAsync(values, user, context.RequestAborted);
 
         Logger.LogTrace("End authorize request. result type: {0}", result?.GetType().ToString() ?? "-none-");
 

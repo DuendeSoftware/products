@@ -49,7 +49,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -89,7 +89,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -133,7 +133,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -170,7 +170,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -209,7 +209,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -252,7 +252,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);
@@ -297,7 +297,7 @@ public class TokenRequestValidation_PKCE
             }
         };
 
-        var handle = await grants.StoreAuthorizationCodeAsync(code);
+        var handle = await grants.StoreAuthorizationCodeAsync(code, _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             authorizationCodeStore: grants);

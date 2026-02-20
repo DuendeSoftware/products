@@ -22,6 +22,7 @@ public class DefaultPersistedGrantServiceTests
     private IUserConsentStore _userConsent;
 
     private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     public DefaultPersistedGrantServiceTests()
     {
@@ -147,7 +148,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux1", "quux2" }
-        });
+        }, _ct);
 
         var handle8 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -159,7 +160,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
         var handle9 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -171,7 +172,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
         var grants = await _subject.GetAllGrantsAsync("123");
 
@@ -287,7 +288,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux1", "quux2" }
-        });
+        }, _ct);
 
         var handle8 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -299,7 +300,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
         var handle9 = await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -311,7 +312,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
         await _subject.RemoveAllGrantsAsync("123", "client1");
 
@@ -321,9 +322,9 @@ public class DefaultPersistedGrantServiceTests
         (await _refreshTokens.GetRefreshTokenAsync(handle4)).ShouldBeNull();
         (await _refreshTokens.GetRefreshTokenAsync(handle5)).ShouldNotBeNull();
         (await _refreshTokens.GetRefreshTokenAsync(handle6)).ShouldNotBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle7)).ShouldBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle8)).ShouldNotBeNull();
-        (await _codes.GetAuthorizationCodeAsync(handle9)).ShouldNotBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle7, _ct)).ShouldBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle8, _ct)).ShouldNotBeNull();
+        (await _codes.GetAuthorizationCodeAsync(handle9, _ct)).ShouldNotBeNull();
     }
     [Fact]
     public async Task RemoveAllGrantsAsync_should_filter_on_session_id()
@@ -527,7 +528,7 @@ public class DefaultPersistedGrantServiceTests
             RedirectUri = "http://client/cb",
             Nonce = "nonce",
             RequestedScopes = new string[] { "quux3" }
-        });
+        }, _ct);
 
         grants = await _subject.GetAllGrantsAsync("123");
 
