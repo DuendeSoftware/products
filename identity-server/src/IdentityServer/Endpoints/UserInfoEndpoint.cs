@@ -89,7 +89,7 @@ internal class UserInfoEndpoint : IEndpointHandler
 
         // generate response
         _logger.LogTrace("Calling into userinfo response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(validationResult);
+        var response = await _responseGenerator.ProcessAsync(validationResult, context.RequestAborted);
 
         _logger.LogDebug("End userinfo request");
         return new UserInfoResult(response);
