@@ -100,7 +100,7 @@ internal class DeviceAuthorizationEndpoint : IEndpointHandler
 
         // create response
         _logger.LogTrace("Calling into device authorize response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestResult, _urls.BaseUrl);
+        var response = await _responseGenerator.ProcessAsync(requestResult, _urls.BaseUrl, context.RequestAborted);
 
         await _events.RaiseAsync(new DeviceAuthorizationSuccessEvent(response, requestResult));
         Telemetry.Metrics.DeviceAuthentication(clientResult.Client.ClientId);

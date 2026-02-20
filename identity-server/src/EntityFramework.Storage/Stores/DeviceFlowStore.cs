@@ -59,33 +59,23 @@ public class DeviceFlowStore : IDeviceFlowStore
         CancellationTokenProvider = cancellationTokenProvider;
     }
 
-    /// <summary>
-    /// Stores the device authorization request.
-    /// </summary>
-    /// <param name="deviceCode">The device code.</param>
-    /// <param name="userCode">The user code.</param>
-    /// <param name="data">The data.</param>
-    /// <returns></returns>
-    public virtual async Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data)
+    /// <inheritdoc/>
+    public virtual async Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.StoreDeviceAuthorization");
 
         Context.DeviceFlowCodes.Add(ToEntity(data, deviceCode, userCode));
 
-        await Context.SaveChangesAsync(CancellationTokenProvider.CancellationToken);
+        await Context.SaveChangesAsync(ct);
     }
 
-    /// <summary>
-    /// Finds device authorization by user code.
-    /// </summary>
-    /// <param name="userCode">The user code.</param>
-    /// <returns></returns>
-    public virtual async Task<DeviceCode> FindByUserCodeAsync(string userCode)
+    /// <inheritdoc/>
+    public virtual async Task<DeviceCode> FindByUserCodeAsync(string userCode, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.FindByUserCode");
 
         var deviceFlowCodes = (await Context.DeviceFlowCodes.AsNoTracking().Where(x => x.UserCode == userCode)
-                .ToArrayAsync(CancellationTokenProvider.CancellationToken))
+                .ToArrayAsync(ct))
             .SingleOrDefault(x => x.UserCode == userCode);
         var model = ToModel(deviceFlowCodes?.Data);
 
@@ -94,17 +84,13 @@ public class DeviceFlowStore : IDeviceFlowStore
         return model;
     }
 
-    /// <summary>
-    /// Finds device authorization by device code.
-    /// </summary>
-    /// <param name="deviceCode">The device code.</param>
-    /// <returns></returns>
-    public virtual async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
+    /// <inheritdoc/>
+    public virtual async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.FindByDeviceCode");
 
         var deviceFlowCodes = (await Context.DeviceFlowCodes.AsNoTracking().Where(x => x.DeviceCode == deviceCode)
-                .ToArrayAsync(CancellationTokenProvider.CancellationToken))
+                .ToArrayAsync(ct))
             .SingleOrDefault(x => x.DeviceCode == deviceCode);
         var model = ToModel(deviceFlowCodes?.Data);
 
@@ -113,18 +99,13 @@ public class DeviceFlowStore : IDeviceFlowStore
         return model;
     }
 
-    /// <summary>
-    /// Updates device authorization, searching by user code.
-    /// </summary>
-    /// <param name="userCode">The user code.</param>
-    /// <param name="data">The data.</param>
-    /// <returns></returns>
-    public virtual async Task UpdateByUserCodeAsync(string userCode, DeviceCode data)
+    /// <inheritdoc/>
+    public virtual async Task UpdateByUserCodeAsync(string userCode, DeviceCode data, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.UpdateByUserCode");
 
         var existing = (await Context.DeviceFlowCodes.Where(x => x.UserCode == userCode)
-                .ToArrayAsync(CancellationTokenProvider.CancellationToken))
+                .ToArrayAsync(ct))
             .SingleOrDefault(x => x.UserCode == userCode);
         if (existing == null)
         {
@@ -141,7 +122,7 @@ public class DeviceFlowStore : IDeviceFlowStore
 
         try
         {
-            await Context.SaveChangesAsync();
+            await Context.SaveChangesAsync(ct);
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -149,17 +130,13 @@ public class DeviceFlowStore : IDeviceFlowStore
         }
     }
 
-    /// <summary>
-    /// Removes the device authorization, searching by device code.
-    /// </summary>
-    /// <param name="deviceCode">The device code.</param>
-    /// <returns></returns>
-    public virtual async Task RemoveByDeviceCodeAsync(string deviceCode)
+    /// <inheritdoc/>
+    public virtual async Task RemoveByDeviceCodeAsync(string deviceCode, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("DeviceFlowStore.RemoveByDeviceCode");
 
         var deviceFlowCodes = (await Context.DeviceFlowCodes.Where(x => x.DeviceCode == deviceCode)
-                .ToArrayAsync(CancellationTokenProvider.CancellationToken))
+                .ToArrayAsync(ct))
             .SingleOrDefault(x => x.DeviceCode == deviceCode);
 
         if (deviceFlowCodes != null)
@@ -170,7 +147,7 @@ public class DeviceFlowStore : IDeviceFlowStore
 
             try
             {
-                await Context.SaveChangesAsync();
+                await Context.SaveChangesAsync(ct);
             }
             catch (DbUpdateConcurrencyException ex)
             {
