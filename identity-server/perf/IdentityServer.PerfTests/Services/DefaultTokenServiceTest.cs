@@ -60,8 +60,8 @@ public class DefaultTokenServiceTest : TestBase<InMemoryIdentityServerContainer>
                 Client = _client,
             },
             ValidatedResources = new ResourceValidationResult(new Resources() { ApiScopes = new[] { _scope } }),
-        });
-        var jwt = await _subject.CreateSecurityTokenAsync(token);
+        }, default);
+        var jwt = await _subject.CreateSecurityTokenAsync(token, default);
         //System.Console.WriteLine(jwt);
     }
 }
