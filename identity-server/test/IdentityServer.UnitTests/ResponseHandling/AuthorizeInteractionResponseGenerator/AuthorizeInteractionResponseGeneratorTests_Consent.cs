@@ -18,6 +18,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
     private IdentityServerOptions _options = new IdentityServerOptions();
     private MockConsentService _mockConsent = new MockConsentService();
     private MockProfileService _fakeUserService = new MockProfileService();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private void RequiresConsent(bool value) => _mockConsent.RequiresConsentResult = value;
 
@@ -90,7 +91,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
     [Fact]
     public async Task ProcessConsentAsync_NullRequest_Throws()
     {
-        Func<Task> act = () => _subject.ProcessConsentAsync(null, new ConsentResponse());
+        Func<Task> act = () => _subject.ProcessConsentAsync(null, new ConsentResponse(), _ct);
 
         var exception = await act.ShouldThrowAsync<ArgumentNullException>();
         exception.ParamName.ShouldBe("request");
@@ -108,7 +109,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RequestedScopes = new List<string> { "openid", "read", "write" },
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
-        await _subject.ProcessConsentAsync(request, null);
+        await _subject.ProcessConsentAsync(request, null, _ct);
     }
 
     [Fact]
@@ -125,7 +126,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
 
-        Func<Task> act = () => _subject.ProcessConsentAsync(request);
+        Func<Task> act = () => _subject.ProcessConsentAsync(request, null, _ct);
 
         var exception = await act.ShouldThrowAsync<ArgumentException>();
         exception.Message.ShouldMatch(".*PromptMode.*");
@@ -145,7 +146,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
 
-        Func<Task> act = () => _subject.ProcessConsentAsync(request);
+        Func<Task> act = () => _subject.ProcessConsentAsync(request, null, _ct);
 
         var exception = await act.ShouldThrowAsync<ArgumentException>();
         exception.Message.ShouldMatch(".*PromptMode.*");
@@ -165,7 +166,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RequestedScopes = new List<string> { "openid", "read", "write" },
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
-        var result = await _subject.ProcessConsentAsync(request);
+        var result = await _subject.ProcessConsentAsync(request, null, _ct);
 
         request.WasConsentShown.ShouldBeFalse();
         result.IsError.ShouldBeTrue();
@@ -185,7 +186,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RequestedScopes = new List<string> { "openid", "read", "write" },
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
-        var result = await _subject.ProcessConsentAsync(request);
+        var result = await _subject.ProcessConsentAsync(request, null, _ct);
         request.WasConsentShown.ShouldBeFalse();
         result.IsConsent.ShouldBeTrue();
         AssertUpdateConsentNotCalled();
@@ -204,7 +205,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RequestedScopes = new List<string> { "openid", "read", "write" },
             ValidatedResources = GetValidatedResources("openid", "read", "write"),
         };
-        var result = await _subject.ProcessConsentAsync(request);
+        var result = await _subject.ProcessConsentAsync(request, null, _ct);
         request.WasConsentShown.ShouldBeFalse();
         result.IsConsent.ShouldBeTrue();
         AssertUpdateConsentNotCalled();
@@ -228,7 +229,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RememberConsent = false,
             ScopesValuesConsented = new string[] { }
         };
-        var result = await _subject.ProcessConsentAsync(request, consent);
+        var result = await _subject.ProcessConsentAsync(request, consent, _ct);
         request.WasConsentShown.ShouldBeTrue();
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.AccessDenied);
@@ -252,7 +253,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RememberConsent = false,
             ScopesValuesConsented = new string[] { }
         };
-        var result = await _subject.ProcessConsentAsync(request, consent);
+        var result = await _subject.ProcessConsentAsync(request, consent, _ct);
         request.WasConsentShown.ShouldBeTrue();
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.AccessDenied);
@@ -280,7 +281,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             ScopesValuesConsented = new string[] { "read" }
         };
 
-        var result = await _subject.ProcessConsentAsync(request, consent);
+        var result = await _subject.ProcessConsentAsync(request, consent, _ct);
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.AccessDenied);
         AssertUpdateConsentNotCalled();
@@ -307,7 +308,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RememberConsent = false,
             ScopesValuesConsented = new string[] { "openid", "read" }
         };
-        var result = await _subject.ProcessConsentAsync(request, consent);
+        var result = await _subject.ProcessConsentAsync(request, consent, _ct);
         request.ValidatedResources.Resources.IdentityResources.Count.ShouldBe(1);
         request.ValidatedResources.Resources.ApiScopes.Count.ShouldBe(1);
         "openid".ShouldBe(request.ValidatedResources.Resources.IdentityResources.Select(x => x.Name).First());
@@ -338,7 +339,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RememberConsent = false,
             ScopesValuesConsented = new string[] { "openid", "read" }
         };
-        var result = await _subject.ProcessConsentAsync(request, consent);
+        var result = await _subject.ProcessConsentAsync(request, consent, _ct);
         request.ValidatedResources.Resources.IdentityResources.Count.ShouldBe(1);
         request.ValidatedResources.Resources.ApiScopes.Count.ShouldBe(1);
         "read".ShouldBe(request.ValidatedResources.Resources.ApiScopes.First().Name);
@@ -368,7 +369,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RememberConsent = true,
             ScopesValuesConsented = new string[] { "openid", "read" }
         };
-        var result = await _subject.ProcessConsentAsync(request, consent);
+        var result = await _subject.ProcessConsentAsync(request, consent, _ct);
         AssertUpdateConsentCalled(client, user, "openid", "read");
     }
 
@@ -393,7 +394,7 @@ public class AuthorizeInteractionResponseGeneratorTests_Consent
             RememberConsent = false,
             ScopesValuesConsented = new string[] { "openid", "read" }
         };
-        var result = await _subject.ProcessConsentAsync(request, consent);
+        var result = await _subject.ProcessConsentAsync(request, consent, _ct);
         AssertUpdateConsentCalled(client, user);
     }
 }
