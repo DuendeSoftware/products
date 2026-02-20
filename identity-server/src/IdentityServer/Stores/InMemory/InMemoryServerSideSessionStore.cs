@@ -18,7 +18,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc />
-    public Task CreateSessionAsync(ServerSideSession session, CT ct = default)
+    public Task CreateSessionAsync(ServerSideSession session, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.CreateSession");
 
@@ -30,7 +30,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc />
-    public Task<ServerSideSession> GetSessionAsync(string key, CT ct = default)
+    public Task<ServerSideSession> GetSessionAsync(string key, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.GetSession");
 
@@ -39,7 +39,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc />
-    public Task UpdateSessionAsync(ServerSideSession session, CT ct = default)
+    public Task UpdateSessionAsync(ServerSideSession session, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.UpdateSession");
 
@@ -48,7 +48,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc />
-    public Task DeleteSessionAsync(string key, CT ct = default)
+    public Task DeleteSessionAsync(string key, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.DeleteSession");
 
@@ -59,7 +59,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc />
-    public Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, CT ct = default)
+    public Task<IReadOnlyCollection<ServerSideSession>> GetSessionsAsync(SessionFilter filter, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.GetSessions");
 
@@ -80,7 +80,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
     }
 
     /// <inheritdoc />
-    public Task DeleteSessionsAsync(SessionFilter filter, CT ct = default)
+    public Task DeleteSessionsAsync(SessionFilter filter, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.DeleteSessions");
 
@@ -108,7 +108,7 @@ public class InMemoryServerSideSessionStore : IServerSideSessionStore
 
 
     /// <inheritdoc/>
-    public Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct = default)
+    public Task<IReadOnlyCollection<ServerSideSession>> GetAndRemoveExpiredSessionsAsync(int count, CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("InMemoryServerSideSessionStore.GetAndRemoveExpiredSession");
 

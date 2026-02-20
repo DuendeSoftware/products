@@ -208,7 +208,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                 {
                     SubjectId = request.SubjectId,
                     SessionId = request.SessionId
-                });
+                }, default);
 
                 var valid = sessions.Count > 0 &&
                     sessions.Any(x => x.Expires == null || DateTime.UtcNow < x.Expires.Value);
@@ -248,7 +248,7 @@ public class DefaultSessionCoordinationService : ISessionCoordinationService
                         }
                         else
                         {
-                            await ServerSideSessionStore.UpdateSessionAsync(session);
+                            await ServerSideSessionStore.UpdateSessionAsync(session, default);
                         }
                     }
                 }

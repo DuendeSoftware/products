@@ -84,7 +84,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
             Ticket = ticket.Serialize(_protector)
         };
 
-        await _store.CreateSessionAsync(session);
+        await _store.CreateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
     }
 
     /// <inheritdoc />
@@ -96,7 +96,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         _logger.LogDebug("Retrieve AuthenticationTicket for key {key}", key);
 
-        var session = await _store.GetSessionAsync(key);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
         if (session == null)
         {
             _logger.LogDebug("No ticket found in store for {key}", key);
@@ -124,7 +124,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
 
         ArgumentNullException.ThrowIfNull(ticket);
 
-        var session = await _store.GetSessionAsync(key);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
         if (session == null)
         {
             // https://github.com/dotnet/aspnetcore/issues/41516#issuecomment-1178076544
@@ -156,7 +156,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         session.DisplayName = name;
         session.Ticket = ticket.Serialize(_protector);
 
-        await _store.UpdateSessionAsync(session);
+        await _store.UpdateSessionAsync(session, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
     }
 
     /// <inheritdoc />
@@ -171,7 +171,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
         // There is a somewhat rare scenario where a session has expired and a request to IdentityServer happens prior
         // to the cleanup job running. When that happens, the session is removed but none of the processing to trigger
         // backchannel logouts, etc. happens so we need a way to kick that off and are doing so here.
-        var session = await _store.GetSessionAsync(key);
+        var session = await _store.GetSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
         if (session != null)
         {
             var userSession = AsUserSessions([session]).SingleOrDefault();
@@ -181,7 +181,7 @@ public class ServerSideTicketStore : IServerSideTicketStore
             }
         }
 
-        await _store.DeleteSessionAsync(key);
+        await _store.DeleteSessionAsync(key, _httpContextAccessor.HttpContext?.RequestAborted ?? default);
     }
 
     /// <inheritdoc/>
