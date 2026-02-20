@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.EntityFramework.Interfaces;
 using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.Services;
@@ -88,7 +89,7 @@ public class ClientStore : IClientStore
     }
 
     /// <inheritdoc/>
-    public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync()
+    public virtual async IAsyncEnumerable<Duende.IdentityServer.Models.Client> GetAllClientsAsync([EnumeratorCancellation] CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("ClientStore.GetAllClients");
 
@@ -106,7 +107,7 @@ public class ClientStore : IClientStore
             .AsSplitQuery();
 
         var clientCount = 0;
-        await foreach (var client in query.AsAsyncEnumerable().WithCancellation(CancellationTokenProvider.CancellationToken))
+        await foreach (var client in query.AsAsyncEnumerable().WithCancellation(ct))
         {
             clientCount++;
             yield return client.ToModel();

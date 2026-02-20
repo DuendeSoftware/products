@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.Runtime.CompilerServices;
 using Duende.IdentityServer.Events;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
@@ -17,6 +18,7 @@ public class ValidatingClientStoreTests
 {
     private readonly TestEventService _events = new();
     private readonly NullLogger<ValidatingClientStore<StubClientStore>> _logger = new();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     public async Task GetAllClientsAsync_WhenAllClientsAreValid_ShouldReturnAllClients()
@@ -32,7 +34,7 @@ public class ValidatingClientStoreTests
         var store = new ValidatingClientStore<StubClientStore>(innerStore, validator, _events, _logger);
 
         var result = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             result.Add(client);
         }
@@ -61,7 +63,7 @@ public class ValidatingClientStoreTests
         var store = new ValidatingClientStore<StubClientStore>(innerStore, validator, _events, _logger);
 
         var result = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             result.Add(client);
         }
@@ -84,7 +86,7 @@ public class ValidatingClientStoreTests
         var store = new ValidatingClientStore<StubClientStore>(innerStore, validator, _events, _logger);
 
         var result = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             result.Add(client);
         }
@@ -101,7 +103,7 @@ public class ValidatingClientStoreTests
         var store = new ValidatingClientStore<StubClientStore>(innerStore, validator, _events, _logger);
 
         var result = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             result.Add(client);
         }
@@ -124,7 +126,7 @@ public class ValidatingClientStoreTests
         var store = new ValidatingClientStore<StubClientStore>(innerStore, validator, eventService, _logger);
 
         var result = new List<Client>();
-        await foreach (var client in store.GetAllClientsAsync())
+        await foreach (var client in store.GetAllClientsAsync(_ct))
         {
             result.Add(client);
         }
@@ -153,7 +155,7 @@ public class ValidatingClientStoreTests
 
         public Task<Client?> FindClientByIdAsync(string clientId, CT _) => Task.FromResult(_client);
 
-        public async IAsyncEnumerable<Client> GetAllClientsAsync()
+        public async IAsyncEnumerable<Client> GetAllClientsAsync([EnumeratorCancellation] CT _)
         {
             foreach (var client in _clients)
             {

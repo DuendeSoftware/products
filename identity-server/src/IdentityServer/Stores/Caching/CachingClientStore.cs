@@ -55,10 +55,10 @@ public class CachingClientStore<T> : IClientStore
 
 #if NET10_0_OR_GREATER
     /// <inheritdoc/>
-    public IAsyncEnumerable<Client> GetAllClientsAsync()
+    public IAsyncEnumerable<Client> GetAllClientsAsync(CT ct)
     {
         using var activity = Tracing.StoreActivitySource.StartActivity("CachingClientStore.GetAllClients");
-        return _inner.GetAllClientsAsync();
+        return _inner.GetAllClientsAsync(ct);
     }
 #endif
 }

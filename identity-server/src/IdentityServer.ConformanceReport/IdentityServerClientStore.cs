@@ -17,7 +17,7 @@ internal sealed class IdentityServerClientStore(IClientStore clientStore) : ICon
         CancellationToken ct = default)
     {
         var clients = new List<ConformanceReportClient>();
-        await foreach (var client in clientStore.GetAllClientsAsync().WithCancellation(ct))
+        await foreach (var client in clientStore.GetAllClientsAsync(ct))
         {
             clients.Add(client.ToConformanceReportClient());
         }
