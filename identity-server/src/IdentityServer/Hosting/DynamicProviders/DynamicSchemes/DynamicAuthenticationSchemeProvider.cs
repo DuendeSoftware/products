@@ -83,7 +83,7 @@ internal class DynamicAuthenticationSchemeProvider : IAuthenticationSchemeProvid
         var dynamicScheme = cache.Get(name);
         if (dynamicScheme == null)
         {
-            var idp = await store.GetBySchemeAsync(name);
+            var idp = await store.GetBySchemeAsync(name, _httpContextAccessor.HttpContext.RequestAborted);
             if (idp != null && idp.Enabled)
             {
                 var providerType = _options.FindProviderType(idp.Type);
