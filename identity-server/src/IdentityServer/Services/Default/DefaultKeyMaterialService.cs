@@ -46,14 +46,14 @@ public class DefaultKeyMaterialService : IKeyMaterialService
             var list = _signingCredentialStores.ToList();
             for (var i = 0; i < list.Count; i++)
             {
-                var key = await list[i].GetSigningCredentialsAsync();
+                var key = await list[i].GetSigningCredentialsAsync(ct);
                 if (key != null)
                 {
                     return key;
                 }
             }
 
-            var automaticKey = await _keyManagerKeyStore.GetSigningCredentialsAsync();
+            var automaticKey = await _keyManagerKeyStore.GetSigningCredentialsAsync(ct);
             if (automaticKey != null)
             {
                 return automaticKey;
@@ -82,14 +82,14 @@ public class DefaultKeyMaterialService : IKeyMaterialService
 
         foreach (var store in _signingCredentialStores)
         {
-            var signingKey = await store.GetSigningCredentialsAsync();
+            var signingKey = await store.GetSigningCredentialsAsync(ct);
             if (signingKey != null)
             {
                 credentials.Add(signingKey);
             }
         }
 
-        var automaticSigningKeys = await _keyManagerKeyStore.GetAllSigningCredentialsAsync();
+        var automaticSigningKeys = await _keyManagerKeyStore.GetAllSigningCredentialsAsync(ct);
         if (automaticSigningKeys != null)
         {
             credentials.AddRange(automaticSigningKeys);
@@ -105,7 +105,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
 
         var keys = new List<SecurityKeyInfo>();
 
-        var automaticSigningKeys = await _keyManagerKeyStore.GetValidationKeysAsync();
+        var automaticSigningKeys = await _keyManagerKeyStore.GetValidationKeysAsync(ct);
         if (automaticSigningKeys?.Any() == true)
         {
             keys.AddRange(automaticSigningKeys);
@@ -113,7 +113,7 @@ public class DefaultKeyMaterialService : IKeyMaterialService
 
         foreach (var store in _validationKeysStores)
         {
-            var validationKeys = await store.GetValidationKeysAsync();
+            var validationKeys = await store.GetValidationKeysAsync(ct);
             keys.AddRange(validationKeys);
         }
 
