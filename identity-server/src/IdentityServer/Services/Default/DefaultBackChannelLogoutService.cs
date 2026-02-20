@@ -82,7 +82,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
         var backChannelRequests = await LogoutNotificationService.GetBackChannelLogoutNotificationsAsync(context, ct);
         if (backChannelRequests.Any())
         {
-            await SendLogoutNotificationsAsync(backChannelRequests);
+            await SendLogoutNotificationsAsync(backChannelRequests, ct);
         }
     }
 
@@ -90,8 +90,9 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// Sends the logout notifications for the collection of clients.
     /// </summary>
     /// <param name="requests"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests)
+    protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests, CT ct)
     {
         requests ??= [];
         var logoutRequestsWithPayload = new List<(BackChannelLogoutRequest, Dictionary<string, string>)>();
@@ -106,7 +107,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
             logoutRequestsWithPayload.Add((backChannelLogoutRequest, payload));
         }
 
-        var logoutRequests = logoutRequestsWithPayload.Select(request => PostLogoutJwt(request.Item1, request.Item2)).ToArray();
+        var logoutRequests = logoutRequestsWithPayload.Select(request => PostLogoutJwt(request.Item1, request.Item2, ct)).ToArray();
         await Task.WhenAll(logoutRequests);
     }
 
@@ -115,8 +116,9 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// </summary>
     /// <param name="client"></param>
     /// <param name="data"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    protected virtual Task PostLogoutJwt(BackChannelLogoutRequest client, Dictionary<string, string> data) => HttpClient.PostAsync(client.LogoutUri, data);
+    protected virtual Task PostLogoutJwt(BackChannelLogoutRequest client, Dictionary<string, string> data, CT ct) => HttpClient.PostAsync(client.LogoutUri, data, ct);
 
     /// <summary>
     /// Creates the form-url-encoded payload (as a dictionary) to send to the client.

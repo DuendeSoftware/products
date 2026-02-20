@@ -122,7 +122,7 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
         else
         {
             // if we're redirecting to a local URL, ensure we persist the UI locales in a way .net's localization will pick them up
-            await _localesService.StoreUiLocalesForRedirectAsync(result.Request.UiLocales);
+            await _localesService.StoreUiLocalesForRedirectAsync(result.Request.UiLocales, context.RequestAborted);
         }
 
         url = url.AddQueryString(result.ReturnUrlParameterName, returnUrl);

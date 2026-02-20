@@ -13,7 +13,7 @@ namespace Duende.IdentityServer.Services.Default;
 
 public class DefaultUiLocalesService(IHttpContextAccessor httpContextAccessor, IOptions<RequestLocalizationOptions> requestLocalizationOptions, ILogger<DefaultUiLocalesService> logger) : IUiLocalesService
 {
-    public virtual Task StoreUiLocalesForRedirectAsync(string? uiLocales)
+    public virtual Task StoreUiLocalesForRedirectAsync(string? uiLocales, CT ct)
     {
         if (httpContextAccessor.HttpContext is null)
         {

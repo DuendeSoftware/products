@@ -38,14 +38,14 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
 
 
     /// <inheritdoc />
-    public async Task<string> GetJwtAsync(string url, Client client)
+    public async Task<string> GetJwtAsync(string url, Client client, CT ct)
     {
         using var activity = Tracing.ServiceActivitySource.StartActivity("DefaultJwtRequestUriHttpClient.GetJwt");
 
         using var req = new HttpRequestMessage(HttpMethod.Get, url);
         req.Options.TryAdd(IdentityServerConstants.JwtRequestClientKey, client);
 
-        var response = await _client.SendAsync(req, _cancellationTokenProvider.CancellationToken);
+        var response = await _client.SendAsync(req, ct);
         if (response.StatusCode == System.Net.HttpStatusCode.OK)
         {
             if (_options.StrictJarValidation)
@@ -61,7 +61,7 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
 
             _sanitizedLogger.LogDebug("Success http response from jwt url {url}", url);
 
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await response.Content.ReadAsStringAsync(ct);
             return json;
         }
 

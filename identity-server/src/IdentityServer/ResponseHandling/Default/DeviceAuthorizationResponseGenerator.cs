@@ -82,13 +82,13 @@ public class DeviceAuthorizationResponseGenerator : IDeviceAuthorizationResponse
         // generate user_code
         var userCodeGenerator = await UserCodeService.GetGenerator(
             validationResult.ValidatedRequest.Client.UserCodeType ??
-            Options.DeviceFlow.DefaultUserCodeType);
+            Options.DeviceFlow.DefaultUserCodeType, ct);
 
         var retryCount = 0;
 
         while (retryCount < userCodeGenerator.RetryLimit)
         {
-            var userCode = await userCodeGenerator.GenerateAsync();
+            var userCode = await userCodeGenerator.GenerateAsync(ct);
 
             var deviceCode = await DeviceFlowCodeService.FindByUserCodeAsync(userCode, ct);
             if (deviceCode == null)

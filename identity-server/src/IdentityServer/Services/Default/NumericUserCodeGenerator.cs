@@ -32,8 +32,9 @@ public class NumericUserCodeGenerator : IUserCodeGenerator
     /// <summary>
     /// Generates the user code.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public Task<string> GenerateAsync()
+    public Task<string> GenerateAsync(CT ct)
     {
         var next = RandomNumberGenerator.GetInt32(100000000, 1000000000);
         return Task.FromResult(next.ToString(CultureInfo.InvariantCulture));

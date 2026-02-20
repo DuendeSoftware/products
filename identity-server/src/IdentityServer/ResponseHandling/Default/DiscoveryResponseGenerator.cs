@@ -92,7 +92,8 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     /// </summary>
     /// <param name="baseUrl">The base URL.</param>
     /// <param name="issuerUri">The issuer URI.</param>
-    public virtual async Task<Dictionary<string, object>> CreateDiscoveryDocumentAsync(string baseUrl, string issuerUri)
+    /// <param name="ct"></param>
+    public virtual async Task<Dictionary<string, object>> CreateDiscoveryDocumentAsync(string baseUrl, string issuerUri, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DiscoveryResponseGenerator.CreateDiscoveryDocument");
 
@@ -106,7 +107,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
         // jwks
         if (Options.Discovery.ShowKeySet)
         {
-            if ((await Keys.GetValidationKeysAsync(default)).Any())
+            if ((await Keys.GetValidationKeysAsync(ct)).Any())
             {
                 entries.Add(OidcConstants.Discovery.JwksUri, baseUrl + ProtocolRoutePaths.DiscoveryWebKeys);
             }
@@ -236,7 +237,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             Options.Discovery.ShowApiScopes ||
             Options.Discovery.ShowClaims)
         {
-            var resources = await ResourceStore.GetAllEnabledResourcesAsync(default);
+            var resources = await ResourceStore.GetAllEnabledResourcesAsync(ct);
             var scopes = new List<string>();
 
             // scopes
@@ -342,7 +343,7 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
             AddSigningAlgorithmsForEndpointIfNeeded(OidcConstants.Discovery.IntrospectionEndpointAuthSigningAlgorithmsSupported, entries, supportedAuthMethods);
         }
 
-        var signingCredentials = await Keys.GetAllSigningCredentialsAsync(default);
+        var signingCredentials = await Keys.GetAllSigningCredentialsAsync(ct);
         if (signingCredentials.Any())
         {
             var signingAlgorithms = signingCredentials.Select(c => c.Algorithm).Distinct();
@@ -458,13 +459,14 @@ public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     /// <summary>
     /// Creates the JWK document.
     /// </summary>
-    public virtual async Task<IEnumerable<Models.JsonWebKey>> CreateJwkDocumentAsync()
+    /// <param name="ct"></param>
+    public virtual async Task<IEnumerable<Models.JsonWebKey>> CreateJwkDocumentAsync(CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("DiscoveryResponseGenerator.CreateJwkDocument");
 
         var webKeys = new List<Models.JsonWebKey>();
 
-        foreach (var key in await Keys.GetValidationKeysAsync(default))
+        foreach (var key in await Keys.GetValidationKeysAsync(ct))
         {
             if (key.Key is X509SecurityKey x509Key)
             {

@@ -18,6 +18,7 @@ public interface IJwtRequestUriHttpClient
     /// </summary>
     /// <param name="url"></param>
     /// <param name="client"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<string?> GetJwtAsync(string url, Client client);
+    Task<string?> GetJwtAsync(string url, Client client, CT ct);
 }
