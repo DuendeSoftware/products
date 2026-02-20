@@ -37,8 +37,7 @@ internal class SamlFrontChannelLogoutRequestBuilder(
 
         var logoutRequest = new LogoutRequest
         {
-            Id = RequestId.New(),
-            Version = SamlVersion.V2,
+            Id = SamlIds.NewRequestId(),
             IssueInstant = timeProvider.GetUtcNow().UtcDateTime,
             Destination = serviceProvider.SingleLogoutServiceUrl.Location,
             Issuer = issuer,
@@ -65,8 +64,8 @@ internal class SamlFrontChannelLogoutRequestBuilder(
         var assertionNs = XNamespace.Get(SamlConstants.Namespaces.Assertion);
 
         var requestElement = new XElement(protocolNs + LogoutRequest.ElementNames.RootElement,
-            new XAttribute("ID", logoutRequest.Id.Value),
-            new XAttribute("Version", logoutRequest.Version.ToString()),
+            new XAttribute("ID", logoutRequest.Id),
+            new XAttribute("Version", logoutRequest.Version),
             new XAttribute("IssueInstant", issueInstant),
             new XAttribute("Destination", logoutRequest.Destination!),
             new XElement(assertionNs + LogoutRequest.ElementNames.Issuer, logoutRequest.Issuer));

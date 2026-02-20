@@ -9,7 +9,6 @@ using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using SamlStatusCode = Duende.IdentityServer.Saml.Models.SamlStatusCode;
 
 namespace Duende.IdentityServer.Internal.Saml.SingleSignin;
 
@@ -37,7 +36,7 @@ internal class DefaultSamlSigninInteractionResponseGenerator(
                 //  ForceAuthn and IsPassive are "true", the identity provider MUST NOT freshly authenticate the
                 //presenter unless the constraints of IsPassive can be met.
                 logger.SamlInteractionPassiveAndForced(LogLevel.Debug);
-                return SamlInteractionResponse.CreateError(SamlStatusCode.NoPassive, "The user is not currently logged in");
+                return SamlInteractionResponse.CreateError(SamlStatusCodes.NoPassive, "The user is not currently logged in");
             }
 
             if (request.ForceAuthn)
@@ -57,7 +56,7 @@ internal class DefaultSamlSigninInteractionResponseGenerator(
         if (request.IsPassive)
         {
             logger.SamlInteractionNoPassive(LogLevel.Debug);
-            return SamlInteractionResponse.CreateError(SamlStatusCode.NoPassive, "The user is not currently logged in and passive login was requested.");
+            return SamlInteractionResponse.CreateError(SamlStatusCodes.NoPassive, "The user is not currently logged in and passive login was requested.");
         }
 
         // Todo: The AuthN request may contain hints on account creation 3.4.1.1 Element <NameIDPolicy>: AllowCreate

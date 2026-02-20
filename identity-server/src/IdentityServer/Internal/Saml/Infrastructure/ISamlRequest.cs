@@ -13,7 +13,7 @@ internal interface ISamlRequest
 {
     internal static abstract string MessageName { get; }
     internal string Issuer { get; }
-    internal SamlVersion Version { get; }
+    internal string Version { get; }
     internal DateTime IssueInstant { get; }
     internal Uri? Destination { get; }
 }

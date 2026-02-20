@@ -118,7 +118,7 @@ internal class EndSessionCallbackHttpWriter : IHttpResponseWriter<EndSessionCall
                 switch (samlFrontChannelLogout.SamlBinding)
                 {
                     case SamlBinding.HttpPost:
-                        var autoPostFormContent = HttpResponseBindings.GenerateAutoPostForm(SamlMessageName.SamlRequest, samlFrontChannelLogout.EncodedContent, samlFrontChannelLogout.Destination, samlFrontChannelLogout.RelayState, includeCsp: true);
+                        var autoPostFormContent = HttpResponseBindings.GenerateAutoPostForm(SamlConstants.RequestProperties.SAMLRequest, samlFrontChannelLogout.EncodedContent, samlFrontChannelLogout.Destination, samlFrontChannelLogout.RelayState, includeCsp: true);
                         sb.Append(CultureInfo.InvariantCulture, $"<iframe sandbox='allow-forms allow-scripts allow-same-origin' srcdoc='{HtmlEncoder.Default.Encode(autoPostFormContent)}'></iframe>");
                         break;
                     case SamlBinding.HttpRedirect:

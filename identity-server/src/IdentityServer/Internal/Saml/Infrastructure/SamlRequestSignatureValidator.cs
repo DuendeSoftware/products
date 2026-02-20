@@ -37,17 +37,17 @@ internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(TimeProvide
 
         if (string.IsNullOrEmpty(signature))
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Requester, Message = "Missing signature parameter" });
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = "Missing signature parameter" });
         }
 
         if (string.IsNullOrEmpty(sigAlg))
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Requester, Message = "Missing signature algorithm parameter" });
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = "Missing signature algorithm parameter" });
         }
 
         if (!SupportedAlgorithms.Contains(sigAlg))
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Requester, Message = $"Unsupported signature algorithm: {sigAlg}" });
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = $"Unsupported signature algorithm: {sigAlg}" });
         }
 
         // re-create the querystring part that is signed. The spec dictates the exact way this is to be done:
@@ -105,7 +105,7 @@ internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(TimeProvide
         }
         catch (XmlException ex)
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Requester, Message = $"Invalid XML: {ex.Message}" });
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = $"Invalid XML: {ex.Message}" });
         }
 
         // Find signature element
@@ -115,14 +115,14 @@ internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(TimeProvide
         var signatureNode = doc.SelectSingleNode("//ds:Signature", nsmgr);
         if (signatureNode == null)
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Requester, Message = "Signature element not found" });
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = "Signature element not found" });
         }
 
         // Get the request ID that must be signed
         var requestId = doc.DocumentElement?.GetAttribute("ID");
         if (string.IsNullOrEmpty(requestId))
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Requester, Message = $"{TSamlRequest.MessageName} missing ID attribute" });
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = $"{TSamlRequest.MessageName} missing ID attribute" });
         }
 
         return ValidateWithCertificates(
@@ -158,7 +158,7 @@ internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(TimeProvide
         var validCertificates = serviceProvider.SigningCertificates?.Where(cert => ValidateCertificate(cert).Success).ToList();
         if (validCertificates == null || validCertificates.Count == 0)
         {
-            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Responder, Message = "No valid certificates configured for service provider" });
+            return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Responder, Message = "No valid certificates configured for service provider" });
         }
 
         foreach (var cert in validCertificates)
@@ -169,7 +169,7 @@ internal class SamlRequestSignatureValidator<TRequest, TSamlRequest>(TimeProvide
             }
         }
 
-        return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCode.Requester, Message = "Invalid signature" });
+        return Result<bool, SamlError>.FromError(new SamlError { StatusCode = SamlStatusCodes.Requester, Message = "Invalid signature" });
     }
 
     private Result<bool, string> ValidateCertificate(X509Certificate2 certificate)

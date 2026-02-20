@@ -122,7 +122,7 @@ internal abstract class SamlRequestProcessorBase<TMessage, TRequest, TSuccess>(
                 Type = SamlRequestErrorType.Protocol,
                 ProtocolError = new SamlProtocolError<TRequest>(sp, request, new SamlError
                 {
-                    StatusCode = SamlStatusCode.Requester,
+                    StatusCode = SamlStatusCodes.Requester,
                     Message = $"Unsupported binding for signature validation: {request.Binding}"
                 })
             };

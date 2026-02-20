@@ -13,7 +13,6 @@ using Duende.IdentityServer.Services;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SamlStatusCode = Duende.IdentityServer.Saml.Models.SamlStatusCode;
 
 namespace Duende.IdentityServer.Internal.Saml.SingleSignin;
 
@@ -157,8 +156,8 @@ internal class SamlSigninRequestProcessor(
 
                 var samlError = new SamlError
                 {
-                    StatusCode = SamlStatusCode.Responder,
-                    SubStatusCode = SamlStatusCode.InvalidNameIdPolicy,
+                    StatusCode = SamlStatusCodes.Responder,
+                    SubStatusCode = SamlStatusCodes.InvalidNameIdPolicy,
                     Message = $"Requested NameID format '{requestedFormat}' is not supported by this IdP"
                 };
                 return new SamlRequestError<SamlSigninRequest>

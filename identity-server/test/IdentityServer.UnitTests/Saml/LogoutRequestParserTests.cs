@@ -50,7 +50,7 @@ public class LogoutRequestParserTests
         var result = _parser.Parse(doc);
 
         result.ShouldNotBeNull();
-        result.Id.Value.ShouldBe("_test-logout-id");
+        result.Id.ShouldBe("_test-logout-id");
         result.Issuer.ShouldBe("https://sp.example.com");
         result.Destination!.ToString().ShouldBe("https://idp.example.com/saml/logout");
         result.NameId.Value.ShouldBe("user@example.com");

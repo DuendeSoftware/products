@@ -20,19 +20,19 @@ internal class SamlRequestValidator(TimeProvider timeProvider, IOptions<SamlOpti
     /// Validates version, issue instant, and destination for a SAML request
     /// </summary>
     internal SamlValidationError? ValidateCommonFields(
-        SamlVersion version,
+        string version,
         DateTime issueInstant,
         Uri? destination,
         SamlServiceProvider serviceProvider,
         string expectedDestination)
     {
         // Version validation
-        if (version != SamlVersion.V2)
+        if (version != SamlVersions.V2)
         {
             return new SamlValidationError
             {
                 Message = "Only Version 2.0 is supported",
-                StatusCode = SamlStatusCode.VersionMismatch
+                StatusCode = SamlStatusCodes.VersionMismatch
             };
         }
 
@@ -44,7 +44,7 @@ internal class SamlRequestValidator(TimeProvider timeProvider, IOptions<SamlOpti
         {
             return new SamlValidationError
             {
-                StatusCode = SamlStatusCode.Requester,
+                StatusCode = SamlStatusCodes.Requester,
                 Message = "Request IssueInstant is in the future"
             };
         }
@@ -55,7 +55,7 @@ internal class SamlRequestValidator(TimeProvider timeProvider, IOptions<SamlOpti
         {
             return new SamlValidationError
             {
-                StatusCode = SamlStatusCode.Requester,
+                StatusCode = SamlStatusCodes.Requester,
                 Message = "Request has expired (IssueInstant too old)"
             };
         }
@@ -67,7 +67,7 @@ internal class SamlRequestValidator(TimeProvider timeProvider, IOptions<SamlOpti
             {
                 return new SamlValidationError
                 {
-                    StatusCode = SamlStatusCode.Requester,
+                    StatusCode = SamlStatusCodes.Requester,
                     Message = $"Invalid destination. Expected '{expectedDestination}'"
                 };
             }
@@ -83,6 +83,6 @@ internal class SamlRequestValidator(TimeProvider timeProvider, IOptions<SamlOpti
 internal class SamlValidationError
 {
     internal required string Message { get; init; }
-    internal SamlStatusCode StatusCode { get; init; } = SamlStatusCode.Requester;
-    internal SamlStatusCode? SubStatusCode { get; init; }
+    internal string StatusCode { get; init; } = SamlStatusCodes.Requester;
+    internal string? SubStatusCode { get; init; }
 }

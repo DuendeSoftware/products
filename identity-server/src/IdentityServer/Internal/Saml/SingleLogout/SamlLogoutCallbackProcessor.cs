@@ -3,7 +3,6 @@
 
 using Duende.IdentityServer.Internal.Saml.Infrastructure;
 using Duende.IdentityServer.Internal.Saml.SingleLogout.Models;
-using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Stores;
 using Microsoft.Extensions.Logging;
@@ -63,7 +62,7 @@ internal class SamlLogoutCallbackProcessor(
         }
 
         var response = await logoutResponseBuilder.BuildSuccessResponseAsync(
-            new RequestId(data.SamlLogoutRequestId),
+            data.SamlLogoutRequestId,
             sp,
             data.SamlRelayState);
 

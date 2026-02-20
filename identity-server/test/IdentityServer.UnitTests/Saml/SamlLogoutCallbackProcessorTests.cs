@@ -168,7 +168,7 @@ public class SamlLogoutCallbackProcessorTests
         var logoutResponse = result.Value;
         logoutResponse.InResponseTo.ShouldBe("_request123");
         logoutResponse.Destination.ShouldBe(sp.SingleLogoutServiceUrl!.Location);
-        logoutResponse.Status.StatusCode.ShouldBe(SamlStatusCode.Success);
+        logoutResponse.Status.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]

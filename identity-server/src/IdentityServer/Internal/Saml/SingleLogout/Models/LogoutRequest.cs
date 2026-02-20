@@ -18,12 +18,12 @@ internal record LogoutRequest : ISamlRequest
     /// <summary>
     /// Gets or sets the unique identifier for this request.
     /// </summary>
-    public required RequestId Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// Gets or sets the SAML version. Must be "2.0".
     /// </summary>
-    public SamlVersion Version { get; set; }
+    public string Version { get; set; } = SamlVersions.V2;
 
     /// <summary>
     /// Gets or sets the time instant of issue in UTC.

@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using Duende.IdentityModel;
 using Duende.IdentityServer.Models;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
-using SamlStatusCode = Duende.IdentityServer.Saml.Models.SamlStatusCode;
+using Duende.IdentityServer.Saml.Models;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
@@ -116,7 +116,7 @@ public class SamlEncryptionTests
 
         var samlResponse = await ExtractAndDecryptSamlSuccessFromPostAsync(result, encryptionCert, CancellationToken.None);
 
-        samlResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         samlResponse.Assertion.ShouldNotBeNull();
 
         samlResponse.Assertion.Subject.ShouldNotBeNull();
@@ -453,7 +453,7 @@ public class SamlEncryptionTests
 
         // Verify can parse as success
         var samlResponse = await ExtractSamlSuccessFromPostAsync(result, CancellationToken.None);
-        samlResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         samlResponse.Assertion.ShouldNotBeNull();
     }
 }

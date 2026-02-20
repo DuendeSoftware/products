@@ -23,7 +23,7 @@ public record AuthNRequest : ISamlRequest
     /// <summary>
     /// Gets or sets the SAML version. Must be "2.0".
     /// </summary>
-    public required SamlVersion Version { get; set; }
+    public required string Version { get; set; }
 
     /// <summary>
     /// Gets or sets the time instant of issue in UTC.

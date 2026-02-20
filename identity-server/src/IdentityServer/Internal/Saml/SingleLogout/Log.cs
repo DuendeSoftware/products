@@ -1,8 +1,6 @@
 // Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
-using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
-using Duende.IdentityServer.Saml.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.IdentityServer.Internal.Saml.SingleLogout;
@@ -32,7 +30,7 @@ internal static partial class Log
         EventName = nameof(ParsedLogoutRequest),
         Message = $"Parsed LogoutRequest. ID: {{{SingleLogoutLogParameters.RequestId}}}, Issuer: {{{SingleLogoutLogParameters.Issuer}}}, SessionIndex: {{{SingleLogoutLogParameters.SessionIndex}}}"
         )]
-    internal static partial void ParsedLogoutRequest(this ILogger logger, LogLevel logLevel, RequestId requestId, string issuer, string sessionIndex);
+    internal static partial void ParsedLogoutRequest(this ILogger logger, LogLevel logLevel, string requestId, string issuer, string sessionIndex);
 
     [LoggerMessage(
         EventName = nameof(FailedToParseLogoutRequest),
@@ -49,12 +47,12 @@ internal static partial class Log
     [LoggerMessage(
         EventName = nameof(ReceivedLogoutRequest),
         Message = $"Received SAML LogoutRequest from {{{SingleLogoutLogParameters.Issuer}}}. RequestId: {{{SingleLogoutLogParameters.RequestId}}}, SessionIndex: {{{SingleLogoutLogParameters.SessionIndex}}}")]
-    internal static partial void ReceivedLogoutRequest(this ILogger logger, LogLevel logLevel, string issuer, RequestId requestId, string sessionIndex);
+    internal static partial void ReceivedLogoutRequest(this ILogger logger, LogLevel logLevel, string issuer, string requestId, string sessionIndex);
 
     [LoggerMessage(
         EventName = nameof(SuccessfullyProcessedLogoutRequest),
         Message = $"Logout request {{{SingleLogoutLogParameters.RequestId}}} with session index {{{SingleLogoutLogParameters.SessionIndex}}} processed successfully")]
-    internal static partial void SuccessfullyProcessedLogoutRequest(this ILogger logger, LogLevel logLevel, RequestId requestId, string sessionIndex);
+    internal static partial void SuccessfullyProcessedLogoutRequest(this ILogger logger, LogLevel logLevel, string requestId, string sessionIndex);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutValidationError),
@@ -74,17 +72,17 @@ internal static partial class Log
     [LoggerMessage(
         EventName = nameof(ProcessingSamlLogoutRequest),
         Message = $"Processing LogoutRequest {{{SingleLogoutLogParameters.RequestId}}} from SP: {{{SingleLogoutLogParameters.SpName}}} ({{{SingleLogoutLogParameters.Issuer}}})")]
-    internal static partial void ProcessingSamlLogoutRequest(this ILogger logger, LogLevel logLevel, RequestId requestId, string spName, string issuer);
+    internal static partial void ProcessingSamlLogoutRequest(this ILogger logger, LogLevel logLevel, string requestId, string spName, string issuer);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutRequestReceivedButNoActiveUserSession),
         Message = $"LogoutRequest {{{SingleLogoutLogParameters.RequestId}}} received from {{{SingleLogoutLogParameters.Issuer}}} but no active user session found")]
-    internal static partial void SamlLogoutRequestReceivedButNoActiveUserSession(this ILogger logger, LogLevel logLevel, RequestId requestId, string issuer);
+    internal static partial void SamlLogoutRequestReceivedButNoActiveUserSession(this ILogger logger, LogLevel logLevel, string requestId, string issuer);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutRequestReceivedWithWrongSessionIndex),
         Message = $"SessionIndex mismatch. Request: {{{SingleLogoutLogParameters.RequestId}}}, SessionIndex: {{{SingleLogoutLogParameters.SessionIndex}}}")]
-    internal static partial void SamlLogoutRequestReceivedWithWrongSessionIndex(this ILogger logger, LogLevel logLevel, RequestId requestId, string sessionIndex);
+    internal static partial void SamlLogoutRequestReceivedWithWrongSessionIndex(this ILogger logger, LogLevel logLevel, string requestId, string sessionIndex);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutRedirectToLogoutPage),
@@ -99,7 +97,7 @@ internal static partial class Log
     [LoggerMessage(
         EventName = nameof(SamlLogoutRequestExpired),
         Message = $"LogoutRequest {{{SingleLogoutLogParameters.RequestId}}} expired. NotOnOrAfter: {{{SingleLogoutLogParameters.NotOnOrAfter}}}")]
-    internal static partial void SamlLogoutRequestExpired(this ILogger logger, LogLevel logLevel, RequestId requestId, DateTime notOnOrAfter);
+    internal static partial void SamlLogoutRequestExpired(this ILogger logger, LogLevel logLevel, string requestId, DateTime notOnOrAfter);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutSignatureValidationFailed),
@@ -129,22 +127,22 @@ internal static partial class Log
     [LoggerMessage(
         EventName = nameof(SamlLogoutUnsupportedVersion),
         Message = $"LogoutRequest has unsupported SAML version: {{{SingleLogoutLogParameters.Version}}}. Only 2.0 is supported")]
-    internal static partial void SamlLogoutUnsupportedVersion(this ILogger logger, LogLevel logLevel, SamlVersion version);
+    internal static partial void SamlLogoutUnsupportedVersion(this ILogger logger, LogLevel logLevel, string version);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutRequestIssueInstantInFuture),
         Message = $"LogoutRequest {{{SingleLogoutLogParameters.RequestId}}} has IssueInstant in the future: {{{SingleLogoutLogParameters.IssueInstant}}}")]
-    internal static partial void SamlLogoutRequestIssueInstantInFuture(this ILogger logger, LogLevel logLevel, RequestId requestId, DateTime issueInstant);
+    internal static partial void SamlLogoutRequestIssueInstantInFuture(this ILogger logger, LogLevel logLevel, string requestId, DateTime issueInstant);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutRequestIssueInstantTooOld),
         Message = $"LogoutRequest {{{SingleLogoutLogParameters.RequestId}}} has IssueInstant too old (expired): {{{SingleLogoutLogParameters.IssueInstant}}}")]
-    internal static partial void SamlLogoutRequestIssueInstantTooOld(this ILogger logger, LogLevel logLevel, RequestId requestId, DateTime issueInstant);
+    internal static partial void SamlLogoutRequestIssueInstantTooOld(this ILogger logger, LogLevel logLevel, string requestId, DateTime issueInstant);
 
     [LoggerMessage(
         EventName = nameof(SamlLogoutRequestInvalidDestination),
         Message = $"LogoutRequest {{{SingleLogoutLogParameters.RequestId}}} has invalid Destination. Received: {{{SingleLogoutLogParameters.Destination}}}, Expected: {{{SingleLogoutLogParameters.ExpectedDestination}}}")]
-    internal static partial void SamlLogoutRequestInvalidDestination(this ILogger logger, LogLevel logLevel, RequestId requestId, Uri destination, string expectedDestination);
+    internal static partial void SamlLogoutRequestInvalidDestination(this ILogger logger, LogLevel logLevel, string requestId, Uri destination, string expectedDestination);
 
     [LoggerMessage(
         EventName = nameof(ProcessingSamlLogoutCallback),

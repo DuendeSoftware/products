@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 #nullable enable
-using Duende.IdentityServer.Saml.Models;
 
 namespace Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 
@@ -14,7 +13,7 @@ internal record Status
     /// <summary>
     /// Gets or sets the status code indicating the success or failure of the request.
     /// </summary>
-    public required SamlStatusCode StatusCode { get; set; }
+    public required string StatusCode { get; set; }
 
     /// <summary>
     /// Gets or sets an optional human-readable message providing additional information about the status.

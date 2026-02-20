@@ -40,7 +40,7 @@ internal class SamlResponseBuilder(
             ServiceProvider = serviceProvider,
             Binding = serviceProvider.AssertionConsumerServiceBinding,
             StatusCode = error.StatusCode,
-            SubStatusCode = error.SubStatusCode != null ? new SamlStatusCode(error.SubStatusCode) : null,
+            SubStatusCode = error.SubStatusCode,
             Message = error.Message,
             AssertionConsumerServiceUrl = acsUrl,
             Issuer = serverUrls.Origin, // Todo: not sure if this is a valid issuer
@@ -153,8 +153,8 @@ internal class SamlResponseBuilder(
             Issuer = issuer,
             Status = new Status
             {
-                StatusCode = SamlStatusCode.Success,
-                NestedStatusCode = samlAuthenticationState.Request?.RequestedAuthnContext != null && !samlAuthenticationState.RequestedAuthnContextRequirementsWereMet ? (string)SamlStatusCode.NoAuthnContext : null,
+                StatusCode = SamlStatusCodes.Success,
+                NestedStatusCode = samlAuthenticationState.Request?.RequestedAuthnContext != null && !samlAuthenticationState.RequestedAuthnContextRequirementsWereMet ? SamlStatusCodes.NoAuthnContext : null,
             },
             Assertion = new Assertion
             {

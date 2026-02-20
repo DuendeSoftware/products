@@ -16,7 +16,6 @@ using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Saml.Models;
 using Microsoft.AspNetCore.Mvc;
 using static Duende.IdentityServer.IntegrationTests.Endpoints.Saml.SamlTestHelpers;
-using SamlStatusCode = Duende.IdentityServer.Saml.Models.SamlStatusCode;
 
 namespace Duende.IdentityServer.IntegrationTests.Endpoints.Saml;
 
@@ -128,7 +127,7 @@ public class SamlSigninEndpointTests
             await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}&RelayState={Data.RelayState}", _ct);
 
         var samlSuccessResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         samlSuccessResponse.RelayState.ShouldBe(Data.RelayState);
     }
 
@@ -251,7 +250,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.PostAsync($"/saml/signin?", content, _ct);
 
         var samlSuccessResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         samlSuccessResponse.RelayState.ShouldBe(Data.RelayState);
     }
 
@@ -542,7 +541,7 @@ public class SamlSigninEndpointTests
         successResponse.Issuer.ShouldBe(Fixture.Url());
         successResponse.InResponseTo.ShouldBe(Data.RequestId);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
 
         var assertion = successResponse.Assertion;
         assertion.ShouldNotBeNull();
@@ -836,7 +835,7 @@ public class SamlSigninEndpointTests
 
         result.StatusCode.ShouldBe(HttpStatusCode.OK);
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -859,7 +858,7 @@ public class SamlSigninEndpointTests
         // Without ForceAuthn, authenticated user goes directly to callback
         normalResult.StatusCode.ShouldBe(HttpStatusCode.OK);
         var samlSuccessResponse = await ExtractSamlSuccessFromPostAsync(normalResult, _ct);
-        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
 
         var forceAuthnRequestXml = Build.AuthNRequestXml(forceAuthn: true);
         var forceAuthnUrlEncoded = await EncodeRequest(forceAuthnRequestXml);
@@ -1038,7 +1037,7 @@ public class SamlSigninEndpointTests
         var signinCallbackResponse = await Fixture.Client.GetAsync(returnUrl, _ct);
 
         var samlSuccessResponse = await ExtractSamlSuccessFromPostAsync(signinCallbackResponse, _ct);
-        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        samlSuccessResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         samlSuccessResponse.Destination.ShouldBe(primaryAcsUrl.ToString());
     }
 
@@ -1151,7 +1150,7 @@ public class SamlSigninEndpointTests
         var (_, _, responseElement) = ParseSamlResponseXml(responseXml);
         VerifySignaturePositionAfterIssuer(responseElement);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1183,7 +1182,7 @@ public class SamlSigninEndpointTests
         assertionElement.ShouldNotBeNull();
         VerifySignaturePositionAfterIssuer(assertionElement!);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1217,7 +1216,7 @@ public class SamlSigninEndpointTests
         assertionElement.ShouldNotBeNull();
         VerifySignaturePositionAfterIssuer(assertionElement!);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1244,7 +1243,7 @@ public class SamlSigninEndpointTests
 
         VerifySignaturePresence(responseXml, expectResponseSignature: false, expectAssertionSignature: false);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1272,7 +1271,7 @@ public class SamlSigninEndpointTests
         // Default behavior should be SignAssertion per SAML best practices
         VerifySignaturePresence(responseXml, expectResponseSignature: false, expectAssertionSignature: true);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1564,7 +1563,7 @@ public class SamlSigninEndpointTests
 
         successResponse.RelayState.ShouldBe(relayStateValue);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1585,7 +1584,7 @@ public class SamlSigninEndpointTests
         var normalUrlEncoded = await EncodeRequest(normalRequestXml);
         var normalResult = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={normalUrlEncoded}", _ct);
         var normalResponse = await ExtractSamlSuccessFromPostAsync(normalResult, _ct);
-        normalResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        normalResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
 
         var forceAuthnRequestXml = Build.AuthNRequestXml(forceAuthn: true);
         var forceAuthnUrlEncoded = await EncodeRequest(forceAuthnRequestXml);
@@ -1624,7 +1623,7 @@ public class SamlSigninEndpointTests
 
         VerifySignaturePresence(responseXml, expectResponseSignature: true, expectAssertionSignature: true);
 
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1656,7 +1655,7 @@ public class SamlSigninEndpointTests
         VerifySignaturePresence(responseXml, expectResponseSignature: true, expectAssertionSignature: false);
 
         successResponse.Destination.ShouldBe(secondaryAcsUrl.ToString());
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
 
@@ -1673,7 +1672,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Missing signature parameter");
     }
 
@@ -1693,7 +1692,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Signature element not found");
     }
 
@@ -1714,7 +1713,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Invalid signature");
     }
 
@@ -1736,7 +1735,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Invalid signature");
     }
 
@@ -1778,7 +1777,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -1802,7 +1801,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -1821,7 +1820,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.GetAsync($"/saml/signin?SAMLRequest={urlEncoded}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -1844,7 +1843,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -1883,7 +1882,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -1904,7 +1903,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Unsupported signature algorithm: http://www.w3.org/2000/09/xmldsig#rsa-sha1");
     }
 
@@ -1926,7 +1925,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&SigAlg={Uri.EscapeDataString(sigAlg)}&Signature={Uri.EscapeDataString(signature)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Invalid signature");
     }
 
@@ -1951,7 +1950,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&RelayState={Uri.EscapeDataString(relayState)}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.RelayState.ShouldBe(relayState);
     }
 
@@ -1973,7 +1972,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Invalid signature");
     }
 
@@ -1996,7 +1995,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         samlError.StatusMessage.ShouldBe("Invalid signature");
     }
 
@@ -2022,7 +2021,7 @@ public class SamlSigninEndpointTests
         var result = await Fixture.Client.PostAsync("/saml/signin", content, _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -2041,7 +2040,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Responder.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Responder);
         samlError.StatusMessage.ShouldBe("No valid certificates configured for service provider");
     }
 
@@ -2061,7 +2060,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var samlError = await ExtractSamlErrorFromPostAsync(result);
-        samlError.StatusCode.ShouldBe(SamlStatusCode.Responder.Value);
+        samlError.StatusCode.ShouldBe(SamlStatusCodes.Responder);
         samlError.StatusMessage.ShouldBe("No valid certificates configured for service provider");
     }
 
@@ -2085,7 +2084,7 @@ public class SamlSigninEndpointTests
             $"/saml/signin?SAMLRequest={urlEncoded}&Signature={Uri.EscapeDataString(signature)}&SigAlg={Uri.EscapeDataString(sigAlg)}", _ct);
 
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -2124,7 +2123,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
     }
 
@@ -2164,8 +2163,8 @@ public class SamlSigninEndpointTests
 
         // Assert
         var samlResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        samlResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
-        samlResponse.SubStatusCode.ShouldBe(SamlStatusCode.NoAuthnContext.Value);
+        samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
+        samlResponse.SubStatusCode.ShouldBe(SamlStatusCodes.NoAuthnContext);
         samlResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
     }
 
@@ -2195,8 +2194,8 @@ public class SamlSigninEndpointTests
 
         // Assert
         var samlResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        samlResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
-        samlResponse.SubStatusCode.ShouldBe(SamlStatusCode.NoAuthnContext.Value);
+        samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
+        samlResponse.SubStatusCode.ShouldBe(SamlStatusCodes.NoAuthnContext);
         samlResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified");
     }
 
@@ -2224,7 +2223,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.AuthnStatement?.AuthnContextClassRef.ShouldBe("urn:oasis:names:tc:SAML:2.0:ac:classes:X509");
     }
 
@@ -2299,8 +2298,8 @@ public class SamlSigninEndpointTests
 
         // Assert
         var errorResponse = await ExtractSamlErrorFromPostAsync(result);
-        errorResponse.StatusCode.ShouldBe(SamlStatusCode.Responder.Value);
-        errorResponse.SubStatusCode.ShouldBe(SamlStatusCode.InvalidNameIdPolicy.Value);
+        errorResponse.StatusCode.ShouldBe(SamlStatusCodes.Responder);
+        errorResponse.SubStatusCode.ShouldBe(SamlStatusCodes.InvalidNameIdPolicy);
         errorResponse.StatusMessage.ShouldBe($"Requested NameID format '{unsupportedFormat}' is not supported by this IdP");
     }
 
@@ -2367,7 +2366,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("test@test.com");
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.EmailAddress);
     }
@@ -2395,7 +2394,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe(persistentIdentifier);
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
     }
@@ -2425,7 +2424,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Unspecified);
         successResponse.Assertion.Subject?.NameId.ShouldBe("user-id");
     }
@@ -2456,8 +2455,8 @@ public class SamlSigninEndpointTests
         var nameId2 = response2.Assertion.Subject?.NameId;
 
         // Verify both responses succeeded
-        response1.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
-        response2.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        response1.StatusCode.ShouldBe(SamlStatusCodes.Success);
+        response2.StatusCode.ShouldBe(SamlStatusCodes.Success);
 
         // Verify format is transient
         response1.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Transient);
@@ -2494,7 +2493,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe(persistentId);
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
         successResponse.Assertion.Subject?.SPNameQualifier.ShouldBe(Data.EntityId.ToString());
@@ -2527,7 +2526,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe(spSpecificId); // Uses SP override, not default
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
         successResponse.Assertion.Subject?.SPNameQualifier.ShouldBe(Data.EntityId.ToString());
@@ -2612,7 +2611,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.SPNameQualifier.ShouldBe(Data.EntityId.ToString());
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
     }
@@ -2648,7 +2647,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe(customPersistentId);
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.Persistent);
     }
@@ -2689,8 +2688,8 @@ public class SamlSigninEndpointTests
         var responseB = await ExtractSamlSuccessFromPostAsync(resultB, _ct);
 
         // Assert
-        responseA.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
-        responseB.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        responseA.StatusCode.ShouldBe(SamlStatusCodes.Success);
+        responseB.StatusCode.ShouldBe(SamlStatusCodes.Success);
 
         responseA.Assertion.Subject?.NameId.ShouldBe(userAPersistentId);
         responseB.Assertion.Subject?.NameId.ShouldBe(userBPersistentId);
@@ -2778,7 +2777,7 @@ public class SamlSigninEndpointTests
 
         // Assert
         var successResponse = await ExtractSamlSuccessFromPostAsync(result, _ct);
-        successResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        successResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
         successResponse.Assertion.Subject?.NameId.ShouldBe("test@testing.com");
         successResponse.Assertion.Subject?.NameIdFormat.ShouldBe(SamlConstants.NameIdentifierFormats.EmailAddress);
     }

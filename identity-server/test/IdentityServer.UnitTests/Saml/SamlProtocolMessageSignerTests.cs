@@ -65,7 +65,7 @@ public class SamlProtocolMessageSignerTests
             new XElement(assertionNs + "Issuer", "https://idp.example.com"),
             new XElement(protocolNs + "Status",
                 new XElement(protocolNs + "StatusCode",
-                    new XAttribute("Value", SamlStatusCode.Success.ToString()))));
+                    new XAttribute("Value", SamlStatusCodes.Success))));
     }
 
     [Fact]

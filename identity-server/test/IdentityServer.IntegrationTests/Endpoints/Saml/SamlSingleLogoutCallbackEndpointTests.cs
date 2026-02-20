@@ -89,7 +89,7 @@ public class SamlSingleLogoutCallbackEndpointTests
 
         // Assert
         var samlResponse = await SamlTestHelpers.ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        samlResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        samlResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]

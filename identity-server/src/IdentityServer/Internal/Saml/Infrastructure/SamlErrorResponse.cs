@@ -9,7 +9,6 @@ using System.Xml.Linq;
 using Duende.IdentityServer.Endpoints.Results;
 using Duende.IdentityServer.Hosting;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Saml.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Duende.IdentityServer.Internal.Saml.Infrastructure;
@@ -27,7 +26,7 @@ internal class SamlErrorResponse : EndpointResult<SamlErrorResponse>
     /// <summary>
     /// Gets the SAML status code for the error.
     /// </summary>
-    public required SamlStatusCode StatusCode { get; init; }
+    public required string StatusCode { get; init; }
 
     /// <summary>
     /// Gets the human-readable error message.
@@ -57,7 +56,7 @@ internal class SamlErrorResponse : EndpointResult<SamlErrorResponse>
     /// <summary>
     /// Gets an optional secondary status code for more specific error information.
     /// </summary>
-    public SamlStatusCode? SubStatusCode { get; init; }
+    public string? SubStatusCode { get; init; }
 
     /// <summary>
     /// Gets or sets the Service Provider where the response will be sent.
@@ -88,7 +87,7 @@ internal class SamlErrorResponse : EndpointResult<SamlErrorResponse>
             var encodedResponse = Convert.ToBase64String(Encoding.UTF8.GetBytes(stringWriter.ToString()));
 
             // Generate HTML form that auto-submits to the ACS URL
-            var html = HttpResponseBindings.GenerateAutoPostForm(SamlMessageName.SamlResponse, encodedResponse, result.AssertionConsumerServiceUrl,
+            var html = HttpResponseBindings.GenerateAutoPostForm(SamlConstants.RequestProperties.SAMLResponse, encodedResponse, result.AssertionConsumerServiceUrl,
                 result.RelayState);
 
             httpContext.Response.ContentType = "text/html";

@@ -19,12 +19,12 @@ internal record Assertion
     ///- xs:ID must conform to the NCName production (Non-Colonized Name) from the XML Namespaces specification
     ///- NCName cannot start with a digit, colon, or certain other characters
     /// </summary>
-    public AssertionId Id { get; } = AssertionId.NewId();
+    public string Id { get; } = SamlIds.NewAssertionId();
 
     /// <summary>
     /// SAML version (must be "2.0")
     /// </summary>
-    public SamlVersion Version { get; } = SamlVersion.V2;
+    public string Version { get; } = SamlVersions.V2;
 
     /// <summary>
     /// Time instant of issuance

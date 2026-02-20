@@ -8,7 +8,7 @@ namespace Duende.IdentityServer.Internal.Saml.Infrastructure;
 
 internal static class HttpResponseBindings
 {
-    internal static string GenerateAutoPostForm(SamlMessageName messageName, string encodedMessage, Uri destination, string? relayState, bool includeCsp = false)
+    internal static string GenerateAutoPostForm(string messageName, string encodedMessage, Uri destination, string? relayState, bool includeCsp = false)
     {
         var relayStateField = relayState == null
             ? string.Empty
@@ -30,7 +30,7 @@ internal static class HttpResponseBindings
         <p><strong>Note:</strong> Since your browser does not support JavaScript, you must press the button below to proceed.</p>
     </noscript>
     <form method=""post"" action=""{HtmlEncoder.Default.Encode(destination.ToString())}"">
-        <input type=""hidden"" name=""{messageName.Value}"" value=""{HtmlEncoder.Default.Encode(encodedMessage)}"" />
+        <input type=""hidden"" name=""{messageName}"" value=""{HtmlEncoder.Default.Encode(encodedMessage)}"" />
         {relayStateField}
         <noscript>
             <input type=""submit"" value=""Continue"" />

@@ -10,7 +10,7 @@ using Duende.IdentityServer.Internal.Saml;
 using Duende.IdentityServer.Internal.Saml.Infrastructure;
 using Duende.IdentityServer.Internal.Saml.SingleSignin.Models;
 using Duende.IdentityServer.Models;
-using SamlStatusCode = Duende.IdentityServer.Saml.Models.SamlStatusCode;
+using Duende.IdentityServer.Saml.Models;
 
 namespace UnitTests.Saml;
 
@@ -58,7 +58,7 @@ public class XmlSignatureHelperTests
             Destination = new Uri("https://sp.example.com/acs"),
             Status = new Status
             {
-                StatusCode = SamlStatusCode.Success
+                StatusCode = SamlStatusCodes.Success
             },
         };
 
@@ -87,7 +87,7 @@ public class XmlSignatureHelperTests
             IssueInstant = DateTime.UtcNow,
             Issuer = "https://idp.example.com",
             Destination = new Uri("https://sp.example.com/acs"),
-            Status = new Status { StatusCode = SamlStatusCode.Success },
+            Status = new Status { StatusCode = SamlStatusCodes.Success },
             Assertion = new Assertion
             {
                 IssueInstant = DateTime.UtcNow,
@@ -131,7 +131,7 @@ public class XmlSignatureHelperTests
             IssueInstant = DateTime.UtcNow,
             Issuer = "https://idp.example.com",
             Destination = new Uri("https://sp.example.com/acs"),
-            Status = new Status { StatusCode = SamlStatusCode.Success },
+            Status = new Status { StatusCode = SamlStatusCodes.Success },
             Assertion = new Assertion
             {
                 IssueInstant = DateTime.UtcNow,
@@ -171,7 +171,7 @@ public class XmlSignatureHelperTests
             IssueInstant = DateTime.UtcNow,
             Issuer = "https://idp.example.com",
             Destination = new Uri("https://sp.example.com/acs"),
-            Status = new Status { StatusCode = SamlStatusCode.Success }
+            Status = new Status { StatusCode = SamlStatusCodes.Success }
         };
 
         var responseElement = _responseSerializer.Serialize(response);
@@ -236,7 +236,7 @@ public class XmlSignatureHelperTests
             IssueInstant = DateTime.UtcNow,
             Issuer = "https://idp.example.com",
             Destination = new Uri("https://sp.example.com/acs"),
-            Status = new Status { StatusCode = SamlStatusCode.Success }
+            Status = new Status { StatusCode = SamlStatusCodes.Success }
         };
 
         var responseElement = _responseSerializer.Serialize(response);
@@ -258,7 +258,7 @@ public class XmlSignatureHelperTests
             IssueInstant = DateTime.UtcNow,
             Issuer = "https://idp.example.com",
             Destination = new Uri("https://sp.example.com/acs"),
-            Status = new Status { StatusCode = SamlStatusCode.Success }
+            Status = new Status { StatusCode = SamlStatusCodes.Success }
         };
 
         var responseElement = _responseSerializer.Serialize(response);
@@ -313,7 +313,7 @@ public class XmlSignatureHelperTests
             IssueInstant = DateTime.UtcNow,
             Issuer = "https://idp.example.com",
             Destination = new Uri("https://sp.example.com/acs"),
-            Status = new Status { StatusCode = SamlStatusCode.Success }
+            Status = new Status { StatusCode = SamlStatusCodes.Success }
         };
 
         var responseElement = _responseSerializer.Serialize(response);
@@ -332,7 +332,7 @@ public class XmlSignatureHelperTests
             IssueInstant = DateTime.UtcNow,
             Issuer = "https://idp.example.com",
             Destination = new Uri("https://sp.example.com/acs"),
-            Status = new Status { StatusCode = SamlStatusCode.Success }
+            Status = new Status { StatusCode = SamlStatusCodes.Success }
             // No Assertion!
         };
 

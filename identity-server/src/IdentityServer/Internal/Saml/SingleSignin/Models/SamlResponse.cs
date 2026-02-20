@@ -19,12 +19,12 @@ internal class SamlResponse : EndpointResult<SamlResponse>
     /// <summary>
     /// Gets or sets the unique identifier for this response.
     /// </summary>
-    public ResponseId Id { get; } = ResponseId.New();
+    public string Id { get; } = SamlIds.NewResponseId();
 
     /// <summary>
     /// Gets or sets the SAML version. Must be "2.0".
     /// </summary>
-    public SamlVersion Version { get; } = SamlVersion.V2;
+    public string Version { get; } = SamlVersions.V2;
 
     /// <summary>
     /// Gets or sets the time instant of issue in UTC.
@@ -87,7 +87,7 @@ internal class SamlResponse : EndpointResult<SamlResponse>
 
             var encodedResponse = Convert.ToBase64String(Encoding.UTF8.GetBytes(signedResponseXml));
 
-            var html = HttpResponseBindings.GenerateAutoPostForm(SamlMessageName.SamlResponse, encodedResponse, result.Destination, result.RelayState);
+            var html = HttpResponseBindings.GenerateAutoPostForm(SamlConstants.RequestProperties.SAMLResponse, encodedResponse, result.Destination, result.RelayState);
 
             httpContext.Response.ContentType = "text/html";
             httpContext.Response.Headers.CacheControl = "no-cache, no-store";

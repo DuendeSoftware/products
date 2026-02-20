@@ -15,7 +15,7 @@ internal class LogoutResponseBuilder(
     TimeProvider timeProvider)
 {
     internal async Task<LogoutResponse> BuildSuccessResponseAsync(
-        RequestId logoutRequestId,
+        string logoutRequestId,
         SamlServiceProvider serviceProvider,
         string? relayState)
     {
@@ -24,15 +24,14 @@ internal class LogoutResponseBuilder(
 
         return new LogoutResponse
         {
-            Id = ResponseId.New(),
-            Version = SamlVersion.V2,
+            Id = SamlIds.NewResponseId(),
             IssueInstant = timeProvider.GetUtcNow().UtcDateTime,
             Destination = destination.Location,
             Issuer = issuer,
-            InResponseTo = logoutRequestId.ToString(),
+            InResponseTo = logoutRequestId,
             Status = new Status
             {
-                StatusCode = SamlStatusCode.Success
+                StatusCode = SamlStatusCodes.Success
             },
             ServiceProvider = serviceProvider,
             RelayState = relayState
@@ -49,12 +48,11 @@ internal class LogoutResponseBuilder(
 
         return new LogoutResponse
         {
-            Id = ResponseId.New(),
-            Version = SamlVersion.V2,
+            Id = SamlIds.NewResponseId(),
             IssueInstant = timeProvider.GetUtcNow().UtcDateTime,
             Destination = destination.Location,
             Issuer = issuer,
-            InResponseTo = request.LogoutRequest.Id.ToString(),
+            InResponseTo = request.LogoutRequest.Id,
             Status = new Status
             {
                 StatusCode = error.StatusCode,

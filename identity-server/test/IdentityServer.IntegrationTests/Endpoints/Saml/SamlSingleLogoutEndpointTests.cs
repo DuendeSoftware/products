@@ -184,7 +184,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.VersionMismatch.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.VersionMismatch);
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Request IssueInstant is in the future");
     }
 
@@ -235,7 +235,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Request has expired (IssueInstant too old)");
     }
 
@@ -259,7 +259,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe($"Invalid destination. Expected '{Fixture.Url()}/saml/logout'");
     }
 
@@ -309,7 +309,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Missing signature parameter");
     }
 
@@ -334,7 +334,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Requester.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Requester);
         logoutResponse.StatusMessage.ShouldBe("Logout request expired (NotOnOrAfter is in the past)");
     }
 
@@ -360,7 +360,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -392,7 +392,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]
@@ -421,7 +421,7 @@ public class SamlSingleLogoutEndpointTests
 
         // Assert
         var logoutResponse = await ExtractSamlLogoutResponseFromPostAsync(result, CancellationToken.None);
-        logoutResponse.StatusCode.ShouldBe(SamlStatusCode.Success.Value);
+        logoutResponse.StatusCode.ShouldBe(SamlStatusCodes.Success);
     }
 
     [Fact]

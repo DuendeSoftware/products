@@ -119,7 +119,7 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
                     Type = SamlRequestErrorType.Protocol,
                     ProtocolError = new SamlProtocolError<SamlLogoutRequest>(sp, request, new SamlError
                     {
-                        StatusCode = SamlStatusCode.Requester,
+                        StatusCode = SamlStatusCodes.Requester,
                         Message = "Logout request expired (NotOnOrAfter is in the past)"
                     })
                 };
@@ -163,7 +163,7 @@ internal class SamlLogoutRequestProcessor : SamlRequestProcessorBase<LogoutReque
             ClientIds = oidcClientIds,
             SamlServiceProviderEntityId = serviceProvider.EntityId,
             SamlSessions = samlSessions,
-            SamlLogoutRequestId = logoutRequest.LogoutRequest.Id.Value,
+            SamlLogoutRequestId = logoutRequest.LogoutRequest.Id,
             SamlRelayState = logoutRequest.RelayState,
             PostLogoutRedirectUri = _urlBuilder.SamlLogoutCallBackUri().ToString()
         };

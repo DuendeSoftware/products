@@ -11,7 +11,7 @@ internal class SamlErrorResponseXmlSerializer : ISamlResultSerializer<SamlErrorR
 {
     public XElement Serialize(SamlErrorResponse result)
     {
-        var responseId = ResponseId.New().ToString();
+        var responseId = SamlIds.NewResponseId();
         var issueInstant = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
 
         var protocolNs = XNamespace.Get(SamlConstants.Namespaces.Protocol);
@@ -19,14 +19,14 @@ internal class SamlErrorResponseXmlSerializer : ISamlResultSerializer<SamlErrorR
 
         // Build Status element
         var statusCodeElement = new XElement(protocolNs + "StatusCode",
-            new XAttribute("Value", result.StatusCode.ToString()));
+            new XAttribute("Value", result.StatusCode));
 
         // Add sub-status code if provided
-        if (result.SubStatusCode?.Value != null)
+        if (result.SubStatusCode != null)
         {
             statusCodeElement.Add(
                 new XElement(protocolNs + "StatusCode",
-                    new XAttribute("Value", result.SubStatusCode.Value.ToString())));
+                    new XAttribute("Value", result.SubStatusCode)));
         }
 
         var statusElement = new XElement(protocolNs + "Status",

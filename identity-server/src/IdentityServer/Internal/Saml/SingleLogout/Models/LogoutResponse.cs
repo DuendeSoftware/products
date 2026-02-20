@@ -23,12 +23,12 @@ internal class LogoutResponse : EndpointResult<LogoutResponse>
     /// <summary>
     /// Gets or sets the unique identifier for this response.
     /// </summary>
-    public required ResponseId Id { get; set; }
+    public required string Id { get; set; }
 
     /// <summary>
     /// Gets or sets the SAML version. Must be "2.0".
     /// </summary>
-    public SamlVersion Version { get; set; } = SamlVersion.V2;
+    public string Version { get; set; } = SamlVersions.V2;
 
     /// <summary>
     /// Gets or sets the time instant of issue in UTC.
@@ -80,7 +80,7 @@ internal class LogoutResponse : EndpointResult<LogoutResponse>
 
             var encodedResponse = Convert.ToBase64String(Encoding.UTF8.GetBytes(signedResponseXml));
 
-            var html = HttpResponseBindings.GenerateAutoPostForm(SamlMessageName.SamlResponse, encodedResponse, result.Destination, result.RelayState);
+            var html = HttpResponseBindings.GenerateAutoPostForm(SamlConstants.RequestProperties.SAMLResponse, encodedResponse, result.Destination, result.RelayState);
 
             httpContext.Response.ContentType = "text/html";
             httpContext.Response.Headers.CacheControl = "no-cache, no-store";
@@ -118,8 +118,8 @@ internal class LogoutResponse : EndpointResult<LogoutResponse>
 
             // Build LogoutResponse element
             var responseElement = new XElement(protocolNs + ElementNames.RootElement,
-                new XAttribute("ID", toSerialize.Id.Value),
-                new XAttribute("Version", toSerialize.Version.ToString()),
+                new XAttribute("ID", toSerialize.Id),
+                new XAttribute("Version", toSerialize.Version),
                 new XAttribute("IssueInstant", issueInstant),
                 new XAttribute("Destination", toSerialize.Destination),
                 new XAttribute("InResponseTo", toSerialize.InResponseTo),
