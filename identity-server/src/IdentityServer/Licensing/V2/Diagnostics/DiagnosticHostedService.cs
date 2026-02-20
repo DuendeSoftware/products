@@ -10,7 +10,7 @@ namespace Duende.IdentityServer.Licensing.V2.Diagnostics;
 
 internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOptions<IdentityServerOptions> options, ILogger<DiagnosticHostedService> logger) : BackgroundService
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CT stoppingToken)
     {
         using var timer = new PeriodicTimer(options.Value.Diagnostics.LogFrequency);
         try
@@ -35,12 +35,12 @@ internal class DiagnosticHostedService(DiagnosticSummary diagnosticSummary, IOpt
     }
 
     // Added for testing purposes to be able to call ExecuteAsync directly.
-    internal Task ExecuteForTestOnly(CancellationToken stoppingToken) => ExecuteAsync(stoppingToken);
+    internal Task ExecuteForTestOnly(CT stoppingToken) => ExecuteAsync(stoppingToken);
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(CT ct)
     {
         await diagnosticSummary.PrintSummary();
 
-        await base.StopAsync(cancellationToken);
+        await base.StopAsync(ct);
     }
 }

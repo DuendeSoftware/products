@@ -11,8 +11,8 @@ internal class TestHybridCache : HybridCache
     private readonly List<(string key, object value, HybridCacheEntryOptions? options)> _setAsyncCalls = new();
     private readonly List<(string key, HybridCacheEntryOptions? options)> _getOrCreateAsyncCalls = new();
 
-    public override async ValueTask<T> GetOrCreateAsync<TState, T>(string key, TState state, Func<TState, CancellationToken, ValueTask<T>> factory, HybridCacheEntryOptions? options = null,
-        IEnumerable<string>? tags = null, CancellationToken cancellationToken = new())
+    public override async ValueTask<T> GetOrCreateAsync<TState, T>(string key, TState state, Func<TState, CT, ValueTask<T>> factory, HybridCacheEntryOptions? options = null,
+        IEnumerable<string>? tags = null, CT ct = new())
     {
         _getOrCreateAsyncCalls.Add((key, options));
 
@@ -25,16 +25,16 @@ internal class TestHybridCache : HybridCache
     }
 
     public override ValueTask SetAsync<T>(string key, T value, HybridCacheEntryOptions? options = null, IEnumerable<string>? tags = null,
-        CancellationToken cancellationToken = new())
+        CT ct = new())
     {
         _setAsyncCalls.Add((key, value!, options));
         _cache[key] = value!;
         return ValueTask.CompletedTask;
     }
 
-    public override ValueTask RemoveAsync(string key, CancellationToken cancellationToken = new()) => throw new NotImplementedException();
+    public override ValueTask RemoveAsync(string key, CT ct = new()) => throw new NotImplementedException();
 
-    public override ValueTask RemoveByTagAsync(string tag, CancellationToken cancellationToken = new()) => throw new NotImplementedException();
+    public override ValueTask RemoveByTagAsync(string tag, CT ct = new()) => throw new NotImplementedException();
 
     public IReadOnlyList<(string key, object value, HybridCacheEntryOptions? options)> SetAsyncCalls => _setAsyncCalls;
     public IReadOnlyList<(string key, HybridCacheEntryOptions? options)> GetOrCreateAsyncCalls => _getOrCreateAsyncCalls;

@@ -22,7 +22,7 @@ public class DiagnosticDataService
         _entries = entries;
     }
 
-    public async Task<ReadOnlyMemory<byte>> GetJsonBytesAsync(CancellationToken cancellationToken = default)
+    public async Task<ReadOnlyMemory<byte>> GetJsonBytesAsync(CT ct = default)
     {
         var bufferWriter = new ArrayBufferWriter<byte>();
         await using var writer = new Utf8JsonWriter(bufferWriter, new JsonWriterOptions { Indented = false });
@@ -37,14 +37,14 @@ public class DiagnosticDataService
 
         writer.WriteEndObject();
 
-        await writer.FlushAsync(cancellationToken);
+        await writer.FlushAsync(ct);
 
         return bufferWriter.WrittenMemory;
     }
 
-    public async Task<string> GetJsonStringAsync(CancellationToken cancellationToken = default)
+    public async Task<string> GetJsonStringAsync(CT ct = default)
     {
-        var bytes = await GetJsonBytesAsync(cancellationToken);
+        var bytes = await GetJsonBytesAsync(ct);
         return Encoding.UTF8.GetString(bytes.Span);
     }
 }

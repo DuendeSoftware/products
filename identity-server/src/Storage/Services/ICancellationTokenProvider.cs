@@ -14,5 +14,5 @@ public interface ICancellationTokenProvider
     /// <summary>
     /// Returns the current CancellationToken, or null if none present.
     /// </summary>
-    CancellationToken CancellationToken { get; }
+    CT CancellationToken { get; }
 }

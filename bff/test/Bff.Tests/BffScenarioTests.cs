@@ -47,7 +47,7 @@ public class BffScenarioTests : BffTestBase
         TaskCompletionSource<string> contentReceived,
         TaskCompletionSource workerIsAllowedToStart) : BackgroundService
     {
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CT stoppingToken)
         {
             await workerIsAllowedToStart.Task;
 

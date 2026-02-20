@@ -18,7 +18,7 @@ public class DiscoveryHealthCheck : IHealthCheck
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CT ct = default)
     {
         ArgumentNullException.ThrowIfNull(context);
         try
@@ -55,7 +55,7 @@ public class DiscoveryKeysHealthCheck : IHealthCheck
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CT ct = default)
     {
         ArgumentNullException.ThrowIfNull(context);
         try

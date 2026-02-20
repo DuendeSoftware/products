@@ -24,7 +24,7 @@ internal class ReplayCache(DPoPHybridCacheProvider cacheProvider) : IReplayCache
         }
     }
 
-    public async Task Add(string handle, TimeSpan expiration, CancellationToken ct)
+    public async Task Add(string handle, TimeSpan expiration, CT ct)
     {
         using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Add");
 
@@ -43,7 +43,7 @@ internal class ReplayCache(DPoPHybridCacheProvider cacheProvider) : IReplayCache
                 | HybridCacheEntryFlags.DisableUnderlyingData
     };
 
-    public async Task<bool> Exists(string handle, CancellationToken ct)
+    public async Task<bool> Exists(string handle, CT ct)
     {
         using var activity = Tracing.ActivitySource.StartActivity("ReplayCache.Exists");
 

@@ -8,12 +8,12 @@ namespace Bff.Performance.TestInfra;
 public class AutoFollowRedirectHandler(Action<string> writeOutput) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+        CT ct)
     {
         var previousUri = request.RequestUri;
         for (var i = 0; i < 20; i++)
         {
-            var result = await base.SendAsync(request, cancellationToken);
+            var result = await base.SendAsync(request, ct);
             if ((result.StatusCode == HttpStatusCode.Found || result.StatusCode == HttpStatusCode.RedirectKeepVerb) && result.Headers.Location != null)
             {
                 writeOutput($"Redirecting from {previousUri} to {result.Headers.Location}");

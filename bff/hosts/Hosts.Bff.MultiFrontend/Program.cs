@@ -166,7 +166,7 @@ app.MapGet("/local/self-contained", (CurrentFrontendAccessor currentFrontendAcce
     return data;
 });
 
-app.MapGet("/local/invokes-external-api", async (CurrentFrontendAccessor currentFrontendAccessor, IHttpClientFactory httpClientFactory, HttpContext c, CancellationToken ct) =>
+app.MapGet("/local/invokes-external-api", async (CurrentFrontendAccessor currentFrontendAccessor, IHttpClientFactory httpClientFactory, HttpContext c, CT ct) =>
 {
     var httpClient = httpClientFactory.CreateClient("api");
     var apiResult = await httpClient.GetAsync("/user-token");
@@ -235,7 +235,7 @@ RouteConfig[] BuildYarpRoutes()
 
 public class FrontendAwareIndexHtmlTransformer : IIndexHtmlTransformer
 {
-    public Task<string?> Transform(string indexHtml, BffFrontend frontend, CancellationToken ct = default)
+    public Task<string?> Transform(string indexHtml, BffFrontend frontend, CT ct = default)
     {
         indexHtml = indexHtml.Replace("[FrontendName]", frontend.Name);
         indexHtml = indexHtml.Replace("[Path]", frontend.MatchingCriteria.MatchingPath + "/"); // Note, the path must end with a slash

@@ -19,13 +19,13 @@ public class ServerSideSessionCleanupHost(
     ILogger<ServerSideSessionCleanupHost> logger) : BackgroundService
 {
     /// <inheritdoc />
-    public override Task StartAsync(CancellationToken cancellationToken) =>
+    public override Task StartAsync(CT ct) =>
         !options.ServerSideSessions.RemoveExpiredSessions
             ? Task.CompletedTask
-            : base.StartAsync(cancellationToken);
+            : base.StartAsync(ct);
 
     /// <inheritdoc />
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CT stoppingToken)
     {
         logger.LogDebug("Starting server-side session removal");
 
@@ -68,7 +68,7 @@ public class ServerSideSessionCleanupHost(
         logger.LogDebug("Stopping server-side session removal");
     }
 
-    private async Task RunAsync(CancellationToken cancellationToken = default)
+    private async Task RunAsync(CT ct = default)
     {
         // this is here for testing
         if (!options.ServerSideSessions.RemoveExpiredSessions)
@@ -88,7 +88,7 @@ public class ServerSideSessionCleanupHost(
 
             while (found > 0)
             {
-                var sessions = await serverSideTicketStore.GetAndRemoveExpiredSessionsAsync(scopedOptions.ServerSideSessions.RemoveExpiredSessionsBatchSize, cancellationToken);
+                var sessions = await serverSideTicketStore.GetAndRemoveExpiredSessionsAsync(scopedOptions.ServerSideSessions.RemoveExpiredSessionsBatchSize, ct);
                 found = sessions.Count;
 
                 if (found <= 0)

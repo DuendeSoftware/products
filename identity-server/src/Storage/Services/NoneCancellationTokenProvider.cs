@@ -10,5 +10,5 @@ namespace Duende.IdentityServer.Services;
 public class NoneCancellationTokenProvider : ICancellationTokenProvider
 {
     /// <inheritdoc/>
-    public CancellationToken CancellationToken => CancellationToken.None;
+    public CT CancellationToken => CT.None;
 }

@@ -20,5 +20,8 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)shared/GlobalAliasses.cs" Link="GlobalAliasses.cs" />
+  </ItemGroup>
 
 </Project>

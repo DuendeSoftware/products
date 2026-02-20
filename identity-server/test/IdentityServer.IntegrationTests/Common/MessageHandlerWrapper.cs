@@ -13,9 +13,9 @@ public class MessageHandlerWrapper : DelegatingHandler
     {
     }
 
-    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
     {
-        Response = await base.SendAsync(request, cancellationToken);
+        Response = await base.SendAsync(request, ct);
         return Response;
     }
 }

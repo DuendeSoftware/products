@@ -11,7 +11,7 @@ public class ClientAssertionService(AssertionService assertionService) : IClient
 {
     public Task<ClientAssertion> GetClientAssertionAsync(ClientCredentialsClientName? clientName = null,
         TokenRequestParameters parameters = null,
-        CancellationToken ct = new())
+        CT ct = new())
     {
         var assertion = new ClientAssertion
         {

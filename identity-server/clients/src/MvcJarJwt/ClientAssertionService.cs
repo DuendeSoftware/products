@@ -10,7 +10,7 @@ namespace MvcJarJwt;
 public class ClientAssertionService(AssertionService assertionService) : IClientAssertionService
 {
     public Task<ClientAssertion> GetClientAssertionAsync(ClientCredentialsClientName? clientName = null, TokenRequestParameters parameters = null,
-        CancellationToken ct = new())
+        CT ct = new())
     {
         var assertion = new ClientAssertion
         {

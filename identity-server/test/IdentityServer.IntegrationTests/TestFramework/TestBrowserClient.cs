@@ -23,7 +23,7 @@ public class TestBrowserClient : HttpClient
         {
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
         {
             CurrentUri = request.RequestUri;
             var cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri);
@@ -32,7 +32,7 @@ public class TestBrowserClient : HttpClient
                 request.Headers.Add("Cookie", cookieHeader);
             }
 
-            var response = await base.SendAsync(request, cancellationToken);
+            var response = await base.SendAsync(request, ct);
 
             if (response.Headers.Contains("Set-Cookie"))
             {

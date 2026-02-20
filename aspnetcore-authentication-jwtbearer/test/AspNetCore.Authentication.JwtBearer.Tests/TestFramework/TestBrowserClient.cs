@@ -15,7 +15,7 @@ public class TestBrowserClient : HttpClient
         public HttpResponseMessage LastResponse { get; private set; } = default!;
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+            CT ct)
         {
             CurrentUri = request.RequestUri!;
             var cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri!);
@@ -24,7 +24,7 @@ public class TestBrowserClient : HttpClient
                 request.Headers.Add("Cookie", cookieHeader);
             }
 
-            var response = await base.SendAsync(request, cancellationToken);
+            var response = await base.SendAsync(request, ct);
 
             if (response.Headers.Contains("Set-Cookie"))
             {

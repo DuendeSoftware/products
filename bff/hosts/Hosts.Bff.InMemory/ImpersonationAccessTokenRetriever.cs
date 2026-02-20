@@ -9,7 +9,7 @@ namespace Bff;
 
 public class ImpersonationAccessTokenRetriever(IAccessTokenRetriever inner) : IAccessTokenRetriever
 {
-    public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CancellationToken ct = default)
+    public async Task<AccessTokenResult> GetAccessTokenAsync(AccessTokenRetrievalContext context, CT ct = default)
     {
         var result = await inner.GetAccessTokenAsync(context, ct);
 

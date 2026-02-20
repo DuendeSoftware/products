@@ -10,7 +10,7 @@ namespace Web;
 public class ClientAssertionService(AssertionService assertionService) : IClientAssertionService
 {
     public Task<ClientAssertion?> GetClientAssertionAsync(ClientCredentialsClientName? clientName = null, TokenRequestParameters? parameters = null,
-        CancellationToken ct = new CancellationToken())
+        CT ct = new CT())
     {
         var assertion = new ClientAssertion
         {

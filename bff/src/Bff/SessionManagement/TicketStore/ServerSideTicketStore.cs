@@ -31,7 +31,7 @@ internal class ServerSideTicketStore(
 
     private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector(DataProtectorPurpose);
 
-    private CT ct => accessor.HttpContext?.RequestAborted ?? CancellationToken.None;
+    private CT ct => accessor.HttpContext?.RequestAborted ?? CT.None;
 
     /// <inheritdoc />
     public async Task<string> StoreAsync(AuthenticationTicket ticket)

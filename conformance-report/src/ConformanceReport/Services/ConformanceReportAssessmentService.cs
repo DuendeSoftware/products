@@ -42,11 +42,11 @@ internal class ConformanceReportAssessmentService
     /// <summary>
     /// Generates a complete conformance assessment report.
     /// </summary>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A conformance report containing the assessment results.</returns>
-    public async Task<ConformanceReportResult> GenerateReportAsync(CancellationToken cancellationToken = default)
+    public async Task<ConformanceReportResult> GenerateReportAsync(CT ct = default)
     {
-        var clients = await _clientStore.GetAllClientsAsync(cancellationToken);
+        var clients = await _clientStore.GetAllClientsAsync(ct);
         var clientList = clients.ToList();
 
         ProfileResult? oauth21Result = null;
@@ -87,13 +87,13 @@ internal class ConformanceReportAssessmentService
     /// Generates a conformance assessment report for a specific profile.
     /// </summary>
     /// <param name="profile">The profile to assess.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>A profile result containing the assessment findings.</returns>
     public async Task<ProfileResult> AssessProfileAsync(
         ConformanceReportProfile profile,
-        CancellationToken cancellationToken = default)
+        CT ct = default)
     {
-        var clients = await _clientStore.GetAllClientsAsync(cancellationToken);
+        var clients = await _clientStore.GetAllClientsAsync(ct);
         var clientList = clients.ToList();
 
         return profile switch

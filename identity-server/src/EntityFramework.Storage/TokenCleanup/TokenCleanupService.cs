@@ -43,15 +43,15 @@ public class TokenCleanupService : ITokenCleanupService
     }
 
     /// <inheritdoc/>
-    public async Task CleanupGrantsAsync(CancellationToken cancellationToken = default)
+    public async Task CleanupGrantsAsync(CT ct = default)
     {
         try
         {
             _logger.LogTrace("Querying for expired grants to remove");
 
-            await RemoveGrantsAsync(cancellationToken);
-            await RemoveDeviceCodesAsync(cancellationToken);
-            await RemovePushedAuthorizationRequestsAsync(cancellationToken);
+            await RemoveGrantsAsync(ct);
+            await RemoveDeviceCodesAsync(ct);
+            await RemovePushedAuthorizationRequestsAsync(ct);
         }
         catch (Exception ex)
         {
@@ -63,12 +63,12 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the stale persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveGrantsAsync(CancellationToken cancellationToken = default)
+    protected virtual async Task RemoveGrantsAsync(CT ct = default)
     {
-        await RemoveExpiredPersistedGrantsAsync(cancellationToken);
+        await RemoveExpiredPersistedGrantsAsync(ct);
         if (_options.RemoveConsumedTokens)
         {
-            await RemoveConsumedPersistedGrantsAsync(cancellationToken);
+            await RemoveConsumedPersistedGrantsAsync(ct);
         }
     }
 
@@ -76,7 +76,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the expired persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveExpiredPersistedGrantsAsync(CancellationToken cancellationToken = default)
+    protected virtual async Task RemoveExpiredPersistedGrantsAsync(CT ct = default)
     {
         var found = int.MaxValue;
 
@@ -92,7 +92,7 @@ public class TokenCleanupService : ITokenCleanupService
             var expiredGrants = await query
                 .Take(_options.TokenCleanupBatchSize)
                 .AsNoTracking()
-                .ToArrayAsync(cancellationToken);
+                .ToArrayAsync(ct);
 
             found = expiredGrants.Length;
 
@@ -114,7 +114,7 @@ public class TokenCleanupService : ITokenCleanupService
                     // To be on the safe side, filter out any possibly newly added item within the interval
                     .Where(pg => foundIds.Contains(pg.Id))
                     // And delete them.
-                    .ExecuteDeleteAsync(cancellationToken);
+                    .ExecuteDeleteAsync(ct);
 
                 if (deleteCount != found)
                 {
@@ -135,7 +135,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (_operationalStoreNotification != null)
                 {
-                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(expiredGrants, cancellationToken);
+                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(expiredGrants, ct);
                 }
             }
         }
@@ -145,7 +145,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the consumed persisted grants.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveConsumedPersistedGrantsAsync(CancellationToken cancellationToken = default)
+    protected virtual async Task RemoveConsumedPersistedGrantsAsync(CT ct = default)
     {
         var found = int.MaxValue;
 
@@ -161,7 +161,7 @@ public class TokenCleanupService : ITokenCleanupService
             var consumedGrants = await query
                 .Take(_options.TokenCleanupBatchSize)
                 .AsNoTracking()
-                .ToArrayAsync(cancellationToken);
+                .ToArrayAsync(ct);
 
             found = consumedGrants.Length;
 
@@ -176,7 +176,7 @@ public class TokenCleanupService : ITokenCleanupService
                         pg.ConsumedTime >= consumedGrants.First().ConsumedTime
                         && pg.ConsumedTime <= consumedGrants.Last().ConsumedTime)
                     .Where(pg => foundIds.Contains(pg.Id))
-                    .ExecuteDeleteAsync(cancellationToken);
+                    .ExecuteDeleteAsync(ct);
 
                 if (deleteCount != found)
                 {
@@ -197,7 +197,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (_operationalStoreNotification != null)
                 {
-                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(consumedGrants, cancellationToken);
+                    await _operationalStoreNotification.PersistedGrantsRemovedAsync(consumedGrants, ct);
                 }
             }
         }
@@ -208,7 +208,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// Removes the stale device codes.
     /// </summary>
     /// <returns></returns>
-    protected virtual async Task RemoveDeviceCodesAsync(CancellationToken cancellationToken = default)
+    protected virtual async Task RemoveDeviceCodesAsync(CT ct = default)
     {
         var found = int.MaxValue;
 
@@ -221,7 +221,7 @@ public class TokenCleanupService : ITokenCleanupService
             var expiredCodes = await query
                 .Take(_options.TokenCleanupBatchSize)
                 .AsNoTracking()
-                .ToArrayAsync(cancellationToken);
+                .ToArrayAsync(ct);
 
             found = expiredCodes.Length;
 
@@ -234,7 +234,7 @@ public class TokenCleanupService : ITokenCleanupService
                 var deleteCount = await query
                     .Where(c => c.Expiration >= expiredCodes.First().Expiration && c.Expiration <= expiredCodes.Last().Expiration)
                     .Where(c => foundCodes.Contains(c.DeviceCode))
-                    .ExecuteDeleteAsync(cancellationToken);
+                    .ExecuteDeleteAsync(ct);
 
                 if (deleteCount != found)
                 {
@@ -255,7 +255,7 @@ public class TokenCleanupService : ITokenCleanupService
 
                 if (_operationalStoreNotification != null)
                 {
-                    await _operationalStoreNotification.DeviceCodesRemovedAsync(expiredCodes, cancellationToken);
+                    await _operationalStoreNotification.DeviceCodesRemovedAsync(expiredCodes, ct);
                 }
             }
         }
@@ -264,7 +264,7 @@ public class TokenCleanupService : ITokenCleanupService
     /// <summary>
     /// Removes stale pushed authorization requests.
     /// </summary>
-    protected virtual async Task RemovePushedAuthorizationRequestsAsync(CancellationToken cancellationToken = default)
+    protected virtual async Task RemovePushedAuthorizationRequestsAsync(CT ct = default)
     {
         var found = int.MaxValue;
 
@@ -276,7 +276,7 @@ public class TokenCleanupService : ITokenCleanupService
         {
             found = await query
                 .Take(_options.TokenCleanupBatchSize)
-                .ExecuteDeleteAsync(cancellationToken);
+                .ExecuteDeleteAsync(ct);
 
             if (found > 0)
             {

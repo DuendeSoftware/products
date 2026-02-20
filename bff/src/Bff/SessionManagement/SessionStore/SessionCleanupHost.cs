@@ -23,7 +23,7 @@ internal class SessionCleanupHost(
 
     private TimeSpan CleanupInterval => _options.SessionCleanupInterval;
 
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public override Task StartAsync(CT ct)
     {
         if (!IsIUserSessionStoreCleanupRegistered())
         {
@@ -31,7 +31,7 @@ internal class SessionCleanupHost(
             throw new InvalidOperationException("No IUserSessionStoreCleanup is registered. Did you add session storage, such as EntityFramework?");
         }
 
-        return base.StartAsync(cancellationToken);
+        return base.StartAsync(ct);
     }
 
     protected override async Task ExecuteAsync(CT ct)

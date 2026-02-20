@@ -22,9 +22,9 @@ public class BrowserHandler : DelegatingHandler
     {
     }
 
-    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CT ct)
     {
-        var response = await SendCookiesAsync(request, cancellationToken);
+        var response = await SendCookiesAsync(request, ct);
 
         var redirectCount = 0;
 
@@ -45,7 +45,7 @@ public class BrowserHandler : DelegatingHandler
 
             request = new HttpRequestMessage(HttpMethod.Get, location);
 
-            response = await SendCookiesAsync(request, cancellationToken).ConfigureAwait(false);
+            response = await SendCookiesAsync(request, ct).ConfigureAwait(false);
 
             redirectCount++;
         }
@@ -64,7 +64,7 @@ public class BrowserHandler : DelegatingHandler
         }
     }
 
-    protected async Task<HttpResponseMessage> SendCookiesAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected async Task<HttpResponseMessage> SendCookiesAsync(HttpRequestMessage request, CT ct)
     {
         if (AllowCookies)
         {
@@ -75,7 +75,7 @@ public class BrowserHandler : DelegatingHandler
             }
         }
 
-        var response = await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, ct);
 
         if (AllowCookies && response.Headers.Contains("Set-Cookie"))
         {

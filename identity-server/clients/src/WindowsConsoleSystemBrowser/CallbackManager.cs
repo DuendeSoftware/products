@@ -26,9 +26,9 @@ internal class CallbackManager
         }
     }
 
-    public async Task<string> RunServer(CancellationToken? token = null)
+    public async Task<string> RunServer(CT? token = null)
     {
-        token = CancellationToken.None;
+        token = CT.None;
 
         await using var server = new NamedPipeServerStream(_name, PipeDirection.In);
         await server.WaitForConnectionAsync(token.Value);
