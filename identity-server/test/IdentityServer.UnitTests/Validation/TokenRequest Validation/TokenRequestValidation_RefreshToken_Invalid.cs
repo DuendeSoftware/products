@@ -71,7 +71,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
@@ -98,7 +98,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
@@ -127,7 +127,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted", _ct);
 
@@ -159,7 +159,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
@@ -191,7 +191,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
         };
 
         var grants = Factory.CreateRefreshTokenStore();
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
 
@@ -244,7 +244,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
                 CreationTime = DateTime.UtcNow,
                 AuthorizedScopes = new[] { "scope1" }
             };
-            var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+            var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
             var parameters = new NameValueCollection();
             parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
@@ -270,7 +270,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
                 CreationTime = DateTime.UtcNow,
                 AuthorizedScopes = new[] { "scope1" }
             };
-            var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+            var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
             var parameters = new NameValueCollection();
             parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");
@@ -306,7 +306,7 @@ public class TokenRequestValidation_RefreshToken_Invalid
             AuthorizedScopes = new[] { "scope1" },
             AuthorizedResourceIndicators = new[] { "urn:api1", "urn:api2" }
         };
-        var handle = await grants.StoreRefreshTokenAsync(refreshToken);
+        var handle = await grants.StoreRefreshTokenAsync(refreshToken, _ct);
 
         var parameters = new NameValueCollection();
         parameters.Add(OidcConstants.TokenRequest.GrantType, "refresh_token");

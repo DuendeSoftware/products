@@ -120,8 +120,8 @@ public class DefaultPersistedGrantStoreTests
             Version = 4
         };
 
-        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle);
+        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle, _ct);
 
         token2.Version.ShouldBe(5);
 
@@ -161,8 +161,8 @@ public class DefaultPersistedGrantStoreTests
             }
         });
 
-        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle);
+        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle, _ct);
 
         token1.ClientId.ShouldBe(token2.ClientId);
         token1.CreationTime.ShouldBe(token2.CreationTime);
@@ -187,9 +187,9 @@ public class DefaultPersistedGrantStoreTests
         };
 
 
-        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        await _refreshTokens.RemoveRefreshTokenAsync(handle);
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle);
+        var handle = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        await _refreshTokens.RemoveRefreshTokenAsync(handle, _ct);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle, _ct);
         token2.ShouldBeNull();
     }
 
@@ -205,13 +205,13 @@ public class DefaultPersistedGrantStoreTests
             Lifetime = 10,
         };
 
-        var handle1 = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        var handle2 = await _refreshTokens.StoreRefreshTokenAsync(token1);
-        await _refreshTokens.RemoveRefreshTokensAsync("123", "client");
+        var handle1 = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        var handle2 = await _refreshTokens.StoreRefreshTokenAsync(token1, _ct);
+        await _refreshTokens.RemoveRefreshTokensAsync("123", "client", _ct);
 
-        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle1);
+        var token2 = await _refreshTokens.GetRefreshTokenAsync(handle1, _ct);
         token2.ShouldBeNull();
-        token2 = await _refreshTokens.GetRefreshTokenAsync(handle2);
+        token2 = await _refreshTokens.GetRefreshTokenAsync(handle2, _ct);
         token2.ShouldBeNull();
     }
 
@@ -357,7 +357,7 @@ public class DefaultPersistedGrantStoreTests
             Subject = _user,
             CreationTime = DateTime.UtcNow,
             Lifetime = 20,
-        });
+        }, _ct);
 
         await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
         {
@@ -373,7 +373,7 @@ public class DefaultPersistedGrantStoreTests
 
         // the -1 is needed because internally we append a version/suffix the handle for encoding
         (await _codes.GetAuthorizationCodeAsync("key-1", _ct)).Lifetime.ShouldBe(30);
-        (await _refreshTokens.GetRefreshTokenAsync("key-1")).Lifetime.ShouldBe(20);
+        (await _refreshTokens.GetRefreshTokenAsync("key-1", _ct)).Lifetime.ShouldBe(20);
         (await _referenceTokens.GetReferenceTokenAsync("key-1", _ct)).Lifetime.ShouldBe(10);
     }
 }
