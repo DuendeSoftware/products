@@ -117,7 +117,7 @@ internal abstract class AuthorizeEndpointBase : IEndpointHandler
             LogRequest(request);
 
             // determine user interaction
-            var interactionResult = await _interactionGenerator.ProcessInteractionAsync(request, consent?.Data);
+            var interactionResult = await _interactionGenerator.ProcessInteractionAsync(request, consent?.Data, ct);
             if (interactionResult.ResponseType == InteractionResponseType.Error)
             {
                 return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error, interactionResult.ErrorDescription, false);

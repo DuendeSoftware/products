@@ -70,8 +70,9 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="consent">The consent.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    public virtual async Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)
+    public virtual async Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeInteractionResponseGenerator.ProcessInteraction");
         activity?.SetTag(Tracing.Properties.ClientId, request.Client.ClientId);
@@ -103,15 +104,15 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
         }
 
         // see if create account was requested
-        var result = await ProcessCreateAccountAsync(request);
+        var result = await ProcessCreateAccountAsync(request, ct);
         if (result.ResponseType == InteractionResponseType.None)
         {
             // see if the user needs to login
-            result = await ProcessLoginAsync(request);
+            result = await ProcessLoginAsync(request, ct);
             if (result.ResponseType == InteractionResponseType.None)
             {
                 // see if the user needs to consent
-                result = await ProcessConsentAsync(request, consent);
+                result = await ProcessConsentAsync(request, consent, ct);
             }
         }
 
@@ -134,8 +135,9 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// Processes the create account logic.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    protected internal virtual Task<InteractionResponse> ProcessCreateAccountAsync(ValidatedAuthorizeRequest request)
+    protected internal virtual Task<InteractionResponse> ProcessCreateAccountAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         InteractionResponse result;
 
@@ -161,8 +163,9 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// Processes the login logic.
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
-    protected internal virtual async Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request)
+    protected internal virtual async Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeInteractionResponseGenerator.ProcessLogin");
 
@@ -305,10 +308,11 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="consent">The consent.</param>
+    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException">Invalid PromptMode</exception>
-    protected internal virtual async Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)
+    protected internal virtual async Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("AuthorizeInteractionResponseGenerator.ProcessConsent");
 
@@ -322,7 +326,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
             throw new ArgumentException("Invalid PromptMode");
         }
 
-        var consentRequired = await Consent.RequiresConsentAsync(request.Subject, request.Client, request.ValidatedResources.ParsedScopes, default);
+        var consentRequired = await Consent.RequiresConsentAsync(request.Subject, request.Client, request.ValidatedResources.ParsedScopes, ct);
 
         if (consentRequired && request.PromptModes.Contains(OidcConstants.PromptModes.None))
         {
@@ -399,7 +403,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
                                 Logger.LogDebug("User indicated to remember consent for scopes: {scopes}", request.ValidatedResources.RawScopeValues);
                             }
 
-                            await Consent.UpdateConsentAsync(request.Subject, request.Client, parsedScopes, default);
+                            await Consent.UpdateConsentAsync(request.Subject, request.Client, parsedScopes, ct);
                         }
                     }
                 }
