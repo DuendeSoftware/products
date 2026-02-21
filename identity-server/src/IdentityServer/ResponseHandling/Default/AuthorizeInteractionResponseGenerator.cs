@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -70,7 +70,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="consent">The consent.</param>
-    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public virtual async Task<InteractionResponse> ProcessInteractionAsync(ValidatedAuthorizeRequest request, ConsentResponse consent, CT ct)
     {
@@ -135,7 +135,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// Processes the create account logic.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected internal virtual Task<InteractionResponse> ProcessCreateAccountAsync(ValidatedAuthorizeRequest request, CT ct)
     {
@@ -163,7 +163,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// Processes the login logic.
     /// </summary>
     /// <param name="request">The request.</param>
-    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected internal virtual async Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request, CT ct)
     {
@@ -308,7 +308,7 @@ public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionRespon
     /// </summary>
     /// <param name="request">The request.</param>
     /// <param name="consent">The consent.</param>
-    /// <param name="ct">A token that can be used to request cancellation of the asynchronous operation.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException">Invalid PromptMode</exception>

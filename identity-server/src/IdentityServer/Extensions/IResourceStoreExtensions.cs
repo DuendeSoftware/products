@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -16,7 +16,7 @@ public static class IResourceStoreExtensions
     /// </summary>
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct)
     {
@@ -89,7 +89,7 @@ public static class IResourceStoreExtensions
     /// </summary>
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public static async Task<Resources> FindEnabledResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct) => (await store.FindResourcesByScopeAsync(scopeNames, ct)).FilterEnabled();
 
@@ -97,7 +97,7 @@ public static class IResourceStoreExtensions
     /// Gets all enabled resources.
     /// </summary>
     /// <param name="store">The store.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public static async Task<Resources> GetAllEnabledResourcesAsync(this IResourceStore store, CT ct)
     {
@@ -112,7 +112,7 @@ public static class IResourceStoreExtensions
     /// </summary>
     /// <param name="store">The store.</param>
     /// <param name="scopeNames">The scope names.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public static async Task<IEnumerable<IdentityResource>> FindEnabledIdentityResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames, CT ct) => (await store.FindIdentityResourcesByScopeNameAsync(scopeNames, ct)).Where(x => x.Enabled).ToArray();
 
@@ -121,6 +121,6 @@ public static class IResourceStoreExtensions
     /// </summary>
     /// <param name="store">The store.</param>
     /// <param name="resourceNames">The resource names.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be cancelled.</param>
+    /// <param name="ct">The cancellation token.</param>
     public static async Task<IEnumerable<ApiResource>> FindEnabledApiResourcesByNameAsync(this IResourceStore store, IEnumerable<string> resourceNames, CT ct) => (await store.FindApiResourcesByNameAsync(resourceNames, ct)).Where(x => x.Enabled).ToArray();
 }

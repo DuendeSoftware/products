@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -19,47 +19,47 @@ public interface IUserSession
     /// </summary>
     /// <param name="principal"></param>
     /// <param name="properties"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     Task<string> CreateSessionIdAsync(ClaimsPrincipal principal, AuthenticationProperties properties, CT ct);
 
     /// <summary>
     /// Gets the current authenticated user.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     Task<ClaimsPrincipal?> GetUserAsync(CT ct);
 
     /// <summary>
     /// Gets the current session identifier.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<string?> GetSessionIdAsync(CT ct);
 
     /// <summary>
     /// Ensures the session identifier cookie asynchronously.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task EnsureSessionIdCookieAsync(CT ct);
 
     /// <summary>
     /// Removes the session identifier cookie.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     Task RemoveSessionIdCookieAsync(CT ct);
 
     /// <summary>
     /// Adds a client to the list of clients the user has signed into during their session.
     /// </summary>
     /// <param name="clientId">The client identifier.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task AddClientIdAsync(string clientId, CT ct);
 
     /// <summary>
     /// Gets the list of clients the user has signed into during their session.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<IEnumerable<string>> GetClientListAsync(CT ct);
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -17,7 +17,7 @@ public interface IPersistedGrantStore
     /// Stores the grant.
     /// </summary>
     /// <param name="grant">The grant.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task StoreAsync(PersistedGrant grant, CT ct);
 
@@ -25,7 +25,7 @@ public interface IPersistedGrantStore
     /// Gets the grant.
     /// </summary>
     /// <param name="key">The key.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<PersistedGrant?> GetAsync(string key, CT ct);
 
@@ -33,7 +33,7 @@ public interface IPersistedGrantStore
     /// Gets all grants based on the filter.
     /// </summary>
     /// <param name="filter">The filter.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter, CT ct);
 
@@ -41,7 +41,7 @@ public interface IPersistedGrantStore
     /// Removes the grant by key.
     /// </summary>
     /// <param name="key">The key.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task RemoveAsync(string key, CT ct);
 
@@ -49,7 +49,7 @@ public interface IPersistedGrantStore
     /// Removes all grants based on the filter.
     /// </summary>
     /// <param name="filter">The filter.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task RemoveAllAsync(PersistedGrantFilter filter, CT ct);
 }

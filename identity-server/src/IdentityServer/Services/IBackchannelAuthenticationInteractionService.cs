@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -28,7 +28,7 @@ public interface IBackchannelAuthenticationInteractionService
     /// Completes the login request with the provided response for the current user or the subject passed.
     /// </summary>
     /// <param name="completionRequest">The completion request.</param>
-    /// <param name="ct">The <see cref="CancellationToken"/> to monitor for cancellation requests.</param>
+    /// <param name="ct">The cancellation token.</param>
     Task CompleteLoginRequestAsync(CompleteBackchannelLoginRequest completionRequest, CT ct);
 }
 

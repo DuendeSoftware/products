@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -17,7 +17,7 @@ public interface IOperationalStoreNotification
     /// Notification for persisted grants being removed.
     /// </summary>
     /// <param name="persistedGrants"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task PersistedGrantsRemovedAsync(IEnumerable<PersistedGrant> persistedGrants, CT ct);
 

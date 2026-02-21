@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -52,7 +52,7 @@ public class ResourceStore : IResourceStore
     /// Finds the API resources by name.
     /// </summary>
     /// <param name="apiResourceNames">The names.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames, CT ct)
     {
@@ -93,7 +93,7 @@ public class ResourceStore : IResourceStore
     /// Gets API resources by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct)
     {
@@ -127,7 +127,7 @@ public class ResourceStore : IResourceStore
     /// Gets identity resources by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames, CT ct)
     {
@@ -158,7 +158,7 @@ public class ResourceStore : IResourceStore
     /// Gets scopes by scope name.
     /// </summary>
     /// <param name="scopeNames"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames, CT ct)
     {

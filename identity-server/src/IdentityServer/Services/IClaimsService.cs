@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -21,7 +21,7 @@ public interface IClaimsService
     /// <param name="resources">The resources.</param>
     /// <param name="includeAllIdentityClaims">Specifies if all claims should be included in the token, or if the userinfo endpoint can be used to retrieve them</param>
     /// <param name="request">The raw request</param>
-    /// <param name="ct">A token to monitor for cancellation requests.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// Claims for the identity token
     /// </returns>
@@ -33,7 +33,7 @@ public interface IClaimsService
     /// <param name="subject">The subject.</param>
     /// <param name="resources">The resources.</param>
     /// <param name="request">The raw request.</param>
-    /// <param name="ct">A token to monitor for cancellation requests.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// Claims for the access token
     /// </returns>

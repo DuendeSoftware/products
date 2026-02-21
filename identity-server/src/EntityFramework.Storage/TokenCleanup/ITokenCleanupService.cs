@@ -16,8 +16,7 @@ public interface ITokenCleanupService
     /// Removes expired persisted grants, expired device codes, and optionally
     /// consumed persisted grants from the stores.
     /// </summary>
-    /// <param name="ct">A token that propagates notification
-    /// that the cleanup operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task CleanupGrantsAsync(CT ct);
 }

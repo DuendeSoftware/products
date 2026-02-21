@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -20,7 +20,7 @@ internal class NopKeyStoreCache : ISigningKeyStoreCache
     /// </summary>
     /// <param name="keys"></param>
     /// <param name="duration"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     public Task StoreKeysAsync(IEnumerable<KeyContainer> keys, TimeSpan duration, CT ct) => Task.CompletedTask;
 }

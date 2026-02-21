@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -17,7 +17,7 @@ public interface IAutomaticKeyManagerKeyStore : IValidationKeysStore, ISigningCr
     /// <summary>
     /// Gets all the signing credentials.
     /// </summary>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task<IEnumerable<SigningCredentials>> GetAllSigningCredentialsAsync(CT ct);
 }

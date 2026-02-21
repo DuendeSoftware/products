@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -24,7 +24,7 @@ public interface ILogoutNotificationService
     /// Builds the http back-channel logout request data for the collection of clients.
     /// </summary>
     /// <param name="context">The context for the logout notification.</param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     Task<IEnumerable<BackChannelLogoutRequest>> GetBackChannelLogoutNotificationsAsync(LogoutNotificationContext context, CT ct);
 }
 

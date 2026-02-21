@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -21,7 +21,7 @@ public interface IConsentService
     /// <param name="subject">The user.</param>
     /// <param name="client">The client.</param>
     /// <param name="parsedScopes">The parsed scopes.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// Boolean if consent is required.
     /// </returns>
@@ -33,7 +33,7 @@ public interface IConsentService
     /// <param name="subject">The subject.</param>
     /// <param name="client">The client.</param>
     /// <param name="parsedScopes">The parsed scopes.</param>
-    /// <param name="ct">The <see cref="CT"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     Task UpdateConsentAsync(ClaimsPrincipal subject, Client client, IEnumerable<ParsedScopeValue> parsedScopes, CT ct);
 }

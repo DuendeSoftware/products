@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -115,7 +115,7 @@ public class DefaultTokenCreationService : ITokenCreationService
     /// <param name="token"></param>
     /// <param name="payload"></param>
     /// <param name="headerElements"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     protected virtual async Task<string> CreateJwtAsync(Token token, string payload,

@@ -1,4 +1,4 @@
-// Copyright (c) Duende Software. All rights reserved.
+﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
 
@@ -90,7 +90,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// Sends the logout notifications for the collection of clients.
     /// </summary>
     /// <param name="requests"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual async Task SendLogoutNotificationsAsync(IEnumerable<BackChannelLogoutRequest> requests, CT ct)
     {
@@ -116,7 +116,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// </summary>
     /// <param name="client"></param>
     /// <param name="data"></param>
-    /// <param name="ct"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
     protected virtual Task PostLogoutJwt(BackChannelLogoutRequest client, Dictionary<string, string> data, CT ct) => HttpClient.PostAsync(client.LogoutUri, data, ct);
 
