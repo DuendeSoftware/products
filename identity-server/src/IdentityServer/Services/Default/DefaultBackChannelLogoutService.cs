@@ -103,7 +103,7 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
             // implementation doesn't make parallel use of a single DB context.
             // Since the signing key material should be cached, only the
             // first serial operation will call the db.
-            var payload = await CreateFormPostPayloadAsync(backChannelLogoutRequest);
+            var payload = await CreateFormPostPayloadAsync(backChannelLogoutRequest, ct);
             logoutRequestsWithPayload.Add((backChannelLogoutRequest, payload));
         }
 
@@ -124,10 +124,11 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// Creates the form-url-encoded payload (as a dictionary) to send to the client.
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    protected async Task<Dictionary<string, string>> CreateFormPostPayloadAsync(BackChannelLogoutRequest request)
+    protected async Task<Dictionary<string, string>> CreateFormPostPayloadAsync(BackChannelLogoutRequest request, CT ct)
     {
-        var token = await CreateTokenAsync(request);
+        var token = await CreateTokenAsync(request, ct);
 
         var data = new Dictionary<string, string>
         {
@@ -140,8 +141,9 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     /// Creates the JWT used for the back-channel logout notification.
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>The token.</returns>
-    protected virtual async Task<string> CreateTokenAsync(BackChannelLogoutRequest request)
+    protected virtual async Task<string> CreateTokenAsync(BackChannelLogoutRequest request, CT ct)
     {
         var claims = await CreateClaimsForTokenAsync(request);
         if (claims.Any(x => x.Type == JwtClaimTypes.Nonce))
@@ -151,11 +153,11 @@ public class DefaultBackChannelLogoutService : IBackChannelLogoutService
 
         if (request.Issuer != null)
         {
-            return await Tools.IssueJwtAsync(DefaultLogoutTokenLifetime, request.Issuer, IdentityServerConstants.TokenTypes.LogoutToken, claims);
+            return await Tools.IssueJwtAsync(DefaultLogoutTokenLifetime, request.Issuer, IdentityServerConstants.TokenTypes.LogoutToken, claims, ct);
         }
 
-        var issuer = await IssuerNameService.GetCurrentAsync(default);
-        return await Tools.IssueJwtAsync(DefaultLogoutTokenLifetime, issuer, IdentityServerConstants.TokenTypes.LogoutToken, claims);
+        var issuer = await IssuerNameService.GetCurrentAsync(ct);
+        return await Tools.IssueJwtAsync(DefaultLogoutTokenLifetime, issuer, IdentityServerConstants.TokenTypes.LogoutToken, claims, ct);
     }
 
     /// <summary>
