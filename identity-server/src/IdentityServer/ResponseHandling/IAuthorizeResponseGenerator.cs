@@ -15,6 +15,7 @@ public interface IAuthorizeResponseGenerator
     /// Creates the response
     /// </summary>
     /// <param name="request">The request.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request);
+    Task<AuthorizeResponse> CreateResponseAsync(ValidatedAuthorizeRequest request, CT ct);
 }

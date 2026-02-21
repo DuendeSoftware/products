@@ -11,5 +11,5 @@ public class MockJwtRequestUriHttpClient : IJwtRequestUriHttpClient
 {
     public string Jwt { get; set; }
 
-    public Task<string> GetJwtAsync(string url, Client client) => Task.FromResult(Jwt);
+    public Task<string> GetJwtAsync(string url, Client client, CT ct) => Task.FromResult(Jwt);
 }

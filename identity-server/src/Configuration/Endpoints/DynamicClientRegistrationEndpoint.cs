@@ -47,7 +47,7 @@ public class DynamicClientRegistrationEndpoint
         // Check content type
         if (!HasCorrectContentType(httpContext.Request))
         {
-            await _responseGenerator.WriteContentTypeError(httpContext);
+            await _responseGenerator.WriteContentTypeError(httpContext, httpContext.RequestAborted);
             return;
         }
 
@@ -55,29 +55,29 @@ public class DynamicClientRegistrationEndpoint
         var request = await TryParseAsync(httpContext.Request);
         if (request == null)
         {
-            await _responseGenerator.WriteBadRequestError(httpContext);
+            await _responseGenerator.WriteBadRequestError(httpContext, httpContext.RequestAborted);
             return;
         }
 
         var dcrContext = new DynamicClientRegistrationContext(request, httpContext.User);
 
         // Validate request values 
-        var validationResult = await _validator.ValidateAsync(dcrContext);
+        var validationResult = await _validator.ValidateAsync(dcrContext, httpContext.RequestAborted);
 
         if (validationResult is DynamicClientRegistrationError validationError)
         {
-            await _responseGenerator.WriteError(httpContext, validationError);
+            await _responseGenerator.WriteError(httpContext, validationError, httpContext.RequestAborted);
         }
         else
         {
-            var processingResult = await _processor.ProcessAsync(dcrContext);
+            var processingResult = await _processor.ProcessAsync(dcrContext, httpContext.RequestAborted);
             if (processingResult is DynamicClientRegistrationError processingFailure)
             {
-                await _responseGenerator.WriteError(httpContext, processingFailure);
+                await _responseGenerator.WriteError(httpContext, processingFailure, httpContext.RequestAborted);
             }
             else if (processingResult is DynamicClientRegistrationResponse success)
             {
-                await _responseGenerator.WriteSuccessResponse(httpContext, success);
+                await _responseGenerator.WriteSuccessResponse(httpContext, success, httpContext.RequestAborted);
             }
             else
             {

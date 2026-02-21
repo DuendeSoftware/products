@@ -79,12 +79,12 @@ internal class IntrospectionHttpWriter(IIssuerNameService issuerNameService, ITo
             var token = new Token
             {
                 Type = JwtClaimTypes.JwtTypes.IntrospectionJwtResponse,
-                Issuer = await issuerNameService.GetCurrentAsync(),
+                Issuer = await issuerNameService.GetCurrentAsync(context.RequestAborted),
                 Audiences = [result.CallerName],
                 CreationTime = DateTime.UtcNow,
                 Claims = [new Claim("token_introspection", ObjectSerializer.ToString(result.Entries), IdentityServerConstants.ClaimValueTypes.Json)]
             };
-            var jwt = await tokenCreationService.CreateTokenAsync(token);
+            var jwt = await tokenCreationService.CreateTokenAsync(token, context.RequestAborted);
 
             await context.Response.WriteAsync(jwt);
         }

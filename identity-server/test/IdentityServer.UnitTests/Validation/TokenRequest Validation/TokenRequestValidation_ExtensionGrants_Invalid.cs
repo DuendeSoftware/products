@@ -14,12 +14,13 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
     private const string Category = "TokenRequest Validation - Extension Grants - Invalid";
 
     private IClientStore _clients = Factory.CreateClientStore();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Invalid_Extension_Grant_Type_For_Client_Credentials_Client()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection
@@ -38,7 +39,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
     [Trait("Category", Category)]
     public async Task Restricted_Extension_Grant_Type()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient");
+        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator();
 
@@ -58,7 +59,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
     [Trait("Category", Category)]
     public async Task Customer_Error_and_Description_Extension_Grant_Type()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient");
+        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(extensionGrantValidators: new[] { new TestGrantValidator(isInvalid: true, errorDescription: "custom error description") });
 
@@ -79,7 +80,7 @@ public class TokenRequestValidation_ExtensionGrants_Invalid
     [Trait("Category", Category)]
     public async Task inactive_user_should_fail()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient");
+        var client = await _clients.FindEnabledClientByIdAsync("customgrantclient", _ct);
 
         var validator = Factory.CreateTokenRequestValidator(
             profile: new TestProfileService(shouldBeActive: false));

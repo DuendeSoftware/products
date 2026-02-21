@@ -17,8 +17,9 @@ public interface IEventService
     /// Raises the specified event.
     /// </summary>
     /// <param name="evt">The event.</param>
+    /// <param name="ct">The cancellation token.</param>
 #pragma warning disable CA1030 // This is our own eventing and this name is appropriate here
-    Task RaiseAsync(Event evt);
+    Task RaiseAsync(Event evt, CT ct);
 #pragma warning restore CA1030
 
     /// <summary>

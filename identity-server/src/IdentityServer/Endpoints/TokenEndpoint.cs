@@ -88,7 +88,7 @@ internal class TokenEndpoint : IEndpointHandler
         _logger.LogDebug("Start token request.");
 
         // validate client
-        var clientResult = await _clientValidator.ValidateAsync(context);
+        var clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
         if (clientResult.IsError)
         {
             var errorMsg = clientResult.Error ?? OidcConstants.TokenErrors.InvalidClient;
@@ -113,7 +113,7 @@ internal class TokenEndpoint : IEndpointHandler
             return error;
         }
 
-        var requestResult = await _requestValidator.ValidateRequestAsync(requestContext);
+        var requestResult = await _requestValidator.ValidateRequestAsync(requestContext, context.RequestAborted);
         if (requestResult.IsError)
         {
             // Note: this is an expected case in the normal DPoP flow and is not a real failure event.
@@ -124,7 +124,7 @@ internal class TokenEndpoint : IEndpointHandler
             }
             else
             {
-                await _events.RaiseAsync(new TokenIssuedFailureEvent(requestResult));
+                await _events.RaiseAsync(new TokenIssuedFailureEvent(requestResult), context.RequestAborted);
             }
 
             Telemetry.Metrics.TokenIssuedFailure(
@@ -136,9 +136,9 @@ internal class TokenEndpoint : IEndpointHandler
 
         // create response
         _logger.LogTrace("Calling into token request response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(requestResult);
+        var response = await _responseGenerator.ProcessAsync(requestResult, context.RequestAborted);
 
-        await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult));
+        await _events.RaiseAsync(new TokenIssuedSuccessEvent(response, requestResult), context.RequestAborted);
 
         Telemetry.Metrics.TokenIssued(clientResult.Client.ClientId, requestResult.ValidatedRequest.GrantType, null,
             response.AccessToken.IsPresent(), response.AccessTokenType.IsPresent() ? requestResult.ValidatedRequest.AccessTokenType : null, response.RefreshToken.IsPresent(),

@@ -61,7 +61,6 @@ internal class RegisteredImplementationsDiagnosticEntry(ServiceCollectionAccesso
                 new(typeof(IBackChannelLogoutHttpClient), [typeof(DefaultBackChannelLogoutHttpClient)]),
                 new(typeof(IBackChannelLogoutService), [typeof(DefaultBackChannelLogoutService)]),
                 new(typeof(ICache<>), [typeof(DefaultCache<>)]),
-                new(typeof(ICancellationTokenProvider), [typeof(DefaultCancellationTokenProvider)]),
                 new(typeof(IClaimsService), [typeof(DefaultClaimsService)]),
                 new(typeof(IConsentService), [typeof(DefaultConsentService)]),
                 new(typeof(ICorsPolicyService), [typeof(DefaultCorsPolicyService)]),

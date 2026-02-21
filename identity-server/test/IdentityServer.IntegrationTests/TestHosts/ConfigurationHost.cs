@@ -6,9 +6,7 @@ using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.Configuration.EntityFramework;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Storage;
-using Duende.IdentityServer.IntegrationTests.Common;
 using Duende.IdentityServer.IntegrationTests.TestFramework;
-using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -31,8 +29,6 @@ public class ConfigurationHost : GenericHost
     {
         services.AddRouting();
         services.AddAuthorization();
-
-        services.AddSingleton<ICancellationTokenProvider, MockCancellationTokenProvider>();
 
         services.AddIdentityServerConfiguration(opt =>
             {

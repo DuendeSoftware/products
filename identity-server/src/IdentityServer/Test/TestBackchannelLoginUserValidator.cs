@@ -22,7 +22,7 @@ public class TestBackchannelLoginUserValidator : IBackchannelAuthenticationUserV
     public TestBackchannelLoginUserValidator(TestUserStore testUserStore) => _testUserStore = testUserStore;
 
     /// <inheritdoc/>
-    public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext)
+    public Task<BackchannelAuthenticationUserValidationResult> ValidateRequestAsync(BackchannelAuthenticationUserValidatorContext userValidatorContext, CT ct)
     {
         var result = new BackchannelAuthenticationUserValidationResult();
 

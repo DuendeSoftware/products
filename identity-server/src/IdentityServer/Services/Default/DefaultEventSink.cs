@@ -23,12 +23,8 @@ public class DefaultEventSink : IEventSink
     /// <param name="logger">The logger.</param>
     public DefaultEventSink(ILogger<DefaultEventService> logger) => _logger = logger;
 
-    /// <summary>
-    /// Raises the specified event.
-    /// </summary>
-    /// <param name="evt">The event.</param>
-    /// <exception cref="System.ArgumentNullException">evt</exception>
-    public virtual Task PersistAsync(Event evt)
+    /// <inheritdoc/>
+    public virtual Task PersistAsync(Event evt, CT ct)
     {
         ArgumentNullException.ThrowIfNull(evt);
 

@@ -15,5 +15,6 @@ public interface IResourceOwnerPasswordValidator
     /// Validates the resource owner password credential
     /// </summary>
     /// <param name="context">The context.</param>
-    Task ValidateAsync(ResourceOwnerPasswordValidationContext context);
+    /// <param name="ct">The cancellation token.</param>
+    Task ValidateAsync(ResourceOwnerPasswordValidationContext context, CT ct);
 }

@@ -100,10 +100,10 @@ internal class IntrospectionEndpoint : IEndpointHandler
         ApiResource api = null;
         Client client = null;
 
-        var apiResult = await _apiSecretValidator.ValidateAsync(context);
+        var apiResult = await _apiSecretValidator.ValidateAsync(context, context.RequestAborted);
         if (apiResult.IsError)
         {
-            clientResult = await _clientValidator.ValidateAsync(context);
+            clientResult = await _clientValidator.ValidateAsync(context, context.RequestAborted);
             if (clientResult.IsError)
             {
                 _logger.LogError("Unauthorized call introspection endpoint. aborting.");
@@ -128,7 +128,7 @@ internal class IntrospectionEndpoint : IEndpointHandler
         {
             _logger.LogError("Malformed request body. aborting.");
             const string error = "Malformed request body";
-            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, error));
+            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, error), context.RequestAborted);
             Telemetry.Metrics.IntrospectionFailure(callerName, error);
             return new StatusCodeResult(HttpStatusCode.BadRequest);
         }
@@ -141,18 +141,18 @@ internal class IntrospectionEndpoint : IEndpointHandler
             Api = api,
             Client = client,
         };
-        var validationResult = await _requestValidator.ValidateAsync(validationRequest);
+        var validationResult = await _requestValidator.ValidateAsync(validationRequest, context.RequestAborted);
         if (validationResult.IsError)
         {
             LogFailure(validationResult.Error, callerName);
-            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, validationResult.Error));
+            await _events.RaiseAsync(new TokenIntrospectionFailureEvent(callerName, validationResult.Error), context.RequestAborted);
             Telemetry.Metrics.IntrospectionFailure(callerName, validationResult.Error);
             return new BadRequestResult(validationResult.Error);
         }
 
         // response generation
         _logger.LogTrace("Calling into introspection response generator: {type}", _responseGenerator.GetType().FullName);
-        var response = await _responseGenerator.ProcessAsync(validationResult);
+        var response = await _responseGenerator.ProcessAsync(validationResult, context.RequestAborted);
 
         // render result
         LogSuccess(validationResult.IsActive, callerName);

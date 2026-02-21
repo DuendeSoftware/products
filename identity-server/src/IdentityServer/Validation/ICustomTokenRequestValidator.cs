@@ -15,8 +15,9 @@ public interface ICustomTokenRequestValidator
     /// Custom validation logic for a token request.
     /// </summary>
     /// <param name="context">The context.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns>
     /// The validation result
     /// </returns>
-    Task ValidateAsync(CustomTokenRequestValidationContext context);
+    Task ValidateAsync(CustomTokenRequestValidationContext context, CT ct);
 }

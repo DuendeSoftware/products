@@ -17,20 +17,23 @@ public interface IAuthorizationCodeStore
     /// Stores the authorization code.
     /// </summary>
     /// <param name="code">The code.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code);
+    Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code, CT ct);
 
     /// <summary>
     /// Gets the authorization code.
     /// </summary>
     /// <param name="code">The code.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<AuthorizationCode?> GetAuthorizationCodeAsync(string code);
+    Task<AuthorizationCode?> GetAuthorizationCodeAsync(string code, CT ct);
 
     /// <summary>
     /// Removes the authorization code.
     /// </summary>
     /// <param name="code">The code.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task RemoveAuthorizationCodeAsync(string code);
+    Task RemoveAuthorizationCodeAsync(string code, CT ct);
 }

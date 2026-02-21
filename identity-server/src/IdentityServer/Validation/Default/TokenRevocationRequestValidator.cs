@@ -35,7 +35,9 @@ internal class TokenRevocationRequestValidator : ITokenRevocationRequestValidato
     /// or
     /// client
     /// </exception>
-    public Task<TokenRevocationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, Client client)
+    /// <param name="ct">The cancellation token.</param>
+    /// <inheritdoc/>
+    public Task<TokenRevocationRequestValidationResult> ValidateRequestAsync(NameValueCollection parameters, Client client, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRevocationRequestValidator.ValidateRequest");
 

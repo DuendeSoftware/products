@@ -58,7 +58,7 @@ internal class CorsPolicyProvider : ICorsPolicyProvider
                 // https://github.com/aspnet/CORS/issues/105
                 var corsPolicyService = _provider.GetRequiredService<ICorsPolicyService>();
 
-                if (await corsPolicyService.IsOriginAllowedAsync(origin))
+                if (await corsPolicyService.IsOriginAllowedAsync(origin, context.RequestAborted))
                 {
                     _sanitizedLogger.LogDebug("CorsPolicyService allowed origin: {origin}", origin);
                     return Allow(origin);

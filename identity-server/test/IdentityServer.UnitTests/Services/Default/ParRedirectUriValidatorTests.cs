@@ -31,7 +31,7 @@ public class ParRedirectUriValidatorTests
             {
                 RequireClientSecret = true,
             }
-        });
+        }, default);
 
         result.ShouldBe(true);
     }
@@ -57,7 +57,7 @@ public class ParRedirectUriValidatorTests
             {
                 RequireClientSecret = true,
             }
-        });
+        }, default);
 
         result.ShouldBe(true);
     }
@@ -82,7 +82,7 @@ public class ParRedirectUriValidatorTests
             RequestParameters = pushedParameters,
             RequestedUri = notThePushedRedirectUri,
             Client = new Client()
-        });
+        }, default);
 
         result.ShouldBe(false);
     }
@@ -110,7 +110,7 @@ public class ParRedirectUriValidatorTests
             {
                 RedirectUris = { "https://registered.example.com" }
             }
-        });
+        }, default);
 
         registeredRedirectUri.ShouldNotBe(pushedRedirectUri);
         result.ShouldBe(true);
@@ -139,7 +139,7 @@ public class ParRedirectUriValidatorTests
             {
                 RedirectUris = { "https://registered.example.com" }
             }
-        });
+        }, default);
 
         registeredRedirectUri.ShouldNotBe(requestedRedirectUri);
         result.ShouldBe(false);

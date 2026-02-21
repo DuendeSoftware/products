@@ -84,7 +84,7 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
 #pragma warning disable CS0618 // Type or member is obsolete
             var msg = new Message<IDictionary<string, string[]>>(result.Request.ToOptimizedFullDictionary());
 #pragma warning restore CS0618 // Type or member is obsolete
-            var id = await _authorizationParametersMessageStore.WriteAsync(msg);
+            var id = await _authorizationParametersMessageStore.WriteAsync(msg, context.RequestAborted);
             returnUrl = returnUrl.AddQueryString(Constants.AuthorizationParamsStore.MessageStoreIdParameterName, id);
         }
         else
@@ -122,7 +122,7 @@ internal class AuthorizeInteractionPageHttpWriter : IHttpResponseWriter<Authoriz
         else
         {
             // if we're redirecting to a local URL, ensure we persist the UI locales in a way .net's localization will pick them up
-            await _localesService.StoreUiLocalesForRedirectAsync(result.Request.UiLocales);
+            await _localesService.StoreUiLocalesForRedirectAsync(result.Request.UiLocales, context.RequestAborted);
         }
 
         url = url.AddQueryString(result.ReturnUrlParameterName, returnUrl);

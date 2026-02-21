@@ -18,6 +18,7 @@ public interface IDeviceFlowThrottlingService
     /// </summary>
     /// <param name="deviceCode">The device code.</param>
     /// <param name="details">The device code details.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<bool> ShouldSlowDown(string deviceCode, DeviceCode details);
+    Task<bool> ShouldSlowDown(string deviceCode, DeviceCode details, CT ct);
 }

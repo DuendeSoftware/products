@@ -14,12 +14,13 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     private const string Category = "TokenRequest Validation - ClientCredentials - Invalid";
 
     private IClientStore _clients = Factory.CreateClientStore();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Invalid_GrantType_For_Client()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -36,7 +37,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Request_should_succeed_even_with_allowed_identity_scopes_because_they_are_filtered_out()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection
@@ -55,7 +56,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Unknown_Scope()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -72,7 +73,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Unknown_Scope_Multiple()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -89,7 +90,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Restricted_Scope()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("client_restricted", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -106,7 +107,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Restricted_Scope_Multiple()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("client_restricted", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -123,7 +124,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Identity_scope_is_not_allowed_for_client_credentials_when_specified_explicitly()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection
@@ -142,7 +143,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Resource_and_Refresh_Token()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -160,7 +161,7 @@ public class TokenRequestValidation_ClientCredentials_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_resource_indicator()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();

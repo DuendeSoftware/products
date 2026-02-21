@@ -23,7 +23,7 @@ public class TestResourceOwnerPasswordValidator : IResourceOwnerPasswordValidato
         _erroDescription = errorDescription;
     }
 
-    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
+    public Task ValidateAsync(ResourceOwnerPasswordValidationContext context, CT ct)
     {
         if (_sendError)
         {

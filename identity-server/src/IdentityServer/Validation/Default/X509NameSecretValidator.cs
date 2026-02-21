@@ -23,7 +23,8 @@ public class X509NameSecretValidator : ISecretValidator
     public X509NameSecretValidator(ILogger<X509NameSecretValidator> logger) => _logger = logger;
 
     /// <inheritdoc/>
-    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+    /// <inheritdoc/>
+    public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret, CT ct)
     {
         var fail = Task.FromResult(new SecretValidationResult { Success = false });
 

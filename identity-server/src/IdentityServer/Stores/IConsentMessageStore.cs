@@ -16,19 +16,22 @@ public interface IConsentMessageStore
     /// </summary>
     /// <param name="id">The id for the message.</param>
     /// <param name="message">The message.</param>
-    Task WriteAsync(string id, Message<ConsentResponse> message);
+    /// <param name="ct">The cancellation token.</param>
+    Task WriteAsync(string id, Message<ConsentResponse> message, CT ct);
 
     /// <summary>
     /// Reads the consent response message.
     /// </summary>
     /// <param name="id">The identifier.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<Message<ConsentResponse>> ReadAsync(string id);
+    Task<Message<ConsentResponse>> ReadAsync(string id, CT ct);
 
     /// <summary>
     /// Deletes the consent response message.
     /// </summary>
     /// <param name="id">The identifier.</param>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task DeleteAsync(string id);
+    Task DeleteAsync(string id, CT ct);
 }

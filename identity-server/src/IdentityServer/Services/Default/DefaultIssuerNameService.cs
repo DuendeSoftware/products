@@ -31,7 +31,7 @@ public class DefaultIssuerNameService : IIssuerNameService
     }
 
     /// <inheritdoc />
-    public Task<string> GetCurrentAsync()
+    public Task<string> GetCurrentAsync(CT ct)
     {
         // if they've explicitly configured a URI then use it,
         // otherwise dynamically calculate it

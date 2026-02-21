@@ -12,9 +12,9 @@ internal class DiagnosticSummary(DiagnosticDataService diagnosticDataService, Id
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("Duende.IdentityServer.Diagnostics.Summary");
 
-    public async Task PrintSummary()
+    public async Task PrintSummary(CT ct)
     {
-        var jsonMemory = await diagnosticDataService.GetJsonBytesAsync();
+        var jsonMemory = await diagnosticDataService.GetJsonBytesAsync(ct);
         var span = jsonMemory.Span;
 
         using var diagnosticActivity = Tracing.DiagnosticsActivitySource.StartActivity("DiagnosticSummary");

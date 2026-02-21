@@ -14,6 +14,7 @@ public interface IIssuerNameService
     /// <summary>
     /// Returns the issuer name for the current request
     /// </summary>
+    /// <param name="ct">The cancellation token.</param>
     /// <returns></returns>
-    Task<string> GetCurrentAsync();
+    Task<string> GetCurrentAsync(CT ct);
 }

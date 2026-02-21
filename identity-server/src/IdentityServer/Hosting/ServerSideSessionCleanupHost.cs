@@ -68,7 +68,7 @@ public class ServerSideSessionCleanupHost(
         logger.LogDebug("Stopping server-side session removal");
     }
 
-    private async Task RunAsync(CT ct = default)
+    private async Task RunAsync(CT ct)
     {
         // this is here for testing
         if (!options.ServerSideSessions.RemoveExpiredSessions)
@@ -100,7 +100,7 @@ public class ServerSideSessionCleanupHost(
 
                 foreach (var session in sessions)
                 {
-                    await sessionCoordinationService.ProcessExpirationAsync(session);
+                    await sessionCoordinationService.ProcessExpirationAsync(session, ct);
                 }
             }
         }

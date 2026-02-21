@@ -17,12 +17,13 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     private const string Category = "TokenRequest Validation - ResourceOwner - Invalid";
 
     private IClientStore _clients = Factory.CreateClientStore();
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     [Fact]
     [Trait("Category", Category)]
     public async Task Invalid_GrantType_For_Client()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("client");
+        var client = await _clients.FindEnabledClientByIdAsync("client", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -39,7 +40,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Unknown_Scope()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -58,7 +59,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Unknown_Scope_Multiple()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -77,7 +78,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Restricted_Scope()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -96,7 +97,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Restricted_Scope_Multiple()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient_restricted", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -115,7 +116,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task No_ResourceOwnerCredentials()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -132,7 +133,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Missing_ResourceOwner_UserName()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -150,7 +151,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Invalid_ResourceOwner_Credentials()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -170,7 +171,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Missing_ResourceOwner_password_for_user_with_password_should_fail()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator();
 
         var parameters = new NameValueCollection();
@@ -187,7 +188,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Password_GrantType_Not_Supported()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator(resourceOwnerValidator: new NotSupportedResourceOwnerPasswordValidator(TestLogger.Create<NotSupportedResourceOwnerPasswordValidator>()));
 
         var parameters = new NameValueCollection();
@@ -207,7 +208,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Inactive_ResourceOwner()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator(profile: new TestProfileService(shouldBeActive: false));
 
         var parameters = new NameValueCollection();
@@ -226,7 +227,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task Password_GrantType_With_Custom_ErrorDescription()
     {
-        var client = await _clients.FindEnabledClientByIdAsync("roclient");
+        var client = await _clients.FindEnabledClientByIdAsync("roclient", _ct);
         var validator = Factory.CreateTokenRequestValidator(resourceOwnerValidator: new TestResourceOwnerPasswordValidator(TokenRequestErrors.InvalidGrant, "custom error description"));
 
         var parameters = new NameValueCollection();
@@ -246,7 +247,7 @@ public class TokenRequestValidation_ResourceOwner_Invalid
     [Trait("Category", Category)]
     public async Task failed_resource_validation_should_fail()
     {
-        var client = (await _clients.FindEnabledClientByIdAsync("roclient")).ToValidationResult();
+        var client = (await _clients.FindEnabledClientByIdAsync("roclient", _ct)).ToValidationResult();
         var mockResourceValidator = new MockResourceValidator();
         var validator = Factory.CreateTokenRequestValidator(resourceValidator: mockResourceValidator);
 

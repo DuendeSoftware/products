@@ -23,6 +23,7 @@ namespace UnitTests.Endpoints.Results;
 public class AuthorizeResultTests
 {
     private AuthorizeHttpWriter _subject;
+    private readonly CT _ct = TestContext.Current.CancellationToken;
 
     private AuthorizeResponse _response = new AuthorizeResponse();
     private IdentityServerOptions _options = new IdentityServerOptions();
@@ -351,7 +352,7 @@ public class AuthorizeResultTests
         var queryString = new Uri(location).Query;
         var queryParams = QueryHelpers.ParseQuery(queryString);
         var errorId = queryParams.First(kvp => kvp.Key == _options.UserInteraction.ErrorIdParameter).Value;
-        var errorMessage = await _mockErrorMessageStore.ReadAsync(errorId);
+        var errorMessage = await _mockErrorMessageStore.ReadAsync(errorId, _ct);
         errorMessage.Data.RedirectUri.ShouldBeNull();
         errorMessage.Data.ResponseMode.ShouldBeNull();
     }

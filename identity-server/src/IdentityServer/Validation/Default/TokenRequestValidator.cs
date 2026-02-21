@@ -45,6 +45,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private readonly ILogger _logger;
 
     private ValidatedTokenRequest _validatedRequest;
+    private CT _ct;
 
     public TokenRequestValidator(
         IdentityServerOptions options,
@@ -98,10 +99,10 @@ internal class TokenRequestValidator : ITokenRequestValidator
     {
         RequestParameters = parameters,
         ClientValidationResult = clientValidationResult
-    });
+    }, CancellationToken.None);
 
     /// <inheritdoc/>
-    public async Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context)
+    public async Task<TokenRequestValidationResult> ValidateRequestAsync(TokenRequestValidationContext context, CT ct)
     {
         using var activity = Tracing.BasicActivitySource.StartActivity("TokenRequestValidator.ValidateRequest");
 
@@ -109,12 +110,13 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         ArgumentNullException.ThrowIfNull(context);
 
+        _ct = ct;
         var parameters = context.RequestParameters;
         var clientValidationResult = context.ClientValidationResult;
 
         _validatedRequest = new ValidatedTokenRequest
         {
-            IssuerName = await _issuerNameService.GetCurrentAsync(),
+            IssuerName = await _issuerNameService.GetCurrentAsync(_ct),
             Raw = parameters ?? throw new ArgumentNullException(nameof(context.RequestParameters)),
             Options = _options
         };
@@ -261,7 +263,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 Url = tokenUrl,
                 Method = "POST",
             };
-            var dpopResult = await _dPoPProofValidator.ValidateAsync(dpopContext);
+            var dpopResult = await _dPoPProofValidator.ValidateAsync(dpopContext, _ct);
             if (dpopResult.IsError)
             {
                 LogError(dpopResult.ErrorDescription ?? dpopResult.Error);
@@ -296,7 +298,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         _logger.LogTrace("Calling into custom request validator: {type}", _customRequestValidator.GetType().FullName);
 
         var customValidationContext = new CustomTokenRequestValidationContext { Result = result };
-        await _customRequestValidator.ValidateAsync(customValidationContext);
+        await _customRequestValidator.ValidateAsync(customValidationContext, _ct);
 
         if (customValidationContext.Result.IsError)
         {
@@ -355,7 +357,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         _validatedRequest.AuthorizationCodeHandle = code;
 
-        var authZcode = await _authorizationCodeStore.GetAuthorizationCodeAsync(code);
+        var authZcode = await _authorizationCodeStore.GetAuthorizationCodeAsync(code, _ct);
         if (authZcode == null)
         {
             LogError("Invalid authorization code", new { code });
@@ -391,7 +393,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
 
         // remove code from store
         // todo: set to consumed in the future?
-        await _authorizationCodeStore.RemoveAuthorizationCodeAsync(code);
+        await _authorizationCodeStore.RemoveAuthorizationCodeAsync(code, _ct);
 
         if (authZcode.CreationTime.HasExceeded(authZcode.Lifetime, _timeProvider.GetUtcNow().UtcDateTime))
         {
@@ -463,7 +465,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.AuthorizationCode.RequestedScopes,
             ResourceIndicators = _validatedRequest.AuthorizationCode.RequestedResourceIndicators,
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -511,7 +513,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // make sure user is enabled
         /////////////////////////////////////////////
         var isActiveCtx = new IsActiveContext(_validatedRequest.AuthorizationCode.Subject, _validatedRequest.Client, IdentityServerConstants.ProfileIsActiveCallers.AuthorizationCodeValidation);
-        await _profile.IsActiveAsync(isActiveCtx);
+        await _profile.IsActiveAsync(isActiveCtx, _ct);
 
         if (isActiveCtx.IsActive == false)
         {
@@ -620,7 +622,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Password = password,
             Request = _validatedRequest
         };
-        await _resourceOwnerValidator.ValidateAsync(resourceOwnerContext);
+        await _resourceOwnerValidator.ValidateAsync(resourceOwnerContext, _ct);
 
         if (resourceOwnerContext.Result.IsError)
         {
@@ -661,7 +663,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // make sure user is enabled
         /////////////////////////////////////////////
         var isActiveCtx = new IsActiveContext(resourceOwnerContext.Result.Subject, _validatedRequest.Client, IdentityServerConstants.ProfileIsActiveCallers.ResourceOwnerValidation);
-        await _profile.IsActiveAsync(isActiveCtx);
+        await _profile.IsActiveAsync(isActiveCtx, _ct);
 
         if (isActiveCtx.IsActive == false)
         {
@@ -696,7 +698,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             return Invalid(OidcConstants.TokenErrors.InvalidGrant);
         }
 
-        var result = await _refreshTokenService.ValidateRefreshTokenAsync(refreshTokenHandle, _validatedRequest.Client);
+        var result = await _refreshTokenService.ValidateRefreshTokenAsync(refreshTokenHandle, _validatedRequest.Client, default);
 
         if (result.IsError)
         {
@@ -811,7 +813,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.RefreshToken.AuthorizedScopes,
             ResourceIndicators = resourceIndicators,
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -878,7 +880,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         // validate device code
         /////////////////////////////////////////////
         var deviceCodeContext = new DeviceCodeValidationContext { DeviceCode = deviceCode, Request = _validatedRequest };
-        await _deviceCodeValidator.ValidateAsync(deviceCodeContext);
+        await _deviceCodeValidator.ValidateAsync(deviceCodeContext, _ct);
 
         if (deviceCodeContext.Result.IsError)
         {
@@ -893,7 +895,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.DeviceCode.AuthorizedScopes,
             ResourceIndicators = null // not supported for device grant
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -957,7 +959,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             AuthenticationRequestId = authRequestId,
             Request = _validatedRequest
         };
-        await _backchannelAuthenticationRequestIdValidator.ValidateAsync(validationContext);
+        await _backchannelAuthenticationRequestIdValidator.ValidateAsync(validationContext, _ct);
 
         if (validationContext.Result.IsError)
         {
@@ -982,7 +984,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = _validatedRequest.BackChannelAuthenticationRequest.AuthorizedScopes,
             ResourceIndicators = _validatedRequest.BackChannelAuthenticationRequest.RequestedResourceIndicators,
-        });
+        }, _ct);
 
         if (!validatedResources.Succeeded)
         {
@@ -1040,7 +1042,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
         /////////////////////////////////////////////
         // validate custom grant type
         /////////////////////////////////////////////
-        var result = await _extensionGrantValidator.ValidateAsync(_validatedRequest);
+        var result = await _extensionGrantValidator.ValidateAsync(_validatedRequest, _ct);
 
         if (result == null)
         {
@@ -1072,7 +1074,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 _validatedRequest.Client,
                 IdentityServerConstants.ProfileIsActiveCallers.ExtensionGrantValidation);
 
-            await _profile.IsActiveAsync(isActiveCtx);
+            await _profile.IsActiveAsync(isActiveCtx, _ct);
 
             if (isActiveCtx.IsActive == false)
             {
@@ -1104,12 +1106,12 @@ internal class TokenRequestValidator : ITokenRequestValidator
                 var clientAllowedScopes = new List<string>();
                 if (!ignoreImplicitIdentityScopes)
                 {
-                    var resources = await _resourceStore.FindResourcesByScopeAsync(_validatedRequest.Client.AllowedScopes);
+                    var resources = await _resourceStore.FindResourcesByScopeAsync(_validatedRequest.Client.AllowedScopes, _ct);
                     clientAllowedScopes.AddRange(resources.ToScopeNames().Where(x => _validatedRequest.Client.AllowedScopes.Contains(x)));
                 }
                 else
                 {
-                    var apiScopes = await _resourceStore.FindApiScopesByNameAsync(_validatedRequest.Client.AllowedScopes);
+                    var apiScopes = await _resourceStore.FindApiScopesByNameAsync(_validatedRequest.Client.AllowedScopes, _ct);
                     clientAllowedScopes.AddRange(apiScopes.Select(x => x.Name));
                 }
 
@@ -1155,7 +1157,7 @@ internal class TokenRequestValidator : ITokenRequestValidator
             Client = _validatedRequest.Client,
             Scopes = requestedScopes,
             ResourceIndicators = resourceIndicators,
-        });
+        }, _ct);
 
         if (!resourceValidationResult.Succeeded)
         {
@@ -1281,12 +1283,12 @@ internal class TokenRequestValidator : ITokenRequestValidator
     private Task RaiseSuccessfulResourceOwnerAuthenticationEventAsync(string userName, string subjectId, string clientId)
     {
         Telemetry.Metrics.ResourceOwnerAuthentication(clientId);
-        return _events.RaiseAsync(new UserLoginSuccessEvent(userName, subjectId, null, interactive: false, clientId));
+        return _events.RaiseAsync(new UserLoginSuccessEvent(userName, subjectId, null, interactive: false, clientId), _ct);
     }
 
     private Task RaiseFailedResourceOwnerAuthenticationEventAsync(string userName, string error, string clientId)
     {
         Telemetry.Metrics.ResourceOwnerAuthenticationFailure(clientId, error);
-        return _events.RaiseAsync(new UserLoginFailureEvent(userName, error, interactive: false, clientId: clientId));
+        return _events.RaiseAsync(new UserLoginFailureEvent(userName, error, interactive: false, clientId: clientId), _ct);
     }
 }

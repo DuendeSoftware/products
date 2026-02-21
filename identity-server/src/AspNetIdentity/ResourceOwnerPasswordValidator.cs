@@ -38,12 +38,8 @@ public class ResourceOwnerPasswordValidator<TUser> : IResourceOwnerPasswordValid
         _logger = logger;
     }
 
-    /// <summary>
-    /// Validates the resource owner password credential
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns></returns>
-    public virtual async Task ValidateAsync(ResourceOwnerPasswordValidationContext context)
+    /// <inheritdoc/>
+    public virtual async Task ValidateAsync(ResourceOwnerPasswordValidationContext context, CT ct)
     {
         var user = await _userManager.FindByNameAsync(context.UserName);
         if (user != null)

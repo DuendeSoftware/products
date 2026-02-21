@@ -50,7 +50,7 @@ public class RevocationRequestValidation
     {
         var parameters = new NameValueCollection();
 
-        var result = await _validator.ValidateRequestAsync(parameters, _client);
+        var result = await _validator.ValidateRequestAsync(parameters, _client, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
@@ -65,7 +65,7 @@ public class RevocationRequestValidation
             { "token_type_hint", "access_token" }
         };
 
-        var result = await _validator.ValidateRequestAsync(parameters, _client);
+        var result = await _validator.ValidateRequestAsync(parameters, _client, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.TokenErrors.InvalidRequest);
@@ -81,7 +81,7 @@ public class RevocationRequestValidation
             { "token_type_hint", "access_token" }
         };
 
-        var result = await _validator.ValidateRequestAsync(parameters, _client);
+        var result = await _validator.ValidateRequestAsync(parameters, _client, default);
 
         result.IsError.ShouldBeFalse();
         result.Token.ShouldBe("foo");
@@ -98,7 +98,7 @@ public class RevocationRequestValidation
             { "token_type_hint", "refresh_token" }
         };
 
-        var result = await _validator.ValidateRequestAsync(parameters, _client);
+        var result = await _validator.ValidateRequestAsync(parameters, _client, default);
 
         result.IsError.ShouldBeFalse();
         result.Token.ShouldBe("foo");
@@ -114,7 +114,7 @@ public class RevocationRequestValidation
             { "token", "foo" }
         };
 
-        var result = await _validator.ValidateRequestAsync(parameters, _client);
+        var result = await _validator.ValidateRequestAsync(parameters, _client, default);
 
         result.IsError.ShouldBeFalse();
         result.Token.ShouldBe("foo");
@@ -131,7 +131,7 @@ public class RevocationRequestValidation
             { "token_type_hint", "invalid" }
         };
 
-        var result = await _validator.ValidateRequestAsync(parameters, _client);
+        var result = await _validator.ValidateRequestAsync(parameters, _client, default);
 
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(Constants.RevocationErrors.UnsupportedTokenType);
