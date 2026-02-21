@@ -255,9 +255,9 @@ public class ServerSideSessionTests
         await _pipeline.LoginAsync("bob");
         _pipeline.RemoveLoginCookie();
 
-        var tickets = await _ticketService.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
+        var tickets = await _ticketService.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" }, _ct);
         tickets.TotalCount.ShouldBe(2);
-        var sessions = await _sessionStore.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
+        var sessions = await _sessionStore.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" }, _ct);
         sessions.TotalCount.ShouldBe(2);
 
         tickets.ResultsToken.ShouldBe(sessions.ResultsToken);
@@ -281,8 +281,8 @@ public class ServerSideSessionTests
         await _pipeline.LoginAsync("alice");
         _pipeline.RemoveLoginCookie();
 
-        var sessions = await _sessionMgmt.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
-        var tickets = await _ticketService.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" });
+        var sessions = await _sessionMgmt.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" }, _ct);
+        var tickets = await _ticketService.QuerySessionsAsync(new SessionQuery { SubjectId = "alice" }, _ct);
 
         tickets.ResultsToken.ShouldBe(sessions.ResultsToken);
         tickets.HasPrevResults.ShouldBe(sessions.HasPrevResults);
@@ -318,7 +318,7 @@ public class ServerSideSessionTests
             RevokeConsents = false,
             RevokeTokens = true,
             SendBackchannelLogoutNotification = false
-        });
+        }, _ct);
 
         (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldBeEmpty();
     }
@@ -348,7 +348,7 @@ public class ServerSideSessionTests
             RevokeTokens = true,
             SendBackchannelLogoutNotification = false,
             ClientIds = new[] { "foo" }
-        });
+        }, _ct);
 
         (await _grantStore.GetAllAsync(new PersistedGrantFilter { SubjectId = "alice" }, _ct)).ShouldNotBeEmpty();
     }
@@ -377,7 +377,7 @@ public class ServerSideSessionTests
             RevokeConsents = false,
             RevokeTokens = false,
             SendBackchannelLogoutNotification = true
-        });
+        }, _ct);
 
         _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeTrue();
     }
@@ -408,7 +408,7 @@ public class ServerSideSessionTests
             RevokeTokens = false,
             SendBackchannelLogoutNotification = true,
             ClientIds = new List<string> { "foo" }
-        });
+        }, _ct);
 
         _pipeline.BackChannelMessageHandler.InvokeWasCalled.ShouldBeFalse();
     }
@@ -439,7 +439,7 @@ public class ServerSideSessionTests
             RevokeConsents = false,
             RevokeTokens = false,
             SendBackchannelLogoutNotification = false
-        });
+        }, _ct);
 
         (await _sessionStore.GetSessionsAsync(new SessionFilter { SubjectId = "alice" }, _ct)).ShouldBeEmpty();
     }
