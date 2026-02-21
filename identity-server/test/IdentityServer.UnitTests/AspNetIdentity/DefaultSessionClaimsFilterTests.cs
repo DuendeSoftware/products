@@ -10,6 +10,8 @@ namespace IdentityServer.UnitTests.AspNetIdentity;
 
 public class DefaultSessionClaimsFilterTests
 {
+    private readonly CT _ct = TestContext.Current.CancellationToken;
+
     [Fact]
     public async Task FilterToSessionClaimsAsync_with_session_and_non_session_claims_should_filter_to_only_session_claims()
     {
@@ -26,7 +28,7 @@ public class DefaultSessionClaimsFilterTests
         var filter = new DefaultSessionClaimsFilter();
         var context = new SecurityStampRefreshingPrincipalContext() { NewPrincipal = newPrincipal, CurrentPrincipal = currentPrincipal };
 
-        var result = await filter.FilterToSessionClaimsAsync(context);
+        var result = await filter.FilterToSessionClaimsAsync(context, _ct);
 
         var resultTypes = result.Select(c => c.Type).ToList();
         resultTypes.Count.ShouldBe(3);
@@ -51,7 +53,7 @@ public class DefaultSessionClaimsFilterTests
         var filter = new DefaultSessionClaimsFilter();
         var context = new SecurityStampRefreshingPrincipalContext { NewPrincipal = newPrincipal, CurrentPrincipal = currentPrincipal };
 
-        var result = await filter.FilterToSessionClaimsAsync(context);
+        var result = await filter.FilterToSessionClaimsAsync(context, _ct);
 
         result.Count.ShouldBe(3);
         string[] expectClaimTypes = [
@@ -75,7 +77,7 @@ public class DefaultSessionClaimsFilterTests
         var filter = new DefaultSessionClaimsFilter();
         var context = new SecurityStampRefreshingPrincipalContext { NewPrincipal = newPrincipal, CurrentPrincipal = currentPrincipal };
 
-        var result = await filter.FilterToSessionClaimsAsync(context);
+        var result = await filter.FilterToSessionClaimsAsync(context, _ct);
 
         result.ShouldBeEmpty();
     }
@@ -88,7 +90,7 @@ public class DefaultSessionClaimsFilterTests
         var filter = new DefaultSessionClaimsFilter();
         var context = new SecurityStampRefreshingPrincipalContext { NewPrincipal = newPrincipal, CurrentPrincipal = currentPrincipal };
 
-        var result = await filter.FilterToSessionClaimsAsync(context);
+        var result = await filter.FilterToSessionClaimsAsync(context, _ct);
 
         result.ShouldBeEmpty();
     }

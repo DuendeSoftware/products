@@ -15,5 +15,6 @@ public interface IClientConfigurationStore
     /// Adds a client to the configuration store.
     /// </summary>
     /// <param name="client">The client to add to the store</param>
-    Task AddAsync(Client client);
+    /// <param name="ct">The cancellation token.</param>
+    Task AddAsync(Client client, CT ct);
 }

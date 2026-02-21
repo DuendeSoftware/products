@@ -26,7 +26,7 @@ public static class SecurityStampValidatorCallback
             return;
         }
 
-        var currentClaimsToKeep = await sessionClaimsFilter.FilterToSessionClaimsAsync(context);
+        var currentClaimsToKeep = await sessionClaimsFilter.FilterToSessionClaimsAsync(context, default);
 
         var id = context.NewPrincipal.Identities.First();
         id.AddClaims(currentClaimsToKeep);
