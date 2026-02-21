@@ -329,6 +329,36 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
         request.ResponseMode = Constants.AllowedResponseModesForGrantType[request.GrantType].First();
 
         //////////////////////////////////////////////////////////
+        // check response_mode parameter and set response_mode
+        //////////////////////////////////////////////////////////
+
+        // check if response_mode parameter is present and valid
+        // NOTE: this is intentionally done before the grant-type and PKCE checks below so that
+        // error responses produced by those checks already carry the client's requested
+        // response_mode rather than the flow default.
+        var responseMode = request.Raw.Get(OidcConstants.AuthorizeRequest.ResponseMode);
+        if (responseMode.IsPresent())
+        {
+            if (Constants.SupportedResponseModes.Contains(responseMode))
+            {
+                if (Constants.AllowedResponseModesForGrantType[request.GrantType].Contains(responseMode))
+                {
+                    request.ResponseMode = responseMode;
+                }
+                else
+                {
+                    LogError("Invalid response_mode for response_type", responseMode, request);
+                    return Invalid(request, OidcConstants.AuthorizeErrors.InvalidRequest, description: "Invalid response_mode for response_type");
+                }
+            }
+            else
+            {
+                LogError("Unsupported response_mode", responseMode, request);
+                return Invalid(request, OidcConstants.AuthorizeErrors.UnsupportedResponseType, description: "Invalid response_mode");
+            }
+        }
+
+        //////////////////////////////////////////////////////////
         // check if flow is allowed at authorize endpoint
         //////////////////////////////////////////////////////////
         if (!Constants.AllowedGrantTypesForAuthorizeEndpoint.Contains(request.GrantType))
@@ -352,33 +382,6 @@ internal class AuthorizeRequestValidator : IAuthorizeRequestValidator
             if (proofKeyResult.IsError)
             {
                 return proofKeyResult;
-            }
-        }
-
-        //////////////////////////////////////////////////////////
-        // check response_mode parameter and set response_mode
-        //////////////////////////////////////////////////////////
-
-        // check if response_mode parameter is present and valid
-        var responseMode = request.Raw.Get(OidcConstants.AuthorizeRequest.ResponseMode);
-        if (responseMode.IsPresent())
-        {
-            if (Constants.SupportedResponseModes.Contains(responseMode))
-            {
-                if (Constants.AllowedResponseModesForGrantType[request.GrantType].Contains(responseMode))
-                {
-                    request.ResponseMode = responseMode;
-                }
-                else
-                {
-                    LogError("Invalid response_mode for response_type", responseMode, request);
-                    return Invalid(request, OidcConstants.AuthorizeErrors.InvalidRequest, description: "Invalid response_mode for response_type");
-                }
-            }
-            else
-            {
-                LogError("Unsupported response_mode", responseMode, request);
-                return Invalid(request, OidcConstants.AuthorizeErrors.UnsupportedResponseType, description: "Invalid response_mode");
             }
         }
 

@@ -402,4 +402,66 @@ public class Authorize_ProtocolValidation_Invalid
         result.IsError.ShouldBeTrue();
         result.Error.ShouldBe(OidcConstants.AuthorizeErrors.InvalidRequest);
     }
+
+    // The next three tests verify that when response_mode is explicitly requested and the
+    // request later fails a grant-type or PKCE check, the error result carries the client's
+    // requested response_mode rather than the flow default (regression for products#1554).
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Grant_Type_Not_Allowed_For_Client_Should_Preserve_Explicit_ResponseMode_Fragment()
+    {
+        // implicitclient only allows the implicit grant, so response_type=code triggers
+        // the "grant type not allowed for client" error path.
+        var parameters = new NameValueCollection();
+        parameters.Add(OidcConstants.AuthorizeRequest.ClientId, "implicitclient");
+        parameters.Add(OidcConstants.AuthorizeRequest.Scope, "openid");
+        parameters.Add(OidcConstants.AuthorizeRequest.RedirectUri, "oob://implicit/cb");
+        parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
+        parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Fragment);
+
+        var validator = Factory.CreateAuthorizeRequestValidator();
+        var result = await validator.ValidateAsync(parameters);
+
+        result.IsError.ShouldBeTrue();
+        result.ValidatedRequest.ResponseMode.ShouldBe(OidcConstants.ResponseModes.Fragment);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Pkce_Required_But_Missing_Should_Preserve_Explicit_ResponseMode_Fragment()
+    {
+        // codeclient.pkce requires PKCE; omitting code_challenge triggers the PKCE error path.
+        var parameters = new NameValueCollection();
+        parameters.Add(OidcConstants.AuthorizeRequest.ClientId, "codeclient.pkce");
+        parameters.Add(OidcConstants.AuthorizeRequest.Scope, "openid");
+        parameters.Add(OidcConstants.AuthorizeRequest.RedirectUri, "https://server/cb");
+        parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
+        parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.Fragment);
+
+        var validator = Factory.CreateAuthorizeRequestValidator();
+        var result = await validator.ValidateAsync(parameters);
+
+        result.IsError.ShouldBeTrue();
+        result.ValidatedRequest.ResponseMode.ShouldBe(OidcConstants.ResponseModes.Fragment);
+    }
+
+    [Fact]
+    [Trait("Category", Category)]
+    public async Task Pkce_Required_But_Missing_Should_Preserve_Explicit_ResponseMode_FormPost()
+    {
+        // codeclient.pkce requires PKCE; omitting code_challenge triggers the PKCE error path.
+        var parameters = new NameValueCollection();
+        parameters.Add(OidcConstants.AuthorizeRequest.ClientId, "codeclient.pkce");
+        parameters.Add(OidcConstants.AuthorizeRequest.Scope, "openid");
+        parameters.Add(OidcConstants.AuthorizeRequest.RedirectUri, "https://server/cb");
+        parameters.Add(OidcConstants.AuthorizeRequest.ResponseType, OidcConstants.ResponseTypes.Code);
+        parameters.Add(OidcConstants.AuthorizeRequest.ResponseMode, OidcConstants.ResponseModes.FormPost);
+
+        var validator = Factory.CreateAuthorizeRequestValidator();
+        var result = await validator.ValidateAsync(parameters);
+
+        result.IsError.ShouldBeTrue();
+        result.ValidatedRequest.ResponseMode.ShouldBe(OidcConstants.ResponseModes.FormPost);
+    }
 }
