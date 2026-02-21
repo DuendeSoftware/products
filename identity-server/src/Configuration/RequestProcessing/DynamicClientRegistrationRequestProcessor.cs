@@ -64,7 +64,7 @@ public class DynamicClientRegistrationRequestProcessor : IDynamicClientRegistrat
             }
         }
 
-        await Store.AddAsync(context.Client);
+        await Store.AddAsync(context.Client, ct);
 
         return new DynamicClientRegistrationResponse(context.Request, context.Client)
         {
