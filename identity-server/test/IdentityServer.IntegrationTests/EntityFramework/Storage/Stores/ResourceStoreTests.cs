@@ -8,7 +8,6 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Stores;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -77,7 +76,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         ApiResource foundResource;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name }, _ct)).SingleOrDefault();
         }
 
@@ -106,7 +105,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         ApiResource foundResource;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             foundResource = (await store.FindApiResourcesByNameAsync(new[] { resource.Name }, _ct)).SingleOrDefault();
         }
 
@@ -138,7 +137,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         IEnumerable<ApiResource> resources;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             resources = await store.FindApiResourcesByScopeNameAsync(new List<string>
             {
                 testApiScope.Name
@@ -172,7 +171,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         IEnumerable<ApiResource> resources;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             resources = await store.FindApiResourcesByScopeNameAsync(new[] { testApiScope.Name }, _ct);
         }
 
@@ -195,7 +194,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         IList<IdentityResource> resources;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             resources = (await store.FindIdentityResourcesByScopeNameAsync(new List<string>
             {
                 resource.Name
@@ -226,7 +225,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         IList<IdentityResource> resources;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             resources = (await store.FindIdentityResourcesByScopeNameAsync(new List<string>
             {
                 resource.Name
@@ -252,7 +251,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         IList<ApiScope> resources;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             resources = (await store.FindApiScopesByNameAsync(new List<string>
             {
                 resource.Name
@@ -283,7 +282,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         IList<ApiScope> resources;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             resources = (await store.FindApiScopesByNameAsync(new List<string>
             {
                 resource.Name
@@ -330,7 +329,7 @@ public class ScopeStoreTests : IntegrationTest<ScopeStoreTests, ConfigurationDbC
         Resources resources;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var store = new ResourceStore(context, new NullLogger<ResourceStore>(), new NoneCancellationTokenProvider());
+            var store = new ResourceStore(context, new NullLogger<ResourceStore>());
             resources = await store.GetAllResourcesAsync(_ct);
         }
 

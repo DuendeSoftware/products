@@ -18,7 +18,6 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
     private readonly HttpClient _client;
     private readonly IdentityServerOptions _options;
     private readonly SanitizedLogger<DefaultJwtRequestUriHttpClient> _sanitizedLogger;
-    private readonly ICancellationTokenProvider _cancellationTokenProvider;
 
     /// <summary>
     /// ctor
@@ -26,14 +25,12 @@ public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
     /// <param name="client">An HTTP client</param>
     /// <param name="options">The options.</param>
     /// <param name="loggerFactory">The logger factory</param>
-    /// <param name="cancellationTokenProvider"></param>
     public DefaultJwtRequestUriHttpClient(HttpClient client, IdentityServerOptions options,
-        ILoggerFactory loggerFactory, ICancellationTokenProvider cancellationTokenProvider)
+        ILoggerFactory loggerFactory)
     {
         _client = client;
         _options = options;
         _sanitizedLogger = new SanitizedLogger<DefaultJwtRequestUriHttpClient>(loggerFactory.CreateLogger<DefaultJwtRequestUriHttpClient>());
-        _cancellationTokenProvider = cancellationTokenProvider;
     }
 
 

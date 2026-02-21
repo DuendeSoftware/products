@@ -7,7 +7,6 @@ using Duende.IdentityServer.EntityFramework.Mappers;
 using Duende.IdentityServer.EntityFramework.Options;
 using Duende.IdentityServer.EntityFramework.Services;
 using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -51,7 +50,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         bool result;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
+            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>());
             result = await service.IsOriginAllowedAsync(testCorsOrigin, _ct);
         }
 
@@ -75,7 +74,7 @@ public class CorsPolicyServiceTests : IntegrationTest<CorsPolicyServiceTests, Co
         bool result;
         await using (var context = new ConfigurationDbContext(options))
         {
-            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>(), new NoneCancellationTokenProvider());
+            var service = new CorsPolicyService(context, new NullLogger<CorsPolicyService>());
             result = await service.IsOriginAllowedAsync("InvalidOrigin", _ct);
         }
 
