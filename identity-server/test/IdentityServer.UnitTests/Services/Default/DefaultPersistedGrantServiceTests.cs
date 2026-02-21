@@ -314,7 +314,7 @@ public class DefaultPersistedGrantServiceTests
             RequestedScopes = new string[] { "quux3" }
         }, _ct);
 
-            await _subject.RemoveAllGrantsAsync("123", _ct, "client1");
+        await _subject.RemoveAllGrantsAsync("123", _ct, "client1");
 
         (await _referenceTokens.GetReferenceTokenAsync(handle1, _ct)).ShouldBeNull();
         (await _referenceTokens.GetReferenceTokenAsync(handle2, _ct)).ShouldNotBeNull();
@@ -396,7 +396,7 @@ public class DefaultPersistedGrantServiceTests
                 Lifetime = 10,
             }, _ct);
 
-        await _subject.RemoveAllGrantsAsync("123", _ct, "client1");
+            await _subject.RemoveAllGrantsAsync("123", _ct, "client1");
 
             (await _refreshTokens.GetRefreshTokenAsync(handle1, _ct)).ShouldBeNull();
             (await _refreshTokens.GetRefreshTokenAsync(handle2, _ct)).ShouldNotBeNull();
